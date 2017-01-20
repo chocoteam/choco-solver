@@ -29,38 +29,10 @@ import org.chocosolver.util.ESat;
 public interface Settings  {
 
     /**
-     * List possible reaction to lack of propagator's idempotency.
-     * @deprecated not available, idempotency should be checked outside common propagation system.
-     */
-    @Deprecated
-    enum Idem {
-        /**
-         * Does nothing.
-         */
-        disabled,
-        /**
-         * Prints an error message when a propagator is not guaranteed to be idempotent -- for debug only
-         */
-        error,
-        /**
-         * Extra call to Propagator.propagate(FULL_PROPAGATION) when no more event is available
-         */
-        force
-    }
-
-    /**
      * @return the welcome message
      */
     default String getWelcomeMessage() {
         return "** Choco 4.0.2 (2017-01) : Constraint Programming Solver, Copyleft (c) 2010-2017";
-    }
-
-    /**
-     * @deprecated not available, idempotency should be checked outside common propagation system.
-     */
-    @Deprecated
-    default Idem getIdempotencyStrategy() {
-        return Idem.disabled;
     }
 
     /**
@@ -214,16 +186,6 @@ public interface Settings  {
      */
     default boolean enableIncrementalityOnBoolSum(int nbvars) {
         return nbvars > 10;
-    }
-
-    /**
-     * If your terminal support ANSI colors (Windows terminals don't), you can set this to true.
-     * @return enable output with colors
-     * @deprecated will be removed in next releases
-     */
-    @Deprecated
-    default boolean outputWithANSIColors(){
-        return false;
     }
 
     /**

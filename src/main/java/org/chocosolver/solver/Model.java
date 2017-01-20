@@ -498,14 +498,6 @@ public class Model implements IModel {
     }
 
     /**
-     * @deprecated use {@link #addConstructiveDisjunction(Constraint...)} instead
-     */
-    @Deprecated
-    public Constraint getConDisStore() {
-        return null;
-    }
-
-    /**
      * Return the current settings for the solver
      *
      * @return a {@link org.chocosolver.solver.Settings}

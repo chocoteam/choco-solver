@@ -637,15 +637,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * @deprecated since 4.0.2. Can be removed anytime after this version.
-     * @see #getSearchState()
-     */
-    @Deprecated
-    public SearchState getState() {
-        return getSearchState();
-    }
-
-    /**
      * @return <tt>true</tt> if the search loops encountered at least one of the stop criteria declared.
      */
     public boolean isStopCriterionMet() {

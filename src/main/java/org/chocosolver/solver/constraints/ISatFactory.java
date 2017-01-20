@@ -576,13 +576,6 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * @deprecated use instead {@link #addConstructiveDisjunction(Constraint...)}
-     */
-    default boolean addConstructiveDisjunction(boolean global, Constraint... cstrs) {
-        return addConstructiveDisjunction(false, cstrs);
-    }
-
-    /**
      * Make a constructive disjunction constraint
      *
      * @param cstrs constraint in disjunction

@@ -17,7 +17,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.restart.IRestartStrategy;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.util.criteria.LongCriterion;
 
@@ -75,15 +74,6 @@ public interface IMoveFactory extends ISelf<Solver> {
         _me().setMove(new MoveBinaryHBFS(_me().getModel(), _me().getSearch(), a, b, N));
     }
 
-
-    /**
-     * @deprecated will be removed in next release
-     * @see #setRestarts(LongCriterion, ICutoffStrategy, int)
-     */
-    @Deprecated
-    default void setRestarts(LongCriterion restartCriterion, IRestartStrategy restartStrategy, int restartsLimit) {
-        setRestarts(restartCriterion, (ICutoffStrategy) restartStrategy, restartsLimit);
-    }
     /**
      * Creates a Move object that encapsulates the current move within a restart move.
      * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
@@ -96,15 +86,6 @@ public interface IMoveFactory extends ISelf<Solver> {
      */
     default void setRestarts(LongCriterion restartCriterion, ICutoffStrategy restartStrategy, int restartsLimit) {
         _me().setMove(new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit));
-    }
-
-    /**
-     * @deprecated
-     * @see #setLubyRestart(int, ICounter, int)
-     */
-    @Deprecated
-    default void setLubyRestart(int scaleFactor, int geometricalFactor, ICounter restartStrategyLimit, int restartLimit) {
-        setLubyRestart(scaleFactor, restartStrategyLimit, restartLimit);
     }
 
     /**
