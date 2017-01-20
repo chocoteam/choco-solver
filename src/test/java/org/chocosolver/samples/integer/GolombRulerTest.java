@@ -8,11 +8,11 @@
  */
 package org.chocosolver.samples.integer;
 
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.ResolutionPolicy.MINIMIZE;
 import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
 import static org.testng.Assert.assertEquals;
 
@@ -28,16 +28,16 @@ public class GolombRulerTest {
             {5, 11}, {6, 17}, {7, 25}, {8, 34}, {9, 44}, {10, 55}//, {11, 72}
     };
 
-    protected Model modeler(int m) {
+    protected Model modeler(int m) throws SetUpException {
         GolombRuler pb = new GolombRuler();
-        pb.readArgs("-m", Integer.toString(m));
+        pb.setUp("-m", Integer.toString(m));
         pb.buildModel();
         pb.configureSearch();
         return pb.getModel();
     }
 
     @Test(groups="10s", timeOut=60000)
-    public void testAll() {
+    public void testAll() throws SetUpException {
         Model sol;
         for (int j = 0; j < OPTIMAL_RULER.length; j++) {
             sol = modeler(OPTIMAL_RULER[j][0]);

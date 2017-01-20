@@ -8,6 +8,7 @@
  */
 package org.chocosolver.samples.integer;
 
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -28,16 +29,16 @@ import static org.testng.Assert.assertEquals;
  */
 public class MagicSquareTest {
 
-    protected Model modeler(int n) {
+    protected Model modeler(int n) throws SetUpException {
         MagicSquare pb = new MagicSquare();
-        pb.readArgs("-n", Integer.toString(n));
+        pb.setUp("-n", Integer.toString(n));
         pb.buildModel();
         pb.configureSearch();
         return pb.getModel();
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testImpact() {
+    public void testImpact() throws SetUpException {
         Model sol;
         int j = 3;
         sol = modeler(j);
@@ -56,7 +57,7 @@ public class MagicSquareTest {
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testAll() {
+    public void testAll()throws SetUpException {
         Model sol;
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
@@ -74,7 +75,7 @@ public class MagicSquareTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testBug1() throws ContradictionException {
+    public void testBug1() throws ContradictionException, SetUpException {
         // square0,0=3 square0,1=6 square0,2={12,13} square0,3={12,13}
         // square1,0={1,2,5,7,8,9...,15} square1,1=16 square1,2={1,2} square1,3={2,5,7,8,9,10...,15}
         // square2,0={1,2,5,7,8,9...,15} square2,1={5,7} square2,2=11 square2,3={2,5,7,8,9,10...,15}
@@ -100,7 +101,7 @@ public class MagicSquareTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testBug2() throws ContradictionException {
+    public void testBug2() throws ContradictionException, SetUpException {
         //square0,0=2 square0,1=13 square0,2=16 square0,3=3
         // square1,0={4,5,6,7,8,9...,14} square1,1={7,8,9,10,11,12...,14} square1,2={4,5,6,7,8,9...,10} square1,3={1,4,5,6,7,8...,15}
         // square2,0={4,5,6,7,8,9...,14} square2,1={6,7,8,9,10,11...,12} square2,2={4,5,6,7,8,9...,10} square2,3={1,4,5,6,7,8...,15}

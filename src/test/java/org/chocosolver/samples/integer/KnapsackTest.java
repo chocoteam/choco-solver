@@ -9,14 +9,14 @@
 package org.chocosolver.samples.integer;
 
 import gnu.trove.list.array.TFloatArrayList;
+
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-
-import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 
 /**
  * <br/>
@@ -27,9 +27,9 @@ import static org.chocosolver.solver.ResolutionPolicy.MAXIMIZE;
 public class KnapsackTest {
     private final static TFloatArrayList times = new TFloatArrayList();
 
-    public Model modelIt(String data, int n) throws IOException {
+    public Model modelIt(String data, int n) throws IOException, SetUpException {
         Knapsack pb = new Knapsack();
-        pb.readArgs("-d", data, "-n", "" + n);
+        pb.setUp("-d", data, "-n", "" + n);
         pb.buildModel();
         for (IntVar v : pb.objects) {
             if (v == null) {
@@ -62,7 +62,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testMain() throws IOException {
+    public void testMain() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         ks.solveIt(ks.modelIt("k10", 10), true);
         ks.solveIt(ks.modelIt("k20", 13), true);
@@ -70,7 +70,7 @@ public class KnapsackTest {
 
 
 	@Test(groups="1s", timeOut=60000)
-    public void testALL0() throws IOException {
+    public void testALL0() throws IOException, SetUpException {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
@@ -81,7 +81,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testALL5() throws IOException {
+    public void testALL5() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
             Model s = ks.modelIt("k10", 3);
@@ -93,7 +93,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testALL10() throws IOException {
+    public void testALL10() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
             Model s = ks.modelIt("k10", 10);
@@ -105,7 +105,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testOPT13() throws IOException {
+    public void testOPT13() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 13);
         ks.solveIt(s, true);
@@ -115,7 +115,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testOPT14() throws IOException {
+    public void testOPT14() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 14);
         ks.solveIt(s, true);
@@ -125,7 +125,7 @@ public class KnapsackTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testOPT15() throws IOException {
+    public void testOPT15() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 15);
         ks.solveIt(s, true);

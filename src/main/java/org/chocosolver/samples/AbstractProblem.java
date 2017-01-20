@@ -3,17 +3,17 @@
  *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.samples;
 
+import org.chocosolver.pf4cs.IProblem;
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.chocosolver.pf4cs.IProblem;
-import org.chocosolver.pf4cs.SetUpException;
 
 import static java.lang.Runtime.getRuntime;
 
@@ -23,7 +23,7 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem implements IProblem {
+public abstract class AbstractProblem implements IProblem<Model> {
 
     /**
      * A seed for random purpose
@@ -38,71 +38,55 @@ public abstract class AbstractProblem implements IProblem {
 
     private boolean userInterruption = true;
 
-    /**
-     * @return the current model
-     */
-    public Model getModel() {
-	return model;
+    @Override
+    public void setUp(String... args) throws SetUpException{
+        CmdLineParser parser = new CmdLineParser(this);
+        try {
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            System.err.println("java " + this.getClass() + " [options...]");
+            parser.printUsage(System.err);
+            System.err.println();
+            throw new SetUpException("Invalid problem options");
+        }
     }
 
     /**
-     * Call the model creation:
-     * <ul>
-     * <li>create a Model</li>
-     * <li>add variables</li>
-     * <li>post constraints</li>
-     * </ul>
+     * @return the current model
      */
-    public abstract void buildModel();
+    @Override
+    public Model getModel() {
+        return model;
+    }
 
     /**
      * Call search configuration
      */
-    public void configureSearch() {}
-
-    /**
-     * Call problem resolution
-     */
-    public abstract void solve();
-
     @Override
-    public void setUp(String... args) throws SetUpException{
-	CmdLineParser parser = new CmdLineParser(this);
-	try {
-	    parser.parseArgument(args);
-	} catch (CmdLineException e) {
-	    System.err.println(e.getMessage());
-	    System.err.println("java " + this.getClass() + " [options...]");
-	    parser.printUsage(System.err);
-	    System.err.println();
-	    throw new SetUpException("Invalid problem options");
-	}
+    public void configureSearch() {
     }
 
     @Override
-    public void tearDown() {}
+    public void tearDown() {
+    }
 
     /**
-     * Read program arguments
-     * @param args list of arguments
-     * @return <tt>true</tt> if arguments were correctly read
+     * @deprecated
+     * @see #setUp(String...)
      */
+    @Deprecated
     public final boolean readArgs(String... args) {
-	CmdLineParser parser = new CmdLineParser(this);
-	try {
-	    parser.parseArgument(args);
-	} catch (CmdLineException e) {
-	    System.err.println(e.getMessage());
-	    System.err.println("java " + this.getClass() + " [options...]");
-	    parser.printUsage(System.err);
-	    System.err.println();
-	    return false;
-	}
-	return true;
+        try {
+            setUp(args);
+        } catch (SetUpException e) {
+            return false;
+        }
+        return true;
     }
 
     private boolean userInterruption() {
-	return userInterruption;
+        return userInterruption;
     }
 
     /**
@@ -113,29 +97,32 @@ public abstract class AbstractProblem implements IProblem {
      * <li>configure the search</li>
      * <li>launch the resolution</li>
      * </ul>
-     * 
+     *
      * @param args
      *            list of arguments to pass to the problem
      */
     public final void execute(String... args) {
-	if (this.readArgs(args)) {
-	    this.buildModel();
-	    this.configureSearch();
+        try {
+            this.setUp(args);
+        } catch (SetUpException e) {
+            return;
+        }
+        this.buildModel();
+        this.configureSearch();
 
-	    Thread statOnKill = new Thread() {
-		public void run() {
-		    if (userInterruption()) {
-			System.out.println(model.getSolver().getMeasures().toString());
-		    }
-		}
-	    };
+        Thread statOnKill = new Thread() {
+            public void run() {
+                if (userInterruption()) {
+                    System.out.println(model.getSolver().getMeasures().toString());
+                }
+            }
+        };
 
-	    getRuntime().addShutdownHook(statOnKill);
+        getRuntime().addShutdownHook(statOnKill);
 
-	    this.solve();
-	    userInterruption = false;
-	    getRuntime().removeShutdownHook(statOnKill);
-	}
+        this.solve();
+        userInterruption = false;
+        getRuntime().removeShutdownHook(statOnKill);
     }
 
 }

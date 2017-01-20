@@ -8,6 +8,7 @@
  */
 package org.chocosolver.samples.integer;
 
+import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.samples.nqueen.*;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
@@ -61,8 +62,8 @@ public class NQueenTest {
         Assert.assertEquals(s.getSolver().getSolutionCount(), NB_QUEENS_SOLUTION[size], "nb sol incorrect");
     }
 
-    protected Model modeler(AbstractNQueen nq, int size) {
-        nq.readArgs("-q", Integer.toString(size));
+    protected Model modeler(AbstractNQueen nq, int size) throws SetUpException {
+        nq.setUp("-q", Integer.toString(size));
         nq.buildModel();
         nq.configureSearch();
         return nq.getModel();
@@ -70,14 +71,14 @@ public class NQueenTest {
 
 
     @Test(groups="5m", timeOut=300000)
-    public void testBinary() {
+    public void testBinary() throws SetUpException {
         Model s = modeler(new NQueenBinary(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testLinBinary() {
+    public void testLinBinary() throws SetUpException {
         Model s = modeler(new NQueenLinearBinary(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
@@ -85,21 +86,21 @@ public class NQueenTest {
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testGlobalBinary() {
+    public void testGlobalBinary() throws SetUpException {
         Model s = modeler(new NQueenBinaryGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testGlobal() throws ContradictionException {
+    public void testGlobal() throws ContradictionException, SetUpException {
         Model s = modeler(new NQueenGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testDualBinary() {
+    public void testDualBinary() throws SetUpException {
         Model s = modeler(new NQueenDualBinary(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
@@ -107,14 +108,14 @@ public class NQueenTest {
 
 
     @Test(groups="5m", timeOut=300000)
-    public void testDualGlobal() {
+    public void testDualGlobal() throws SetUpException {
         Model s = modeler(new NQueenDualGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testAll1() {
+    public void testAll1() throws SetUpException {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
@@ -132,7 +133,7 @@ public class NQueenTest {
     }
 
     @Test(groups="5m", timeOut=300000)
-    public void testAll2() {
+    public void testAll2() throws SetUpException {
         Model sol;
         for (int j = 4; j < 14; j++) {
             sol = modeler(new NQueenBinary(), j);
@@ -153,7 +154,7 @@ public class NQueenTest {
 
 
     @Test(groups="1s", timeOut=60000)
-    public void testBug1() throws ContradictionException {
+    public void testBug1() throws ContradictionException, SetUpException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Model model = modeler(new NQueenBinaryGlobal(), 16);
         model.getSolver().propagate();

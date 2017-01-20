@@ -8,6 +8,7 @@
  */
 package org.chocosolver.samples.integer;
 
+import org.chocosolver.pf4cs.SetUpException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -47,12 +48,12 @@ public class CostasArraysTest {
 	}
 
 	@Test(groups = "10s", timeOut = 60000)
-	public void testSols(){
+	public void testSols() throws SetUpException {
 		int[] size = new int[]{5,6,7,8};
 		int[] nbSols = new int[]{20,58,100,222};
 		for(int i=0;i<size.length;i++) {
 			CostasArrays ca = new CostasArrays();
-			ca.readArgs("-o", size[i] + "");
+			ca.setUp("-o", size[i] + "");
 			ca.buildModel();
 			while (ca.getModel().getSolver().solve()) ;
 			Assert.assertEquals(nbSols[i], ca.getModel().getSolver().getSolutionCount());
