@@ -42,6 +42,12 @@ then
     REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
     sedInPlace "${REGEX}" CHANGES.md
     # add a new empty line in CHANGES.md
+    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./src/sphinx/source/conf.py
+    sedInPlace "s%release = .*%release = '${VERSION}'%" ./src/docs/source/conf.py
+
+    cd ./src/sphinx/
+    make latexpdf
+else
 
     sedInPlace '6 i\
     \
@@ -55,11 +61,4 @@ then
     ### Closed issues and pull requests:\
     \
     ' CHANGES.md
-
-    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./src/sphinx/source/conf.py
-    sedInPlace "s%release = .*%release = '${VERSION}'%" ./src/docs/source/conf.py
-
-    cd ./src/sphinx/
-    make latexpdf
-
 fi

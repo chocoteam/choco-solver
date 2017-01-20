@@ -31,25 +31,30 @@ function makeArchive(){
 # push javadoc onto website
 function pushJavadoc(){
     VERSION=$1
-    cd choco-${VERSION}|| quit "unable to cd dir"
-    git clone https://github.com/chocoteam/chocoteam.github.io.git|| quit "unable to clone website"
-    cd chocoteam.github.io/|| quit "unable to go into website"
-    git fetch & git pull origin master|| quit "unable to update website"
-    unzip ../apidocs-${VERSION}.zip ./apidocs/|| quit "unable to unzip apidocs"
+    LOCAL=`mktemp -d -t choco.XXX`|| quit "unable to make temp dir"
+    echo ${LOCAL}
+    git -C ${LOCAL} init
+    git -C ${LOCAL} remote add origin "https://github.com/chocoteam/chocoteam.github.io.git"||exit 1
+    git -C ${LOCAL} fetch origin||exit 1
+    git -C ${LOCAL} checkout master||git -C ${LOCAL} checkout -b master
+    unzip -o ./choco-${VERSION}/apidocs-${VERSION}.zip -d ${LOCAL}|| quit "unable to unzip apidocs"
+    cd ${LOCAL}|| quit "unable to go into website"
+    git add ./apidocs/ || quit "unable to add apidocs"
     git commit -a -m "push javadoc of ${VERSION}"|| quit "unable to commit"
     git push origin master || quit "unable to push website"
-    cd ..
-    rm -r chocoteam.github.io/
+    cd -
+    rm -rf ${LOCAL} || quit "unable to remove ${LOCAL}"
 }
 #
 # extract comment from CHANGES.md
 function extractReleaseComment(){
+    VERSION=$1
     LINES=$(grep -ne "-------------------" CHANGES.md |  cut -d : -f1 | tr "\n" ",")
     IFS=',' read -r -a ARRAY <<< "$LINES"
     FROM=$(expr ${ARRAY[1]} + 1)
     TO=$(expr ${ARRAY[2]} - 2)
     CHANGES=$(cat ./CHANGES.md | sed -n "${FROM},${TO}p" | perl -p -e 's/  /\\t/' | perl -p -e 's/\n/\\n/g')
-    echo '{ "tag_name": "choco-4.0.2", "target_commitish": "master","name": "4.0.2","body": '\""$CHANGES"\"' ,"draft": true, "prerelease": false}'
+    echo '{ "tag_name": "${VERSION}", "target_commitish": "master","name": "${VERSION}","body": '\""$CHANGES"\"' ,"draft": true, "prerelease": false}'
 }
 #
 # create a milestone based on comment ($1), version ($2) and token ($3)
@@ -57,6 +62,7 @@ function createRelease(){
     DATA=$1
     VERSION=$2
     TOKEN=$3
+    echo "DATA: ${DATA}"
     # create release
     curl -i -H 'Authorization: token ${t}' \
             -data $DATA \
@@ -78,7 +84,6 @@ function createMilestone(){
         "https://api.github.com/repos/chocoteam/choco-solver/milestones"
 }
 
-echo "Start release with zip option on"
 VERSION=$1
 
 # create archive
@@ -91,7 +96,7 @@ pushJavadoc ${VERSION}
 #find position of release separator in CHANGES.md, only keep the 2nd and 3rd
 
 # create release
-createRelease $(extractReleaseComment) ${VERSION} ${GH_TOKEN}
+createRelease $(extractReleaseComment ${VERSION}) ${VERSION} ${GH_TOKEN}
 # create the next milestone
 createMilestone ${VERSION} ${GH_TOKEN}
 
