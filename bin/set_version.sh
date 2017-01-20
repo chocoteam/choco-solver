@@ -52,7 +52,7 @@ then
     \
     ### Deprecated API:\
     \
-    ### Closed issues:\
+    ### Closed issues and pull requests:\
     \
     ' CHANGES.md
 

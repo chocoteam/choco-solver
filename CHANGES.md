@@ -12,7 +12,7 @@ NEXT MILESTONE
   - restrict calls to `Solver.setEngine(...)` when propagation started. See javadoc for details.
   - remove global constructive disjunction, only local constructive disjunction is allowed.
   - add `Solution.restore()` to restore a solution (#354).
-  - deep reset of `Solver` (#490,#491)
+  - deep reset of `Solver` (#490, #491)
     
 ### Deprecated API:
   - `Solver.getState()` (#485)
@@ -20,9 +20,9 @@ NEXT MILESTONE
   - `Settings.outputWithANSIColors`, `IOutputFactory.ANSI_*`
   - `IMoveFactory.setLubyRestart(int, int, ICounter, int)`
 
-### Closed issues: 
+### Closed issues and pull requests: 
 
-\#468, #481, #486, #487, #488, #492, #494, #495, #496, #499.
+\#468, #479, #480, #481, #484, #487, #488, #489, #492, #493, #494, #495, #496, #497, #499.
 
 4.0.1 - 16 Dec 2016
 -------------------
