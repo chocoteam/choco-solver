@@ -43,7 +43,7 @@ then
     sedInPlace "${REGEX}" CHANGES.md
     # add a new empty line in CHANGES.md
 
-    sedInPlace '5 i\
+    sedInPlace '6 i\
     \
     NEXT MILESTONE\
     -------------------\
@@ -60,8 +60,6 @@ then
     sedInPlace "s%release = .*%release = '${VERSION}'%" ./src/docs/source/conf.py
 
     cd ./src/sphinx/
-    make latexpdf
-    make latexpdf
     make latexpdf
 
 fi

@@ -16,7 +16,7 @@ Choco-solver is an open-source Java library for Constraint Programming.
 
 Choco-solver is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
 
-Current stable version is 4.0.1 (12 Dec 2016).
+Current stable version is 4.0.2 (20 Jan 2017).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -26,7 +26,7 @@ Choco-solver comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2016, Ecole des Mines de Nantes).
+Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2017, Ecole des Mines de Nantes).
 
 Contact: choco@mines-nantes.fr
 
@@ -52,7 +52,7 @@ model.getSolver().printStatistics();
 ## Documentation, Support and Issues
 
 The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
-[tarball](https://github.com/chocoteam/choco-solver/releases/download/choco-4.0.1/choco-4.0.1.zip) which contains
+[tarball](https://github.com/chocoteam/choco-solver/releases/download/choco-4.0.2/choco-4.0.2.zip) which contains
 the binary, the source code, the user guide (pdf) and the apidocs (zip).
 
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
@@ -114,7 +114,7 @@ In the following, we distinguish two usages of Choco:
 - as a standalone application: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-4.0.1-with-dependencies.jar` or `choco-solver-4.0.1.jar`.
+The name of the jar file terms the packaging: `choco-solver-4.0.2-with-dependencies.jar` or `choco-solver-4.0.2.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -127,7 +127,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.0.1</version>
+   <version>4.0.2</version>
 </dependency>
 ```
 
@@ -162,8 +162,8 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     dk.brics.automaton:automaton:1.11-8
-    args4j:args4j:2.33
     org.javabits.jgrapht:jgrapht-core:0.9.3
+    org.choco-solver:cutoffseq:1.0.2
     org.choco-solver:choco-sat:1.0.2
     net.sf.trove4j:trove4j:3.0.3
     com.github.cp-profiler:cpprof-java:1.3.0
