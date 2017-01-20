@@ -8,9 +8,6 @@
  */
 package org.chocosolver.pf4cs;
 
-import org.kohsuke.args4j.CmdLineException;
-import org.kohsuke.args4j.CmdLineParser;
-
 /**
  * A class that provides a pattern to declare a model and solve it. <br/>
  * The methods are considered to be called in the following order:
@@ -24,35 +21,39 @@ import org.kohsuke.args4j.CmdLineParser;
  *
  * @author Charles Prud'homme
  * @since 03/01/2017
+ * @param M M the constraint model object built thanks to this interface (designed to be library independant except for this) 
  */
-public interface IProblem extends IUpDown {
+public interface IProblem<M> extends IUpDown {
 
     @Override
-    default void setUp(String... args) throws SetUpException{
-        CmdLineParser parser = new CmdLineParser(this);
-        try {
-            parser.parseArgument(args);
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            System.err.println("java " + this.getClass() + " [options...]");
-            parser.printUsage(System.err);
-            System.err.println();
-            throw new SetUpException("Invalid problem options");
-        }
-    }
+    void setUp(String... args) throws SetUpException;
 
     /**
-     * Call the model creation
+     * Call the model creation.
+     * <ul>
+     * <li>add variables</li>
+     * <li>post constraints</li>
+     * <li>(for optimization problems) define the objective(s) here or later in {@link IProblem#configureSearch()})</li>
+     * </ul>
      */
-	void buildModel();
+    void buildModel();
 
     /**
-     * Call search configuration
+     * Get constraint model object.
+     * @param M the constraint model object      
+     * @return the current model
      */
-	void configureSearch();
+    M getModel();
+   
+    /**
+     * Call search configuration.
+     * For optimization problems, define the objective if it has not been done in {@link IProblem#buildModel()}. 
+     */
+    void configureSearch();
 
-	/**
-     * Call problem resolution
+    /**
+     * Call problem resolution. 
+     * For optimization problems, the objective(s) must be defined before this call. 
      */
-	void solve();
+    void solve();
 }
