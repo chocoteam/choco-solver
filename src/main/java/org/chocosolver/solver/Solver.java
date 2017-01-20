@@ -346,7 +346,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * - run the initial propagation,
      * - initialize the Move and the search strategy
      */
-    private void initialize() {
+    protected void initialize() {
         // for fast construction of "external" constraint, they are initialized once for all
         if (mModel.minisat != null) {
             mModel.minisat.getPropSat().initialize();
