@@ -43,6 +43,8 @@ sedInPlace "s%choco-solver-.*-with-dependencies.jar%choco-solver-${CHOCO_VERSION
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 mvn license:format
 
+git commit -m "initiate release ${VERSION}" -a
+
 echo "Start release"
 #Extract the version
 COMMIT=$(git rev-parse HEAD)
