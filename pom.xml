@@ -14,7 +14,7 @@
 
     <groupId>org.choco-solver</groupId>
     <artifactId>samples</artifactId>
-    <version>4.0.3-SNAPSHOT</version>
+    <version>4.0.3</version>
     <packaging>jar</packaging>
 
     <name>Samples</name>
