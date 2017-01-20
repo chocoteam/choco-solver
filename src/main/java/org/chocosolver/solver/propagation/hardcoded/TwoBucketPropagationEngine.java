@@ -77,12 +77,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private final boolean DEBUG;
 
     /**
-     * When debugging with colors is needed, set this paramater to <tt>true</tt>.
-     * Set also {@link #DEBUG} to <tt>true</tt>.
-     */
-    private final boolean COLOR;
-
-    /**
      * Fine events priority binding.
      */
     private final short[] match_f;
@@ -179,7 +173,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         match_c = model.getSettings().getCoarseEventPriority();
 
         this.DEBUG = model.getSettings().debugPropagation();
-        this.COLOR = model.getSettings().outputWithANSIColors();
     }
 
     @Override

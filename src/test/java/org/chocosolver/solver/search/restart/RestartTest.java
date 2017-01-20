@@ -61,7 +61,7 @@ public class RestartTest {
     @Test(groups="1s", timeOut=60000)
     public void testLubyRestart1() {
         Model model = buildQ(4);
-        model.getSolver().setLubyRestart(2, 2, new NodeCounter(model, 2), 2);
+        model.getSolver().setLubyRestart(2, new NodeCounter(model, 2), 2);
         while (model.getSolver().solve()) ;
         // not 2, because of restart, that found twice the same solution
         assertEquals(model.getSolver().getSolutionCount(), 2);

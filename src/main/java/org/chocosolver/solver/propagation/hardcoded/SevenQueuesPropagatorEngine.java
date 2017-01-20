@@ -48,10 +48,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      */
     private final boolean DEBUG;
     /**
-     * For debugging purpose: set to <tt>true</tt> to use color on console when debugging
-     */
-    private final boolean COLOR;
-    /**
      * Internal unique contradiction exception, used on propagation failures
      */
     private final ContradictionException exception;
@@ -126,7 +122,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         //noinspection unchecked
         this.pro_queue = new CircularQueue[8];
         this.DEBUG = model.getSettings().debugPropagation();
-        this.COLOR = model.getSettings().outputWithANSIColors();
 
     }
 

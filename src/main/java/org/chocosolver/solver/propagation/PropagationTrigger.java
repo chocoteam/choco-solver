@@ -34,7 +34,7 @@ public class PropagationTrigger  {
     private final IPropagationEngine engine; // wrapped engine
     private final IEnvironment environment;
     private final Model model;
-    private final boolean DEBUG, COLOR;
+    private final boolean DEBUG;
 
     // stores the static propagators
     private ArrayList<Propagator> sta_propagators = new ArrayList<>();
@@ -51,7 +51,6 @@ public class PropagationTrigger  {
         this.model = model;
         size = 0;
         this.DEBUG = model.getSettings().debugPropagation();
-        this.COLOR = model.getSettings().outputWithANSIColors();
     }
 
     public void addAll(Propagator... propagators) {
