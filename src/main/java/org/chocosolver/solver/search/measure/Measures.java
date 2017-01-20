@@ -27,13 +27,6 @@ public class Measures implements IMeasures, Cloneable {
     //***********************************************************************************
 
     /**
-     * To transform time from nanoseconds to seconds
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    protected static final float IN_SEC = 1000 * 1000 * 1000f;
-
-    /**
      * Name of the model observed -- no reference to the model should be done in this class
      */
     protected String modelName;

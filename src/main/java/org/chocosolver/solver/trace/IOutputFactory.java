@@ -26,39 +26,6 @@ import java.io.PrintStream;
  * @since 12/11/14
  */
 public interface IOutputFactory extends ISelf<Solver> {
-
-    // http://stackoverflow.com/questions/5762491/how-to-print-color-in-console-using-system-out-println
-    /**
-     * ANSI code for white
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    String ANSI_RESET = "\u001B[0m";
-    /**
-     * ANSI code for blue
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    String ANSI_BLUE = "\u001B[34m";
-    /**
-     * ANSI code for purple
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    String ANSI_PURPLE = "\u001B[35m";
-    /**
-     * ANSI code for green
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    String ANSI_GREEN = "\u001B[32m";
-    /**
-     * ANSI code for gray
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    String ANSI_GRAY = "\u001B[37m";
-
     /**
      * Set the current output stream (default is System.out)
      *
