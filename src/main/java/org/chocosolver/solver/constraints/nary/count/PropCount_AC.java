@@ -188,29 +188,34 @@ public class PropCount_AC extends Propagator<IntVar> {
 
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
+	boolean nrules = ruleStore.addPropagatorActivationRule(this);
         if (var == vars[n]) {
-            boolean isDecUpp = evt == IntEventType.DECUPP;
-            for (int i = 0; i < n; i++) {
-                if (vars[i].contains(value)) {
-                    if (vars[i].isInstantiated()) {
-                        nrules |= ruleStore.addFullDomainRule(vars[i]);
-                    }
-                } else if (isDecUpp) {
-                    nrules |= ruleStore.addRemovalRule(vars[i], value);
-                }
-            }
-        } else {
-            nrules |= ruleStore.addBoundsRule(vars[n]);
             if (evt == IntEventType.REMOVE) {
                 for (int i = 0; i < n; i++) {
-                    if (vars[i].isInstantiatedTo(value)) {
-                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    if (!vars[i].contains(value)) {
+                        nrules |= ruleStore.addRemovalRule(vars[i], value);
                     }
                 }
             } else {
                 for (int i = 0; i < n; i++) {
                     nrules |= ruleStore.addFullDomainRule(vars[i]);
+                }
+            }
+        } else {
+            nrules |= ruleStore.addBoundsRule(vars[n]);
+            if (evt == IntEventType.REMOVE) {
+                if (this.value == value){
+                    for (int i = 0; i < n; i++) {
+                        if (vars[i].isInstantiatedTo(value)) {
+                            nrules |= ruleStore.addFullDomainRule(vars[i]);
+                        }
+                    }
+                } // the other case can not be performed by the filtering algorithm
+            } else { 
+                for (int i = 0; i < n; i++) {
+                    if (!vars[i].isInstantiatedTo(value)) {
+                        nrules |= ruleStore.addFullDomainRule(vars[i]);
+                    }
                 }
             }
         }
