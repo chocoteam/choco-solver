@@ -11,14 +11,32 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.binary.*;
+import org.chocosolver.solver.constraints.binary.PropAbsolute;
+import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
+import org.chocosolver.solver.constraints.binary.PropEqualXY_C;
+import org.chocosolver.solver.constraints.binary.PropEqualX_Y;
+import org.chocosolver.solver.constraints.binary.PropScale;
+import org.chocosolver.solver.constraints.binary.PropSquare;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.extension.binary.*;
-import org.chocosolver.solver.constraints.extension.nary.*;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC2001;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3bitrm;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
+import org.chocosolver.solver.constraints.extension.binary.PropBinFC;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeFC;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001Positive;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rm;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rmPositive;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGACSTRPos;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeMDDC;
+import org.chocosolver.solver.constraints.extension.nary.PropTableStr2;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
@@ -35,8 +53,18 @@ import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
-import org.chocosolver.solver.constraints.nary.channeling.*;
-import org.chocosolver.solver.constraints.nary.circuit.*;
+import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
+import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuitSCC;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_AntiArboFiltering;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_ArboFiltering;
+import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
+import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuit;
+import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuitDominatorFilter;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
@@ -60,7 +88,11 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.*;
+import org.chocosolver.solver.constraints.ternary.PropDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
+import org.chocosolver.solver.constraints.ternary.PropMaxBC;
+import org.chocosolver.solver.constraints.ternary.PropMinBC;
+import org.chocosolver.solver.constraints.ternary.Times;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.exception.SolverException;
@@ -191,7 +223,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an arithmetic constraint : var1 op var2,
-	 * where op in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
+	 * where op in {"=", "!=", ">","<",">=","<="} or {"+", "-", "*", "/"}
 	 *
 	 * @param var1 first variable
 	 * @param op1  an operator
@@ -199,23 +231,73 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param op2  another operator
 	 * @param cste an operator
 	 */
-	default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
-		if (var2.isInstantiated()) {
-			if ("+".equals(op1)) {
-				return arithm(var1, op2, cste - var2.getValue());
-			} else if ("-".equals(op1)) {
-				return arithm(var1, op2, cste + var2.getValue());
-			}
-		}
-		if (var1.isInstantiated()) {
-			if ("+".equals(op1)) {
-				return arithm(var2, op2, cste - var1.getValue());
-			} else if ("-".equals(op1)) {
-				return arithm(var2, Operator.getFlip(op2), var1.getValue() - cste);
-			}
-		}
-		return new Arithmetic(var1, Operator.get(op1), var2, Operator.get(op2), cste);
-	}
+	@SuppressWarnings("Duplicates")
+    default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, int cste) {
+        if (op1.equals("*") || op1.equals("/") || op2.equals("*") || op2.equals("/")) {
+            switch (op1) {
+                case "*": // v1 * v2 OP cste
+                    if (Operator.EQ.name().equals(op2)) {
+                        return times(var1, var2, cste);
+                    } else {
+                        int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
+                        IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                        _me().times(var1, var2, var4).post();
+                        return arithm(var4, op2, cste);
+                    }
+                case "/":
+                    // v1 / v2 OP cste
+                    if (Operator.EQ.name().equals(op2)) {
+                        return div(var1, var2, _me().intVar(cste));
+                    } else {
+                        int[] bounds = VariableUtils.boundsForDivision(var1, var2);
+                        IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                        _me().div(var1, var2, var4).post();
+                        return arithm(var4, op2, cste);
+                    }
+                default:
+                    switch (op2) {
+                        default:
+                            throw new SolverException("Unknown operators for arithm constraint");
+                        case "*": // v1 OP v2 * cste
+                            if (Operator.EQ.name().equals(op1)) {
+                                return times(var2, cste, var1);
+                            } else {
+                                int[] bounds = VariableUtils.boundsForMultiplication(var2, _me().intVar(cste));
+                                IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                                _me().times(var2, cste, var4).post();
+                                return arithm(var1, op1, var4);
+                            }
+                        case "/":
+                            // v1 OP v2 / cste
+                            if (Operator.EQ.name().equals(op1)) {
+                                return div(var2, _me().intVar(cste), var1);
+                            } else {
+                                // v1 OP v2 / v3
+                                int[] bounds = VariableUtils.boundsForDivision(var2, _me().intVar(cste));
+                                IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                                _me().div(var2, _me().intVar(cste), var4).post();
+                                return arithm(var1, op1, var4);
+                            }
+                    }
+            }
+        } else {
+            if (var2.isInstantiated()) {
+                if ("+".equals(op1)) {
+                    return arithm(var1, op2, cste - var2.getValue());
+                } else if ("-".equals(op1)) {
+                    return arithm(var1, op2, cste + var2.getValue());
+                }
+            }
+            if (var1.isInstantiated()) {
+                if ("+".equals(op1)) {
+                    return arithm(var2, op2, cste - var1.getValue());
+                } else if ("-".equals(op1)) {
+                    return arithm(var2, Operator.getFlip(op2), var1.getValue() - cste);
+                }
+            }
+            return new Arithmetic(var1, Operator.get(op1), var2, Operator.get(op2), cste);
+        }
+    }
 
 	/**
 	 * Creates a distance constraint : |var1-var2| op cste
@@ -347,7 +429,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
 	/**
 	 * Creates an arithmetic constraint: var1 op1 var2 op2 var3,
-	 * where op1 and op2 in {"=", "!=", ">","<",">=","<="} or {"+", "-"}
+	 * where op1 and op2 in {"=", "!=", ">","<",">=","<="} or {"+", "-", "*", "/"}
 	 *
 	 * @param var1 first variable
 	 * @param op1  an operator
@@ -355,14 +437,58 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param op2  another operator
 	 * @param var3 third variable
 	 */
+	@SuppressWarnings("Duplicates")
 	default Constraint arithm(IntVar var1, String op1, IntVar var2, String op2, IntVar var3) {
 		switch (op1) {
 			case "+":
 				return scalar(new IntVar[]{var1, var2}, new int[]{1, 1}, op2, var3);
 			case "-":
 				return scalar(new IntVar[]{var1, var2}, new int[]{1, -1}, op2, var3);
-			default:
-				switch (op2) {
+            case "*":
+                // v1 * v2 = v3
+                if(Operator.EQ.name().equals(op2)){
+                    return times(var1, var2, var3);
+                }else{
+                    // v1 * v2 OP v3
+                    int[] bounds = VariableUtils.boundsForMultiplication(var1, var2);
+                    IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                    _me().times(var1, var2, var4).post();
+                    return arithm(var4, op2, var3);
+                }
+            case "/":
+                // v1 / v2 = v3
+                if(Operator.EQ.name().equals(op2)){
+                    return div(var1, var2, var3);
+                }else{
+                    // v1 / v2 OP v3
+                    int[] bounds = VariableUtils.boundsForDivision(var1, var2);
+                    IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+                    _me().div(var1, var2, var4).post();
+                    return arithm(var4, op2, var3);
+                }
+			default:switch (op2) {
+					case "*":
+						// v1 = v2 * v3
+						if(Operator.EQ.name().equals(op1)){
+							return times(var2, var3, var1);
+						}else{
+							// v1 OP v2 * v3
+							int[] bounds = VariableUtils.boundsForMultiplication(var2, var3);
+							IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+							_me().times(var2, var3, var4).post();
+							return arithm(var1, op1, var4);
+						}
+					case "/":
+						// v1 = v2 / v3
+						if(Operator.EQ.name().equals(op1)){
+							return div(var2, var3, var1);
+						}else{
+							// v1 OP v2 / v3
+							int[] bounds = VariableUtils.boundsForDivision(var2, var3);
+							IntVar var4 = _me().intVar(bounds[0], bounds[1]);
+							_me().div(var2, var3, var4).post();
+							return arithm(var1, op1, var4);
+						}
 					case "+":
 						return scalar(new IntVar[]{var1, var3}, new int[]{1, -1}, op1, var2);
 					case "-":

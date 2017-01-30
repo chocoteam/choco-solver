@@ -8,12 +8,13 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- `arithm(IntVar,String,IntVar,String,int)` and `arithm(IntVar,String,IntVar,String,IntVar)` manage '*' and '/'
 
 ### Deprecated API:
 
 ### Closed issues and pull requests:
 
-\#500.
+\#500, #502.
 
 
 4.0.2 - 20 Jan 2017

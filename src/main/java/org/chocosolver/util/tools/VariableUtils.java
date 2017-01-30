@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.util.tools;
 
@@ -47,7 +47,7 @@ public class VariableUtils {
      */
     public static int[] boundsForScalar(IntVar[] vars, int[] coeffs) {
         long[] bounds = new long[2];
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] += vars[i].getLB() * coeffs[i];
             bounds[1] += vars[i].getUB() * coeffs[i];
         }
@@ -60,7 +60,7 @@ public class VariableUtils {
      */
     public static double[] boundsForAddition(RealVar... vars) {
         double[] bounds = new double[2];
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] += vars[i].getLB();
             bounds[1] += vars[i].getUB();
         }
@@ -75,7 +75,7 @@ public class VariableUtils {
     }
 
     private static double[] bound(double... values) {
-        return new double[]{stream(values).min().getAsDouble(),stream(values).max().getAsDouble()};
+        return new double[]{stream(values).min().getAsDouble(), stream(values).max().getAsDouble()};
     }
 
     /**
@@ -95,7 +95,7 @@ public class VariableUtils {
      * @return computes the bounds for "x - y"
      */
     public static double[] boundsForSubstraction(RealVar x, RealVar y) {
-        return new double[]{x.getLB() - y.getUB(),x.getUB() - y.getLB()};
+        return new double[]{x.getLB() - y.getUB(), x.getUB() - y.getLB()};
     }
 
 
@@ -133,11 +133,25 @@ public class VariableUtils {
      * @return computes the bounds for "x / y"
      */
     public static int[] boundsForDivision(IntVar x, IntVar y) {
+        int lx = x.getLB();
+        int ux = x.getUB();
+        int ly = y.getLB();
+        int uy = y.getUB();
+        if (ly == 0) {
+            ly++;
+        }
+        if (uy == 0) {
+            uy--;
+        }
+        if (ly < 0 && 0 < uy) {
+            ly = -1;
+            uy = 1;
+        }
         return bound(
-                x.getLB() / y.getLB(),
-                x.getLB() / y.getUB(),
-                x.getUB() / y.getLB(),
-                x.getUB() / y.getUB()
+                lx / ly,
+                lx / uy,
+                ux / ly,
+                ux / uy
         );
     }
 
@@ -228,7 +242,7 @@ public class VariableUtils {
      */
     public static int[] boundsForMinimum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE};
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] = Math.min(bounds[0], vars[i].getLB());
             bounds[1] = Math.min(bounds[1], vars[i].getUB());
         }
@@ -242,7 +256,7 @@ public class VariableUtils {
      */
     public static double[] boundsForMinimum(RealVar... vars) {
         double[] bounds = new double[]{Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY};
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] = Math.min(bounds[0], vars[i].getLB());
             bounds[1] = Math.min(bounds[1], vars[i].getUB());
         }
@@ -255,7 +269,7 @@ public class VariableUtils {
      */
     public static int[] boundsForMaximum(IntVar... vars) {
         int[] bounds = new int[]{Integer.MIN_VALUE, Integer.MIN_VALUE};
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] = Math.max(bounds[0], vars[i].getLB());
             bounds[1] = Math.max(bounds[1], vars[i].getUB());
         }
@@ -268,7 +282,7 @@ public class VariableUtils {
      */
     public static double[] boundsForMaximum(RealVar... vars) {
         double[] bounds = new double[]{Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY};
-        for(int i = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             bounds[0] = Math.max(bounds[0], vars[i].getLB());
             bounds[1] = Math.max(bounds[1], vars[i].getUB());
         }
@@ -288,11 +302,11 @@ public class VariableUtils {
      * @param y another int variable
      * @return true if the two domains intersect
      */
-    public static boolean intersect(IntVar x , IntVar y) {
+    public static boolean intersect(IntVar x, IntVar y) {
         if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
             return false;
         }
-        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
+        if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (y.contains(val)) {
@@ -310,7 +324,7 @@ public class VariableUtils {
      * @param model model to create IntVar
      * @return
      */
-    public static IntVar[] toIntVar(Model model, int... values){
+    public static IntVar[] toIntVar(Model model, int... values) {
         return Arrays.stream(values).mapToObj(i -> model.intVar(i)).toArray(IntVar[]::new);
     }
 
@@ -319,8 +333,8 @@ public class VariableUtils {
      * @return <i>true</i> if the variable is a constant, based on its type,
      * <i>false</i> otherwise
      */
-    public static boolean isConstant(Variable var){
-        return (var.getTypeAndKind() & Variable.CSTE) !=0;
+    public static boolean isConstant(Variable var) {
+        return (var.getTypeAndKind() & Variable.CSTE) != 0;
     }
 
     /**
@@ -328,8 +342,8 @@ public class VariableUtils {
      * @return <i>true</i> if the variable is a view, based on its type,
      * <i>false</i> otherwise
      */
-    public static boolean isView(Variable var){
-        return (var.getTypeAndKind() & Variable.VIEW) !=0;
+    public static boolean isView(Variable var) {
+        return (var.getTypeAndKind() & Variable.VIEW) != 0;
     }
 
 }
