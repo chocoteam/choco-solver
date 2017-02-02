@@ -63,7 +63,10 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
                     int task2 = tsks[y];
                     int t1 = s[task1].getLB();
                     int t2 = e[task2].getUB();
-                    if (t1 < t2 && (t1 < e[task2].getLB() || t2 > s[task1].getUB())) {
+                    if(e[task1].getLB()>s[task2].getUB()){
+                        s[task1].updateLowerBound(e[task2].getLB(),aCause);
+                        e[task2].updateUpperBound(s[task1].getUB(),aCause);
+                    }else if (t1 < t2 && (t1 < e[task2].getLB() || t2 > s[task1].getUB())) {
                         int W = 0;
                         for (int task3 : tsks) {
                             if (task3 != task1 && task3 != task2) {
