@@ -8,10 +8,11 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-
-
 
 /**
  * A search strategy provides decisions to go down in the search space.
@@ -71,5 +72,17 @@ public abstract class AbstractStrategy<V extends Variable>  {
      */
     public V[] getVariables() {
         return vars;
+    }
+
+    /**
+     *  Creates an assignment decision object for integer variables
+     *  Just a simple shortcut for :
+     *  solver.getDecisionPath().makeIntDecision(var,DecisionOperatorFactory.makeIntEq(),val);
+     * @param var variable to branch on
+     * @param val value to branch on
+     * @return an assignment decision object (var = val) for integer variables
+     */
+    protected final IntDecision makeIntDecision(IntVar var, int val){
+        return var.getModel().getSolver().getDecisionPath().makeIntDecision(var, DecisionOperatorFactory.makeIntEq(),val);
     }
 }

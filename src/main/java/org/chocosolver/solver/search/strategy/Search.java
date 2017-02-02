@@ -13,7 +13,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
@@ -361,21 +360,5 @@ public class Search {
 
         // 6. add last conflict
         return lastConflict(sequencer(strats.toArray(new AbstractStrategy[strats.size()])));
-    }
-
-    // ************************************************************************************
-    // UTILS
-    // ************************************************************************************
-
-    /**
-     *  Creates an assignment decision object for integer variables
-     *  Just a simple shortcut for :
-     *  solver.getDecisionPath().makeIntDecision(var,DecisionOperatorFactory.makeIntEq(),val);
-     * @param var variable to branch on
-     * @param val value to branch on
-     * @return an assignment decision object (var = val) for integer variables
-     */
-    public static IntDecision makeIntDecision(IntVar var, int val){
-        return var.getModel().getSolver().getDecisionPath().makeIntDecision(var,DecisionOperatorFactory.makeIntEq(),val);
     }
 }
