@@ -800,6 +800,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 *                  (which counts from 1 to n instead of from 0 to n-1)
 	 */
 	default Constraint binPacking(IntVar[] itemBin, int[] itemSize, IntVar[] binLoad, int offset) {
+		if(itemBin.length!=itemSize.length) {
+			throw new SolverException("itemBin and itemSize arrays should have same size");
+		}
 		Model model = itemBin[0].getModel();
 		// redundant filtering
 		int sum = 0;
@@ -1043,6 +1046,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a cumulative constraint
 	 */
 	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
+		if(tasks.length!=heights.length) {
+			throw new SolverException("Tasks and heights arrays should have same size");
+		}
 		int nbUseFull = 0;
 		for (int h = 0; h < heights.length; h++) {
 			if (heights[h].getUB()>0 && tasks[h].getDuration().getUB()>0) {
@@ -1220,7 +1226,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint inverseChanneling(IntVar[] vars1, IntVar[] vars2, int offset1, int offset2) {
 		if (vars1.length != vars2.length)
-			throw new UnsupportedOperationException(Arrays.toString(vars1) + " and " + Arrays.toString(vars2) + " should have same size");
+			throw new SolverException(Arrays.toString(vars1) + " and " + Arrays.toString(vars2) + " should have same size");
 		boolean allEnum = true;
 		for (int i = 0; i < vars1.length && allEnum; i++) {
 			if (!(vars1[i].hasEnumeratedDomain() && vars2[i].hasEnumeratedDomain())) {
@@ -1553,7 +1559,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		assert start != null && end != null && vars != null;
 		switch (vars.length) {
 			case 0:
-				throw new UnsupportedOperationException("|vars| Should be strictly greater than 0");
+				throw new SolverException("|vars| Should be strictly greater than 0");
 			case 1:
 				return Constraint.merge("path",
 						arithm(start, "=", offset),
@@ -1613,6 +1619,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a scalar constraint
 	 */
 	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, IntVar scalar) {
+		if(vars.length!=coeffs.length) {
+			throw new SolverException("vars and coeffs arrays should have same size");
+		}
 		return IntLinCombFactory.reduce(vars, coeffs, Operator.get(operator), scalar);
 	}
 
@@ -1630,6 +1639,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a sort constraint
 	 */
 	default Constraint sort(IntVar[] vars, IntVar[] sortedVars) {
+		if(vars.length!=sortedVars.length) {
+			throw new SolverException("vars and sortedVars arrays should have same size");
+		}
 		//        return new Constraint("Sort", new PropSort(vars, sortedVars));
 		IntVar[][] X = new IntVar[vars.length][1];
 		IntVar[][] Y = new IntVar[sortedVars.length][1];
@@ -1695,7 +1707,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		assert start != null && end != null && vars != null;
 		switch (vars.length) {
 			case 0:
-				throw new UnsupportedOperationException("|vars| Should be strictly greater than 0");
+				throw new SolverException("|vars| Should be strictly greater than 0");
 			case 1:
 				return Constraint.merge("subPath",
 						arithm(start, "=", offset),

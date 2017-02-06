@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -46,7 +47,7 @@ public class PropDiffN extends Propagator<IntVar> {
         this.fast = fast;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
-            throw new UnsupportedOperationException();
+            throw new SolverException("PropDiffN variable arrays do not have same size");
         }
         overlappingBoxes = new UndirectedGraph(model, n, SetType.LINKED_LIST, true);
         boxesToCompute = SetFactory.makeStoredSet(SetType.LINKED_LIST, 0, model);
