@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
@@ -61,7 +62,7 @@ public class InverseChannelingTest {
         assertEquals(checkSolutions(model, intVars1, intVars2), 2);
     }
 
-    @Test(groups = "1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class,
+    @Test(groups = "1s", timeOut=60000, expectedExceptions = SolverException.class,
             dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testLengthsDiffer(boolean bounded, Settings settings) {
         Model model = new Model();
