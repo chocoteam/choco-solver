@@ -102,9 +102,11 @@ public abstract class Decision<E extends Variable> implements ICause, Serializab
      * instead of backtracking once and applying its negation (e.g. x!=3)
      * the resolver will backtrack twice and negates the previous decision.
      * @param isRefutable set to false to disable refutation
+     * @return this object
      */
-    public final void setRefutable(boolean isRefutable) {
+    public final Decision<E> setRefutable(boolean isRefutable) {
         max_branching = isRefutable ? 2 : 1;
+        return this;
     }
 
     /**
