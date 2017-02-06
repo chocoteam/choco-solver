@@ -15,9 +15,9 @@ A model
 
     // VARIABLES
     // set of marks that should be put on the ruler
-    IntVar[] ticks = ticks = model.intVarArray("a", m, 0, 9999, true);
+    IntVar[] ticks = model.intVarArray("a", m, 0, 999, false);
     // set of distances between two distinct marks
-    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
+    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 999, false);
 
     // CONSTRAINTS
     // the first mark is set to 0
@@ -40,8 +40,6 @@ A model
     model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
 
 
-There is no particular need for setting enumerated-domain variables.
-Most of the constraint but alldifferent reason on bounds only.
 
 
 A search strategy
@@ -82,9 +80,9 @@ The entire code
 
     // VARIABLES
     // set of marks that should be put on the ruler
-    IntVar[] ticks = ticks = model.intVarArray("a", m, 0, 9999, true);
+    IntVar[] ticks = ticks = model.intVarArray("a", m, 0, 999, false);
     // set of distances between two distinct marks
-    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 9999, true);
+    IntVar[] diffs = model.intVarArray("d", (m * (m - 1)) / 2, 0, 999, false);
 
     // CONSTRAINTS
     // the first mark is set to 0
@@ -118,17 +116,17 @@ The trace of the execution is roughly:
 
 .. code::
 
-    Model[GolombRuler], 1 Solutions, MINIMIZE a[9] = 80, Resolution time 0,015s, 10 Nodes (661,7 n/s), 0 Backtracks, 0 Fails, 0 Restarts
-    Model[GolombRuler], 2 Solutions, MINIMIZE a[9] = 75, Resolution time 0,025s, 18 Nodes (711,1 n/s), 14 Backtracks, 7 Fails, 0 Restarts
-    Model[GolombRuler], 3 Solutions, MINIMIZE a[9] = 73, Resolution time 0,035s, 30 Nodes (849,6 n/s), 36 Backtracks, 17 Fails, 0 Restarts
-    Model[GolombRuler], 4 Solutions, MINIMIZE a[9] = 72, Resolution time 0,044s, 53 Nodes (1 199,5 n/s), 80 Backtracks, 40 Fails, 0 Restarts
-    Model[GolombRuler], 5 Solutions, MINIMIZE a[9] = 70, Resolution time 0,055s, 95 Nodes (1 731,3 n/s), 162 Backtracks, 79 Fails, 0 Restarts
-    Model[GolombRuler], 6 Solutions, MINIMIZE a[9] = 68, Resolution time 0,085s, 161 Nodes (1 886,6 n/s), 292 Backtracks, 144 Fails, 0 Restarts
-    Model[GolombRuler], 7 Solutions, MINIMIZE a[9] = 66, Resolution time 0,136s, 288 Nodes (2 120,3 n/s), 546 Backtracks, 269 Fails, 0 Restarts
-    Model[GolombRuler], 8 Solutions, MINIMIZE a[9] = 62, Resolution time 0,157s, 374 Nodes (2 389,4 n/s), 712 Backtracks, 353 Fails, 0 Restarts
-    Model[GolombRuler], 9 Solutions, MINIMIZE a[9] = 60, Resolution time 0,263s, 1354 Nodes (5 145,0 n/s), 2670 Backtracks, 1331 Fails, 0 Restarts
-    Model[GolombRuler], 10 Solutions, MINIMIZE a[9] = 55, Resolution time 0,779s, 7997 Nodes (10 260,4 n/s), 15951 Backtracks, 7972 Fails, 0 Restarts
-    Model[GolombRuler], 10 Solutions, MINIMIZE a[9] = 55, Resolution time 1,218s, 15981 Nodes (13 123,6 n/s), 31943 Backtracks, 15962 Fails, 0 Restarts
+    Model[Golomb ruler], 1 Solutions, MINIMIZE a[9] = 80, Resolution time 0,017s, 10 Nodes (593,7 n/s), 0 Backtracks, 0 Fails, 0 Restarts
+    Model[Golomb ruler], 2 Solutions, MINIMIZE a[9] = 75, Resolution time 0,026s, 18 Nodes (696,8 n/s), 14 Backtracks, 7 Fails, 0 Restarts
+    Model[Golomb ruler], 3 Solutions, MINIMIZE a[9] = 73, Resolution time 0,032s, 30 Nodes (949,9 n/s), 36 Backtracks, 17 Fails, 0 Restarts
+    Model[Golomb ruler], 4 Solutions, MINIMIZE a[9] = 72, Resolution time 0,040s, 53 Nodes (1 324,0 n/s), 80 Backtracks, 40 Fails, 0 Restarts
+    Model[Golomb ruler], 5 Solutions, MINIMIZE a[9] = 70, Resolution time 0,054s, 95 Nodes (1 773,2 n/s), 162 Backtracks, 79 Fails, 0 Restarts
+    Model[Golomb ruler], 6 Solutions, MINIMIZE a[9] = 68, Resolution time 0,065s, 161 Nodes (2 487,9 n/s), 292 Backtracks, 144 Fails, 0 Restarts
+    Model[Golomb ruler], 7 Solutions, MINIMIZE a[9] = 66, Resolution time 0,082s, 288 Nodes (3 529,9 n/s), 546 Backtracks, 269 Fails, 0 Restarts
+    Model[Golomb ruler], 8 Solutions, MINIMIZE a[9] = 62, Resolution time 0,092s, 374 Nodes (4 075,8 n/s), 712 Backtracks, 353 Fails, 0 Restarts
+    Model[Golomb ruler], 9 Solutions, MINIMIZE a[9] = 60, Resolution time 0,210s, 1354 Nodes (6 435,1 n/s), 2670 Backtracks, 1331 Fails, 0 Restarts
+    Model[Golomb ruler], 10 Solutions, MINIMIZE a[9] = 55, Resolution time 0,531s, 7997 Nodes (15 050,6 n/s), 15951 Backtracks, 7972 Fails, 0 Restarts
+    Model[Golomb ruler], 10 Solutions, MINIMIZE a[9] = 55, Resolution time 0,940s, 15981 Nodes (16 999,3 n/s), 31943 Backtracks, 15962 Fails, 0 Restarts
 
 
 
