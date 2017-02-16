@@ -36,16 +36,18 @@ public class PropBoolMin extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x1 = -1;
-        x2 = -1;
+        x1 = 0;
+        x2 = 1;
+        int c = 2;
         for (int i = 0; i < n; i++) {
-            if (!vars[i].isInstantiated()) {
-                if (x1 == -1) {
+            if (c>0 && !vars[i].isInstantiated()) {
+                if (c == 2) {
                     x1 = i;
-                } else if (x2 == -1) {
+                } else{
                     x2 = i;
                 }
-            } else if (vars[i].getValue() == 0) {
+                c--;
+            } else if (vars[i].isInstantiatedTo(0)) {
                 vars[n].instantiateTo(0, this);
                 if (vars[n].isInstantiatedTo(0)) {
                     setPassive();
@@ -67,13 +69,20 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 }
             } else if (idxVarInProp == x1 || idxVarInProp == x2) {
                 if (idxVarInProp == x1) {
+                    int t = x1;
                     x1 = x2;
+                    x2 = t;
                 }
-                x2 = -1;
                 for (int i = 0; i < n; i++) {
                     if (i != x1 && !vars[i].isInstantiated()) {
                         x2 = i;
                         break;
+                    }else if (vars[i].isInstantiatedTo(0)) {
+                        vars[n].instantiateTo(0, this);
+                        if (vars[n].isInstantiatedTo(0)) {
+                            setPassive();
+                            return;
+                        }
                     }
                 }
                 filter();
@@ -82,17 +91,20 @@ public class PropBoolMin extends Propagator<BoolVar> {
     }
 
     public void filter() throws ContradictionException {
-        if (x1 == -1) {
+        int b1 = vars[x1].isInstantiated()? vars[x1].getValue():2;
+        int b2 = vars[x2].isInstantiated()? vars[x2].getValue():2;
+        int bn = vars[n].isInstantiated()? vars[n].getValue():2;
+
+        if(b1 == 1 && b2 == 1){
+            setPassive();
             vars[n].instantiateTo(1, this);
-            if (vars[n].isInstantiatedTo(1)) {
-                setPassive();
+        }else if(bn == 0){
+            if(b1 == 1){
+                vars[x2].instantiateTo(0, this);
+            }else if(b2 == 1){
+                vars[x1].instantiateTo(0, this);
             }
-        }else if (x2 == -1 && vars[n].isInstantiatedTo(0)) {
-            vars[x1].instantiateTo(0, this);
-            if (vars[x1].isInstantiatedTo(0)) {
-                setPassive();
-            }
-        }else if (vars[n].isInstantiatedTo(1)) {
+        }else if(bn == 1) {
             for (int i = 0; i < n; i++) {
                 vars[i].instantiateTo(1, this);
             }

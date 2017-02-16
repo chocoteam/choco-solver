@@ -8,19 +8,25 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Jean-Guillaume Fages
@@ -285,4 +291,158 @@ public class MinMaxTest {
         }
         return nbSol;
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMin1(){
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b",2);
+        BoolVar target = model.boolVar("t");
+
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.min(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            solver.propagate();
+            model.getEnvironment().worldPush();
+            bvars[0].instantiateTo(1, Cause.Null);
+            solver.propagate();
+            model.getEnvironment().worldPush();
+            bvars[1].instantiateTo(1, Cause.Null);
+            solver.propagate();
+            Assert.assertTrue(target.isInstantiatedTo(1));
+            model.getEnvironment().worldPop();
+            bvars[1].instantiateTo(1, Cause.Null);
+            solver.propagate();
+            Assert.assertTrue(target.isInstantiatedTo(1));
+
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMin2(){
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b",2);
+        BoolVar target = model.boolVar("t");
+        Random rnd = new Random(0);
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.min(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            int v;
+            solver.propagate();
+            for(int i = 0; i< 10000; i++){
+                model.getEnvironment().worldPush();
+                switch (rnd.nextInt(3)){
+                    case 0:
+                        bvars[0].instantiateTo(rnd.nextInt(2), Cause.Null);
+                        solver.propagate();
+                        bvars[1].instantiateTo(rnd.nextInt(2), Cause.Null);
+                        solver.propagate();
+                        break;
+                    case 1:
+                        v = rnd.nextInt(2);
+                        bvars[0].instantiateTo(v, Cause.Null);
+                        solver.propagate();
+                        if(v == 1) {
+                            target.instantiateTo(rnd.nextInt(2), Cause.Null);
+                            solver.propagate();
+                        }
+                        break;
+                    case 2:
+                        v = rnd.nextInt(2);
+                        bvars[1].instantiateTo(v, Cause.Null);
+                        solver.propagate();
+                        if(v == 1) {
+                            target.instantiateTo(rnd.nextInt(2), Cause.Null);
+                            solver.propagate();
+                        }
+                        break;
+                }
+                Assert.assertEquals(solver.isSatisfied(), ESat.TRUE);
+                model.getEnvironment().worldPop();
+            }
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMax1(){
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b",2);
+        BoolVar target = model.boolVar("t");
+
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.max(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            solver.propagate();
+            model.getEnvironment().worldPush();
+            bvars[0].instantiateTo(0, Cause.Null);
+            solver.propagate();
+            model.getEnvironment().worldPush();
+            bvars[1].instantiateTo(0, Cause.Null);
+            solver.propagate();
+            Assert.assertTrue(target.isInstantiatedTo(0));
+            model.getEnvironment().worldPop();
+            bvars[1].instantiateTo(0, Cause.Null);
+            solver.propagate();
+            Assert.assertTrue(target.isInstantiatedTo(0));
+
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMax2(){
+        Model model = new Model();
+        BoolVar[] bvars = model.boolVarArray("b",2);
+        BoolVar target = model.boolVar("t");
+        Random rnd = new Random(0);
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.max(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            int v;
+            solver.propagate();
+            for(int i = 0; i< 10000; i++){
+                model.getEnvironment().worldPush();
+                switch (rnd.nextInt(3)){
+                    case 0:
+                        bvars[0].instantiateTo(rnd.nextInt(2), Cause.Null);
+                        solver.propagate();
+                        bvars[1].instantiateTo(rnd.nextInt(2), Cause.Null);
+                        solver.propagate();
+                        break;
+                    case 1:
+                        v = rnd.nextInt(2);
+                        bvars[0].instantiateTo(v, Cause.Null);
+                        solver.propagate();
+                        if(v == 0) {
+                            target.instantiateTo(rnd.nextInt(2), Cause.Null);
+                            solver.propagate();
+                        }
+                        break;
+                    case 2:
+                        v = rnd.nextInt(2);
+                        bvars[1].instantiateTo(v, Cause.Null);
+                        solver.propagate();
+                        if(v == 0) {
+                            target.instantiateTo(rnd.nextInt(2), Cause.Null);
+                            solver.propagate();
+                        }
+                        break;
+                }
+                Assert.assertEquals(solver.isSatisfied(), ESat.TRUE);
+                model.getEnvironment().worldPop();
+            }
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
