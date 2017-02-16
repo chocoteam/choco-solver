@@ -245,7 +245,7 @@ public enum ArrayUtils {
      * @return a new Array composed of both given in parameters.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T[] append(T[] array, T... elements) {
+    public static <T> T[] concat(T[] array, T... elements) {
         return append(array, elements);
     }
 
@@ -282,7 +282,7 @@ public enum ArrayUtils {
      * @return a new Array composed of both given in parameters.
      */
     @SuppressWarnings("unchecked")
-    public static <T> T[] append(int[] array, int... elements) {
+    public static int[] concat(int[] array, int... elements) {
         return append(array, elements);
     }
 
