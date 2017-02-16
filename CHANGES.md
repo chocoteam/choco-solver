@@ -9,6 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 - `arithm(IntVar,String,IntVar,String,int)` and `arithm(IntVar,String,IntVar,String,IntVar)` manage '*' and '/'
+- add new APIs to `ArrayUtils`
+- fix error in `PropBoolMin` and `PropBoolMax`
 
 ### Deprecated API:
 
