@@ -74,6 +74,46 @@ public enum ArrayUtils {
      * Returns the column <i>c</i> extracted from matrix <i>array</i>.
      * @param array double entry matrix
      * @param c index of the column to get
+     * @return the column <i>c</i> from <i>array</i>, or null if array is null or array.length is null,
+     * or if c is negative or if array.length < c
+     */
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    public static int[] getColumn(final int[][] array, final int c) {
+        if (array != null && array.length > 0
+                && c >= 0 && array[0].length > c) {
+            int[] res = new int[array.length];
+            for (int i = 0; i < array.length; i++) {
+                res[i] = array[i][c];
+            }
+            return res;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the column <i>c</i> extracted from matrix <i>array</i>.
+     * @param array double entry matrix
+     * @param c index of the column to get
+     * @return the column <i>c</i> from <i>array</i>, or null if array is null or array.length is null,
+     * or if c is negative or if array.length < c
+     */
+    @SuppressWarnings({"unchecked", "RedundantCast"})
+    public static double[] getColumn(final double[][] array, final int c) {
+        if (array != null && array.length > 0
+                && c >= 0 && array[0].length > c) {
+            double[] res = new double[array.length];
+            for (int i = 0; i < array.length; i++) {
+                res[i] = array[i][c];
+            }
+            return res;
+        }
+        return null;
+    }
+
+    /**
+     * Returns the column <i>c</i> extracted from matrix <i>array</i>.
+     * @param array double entry matrix
+     * @param c index of the column to get
      * @param <T> the class of the objects in the input matrix
      * @return the column <i>c</i> from <i>array</i>, or null if array is null or array.length is null,
      * or if c is negative or if array.length < c
@@ -198,6 +238,18 @@ public enum ArrayUtils {
     }
 
     /**
+     * Append <i>elements</i> at the end of another <i>array</i>
+     *
+     * @param array array of arrays to append
+     * @param elements elements to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] append(T[] array, T... elements) {
+        return append(array, elements);
+    }
+
+    /**
      * Append int arrays
      *
      * @param toAppend array of arrays to append
@@ -220,6 +272,18 @@ public enum ArrayUtils {
             }
         }
         return ret;
+    }
+
+    /**
+     * Append <i>elements</i> at the end of another <i>array</i>
+     *
+     * @param array array of arrays to append
+     * @param elements elements to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> T[] append(int[] array, int... elements) {
+        return append(array, elements);
     }
 
     /**
