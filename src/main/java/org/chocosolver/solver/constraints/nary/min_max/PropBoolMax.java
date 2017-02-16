@@ -42,6 +42,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
         for (int i = 0; i < n; i++) {
             if (c>0 && !vars[i].isInstantiated()) {
                 if (c == 2) {
+                    x2 = x1;
                     x1 = i;
                 } else{
                     x2 = i;

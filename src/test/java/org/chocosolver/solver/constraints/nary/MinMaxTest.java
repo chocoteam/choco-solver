@@ -368,6 +368,27 @@ public class MinMaxTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testMin3(){
+        Model model = new Model();
+        BoolVar[] bvars = new BoolVar[4];
+        bvars[0] = model.boolVar(true);
+        bvars[1] = model.boolVar();
+        bvars[2] = model.boolVar(true);
+        bvars[3] = model.boolVar(true);
+        BoolVar target = model.boolVar(false);
+
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.min(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        Assert.assertTrue(bvars[1].isInstantiatedTo(0));
+    }
+
 
     @Test(groups="1s", timeOut=60000)
     public void testMax1(){
@@ -443,6 +464,27 @@ public class MinMaxTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMax3(){
+        Model model = new Model();
+        BoolVar[] bvars = new BoolVar[4];
+        bvars[0] = model.boolVar(false);
+        bvars[1] = model.boolVar();
+        bvars[2] = model.boolVar(false);
+        bvars[3] = model.boolVar(false);
+        BoolVar target = model.boolVar(true);
+
+//        model.sum(bvars, "=", bvars.length).reifyWith(target);
+        model.max(target, bvars).post();
+        Solver solver = model.getSolver();
+        try {
+            solver.propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        Assert.assertTrue(bvars[1].isInstantiatedTo(1));
     }
 
 }
