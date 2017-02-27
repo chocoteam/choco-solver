@@ -203,9 +203,6 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         initializeData();
         maintainList();
         pruningPhase();
-        if (getCartesianProduct() <= last.get() + 1) {
-            setPassive();
-        }
     }
 
     private double getCartesianProduct() {

@@ -50,6 +50,13 @@ public class ValidityChecker implements IntComparator {
             sortedidx[i] = i;
         }
         sorter.sort(sortedidx, arity, this);
+        boolean correct = true;
+        for(int i = 0; i < vars.length-1; i++){
+            correct &= vars[sortedidx[i]].getDomainSize() <= vars[sortedidx[i + 1]].getDomainSize();
+        }
+        if(!correct){
+            assert false: "wrong sort";
+        }
     }
 
     // Is tuple valide ?
@@ -61,6 +68,6 @@ public class ValidityChecker implements IntComparator {
 
     @Override
     public int compare(int i1, int i2) {
-        return vars[sortedidx[i1]].getDomainSize() - vars[sortedidx[i2]].getDomainSize();
+        return vars[i1].getDomainSize() - vars[i2].getDomainSize();
     }
 }

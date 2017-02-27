@@ -72,6 +72,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (firstProp) {
             firstProp = false;
+            model.getEnvironment().save(() -> firstProp = true);
             initialPropagate();
         }
         Filter();
