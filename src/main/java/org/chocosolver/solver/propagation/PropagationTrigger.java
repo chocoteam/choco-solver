@@ -62,17 +62,13 @@ public class PropagationTrigger  {
         }
     }
 
-    public void dynAdd(Propagator propagator, boolean permanent) {
-        if (permanent) {
-            assert perm_propagators.size() == perm_world.size();
-            int pos = find(propagator);
-            if (pos == -1) {
-                perm_propagators.add(propagator);
-                perm_world.add(Integer.MAX_VALUE);
-                size++;
-            } else {
-                perm_world.replaceQuick(pos, Integer.MAX_VALUE);
-            }
+    public void propagateOnBacktrack(Propagator propagator) {
+        assert perm_propagators.size() == perm_world.size();
+        int pos = find(propagator);
+        if(pos == -1){
+            dynAdd(propagator, true);
+        }else {
+            perm_world.replaceQuick(pos, Integer.MAX_VALUE);
         }
     }
 
@@ -85,6 +81,14 @@ public class PropagationTrigger  {
         else return i;
     }
 
+    public void dynAdd(Propagator propagator, boolean permanent) {
+        if (permanent) {
+            assert perm_propagators.size() == perm_world.size();
+            perm_propagators.add(propagator);
+            perm_world.add(Integer.MAX_VALUE);
+            size++;
+        }
+    }
 
     public void remove(Propagator propagator) {
         // Remove a pending propagator, ie, not yet propagated
@@ -133,38 +137,13 @@ public class PropagationTrigger  {
         }
         if (perm_propagators.size() > 0) {
             int cw = environment.getWorldIndex(); // get current index
-            for (int p = 0; p < perm_propagators.size(); p++) {
-                if (perm_world.getQuick(p) >= cw) {
-                    execute(perm_propagators.get(p), engine);
-                    perm_world.replace(p, cw);
-                    // TODO: add a test on the root world to clear the list
-                }
+            int p = perm_propagators.size() - 1;
+            while (p >= 0 && perm_world.getQuick(p) >= cw) {
+                execute(perm_propagators.get(p), engine);
+                perm_world.replaceQuick(p, cw);
+                p--;
             }
         }
-        /*if (tmp_propagators.size() > 0) {
-            for (int p = 0; p < tmp_propagators.size(); p++) {
-                Propagator propagator = tmp_propagators.get(p);
-                execute(propagator, engine);
-                tmp_propagators.remove(p);
-                p--;
-                size--;
-                tmp_cstr.add(propagator.getConstraint());
-            }
-            for (final Constraint c : tmp_cstr) {
-                // the constraint has been added during the resolution.
-                // it should be removed on backtrack -> create a new undo operation
-                environment.save(new Operation() {
-                    @Override
-                    public void undo() {
-                        if (LoggerFactory.getLogger("solver").isDebugEnabled()) {
-                            LoggerFactory.getLogger("solver").debug("unpost " + c);
-                        }
-                        model.unpost(c);
-                    }
-                });
-            }
-            tmp_cstr.clear();
-        }*/
     }
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {

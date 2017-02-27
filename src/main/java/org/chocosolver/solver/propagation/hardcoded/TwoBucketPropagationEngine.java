@@ -27,6 +27,7 @@ import org.chocosolver.util.objects.IntMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,7 +66,10 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      * The singleton exception to use (and to configure) when a contradiction is detected.
      */
     private final ContradictionException exception;
-
+    /**
+     * current number of propagators declared
+     */
+    private int size;
     /**
      * List of propagators.
      */
@@ -180,14 +184,12 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         if (!init) {
             List<Propagator> _propagators = new ArrayList<>();
             Constraint[] constraints = model.getCstrs();
-            int nbProp = 0;
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
-                for (int j = 0; j < cprops.length; j++, nbProp++) {
-                    _propagators.add(cprops[j]);
-                }
+                Collections.addAll(_propagators, cprops);
             }
             propagators = _propagators.toArray(new Propagator[_propagators.size()]);
+            size = _propagators.size();
             p2i = new IntMap(propagators.length);
             for (int j = 0; j < propagators.length; j++) {
                 if(p2i.containsKey(propagators[j].getId())){
@@ -214,35 +216,36 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             _max_++;
             max_c = _max_;
 
+            //noinspection unchecked
             pro_queue_f = new ArrayDeque[max_f];
             for (int i = 0; i < max_f; i++) {
                 pro_queue_f[i] = new ArrayDeque<>(propagators.length / 2 + 1);
             }
-            schedule_f = new boolean[nbProp];
+            schedule_f = new boolean[size];
 
-
+            //noinspection unchecked
             pro_queue_c = new ArrayDeque[max_c];
             for (int i = 0; i < max_c; i++) {
                 pro_queue_c[i] = new ArrayDeque<>(propagators.length / 2 + 1);
             }
-            schedule_c = new boolean[nbProp];
+            schedule_c = new boolean[size];
 
             notEmpty = 0;
 
-            event_f = new IntCircularQueue[nbProp];
-            eventmasks = new int[nbProp][];
-            for (int i = 0; i < nbProp; i++) {
+            event_f = new IntCircularQueue[size];
+            eventmasks = new int[size][];
+            for (int i = 0; i < size; i++) {
                 if (propagators[i].reactToFineEvent()) {
                     int nbv = propagators[i].getNbVars();
                     event_f[i] = new IntCircularQueue(nbv);
                     eventmasks[i] = new int[nbv];
                 }
             }
-            event_c = new PropagatorEventType[nbProp];
+            event_c = new PropagatorEventType[size];
             Arrays.fill(event_c, PropagatorEventType.VOID);
             init = true;
         }
-        trigger.addAll(propagators);
+        trigger.addAll(Arrays.copyOfRange(propagators, 0, size));
     }
 
     @Override
@@ -390,6 +393,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         Propagator prop;
         int pindice;
         EvtScheduler si = variable._schedIter();
+        //noinspection unchecked
         si.init(type);
         while (si.hasNext()) {
             int p = variable.getDindex(si.next());
@@ -471,47 +475,50 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException{
-        int osize = propagators.length;
+        int osize = size;
         int nbp = ps.length;
-        int nsize = osize + nbp;
-        Propagator[] _propagators = propagators;
-        propagators = new Propagator[nsize];
-        System.arraycopy(_propagators, 0, propagators, 0, osize);
+        size += nbp;
+        boolean resize = (size > propagators.length);
+        if(resize){
+            int nsize = (size * 3 / 2) + 1;
+            Propagator[] _propagators = propagators;
+            propagators = new Propagator[nsize];
+            System.arraycopy(_propagators, 0, propagators, 0, osize);
+
+            boolean[] _schedule_f = schedule_f;
+            schedule_f = new boolean[nsize];
+            System.arraycopy(_schedule_f, 0, schedule_f, 0, osize);
+
+            boolean[] _schedule_c = schedule_c;
+            schedule_c = new boolean[nsize];
+            System.arraycopy(_schedule_c, 0, schedule_c, 0, osize);
+
+
+            PropagatorEventType[] _event_c = event_c;
+            event_c = new PropagatorEventType[nsize];
+            System.arraycopy(_event_c, 0, event_c, 0, osize);
+            Arrays.fill(event_c, osize, nsize, PropagatorEventType.VOID);
+
+            IntCircularQueue[] _event_f = event_f;
+            event_f = new IntCircularQueue[nsize];
+            System.arraycopy(_event_f, 0, event_f, 0, osize);
+
+            int[][] _eventmasks = eventmasks;
+            eventmasks = new int[nsize][];
+            System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
+
+        }
         System.arraycopy(ps, 0, propagators, osize, nbp);
-        for (int j = osize; j < nsize; j++) {
-            if(p2i.containsKey(propagators[j].getId())){
+        for (int i = osize; i < size; i++) {
+            if(p2i.containsKey(propagators[i].getId())){
                 throw new SolverException("The following propagator " +
                         "is declared more than once into the propagation engine " +
                         "(this happens when a constraint is posted twice " +
                         "or when a posted constraint is also reified.)\n" +
-                        propagators[j]+" of "+propagators[j].getConstraint());
+                        propagators[i]+" of "+propagators[i].getConstraint());
             }
-            p2i.put(propagators[j].getId(), j);
-            trigger.dynAdd(propagators[j], permanent);
-        }
-
-        boolean[] _schedule_f = schedule_f;
-        schedule_f = new boolean[nsize];
-        System.arraycopy(_schedule_f, 0, schedule_f, 0, osize);
-
-        boolean[] _schedule_c = schedule_c;
-        schedule_c = new boolean[nsize];
-        System.arraycopy(_schedule_c, 0, schedule_c, 0, osize);
-
-
-        PropagatorEventType[] _event_c = event_c;
-        event_c = new PropagatorEventType[nsize];
-        System.arraycopy(_event_c, 0, event_c, 0, osize);
-        Arrays.fill(event_c, osize, nsize, PropagatorEventType.VOID);
-
-        IntCircularQueue[] _event_f = event_f;
-        event_f = new IntCircularQueue[nsize];
-        System.arraycopy(_event_f, 0, event_f, 0, osize);
-
-        int[][] _eventmasks = eventmasks;
-        eventmasks = new int[nsize][];
-        System.arraycopy(_eventmasks, 0, eventmasks, 0, osize);
-        for (int i = osize; i < nsize; i++) {
+            p2i.put(propagators[i].getId(), i);
+            trigger.dynAdd(propagators[i], permanent);
             if (propagators[i].reactToFineEvent()) {
                 eventmasks[i] = new int[propagators[i].getNbVars()];
                 event_f[i] = new IntCircularQueue(propagators[i].getNbVars());
@@ -533,7 +540,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
 
     @Override
     public void propagateOnBacktrack(Propagator p) {
-        trigger.dynAdd(p, true);
+        trigger.propagateOnBacktrack(p);
     }
 
     @Override
@@ -542,64 +549,23 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             if(lastProp == toDelete){
                 lastProp = null;
             }
-            int nsize = propagators.length - 1;
-            Propagator toMove = propagators[nsize];
+            size--;
+            // 1. delete toDelete
+            Propagator toMove = propagators[size];
             int idtd = p2i.get(toDelete.getId());
             int idtm = p2i.get(toMove.getId());
             p2i.clear(toDelete.getId());
 
             assert idtd <= idtm : "wrong id for prop to delete";
-
-            // 1. remove from propagators[] and p2i
-            Propagator[] _propagators = propagators;
-            propagators = new Propagator[nsize];
-            System.arraycopy(_propagators, 0, propagators, 0, nsize);
-
-            // 2. resize schedule_f[]
-            boolean sftm = schedule_f[idtm];
-            assert !schedule_f[idtd] : "try to delete a propagator which is scheduled (fine)";
-            boolean[] _schedule_f = schedule_f;
-            schedule_f = new boolean[nsize];
-            System.arraycopy(_schedule_f, 0, schedule_f, 0, nsize);
-
-            // 3. resize schedule_c[]
-            boolean sctm = schedule_c[idtm];
-            assert !schedule_c[idtd] : "try to delete a propagator which is scheduled (coarse)";
-            boolean[] _schedule_c = schedule_c;
-            schedule_c = new boolean[nsize];
-            System.arraycopy(_schedule_c, 0, schedule_c, 0, nsize);
-
-            // 4. remove event_f
-            IntCircularQueue icqtm = event_f[idtm];
-            assert !toDelete.reactToFineEvent() || event_f[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
-            IntCircularQueue[] _event_f = event_f;
-            event_f = new IntCircularQueue[nsize];
-            System.arraycopy(_event_f, 0, event_f, 0, nsize);
-
-
-            // 5. remove event_f
-            PropagatorEventType ettm = event_c[idtm];
-            assert event_c[idtd] == PropagatorEventType.VOID : "try to delete a propagator which has events to propagate (coarse)";
-            PropagatorEventType[] _event_c = event_c;
-            event_c = new PropagatorEventType[nsize];
-            System.arraycopy(_event_c, 0, event_c, 0, nsize);
-
-            // 6. remove eventmasks
-            int[] emtm = eventmasks[idtm];
-//            assert eventmasks[idtd]. : "try to delete a propagator which has events to propagate (fine)";
-            int[][] _eventmasks = eventmasks;
-            eventmasks = new int[nsize][];
-            System.arraycopy(_eventmasks, 0, eventmasks, 0, nsize);
-
-            // 6. copy data
-            if (idtd < nsize) {
+            // 6. move toMove
+            if (idtd < size) {
                 propagators[idtd] = toMove;
                 p2i.put(toMove.getId(), idtd);
-                schedule_f[idtd] = sftm;
-                schedule_c[idtd] = sctm;
-                event_f[idtd] = icqtm;
-                event_c[idtd] = ettm;
-                eventmasks[idtd] = emtm;
+                schedule_f[idtd] = schedule_f[idtm];
+                schedule_c[idtd] = schedule_c[idtm];
+                event_f[idtd] = event_f[idtm];
+                event_c[idtd] = event_c[idtm];
+                eventmasks[idtd] = eventmasks[idtm];
             }
             trigger.remove(toDelete);
         }
