@@ -1414,7 +1414,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint max(BoolVar max, BoolVar[] vars) {
-		return new Constraint("MinOverBools", new PropBoolMax(vars, max));
+		return new Constraint("MaxOverBools", new PropBoolMax(vars, max));
 	}
 
 	/**

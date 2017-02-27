@@ -41,10 +41,10 @@ public class PropBoolMin extends Propagator<BoolVar> {
         int c = 2;
         for (int i = 0; i < n; i++) {
             if (c>0 && !vars[i].isInstantiated()) {
-                if (c == 2) {
+                if (c == 2 && i > 1) {
                     x2 = x1;
                     x1 = i;
-                } else{
+                } else if(i > 1){
                     x2 = i;
                 }
                 c--;
