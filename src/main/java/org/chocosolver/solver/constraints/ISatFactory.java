@@ -251,7 +251,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().sum(BOOLVARS, ">", 0).reifyWith(TARGET);
+            _me().max(TARGET, BOOLVARS).post();
             return true;
         }
     }
@@ -275,7 +275,7 @@ public interface ISatFactory extends ISelf<Model> {
             sat.afterAddingClauses();
             return add;
         }else{
-            _me().sum(BOOLVARS, "=", BOOLVARS.length).reifyWith(TARGET);
+            _me().min(TARGET, BOOLVARS).post();
             return true;
         }
     }
