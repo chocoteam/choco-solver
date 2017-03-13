@@ -35,6 +35,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
@@ -1412,17 +1413,17 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
             if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
-                int[] values = exps.get(1).toIntArray();
-                model.member(a, values).reifyWith(r);
+                IntIterableRangeSet set =  new IntIterableRangeSet(exps.get(1).toIntArray());
+                model.reifyXinS(a, set, r);
             } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
                 int low = ((ESetBounds) exps.get(1)).getLow();
                 int upp = ((ESetBounds) exps.get(1)).getUpp();
-                model.member(a, low, upp).reifyWith(r);
+                IntIterableRangeSet set =  new IntIterableRangeSet(low, upp);
+                model.reifyXinS(a, set, r);
             } else {
                 SetVar b = exps.get(1).setVarValue(model);
                 model.member(a, b).reifyWith(r);
             }
-
         }
     },
     set_intersect {

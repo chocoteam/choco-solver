@@ -19,6 +19,7 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -182,6 +183,10 @@ public class Datas {
                 System.out.printf(name);
             }
         }
+        if (printStat) {
+            // TODO used to use the toOneShortLineString that has been removed
+            System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
+        }
         System.out.printf("----------\n");
     }
 
@@ -193,10 +198,6 @@ public class Datas {
         }
         solution.record();
         printSolution();
-        if (printStat) {
-            // TODO used to use the toOneShortLineString that has been removed
-            System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
-        }
     }
 
     private Variable[] allOutPutVars() {
@@ -210,17 +211,14 @@ public class Datas {
         return vars.toArray(new Variable[0]);
     }
 
-    public void doFinalOutPut(boolean userinterruption) {
+    public void doFinalOutPut() {
         Solver solver = model.getSolver();
         // TODO there used to be "isComplete" (e.g. in case LNS stops)
-        boolean complete = !solver.isStopCriterionMet() && !solver.hasEndedUnexpectedly();
+        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
         if(nbSolution>0){
             if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
                 System.out.printf("==========\n");
             }
-//            if (solver.getObjectiveManager().isOptimization()&& !complete) {
-//                System.out.printf("=====UNBOUNDED=====\n");
-//            }
         }else{
             if(complete){
                 System.out.printf("=====UNSATISFIABLE=====\n");

@@ -8,7 +8,12 @@
  */
 package org.chocosolver.parser.flatzinc;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CommonToken;
+import org.antlr.v4.runtime.CommonTokenFactory;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.UnbufferedCharStream;
+import org.antlr.v4.runtime.UnbufferedTokenStream;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
@@ -65,7 +70,7 @@ public class Flatzinc extends RegParser {
         return new Thread() {
             public void run() {
                 if (userinterruption) {
-                    datas[bestModelID()].doFinalOutPut(userinterruption);
+                    datas[bestModelID()].doFinalOutPut();
                     System.out.printf("%% Unexpected resolution interruption!");
                 }
             }
@@ -137,8 +142,7 @@ public class Flatzinc extends RegParser {
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
-        datas[bestModelID()].doFinalOutPut(userinterruption);
-        listeners.forEach(ParserListener::afterSolving);
+        datas[bestModelID()].doFinalOutPut();
     }
 
     private int bestModelID() {
