@@ -89,6 +89,15 @@ public class IntIterableRangeSet implements IntIterableSet {
 		ELEMENTS[0] = ELEMENTS[1] = e;
 	}
 
+    /**
+     * Create an interval-based ordered set initialized to an array of values
+     * @param values some values
+     */
+    public IntIterableRangeSet(int[] values) {
+        this();
+        addAll(values);
+    }
+
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
