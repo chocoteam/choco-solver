@@ -358,6 +358,13 @@ public abstract class AbstractVariable implements Variable {
     }
 
     /**
+     * @return <tt>true</tt> if this variable has a singleton domain (different from instantiated)
+     */
+    public boolean isAConstant() {
+        return (getTypeAndKind() & TYPE) == CSTE;
+    }
+
+    /**
      * @return the event scheduler
      */
     @SuppressWarnings("unchecked")
