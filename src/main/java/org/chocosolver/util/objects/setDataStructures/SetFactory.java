@@ -23,6 +23,7 @@ import org.chocosolver.util.objects.setDataStructures.constant.Set_CstInterval;
 import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap2;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;
 
 /**
@@ -50,6 +51,9 @@ public class SetFactory {
 	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
 		if (HARD_CODED) {
+			if (type == SetType.BIPARTITESET2) {
+				return new Set_Std_Swap2(environment);
+			}else
 			if (type == SetType.BIPARTITESET) {
 				return new Set_Std_Swap(environment, offSet);
 			}else if (type == SetType.BITSET) {

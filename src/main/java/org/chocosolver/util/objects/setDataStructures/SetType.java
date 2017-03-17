@@ -10,6 +10,7 @@ package org.chocosolver.util.objects.setDataStructures;
 
 public enum SetType {
 	BIPARTITESET,
+    BIPARTITESET2,
     LINKED_LIST,
 	BITSET,
 	FIXED_ARRAY,
