@@ -75,6 +75,15 @@ public interface Settings  {
     }
 
     /**
+     * Define the minimum number of cardinality threshold to a sum/scalar constraint to be decomposed in intermediate
+     * sub-sums.
+     * @return minimum number of cardinality threshold to a sum constraint to be decomposed
+     */
+    default int getMinCardForSumDecomposition() {
+        return 100;
+    }
+
+    /**
      * Set to true to replace some intension constraints by extension constraints
      * @return <tt>true</tt> if some intension constraints can be replaced by extension constraints
      */
@@ -162,7 +171,6 @@ public interface Settings  {
      * This can be quite big, though, and it slows down the overall process.
      *
      * Note that this parameter is read once at propagation engine creation and set in a final variable.
-     * Note that enabling colors may be helpful (see {@link #outputWithANSIColors()})
      * @return true if all events are output in the console
      */
     default boolean debugPropagation(){

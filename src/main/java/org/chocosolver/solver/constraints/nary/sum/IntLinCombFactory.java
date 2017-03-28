@@ -8,6 +8,8 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
@@ -64,7 +66,21 @@ public class IntLinCombFactory {
      */
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR) {
         // 0. normalize data
-        Model Model = SCALAR.getModel();
+        Model model = SCALAR.getModel();
+        if (VARS.length > model.getSettings().getMinCardForSumDecomposition()) {
+            int k = VARS.length;
+            int d1 = (int) Math.sqrt(k);
+            int d2 = k / d1 + (k % d1 == 0?0:1);
+            IntVar[] intermVar = new IntVar[d1];
+            for (int i = 0, z = 0; i < k; i += d2, z++) {
+                intermVar[z] = model.intVar(IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
+                int size = Math.min(i + d2, k);
+                model.scalar(Arrays.copyOfRange(VARS, i, size),
+                        Arrays.copyOfRange(COEFFS, i, size),
+                        "=", intermVar[z]).post();
+            }
+            return model.sum(intermVar, "=", SCALAR);
+        }
         IntVar[] NVARS;
         int[] NCOEFFS;
         int RESULT = 0;
@@ -85,20 +101,30 @@ public class IntLinCombFactory {
         int nones = 0, nmones = 0;
         int ldom = 0, lidx = -1;
         // 1. reduce coefficients and variables
-        // a. quadratic iteration in order to detect multiple occurrences of a variable
+        // a. first loop to detect constant and merge duplicate variable/coefficient
+        TIntIntHashMap map = new TIntIntHashMap(NVARS.length, 1.5f, -1, -1);
         for (int i = 0; i < NVARS.length; i++) {
             if (VariableUtils.isConstant(NVARS[i])) {
                 RESULT -= NVARS[i].getValue() * NCOEFFS[i];
                 NCOEFFS[i] = 0;
             } else if (NCOEFFS[i] != 0) {
                 int id = NVARS[i].getId();
-                for (int j = i + 1; j < NVARS.length; j++) {
-                    if (NVARS[j].getId() == id) {
-                        NCOEFFS[i] += NCOEFFS[j];
-                        NCOEFFS[j] = 0;
-                    }
+                int pos = map.get(id);
+                if (pos == -1) {
+                    map.put(id, k);
+                    NVARS[k] = NVARS[i];
+                    NCOEFFS[k] = NCOEFFS[i];
+                    k++;
+                } else {
+                    NCOEFFS[pos] += NCOEFFS[i];
+                    NCOEFFS[i] = 0;
                 }
             }
+        }
+        // b. second step to remove variable with coeff set to 0
+        int _k = k;
+        k = 0;
+        for (int i = 0; i < _k; i++) {
             if (NCOEFFS[i] != 0) {
                 if (NVARS[i].isBool()) nbools++; // count number of boolean variables
                 if (NCOEFFS[i] == 1) nones++; // count number of coeff set to 1
@@ -116,17 +142,17 @@ public class IntLinCombFactory {
         if (k == 0) {
             switch (OPERATOR) {
                 case EQ:
-                    return RESULT == 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT == 0 ? model.trueConstraint() : model.falseConstraint();
                 case NQ:
-                    return RESULT != 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT != 0 ? model.trueConstraint() : model.falseConstraint();
                 case LE:
-                    return RESULT >= 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT >= 0 ? model.trueConstraint() : model.falseConstraint();
                 case LT:
-                    return RESULT > 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT > 0 ? model.trueConstraint() : model.falseConstraint();
                 case GE:
-                    return RESULT <= 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT <= 0 ? model.trueConstraint() : model.falseConstraint();
                 case GT:
-                    return RESULT < 0 ? Model.trueConstraint() : Model.falseConstraint();
+                    return RESULT < 0 ? model.trueConstraint() : model.falseConstraint();
                 default:
                     throw new SolverException("Unexpected Tuple operator " + OPERATOR
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
@@ -152,7 +178,6 @@ public class IntLinCombFactory {
             return selectScalar(NVARS, NCOEFFS, OPERATOR, RESULT);
         }
     }
-
 
     /**
      * Select the most relevant Sum constraint to return
