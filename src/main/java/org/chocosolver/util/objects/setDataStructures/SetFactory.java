@@ -51,7 +51,7 @@ public class SetFactory {
 	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
 		IEnvironment environment = model.getEnvironment();
 		if (HARD_CODED) {
-			if (type == SetType.BIPARTITESET2) {
+			if (type == SetType.SMALLBIPARTITESET) {
 				return new Set_Std_Swap2(environment);
 			}else
 			if (type == SetType.BIPARTITESET) {

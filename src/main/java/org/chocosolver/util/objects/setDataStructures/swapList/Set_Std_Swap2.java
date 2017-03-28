@@ -58,7 +58,7 @@ public class Set_Std_Swap2 implements ISet {
 
     @Override
     public boolean add(int element) {
-        if(!values.contains(element)){
+        if(!contains(element)){
             int pos = size.add(1);
             values.insert(pos - 1, element);
             return true;
@@ -87,7 +87,7 @@ public class Set_Std_Swap2 implements ISet {
     @Override
     public boolean contains(int element) {
         int pos = values.indexOf(element);
-        return pos > -1 && pos <= size();
+        return pos > -1 && pos < size();
     }
 
     @Override
@@ -126,7 +126,7 @@ public class Set_Std_Swap2 implements ISet {
 
     @Override
     public SetType getSetType() {
-        return SetType.BIPARTITESET2;
+        return SetType.SMALLBIPARTITESET;
     }
 
     @Override
