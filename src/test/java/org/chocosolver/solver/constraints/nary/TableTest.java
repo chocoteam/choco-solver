@@ -184,7 +184,7 @@ public class TableTest {
 			}
 			out.println("");
 			for (int i = 0; i < reified.length; i++) {
-				out.print(reified[i].getValue() + "\t");
+				out.print(sol.getIntVal(reified[i]) + "\t");
 			}
 			out.println("\n" + "obj = " + sol.getIntVal(sum) + ", backtracks = " + model.getSolver().getBackTrackCount());
 		}

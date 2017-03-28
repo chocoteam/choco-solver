@@ -300,6 +300,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     @Override
     public int getValue() {
+        assert isInstantiated() : name + " not instantiated";
         return getLB();
     }
 

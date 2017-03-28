@@ -213,9 +213,11 @@ public class ObjectiveTest {
             r.setEngine(new SevenQueuesPropagatorEngine(model));
         }
         r.getMeasures().setReadingTimeCount(nanoTime());
-        while (model.getSolver().solve()) ;
+        int bestvalue = -1;
+        while (model.getSolver().solve()) {
+            bestvalue = b1.getValue();
+        }
 //        System.out.println(b1 + " " + b2);
-        int bestvalue = b1.getValue();
         r.reset();
         r.setObjectiveManager(ObjectiveFactory.SAT());
         model.arithm(b1, "=", bestvalue).post();
