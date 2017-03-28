@@ -154,9 +154,7 @@ public class DirectedGraph implements IGraph {
     public boolean removeArc(int from, int to) {
         if (successors[from].contains(to)) {
             assert (predecessors[to].contains(from)) : "incoherent directed graph";
-            successors[from].remove(to);
-            predecessors[to].remove(from);
-            return true;
+            return successors[from].remove(to) | predecessors[to].remove(from);
         }
         return false;
     }
@@ -198,9 +196,7 @@ public class DirectedGraph implements IGraph {
         addNode(to);
         if (!successors[from].contains(to)) {
             assert (!predecessors[to].contains(from)) : "incoherent directed graph";
-            successors[from].add(to);
-            predecessors[to].add(from);
-            return true;
+            return successors[from].add(to) & predecessors[to].add(from);
         }
         return false;
     }
