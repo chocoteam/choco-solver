@@ -272,7 +272,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
 
     /**
      * Returns the first value just after v in <code>this</code> which is <b>out of</b> the domain.
-     * If <i>v</i> is less than or equal to {@link #getLB()-2}, returns <i>v + 1</i>,
+     * If <i>v</i> is less than or equal to {@link #getLB()}-2, returns <i>v + 1</i>,
      * if <i>v</i> is greater than or equal to {@link #getUB()}, returns <i>v + 1</i>.
      *
      * @param v the value to start checking (exclusive)
@@ -300,7 +300,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
 
     /**
      * Returns the first value just before v in <code>this</code> which is <b>out of</b> the domain.
-     * If <i>v</i> is greater than or equal to {@link #getUB()+2}, returns <i>v - 1</i>,
+     * If <i>v</i> is greater than or equal to {@link #getUB()}+2, returns <i>v - 1</i>,
      * if <i>v</i> is less than or equal to {@link #getLB()}, returns <i>v - 1</i>.
      *
      * @param v the value to start checking (exclusive)

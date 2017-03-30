@@ -122,7 +122,7 @@ public final class ScaleView extends IntView {
 
     @Override
     public int nextValueOut(int v) {
-        return var.nextValue(MathUtils.divFloor(v, cste)) * cste;
+        return var.nextValueOut(MathUtils.divFloor(v, cste)) * cste;
     }
 
     @Override
