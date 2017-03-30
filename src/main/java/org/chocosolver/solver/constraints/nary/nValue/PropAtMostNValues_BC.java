@@ -19,6 +19,9 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * Propagator for the atMostNValues constraint
  * The number of distinct values in the set of variables vars is at most equal to nValues
@@ -67,7 +70,7 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
      * @param nValues integer variable
      */
     public PropAtMostNValues_BC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
+        super(concat(variables, nValues), QUADRATIC, false);
         n = variables.length;
         minValue = vars[0].getLB();
         int maxValue = vars[0].getUB();

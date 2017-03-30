@@ -9,7 +9,6 @@
 package org.chocosolver.solver.constraints.nary.nValue;
 
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.graph.G;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.mis.F;
 import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R;
@@ -18,7 +17,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.CUBIC;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * Propagator for the atMostNValues constraint
@@ -46,7 +47,7 @@ public class PropAMNV extends Propagator<IntVar> {
      * The number of distinct values in X is at most equal to N
      */
     public PropAMNV(IntVar[] X, IntVar N, G graph, F heur, R[] rules) {
-        super(ArrayUtils.append(X, new IntVar[]{N}), PropagatorPriority.CUBIC, true);
+        super(concat(X, N), CUBIC, true);
         this.graph = graph;
         this.heur = heur;
         this.rules = rules;

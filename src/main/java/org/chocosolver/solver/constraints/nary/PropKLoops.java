@@ -11,7 +11,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -19,7 +18,9 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * Incremental propagator which restricts the number of loops:
@@ -54,7 +55,7 @@ public class PropKLoops extends Propagator<IntVar> {
 	 * @param nbLoops integer variable
 	 */
 	public PropKLoops(IntVar[] succs, int offSet, IntVar nbLoops) {
-		super(ArrayUtils.append(succs, new IntVar[]{nbLoops}), PropagatorPriority.UNARY, true);
+		super(concat(succs, nbLoops), UNARY, true);
 		this.n = succs.length;
 		this.offSet = offSet;
 		IEnvironment environment = model.getEnvironment();

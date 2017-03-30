@@ -15,6 +15,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * Propagator for the atMostNValues constraint
  * The number of distinct values in the set of variables vars is at most equal to nValues
@@ -46,7 +49,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
      * @param nValues         integer variable
      */
     public PropAtLeastNValues(IntVar[] variables, int[] concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
+        super(concat(variables, nValues), QUADRATIC, false);
         n = variables.length;
         this.concernedValues = concernedValues;
         mate = new int[concernedValues.length];

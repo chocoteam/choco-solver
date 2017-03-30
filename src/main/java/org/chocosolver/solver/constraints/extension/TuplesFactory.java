@@ -14,6 +14,8 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * A Factory to ease generation of tuples.
  * One may keep in mind that tuples generation directly depends on the product of domain cardinality, but also on the algorithm defines in the filter.
@@ -390,7 +392,7 @@ public class TuplesFactory {
                     throw new SolverException("Unexpected Tuple operator " + op
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
-        }, true, ArrayUtils.append(VARS, new IntVar[]{SCALAR}));
+        }, true, ArrayUtils.concat(VARS, SCALAR));
     }
 
     /**
@@ -425,7 +427,7 @@ public class TuplesFactory {
                     throw new SolverException("Unexpected Tuple operator " + op
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
-        }, true, ArrayUtils.append(VARS, new IntVar[]{SUM}));
+        }, true, concat(VARS, SUM));
     }
 
     /**

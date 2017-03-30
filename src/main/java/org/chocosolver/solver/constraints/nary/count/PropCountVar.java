@@ -54,7 +54,7 @@ public class PropCountVar extends Propagator<IntVar> {
      * @param valueCardinality integer variable
      */
     public PropCountVar(IntVar[] decvars, IntVar restrictedValue, IntVar valueCardinality) {
-        super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality, restrictedValue}), PropagatorPriority.QUADRATIC, false);
+        super(ArrayUtils.concat(decvars, valueCardinality, restrictedValue), PropagatorPriority.QUADRATIC, false);
         this.n = decvars.length;
         this.card = this.vars[n];
         this.val = this.vars[n + 1];

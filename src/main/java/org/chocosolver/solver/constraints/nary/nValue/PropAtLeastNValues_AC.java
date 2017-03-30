@@ -25,6 +25,9 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * AtLeastNValues Propagator (similar to SoftAllDiff)
  * The number of distinct values in vars is at least nValues
@@ -72,7 +75,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param nValues integer variable
      */
     public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, true);
+        super(concat(variables, nValues), QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);

@@ -21,6 +21,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * Propagator for the atMostNValues constraint
  * The number of distinct values in the set of variables vars is at most equal to nValues
@@ -57,7 +60,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
      * @param nValues integer variable
      */
     public PropAtMostNValues(IntVar[] variables, int[] concernedValues, IntVar nValues) {
-        super(ArrayUtils.append(variables, new IntVar[]{nValues}), PropagatorPriority.QUADRATIC, false);
+        super(concat(variables, nValues), QUADRATIC, false);
         n = variables.length;
         this.concernedValues = concernedValues;
         unusedValues = new int[concernedValues.length];

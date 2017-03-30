@@ -9,14 +9,15 @@
 package org.chocosolver.solver.constraints.nary.channeling;
 
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.IntProcedure;
-import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * Constraints that map the boolean assignments variables (bvars) with the standard assignment variables (var).
@@ -34,7 +35,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
     private final int offSet;
 
     public PropEnumDomainChanneling(BoolVar[] bvars, IntVar aVar, final int offSet) {
-        super(ArrayUtils.append(bvars, new IntVar[]{aVar}), PropagatorPriority.UNARY, true);
+        super(concat(bvars, aVar), UNARY, true);
         assert aVar.hasEnumeratedDomain();
         this.n = bvars.length;
         this.offSet = offSet;

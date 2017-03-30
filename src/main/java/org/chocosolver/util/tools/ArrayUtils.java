@@ -10,6 +10,9 @@ package org.chocosolver.util.tools;
 
 import gnu.trove.list.array.TIntArrayList;
 
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -238,6 +241,46 @@ public enum ArrayUtils {
     }
 
     /**
+     * Append two Arrays
+     *
+     * @param toAppend array of arrays to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static IntVar[] append(IntVar[]... toAppend) {
+        int total = length(toAppend);
+        IntVar[] ret = new IntVar[total];
+        int pos = 0;
+        for (IntVar[] tab : toAppend) {
+            if (tab != null) {
+                System.arraycopy(tab, 0, ret, pos, tab.length);
+                pos += tab.length;
+            }
+        }
+        return ret;
+    }
+
+    /**
+     * Append two Arrays
+     *
+     * @param toAppend array of arrays to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static BoolVar[] append(BoolVar[]... toAppend) {
+        int total = length(toAppend);
+        BoolVar[] ret = new BoolVar[total];
+        int pos = 0;
+        for (BoolVar[] tab : toAppend) {
+            if (tab != null) {
+                System.arraycopy(tab, 0, ret, pos, tab.length);
+                pos += tab.length;
+            }
+        }
+        return ret;
+    }
+
+    /**
      * Append <i>elements</i> at the end of another <i>array</i>
      *
      * @param array array of arrays to append
@@ -246,6 +289,30 @@ public enum ArrayUtils {
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] concat(T[] array, T... elements) {
+        return append(array, elements);
+    }
+
+    /**
+     * Append <i>elements</i> at the end of another <i>array</i>
+     *
+     * @param array array of arrays to append
+     * @param elements elements to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static IntVar[] concat(IntVar[] array, IntVar... elements) {
+        return append(array, elements);
+    }
+
+    /**
+     * Append <i>elements</i> at the end of another <i>array</i>
+     *
+     * @param array array of arrays to append
+     * @param elements elements to append
+     * @return a new Array composed of both given in parameters.
+     */
+    @SuppressWarnings("unchecked")
+    public static BoolVar[] concat(BoolVar[] array, BoolVar... elements) {
         return append(array, elements);
     }
 

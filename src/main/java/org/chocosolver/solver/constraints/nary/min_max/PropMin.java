@@ -9,12 +9,13 @@
 package org.chocosolver.solver.constraints.nary.min_max;
 
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * <br/>
@@ -27,7 +28,7 @@ public class PropMin extends Propagator<IntVar> {
     private final int n;
 
     public PropMin(IntVar[] variables, IntVar maxVar) {
-        super(ArrayUtils.append(variables, new IntVar[]{maxVar}), PropagatorPriority.LINEAR, false);
+        super(concat(variables, maxVar), LINEAR, false);
         n = variables.length;
         assert n > 0;
     }

@@ -17,6 +17,9 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * A propagator for SUM(x_i) = y + b, where x_i are boolean variables
  * <br/>
@@ -47,7 +50,7 @@ public class PropSumBool extends PropSum {
      * @param reactOnFineEvent set to <tt>true</tt> to react on fine events
      */
     protected PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b, boolean reactOnFineEvent) {
-        super(ArrayUtils.append(variables, new IntVar[]{sum}), pos, o, b, PropagatorPriority.BINARY, reactOnFineEvent);
+        super(concat(variables, sum), pos, o, b, BINARY, reactOnFineEvent);
         this.sum = sum;
     }
 

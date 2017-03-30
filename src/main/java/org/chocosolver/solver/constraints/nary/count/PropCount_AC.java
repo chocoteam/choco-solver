@@ -9,7 +9,6 @@
 package org.chocosolver.solver.constraints.nary.count;
 
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
@@ -21,7 +20,9 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * Define a COUNT constraint setting size{forall v in lvars | v = occval} = occVar
@@ -56,7 +57,7 @@ public class PropCount_AC extends Propagator<IntVar> {
      * @param valueCardinality integer variable
      */
     public PropCount_AC(IntVar[] decvars, int restrictedValue, IntVar valueCardinality) {
-        super(ArrayUtils.append(decvars, new IntVar[]{valueCardinality}), PropagatorPriority.LINEAR, true);
+        super(concat(decvars, valueCardinality), LINEAR, true);
         this.value = restrictedValue;
         this.n = decvars.length;
         this.possibles = SetFactory.makeStoredSet(SetType.BITSET, 0, model);

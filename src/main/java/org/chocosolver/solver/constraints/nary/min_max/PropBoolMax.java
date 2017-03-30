@@ -27,7 +27,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
     private int x1, x2;
 
     public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
-        super(ArrayUtils.append(variables, new BoolVar[]{maxVar}), PropagatorPriority.UNARY, true);
+        super(ArrayUtils.concat(variables, maxVar), PropagatorPriority.UNARY, true);
         n = variables.length;
         x1 = -1;
         x2 = -1;

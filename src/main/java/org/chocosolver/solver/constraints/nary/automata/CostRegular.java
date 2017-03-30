@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.HashSet;
 
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 /**
  * COST_REGULAR constraint
  * <br/>
@@ -36,9 +38,9 @@ public class CostRegular extends Constraint {
 
     public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton) {
 		super("CostRegular",new PropCostRegular(
-				ArrayUtils.append(ivars, new IntVar[]{cost}),
+				ArrayUtils.concat(ivars, cost),
 				cautomaton,
-				initGraph(ArrayUtils.append(ivars, new IntVar[]{cost}), cautomaton)
+				initGraph(concat(ivars, cost), cautomaton)
 		));
     }
 
