@@ -93,6 +93,22 @@ public class Model implements IModel {
     private int vIdx;
 
     /**
+     * Store the number of declared {@link IntVar}, including {@link BoolVar}.
+     */
+    private int nbIntVar;
+    /**
+     * Store the number of declared {@link BoolVar}.
+     */
+    private int nbBoolVar;
+    /**
+     * Store the number of declared {@link SetVar}.
+     */
+    private int nbSetVar;
+    /**
+     * Store the number of declared {@link RealVar}.
+     */
+    private int nbRealVar;
+    /**
      * Constraints of the model
      */
     private Constraint[] cstrs;
@@ -304,15 +320,28 @@ public class Model implements IModel {
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains all the IntVar of the model.
-     * <b>excludes</b> BoolVar if includeBoolVar=false.
+     * Returns the number of {@link IntVar} of the model involved in <code>this</code>,
+     * <b>excluding</b> {@link BoolVar} if <i>includeBoolVar</i>=<i>false</i>.
+     * It also counts FIXED variables and VIEWS, if any.
+     *
+     * @param includeBoolVar indicates whether or not to include {@link BoolVar}
+     * @return the number of {@link IntVar} of the model involved in <code>this</code>
+     */
+    public int getNbIntVar(boolean includeBoolVar){
+        return nbIntVar + (includeBoolVar?nbBoolVar:0);
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains all the {@link IntVar} of the model.
+     * <b>excludes</b> {@link BoolVar} if includeBoolVar=false.
      * It also contains FIXED variables and VIEWS, if any.
      *
-     * @param includeBoolVar indicates whether or not to include BoolVar
-     * @return array of IntVars in <code>this</code> model
+     * @param includeBoolVar indicates whether or not to include {@link BoolVar}
+     * @return array of {@link IntVar} in <code>this</code> model
      */
     public IntVar[] retrieveIntVars(boolean includeBoolVar) {
-        IntVar[] ivars = new IntVar[vIdx];
+        int size = getNbIntVar(includeBoolVar);
+        IntVar[] ivars = new IntVar[size];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
             int kind = (vars[i].getTypeAndKind() & Variable.KIND);
@@ -320,58 +349,95 @@ public class Model implements IModel {
                 ivars[k++] = (IntVar) vars[i];
             }
         }
-        return Arrays.copyOf(ivars, k);
+        assert k == size;
+        return ivars;
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the BoolVar only.
+     * Returns the number of {@link BoolVar} of the model involved in <code>this</code>,
+     * It also counts FIXED variables and VIEWS, if any.
+     *
+     * @return the number of {@link BoolVar} of the model involved in <code>this</code>
+     */
+    public int getNbBoolVar(){
+        return nbBoolVar;
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the {@link BoolVar} only.
      * It also contains FIXED variables and VIEWS, if any.
      *
-     * @return array of BoolVars in <code>this</code> model
+     * @return array of {@link BoolVar} in <code>this</code> model
      */
     public BoolVar[] retrieveBoolVars() {
-        BoolVar[] bvars = new BoolVar[vIdx];
+        int size = getNbBoolVar();
+        BoolVar[] bvars = new BoolVar[size];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
             if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.BOOL) {
                 bvars[k++] = (BoolVar) vars[i];
             }
         }
-        return Arrays.copyOf(bvars, k);
+        assert k == size;
+        return bvars;
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the SetVar only.
+     * Returns the number of {@link SetVar} of the model involved in <code>this</code>,
+     * It also counts FIXED variables and VIEWS, if any.
+     *
+     * @return the number of {@link SetVar} of the model involved in <code>this</code>
+     */
+    public int getNbSetVar(){
+        return nbSetVar;
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the {@link SetVar} only.
      * It also contains FIXED variables and VIEWS, if any.
      *
      * @return array of SetVars in <code>this</code> model
      */
     public SetVar[] retrieveSetVars() {
-        SetVar[] bvars = new SetVar[vIdx];
+        int size = getNbSetVar();
+        SetVar[] svars = new SetVar[size];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
             if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.SET) {
-                bvars[k++] = (SetVar) vars[i];
+                svars[k++] = (SetVar) vars[i];
             }
         }
-        return Arrays.copyOf(bvars, k);
+        assert k == size;
+        return svars;
     }
 
     /**
-     * Iterate over the variable of <code>this</code> and build an array that contains the RealVar only.
+     * Returns the number of {@link RealVar} of the model involved in <code>this</code>,
+     * It also counts FIXED variables and VIEWS, if any.
+     *
+     * @return the number of {@link RealVar} of the model involved in <code>this</code>
+     */
+    public int getNbRealVar(){
+        return nbRealVar;
+    }
+
+    /**
+     * Iterate over the variable of <code>this</code> and build an array that contains the {@link RealVar} only.
      * It also contains FIXED variables and VIEWS, if any.
      *
-     * @return array of RealVars in <code>this</code> model
+     * @return array of {@link RealVar} in <code>this</code> model
      */
     public RealVar[] retrieveRealVars() {
-        RealVar[] bvars = new RealVar[vIdx];
+        int size = getNbRealVar();
+        RealVar[] rvars = new RealVar[vIdx];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
             if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
-                bvars[k++] = (RealVar) vars[i];
+                rvars[k++] = (RealVar) vars[i];
             }
         }
-        return Arrays.copyOf(bvars, k);
+        assert k == size;
+        return rvars;
     }
 
     /**
@@ -627,6 +693,21 @@ public class Model implements IModel {
             System.arraycopy(tmp, 0, vars, 0, vIdx);
         }
         vars[vIdx++] = variable;
+        switch ((variable.getTypeAndKind() & Variable.KIND)){
+            case Variable.INT:
+                nbIntVar++;
+                break;
+            case Variable.BOOL:
+                nbIntVar++;
+                nbBoolVar++;
+                break;
+            case Variable.SET:
+                nbSetVar++;
+                break;
+            case Variable.REAL:
+                nbRealVar++;
+                break;
+        }
     }
 
     /**
@@ -645,6 +726,21 @@ public class Model implements IModel {
         }
         System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
         vars[--vIdx] = null;
+        switch ((variable.getTypeAndKind() & Variable.KIND)){
+            case Variable.INT:
+                nbIntVar--;
+                break;
+            case Variable.BOOL:
+                nbIntVar--;
+                nbBoolVar--;
+                break;
+            case Variable.SET:
+                nbSetVar--;
+                break;
+            case Variable.REAL:
+                nbRealVar--;
+                break;
+        }
     }
 
     /**
