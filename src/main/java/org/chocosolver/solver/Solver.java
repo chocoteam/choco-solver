@@ -10,6 +10,8 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.IExplanationEngine;
@@ -37,6 +39,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
@@ -348,11 +351,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     protected void initialize() {
         // for fast construction of "external" constraint, they are initialized once for all
-        if (mModel.minisat != null) {
-            mModel.minisat.getPropSat().initialize();
+        if(mModel.getHook(Model.MINISAT_HOOK_NAME) != null){
+            SatConstraint minisat = (SatConstraint) mModel.getHook(Model.MINISAT_HOOK_NAME);
+            minisat.getPropSat().initialize();
         }
-        if (mModel.nogoods != null) {
-            mModel.nogoods.getPropNogoods().initialize();
+        if(mModel.getHook(Model.NOGOODS_HOOK_NAME) != null){
+            NogoodConstraint nogoods = (NogoodConstraint) mModel.getHook(Model.NOGOODS_HOOK_NAME);
+            nogoods.getPropNogoods().initialize();
         }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {
@@ -371,6 +376,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         M.setTopDecisionPosition(0);
         mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
+            if(mModel.getHook(Model.TASK_SET_HOOK_NAME) != null){
+                ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
+                for(int i = 0; i< tset.size(); i++){
+                    tset.get(i).ensureBoundConsistency();
+                }
+            }
             P.execute(this);
             action = extend;
             mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2

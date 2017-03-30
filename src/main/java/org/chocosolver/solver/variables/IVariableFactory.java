@@ -15,6 +15,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.chocosolver.util.tools.VariableUtils;
 
 /**
  * Interface to make variables (BoolVar, IntVar, RealVar and SetVar)
@@ -434,6 +435,38 @@ public interface IVariableFactory extends ISelf<Model> {
     //*************************************************************************************
     // TASK VARIABLES
     //*************************************************************************************
+
+    /**
+     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
+     * such that: s + p = e, where <i>e</i> is the ending time.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variable, starting time
+     * @param p fixed processing time
+     * @return a task variable.
+     */
+    default Task taskVar(IntVar s, int p){
+        return new Task(s, _me().intVar(p), _me().intOffsetView(s, p));
+    }
+
+    /**
+     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
+     * such that: s + p = e, where <i>e</i> is the ending time.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variable, starting time
+     * @param p fixed processing time
+     * @return a task variable.
+     */
+    default Task taskVar(IntVar s, IntVar p){
+        int[] bounds = VariableUtils.boundsForAddition(s, p);
+        IntVar end = _me().intVar(bounds[0], bounds[1]);
+        return new Task(s, p, end);
+    }
 
     /**
      * Creates a task variable, made of a starting time <i>s</i>,

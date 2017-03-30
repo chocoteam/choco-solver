@@ -63,6 +63,15 @@ public class Model implements IModel {
     public static boolean MINIMIZE = false;
 
     /**
+     * Name of internal hook dedicated to store declared {@link org.chocosolver.solver.variables.Task}.
+     */
+    public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
+
+    public static final String MINISAT_HOOK_NAME = "H_MINISAT";
+
+    public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
+
+    /**
      * Settings to use with this solver
      */
     private Settings settings = new Settings() {
@@ -132,16 +141,6 @@ public class Model implements IModel {
      * Counter used to name variables created internally
      */
     private int nameId = 1;
-
-    /**
-     * A MiniSat instance, useful to deal with clauses
-     */
-    protected SatConstraint minisat;
-
-    /**
-     * A MiniSat instance adapted to nogood management
-     */
-    protected NogoodConstraint nogoods;
 
     /**
      * An Ibex (continuous constraint model) instance
@@ -456,20 +455,22 @@ public class Model implements IModel {
      * @return the minisat constraint
      */
     public SatConstraint getMinisat() {
-        if (minisat == null) {
-            minisat = new SatConstraint(this);
+        if (getHook(MINISAT_HOOK_NAME) == null) {
+            SatConstraint minisat = new SatConstraint(this);
             minisat.post();
+            addHook(MINISAT_HOOK_NAME, minisat);
         }
-        return minisat;
+        return (SatConstraint) getHook(MINISAT_HOOK_NAME);
     }
 
     /**
      * Unpost minisat constraint from model, if any.
      */
     public void removeMinisat(){
-        if(minisat != null){
+        if (getHook(MINISAT_HOOK_NAME) == null) {
+            SatConstraint minisat = (SatConstraint) getHook(MINISAT_HOOK_NAME);
             unpost(minisat);
-            minisat = null;
+            removeHook(MINISAT_HOOK_NAME);
         }
     }
 
@@ -480,20 +481,22 @@ public class Model implements IModel {
      * @return the no good constraint
      */
     public NogoodConstraint getNogoodStore() {
-        if (nogoods == null) {
-            nogoods = new NogoodConstraint(this);
+        if (getHook(NOGOODS_HOOK_NAME) == null) {
+            NogoodConstraint nogoods = new NogoodConstraint(this);
             nogoods.post();
+            addHook(NOGOODS_HOOK_NAME, nogoods);
         }
-        return nogoods;
+        return (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
     }
 
     /**
      * Unpost nogood store constraint from model, if any.
      */
     public void removeNogoodStore(){
-        if(nogoods != null){
+        if (getHook(NOGOODS_HOOK_NAME) == null) {
+            NogoodConstraint nogoods = (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
             unpost(nogoods);
-            nogoods = null;
+            removeHook(NOGOODS_HOOK_NAME);
         }
     }
 

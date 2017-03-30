@@ -15,11 +15,14 @@
 
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+
+import java.util.ArrayList;
 
 /**
  * Container representing a task:
@@ -58,6 +61,13 @@ public class Task {
         } else {
             update = new TaskMonitorBound(s, d, e);
         }
+        Model model = s.getModel();
+        ArrayList<Task> tset = (ArrayList<Task>) model.getHook(Model.TASK_SET_HOOK_NAME);
+        if(tset == null){
+            tset = new ArrayList<>();
+            model.addHook(Model.TASK_SET_HOOK_NAME, tset);
+        }
+        tset.add(this);
     }
 
     //***********************************************************************************
