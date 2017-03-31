@@ -197,7 +197,7 @@ IntelliJ Idea
 Eclipse
   .. code-block:: bash
 
-   mvn eclipse:eclipse
+   mvn eclipse:configure-workspace eclipse:eclipse
 
 
 Example
