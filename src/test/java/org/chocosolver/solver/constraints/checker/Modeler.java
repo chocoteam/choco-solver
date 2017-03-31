@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
@@ -455,7 +456,9 @@ public interface Modeler {
             for (String st : (String[]) parameters) {
                 switch (st) {
                     case "at_least_AC":
-                        new Constraint("atLeastNVAC", new PropAtLeastNValues_AC(decvars, vars[n - 1])).post();
+                        new Constraint("atLeastNVAC", new PropAtLeastNValues_AC(decvars,
+                                s.getDomainUnion(decvars),
+                                vars[n - 1])).post();
                         break;
                     case "at_most_BC":
                         new Constraint("atMostBC", new PropAtMostNValues_BC(decvars, vars[n - 1])).post();

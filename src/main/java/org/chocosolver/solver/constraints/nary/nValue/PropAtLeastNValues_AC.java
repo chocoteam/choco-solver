@@ -9,8 +9,8 @@
 package org.chocosolver.solver.constraints.nary.nValue;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -21,7 +21,6 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
@@ -74,14 +73,14 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param variables array of integer variables
      * @param nValues integer variable
      */
-    public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
+    public PropAtLeastNValues_AC(IntVar[] variables, int[] vals, IntVar nValues) {
         super(concat(variables, nValues), QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         n = variables.length;
-        map = new TIntIntHashMap();
+        map = new TIntIntHashMap(vals.length);
         IntVar v;
         int ub;
         int idx = n;

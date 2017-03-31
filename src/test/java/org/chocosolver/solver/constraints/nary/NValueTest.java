@@ -91,6 +91,20 @@ public class NValueTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testAtLeastFixed2() {
+        Model model = new Model();
+        for(int i = 0 ; i < 1_000; i++) {
+            final IntVar[] XS = model.intVarArray("XS", 3, 0, 80, false);
+            final IntVar N = model.intVar("N", 2, 3);
+            model.atLeastNValues(XS, N, true).post();
+        }
+        model.getSolver().showStatistics();
+//        model.getSolver().showDecisions();
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testAtMostFixed() {
         Model model = new Model();
         final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);

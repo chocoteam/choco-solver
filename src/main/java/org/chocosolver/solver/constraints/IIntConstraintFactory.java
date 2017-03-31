@@ -709,7 +709,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint among(IntVar nbVar, IntVar[] vars, int[] values) {
 		int[] vls = new TIntHashSet(values).toArray(); // remove double occurrences
 		Arrays.sort(vls);                              // sort
-		return new Constraint("Among", new PropAmongGAC(ArrayUtils.append(vars, new IntVar[]{nbVar}), vls));
+		return new Constraint("Among", new PropAmongGAC(ArrayUtils.concat(vars, nbVar), vls));
 	}
 
 	/**
@@ -753,7 +753,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
 		int[] vals = getDomainUnion(vars);
 		if (AC) {
-			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues), new PropAtLeastNValues_AC(vars, nValues));
+			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues),
+					new PropAtLeastNValues_AC(vars, vals, nValues));
 		} else {
 			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues));
 		}
@@ -1572,7 +1573,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				} else {
 					return Constraint.merge("path",
 							arithm(start, "!=", end),
-							circuit(ArrayUtils.append(vars, new IntVar[]{start}), offset),
+							circuit(ArrayUtils.concat(vars, start), offset),
 							element(end.getModel().intVar(vars.length + offset), vars, end, offset)
 					);
 				}
@@ -1718,7 +1719,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			default:
 				return Constraint.merge("subPath",
 						arithm(start, "<", vars.length + offset),
-						subCircuit(ArrayUtils.append(vars, new IntVar[]{start}), offset, end.getModel().intOffsetView(SIZE, 1)),
+						subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intOffsetView(SIZE, 1)),
 						element(end.getModel().intVar(vars.length + offset), vars, end, offset)
 				);
 		}
