@@ -21,6 +21,7 @@ import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_Std_BitSet;
 import org.chocosolver.util.objects.setDataStructures.constant.Set_CstInterval;
 import org.chocosolver.util.objects.setDataStructures.constant.Set_FixedArray;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap2;
@@ -76,7 +77,9 @@ public class SetFactory {
 	 */
 	public static ISet makeSet(SetType type, int offSet) {
 		switch (type) {
-			case BIPARTITESET:
+			case RANGESET:
+				return makeRangeSet();
+				case BIPARTITESET:
 				return makeBipartiteSet(offSet);
 			case LINKED_LIST:
 				return makeLinkedList();
@@ -86,6 +89,14 @@ public class SetFactory {
 			case FIXED_INTERVAL: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_INTERVAL+" set");
 			default:throw new UnsupportedOperationException("Unsupported SetType "+type);
 		}
+	}
+
+	/**
+	 * Creates a set based on an ordered list of ranges
+	 * @return a new set
+	 */
+	public static ISet makeRangeSet() {
+		return new IntIterableRangeSet();
 	}
 
 	// --- List

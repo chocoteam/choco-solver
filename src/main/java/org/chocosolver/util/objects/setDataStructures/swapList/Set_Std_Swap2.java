@@ -19,14 +19,8 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 /**
  * Set of integers based on BipartiteSet implementation
  * BEWARE : CANNOT BOTH ADD AND REMOVE ELEMENTS DURING SEARCH
- * (add only or remove only)
  *
- * add : O(1)
- * testPresence: O(1)
- * remove: O(1)
- * iteration : O(m)
- *
- * @author : Jean-Guillaume Fages
+ * @author : Charles Prud'homme
  */
 public class Set_Std_Swap2 implements ISet {
 
