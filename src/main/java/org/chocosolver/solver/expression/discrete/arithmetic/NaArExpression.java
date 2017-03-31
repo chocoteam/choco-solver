@@ -104,10 +104,10 @@ public class NaArExpression implements ArExpression {
 
     @Override
     public int eval(int[] values, Map<IntVar, Integer> map) {
-        int r = es[0].eval(values, map);
+//        int r = es[0].eval(values, map);
         return Arrays.stream(es)
                 .mapToInt(e -> e.eval(values, map))
-                .reduce(0, (e1, e2) -> op.eval(e1, e2));
+                .reduce(op.identity(), (e1, e2) -> op.eval(e1, e2));
     }
 
     @Override

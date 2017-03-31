@@ -56,6 +56,11 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            int identity() {
+                return 0;
+            }
         },
         /**
          * absolute operator
@@ -69,6 +74,11 @@ public interface ArExpression {
             @Override
             int eval(int i1, int i2) {
                 throw new UnsupportedOperationException();
+            }
+
+            @Override
+            int identity() {
+                return 0;
             }
         },
         /**
@@ -84,6 +94,11 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 return MathUtils.safeAdd(i1, i2);
             }
+
+            @Override
+            int identity() {
+                return 0;
+            }
         },
         /**
          * subtraction operator
@@ -97,6 +112,11 @@ public interface ArExpression {
             @Override
             int eval(int i1, int i2) {
                 return MathUtils.safeSubstract(i1, i2);
+            }
+
+            @Override
+            int identity() {
+                return 0;
             }
         },
         /**
@@ -112,6 +132,11 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 return MathUtils.safeMultiply(i1, i2);
             }
+
+            @Override
+            int identity() {
+                return 1;
+            }
         },
         /**
          * division operator
@@ -124,7 +149,20 @@ public interface ArExpression {
 
             @Override
             int eval(int i1, int i2) {
-                return i1 / i2;
+                if(i2 == 0){
+                    if(i1>0) {
+                        return Integer.MAX_VALUE;
+                    }else{
+                        return Integer.MIN_VALUE;
+                    }
+                }else {
+                    return i1 / i2;
+                }
+            }
+
+            @Override
+            int identity() {
+                return 0;
             }
         },
         /**
@@ -138,7 +176,20 @@ public interface ArExpression {
 
             @Override
             int eval(int i1, int i2) {
-                return i1 % i2;
+                if(i2 == 0){
+                    if(i1>0) {
+                        return Integer.MAX_VALUE;
+                    }else{
+                        return Integer.MIN_VALUE;
+                    }
+                }else {
+                    return i1 % i2;
+                }
+            }
+
+            @Override
+            int identity() {
+                return 0;
             }
         },
         /**
@@ -154,6 +205,11 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 throw new UnsupportedOperationException();
             }
+
+            @Override
+            int identity() {
+                return 0;
+            }
         },
         /**
          * power operator
@@ -167,6 +223,11 @@ public interface ArExpression {
             @Override
             int eval(int i1, int i2) {
                 return MathUtils.pow(i1, i2);
+            }
+
+            @Override
+            int identity() {
+                return 0;
             }
         },
         /**
@@ -182,6 +243,11 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 return Math.min(i1, i2);
             }
+
+            @Override
+            int identity() {
+                return Integer.MAX_VALUE;
+            }
         },
         /**
          * max operator
@@ -196,11 +262,18 @@ public interface ArExpression {
             int eval(int i1, int i2) {
                 return Math.max(i1, i2);
             }
+
+            @Override
+            int identity() {
+                return Integer.MIN_VALUE;
+            }
         };
 
         abstract int eval(int i1);
 
         abstract int eval(int i1, int i2);
+
+        abstract int identity();
     }
 
     /**

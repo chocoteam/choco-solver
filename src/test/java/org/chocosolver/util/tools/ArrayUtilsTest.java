@@ -9,9 +9,13 @@
 package org.chocosolver.util.tools;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -99,6 +103,46 @@ public class ArrayUtilsTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testGetColumn3() throws Exception {
+        int[][] n = new int[2][3];
+        n[0][0] = 0;
+        n[0][1] = 1;
+        n[0][2] = 2;
+        n[1][0] = 3;
+        n[1][1] = 4;
+        n[1][2] = 5;
+        int[] nn = ArrayUtils.getColumn(n, 1);
+        Assert.assertEquals(nn, new Number[]{n[0][1], n[1][1]});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testGetColumn4() throws Exception {
+        int[][] n = null;
+        int[] nn = ArrayUtils.getColumn(n, 1);
+        Assert.assertEquals(nn, null);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testGetColumn5() throws Exception {
+        double[][] n = new double[2][3];
+        n[0][0] = 0d;
+        n[0][1] = 1d;
+        n[0][2] = 2d;
+        n[1][0] = 3d;
+        n[1][1] = 4d;
+        n[1][2] = 5d;
+        double[] nn = ArrayUtils.getColumn(n, 1);
+        Assert.assertEquals(nn, new Number[]{n[0][1], n[1][1]});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testGetColumn6() throws Exception {
+        double[][] n = null;
+        double[] nn = ArrayUtils.getColumn(n, 1);
+        Assert.assertEquals(nn, null);
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testLength() throws Exception {
         Integer[] a = {1,2,3};
         Integer[] b = {4,5};
@@ -122,10 +166,16 @@ public class ArrayUtilsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testGet1() throws Exception {
-        Integer[] a = {1,2,3};
-        Integer[] b = {4,5};
-        Integer[] c = {6};
-        Assert.assertEquals(ArrayUtils.get(4, a,b,c), b[1]);
+        List<Integer> a = new ArrayList<Integer>(){{
+            add(1); add(2);add(3);
+        }};
+        List<Integer> b = new ArrayList<Integer>(){{
+            add(4); add(5);
+        }};
+        List<Integer> c = new ArrayList<Integer>(){{
+            add(6);
+        }};
+        Assert.assertEquals(ArrayUtils.get(4, a,b,c), b.get(1));
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -148,6 +198,30 @@ public class ArrayUtilsTest {
         n2[0] = 2;
         n2[1] = 3;
         Assert.assertEquals(ArrayUtils.append(n1, n2), new int[]{n1[0], n1[1], n2[0], n2[1]});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testAppend3() throws Exception {
+        Model model = new Model();
+        IntVar[] n1 = new IntVar[2];
+        n1[0] = model.intVar(2);
+        n1[1] = model.intVar(3);
+        IntVar[] n2 = new IntVar[2];
+        n2[0] = model.intVar(4);
+        n2[1] = model.intVar(5);
+        Assert.assertEquals(ArrayUtils.append(n1, n2), new IntVar[]{n1[0], n1[1], n2[0], n2[1]});
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testAppend4() throws Exception {
+        Model model = new Model();
+        BoolVar[] n1 = new BoolVar[2];
+        n1[0] = model.boolVar(false);
+        n1[1] = model.boolVar(true);
+        BoolVar[] n2 = new BoolVar[2];
+        n2[0] = model.boolVar();
+        n2[1] = model.boolVar();
+        Assert.assertEquals(ArrayUtils.append(n1, n2), new BoolVar[]{n1[0], n1[1], n2[0], n2[1]});
     }
 
     @Test(groups="1s", timeOut=60000)

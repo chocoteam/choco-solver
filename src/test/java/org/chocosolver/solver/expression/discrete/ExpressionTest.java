@@ -194,4 +194,155 @@ public class ExpressionTest {
         IntStream.range(1, XS.length).forEach(i -> r[0] = r[0].add(XS[i]));
         eval(model, Y.eq(r[0]), p, 66);
     }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test18(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar[] y = model.intVarArray(2, 0, 5);
+        eval(model, x.add(y).eq(10), p, 21);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test19(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar[] y = model.intVarArray(2, 0, 5);
+        eval(model, x.mul(y).eq(20), p, 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test20(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar[] y = model.intVarArray(2, 0, 5);
+        eval(model, x.min(y).eq(1), p, 61);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test21(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar[] y = model.intVarArray(2, 0, 5);
+        eval(model, x.max(y).eq(1), p, 7);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test22(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        eval(model, x.add(2).eq(4), p, 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test23(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.sub(y).eq(3), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test24(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.mul(y).eq(4), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test25(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.div(y).eq(1), p, 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test26(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.mod(y).eq(1), p, 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test27(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.pow(y).eq(4), p, 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test28(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.min(y).eq(1), p, 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test29(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.max(y).eq(1), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test30(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.dist(y).eq(1), p, 10);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test31(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.dist(2).eq(y), p, 6);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test32(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.lt(y), p, 15);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test33(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.le(y), p, 21);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test34(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.gt(y), p, 15);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test35(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.ge(y), p, 21);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test36(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.ne(y), p, 30);
+    }
 }
