@@ -198,7 +198,7 @@ public class MDDTest {
         Solver solver  = model.getSolver();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 3);
-        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
+        Assert.assertEquals(mdd.getDiagram(), new int[]{3, 3, 11, 0, 0, 6, 0, 0, -1, 0, 0, 6, 0, 0});
     }
 
 }
