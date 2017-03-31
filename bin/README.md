@@ -9,6 +9,7 @@ This document reports the release process.
 
 2. Check maven dependencies, update if necessary, and clean also (using archiva f-ex.)
 
+
     $ mvn versions:display-dependency-updates
 
     $ mvn versions:display-plugin-updates
@@ -29,13 +30,15 @@ And run license check:
 
 4. Check that ALL issues are reported in **CHANGES.md** files
 
-    $ ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..develop | grep "#[0-9]"
 
-5. Make sure the website is mounted to /Volume/htdocs/ and run the command :
+    $ ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..master | grep "#[0-9]"
+
+5. Now you can run the command: 
+
 
     $ ./bin/release.sh
 
-    However, deployment and zip file (jar files, user guide and javadoc) need to be done locally:
+However, deployment and zip file (jar files, user guide and javadoc) need to be done locally:
 
     ./bin/package.sh X.Y.Z
 
