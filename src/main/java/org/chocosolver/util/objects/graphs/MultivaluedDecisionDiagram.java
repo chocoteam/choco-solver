@@ -10,6 +10,7 @@ package org.chocosolver.util.objects.graphs;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -139,6 +140,31 @@ public class MultivaluedDecisionDiagram  {
         init(TUPLES);
     }
 
+    /**
+     * Create an MDD based on an array of flatten domains and a set of transitions
+     *
+     * @param VARIABLES   array of flatten domains
+     * @param TRANSITIONS      list of transitions
+     */
+    public MultivaluedDecisionDiagram(IntVar[] VARIABLES, int[][] TRANSITIONS) {
+        int[][]FLATDOM = flattenDomain(VARIABLES);
+        this.nbLayers = FLATDOM.length;
+        this.offsets = new int[nbLayers];
+        this.sizes = new int[nbLayers];
+        this.compactOnce = true;
+        this.sortTuples = true;
+        int maxDom = 0;
+        for (int i = 0; i < nbLayers; i++) {
+            offsets[i] = FLATDOM[i][0];
+            sizes[i] = FLATDOM[i][FLATDOM[i].length - 1] - FLATDOM[i][0] + 1;
+            if (maxDom < sizes[i]) {
+                maxDom = sizes[i];
+            }
+        }
+        mdd = new int[nbLayers * maxDom];
+        init(TRANSITIONS);
+    }
+
     @SuppressWarnings("unchecked")
     private void init(Tuples TUPLES) {
         nextFreeCell = sizes[0];
@@ -204,6 +230,84 @@ public class MultivaluedDecisionDiagram  {
         }
         return true;
     }
+
+    @SuppressWarnings("unchecked")
+    private void init(int[][] TRANSITIONS) {
+        nextFreeCell = sizes[0];
+        _pos = new int[nbLayers];
+        Arrays.sort(TRANSITIONS, (t1, t2) -> {
+            int d = t1[0] - t2[0];
+            if(d == 0){
+                return t1[2] - t2[2];
+            }
+            return d;
+        });
+        _nodesToRemove = new TIntIntHashMap(16, .5f, -1, -1);
+        _identicalNodes = new ArrayList[nbLayers][];
+        _nodeId = new TIntArrayList[nbLayers][];
+
+        // Then add tuples
+        // 0 is the root node
+        // -1 is the target node
+        int pf = 0;
+        TIntIntHashMap node = new TIntIntHashMap(16, 1.5f, -2, -2);
+        TIntIntHashMap posi = new TIntIntHashMap(16, 1.5f, -2, -2);
+        for (int t = 0; t < TRANSITIONS.length; t++) {
+            //addTransition(TRANSITIONS[t]);
+            int f = TRANSITIONS[t][0];
+            int v = TRANSITIONS[t][1];
+            int d = TRANSITIONS[t][2];
+            if(f == 0){
+                if(v < offsets[f] || v >= offsets[f] + sizes[f]){
+                    continue;
+                }
+                int p = v - offsets[f];
+                ensureCapacity(p + sizes[f]);
+                assert mdd[p] == EMPTY;
+                if (d == -1) { // if this is the last variable => terminal node
+                    mdd[p] = TERMINAL;
+                } else { // otherwise, create an edge to a new location, stated by nextFreeCell
+                    if(!node.containsKey(d)) {
+                        mdd[p] = nextFreeCell;
+                        pf = f + 1;
+                        node.putIfAbsent(d, f + 1);
+                        posi.putIfAbsent(d, nextFreeCell);
+                        nextFreeCell += sizes[f + 1];
+                    }else{
+                        mdd[p] = posi.get(d);
+                    }
+                }
+            }else{
+                int _f = node.get(f);
+                if(v < offsets[_f] || v >= offsets[_f] + sizes[_f]){
+                    continue;
+                }
+                int p = posi.get(f) + v - offsets[_f];
+                if(pf!=_f){
+//                    detectIsomorphism(0, pf);
+//                    deleteIsomorphism();
+                    pf = f;
+                }
+                ensureCapacity(p + sizes[_f]);
+                if (mdd[p] == EMPTY) {
+                    if (d == -1) { // if this is the last variable => terminal node
+                        mdd[p] = TERMINAL;
+                    } else { // otherwise, create an edge to a new location, stated by nextFreeCell
+                        if(!node.containsKey(d)) {
+                            mdd[p] = nextFreeCell;
+                            node.putIfAbsent(d, _f + 1);
+                            posi.putIfAbsent(d, nextFreeCell);
+                            nextFreeCell += sizes[_f + 1];
+                        }else{
+                            mdd[p] = posi.get(d);
+                        }
+                    }
+                }
+            }
+        }
+        compact();
+    }
+
 
     /**
      * Ensure all data structure are correctly sized.

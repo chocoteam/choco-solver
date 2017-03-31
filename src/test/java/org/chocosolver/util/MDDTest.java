@@ -9,6 +9,7 @@
 package org.chocosolver.util;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
@@ -149,6 +150,55 @@ public class MDDTest {
         for (int t = 0; t < tuples.nbTuples(); t++) {
             Assert.assertTrue(mdd.exists(tuples.get(t)));
         }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test6() {
+        Model model = new Model();
+        IntVar[] vars = new IntVar[3];
+        vars[0] = model.intVar("X", 0, 2, false);
+        vars[1] = model.intVar("Y", new int[]{0, 2});
+        vars[2] = model.intVar("Z", new int[]{-2, 0, 2});
+        int[][] transitions = new int[8][3];
+        transitions[0] = new int[]{0,0,1};
+        transitions[1] = new int[]{0,1,2};
+        transitions[2] = new int[]{0,2,3};
+        transitions[3] = new int[]{1,2,4};
+        transitions[4] = new int[]{2,2,4};
+        transitions[5] = new int[]{3,0,5};
+        transitions[6] = new int[]{4,0,-1};
+        transitions[7] = new int[]{5,0,-1};
+
+        MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, transitions);
+        model.mddc(vars, mdd).post();
+
+        Solver solver  = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 3);
+
+        Assert.assertEquals(mdd.getDiagram(), new int[]{3,3,6,0,0,9,9,0,0,0,0,-1,0,0});
+
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test7() {
+        Model model = new Model();
+        IntVar[] vars = new IntVar[3];
+        vars[0] = model.intVar("X", 0, 2, false);
+        vars[1] = model.intVar("Y", new int[]{0, 2});
+        vars[2] = model.intVar("Z", new int[]{-2, 0, 2});
+        Tuples tuples = new Tuples();
+        tuples.add(0, 2, 0);
+        tuples.add(1, 2, 0);
+        tuples.add(2, 0, 0);
+
+        MultivaluedDecisionDiagram mdd = new MultivaluedDecisionDiagram(vars, tuples, false, true);
+        model.mddc(vars, mdd).post();
+
+        Solver solver  = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 3);
+        Assert.assertEquals(mdd.getDiagram(), new int[]{2, 5, -1, 0, -1, -1, 0, 0});
     }
 
 }
