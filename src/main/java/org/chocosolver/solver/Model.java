@@ -429,7 +429,7 @@ public class Model implements IModel {
      */
     public RealVar[] retrieveRealVars() {
         int size = getNbRealVar();
-        RealVar[] rvars = new RealVar[vIdx];
+        RealVar[] rvars = new RealVar[size];
         int k = 0;
         for (int i = 0; i < vIdx; i++) {
             if ((vars[i].getTypeAndKind() & Variable.KIND) == Variable.REAL) {
@@ -698,7 +698,6 @@ public class Model implements IModel {
                 nbIntVar++;
                 break;
             case Variable.BOOL:
-                nbIntVar++;
                 nbBoolVar++;
                 break;
             case Variable.SET:
@@ -731,7 +730,6 @@ public class Model implements IModel {
                 nbIntVar--;
                 break;
             case Variable.BOOL:
-                nbIntVar--;
                 nbBoolVar--;
                 break;
             case Variable.SET:
