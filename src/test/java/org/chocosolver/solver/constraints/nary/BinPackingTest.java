@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -36,26 +37,19 @@ public class BinPackingTest {
 		return elt.toArray(new Object[elt.size()][1]);
 	}
 
-	@Test(groups="1s", timeOut=60000, dataProvider = "params")
-	public void test(boolean decomp) {
+	@Test(groups="1s", timeOut=60000)
+	public void testFixedLoadBackPropag() {
 		Model model = new Model();
 		int[] itemSize = new int[]{2,3,1};
-		IntVar[] itemBin = model.intVarArray(3,-1,1);
-		IntVar[] binLoad = model.intVarArray(3,-5,5);
-		int offset = 0;
-		if(decomp){
-			bpDecomposition(itemBin,itemSize,binLoad,offset).post();
-		}else{
-			model.binPacking(itemBin,itemSize,binLoad,offset).post();
-		}
-		while(model.getSolver().solve()){
-			assertTrue(itemBin[0].getValue()>=offset);
-			assertTrue(itemBin[1].getValue()>=offset);
-			assertTrue(binLoad[0].getValue()>=0);
-			assertTrue(binLoad[1].getValue()>=0);
-			assertEquals(binLoad[2].getValue(),0);
-		}
-		assertEquals(6, model.getSolver().getSolutionCount());
+		IntVar[] itemBin = model.intVarArray("binOfItem",3,-1,1);
+		IntVar[] binLoad = model.intVarArray("binLoad",2,3,3);
+		model.binPacking(itemBin,itemSize,binLoad,0).post();
+		model.getSolver().showSolutions();
+		model.getSolver().setSearch(Search.inputOrderLBSearch(itemBin));
+		boolean sol = model.getSolver().solve();
+		assertTrue(sol);
+		assertEquals(0, model.getSolver().getFailCount());
+		assertEquals(2, model.getSolver().getNodeCount());
 	}
 
 	@Test(groups="1s", timeOut=60000, dataProvider = "params")
