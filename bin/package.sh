@@ -53,38 +53,24 @@ function extractReleaseComment(){
     IFS=',' read -r -a ARRAY <<< "$LINES"
     FROM=$(expr ${ARRAY[1]} + 1)
     TO=$(expr ${ARRAY[2]} - 2)
-    CHANGES=$(cat ./CHANGES.md | sed -n "${FROM},${TO}p" | perl -p -e 's/  /\\t/' | perl -p -e 's/\n/\\n/g')
-    echo '{ "tag_name": "${VERSION}", "target_commitish": "master","name": "${VERSION}","body": '\""$CHANGES"\"' ,"draft": true, "prerelease": false}'
-}
-#
-# create a milestone based on comment ($1), version ($2) and token ($3)
-function createRelease(){
-    DATA=$1
-    VERSION=$2
-    TOKEN=$3
-    echo "DATA: ${DATA}"
-    # create release
-    curl -i -H 'Authorization: token ${t}' \
-            -data $DATA \
-            "https://api.github.com/repos/chocoteam/choco-solver/releases"
-    # add asset
-    curl -i \
-         -H "Authorization: token ${TOKEN}" \
-         -H "Content-Type: application/zip" \
-         --data-binary @choco-${VERSION}.zip \
-         "https://uploads.github.com/repos/chocoteam/choco-solver/releases/choco-${VERSION}/assets?name=choco-${VERSION}.zip"
-}
-# create a milestone based on version ($1) and token ($2)
-function createMilestone(){
-    VERSION=$1
-    TOKEN=$2
-    NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))")
-    curl -i -H 'Authorization: token ${t}' \
-        -data '{ "title": "${NEXT}"}' \
-        "https://api.github.com/repos/chocoteam/choco-solver/milestones"
+    CHANGES=$(cat ./CHANGES.md | sed -n "${FROM},${TO}p" | perl -p -e 's/  /\\t/' | perl -p -e 's/(\#)([0-9])/\\#\2/' | perl -p -e 's/\n/\\n/g')
+    echo '{"tag_name":'\""${VERSION}"\"',"target_commitish":"master","name":'\""${VERSION}"\"',"body":'\""$CHANGES"\"',"draft": false,"prerelease": false}' > $2
 }
 
+if [ "$#" -ne 1 ] ; then
+    quit "Incorrect number of arguments"
+fi
+
+
 VERSION=$1
+
+GH_API="https://api.github.com/repos/chocoteam/choco-solver/"
+GH_UPL="https://uploads.github.com/repos/chocoteam/choco-solver/"
+
+AUTH="Authorization: token ${GH_TOKEN}"
+
+# Validate token.
+curl -o /dev/null -i -sH "${AUTH}" "${GH_API}/releases" || quit "Error: Invalid repo, token or network issue!";
 
 # create archive
 makeArchive ${VERSION}
@@ -94,11 +80,33 @@ pushJavadoc ${VERSION}
 
 # prepare release comment
 #find position of release separator in CHANGES.md, only keep the 2nd and 3rd
+temp_file="tmpreadme.txt"
+$(touch ${temp_file}) || quit "Unable to create tmp file"
+
+# extract release comment
+extractReleaseComment ${VERSION} ${temp_file} || quit "Unable to extract release comment"
 
 # create release
-createRelease $(extractReleaseComment ${VERSION}) ${VERSION} ${GH_TOKEN}
-# create the next milestone
-createMilestone ${VERSION} ${GH_TOKEN}
+response=$(curl -i -sH "$AUTH" --data @${temp_file} "${GH_API}/releases") || quit "Unable to create the release"
 
-rmdir choco-${VERSION}
+# get the asset id
+eval $(echo "$response" | grep -m 1 "id.:" | tr : = | tr -cd '[[:alnum:]]=')
+[ "$id" ] || quit "Error: Failed to get release id for tag: ${VERSION}"; echo "$response" | awk 'length($0)<100' >&2
+
+# add asset
+curl -i -sH "$AUTH" -H "Content-Type: application/zip" \
+         -data-binary @choco-${VERSION}.zip \
+         "${GH_UPL}/releases/${VERSION}/assets?name=choco-${VERSION}.zip" \
+         || quit "Unable to add asset"
+
+
+# create the next milestone
+NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))") || quit "Unable to get next release number"
+curl -i -sH "$AUTH" --data '{ "title": '\""${NEXT}"\"'}' \
+        "${GH_API}milestones"
+
+#createMilestone ${VERSION} ${GH_TOKEN}
+
+rmdir -R choco-${VERSION}
+rm ${temp_file} || quit "Unable to remove tmp file"
 git checkout master
