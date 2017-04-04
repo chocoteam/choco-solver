@@ -8,8 +8,10 @@
  */
 package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.Set_ReadOnly;
 import org.testng.annotations.Test;
 
@@ -273,6 +275,17 @@ public abstract class SetTest {
         assertTrue(Arrays.equals(ro.toArray(), set.toArray()));
     }
 
+	@Test(groups = "1s", timeOut=60000)
+	public void testAddRemoveReturnValueNB() {
+		ISet set = create();
+		set.add(1);
+		assertFalse(set.add(1));
+		assertTrue(set.remove(1));
+		assertTrue(set.add(2));
+		assertTrue(set.contains(2));
+		assertFalse(set.contains(1));
+		assertFalse(set.remove(1));
+	}
 
     public abstract ISet create(int offset);
 

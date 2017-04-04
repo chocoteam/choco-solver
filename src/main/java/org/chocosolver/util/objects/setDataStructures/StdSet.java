@@ -21,7 +21,7 @@ import org.chocosolver.util.PoolManager;
 public class StdSet implements ISet {
 
 
-    private static ThreadLocal<PoolManager<ListOP>> poolManagerThreadLocal = new ThreadLocal<>();
+//    private static ThreadLocal<PoolManager<ListOP>> poolManagerThreadLocal = new ThreadLocal<>();
 
     //***********************************************************************************
 	// VARIABLES
@@ -42,11 +42,11 @@ public class StdSet implements ISet {
     public StdSet(IEnvironment environment, ISet set) {
         super();
         this.environment = environment;
-        this.operationPoolGC = poolManagerThreadLocal.get();
-        if(this.operationPoolGC == null){
+//        this.operationPoolGC = poolManagerThreadLocal.get();
+//        if(this.operationPoolGC == null){
             this.operationPoolGC = new PoolManager<>();
-            poolManagerThreadLocal.set(this.operationPoolGC);
-        }
+//            poolManagerThreadLocal.set(this.operationPoolGC);
+//        }
         this.set = set;
     }
 

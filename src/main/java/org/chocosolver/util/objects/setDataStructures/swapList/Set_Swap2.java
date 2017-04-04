@@ -9,7 +9,6 @@
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -20,15 +19,15 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  * Set of integers based on BipartiteSet implementation for small sets (arraylist inside)
  * BEWARE : CANNOT BOTH ADD AND REMOVE ELEMENTS DURING SEARCH
  *
- * @author : Charles Prud'homme, Jean-Guillaume FAGES (fix remove)
+ * @author : Charles Prud'homme, Jean-Guillaume FAGES
  */
-public class Set_Std_Swap2 implements ISet {
+public class Set_Swap2 implements ISet {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-    protected IStateInt size;
+    protected int size;
     protected TIntArrayList values;
     private ISetIterator iter = newIterator();
 
@@ -39,10 +38,9 @@ public class Set_Std_Swap2 implements ISet {
 
 	/**
 	 * Creates an empty bipartite set
-	 * @param e backtracking environment
 	 */
-	public Set_Std_Swap2(IEnvironment e){
-		size = e.makeInt(0);
+	public Set_Swap2(){
+		size = 0;
         values = new TIntArrayList(4);
 	}
 
@@ -53,8 +51,8 @@ public class Set_Std_Swap2 implements ISet {
     @Override
     public boolean add(int element) {
         if(!contains(element)){
-            int pos = size.add(1);
-            values.insert(pos - 1, element);
+            values.insert(size, element);
+			size++;
             return true;
         }
         return false;
@@ -64,13 +62,13 @@ public class Set_Std_Swap2 implements ISet {
     public boolean remove(int element) {
         int pos = values.indexOf(element);
         int s = size();
-        if(pos > -1 && pos < s){
+		if(pos > -1 && pos < s){
             iter.notifyRemoving(element);
             s--;
-            int t = values.get(s);
-            values.set(pos, t);
-            values.set(s, element);
-            size.add(-1);
+			int t = values.get(s);
+			values.set(pos, t);
+			values.set(s, element);
+            size--;
             return true;
         }else return false;
     }
@@ -83,12 +81,12 @@ public class Set_Std_Swap2 implements ISet {
 
     @Override
     public int size() {
-        return size.get();
+        return size;
     }
 
     @Override
     public void clear() {
-        size.set(0);
+        size = 0;
     }
 
     @Override
@@ -120,16 +118,16 @@ public class Set_Std_Swap2 implements ISet {
         return SetType.SMALLBIPARTITESET;
     }
 
-    @Override
-    public String toString() {
-        String st = "{";
-        ISetIterator iter = newIterator();
-        while (iter.hasNext()) {
-            st+=iter.nextInt()+", ";
-        }
-        st+="}";
-        return st.replace(", }","}");
-    }
+	@Override
+	public String toString() {
+		String st = "{";
+		ISetIterator iter = newIterator();
+		while (iter.hasNext()) {
+			st+=iter.nextInt()+", ";
+		}
+		st+="}";
+		return st.replace(", }","}");
+	}
 
     @Override
     public ISetIterator iterator(){

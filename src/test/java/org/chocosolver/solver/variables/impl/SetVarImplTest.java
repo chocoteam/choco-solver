@@ -14,13 +14,31 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * @author Guillaume Le Lou�t [guillaume.lelouet@gmail.com] 2016
+ * @author Guillaume Le Lou�t [guillaume.lelouet@gmail.com] 2016, Jean-Guillaume Fages
  */
 public class SetVarImplTest {
+
+	@Test(groups="1s", timeOut=60000)
+	public void testStructures(){
+		for(SetType type:SetType.values()) {
+			if(!type.name().contains("FIXED")) {
+				for (boolean b : new boolean[]{true, false}) {
+					SetFactory.HARD_CODED = b;
+					System.out.println(type.name());
+					Model m = new Model();
+					SetVar s1 = new SetVarImpl("s1", new int[0], type, ArrayUtils.array(0, 2), type, m);
+					SetVar s2 = new SetVarImpl("s2", new int[0], type, ArrayUtils.array(0, 2), type, m);
+					while (m.getSolver().solve()) ;
+					Assert.assertEquals(64, m.getSolver().getSolutionCount());
+				}
+			}
+		}
+	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void testSetVarInstantiated() {

@@ -11,8 +11,13 @@ package org.chocosolver.util.objects.setDataStructures.backtrackable;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.testng.Assert.*;
 
@@ -25,14 +30,24 @@ public abstract class BacktrackableSetTest extends SetTest{
 
     protected Model model = new Model();
 
+    @DataProvider(name = "params")
+    public Object[][] data1D(){
+        // indicates whether to use hard coded implementation or not
+        List<Object[]> elt = new ArrayList<>();
+        elt.add(new Object[]{true});
+        elt.add(new Object[]{false});
+        return elt.toArray(new Object[elt.size()][1]);
+    }
+
     /**
      * Factory enabling to create an empty backtrackable set
      * @return backtracking implementation of {@link ISet}
      */
     public abstract ISet create();
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testNominal() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testNominal(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         set.add(1);
@@ -47,8 +62,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.contains(1));
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testTwoPushes() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testTwoPushes(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         environment.worldPush();
@@ -61,8 +77,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testPopUntilZero() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testPopUntilZero(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         environment.worldPush();
@@ -76,8 +93,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "10s", timeOut=60000)
-    public void testSeveralPushes() {
+    @Test(groups = "10s", timeOut=60000, dataProvider = "params")
+    public void testSeveralPushes(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         environment.worldPush();
@@ -97,8 +115,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertEquals(environment.getWorldIndex(), 0);
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testVoidPushes() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testVoidPushes(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         environment.worldPush();
@@ -116,8 +135,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testTwoSets() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testTwoSets(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet a = create();
         ISet b = create();
         IEnvironment environment = model.getEnvironment();
@@ -142,8 +162,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertFalse(b.contains(1));
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testAddRemoveReturnValue() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testAddRemoveReturnValue(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
         IEnvironment environment = model.getEnvironment();
         environment.worldPush();
@@ -158,8 +179,9 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertFalse(set.remove(1));
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testRemoveInLoop() {
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testRemoveInLoop(boolean exp) {
+        SetFactory.HARD_CODED = exp;
         ISet set = create();
 
         set.add(1);

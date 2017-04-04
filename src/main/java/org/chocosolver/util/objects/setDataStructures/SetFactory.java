@@ -26,6 +26,7 @@ import org.chocosolver.util.objects.setDataStructures.linkedlist.Set_LinkedList;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Std_Swap2;
 import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap;
+import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap2;
 
 /**
  * Factory for creating sets
@@ -54,8 +55,7 @@ public class SetFactory {
 		if (HARD_CODED) {
 			if (type == SetType.SMALLBIPARTITESET) {
 				return new Set_Std_Swap2(environment);
-			}else
-			if (type == SetType.BIPARTITESET) {
+			}else if (type == SetType.BIPARTITESET) {
 				return new Set_Std_Swap(environment, offSet);
 			}else if (type == SetType.BITSET) {
 				return new Set_Std_BitSet(environment, offSet);
@@ -79,8 +79,10 @@ public class SetFactory {
 		switch (type) {
 			case RANGESET:
 				return makeRangeSet();
-				case BIPARTITESET:
+			case BIPARTITESET:
 				return makeBipartiteSet(offSet);
+			case SMALLBIPARTITESET:
+				return makeSmallBipartiteSet();
 			case LINKED_LIST:
 				return makeLinkedList();
 			case BITSET:
@@ -133,6 +135,15 @@ public class SetFactory {
 	 */
 	public static ISet makeBipartiteSet(int offSet) {
 		return new Set_Swap(offSet);
+	}
+
+	/**
+	 * Creates a set of integers, based on an offseted bipartite set, for small sets
+	 * (arraylist inside to consume less memory)
+	 * @return a new bipartite set
+	 */
+	public static ISet makeSmallBipartiteSet() {
+		return new Set_Swap2();
 	}
 
 	// --- Constant Set
