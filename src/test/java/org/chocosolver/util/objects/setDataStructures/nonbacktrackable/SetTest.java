@@ -69,6 +69,7 @@ public abstract class SetTest {
         ISet set = create();
         assertTrue(set.add(5));
         assertFalse(set.add(5));
+        assertFalse(set.remove(50));
         assertTrue(set.remove(5));
         assertTrue(set.isEmpty());
     }

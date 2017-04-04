@@ -101,7 +101,7 @@ public class Set_LinkedList implements ISet {
 				previous = current;
 				current = current.next;
 			}
-			throw new UnsupportedOperationException();
+			return false;
 		}
 	}
 
