@@ -173,7 +173,7 @@ public class Set_LinkedList implements ISet {
 	@Override
 	public ISetIterator newIterator(){
 		return new ISetIterator() {
-			private IntCell nextCell;
+			private IntCell nextCell = first;
 			@Override
 			public void reset() {
 				nextCell = first;
