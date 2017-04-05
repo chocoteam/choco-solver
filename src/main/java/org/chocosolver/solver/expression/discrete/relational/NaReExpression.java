@@ -85,12 +85,9 @@ public class NaReExpression extends ReExpression {
             me = model.boolVar(model.generateName(op+"_exp_"));
             switch (op) {
                 case EQ:
-//                    model.allEqual(vs).reifyWith(me);
-                    BoolVar[] bvars = model.boolVarArray(es.length -1);
-                    for(int i = 1; i < es.length; i++){
-                        model.reifyXeqY(vs[0],vs[i],bvars[i - 1]);
-                    }
-                    model.addClausesBoolAndArrayEqVar(bvars, me);
+                    IntVar count = model.intVar(op+"_count_", 1, vs.length);
+                    model.atMostNValues(vs, count, false).post();
+                    model.arithm(count, "<=", 1).reifyWith(me);
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
