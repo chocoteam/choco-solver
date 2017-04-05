@@ -34,7 +34,7 @@ public abstract class BacktrackableSetTest extends SetTest{
 
     protected Model model;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void init(){
         model = new Model();
     }
