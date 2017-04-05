@@ -83,7 +83,8 @@ public class StdSet implements ISet {
     public void clear() {
         ISetIterator iter = iterator();
         while (iter.hasNext()) {
-            environment.save(()->set.add(iter.nextInt()));
+            int val = iter.nextInt(); // #519: outside the lambda construction to avoid end-less iteration
+            environment.save(()->set.add(val));
         }
         set.clear();
     }
