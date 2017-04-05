@@ -9,6 +9,9 @@
 package org.chocosolver.util.objects.setDataStructures;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.solver.Model;
+import org.chocosolver.util.PoolManager;
 
 /**
  * Generic backtrable set for trailing
@@ -18,12 +21,16 @@ import org.chocosolver.memory.IEnvironment;
  */
 public class StdSet implements ISet {
 
+    private static final String HK_LIST_OP_PM = "HK_LIST_OP_PM";
     //***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
     // trailing
     private final IEnvironment environment;
+    private PoolManager<ListOP> operationPoolGC;
+    private final static boolean ADD = true;
+    private final static boolean REMOVE = false;
     // set (decorator design pattern)
     private ISet set;
 
@@ -31,9 +38,14 @@ public class StdSet implements ISet {
 	// CONSTRUCTOR
 	//***********************************************************************************
 
-    public StdSet(IEnvironment environment, ISet set) {
+    public StdSet(Model model, ISet set) {
         super();
-        this.environment = environment;
+        this.environment = model.getEnvironment();
+        this.operationPoolGC = (PoolManager<ListOP>) model.getHook(HK_LIST_OP_PM);
+        if(this.operationPoolGC == null){
+            this.operationPoolGC = new PoolManager<>();
+            model.addHook(HK_LIST_OP_PM, this.operationPoolGC);
+        }
         this.set = set;
     }
 
@@ -54,7 +66,11 @@ public class StdSet implements ISet {
     @Override
     public boolean add(int element) {
         if (set.add(element)) {
-            environment.save(()->set.remove(element));
+            ListOP op = operationPoolGC.getE();
+            if (op == null) {
+                op = new ListOP();
+            }
+            op.set(set, element, REMOVE);
             return true;
         }
         return false;
@@ -63,7 +79,11 @@ public class StdSet implements ISet {
     @Override
     public boolean remove(int element) {
         if (set.remove(element)) {
-            environment.save(()->set.add(element));
+            ListOP op = operationPoolGC.getE();
+            if (op == null) {
+                op = new ListOP();
+            }
+            op.set(set, element, ADD);
             return true;
         }
         return false;
@@ -83,8 +103,11 @@ public class StdSet implements ISet {
     public void clear() {
         ISetIterator iter = iterator();
         while (iter.hasNext()) {
-            int val = iter.nextInt(); // #519: outside the lambda construction to avoid end-less iteration
-            environment.save(()->set.add(val));
+            ListOP op = operationPoolGC.getE();
+            if (op == null) {
+                op = new ListOP();
+            }
+            op.set(set, iter.nextInt(), ADD);
         }
         set.clear();
     }
@@ -102,6 +125,33 @@ public class StdSet implements ISet {
     @Override
     public String toString() {
         return set.toString();
+    }
+
+    //***********************************************************************************
+    // TRAILING OPERATIONS
+    //***********************************************************************************
+
+    private class ListOP implements IOperation {
+        private int element;
+        private boolean addOrRemove;
+        private ISet mset;
+
+        @Override
+        public void undo() {
+            if (addOrRemove) {
+                this.mset.add(element);
+            } else {
+                this.mset.remove(element);
+            }
+            operationPoolGC.returnE(this);
+        }
+
+        public void set(ISet set, int i, boolean add) {
+            this.mset = set;
+            this.element = i;
+            this.addOrRemove = add;
+            environment.save(this);
+        }
     }
 
     @Override

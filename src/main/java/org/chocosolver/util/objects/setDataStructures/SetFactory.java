@@ -61,7 +61,7 @@ public class SetFactory {
 				return new Set_Std_BitSet(environment, offSet);
 			}
 		}
-		return new StdSet(environment,makeSet(type,offSet));
+		return new StdSet(model,makeSet(type,offSet));
 	}
 
 
