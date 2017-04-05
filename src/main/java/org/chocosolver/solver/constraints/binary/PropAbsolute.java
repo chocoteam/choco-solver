@@ -8,17 +8,14 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -31,25 +28,14 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropAbsolute extends Propagator<IntVar> {
 
-    private RemProc rem_proc;
-    private IIntDeltaMonitor[] idms;
     private IntVar X, Y;
     private boolean bothEnumerated;
-    private ICause cause;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);
         this.X = vars[0];
         this.Y = vars[1];
-        this.cause = this;
         bothEnumerated = X.hasEnumeratedDomain() && Y.hasEnumeratedDomain();
-        if (bothEnumerated) {
-            rem_proc = new RemProc();
-            this.idms = new IIntDeltaMonitor[this.vars.length];
-            for (int i = 0; i < this.vars.length; i++) {
-                idms[i] = vars[i].hasEnumeratedDomain() ? this.vars[i].monitorDelta(this) : IIntDeltaMonitor.Default.NONE;
-            }
-        }
     }
 
     @Override
@@ -98,19 +84,31 @@ public class PropAbsolute extends Propagator<IntVar> {
         setBounds();
         if (bothEnumerated) {
             enumeratedFiltering();
-            idms[0].unfreeze();
-            idms[1].unfreeze();
         }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        if (bothEnumerated) {
-            idms[varIdx].freeze();
-            idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-            idms[varIdx].unfreeze();
-        } else {
-            setBounds();
+        if (IntEventType.isInstantiate(mask)){
+            if(varIdx == 1){
+                setPassive();
+                X.instantiateTo(Math.abs(Y.getValue()), this);
+            }else if(Y.hasEnumeratedDomain()){
+                setPassive();
+                int val = X.getValue();
+                Y.updateBounds(-val, val, this);
+                val--;
+                Y.removeInterval(-val, val, this);
+            }else{
+                setBounds();
+            }
+        }else {
+            if(IntEventType.isBound(mask)) {
+                setBounds();
+            }
+            if (IntEventType.isRemove(mask) && bothEnumerated) {
+                enumeratedFiltering();
+            }
         }
     }
 
@@ -153,27 +151,6 @@ public class PropAbsolute extends Propagator<IntVar> {
         for (int v = min; v <= max; v = Y.nextValue(v)) {
             if (!(X.contains(Math.abs(v)))) {
                 Y.removeValue(v, this);
-            }
-        }
-    }
-
-    private class RemProc implements UnaryIntProcedure<Integer> {
-        private int var;
-
-        @Override
-        public UnaryIntProcedure set(Integer idxVar) {
-            this.var = idxVar;
-            return this;
-        }
-
-        @Override
-        public void execute(int val) throws ContradictionException {
-            if (var == 0) {
-                vars[1].removeValue(val, cause);
-                vars[1].removeValue(-val, cause);
-            } else {
-                if (!vars[1].contains(-val))
-                    vars[0].removeValue(Math.abs(val), cause);
             }
         }
     }
