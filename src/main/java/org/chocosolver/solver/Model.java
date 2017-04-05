@@ -533,7 +533,7 @@ public class Model implements IModel {
      * Unpost minisat constraint from model, if any.
      */
     public void removeMinisat(){
-        if (getHook(MINISAT_HOOK_NAME) == null) {
+        if (getHook(MINISAT_HOOK_NAME) != null) {
             SatConstraint minisat = (SatConstraint) getHook(MINISAT_HOOK_NAME);
             unpost(minisat);
             removeHook(MINISAT_HOOK_NAME);
@@ -559,7 +559,7 @@ public class Model implements IModel {
      * Unpost nogood store constraint from model, if any.
      */
     public void removeNogoodStore(){
-        if (getHook(NOGOODS_HOOK_NAME) == null) {
+        if (getHook(NOGOODS_HOOK_NAME) != null) {
             NogoodConstraint nogoods = (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
             unpost(nogoods);
             removeHook(NOGOODS_HOOK_NAME);
