@@ -10,6 +10,7 @@ package org.chocosolver.solver.expression.discrete.arithmetic;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.relational.BiReExpression;
+import org.chocosolver.solver.expression.discrete.relational.NaReExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
@@ -600,5 +601,13 @@ public interface ArExpression {
      */
     default ReExpression eq(ArExpression y) {
         return new BiReExpression(ReExpression.Operator.EQ, this, y);
+    }
+
+    /**
+     * @param ys some expressions
+     * @return return the expression "x = y_1 = y_2 = ..." where this is "x"
+     */
+    default ReExpression eq(ArExpression... ys) {
+        return new NaReExpression(ReExpression.Operator.EQ, this, ys);
     }
 }

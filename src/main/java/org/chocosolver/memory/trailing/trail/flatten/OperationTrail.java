@@ -76,8 +76,7 @@ public class OperationTrail implements IOperationTrail {
     public void worldPop(int worldIndex) {
         final int wsl = worldStartLevels[worldIndex];
         while (currentLevel > wsl) {
-            currentLevel--;
-            valueStack[currentLevel].undo();
+            valueStack[--currentLevel].undo();
         }
     }
 
@@ -101,8 +100,7 @@ public class OperationTrail implements IOperationTrail {
      * on the stacks.
      */
     public void savePreviousState(IOperation oldValue) {
-        valueStack[currentLevel] = oldValue;
-        currentLevel++;
+        valueStack[currentLevel++] = oldValue;
         if (currentLevel == valueStack.length) {
             resizeUpdateCapacity();
         }

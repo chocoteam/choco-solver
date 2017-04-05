@@ -188,4 +188,5 @@ installed in your local maven repository and available in the `target` sub-folde
 
 
 ===================
+
 The Choco-solver dev team.

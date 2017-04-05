@@ -53,9 +53,19 @@ public class NaArExpression implements ArExpression {
      * @param es some expressions
      */
     public NaArExpression(Operator op, ArExpression e, ArExpression... es) {
+        this(op, ArrayUtils.append(new ArExpression[]{e}, es));
+    }
+
+    /**
+     * Builds a n-ary expression
+     *
+     * @param op an operator
+     * @param es some expressions
+     */
+    public NaArExpression(Operator op, ArExpression... es) {
         this.op = op;
-        this.es = ArrayUtils.append(new ArExpression[]{e}, es);
-        this.model = e.getModel();
+        this.es = es;
+        this.model = es[0].getModel();
     }
 
     @Override

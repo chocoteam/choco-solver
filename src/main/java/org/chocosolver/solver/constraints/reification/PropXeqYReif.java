@@ -123,6 +123,6 @@ public class PropXeqYReif extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + vars[0].getName() +" = " + vars[0].getName() + ") <=> "+vars[2].getName();
+        return "(" + vars[0].getName() +" = " + vars[1].getName() + ") <=> "+vars[2].getName();
     }
 }

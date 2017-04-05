@@ -8,12 +8,11 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
@@ -45,7 +44,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
     /**
      * Temporary. Stores index of variables with the same (best) score
      */
-    private TIntList bests;
+    private TIntArrayList bests;
 
     /**
      * Randomness to break ties
@@ -87,7 +86,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar>{
     @Override
     public Decision<IntVar> getDecision() {
         IntVar best = null;
-        bests.clear();
+        bests.resetQuick();
         pid2arity.clear();
         long _d1 = Integer.MAX_VALUE;
         long _d2 = 0;

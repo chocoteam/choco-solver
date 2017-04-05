@@ -141,7 +141,9 @@ public class MultivaluedDecisionDiagram  {
     }
 
     /**
-     * Create an MDD based on an array of flatten domains and a set of transitions
+     * Create an MDD based on an array of flatten domains and a set of transitions.
+     * The first of the graph has to be labeled '0' and the last node of the graph has to be labeled '-1'.
+     * Then, a transition is triple <f, v, t> which denotes an arc from node 'f' to node 't' valued to 'v'.
      *
      * @param VARIABLES   array of flatten domains
      * @param TRANSITIONS      list of transitions

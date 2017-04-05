@@ -16,7 +16,9 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -31,7 +33,7 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class BiReExpression implements ReExpression {
+public class NaReExpression implements ReExpression {
 
     /**
      * The model in which the expression is declared
@@ -46,29 +48,34 @@ public class BiReExpression implements ReExpression {
     /**
      * Operator of the arithmetic expression
      */
-    ReExpression.Operator op = null;
+    Operator op = null;
 
     /**
-     * The first expression this expression relies on
+     * The expressions this expression relies on
      */
-    private ArExpression e1;
+    private ArExpression[] es;
+
     /**
-     * The second expression this expression relies on
+     * Builds a nary expression
+     *
+     * @param op an operator
+     * @param e an expression
+     * @param es some expressions
      */
-    private ArExpression e2;
+    public NaReExpression(Operator op, ArExpression e, ArExpression... es) {
+        this(op, ArrayUtils.append(new ArExpression[]{e}, es));
+    }
 
     /**
      * Builds a binary expression
      *
      * @param op an operator
-     * @param e1 an expression
-     * @param e2 an expression
+     * @param es some expressions
      */
-    public BiReExpression(ReExpression.Operator op, ArExpression e1, ArExpression e2) {
-        this.model = e1.getModel();
+    public NaReExpression(Operator op, ArExpression... es) {
+        this.model = es[0].getModel();
         this.op = op;
-        this.e1 = e1;
-        this.e2 = e2;
+        this.es = es;
     }
 
     @Override
@@ -79,27 +86,16 @@ public class BiReExpression implements ReExpression {
     @Override
     public BoolVar boolVar() {
         if (me == null) {
-            IntVar v1 = e1.intVar();
-            IntVar v2 = e2.intVar();
+            IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
             me = model.boolVar(model.generateName(op+"_exp_"));
             switch (op) {
-                case LT:
-                    model.reifyXltY(v1,v2, me);
-                    break;
-                case LE:
-                    model.reifyXleY(v1,v2, me);
-                    break;
-                case GE:
-                    model.reifyXltY(v2,v1, me);
-                    break;
-                case GT:
-                    model.reifyXltY(v2,v1, me);
-                    break;
-                case NE:
-                    model.reifyXneY(v1,v2, me);
-                    break;
                 case EQ:
-                    model.reifyXeqY(v1,v2, me);
+//                    model.allEqual(vs).reifyWith(me);
+                    BoolVar[] bvars = model.boolVarArray(es.length -1);
+                    for(int i = 1; i < es.length; i++){
+                        model.reifyXeqY(vs[0],vs[i],bvars[i - 1]);
+                    }
+                    model.addClausesBoolAndArrayEqVar(bvars, me);
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
@@ -110,22 +106,10 @@ public class BiReExpression implements ReExpression {
 
     @Override
     public Constraint decompose() {
-        IntVar v1 = e1.intVar();
-        IntVar v2 = e2.intVar();
-        Model model = v1.getModel();
+        IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
         switch (op) {
-            case LT:
-                return model.arithm(v1, "<", v2);
-            case LE:
-                return model.arithm(v1, "<=", v2);
-            case GE:
-                return model.arithm(v1, ">=", v2);
-            case GT:
-                return model.arithm(v1, ">", v2);
-            case NE:
-                return model.arithm(v1, "!=", v2);
             case EQ:
-                return model.arithm(v1, "=", v2);
+                return model.allEqual(vs);
         }
         throw new SolverException("Unexpected case");
     }
@@ -133,13 +117,12 @@ public class BiReExpression implements ReExpression {
     @Override
     public Constraint extension() {
         HashSet<IntVar> avars = new LinkedHashSet<>();
-        extractVar(avars, e1);
-        extractVar(avars, e2);
+        Arrays.stream(es).forEach(e -> extractVar(avars, e));
         IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
         Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
         Tuples tuples = TuplesFactory.generateTuples(values -> eval(values, map), true, uvars);
 //        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
-        return e1.getModel().table(uvars, tuples);
+        return model.table(uvars, tuples);
     }
 
     /**
@@ -159,11 +142,15 @@ public class BiReExpression implements ReExpression {
 
     @Override
     public boolean eval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e1.eval(values, map), e2.eval(values, map));
+        boolean eval = true;
+        for(int i = 1; i < es.length; i++){
+            eval &= op.eval(es[0].eval(values, map), es[i].eval(values, map));
+        }
+        return eval;
     }
 
     @Override
     public String toString() {
-        return op.name() + "(" + e1.toString() + "," + e2.toString() + ")";
+        return op.name() + "(" + es[0].toString() + ", ...," + es[es.length - 1].toString() + ")";
     }
 }
