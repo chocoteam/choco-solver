@@ -21,7 +21,7 @@ import org.chocosolver.util.PoolManager;
 public class StdSet implements ISet {
 
 
-//    private static ThreadLocal<PoolManager<ListOP>> poolManagerThreadLocal = new ThreadLocal<>();
+    private static ThreadLocal<PoolManager<ListOP>> poolManagerThreadLocal = new ThreadLocal<>();
 
     //***********************************************************************************
 	// VARIABLES
@@ -42,11 +42,11 @@ public class StdSet implements ISet {
     public StdSet(IEnvironment environment, ISet set) {
         super();
         this.environment = environment;
-//        this.operationPoolGC = poolManagerThreadLocal.get();
-//        if(this.operationPoolGC == null){
+        this.operationPoolGC = poolManagerThreadLocal.get();
+        if(this.operationPoolGC == null){
             this.operationPoolGC = new PoolManager<>();
-//            poolManagerThreadLocal.set(this.operationPoolGC);
-//        }
+            poolManagerThreadLocal.set(this.operationPoolGC);
+        }
         this.set = set;
     }
 
@@ -71,7 +71,7 @@ public class StdSet implements ISet {
             if (op == null) {
                 op = new ListOP();
             }
-            op.set(element, REMOVE);
+            op.set(set, element, REMOVE);
             return true;
         }
         return false;
@@ -84,7 +84,7 @@ public class StdSet implements ISet {
             if (op == null) {
                 op = new ListOP();
             }
-            op.set(element, ADD);
+            op.set(set, element, ADD);
             return true;
         }
         return false;
@@ -108,7 +108,7 @@ public class StdSet implements ISet {
             if (op == null) {
                 op = new ListOP();
             }
-            op.set(iter.nextInt(), ADD);
+            op.set(set, iter.nextInt(), ADD);
         }
         set.clear();
     }
@@ -135,20 +135,22 @@ public class StdSet implements ISet {
     private class ListOP implements IOperation {
         private int element;
         private boolean addOrRemove;
+        private ISet mset;
 
         @Override
         public void undo() {
             if (addOrRemove) {
-                set.add(element);
+                this.mset.add(element);
             } else {
-                set.remove(element);
+                this.mset.remove(element);
             }
             operationPoolGC.returnE(this);
         }
 
-        public void set(int i, boolean add) {
-            element = i;
-            addOrRemove = add;
+        public void set(ISet set, int i, boolean add) {
+            this.mset = set;
+            this.element = i;
+            this.addOrRemove = add;
             environment.save(this);
         }
     }

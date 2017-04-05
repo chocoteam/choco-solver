@@ -16,7 +16,7 @@ NEXT MILESTONE
 
 ### Closed issues and pull requests:
 
-\#518.
+\#518, #519.
 
 
 4.0.3 - 31 Mar 2017
