@@ -264,9 +264,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean searchLoop() {
         boolean solution = false;
         boolean left = true;
+        Thread th = Thread.currentThread();
         while (!stop) {
             stop = isStopCriterionMet();
-            if (stop || Thread.currentThread().isInterrupted()) {
+            if (stop || th.isInterrupted()) {
                 if (stop) {
                     mMeasures.setSearchState(SearchState.STOPPED);
                 } else {
