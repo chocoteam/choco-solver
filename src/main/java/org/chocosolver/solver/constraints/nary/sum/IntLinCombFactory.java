@@ -217,22 +217,19 @@ public class IntLinCombFactory {
                     // deal with X + Y = Z
                     if ((COEFFS[0] == 1 && COEFFS[1] == 1 && COEFFS[2] == -1)
                             || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
-                        return new Constraint(String.format("%s + %s = %s",
-                                VARS[0].getName(), VARS[1].getName(), VARS[2].getName()),
+                        return new Constraint("X + Y = Z",
                                 new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
                     }
                     // deal with X + Z  = Y
                     if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
                             || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
-                        return new Constraint(String.format("%s + %s = %s",
-                                VARS[0].getName(), VARS[2].getName(), VARS[1].getName()),
+                        return new Constraint("X + Y = Z",
                                 new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
                     }
                     // deal with Y + Z  = X
                     if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
                             || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
-                        return new Constraint(String.format("%s + %s = %s",
-                                VARS[1].getName(), VARS[2].getName(), VARS[0].getName()),
+                        return new Constraint("X + Y = Z",
                                 new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
                     }
                 }
