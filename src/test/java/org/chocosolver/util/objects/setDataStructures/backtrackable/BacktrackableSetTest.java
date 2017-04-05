@@ -230,7 +230,7 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertEquals(4, set.size());
     }
 
-    @Test(groups = "10s", timeOut=500)
+    @Test(groups = "10s", timeOut=60000)
     public void memoryCrashTest() {
         SetFactory.HARD_CODED = false;
         ISet set = create();
