@@ -220,4 +220,18 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(4 <= size);
         assertEquals(4, set.size());
     }
+
+    @Test(groups = "10s", timeOut=60000)
+    public void memoryCrashTest() {
+        SetFactory.HARD_CODED = false;
+        ISet set = create();
+        assertTrue(set.add(2));
+        IEnvironment environment = model.getEnvironment();
+        for(int k=0;k<3_000;k++) {
+            environment.worldPush();
+            for (int i = 0; i < 100_000; i++) set.add(i);
+            environment.worldPop();
+            assertTrue(set.size() == 1);
+        }
+    }
 }
