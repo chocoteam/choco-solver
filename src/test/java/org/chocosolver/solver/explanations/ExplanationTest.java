@@ -381,7 +381,7 @@ public class ExplanationTest {
         model.getSolver().solve();
         // force fake failure
         for(int i = 0; i < 5; i++){
-            model.getSolver().getEngine().getContradictionException().set(Cause.Null, vs[i], "");
+            model.getSolver().getContradictionException().set(Cause.Null, vs[i], "");
             lex.onFailure(model.getSolver());
             Assert.assertEquals(lex.getLastExplanation().getDecisions().cardinality(), 1, "fails on "+i);
         }

@@ -106,11 +106,6 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-
-    }
-
-    @Override
     public int getTypeAndKind() {
         return Variable.REAL | Variable.CSTE;
     }

@@ -50,10 +50,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      */
     private final boolean DEBUG;
     /**
-     * Internal unique contradiction exception, used on propagation failures
-     */
-    private final ContradictionException exception;
-    /**
      * The model declaring this engine
      */
     private final Model model;
@@ -122,23 +118,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * @param model the declaring model
      */
     public SevenQueuesPropagatorEngine(Model model) {
-        this.exception = new ContradictionException();
         this.trigger = new PropagationTrigger(this, model);
         this.model = model;
         //noinspection unchecked
         this.pro_queue = new CircularQueue[8];
         this.DEBUG = model.getSettings().debugPropagation();
 
-    }
-
-    @Override
-    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-        throw exception.set(cause, variable, message);
-    }
-
-    @Override
-    public ContradictionException getContradictionException() {
-        return exception;
     }
 
     @Override

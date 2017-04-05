@@ -279,10 +279,4 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
             monitors[i].onUpdate(this, event);
         }
     }
-
-    @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        assert cause != null;
-        model.getSolver().getEngine().fails(cause, this, message);
-    }
 }

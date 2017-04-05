@@ -74,7 +74,7 @@ public class LearnDBT extends LearnCBJ {
     @Override
     protected void identifyRefutedDecision(int nworld) {
         dbTstrategy.clear();
-        if (nworld == 1 || mModel.getSolver().getEngine().getContradictionException().c == mModel.getSolver().getObjectiveManager()) {
+        if (nworld == 1 || mModel.getSolver().getContradictionException().c == mModel.getSolver().getObjectiveManager()) {
             super.identifyRefutedDecision(nworld);
             return;
         }

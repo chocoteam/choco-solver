@@ -166,12 +166,12 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public int getId() {
+    public final int getId() {
         return ID;
     }
 
     @Override
-    public int link(Propagator propagator, int idxInProp) {
+    public final int link(Propagator propagator, int idxInProp) {
         // 1. ensure capacity
         if (dindices[5] == propagators.length) {
             Propagator[] tmp = propagators;
@@ -216,7 +216,7 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public void unlink(Propagator propagator, int idxInProp) {
+    public final void unlink(Propagator propagator, int idxInProp) {
         int i = propagator.getVIndice(idxInProp); // todo deal with -1
         assert propagators[i] == propagator:"Try to unlink :\n"+propagator+"\nfrom "+this.getName()+" but found:\n"+propagators[i];
         // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
@@ -234,42 +234,42 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public Propagator[] getPropagators() {
+    public final Propagator[] getPropagators() {
         return propagators;
     }
 
     @Override
-    public Propagator getPropagator(int idx) {
+    public final Propagator getPropagator(int idx) {
         return propagators[idx];
     }
 
     @Override
-    public int getNbProps() {
+    public final int getNbProps() {
         return dindices[5];
     }
 
     @Override
-    public int[] getPIndices() {
+    public final int[] getPIndices() {
         return pindices;
     }
 
     @Override
-    public void setPIndice(int pos, int val) {
+    public final void setPIndice(int pos, int val) {
         pindices[pos] = val;
     }
 
     @Override
-    public int getDindex(int i) {
+    public final int getDindex(int i) {
         return dindices[i];
     }
 
     @Override
-    public int getIndexInPropagator(int pidx) {
+    public final int getIndexInPropagator(int pidx) {
         return pindices[pidx];
     }
 
     @Override
-    public String getName() {
+    public final String getName() {
         return this.name;
     }
 
@@ -331,12 +331,18 @@ public abstract class AbstractVariable implements Variable {
         views[vIdx++] = view;
     }
 
-    public Model getModel() {
+    @Override
+    public final void contradiction(ICause cause, String message) throws ContradictionException {
+        assert cause != null;
+        model.getSolver().throwsException(cause, this, message);
+    }
+
+    public final Model getModel() {
         return model;
     }
 
     @Override
-    public IView[] getViews() {
+    public final IView[] getViews() {
         return Arrays.copyOfRange(views, 0, vIdx);
     }
 
@@ -353,14 +359,14 @@ public abstract class AbstractVariable implements Variable {
     /**
      * @return <tt>true</tt> if this variable has a domain included in [0,1].
      */
-    public boolean isBool() {
+    public final boolean isBool() {
         return (getTypeAndKind() & KIND) == BOOL;
     }
 
     /**
      * @return <tt>true</tt> if this variable has a singleton domain (different from instantiated)
      */
-    public boolean isAConstant() {
+    public final boolean isAConstant() {
         return (getTypeAndKind() & TYPE) == CSTE;
     }
 
@@ -368,7 +374,7 @@ public abstract class AbstractVariable implements Variable {
      * @return the event scheduler
      */
     @SuppressWarnings("unchecked")
-    public EvtScheduler _schedIter() {
+    public final EvtScheduler _schedIter() {
         return scheduler;
     }
 

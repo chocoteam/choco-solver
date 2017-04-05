@@ -156,12 +156,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        assert cause != null;
-        model.getSolver().getEngine().fails(cause, this, message);
-    }
-
-    @Override
     public int getTypeAndKind() {
         return VAR | REAL;
     }

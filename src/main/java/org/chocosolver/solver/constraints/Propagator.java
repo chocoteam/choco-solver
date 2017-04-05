@@ -477,7 +477,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        model.getSolver().getEngine().fails(this, null, null);
+        model.getSolver().throwsException(this, null, null);
     }
 
     @Override

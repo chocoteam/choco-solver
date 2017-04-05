@@ -413,13 +413,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        assert cause != null;
-        model.getSolver().getEngine().fails(cause, this, message);
-    }
-
-
-    @Override
     public DisposableValueIterator getValueIterator(boolean bottomUp) {
         if (_viterator == null || _viterator.isNotReusable()) {
             _viterator = new DisposableValueBoundIterator(this);

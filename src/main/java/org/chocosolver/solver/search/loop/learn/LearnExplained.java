@@ -115,7 +115,7 @@ public class LearnExplained implements Learn {
      * Actions to do when a failure is met.
      */
     public void onFailure(Solver solver){
-        ContradictionException cex = mModel.getSolver().getEngine().getContradictionException();
+        ContradictionException cex = mModel.getSolver().getContradictionException();
         assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation = mExplainer.explain(cex);
     }

@@ -63,10 +63,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private final Model model;
 
     /**
-     * The singleton exception to use (and to configure) when a contradiction is detected.
-     */
-    private final ContradictionException exception;
-    /**
      * current number of propagators declared
      */
     private int size;
@@ -169,7 +165,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
      * @param model the declaring model.
      */
     public TwoBucketPropagationEngine(Model model) {
-        this.exception = new ContradictionException();
         this.trigger = new PropagationTrigger(this, model);
         this.model = model;
 
@@ -246,16 +241,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             init = true;
         }
         trigger.addAll(Arrays.copyOfRange(propagators, 0, size));
-    }
-
-    @Override
-    public void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-        throw exception.set(cause, variable, message);
-    }
-
-    @Override
-    public ContradictionException getContradictionException() {
-        return exception;
     }
 
     @Override

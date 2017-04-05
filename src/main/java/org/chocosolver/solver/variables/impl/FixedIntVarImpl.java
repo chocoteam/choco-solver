@@ -270,11 +270,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        model.getSolver().getEngine().fails(cause, this, message);
-    }
-
-    @Override
     public int getTypeAndKind() {
         return Variable.INT | Variable.CSTE;
     }

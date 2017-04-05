@@ -176,7 +176,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** The propagation engine to use */
     private IPropagationEngine engine;
-
+    /**
+     * Internal unique contradiction exception, used on propagation failures
+     */
+    private final ContradictionException exception;
     /**
      * Problem feasbility:
      * - UNDEFINED if unknown,
@@ -206,6 +209,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected Solver(Model aModel) {
         mModel = aModel;
         engine = NoPropagationEngine.SINGLETON;
+        exception = new ContradictionException();
         explainer = NoExplanationEngine.SINGLETON;
         objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
@@ -220,6 +224,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         setNoLearning();
     }
 
+    public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
+        throw exception.set(c,v,s);
+    }
+
+    public ContradictionException  getContradictionException() {
+        return exception;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////     SEARCH LOOP       //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

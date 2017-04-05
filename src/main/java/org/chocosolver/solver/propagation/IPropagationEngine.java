@@ -9,6 +9,7 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -88,20 +89,19 @@ public interface IPropagationEngine  {
     }
 
     /**
-     * Throw a contradiction exception
-     * @param cause origin of the failure
-     * @param variable can be null
-     * @param message can be null
-     * @throws ContradictionException failure forced
+     * @deprecated replaced by {@link org.chocosolver.solver.Solver#throwsException(ICause, Variable, String)}
      */
+    @Deprecated
     default void fails(ICause cause, Variable variable, String message) throws ContradictionException {
+        throw new UnsupportedOperationException("replaced by {@link org.chocosolver.solver.Solver#throwsException(ICause, Variable, String)}");
     }
 
     /**
-     * @return the (unique) contradiction attached to this propagation engine
+     * @deprecated replaced by {@link Solver#getContradictionException()} ()}
      */
+    @Deprecated
     default ContradictionException getContradictionException() {
-        throw new UnsupportedOperationException("no propagation engine has been defined");
+        throw new UnsupportedOperationException("replaced by {@link Solver#getContradictionException()}");
     }
 
     /**

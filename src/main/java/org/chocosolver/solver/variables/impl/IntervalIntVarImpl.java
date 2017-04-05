@@ -511,13 +511,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void contradiction(ICause cause, String message) throws ContradictionException {
-        assert cause != null;
-//        records.forEachRemVal(onContradiction.set(this, event, cause));
-        model.getSolver().getEngine().fails(cause, this, message);
-    }
-
-    @Override
     public int getTypeAndKind() {
         return VAR | INT;
     }
