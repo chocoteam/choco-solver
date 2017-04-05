@@ -12,9 +12,12 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Binary arithmetic expression
@@ -93,6 +96,11 @@ public class NaLoExpression extends LoExpression {
     }
 
     @Override
+    public void extractVar(HashSet<IntVar> variables) {
+        Arrays.stream(es).forEach(e -> e.extractVar(variables));
+    }
+
+    @Override
     public Constraint decompose() {
         BoolVar[] vs = Arrays.stream(es).map(e -> e.boolVar()).toArray(BoolVar[]::new);
         switch (op) {
@@ -103,6 +111,15 @@ public class NaLoExpression extends LoExpression {
             default:
                 throw new UnsupportedOperationException("N-ary logical expressions does not support " + op.name());
         }
+    }
+
+    @Override
+    public boolean eval(int[] values, Map<IntVar, Integer> map) {
+        boolean eval = true;
+        for(int i = 1; i < es.length; i++){
+            eval &= op.eval(es[0].eval(values, map), es[i].eval(values, map));
+        }
+        return eval;
     }
 
     @Override

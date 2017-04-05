@@ -13,6 +13,10 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+
+import java.util.HashSet;
+import java.util.Map;
 
 /**
  * Binary arithmetic expression
@@ -91,6 +95,12 @@ public class BiLoExpression extends LoExpression {
     }
 
     @Override
+    public void extractVar(HashSet<IntVar> variables) {
+        e1.extractVar(variables);
+        e2.extractVar(variables);
+    }
+
+    @Override
     public Constraint decompose() {
         BoolVar v1 = e1.boolVar();
         BoolVar v2 = e2.boolVar();
@@ -104,6 +114,11 @@ public class BiLoExpression extends LoExpression {
                 return model.arithm(v1.not(), "+", v2, ">", 0);
         }
         throw new SolverException("Unexpected case");
+    }
+
+    @Override
+    public boolean eval(int[] values, Map<IntVar, Integer> map) {
+        return op.eval(e1.eval(values, map), e2.eval(values, map));
     }
 
     @Override

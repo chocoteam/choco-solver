@@ -10,18 +10,13 @@ package org.chocosolver.solver.expression.discrete.relational;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Binary relational expression
@@ -31,7 +26,7 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class BiReExpression implements ReExpression {
+public class BiReExpression extends ReExpression {
 
     /**
      * The model in which the expression is declared
@@ -109,6 +104,12 @@ public class BiReExpression implements ReExpression {
     }
 
     @Override
+    public void extractVar(HashSet<IntVar> variables) {
+        e1.extractVar(variables);
+        e2.extractVar(variables);
+    }
+
+    @Override
     public Constraint decompose() {
         IntVar v1 = e1.intVar();
         IntVar v2 = e2.intVar();
@@ -128,33 +129,6 @@ public class BiReExpression implements ReExpression {
                 return model.arithm(v1, "=", v2);
         }
         throw new SolverException("Unexpected case");
-    }
-
-    @Override
-    public Constraint extension() {
-        HashSet<IntVar> avars = new LinkedHashSet<>();
-        extractVar(avars, e1);
-        extractVar(avars, e2);
-        IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
-        Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
-        Tuples tuples = TuplesFactory.generateTuples(values -> eval(values, map), true, uvars);
-//        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
-        return e1.getModel().table(uvars, tuples);
-    }
-
-    /**
-     * Extract the variables from this expression
-     * @param variables set of variables
-     * @param ae expression to extract variables from
-     */
-    private static void extractVar(HashSet<IntVar> variables, ArExpression ae) {
-        if (ae.isExpressionLeaf()) {
-            variables.add((IntVar) ae);
-        } else {
-            for (ArExpression e : ae.getExpressionChild()) {
-                extractVar(variables, e);
-            }
-        }
     }
 
     @Override

@@ -15,6 +15,7 @@ import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
 
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -288,6 +289,20 @@ public interface ArExpression {
      */
     default boolean isExpressionLeaf(){
         return false;
+    }
+
+    /**
+     * Extract the variables from this expression
+     * @param variables set of variables
+     */
+    default void extractVar(HashSet<IntVar> variables) {
+        if (this.isExpressionLeaf()) {
+            variables.add((IntVar) this);
+        } else {
+            for (ArExpression e : getExpressionChild()) {
+                e.extractVar(variables);
+            }
+        }
     }
 
     /**

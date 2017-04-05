@@ -10,13 +10,19 @@ package org.chocosolver.solver.expression.discrete.relational;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * relational expression
@@ -26,12 +32,12 @@ import java.util.Map;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public interface ReExpression {
+public abstract class ReExpression {
 
     /**
      * List of available operator for relational expression
      */
-    enum Operator {
+    public enum Operator {
         /**
          * less than
          */
@@ -95,18 +101,24 @@ public interface ReExpression {
      *
      * @return a Model object
      */
-    Model getModel();
+    public abstract Model getModel();
 
     /**
      * @return the relational expression as an {@link BoolVar}.
      * If necessary, it creates intermediary variable and posts intermediary constraints
      */
-    BoolVar boolVar();
+    public abstract BoolVar boolVar();
+
+    /**
+     * Extract the variables from this expression
+     * @param variables set of variables
+     */
+    public abstract void extractVar(HashSet<IntVar> variables);
 
     /**
      * Post the decomposition of this expression in the solver
      */
-    default void post() {
+    public void post() {
         decompose().post();
     }
 
@@ -114,20 +126,28 @@ public interface ReExpression {
      * @return the topmost constraint representing the expression. If needed, a call to this method
      * creates additional variables and posts additional constraints.
      */
-    Constraint decompose();
+    public abstract Constraint decompose();
 
     /**
      * @return a TABLE constraint that captures the expression
      */
-    Constraint extension();
+    public final Constraint extension() {
+        HashSet<IntVar> avars = new LinkedHashSet<>();
+        extractVar(avars);
+        IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
+        Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
+        Tuples tuples = TuplesFactory.generateTuples(values -> eval(values, map), true, uvars);
+//        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
+        return getModel().table(uvars, tuples);
+    }
 
-    boolean eval(int[] values, Map<IntVar, Integer> map);
+    public abstract boolean eval(int[] values, Map<IntVar, Integer> map);
 
     /**
      * @param y some relational expressions
      * @return return the expression "x &and; y_1 &and; y_2 &and; ..." where this is "x"
      */
-    default ReExpression and(ReExpression... y) {
+    public final ReExpression and(ReExpression... y) {
         return new NaLoExpression(LoExpression.Operator.AND, this, y);
     }
 
@@ -135,7 +155,7 @@ public interface ReExpression {
      * @param y some relational expressions
      * @return return the expression "x &or; y_1 &or; y_2 &or; ..." where this is "x"
      */
-    default ReExpression or(ReExpression... y) {
+    public final ReExpression or(ReExpression... y) {
         return new NaLoExpression(LoExpression.Operator.OR, this, y);
     }
 
@@ -143,7 +163,7 @@ public interface ReExpression {
      * @param y a relational expression
      * @return return the expression "x &oplus; y" where this is "x"
      */
-    default ReExpression xor(ReExpression y) {
+    public final ReExpression xor(ReExpression y) {
         return new BiLoExpression(LoExpression.Operator.XOR, this, y);
     }
 
@@ -151,7 +171,7 @@ public interface ReExpression {
      * @param y a relational expression
      * @return return the expression "x &rArr; y" where this is "x"
      */
-    default ReExpression imp(ReExpression y) {
+    public final ReExpression imp(ReExpression y) {
         return new BiLoExpression(LoExpression.Operator.IMP, this, y);
     }
 
@@ -159,7 +179,7 @@ public interface ReExpression {
      * @param y a relational expression
      * @return return the expression "x &hArr; y" where this is "x"
      */
-    default ReExpression iff(ReExpression y) {
+    public final ReExpression iff(ReExpression y) {
         return new BiLoExpression(LoExpression.Operator.IFF, this, y);
     }
 }

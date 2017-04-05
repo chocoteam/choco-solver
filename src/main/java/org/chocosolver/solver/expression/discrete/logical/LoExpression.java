@@ -9,12 +9,8 @@
 package org.chocosolver.solver.expression.discrete.logical;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-
-import java.util.Map;
 
 /**
  * <p>
@@ -23,7 +19,7 @@ import java.util.Map;
  * @author Charles Prud'homme
  * @since 04/04/2017.
  */
-public abstract class LoExpression implements ReExpression {
+public abstract class LoExpression extends ReExpression {
 
     /**
      * List of available operator for relational expression
@@ -83,26 +79,4 @@ public abstract class LoExpression implements ReExpression {
      */
     public abstract BoolVar boolVar();
 
-    /**
-     * Post the decomposition of this expression in the solver
-     */
-    public void post() {
-        decompose().post();
-    }
-
-    /**
-     * @return the topmost constraint representing the expression. If needed, a call to this method
-     * creates additional variables and posts additional constraints.
-     */
-    public abstract Constraint decompose();
-
-    @Override
-    public final Constraint extension() {
-        throw new UnsupportedOperationException("LoExpression does not support \"to extension\" transformation yet");
-    }
-
-    @Override
-    public boolean eval(int[] values, Map<IntVar, Integer> map) {
-        throw new UnsupportedOperationException("LoExpression does not support \"eval\" yet");
-    }
 }

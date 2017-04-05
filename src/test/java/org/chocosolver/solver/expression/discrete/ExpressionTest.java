@@ -32,7 +32,7 @@ public class ExpressionTest {
         return new Object[][]{{0}, {1}};
     }
 
-    public void eval(Model model, ReExpression ex, int postAs, int nbsol){
+    private void eval(Model model, ReExpression ex, int postAs, int nbsol){
         switch (postAs){
             case 0:
                 ex.decompose().post();
@@ -41,8 +41,8 @@ public class ExpressionTest {
                 ex.extension().post();
                 break;
         }
-        System.out.printf("%s\n", model);
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
+        model.getSolver().printShortStatistics();
     }
 
 
@@ -345,4 +345,54 @@ public class ExpressionTest {
         IntVar y = model.intVar(0, 5);
         eval(model, x.ne(y), p, 30);
     }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test37(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).or(x.eq(y)), p, 11);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test38(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).or(x.eq(y).and(x.eq(1))), p, 6);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test39(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).and(x.add(2).le(6)), p, 4);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test40(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).iff(x.add(2).le(6)), p, 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test41(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).imp(x.add(2).le(6)), p, 35);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test42(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        IntVar y = model.intVar(0, 5);
+        eval(model, x.eq(y.add(1)).xor(x.add(2).le(6)), p, 27);
+    }
+
+
 }
