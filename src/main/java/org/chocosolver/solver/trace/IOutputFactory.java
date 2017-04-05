@@ -66,8 +66,22 @@ public interface IOutputFactory extends ISelf<Solver> {
         _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
         _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
         _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
-        _me().getOut().printf("\tDefault search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
-        _me().getOut().printf("\tCompleted search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
+        _me().getOut().printf("\tUser-defined search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
+        _me().getOut().printf("\tComplementary search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
+    }
+
+    /**
+     * Print (succint) features of the solver given in argument in a single line.
+     */
+    default void printShortFeatures() {
+        StringBuilder st = new StringBuilder(256);
+        st.append("Model[").append(_me().getModelName()).append("], ");
+        st.append(String.format("%d Variables, %d Constraints, %s user-defined search strategy, %s complementary search strategy",
+                _me().getModel().getNbVars(),
+                _me().getModel().getNbCstrs(),
+                _me().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
+                _me().isSearchCompleted() ? "w/" : "w/o"));
+        getOut().println(st.toString());
     }
 
     /**

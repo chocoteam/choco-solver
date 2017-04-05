@@ -8,10 +8,15 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- add logical operator to expression (#520). Now it is possible, f-ex., to declare expression like:
+```x.eq(y.add(1)).or(x.eq(y).and(x.eq(1)))```
+- add new API to `Solver` to print features in a single line
 
 ### Deprecated API:
 
 ### Closed issues and pull requests:
+
+\#518.
 
 
 4.0.3 - 31 Mar 2017
