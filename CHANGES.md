@@ -12,11 +12,14 @@ NEXT MILESTONE
 ```x.eq(y.add(1)).or(x.eq(y).and(x.eq(1)))```
 - add new API to `Solver` to print features in a single line
 
-### Deprecated API:
+### Deprecated API (to be removed in next release):
+- `IPropagationEngine.fails(c,v,m)` is replaced by `Solver.throwsException(c,v,m)` (#524)
+- `IPropagationEngine.getContradictionException()` is replaced by `Solver.getContradictionException()` (#524)
+
 
 ### Closed issues and pull requests:
 
-\#518, #519.
+\#518, #519, #520, #524.
 
 
 4.0.3 - 31 Mar 2017

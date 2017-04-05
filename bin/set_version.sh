@@ -56,7 +56,7 @@ else
     \
     ### Major features:\
     \
-    ### Deprecated API:\
+    ### Deprecated API (to be removed in next release):\
     \
     ### Closed issues and pull requests:\
     \
