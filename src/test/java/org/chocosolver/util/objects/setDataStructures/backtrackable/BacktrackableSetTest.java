@@ -13,13 +13,17 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.nonbacktrackable.SetTest;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Test the backtracking properties of {@link ISet} under two backtracking environments : <code>COPY</code> and
@@ -28,7 +32,12 @@ import static org.testng.Assert.*;
  */
 public abstract class BacktrackableSetTest extends SetTest{
 
-    protected Model model = new Model();
+    protected Model model;
+
+    @BeforeMethod
+    public void init(){
+        model = new Model();
+    }
 
     @DataProvider(name = "params")
     public Object[][] data1D(){
@@ -221,15 +230,15 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertEquals(4, set.size());
     }
 
-    @Test(groups = "10s", timeOut=60000)
+    @Test(groups = "10s", timeOut=500)
     public void memoryCrashTest() {
         SetFactory.HARD_CODED = false;
         ISet set = create();
         assertTrue(set.add(2));
         IEnvironment environment = model.getEnvironment();
-        for(int k=0;k<3_000;k++) {
+        for(int k=0;k<300;k++) {
             environment.worldPush();
-            for (int i = 0; i < 100_000; i++) set.add(i);
+            for (int i = 0; i < 1000; i++) set.add(i);
             environment.worldPop();
             assertTrue(set.size() == 1);
         }
