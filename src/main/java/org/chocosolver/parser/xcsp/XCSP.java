@@ -13,9 +13,13 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.SearchState;
 import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.Option;
+import org.xcsp.checker.SolutionChecker;
 
+import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -25,8 +29,19 @@ import java.util.List;
  */
 public class XCSP extends RegParser {
 
+    // Contains mapping with variables and output prints
+    public XCSPParser[] parsers;
+
     @Argument(required = true, metaVar = "file", usage = "XCSP file to parse.")
     public String instance;
+
+    @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker")
+    protected boolean cs = false;
+
+    /**
+     * Needed to print the last solution found
+     */
+    private final StringBuilder output = new StringBuilder();
 
     public XCSP() {
         super("ChocoXCSP");
@@ -34,24 +49,36 @@ public class XCSP extends RegParser {
     }
 
     @Override
+    public char getCommentChar() {
+        return 'c';
+    }
+
+    @Override
+    public Thread actionOnKill() {
+        return new Thread(() -> {
+            if (userinterruption) {
+                finalOutPut(getModel().getSolver());
+                System.out.printf("c Unexpected resolution interruption!");
+            }
+        });
+    }
+
+    @Override
     public void createSolver() {
         listeners.forEach(ParserListener::beforeSolverCreation);
         assert nb_cores > 0;
         if (nb_cores > 1) {
-            System.out.printf("%% " + nb_cores + " solvers in parallel\n");
+            System.out.printf("c %s solvers in parallel\n", nb_cores );
         } else {
-            System.out.printf("%% simple solver\n");
+            System.out.printf("c simple solver\n");
         }
         String iname = Paths.get(instance).getFileName().toString();
+        parsers = new XCSPParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1));
             threadModel.set(defaultSettings);
             portfolio.addModel(threadModel);
-            if (stat) {
-                threadModel.getSolver().plugMonitor(
-                        (IMonitorSolution) ()
-                                -> System.out.printf("%% %s \n", threadModel.getSolver().toOneLineString()));
-            }
+            parsers[i] = new XCSPParser();
         }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
@@ -62,16 +89,20 @@ public class XCSP extends RegParser {
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
             try {
-                parse(models.get(i));
+                parse(models.get(i), parsers[i]);
             } catch (Exception e) {
-                throw new Error(e.getMessage());
+                System.out.printf("s UNSUPPORTED\n");
+                System.out.printf("c %s\n", e.getMessage());
+                userinterruption = false;
+                e.printStackTrace();
+                System.exit(-1);
             }
         }
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    public void parse(Model target) throws Exception {
-        new XCSPParser().model(target, instance);
+    public void parse(Model target, XCSPParser parser) throws Exception {
+        parser.model(target, instance);
 //        Files.move(Paths.get(instance),
 //                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
 //                StandardCopyOption.REPLACE_EXISTING);
@@ -82,34 +113,84 @@ public class XCSP extends RegParser {
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
-        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
+        if (portfolio.getModels().size() == 1) {
+            singleThread();
+        } else {
+            manyThread();
+        }
+        listeners.forEach(ParserListener::afterSolving);
+    }
+
+    private void singleThread(){
+        Model model = portfolio.getModels().get(0);
+        boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
+        Solver solver = model.getSolver();
+        solver.getOut().print("c ");
+        solver.printShortFeatures();
         if (enumerate) {
-            while (portfolio.solve()) {
-//                datas[bestModelID()].onSolution();
+            while (solver.solve()) {
+                onSolution(solver, parsers[0]);
             }
         } else {
-            if (portfolio.solve()) {
-//                datas[bestModelID()].onSolution();
+            if (solver.solve()) {
+                onSolution(solver, parsers[0]);
             }
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
-//        datas[bestModelID()].doFinalOutPut(userinterruption);
-        listeners.forEach(ParserListener::afterSolving);
+        finalOutPut(solver);
     }
 
-    private int bestModelID() {
-        Model best = getModel();
-        for (int i = 0; i < nb_cores; i++) {
-            if (best == portfolio.getModels().get(i)) {
-                return i;
+    private void manyThread(){
+        boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
+        if (enumerate) {
+            while (portfolio.solve()) {
+                onSolution(getModel().getSolver(), parsers[bestModelID()]);
+            }
+        } else {
+            if (portfolio.solve()) {
+                onSolution(getModel().getSolver(), parsers[bestModelID()]);
             }
         }
-        return -1;
+        userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+        finalOutPut(getModel().getSolver());
     }
 
-    @Override
-    public Thread actionOnKill() {
-        return new Thread();
+    private void onSolution(Solver solver, XCSPParser parser){
+        if (solver.getObjectiveManager().isOptimization()){
+            System.out.printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
+        }
+        output.setLength(0);
+        output.append(parser.printSolution());
+        if (stat) {
+            System.out.printf("c %s \n", solver.getMeasures().toOneLineString());
+        }
+    }
+
+    private void finalOutPut(Solver solver) {
+        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
+        if (solver.getSolutionCount() > 0) {
+            if (solver.getObjectiveManager().isOptimization() && complete) {
+                output.insert(0, "s OPTIMUM FOUND\n");
+            }else{
+                output.insert(0, "s SATISFIABLE\n");
+            }
+        } else if (complete) {
+            output.insert(0, "s UNSATISFIABLE\n");
+        } else {
+            output.insert(0, "s UNKNOWN\n");
+        }
+        System.out.printf("%s", output);
+        if (stat) {
+            System.out.printf("c %s \n", solver.getMeasures().toOneLineString());
+        }
+        if(cs) {
+            try {
+                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

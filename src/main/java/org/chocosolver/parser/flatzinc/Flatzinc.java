@@ -20,7 +20,9 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solver;
 import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -63,6 +65,11 @@ public class Flatzinc extends RegParser {
         this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
+    }
+
+    @Override
+    public char getCommentChar() {
+        return '%';
     }
 
     @Override
@@ -130,6 +137,33 @@ public class Flatzinc extends RegParser {
     @Override
     public void solve() {
         listeners.forEach(ParserListener::beforeSolving);
+        if (portfolio.getModels().size() == 1) {
+            singleThread();
+        } else {
+            manyThread();
+        }
+        listeners.forEach(ParserListener::afterSolving);
+    }
+
+    private void singleThread(){
+        Model model = portfolio.getModels().get(0);
+        boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
+        Solver solver = model.getSolver();
+        if (enumerate) {
+            while (solver.solve()) {
+                datas[0].onSolution();
+            }
+        } else {
+            if (solver.solve()) {
+                datas[0].onSolution();
+            }
+        }
+        userinterruption = false;
+        Runtime.getRuntime().removeShutdownHook(statOnKill);
+        datas[0].doFinalOutPut();
+    }
+
+    private void manyThread(){
         boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
             while (portfolio.solve()) {
@@ -143,15 +177,5 @@ public class Flatzinc extends RegParser {
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
         datas[bestModelID()].doFinalOutPut();
-    }
-
-    private int bestModelID() {
-        Model best = getModel();
-        for (int i = 0; i < nb_cores; i++) {
-            if (best == portfolio.getModels().get(i)) {
-                return i;
-            }
-        }
-        return -1;
     }
 }

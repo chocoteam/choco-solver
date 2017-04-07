@@ -98,6 +98,8 @@ public abstract class RegParser implements IParser {
         Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 
+    public abstract char getCommentChar();
+
     @Override
     public final void addListener(ParserListener listener) {
         listeners.add(listener);
@@ -111,7 +113,7 @@ public abstract class RegParser implements IParser {
     @Override
     public void setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
-        System.out.printf("%% %s\n", Arrays.toString(args));
+        System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
         try {
             cmdparser.parseArgument(args);
@@ -181,5 +183,15 @@ public abstract class RegParser implements IParser {
             m = portfolio.getModels().get(0);
         }
         return m;
+    }
+
+    public final int bestModelID() {
+        Model best = getModel();
+        for (int i = 0; i < nb_cores; i++) {
+            if (best == portfolio.getModels().get(i)) {
+                return i;
+            }
+        }
+        return -1;
     }
 }
