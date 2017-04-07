@@ -88,7 +88,7 @@ public final class DecisionOperatorFactory {
         public DecisionOperator<IntVar> opposite() {
             return makeIntNeq();
         }
-    };
+    }
 
     private static final class IntNeqDecision implements DecisionOperator<IntVar> {
 
@@ -127,7 +127,7 @@ public final class DecisionOperatorFactory {
         public DecisionOperator<IntVar> opposite() {
             return makeIntEq();
         }
-    };
+    }
 
     private static final class IntSplitDecision implements DecisionOperator<IntVar> {
 
@@ -162,7 +162,7 @@ public final class DecisionOperatorFactory {
             return makeIntReverseSplit();
         }
 
-    };
+    }
 
     private static final class IntReverseSplitDecision implements DecisionOperator<IntVar> {
 
@@ -204,7 +204,7 @@ public final class DecisionOperatorFactory {
         public DecisionOperator<IntVar> opposite() {
             return makeIntSplit();
         }
-    };
+    }
 
 
     // SETS
@@ -248,7 +248,7 @@ public final class DecisionOperatorFactory {
         public DecisionOperator<SetVar> opposite() {
             return DecisionOperatorFactory.makeSetRemove();
         }
-    };
+    }
 
     private static final class SetRemoveDecision implements DecisionOperator<SetVar> {
 
@@ -290,7 +290,5 @@ public final class DecisionOperatorFactory {
         public DecisionOperator<SetVar> opposite() {
             return DecisionOperatorFactory.makeSetForce();
         }
-    };
-
-
+    }
 }
