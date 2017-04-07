@@ -330,14 +330,18 @@ public class MultivaluedDecisionDiagram  {
      */
     @SuppressWarnings("unchecked")
     private void compact() {
-        _nodesToRemove.clear();
-        for (int i = 0; i < nbLayers; i++) {
-            _identicalNodes[i] = new ArrayList[sizes[i]];
-            _nodeId[i] = new TIntArrayList[sizes[i]];
+        long card = Arrays.stream(sizes).mapToLong(i -> (long)i)
+                .reduce((a,b) -> a * b).getAsLong();
+        if(card <= 2_000_000) {
+            _nodesToRemove.clear();
+            for (int i = 0; i < nbLayers; i++) {
+                _identicalNodes[i] = new ArrayList[sizes[i]];
+                _nodeId[i] = new TIntArrayList[sizes[i]];
+            }
+            _removedCells = 0;
+            detectIsomorphism(0, 0);
+            deleteIsomorphism();
         }
-        _removedCells = 0;
-        detectIsomorphism(0, 0);
-        deleteIsomorphism();
     }
 
     /**
@@ -364,6 +368,10 @@ public class MultivaluedDecisionDiagram  {
                     break;
             }
         }
+        return doStuff(node, layer, nbChild, nodeChild);
+    }
+
+    private int doStuff(int node, int layer, int nbChild, int[] nodeChild) {
         boolean known = false;
         if (_identicalNodes[layer][nbChild] == null) {
             _identicalNodes[layer][nbChild] = new ArrayList<>();
@@ -373,12 +381,7 @@ public class MultivaluedDecisionDiagram  {
                 int[] currentNode = _identicalNodes[layer][nbChild].get(j);
                 boolean found = _nodeId[layer][nbChild].get(j) != node;  // deal with previously analyzed nodes
                 known |= !found;
-                for (int i = currentNode.length - 1; i >= 0 && found; i--) {
-                    if (currentNode[i] != nodeChild[i]) {
-                        found = false;
-                    }
-                }
-                if (found) {
+                if (found && Arrays.equals(currentNode, nodeChild)) {
                     int insert = _nodesToRemove.put(node, sizes[layer]);
                     if (insert == -1) {
                         _removedCells += sizes[layer];

@@ -58,7 +58,12 @@ public class PropagationTrigger  {
         sta_propagators.addAll(Arrays.asList(propagators));
         size += propagators.length;
         if(model.getSettings().sortPropagatorActivationWRTPriority()) {
-            sta_propagators.sort((p1, p2) -> p1.getPriority().priority - p2.getPriority().priority);
+            sta_propagators.sort((p1, p2) -> {
+                int p = p1.getPriority().priority - p2.getPriority().priority;
+                if (p == 0) {
+                    return p1.getNbVars() - p2.getNbVars();
+                } else return p;
+            });
         }
     }
 

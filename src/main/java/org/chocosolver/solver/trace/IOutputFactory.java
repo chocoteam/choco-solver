@@ -66,6 +66,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
         _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
         _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
+        _me().getOut().printf("\tBuilding time : %.3fs\n", _me().getReadingTimeCount());
         _me().getOut().printf("\tUser-defined search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
         _me().getOut().printf("\tComplementary search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
     }
@@ -76,9 +77,10 @@ public interface IOutputFactory extends ISelf<Solver> {
     default void printShortFeatures() {
         StringBuilder st = new StringBuilder(256);
         st.append("Model[").append(_me().getModelName()).append("], ");
-        st.append(String.format("%d Variables, %d Constraints, %s user-defined search strategy, %s complementary search strategy",
+        st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
                 _me().getModel().getNbVars(),
                 _me().getModel().getNbCstrs(),
+                _me().getReadingTimeCount(),
                 _me().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
                 _me().isSearchCompleted() ? "w/" : "w/o"));
         getOut().println(st.toString());
