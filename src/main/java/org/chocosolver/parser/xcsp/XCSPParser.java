@@ -19,7 +19,6 @@ import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
 import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
-import org.chocosolver.solver.expression.discrete.logical.UnLoExpression;
 import org.chocosolver.solver.expression.discrete.relational.NaReExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
@@ -100,7 +99,12 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrIntension(String id, XVariables.XVarInteger[] scope, XNodeParent<XVariables.XVarInteger> tree) {
-        buildRe(tree).post();
+        ReExpression exp = buildRe(tree);
+        if(VariableUtils.domainCardinality(vars(scope)) < Integer.MAX_VALUE / 1000){
+            exp.extension().post();
+        }else{
+            exp.decompose().post();
+        }
     }
 
     private ArExpression[] extractAr(XNode<XVariables.XVarInteger>[] sons){
@@ -163,7 +167,7 @@ public class XCSPParser implements XCallbacks2 {
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
         ArExpression[] aes = null;
         ReExpression[] res = null;
-        if(type.isLogicalOperator()){
+        if(type.isLogicalOperator() || type.equals(Types.TypeExpr.NOT)){
             res = extractRe(sons);
         }else{
             aes = extractAr(sons);
@@ -224,7 +228,7 @@ public class XCSPParser implements XCallbacks2 {
             case IMP:
                 return new NaLoExpression(LoExpression.Operator.OR, res);
             case NOT:
-                return new UnLoExpression(LoExpression.Operator.NOT, res[0]);
+                return res[0].not();
             default:
                 throw new UnsupportedOperationException("Unknown type : " + type);
         }
