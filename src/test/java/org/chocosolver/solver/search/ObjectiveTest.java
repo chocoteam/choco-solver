@@ -48,7 +48,7 @@ import static org.testng.Assert.*;
  */
 public class ObjectiveTest {
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         Model model = new Model();
 
@@ -56,9 +56,9 @@ public class ObjectiveTest {
         model.arithm(iv, ">=", 0).post();
         model.arithm(iv, "<=", 10).post();
         Random rnd = new Random();
-        for (int i = 0; i < 2000; i++) {
+        for (int i = 0; i < 200; i++) {
             rnd.setSeed(i);
-            int k = rnd.nextInt(4);
+			int k = rnd.nextInt(4);
             switch (k) {
                 case 0:
                     one(model, iv);
@@ -238,7 +238,7 @@ public class ObjectiveTest {
         assertEquals(model.getSolver().isStopCriterionMet(), false);
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testAdaptiveCut1() {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
@@ -260,7 +260,7 @@ public class ObjectiveTest {
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testAdaptiveCut2() {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");
@@ -281,7 +281,7 @@ public class ObjectiveTest {
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testAdaptiveCut3() {
         Model model = makeGolombRuler(8);
         IntVar objective = (IntVar) model.getHook("objective");

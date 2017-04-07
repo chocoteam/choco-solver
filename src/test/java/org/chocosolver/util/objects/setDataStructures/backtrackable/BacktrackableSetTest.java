@@ -99,7 +99,7 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertTrue(set.isEmpty());
     }
 
-    @Test(groups = "10s", timeOut=60000, dataProvider = "params")
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
     public void testSeveralPushes(boolean exp) {
         SetFactory.HARD_CODED = exp;
         ISet set = create();
@@ -227,7 +227,7 @@ public abstract class BacktrackableSetTest extends SetTest{
         assertEquals(4, set.size());
     }
 
-    @Test(groups = "10s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void memoryCrashTest() {
         SetFactory.HARD_CODED = false;
         ISet set = create();

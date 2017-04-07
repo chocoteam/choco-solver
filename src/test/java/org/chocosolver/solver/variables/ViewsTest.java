@@ -621,7 +621,7 @@ public class ViewsTest {
         assertEquals(x3.getValue(), 1);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testScale(){
         int n = 9;
         Model viewModel = makeModel(true);
@@ -631,7 +631,7 @@ public class ViewsTest {
         testModels(viewModel,noViewModel);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testOffset(){
         int n = 9;
         Model viewModel = makeModel(true);
@@ -641,9 +641,9 @@ public class ViewsTest {
         testModels(viewModel,noViewModel);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testMinus(){
-        int n = 9;
+        int n = 7;
         Model viewModel = makeModel(true);
         minus(viewModel,n);
         Model noViewModel = makeModel(false);
@@ -651,9 +651,9 @@ public class ViewsTest {
         testModels(viewModel,noViewModel);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testBoolNot(){
-        int n = 23;
+        int n = 16;
         Model viewModel = makeModel(true);
         boolNot(viewModel,n);
         Model noViewModel = makeModel(false);
@@ -661,9 +661,9 @@ public class ViewsTest {
         testModels(viewModel,noViewModel);
     }
 
-    @Test(groups = "10s", timeOut=60000)
+    @Test(groups = "1s", timeOut=60000)
     public void testBoolNotNot() {
-        int n = 20;
+        int n = 16;
         Model viewModel = makeModel(true);
         boolNotNot(viewModel, n);
         Model noViewModel = makeModel(false);

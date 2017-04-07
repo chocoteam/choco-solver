@@ -70,7 +70,7 @@ public class NotEmptyTest {
         assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = "10s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testComparedToNbEmpty() {
         Model model = new Model();
         int[] ub = new int[20];

@@ -205,10 +205,10 @@ public class ReifiedTest {
      * C. Bessiere, G. Katsirelos, N. Narodytska, C.G. Quimper, T. Walsh.
      * Proceedings IJCAI'09, Pasadena CA, pages 419-424.
      */
-    @Test(groups = "5m", timeOut = 300000)
+    @Test(groups="10s", timeOut = 300000)
     public void testAllDifferentDecomp() {
 
-        for (int i = 1; i < 12; i++) {
+        for (int i = 1; i < 11; i++) {
 //            System.out.printf("i : %d\n", i);
             Random r = new Random(i);
             for (double d = 1.0; d <= 1.0; d += 0.125) {

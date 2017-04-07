@@ -225,18 +225,18 @@ public class ModelTest {
         while (s.getSolver().solve()) ;
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testParBug2() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             Model model = knapsack();
             while (model.getSolver().solve()) ;
             Assert.assertEquals(model.getSolver().getObjectiveManager().getBestSolutionValue(), 51);
         }
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testParBug3() {
-        for (int iter = 0; iter < 5000; iter++) {
+        for (int iter = 0; iter < 500; iter++) {
             Model model = knapsack();
             model.getSolver().setSearch(randomSearch(model.retrieveIntVars(true), iter));
             while (model.getSolver().solve()) ;
@@ -420,9 +420,9 @@ public class ModelTest {
         Assert.assertEquals(m.getSolver().streamSolutions().count(), 2);
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFindOptimalSolution() {
-        Model m = ProblemMaker.makeGolombRuler(10);
+        Model m = ProblemMaker.makeGolombRuler(8);
         Assert.assertNotNull(m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false));
     }
 

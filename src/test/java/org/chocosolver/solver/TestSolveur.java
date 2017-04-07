@@ -21,10 +21,10 @@ import static org.testng.Assert.assertEquals;
  */
 public class TestSolveur {
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testBinaryCliqueNeq() {
         int nbSol = 1;
-        for (int kk = 2; kk <= 9; kk++) {
+        for (int kk = 2; kk < 9; kk++) {
             int m = (kk * (kk - 1)) / 2;
             int min = 1;
             nbSol *= kk;
@@ -47,10 +47,10 @@ public class TestSolveur {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testOneAllDiff() {
         int nbSol = 1;
-        for (int k = 2; k <= 9; k++) {
+        for (int k = 2; k < 8; k++) {
             int m = 1;
             int min = 1;
             nbSol *= k;
