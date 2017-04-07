@@ -12,9 +12,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
+import org.chocosolver.solver.expression.discrete.logical.UnLoExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -32,7 +34,7 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public abstract class ReExpression {
+public abstract class ReExpression implements ArExpression {
 
     /**
      * List of available operator for relational expression
@@ -109,6 +111,11 @@ public abstract class ReExpression {
      */
     public abstract BoolVar boolVar();
 
+    @Override
+    public IntVar intVar() {
+        return boolVar();
+    }
+
     /**
      * Extract the variables from this expression
      * @param variables set of variables
@@ -136,12 +143,17 @@ public abstract class ReExpression {
         extractVar(avars);
         IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
         Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
-        Tuples tuples = TuplesFactory.generateTuples(values -> eval(values, map), true, uvars);
+        Tuples tuples = TuplesFactory.generateTuples(values -> beval(values, map), true, uvars);
 //        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
         return getModel().table(uvars, tuples);
     }
 
-    public abstract boolean eval(int[] values, Map<IntVar, Integer> map);
+    public abstract boolean beval(int[] values, Map<IntVar, Integer> map);
+
+    @Override
+    public int ieval(int[] values, Map<IntVar, Integer> map) {
+        return beval(values, map)?1:0;
+    }
 
     /**
      * @param y some relational expressions
@@ -177,9 +189,16 @@ public abstract class ReExpression {
 
     /**
      * @param y a relational expression
-     * @return return the expression "x &hArr; y" where this is "x"
+     * @return return the expression "x &hArr; y_1 &hArr; y_2 &hArr; ..." where this is "x"
      */
-    public final ReExpression iff(ReExpression y) {
-        return new BiLoExpression(LoExpression.Operator.IFF, this, y);
+    public final ReExpression iff(ReExpression... y) {
+        return new NaLoExpression(LoExpression.Operator.IFF, this, y);
+    }
+
+    /**
+     * @return return the expression "&not;x" where this is "x"
+     */
+    public final ReExpression not() {
+        return new UnLoExpression(LoExpression.Operator.NOT, this);
     }
 }

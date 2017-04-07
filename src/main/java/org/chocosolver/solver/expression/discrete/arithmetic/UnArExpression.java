@@ -90,8 +90,8 @@ public class UnArExpression implements ArExpression {
     }
 
     @Override
-    public int eval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e.eval(values, map));
+    public int ieval(int[] values, Map<IntVar, Integer> map) {
+        return op.eval(e.ieval(values, map));
     }
 
     @Override

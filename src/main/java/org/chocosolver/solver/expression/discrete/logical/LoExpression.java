@@ -60,6 +60,12 @@ public abstract class LoExpression extends ReExpression {
             boolean eval(boolean b1, boolean b2) {
                 return !b1 || b2;
             }
+        },
+        NOT{
+            @Override
+            boolean eval(boolean b1, boolean b2) {
+                return !b1 || !b2;
+            }
         };
 
         abstract boolean eval(boolean b1, boolean b2);
@@ -78,5 +84,4 @@ public abstract class LoExpression extends ReExpression {
      * If necessary, it creates intermediary variable and posts intermediary constraints
      */
     public abstract BoolVar boolVar();
-
 }

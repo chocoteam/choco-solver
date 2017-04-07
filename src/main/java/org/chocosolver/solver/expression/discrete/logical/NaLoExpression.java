@@ -88,6 +88,15 @@ public class NaLoExpression extends LoExpression {
                 case OR:
                     model.addClausesBoolOrArrayEqVar(vs, me);
                     break;
+                case IFF:
+                    if(vs.length == 2){
+                        model.reifyXeqY(vs[0], vs[1], me);
+                    }else {
+                        IntVar count = model.intVar(op + "_count_", 1, 2);
+                        model.atMostNValues(vs, count, false).post();
+                        model.reifyXltC(count, 2, me);
+                    }
+                    break;
                 default:
                     throw new UnsupportedOperationException("N-ary logical expressions does not support " + op.name());
             }
@@ -108,16 +117,22 @@ public class NaLoExpression extends LoExpression {
                 return model.sum(vs, "=", vs.length);
             case OR:
                 return model.sum(vs, ">", 0);
+            case IFF:
+                if(vs.length == 2){
+                    return model.arithm(vs[0], "=", vs[1]);
+                }else {
+                    return model.allEqual(vs);
+                }
             default:
                 throw new UnsupportedOperationException("N-ary logical expressions does not support " + op.name());
         }
     }
 
     @Override
-    public boolean eval(int[] values, Map<IntVar, Integer> map) {
+    public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval = true;
         for(int i = 1; i < es.length; i++){
-            eval &= op.eval(es[0].eval(values, map), es[i].eval(values, map));
+            eval &= op.eval(es[0].beval(values, map), es[i].beval(values, map));
         }
         return eval;
     }

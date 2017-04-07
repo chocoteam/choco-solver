@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class BiLoExpression extends LoExpression {
+public class UnLoExpression extends LoExpression {
 
     /**
      * The model in which the expression is declared
@@ -46,24 +46,17 @@ public class BiLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private ReExpression e1;
-
-    /**
-     * The second expression this expression relies on
-     */
-    private ReExpression e2;
+    private ReExpression e;
     /**
      * Builds a n-ary expression
      *
      * @param op an operator
-     * @param e1 an expression
-     * @param e2 an expression
+     * @param e an expression
      */
-    public BiLoExpression(Operator op, ReExpression e1, ReExpression e2) {
-        this.model = e1.getModel();
+    public UnLoExpression(Operator op, ReExpression e) {
+        this.model = e.getModel();
         this.op = op;
-        this.e1 = e1;
-        this.e2 = e2;
+        this.e = e;
     }
 
     @Override
@@ -74,21 +67,13 @@ public class BiLoExpression extends LoExpression {
     @Override
     public BoolVar boolVar() {
         if (me == null) {
-            BoolVar b1 = e1.boolVar();
-            BoolVar b2 = e1.boolVar();
-            me = model.boolVar(model.generateName(op + "_exp_"));
+            BoolVar b = e.boolVar();
             switch (op) {
-                case XOR:
-                    model.addClausesBoolXorEqVar(b1, b2, me);
-                    break;
-                case IFF:
-                    model.addClausesBoolAndEqVar(b1, b2, me);
-                    break;
-                case IMP:
-                    model.addClausesBoolOrEqVar(b1.not(), b2, me);
+                case NOT:
+                    me = model.boolNotView(b);
                     break;
                 default:
-                    throw new UnsupportedOperationException("Binary logical expressions does not support " + op.name());
+                    throw new UnsupportedOperationException("Unary logical expressions does not support " + op.name());
             }
         }
         return me;
@@ -96,33 +81,27 @@ public class BiLoExpression extends LoExpression {
 
     @Override
     public void extractVar(HashSet<IntVar> variables) {
-        e1.extractVar(variables);
-        e2.extractVar(variables);
+        e.extractVar(variables);
     }
 
     @Override
     public Constraint decompose() {
-        BoolVar v1 = e1.boolVar();
-        BoolVar v2 = e2.boolVar();
+        BoolVar v1 = e.boolVar();
         Model model = v1.getModel();
         switch (op) {
-            case XOR:
-                return model.arithm(v1, "!=", v2);
-            case IFF:
-                return model.arithm(v1, "=", v2);
-            case IMP:
-                return model.arithm(v1.not(), "+", v2, ">", 0);
+            case NOT:
+                return model.arithm(v1, "<", 1);
         }
         throw new SolverException("Unexpected case");
     }
 
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e1.beval(values, map), e2.beval(values, map));
+        return op.eval(e.beval(values, map), true);
     }
 
     @Override
     public String toString() {
-        return op.name() + "(" + e1.toString() + ", " + e2.toString() + ")";
+        return op.name() + "(" + e.toString()+ ")";
     }
 }

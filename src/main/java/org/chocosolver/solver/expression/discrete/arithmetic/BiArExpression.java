@@ -126,8 +126,8 @@ public class BiArExpression implements ArExpression {
     }
 
     @Override
-    public int eval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e1.eval(values, map), e2.eval(values, map));
+    public int ieval(int[] values, Map<IntVar, Integer> map) {
+        return op.eval(e1.ieval(values, map), e2.ieval(values, map));
     }
 
     @Override

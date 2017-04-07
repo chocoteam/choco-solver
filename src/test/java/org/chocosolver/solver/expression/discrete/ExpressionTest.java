@@ -11,6 +11,7 @@ package org.chocosolver.solver.expression.discrete;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -394,5 +395,28 @@ public class ExpressionTest {
         eval(model, x.eq(y.add(1)).xor(x.add(2).le(6)), p, 27);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test43(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 3);
+        IntVar y = model.intVar(0, 3);
+        eval(model, x.ge(2).add(y.ge(2)).eq(1), p, 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test44(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 3);
+        IntVar y = model.intVar(0, 3);
+        eval(model, x.ge(2).not().add(y.ge(2)).eq(1), p, 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test45(int p) {
+        Model model = new Model();
+        BoolVar x = model.boolVar();
+        IntVar y = model.intVar(0, 3);
+        eval(model, x.eq(y.eq(1).not().and(y.eq(2).not())), p, 4);
+    }
 
 }

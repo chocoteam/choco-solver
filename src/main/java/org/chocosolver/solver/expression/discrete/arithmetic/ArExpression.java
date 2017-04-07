@@ -311,7 +311,7 @@ public interface ArExpression {
      * @return an evaluation of this expression with a tuple
      */
     @SuppressWarnings("SuspiciousMethodCalls")
-    default int eval(int[] values, Map<IntVar, Integer> map){
+    default int ieval(int[] values, Map<IntVar, Integer> map){
         assert this instanceof IntVar;
         return values[map.get(this)];
     }

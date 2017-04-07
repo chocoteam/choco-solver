@@ -85,7 +85,7 @@ public class BiReExpression extends ReExpression {
                     model.reifyXleY(v1,v2, me);
                     break;
                 case GE:
-                    model.reifyXltY(v2,v1, me);
+                    model.reifyXleY(v2,v1, me);
                     break;
                 case GT:
                     model.reifyXltY(v2,v1, me);
@@ -132,8 +132,8 @@ public class BiReExpression extends ReExpression {
     }
 
     @Override
-    public boolean eval(int[] values, Map<IntVar, Integer> map) {
-        return op.eval(e1.eval(values, map), e2.eval(values, map));
+    public boolean beval(int[] values, Map<IntVar, Integer> map) {
+        return op.eval(e1.ieval(values, map), e2.ieval(values, map));
     }
 
     @Override

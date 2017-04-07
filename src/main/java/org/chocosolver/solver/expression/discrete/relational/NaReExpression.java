@@ -85,9 +85,13 @@ public class NaReExpression extends ReExpression {
             me = model.boolVar(model.generateName(op+"_exp_"));
             switch (op) {
                 case EQ:
-                    IntVar count = model.intVar(op+"_count_", 1, vs.length);
-                    model.atMostNValues(vs, count, false).post();
-                    model.reifyXltC(count, 2, me);
+                    if(vs.length == 2){
+                        model.reifyXeqY(vs[0], vs[1], me);
+                    }else {
+                        IntVar count = model.intVar(op + "_count_", 1, vs.length);
+                        model.atMostNValues(vs, count, false).post();
+                        model.reifyXltC(count, 2, me);
+                    }
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
@@ -106,16 +110,20 @@ public class NaReExpression extends ReExpression {
         IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
         switch (op) {
             case EQ:
-                return model.allEqual(vs);
+                if(vs.length == 2){
+                    return model.arithm(vs[0], "=", vs[1]);
+                }else {
+                    return model.allEqual(vs);
+                }
         }
         throw new SolverException("Unexpected case");
     }
 
     @Override
-    public boolean eval(int[] values, Map<IntVar, Integer> map) {
+    public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval = true;
         for(int i = 1; i < es.length; i++){
-            eval &= op.eval(es[0].eval(values, map), es[i].eval(values, map));
+            eval &= op.eval(es[0].ieval(values, map), es[i].ieval(values, map));
         }
         return eval;
     }
