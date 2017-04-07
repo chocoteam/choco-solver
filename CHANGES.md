@@ -16,6 +16,9 @@ NEXT MILESTONE
 - `IPropagationEngine.fails(c,v,m)` is replaced by `Solver.throwsException(c,v,m)` (#524)
 - `IPropagationEngine.getContradictionException()` is replaced by `Solver.getContradictionException()` (#524)
 
+### Remove dead code:
+- SparseSet
+- IFeatures, Features, IAttribute and Attribute
 
 ### Closed issues and pull requests:
 
