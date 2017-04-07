@@ -15,6 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -110,23 +111,25 @@ public class ClauseTest {
         assertEquals(sol, 2);
     }
 
-
-    @Test(groups="1s", timeOut=60000)
-    public void test2() {
-        Model model = new Model();
-        BoolVar[] bvars = model.boolVarArray("b", 2);
-        LogOp tree = LogOp.or(bvars[0], bvars[1]);
-        model.addClauses(tree);
-        model.getMinisat().getPropSat().initialize();
-        try {
-            model.getSolver().propagate();
-            bvars[1].instantiateTo(0, Cause.Null);
-            bvars[0].instantiateTo(1, Cause.Null);
-            model.getSolver().propagate();
-        } catch (ContradictionException ex) {
-            Assert.fail();
-        }
-    }
+	@Test(groups="1s", timeOut=60000)
+	public void test2() {
+		Model model = new Model();
+		BoolVar[] bvars = model.boolVarArray("b", 2);
+		LogOp tree = LogOp.or(bvars[0], bvars[1]);
+		model.addClauses(tree);
+		model.getMinisat().getPropSat().initialize();
+		Assert.assertEquals(model.getSolver().isSatisfied(), ESat.UNDEFINED);
+		try {
+			model.getSolver().propagate();
+			bvars[1].instantiateTo(0, Cause.Null);
+			bvars[0].instantiateTo(1, Cause.Null);
+			model.getSolver().propagate();
+		} catch (ContradictionException ex) {
+			Assert.fail();
+		}
+		model.getSolver().solve();
+		Assert.assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
+	}
 
     @Test(groups="1s", timeOut=60000)
     public void test30() {

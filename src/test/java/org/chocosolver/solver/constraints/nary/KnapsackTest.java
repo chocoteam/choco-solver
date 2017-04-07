@@ -15,6 +15,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.variables.Largest;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.MathUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -43,7 +44,7 @@ public class KnapsackTest {
 		for(int i=0;i<M;i++){
 			bVar[i] = m.intVar(0,b[i]);
 		}
-		IntVar objective = m.intVar(0,100000);
+		IntVar objective = m.intVar(0, N*MathUtils.max(c));
 		m.setObjective(Model.MAXIMIZE,objective);
 		m.scalar(x,c,"=",objective).post();
 		for(int i=0;i<M;i++){

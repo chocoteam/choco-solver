@@ -66,4 +66,16 @@ public class MathUtilsTest {
         Assert.assertEquals(MathUtils.safeSubstract(Integer.MIN_VALUE, 10), Integer.MIN_VALUE);
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testMinMax() {
+        int[] vls = new int[]{0,-5,12,-3,0,4,-1};
+        Assert.assertEquals(-5,MathUtils.min(vls));
+        Assert.assertEquals(12,MathUtils.max(vls));
+        int[][] vls2 = new int[][]{{0,-5},{12,-3,0,4,-1}};
+        Assert.assertEquals(MathUtils.min(vls2),MathUtils.min(vls));
+        Assert.assertEquals(MathUtils.max(vls2),MathUtils.max(vls));
+        Assert.assertEquals(MathUtils.min(ArrayUtils.flatten(vls2)),MathUtils.min(vls));
+        Assert.assertEquals(MathUtils.max(ArrayUtils.flatten(vls2)),MathUtils.max(vls));
+    }
+
 }
