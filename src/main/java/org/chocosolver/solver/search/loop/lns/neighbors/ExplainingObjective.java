@@ -11,17 +11,12 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
 import org.chocosolver.cutoffseq.GeometricalCutoffStrategy;
 import org.chocosolver.cutoffseq.ICutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.ArrayEventStore;
-import org.chocosolver.solver.explanations.Explanation;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.NoExplanationEngine;
-import org.chocosolver.solver.explanations.RuleStore;
+import org.chocosolver.solver.explanations.*;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;

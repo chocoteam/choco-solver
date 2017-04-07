@@ -10,7 +10,6 @@ package org.chocosolver.solver.constraints.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;

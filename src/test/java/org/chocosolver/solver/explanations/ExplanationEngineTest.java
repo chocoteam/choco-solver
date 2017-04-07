@@ -8,25 +8,6 @@
  */
 package org.chocosolver.solver.explanations;
 
-import static java.lang.System.out;
-import static java.util.Arrays.copyOfRange;
-import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.Search.greedySearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -44,6 +25,15 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.lang.System.out;
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.testng.Assert.*;
 
 /**
  * Created by cprudhom on 09/12/14.

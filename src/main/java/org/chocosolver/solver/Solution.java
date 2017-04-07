@@ -10,7 +10,6 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;

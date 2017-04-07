@@ -8,15 +8,15 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>

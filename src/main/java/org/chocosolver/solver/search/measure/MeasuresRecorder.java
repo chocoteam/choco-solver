@@ -8,14 +8,14 @@
  */
 package org.chocosolver.solver.search.measure;
 
+import org.chocosolver.solver.objective.IBoundsManager;
+import org.chocosolver.solver.search.SearchState;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Objects;
 import java.util.function.LongSupplier;
-
-import org.chocosolver.solver.objective.IBoundsManager;
-import org.chocosolver.solver.search.SearchState;
 
 /**
  * Object which stores resolution information to get statistics

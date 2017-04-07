@@ -10,11 +10,9 @@ package org.chocosolver.solver.constraints.nary.nValue;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 import java.util.Iterator;

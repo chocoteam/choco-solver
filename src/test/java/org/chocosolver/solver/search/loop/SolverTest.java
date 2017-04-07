@@ -20,9 +20,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.Search.greedySearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
+import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
 import static org.testng.Assert.assertEquals;

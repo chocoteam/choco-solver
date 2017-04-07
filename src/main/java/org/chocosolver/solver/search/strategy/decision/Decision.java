@@ -8,11 +8,11 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
-import java.io.Serializable;
-
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
+
+import java.io.Serializable;
 
 /**
  * An abstract which defines a Decision

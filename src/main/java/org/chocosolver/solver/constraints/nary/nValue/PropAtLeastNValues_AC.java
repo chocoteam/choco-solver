@@ -9,7 +9,6 @@
 package org.chocosolver.solver.constraints.nary.nValue;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;

@@ -10,7 +10,6 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.sat.PropSat;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;

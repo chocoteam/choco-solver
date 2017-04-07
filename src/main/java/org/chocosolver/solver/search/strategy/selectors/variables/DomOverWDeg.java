@@ -9,7 +9,6 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.FailPerPropagator;

@@ -9,16 +9,10 @@
 package org.chocosolver.util.tools;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static java.lang.reflect.Array.newInstance;
 

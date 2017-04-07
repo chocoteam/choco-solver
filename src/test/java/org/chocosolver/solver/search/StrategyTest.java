@@ -8,13 +8,6 @@
  */
 package org.chocosolver.solver.search;
 
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayDeque;
-
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -23,17 +16,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.variables.AntiFirstFail;
-import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
-import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
-import org.chocosolver.solver.search.strategy.selectors.variables.Largest;
-import org.chocosolver.solver.search.strategy.selectors.variables.MaxDelta;
-import org.chocosolver.solver.search.strategy.selectors.variables.MaxRegret;
-import org.chocosolver.solver.search.strategy.selectors.variables.MinDelta;
-import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
-import org.chocosolver.solver.search.strategy.selectors.variables.Smallest;
-import org.chocosolver.solver.search.strategy.selectors.variables.VariableEvaluator;
-import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
 import org.chocosolver.solver.variables.IntVar;
@@ -41,6 +24,13 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayDeque;
+
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * <br/>

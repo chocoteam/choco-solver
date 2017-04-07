@@ -49,14 +49,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.chocosolver.solver.Solver.Action.extend;
-import static org.chocosolver.solver.Solver.Action.initialize;
-import static org.chocosolver.solver.Solver.Action.propagate;
-import static org.chocosolver.solver.Solver.Action.repair;
-import static org.chocosolver.solver.Solver.Action.validate;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.solver.Solver.Action.*;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * This class is inspired from :
