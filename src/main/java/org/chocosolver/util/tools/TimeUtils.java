@@ -82,34 +82,9 @@ public class TimeUtils {
      * - "180s": three minutes
      *
      * @param duration a String which describes the duration
-     * @return the duration in seconds
+     * @return the duration in seconds (floored, so 30.5s returns 30)
      */
     public static long convertInSeconds(String duration) {
-        long milliseconds = 0;
-        duration = duration.replaceAll("\\s+", "");
-        Matcher matcher = Dp.matcher(duration);
-        if (matcher.find() && matcher.groupCount() == 1) {
-            int days = Integer.parseInt(matcher.group(1));
-            milliseconds += TimeUnit.SECONDS.convert(days, TimeUnit.DAYS);
-        }
-        matcher = Hp.matcher(duration);
-        if (matcher.find() && matcher.groupCount() == 1) {
-            int hours = Integer.parseInt(matcher.group(1));
-            milliseconds += TimeUnit.SECONDS.convert(hours, TimeUnit.HOURS);
-        }
-        matcher = Mp.matcher(duration);
-        if (matcher.find() && matcher.groupCount() == 1) {
-            int minutes = Integer.parseInt(matcher.group(1));
-            milliseconds += TimeUnit.SECONDS.convert(minutes, TimeUnit.MINUTES);
-        }
-        matcher = Sp.matcher(duration);
-        if (matcher.find() && matcher.groupCount() == 2) {
-            double seconds = Double.parseDouble(matcher.group(1));
-            milliseconds += (int) (seconds);
-        }
-        if (milliseconds == 0) {
-            milliseconds = Long.parseLong(duration);
-        }
-        return milliseconds;
+        return convertInMilliseconds(duration)/1000;
     }
 }
