@@ -15,6 +15,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 - `IPropagationEngine.fails(c,v,m)` is replaced by `Solver.throwsException(c,v,m)` (#524)
 - `IPropagationEngine.getContradictionException()` is replaced by `Solver.getContradictionException()` (#524)
+- `MathUtils.bounds(values)` is replaced by a call to `MathUtils.min(values)` and `MathUtils.max(values)`
 
 ### Remove dead code:
 - SparseSet

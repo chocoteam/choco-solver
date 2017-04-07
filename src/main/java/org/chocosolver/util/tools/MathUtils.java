@@ -211,6 +211,7 @@ public final class MathUtils {
         return min;
     }
 
+    @Deprecated // will be removed in next release. Use min and max instead
     public static Point bounds(int[] values) {
         if (values == null || values.length == 0) {
             return new Point(Integer.MAX_VALUE, Integer.MIN_VALUE);
