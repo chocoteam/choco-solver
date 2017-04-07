@@ -23,7 +23,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public HeightCumulFilter(int n, Propagator cause){
+	public HeightCumulFilter(int n, Propagator<IntVar> cause){
 		super(n,cause);
 		FIXPOINT = false;
 	}

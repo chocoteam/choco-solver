@@ -31,7 +31,7 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public DisjunctiveTaskIntervalFilter(int nbMaxTasks, Propagator cause) {
+    public DisjunctiveTaskIntervalFilter(int nbMaxTasks, Propagator<IntVar> cause) {
         super(nbMaxTasks,cause);
     }
 

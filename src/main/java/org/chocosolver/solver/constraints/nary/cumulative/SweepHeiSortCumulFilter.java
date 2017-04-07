@@ -36,7 +36,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepHeiSortCumulFilter(int n, Propagator cause){
+	public SweepHeiSortCumulFilter(int n, Propagator<IntVar> cause){
 		super(n,cause);
 		sortedTasks = new int[n];
 		taskSorter = new ArraySort(n,false,true);

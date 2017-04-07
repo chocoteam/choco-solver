@@ -25,7 +25,7 @@ public abstract class CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected Propagator aCause;
+	protected Propagator<IntVar> aCause;
 	protected int nbMaxTasks;
 
 	//***********************************************************************************
@@ -37,7 +37,7 @@ public abstract class CumulFilter {
 	 * @param nbMaxTasks	maximum number of tasks
 	 * @param cause			a cumulative propagator
 	 */
-	public CumulFilter(int nbMaxTasks, Propagator cause){
+	public CumulFilter(int nbMaxTasks, Propagator<IntVar> cause){
 		this.nbMaxTasks = nbMaxTasks;
 		this.aCause = cause;
 	}

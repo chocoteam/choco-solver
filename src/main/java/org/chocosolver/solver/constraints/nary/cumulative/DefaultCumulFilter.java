@@ -30,7 +30,7 @@ public class DefaultCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DefaultCumulFilter(int nbMaxTasks, Propagator cause) {
+	public DefaultCumulFilter(int nbMaxTasks, Propagator<IntVar> cause) {
 		super(nbMaxTasks, cause);
 		nrj = Cumulative.Filter.NRJ.make(nbMaxTasks,aCause);
 	}

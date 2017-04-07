@@ -32,7 +32,7 @@ public class TimeCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public TimeCumulFilter(int nbMaxTasks, Propagator cause) {
+	public TimeCumulFilter(int nbMaxTasks, Propagator<IntVar> cause) {
 		super(nbMaxTasks, cause);
 	}
 

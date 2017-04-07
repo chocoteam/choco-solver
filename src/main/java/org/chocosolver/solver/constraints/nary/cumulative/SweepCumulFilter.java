@@ -53,7 +53,7 @@ public class SweepCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepCumulFilter(int n, Propagator cause){
+	public SweepCumulFilter(int n, Propagator<IntVar> cause){
 		super(n,cause);
 		map = new int[n];
 		slb = new int[n];

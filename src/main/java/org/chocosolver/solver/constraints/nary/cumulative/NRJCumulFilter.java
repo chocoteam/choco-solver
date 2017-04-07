@@ -35,7 +35,7 @@ public class NRJCumulFilter extends CumulFilter{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public NRJCumulFilter(int n, Propagator cause){
+	public NRJCumulFilter(int n, Propagator<IntVar> cause){
 		super(n,cause);
 		sor_array = new int[n];
 		sorter = new ArraySort(n,false,true);
