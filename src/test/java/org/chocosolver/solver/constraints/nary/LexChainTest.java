@@ -98,10 +98,10 @@ public class LexChainTest {
         return model;
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testE() {
         Random random = new Random();
-        for (int seed = 0; seed < 1000; seed++) {
+        for (int seed = 0; seed < 100; seed++) {
             random.setSeed(seed);
             int n = 2 + random.nextInt(2);
             int m = 2 + random.nextInt(2);
@@ -117,10 +117,10 @@ public class LexChainTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testB() {
         Random random = new Random();
-        for (int seed = 0; seed < 1000; seed++) {
+        for (int seed = 0; seed < 100; seed++) {
             random.setSeed(seed);
             int n = 2 + random.nextInt(2);
             int m = 2 + random.nextInt(2);

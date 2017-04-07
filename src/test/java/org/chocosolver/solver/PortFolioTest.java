@@ -81,9 +81,9 @@ public class PortFolioTest {
     }
 
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP2() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
@@ -96,9 +96,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP3() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 20; i++) {
@@ -113,9 +113,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP3bug() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
@@ -130,9 +130,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP3bug2() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 20; i++) {
@@ -147,9 +147,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP3bug3() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio();
             for (int i = 0; i < 20; i++) {
@@ -164,9 +164,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP4() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio();
             for(int w=0;w<10;w++) {
@@ -181,9 +181,9 @@ public class PortFolioTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testP5() {
-        for (int iter = 0; iter < 500; iter++) {
+        for (int iter = 0; iter < 50; iter++) {
             System.out.println("ITERATION "+iter);
             ParallelPortfolio pares = new ParallelPortfolio(false);
             for (int i = 0; i < 10; i++) {

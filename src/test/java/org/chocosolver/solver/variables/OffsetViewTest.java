@@ -92,10 +92,10 @@ public class OffsetViewTest {
         return s;
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testRandom1() {
         Random rand = new Random();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             rand.setSeed(i);
             int low = rand.nextInt(10);
             int upp = low + rand.nextInt(1000);
@@ -122,10 +122,10 @@ public class OffsetViewTest {
 
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testRandom3() {
         int N = 9999;
-        for (int i = 1; i < 10; i++) {
+        for (int i = 1; i < 5; i++) {
             Model sb = bijective(1, N, 3);
             Model sc = contraint(1, N, 3);
             while (sb.getSolver().solve()) ;

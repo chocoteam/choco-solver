@@ -69,9 +69,9 @@ public class ExplanationTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testNosolBut0() {
-        for (int n = 500; n < 4501; n += 500) {
+        for (int n = 500; n < 3000; n += 800) {
             for (int e = 2; e < 4; e++) {
                 for (int ng = 0; ng < 2; ng++) {
                     final Model model = new Model();
@@ -131,10 +131,10 @@ public class ExplanationTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testMS() {
         for (int n = 2; n < 5; n++) {
-            for (long seed = 0; seed < 25; seed++) {
+            for (long seed = 0; seed < 5; seed++) {
                 for (int e = 1; e < 4; e++) {
                     for (int ng = 0; ng < 2; ng++) {
                         int ms = n * (n * n + 1) / 2;

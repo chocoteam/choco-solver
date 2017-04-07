@@ -24,9 +24,9 @@ import static org.chocosolver.util.tools.ArrayUtils.append;
 public class BottleneckTest {
 
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testStynes1() {
-        for (int n = 100; n < 201; n += 50) {
+        for (int n = 60; n < 150; n += 50) {
             Model model = new Model();
 
             IntVar[] nexts = new IntVar[n];
@@ -51,9 +51,9 @@ public class BottleneckTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testStynes2() {
-        int n = 10000;
+        int n = 5000;
         {
             Model model = new Model();
 
@@ -77,9 +77,5 @@ public class BottleneckTest {
 
             model.getSolver().solve();
         }
-
-
     }
-
-
 }

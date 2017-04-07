@@ -121,10 +121,10 @@ public class DynamicAdditionTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000, dataProvider = "env")
+    @Test(groups="10s", timeOut=300000, dataProvider = "env")
     public void test3(EnvironmentTrailing environment) {
         environment.buildFakeHistoryOn(new Except_0());
-        int n = 50000;
+        int n = 5000;
         int m = 3000;
         int k = 100;
         IStateInt[] si = new IStateInt[n];

@@ -73,9 +73,9 @@ public class TableTest {
 		}
 	}
 
-	@Test(groups="5m", timeOut=300000)
+	@Test(groups="10s", timeOut=300000)
 	public void testAllEquals() {
-		int[][] params = {{5, 2, 9}, {5, -2, 3}, {10, 2, 4}, {5, 0, 20}};
+		int[][] params = {{5, 2, 9}, {5, -2, 3}, {5, 0, 15}};//, {10, 2, 4}};
 		for (int p = 0; p < params.length; p++) {
 			Model model = new Model();
 			IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
@@ -113,9 +113,9 @@ public class TableTest {
 		}
 	}
 
-	@Test(groups="5m", timeOut=300000)
+	@Test(groups="10s", timeOut=300000)
 	public void testAllDifferent() {
-		int[][] params = {{5, 2, 9}, {5, -2, 3}, {7, 0, 7}};
+		int[][] params = {{5, 2, 9}, {5, -2, 3}, {6, 0, 7}};
 
 		for (int p = 2; p < params.length; p++) {
 			Model model = new Model();
@@ -237,9 +237,9 @@ public class TableTest {
 	}
 
 
-	@Test(groups="5m", timeOut=300000)
+	@Test(groups="10s", timeOut=300000)
 	public void testRandom() {
-		int[][] params = {{3, 1, 3}, {5, 2, 9}, {5, -2, 3}, {7, 2, 4}};
+		int[][] params = {{3, 1, 3}, {5, 2, 7}};//, {5, -2, 3}, {7, 2, 4}};
 		final Random rnd = new Random();
 		for (int p = 0; p < params.length; p++) {
 			for (long seed = 0; seed < 10; seed++) {

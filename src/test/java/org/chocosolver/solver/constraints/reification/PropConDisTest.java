@@ -76,10 +76,10 @@ public class PropConDisTest {
     }
 
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void test3() {
         Random rnd = new Random();
-        for (int n = 1; n < 20; n += 1) {
+        for (int n = 1; n < 18; n += 2) {
             out.printf("Size: %d\n", n);
             Model or = modelPb(n, n, rnd, false, true);
             Model cd = modelPb(n, n, rnd, true, true);
@@ -100,10 +100,10 @@ public class PropConDisTest {
         }
     }
 
-    @Test(groups="5m", timeOut=3000000)
+    @Test(groups="10s", timeOut=3000000)
     public void test4() {
         Random rnd = new Random();
-        for (int n = 1; n < 4; n += 1) {
+        for (int n = 1; n < 3; n ++) {
             System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
                 out.printf("Size: %d (%d)\n", n, seed);

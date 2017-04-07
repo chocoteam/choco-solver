@@ -243,7 +243,7 @@ public class ViewsTest {
         return elt.toArray(new Object[elt.size()][1]);
     }
 
-    @Test(groups="5m", timeOut=300000, dataProvider = "1d")
+    @Test(groups="10s", timeOut=300000, dataProvider = "1d")
     public void test1d(int seed) {
         // Z = X + Y + ...
         Model ref = new Model();

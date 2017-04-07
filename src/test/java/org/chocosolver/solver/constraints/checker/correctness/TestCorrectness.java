@@ -293,31 +293,28 @@ public class TestCorrectness {
     }
 
     // MDD
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testMDD() {
         Random rnd = new Random();
-        for (int i = 0; i < 5; i++) {
-            System.out.println(i);
-            long seed = System.currentTimeMillis();
-            rnd.setSeed(seed);
-            for (int n = 2; n < 10; n++) {
-                final int finalN = n;
-                int[][] doms = new int[n][n];
-                for (int j = 0; j < n; j++) {
-                    for (int k = 0; k < n; k++) {
-                        doms[j][k] = k - n / 2;
-                    }
+        long seed = System.currentTimeMillis();
+        rnd.setSeed(seed);
+        for (int n = 2; n < 10; n++) {
+            final int finalN = n;
+            int[][] doms = new int[n][n];
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    doms[j][k] = k - n / 2;
                 }
-                Tuples tuples = TuplesFactory.generateTuples(
-                        new TupleValidator() {
-                            int nb = 4 * finalN;
-                            @Override
-                            public boolean valid(int... values) {
-                                return rnd.nextBoolean() && nb-- > 0;
-                            }
-                        }, true, doms);
-                CorrectnessChecker.checkCorrectness(Modeler.modelmddcAC, n, -n / 2, n / 2, seed, new MultivaluedDecisionDiagram(doms, tuples));
             }
+            Tuples tuples = TuplesFactory.generateTuples(
+                    new TupleValidator() {
+                        int nb = 4 * finalN;
+                        @Override
+                        public boolean valid(int... values) {
+                            return rnd.nextBoolean() && nb-- > 0;
+                        }
+                    }, true, doms);
+            CorrectnessChecker.checkCorrectness(Modeler.modelmddcAC, n, -n / 2, n / 2, seed, new MultivaluedDecisionDiagram(doms, tuples));
         }
     }
 

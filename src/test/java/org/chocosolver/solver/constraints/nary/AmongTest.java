@@ -50,7 +50,7 @@ public class AmongTest {
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testRandomProblems2() {
         for (int bigseed = 0; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;

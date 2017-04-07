@@ -154,10 +154,10 @@ public class IntLinCombTest {
         return model;
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testSumvsIntLinCombTest() {
         Random rand = new Random();
-        for (int seed = 0; seed < 400; seed++) {
+        for (int seed = 0; seed < 20; seed++) {
             rand.setSeed(seed);
             int n = 1 + rand.nextInt(6);
             int min = -10 + rand.nextInt(20);
@@ -534,7 +534,7 @@ public class IntLinCombTest {
         assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups="10s", timeOut=300000)
     public void testB1() {
         Model model = new Model();
         model.set(new Settings() {
@@ -543,7 +543,7 @@ public class IntLinCombTest {
                 return new short[]{0, 0, 0, 0, 1, 2, 3};
             }
         });
-        int n = 23;
+        int n = 20;
         BoolVar[] bs = model.boolVarArray("b", n);
         int[] cs = new int[n];
         int k = (int) (n * .7);
