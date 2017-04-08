@@ -564,7 +564,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		} else if (TuplesFactory.canBeTupled(X, Y, Z)) {
 			return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
 		} else {
-			return new Times(X, Y, Z);
+			return new Constraint("Times",new PropTimesNaive(X, Y, Z));
 		}
 	}
 
