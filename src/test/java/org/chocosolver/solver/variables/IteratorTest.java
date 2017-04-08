@@ -10,7 +10,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.ternary.Max;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -597,7 +596,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax1() {
         Model model = new Model();
-        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
+        IntVar var = model.intVar("a", new int[]{3, 4}).max(model.intVar("b", new int[]{2, 5})).intVar();
         DisposableValueIterator vit = var.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.next());
@@ -611,7 +610,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax2() {
         Model model = new Model();
-        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
+        IntVar var = model.intVar("a", new int[]{3, 4}).max(model.intVar("b", new int[]{2, 5})).intVar();
         DisposableValueIterator vit = var.getValueIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(5, vit.previous());
@@ -625,7 +624,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax3() {
         Model model = new Model();
-        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
+        IntVar var = model.intVar("a", new int[]{3, 4}).max(model.intVar("b", new int[]{2, 5})).intVar();
         DisposableRangeIterator vit = var.getRangeIterator(true);
         Assert.assertTrue(vit.hasNext());
         Assert.assertEquals(3, vit.min());
@@ -637,7 +636,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMax4() {
         Model model = new Model();
-        IntVar var = Max.var(model.intVar("a", new int[]{3, 4}), model.intVar("b", new int[]{2, 5}));
+        IntVar var = model.intVar("a", new int[]{3, 4}).max(model.intVar("b", new int[]{2, 5})).intVar();
         DisposableRangeIterator vit = var.getRangeIterator(false);
         Assert.assertTrue(vit.hasPrevious());
         Assert.assertEquals(3, vit.min());

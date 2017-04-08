@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.constraints.ternary.Max.var;
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.testng.Assert.*;
 
@@ -131,7 +130,7 @@ public class ViewsTest {
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar y = model.intVar("y", 0, 2, false);
-                IntVar z = var(x, y);
+                IntVar z = x.max(y).intVar();
                 model.getSolver().setSearch(randomSearch(new IntVar[]{x, y, z}, seed));
 
             }
