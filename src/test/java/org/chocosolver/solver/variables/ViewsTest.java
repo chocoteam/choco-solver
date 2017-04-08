@@ -113,16 +113,16 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testa() {
         // Z = max(X + Y)
-        for (int seed = 0; seed < 9999; seed += 1) {
+        for (int seed = 0; seed < 99; seed += 1) {
             Model ref = new Model();
             Model model = new Model();
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
-                IntVar z = ref.intVar("z", 0, 2, true);
+                IntVar z = ref.intVar("z", 0, 2, false);
                 ref.max(z, x, y).post();
                 ref.getSolver().setSearch(randomSearch(new IntVar[]{x, y, z}, seed));
 
