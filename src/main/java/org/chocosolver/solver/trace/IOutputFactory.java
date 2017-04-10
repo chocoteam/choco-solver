@@ -11,6 +11,7 @@ package org.chocosolver.solver.trace;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.*;
+import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -66,7 +67,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
         _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
         _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
-        _me().getOut().printf("\tBuilding time : %.3fs\n", _me().getReadingTimeCount());
+        _me().getOut().printf("\tBuilding time : %.3fs\n", (System.nanoTime() - _me().getModel().getCreationTime())  / IMeasures.IN_SEC);
         _me().getOut().printf("\tUser-defined search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
         _me().getOut().printf("\tComplementary search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
     }
@@ -80,7 +81,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
                 _me().getModel().getNbVars(),
                 _me().getModel().getNbCstrs(),
-                _me().getReadingTimeCount(),
+                (System.nanoTime() - _me().getModel().getCreationTime())  / IMeasures.IN_SEC,
                 _me().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
                 _me().isSearchCompleted() ? "w/" : "w/o"));
         getOut().println(st.toString());

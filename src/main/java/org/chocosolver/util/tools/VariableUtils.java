@@ -291,10 +291,14 @@ public class VariableUtils {
 
     /**
      * @param vars an array of variables
-     * @return the variables' domain cardinality
+     * @return the variables' domain cardinality or {@link Integer#MAX_VALUE} if too large.
      */
     public static long domainCardinality(IntVar... vars) {
-        return Arrays.stream(vars).mapToInt(IntVar::getDomainSize).asLongStream().reduce(1, (a, b) -> a * b);
+        long card = 1;
+        for (int i = 0; i < vars.length && card < Integer.MAX_VALUE; i++) {
+            card *= vars.length;
+        }
+        return Math.min(Integer.MAX_VALUE, card);
     }
 
     /**
