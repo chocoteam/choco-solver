@@ -12,7 +12,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 
 /**
@@ -25,7 +24,7 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropSumBoolIncr extends PropSumBool {
+public class PropSumFullBoolIncr extends PropSumFullBool {
 
     /**
      * Sum of lower bounds maintained incrementally.
@@ -46,18 +45,17 @@ public class PropSumBoolIncr extends PropSumBool {
     private boolean doFilter;
 
     /**
-     * Creates a sum propagator: SUM(x_i) Op sum + b, where x_i are boolean variables, maintained incrementally.
+     * Creates a sum propagator: SUM(x_i) Op b, where x_i are boolean variables, maintained incrementally.
      * Coefficients are induced by <code>pos</code>:
      * those before <code>pos</code> (included) are equal to 1,
      * the other ones are equal to -1.
      * @param variables list of boolean variables
      * @param pos position of the last positive (induced) coefficient
      * @param o operator
-     * @param sum resulting variable
      * @param b bound to respect
      */
-    public PropSumBoolIncr(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
-        super(variables, pos, o, sum, b, true);
+    public PropSumFullBoolIncr(BoolVar[] variables, int pos, Operator o, int b) {
+        super(variables, pos, o, b, true);
         this.bLB = model.getEnvironment().makeInt();
         this.bUB = model.getEnvironment().makeInt();
     }
@@ -76,7 +74,7 @@ public class PropSumBoolIncr extends PropSumBool {
                     ub++;
                 }
             }
-            for (; i < l -1; i++) { // then the negative ones
+            for (; i < l; i++) { // then the negative ones
                 if (vars[i].isInstantiated()) {
                     k = vars[i].getLB();
                     lb -= k;
@@ -103,7 +101,7 @@ public class PropSumBoolIncr extends PropSumBool {
                 bUB.add(-1);
                 doFilter |= o != Operator.LE;
             }
-        } else if (idxVarInProp < l -1) {
+        } else if (idxVarInProp < l) {
             int k = vars[idxVarInProp].getLB();
             if (k == 0) {
                 bLB.add(1);
@@ -122,15 +120,15 @@ public class PropSumBoolIncr extends PropSumBool {
 
     @Override
     protected void prepare() {
-        sumLB = bLB.get() - sum.getUB();
-        sumUB = bUB.get() - sum.getLB();
+        sumLB = bLB.get();
+        sumUB = bUB.get();
     }
 
     @Override
     protected PropSum opposite(){
-        BoolVar[] bvars = new BoolVar[vars.length-1];
+        BoolVar[] bvars = new BoolVar[vars.length];
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
-        return new PropSumBoolIncr(bvars, pos, nop(o), vars[vars.length-1], b + nb(o));
+        return new PropSumFullBoolIncr(bvars, pos, nop(o), b + nb(o));
     }
 
 }

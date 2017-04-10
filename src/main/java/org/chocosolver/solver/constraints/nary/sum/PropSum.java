@@ -211,7 +211,7 @@ public class PropSum extends Propagator<IntVar> {
                             anychange = true;
                         }
                     }
-                    if (I[i] + E > 0) {
+                    if (I[i] - E > 0) {
                         ub = vars[i].getUB();
                         lb = ub - I[i];
                         if (vars[i].updateLowerBound(ub - E, this)) {

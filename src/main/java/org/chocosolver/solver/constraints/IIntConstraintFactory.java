@@ -1803,9 +1803,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param algo to choose among {"TC+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
-		/*if (vars.length == 2) {
+		if (vars.length == 2) {
 			return table(vars[0], vars[1], tuples);
-		}*/
+		}
 		if(algo.contains("+") && !tuples.isFeasible()){
 			throw new SolverException(algo+" table algorithm cannot be used with forbidden tuples.");
 		}

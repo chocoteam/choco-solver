@@ -9,13 +9,10 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Operator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-
-import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
-import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * A propagator for SUM(x_i) = y + b, where x_i are boolean variables
@@ -27,57 +24,40 @@ import static org.chocosolver.util.tools.ArrayUtils.concat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public class PropSumBool extends PropSum {
+public class PropSumFullBool extends PropSum {
 
     /**
-     * The resulting variable
-     */
-    protected final IntVar sum;
-
-    /**
-     * Creates a sum propagator: SUM(x_i) Op sum + b, where x_i are boolean variables.
+     * Creates a sum propagator: SUM(x_i) Op b, where x_i are boolean variables.
      * Coefficients are induced by <code>pos</code>:
      * those before <code>pos</code> (included) are equal to 1,
      * the other ones are equal to -1.
      * @param variables list of boolean variables
      * @param pos position of the last positive (induced) coefficient
      * @param o operator
-     * @param sum resulting variable
      * @param b bound to respect
      * @param reactOnFineEvent set to <tt>true</tt> to react on fine events
      */
-    protected PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b, boolean reactOnFineEvent) {
-        super(concat(variables, sum), pos, o, b, BINARY, reactOnFineEvent);
-        this.sum = sum;
+    protected PropSumFullBool(BoolVar[] variables, int pos, Operator o, int b, boolean reactOnFineEvent) {
+        super(variables, pos, o, b, PropagatorPriority.BINARY, reactOnFineEvent);
     }
 
     /**
-     * Creates a sum propagator: SUM(x_i) Op sum + b, where x_i are boolean variables.
+     * Creates a sum propagator: SUM(x_i) Op b, where x_i are boolean variables.
      * Coefficients are induced by <code>pos</code>:
      * those before <code>pos</code> (included) are equal to 1,
      * the other ones are equal to -1.
      * @param variables list of boolean variables
      * @param pos position of the last positive (induced) coefficient
      * @param o operator
-     * @param sum resulting variable
      * @param b bound to respect
      */
-    public PropSumBool(BoolVar[] variables, int pos, Operator o, IntVar sum, int b) {
-        this(variables, pos, o, sum, b, false);
+    public PropSumFullBool(BoolVar[] variables, int pos, Operator o, int b) {
+        this(variables, pos, o, b, false);
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        switch (o) {
-            case NQ:
-                return IntEventType.INSTANTIATE.getMask();
-            case LE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l - 1 ? IntEventType.DECUPP : IntEventType.VOID);
-            case GE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx == l - 1 ? IntEventType.INCLOW : IntEventType.VOID);
-            default:
-                return IntEventType.boundAndInst();
-        }
+        return IntEventType.INSTANTIATE.getMask();
     }
 
     @Override
@@ -93,7 +73,7 @@ public class PropSumBool extends PropSum {
                 ub++;
             }
         }
-        for (; i < l - 1; i++) { // then the negative ones
+        for (; i < l ; i++) { // then the negative ones
             if (vars[i].isInstantiated()) {
                 k = vars[i].getLB();
                 lb -= k;
@@ -102,8 +82,8 @@ public class PropSumBool extends PropSum {
                 lb--;
             }
         }
-        sumLB = lb - sum.getUB();
-        sumUB = ub - sum.getLB();
+        sumLB = lb;
+        sumUB = ub;
     }
 
     @SuppressWarnings({"NullableProblems"})
@@ -111,22 +91,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (F < 0 || E < 0) {
-            fails();
-        }
         int lb, ub, i = 0;
-        // deal with sum
-        lb = -sum.getUB();
-        ub = -sum.getLB();
-        if (sum.updateLowerBound(-F - lb, this)) {
-            int nub = -sum.getLB();
-            E += nub - ub;
-            ub = nub;
-        }
-        if (sum.updateUpperBound(-ub + E, this)) {
-            int nlb = -sum.getUB();
-            F -= nlb - lb;
-        }
         if (F <= 0 || E <= 0) { // the main reason we implemented a dedicated version
             // positive coefficients first
             while (i < pos) {
@@ -141,7 +106,7 @@ public class PropSumBool extends PropSum {
                 i++;
             }
             // then negative ones
-            while (i < l - 1) {
+            while (i < l) {
                 lb = vars[i].getUB();
                 if (F <= 0 && vars[i].updateLowerBound(-F + lb, this)) {
                     E--;
@@ -161,17 +126,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (F < 0) {
-            fails();
-        }
-        int lb, ub, i = 0;
-        // deal with sum
-        lb = -sum.getUB();
-        ub = -sum.getLB();
-        if (sum.updateLowerBound(-F - lb, this)) {
-            int nub = -sum.getLB();
-            E += nub - ub;
-        }
+        int lb, i = 0;
         if (F <= 0) { // the main reason we implemented a dedicated version
             // positive coefficients first
             while (i < pos) {
@@ -182,7 +137,7 @@ public class PropSumBool extends PropSum {
                 i++;
             }
             // then negative ones
-            while (i < l - 1) {
+            while (i < l) {
                 lb = vars[i].getUB();
                 if (vars[i].updateLowerBound(-F + lb, this)) {
                     E--;
@@ -200,17 +155,8 @@ public class PropSumBool extends PropSum {
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (E < 0) {
-            fails();
-        }
-        int lb, ub, i = 0;
+        int ub, i = 0;
         // deal with sum
-        lb = -sum.getUB();
-        ub = -sum.getLB();
-        if (sum.updateUpperBound(-ub + E, this)) {
-            int nlb = -sum.getUB();
-            F -= nlb - lb;
-        }
         if (E <= 0) { // the main reason we implemented a dedicated version
             // positive coefficients first
             while (i < pos) {
@@ -221,7 +167,7 @@ public class PropSumBool extends PropSum {
                 i++;
             }
             // then negative ones
-            while (i < l - 1) {
+            while (i < l) {
                 ub = vars[i].getLB();
                 if (vars[i].updateUpperBound(ub + E, this)) {
                     F--;
@@ -242,18 +188,17 @@ public class PropSumBool extends PropSum {
         for (; i < pos; i++) {
             linComb.append(" + ").append(vars[i].getName());
         }
-        for (; i < l - 1; i++) {
+        for (; i < l; i++) {
             linComb.append(" - ").append(vars[i].getName());
         }
-        linComb.append(" ").append(o).append(" ");
-        linComb.append(vars[i].getName()).append(" ").append(b < 0 ? "- " : "+ ").append(Math.abs(b));
+        linComb.append(" ").append(o).append(" ").append(b);
         return linComb.toString();
     }
 
     @Override
     protected PropSum opposite(){
-        BoolVar[] bvars = new BoolVar[vars.length-1];
+        BoolVar[] bvars = new BoolVar[vars.length];
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
-        return new PropSumBool(bvars, pos, nop(o), vars[vars.length-1], b + nb(o), reactToFineEvt);
+        return new PropSumFullBool(bvars, pos, nop(o), b, reactToFineEvt);
     }
 }

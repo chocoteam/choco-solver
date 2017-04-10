@@ -398,6 +398,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
             L.record(this);
+            L.forget(this);
             mModel.getEnvironment().worldPop();
             stop = true;
         }

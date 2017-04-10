@@ -252,24 +252,22 @@ public class IntLinCombFactory {
                     RESULT--;
                 }
                 //TODO: deal with clauses and reification
-                Model Model = VARS[0].getModel();
+                Model model = VARS[0].getModel();
                 if (nbools == VARS.length) {
-                    if (Model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new SumConstraint("BoolSum", new PropSumBoolIncr(Model.toBoolVar(tmpV), b, OPERATOR,
-                                Model.intVar(RESULT), 0));
+                    if (model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new SumConstraint("FullBoolSum", new PropSumFullBoolIncr(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
                     } else {
-                        return new SumConstraint("BoolSum", new PropSumBool(Model.toBoolVar(tmpV), b, OPERATOR,
-                                Model.intVar(RESULT), 0));
+                        return new SumConstraint("FullBoolSum", new PropSumFullBool(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool() && COEFFS[VARS.length - 1] == -1) {
                     // the large domain variable is on the last idx
-                    if (Model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new SumConstraint("BoolSum", new PropSumBoolIncr(Model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                    if (model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
+                        return new SumConstraint("BoolSum", new PropSumBoolIncr(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     } else {
-                        return new SumConstraint("BoolSum", new PropSumBool(Model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new SumConstraint("BoolSum", new PropSumBool(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     }
@@ -334,23 +332,5 @@ public class IntLinCombFactory {
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * @param vars array of integer variables
-     * @param coefs array of ints
-     * @return compute the bounds of the result of scalar product vars*coefs.
-     */
-    public static int[] getScalarBounds(IntVar[] vars, int[] coefs) {
-        int[] ext = new int[2];
-        for (int i = 0; i < vars.length; i++) {
-            int min = Math.min(0, vars[i].getLB() * coefs[i]);
-            min = Math.min(min, vars[i].getUB() * coefs[i]);
-            int max = Math.max(0, vars[i].getLB() * coefs[i]);
-            max = Math.max(max, vars[i].getUB() * coefs[i]);
-            ext[0] += min;
-            ext[1] += max;
-        }
-        return ext;
-    }
 
 }

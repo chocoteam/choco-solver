@@ -23,10 +23,12 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static java.util.Arrays.fill;
@@ -112,8 +114,14 @@ public class IntLinCombTest {
     }
 
 
-    protected Model sum(int[][] domains, int[] coeffs, int b, int op) {
+    protected Model sum(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
         Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean enableIncrementalityOnBoolSum(int nbvars) {
+                return incr;
+            }
+        });
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -133,8 +141,14 @@ public class IntLinCombTest {
         return model;
     }
 
-    protected Model intlincomb(int[][] domains, int[] coeffs, int b, int op) {
+    protected Model intlincomb(int[][] domains, int[] coeffs, int b, int op, boolean incr) {
         Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean enableIncrementalityOnBoolSum(int nbvars) {
+                return incr;
+            }
+        });
         IntVar[] bins = new IntVar[domains.length];
         for (int i = 0; i < domains.length; i++) {
             bins[i] = model.intVar("v_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
@@ -154,10 +168,91 @@ public class IntLinCombTest {
         return model;
     }
 
-    @Test(groups="10s", timeOut=300000)
-    public void testSumvsIntLinCombTest() {
+
+    @DataProvider(name = "boolean")
+    public Object[][] createData() {
+        return new Object[][] {
+                new Object[]{false},
+                new Object[]{true}
+        };
+    }
+
+    @Test(groups="1s", timeOut=300000, dataProvider = "boolean")
+    public void testSumvsIntLinCombTest2(boolean incr) {
         Random rand = new Random();
-        for (int seed = 0; seed < 20; seed++) {
+        for (int seed = 0; seed < 500; seed++) {
+            rand.setSeed(seed);
+            int n = 1 + rand.nextInt(6);
+            int[][] domains = buildFullDomains(n, 0, 1, rand, 1.0, false);
+            int[] coeffs = new int[n];
+            for (int i = 0; i < n; i++) {
+                coeffs[i] = -25 + rand.nextInt(50);
+            }
+            int lb = -50 + rand.nextInt(100);
+            int op = -1 + rand.nextInt(3);
+            Model sum = sum(domains, coeffs, lb, op, incr);
+            Model intlincomb = intlincomb(domains, coeffs, lb, op, incr);
+
+
+            while (sum.getSolver().solve()) ;
+            while (intlincomb.getSolver().solve()) ;
+            assertEquals(sum.getSolver().getSolutionCount(), intlincomb.getSolver().getSolutionCount());
+            assertEquals(sum.getSolver().getNodeCount(), intlincomb.getSolver().getNodeCount());
+        }
+    }
+
+    @Test(groups="1s", timeOut=300000, dataProvider = "boolean")
+    public void testSumvsIntLinCombTest3(boolean incr) {
+        Random rand = new Random();
+        for (int seed = 0; seed < 500; seed++) {
+            rand.setSeed(seed);
+            int n = 1 + rand.nextInt(6);
+            int[][] domains = buildFullDomains(n, 0, 1, rand, 1.0, false);
+            int[] coeffs = new int[n];
+            Arrays.fill(coeffs, 1);
+            int lb = rand.nextInt(50);
+            int op = -1 + rand.nextInt(3);
+
+            Model sum = sum(domains, coeffs, lb, op, incr);
+            Model intlincomb = intlincomb(domains, coeffs, lb, op, incr);
+
+
+            while (sum.getSolver().solve()) ;
+            while (intlincomb.getSolver().solve()) ;
+            assertEquals(sum.getSolver().getSolutionCount(), intlincomb.getSolver().getSolutionCount());
+            assertEquals(sum.getSolver().getNodeCount(), intlincomb.getSolver().getNodeCount());
+        }
+    }
+
+    @Test(groups="1s", timeOut=300000, dataProvider = "boolean")
+    public void testSumvsIntLinCombTest4(boolean incr) {
+        Random rand = new Random();
+        for (int seed = 0; seed < 500; seed++) {
+            rand.setSeed(seed);
+            int n = 1 + rand.nextInt(6);
+            int[][] domains0 = buildFullDomains(n - 1, 0, 1, rand, 1.0, false);
+            int[][] domains1 = buildFullDomains(1, -10, 10, rand, 1.0, false);
+            int[][] domains = ArrayUtils.append(domains0, domains1);
+            int[] coeffs = new int[n];
+            Arrays.fill(coeffs, 1);
+            int lb = rand.nextInt(50);
+            int op = -1 + rand.nextInt(3);
+
+            Model sum = sum(domains, coeffs, lb, op, incr);
+            Model intlincomb = intlincomb(domains, coeffs, lb, op, incr);
+
+
+            while (sum.getSolver().solve()) ;
+            while (intlincomb.getSolver().solve()) ;
+            assertEquals(sum.getSolver().getSolutionCount(), intlincomb.getSolver().getSolutionCount());
+            assertEquals(sum.getSolver().getNodeCount(), intlincomb.getSolver().getNodeCount());
+        }
+    }
+
+    @Test(groups="10s", timeOut=300000, dataProvider = "boolean")
+    public void testSumvsIntLinCombTest(boolean incr) {
+        Random rand = new Random();
+        for (int seed = 0; seed < 100; seed++) {
             rand.setSeed(seed);
             int n = 1 + rand.nextInt(6);
             int min = -10 + rand.nextInt(20);
@@ -170,8 +265,9 @@ public class IntLinCombTest {
             int lb = -50 + rand.nextInt(100);
             int op = -1 + rand.nextInt(3);
 
-            Model sum = sum(domains, coeffs, lb, op);
-            Model intlincomb = intlincomb(domains, coeffs, lb, op);
+            Model sum = sum(domains, coeffs, lb, op, incr);
+            Model intlincomb = intlincomb(domains, coeffs, lb, op, incr);
+
 
             while (sum.getSolver().solve()) ;
             while (intlincomb.getSolver().solve()) ;
@@ -180,9 +276,9 @@ public class IntLinCombTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testUSum1() {
-        Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1);
+    @Test(groups="1s", timeOut=60000, dataProvider = "boolean")
+    public void testUSum1(boolean incr) {
+        Model sumleq = sum(new int[][]{{-2, 3}}, new int[]{-2}, -6, -1, incr);
         while (sumleq.getSolver().solve()) ;
     }
 
@@ -191,9 +287,9 @@ public class IntLinCombTest {
      * When an opposite var is declared, the lower (resp. upper) bound modification
      * should be transposed in upper (resp. lower) bound event...
      */
-    @Test(groups="1s", timeOut=60000)
-    public void testUSum2() throws ContradictionException {
-        Model sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0);
+    @Test(groups="1s", timeOut=60000, dataProvider = "boolean")
+    public void testUSum2(boolean incr) throws ContradictionException {
+        Model sum = sum(new int[][]{{-2, 7}, {-1, 6}, {2}, {-2, 5}, {-2, 4}, {-2, 6}}, new int[]{-7, 13, -3, -18, -24, 1}, 30, 0, incr);
         PropagationEngineFactory.DEFAULT.make(sum);
         Variable[] vars = sum.getVars();
         ((IntVar) vars[0]).instantiateTo(-2, Cause.Null);
@@ -273,7 +369,7 @@ public class IntLinCombTest {
         Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropSumBool);
+        Assert.assertTrue(p instanceof PropSumFullBool);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -284,7 +380,7 @@ public class IntLinCombTest {
         Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropSumBool);
+        Assert.assertTrue(p instanceof PropSumFullBool);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -295,7 +391,7 @@ public class IntLinCombTest {
         Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropSumBool);
+        Assert.assertTrue(p instanceof PropSumFullBool);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -306,7 +402,7 @@ public class IntLinCombTest {
         Constraint c = model.scalar(ivars, coeffs, "=", 0);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropSumBool);
+        Assert.assertTrue(p instanceof PropSumFullBool);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -795,10 +891,10 @@ public class IntLinCombTest {
         c.reifyWith(b);
         Constraint oc = c.getOpposite();
         Assert.assertTrue(c instanceof SumConstraint);
-        Assert.assertTrue(c.getPropagator(0) instanceof PropSumBool);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropSumFullBool);
         Assert.assertTrue(oc instanceof SumConstraint);
-        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumBool);
-        PropSumBool poc = (PropSumBool) oc.getPropagator(0);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumFullBool);
+        PropSumFullBool poc = (PropSumFullBool) oc.getPropagator(0);
         Assert.assertEquals(poc.o, Operator.NQ);
         Assert.assertEquals(oc.getOpposite(), c);
     }
@@ -812,10 +908,10 @@ public class IntLinCombTest {
         c.reifyWith(b);
         Constraint oc = c.getOpposite();
         Assert.assertTrue(c instanceof SumConstraint);
-        Assert.assertTrue(c.getPropagator(0) instanceof PropSumBoolIncr);
+        Assert.assertTrue(c.getPropagator(0) instanceof PropSumFullBoolIncr);
         Assert.assertTrue(oc instanceof SumConstraint);
-        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumBoolIncr);
-        PropSumBoolIncr poc = (PropSumBoolIncr) oc.getPropagator(0);
+        Assert.assertTrue(oc.getPropagator(0) instanceof PropSumFullBoolIncr);
+        PropSumFullBoolIncr poc = (PropSumFullBoolIncr) oc.getPropagator(0);
         Assert.assertEquals(poc.o, Operator.EQ);
         Assert.assertEquals(oc.getOpposite(), c);
     }
