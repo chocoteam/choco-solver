@@ -19,7 +19,6 @@ notifications:
     - choco@emn.fr
     on_success: always
     on_failure: always
-install: mvn install:install-file -Dfile=./src/main/resources/xcsp-lib/xcsp3-1.0.0-SNAPSHOT.jar -DgroupId=xcsp3 -DartifactId=xcsp3 -Dversion=1.0.0-SNAPSHOT -Dpackaging=jar
 script: mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP
 after_success:
 - bash <(curl -s https://codecov.io/bash)
