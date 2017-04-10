@@ -241,7 +241,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
             while (!pro_queue[i].isEmpty()) {
                 // revision of the variable
-                flush(pro_queue[i].pollFirst());
+                flush(pro_queue[i].pollLast());
             }
             notEmpty = notEmpty & ~(1 << i);
         }
@@ -255,7 +255,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         if (prop.reactToFineEvent()) {
             evtset = eventsets[aid];
             while (evtset.size() > 0) {
-                int v = evtset.pollFirst();
+                int v = evtset.pollLast();
                 eventmasks[aid][v] = 0;
             }
             evtset.clear();
@@ -281,10 +281,10 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             int t = variable.getDindex(si.next());
             for (; p < t; p++) {
                 prop = vpropagators[p];
-                pindice = vindices[p];
                 if (prop.isActive() && cause != prop) {
                     int aid = p2i.get(prop.getId());
                     if (prop.reactToFineEvent()) {
+                        pindice = vindices[p];
                         boolean needSched = (eventmasks[aid][pindice] == 0);
                         eventmasks[aid][pindice] |= type.getMask();
                         if (needSched) {
