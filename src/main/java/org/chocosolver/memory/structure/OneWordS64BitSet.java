@@ -85,6 +85,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         return copy;
     }
 
+    @Deprecated // never used internally
     public BitSet copyToBitSet() {
         BitSet view = new BitSet(this.size());
         for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
@@ -114,6 +115,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      * @since 1.4
      */
+    @Deprecated // never used internally
     public void flip(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
@@ -135,6 +137,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Deprecated // never used internally
     public void flip(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -429,6 +432,7 @@ public class OneWordS64BitSet implements IStateBitSet {
             return -1;
     }
 
+    @Deprecated // never used internally
     public int capacity() {
         return BITS_PER_WORD;
     }
@@ -477,6 +481,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Deprecated // never used internally
     public void and(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -490,6 +495,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Deprecated // never used internally
     public void or(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -508,6 +514,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param setI a bit set.
      */
+    @Deprecated // never used internally
     public void xor(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -520,6 +527,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *             <code>BitSet</code>.
      * @since 1.2
      */
+    @Deprecated // never used internally
     public void andNot(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -534,6 +542,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *         the specified <code>BitSet</code>.
      * @since 1.4
      */
+    @Deprecated // never used internally
     public boolean intersects(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -570,6 +579,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         return word == set.word;
     }
 
+    @Deprecated // never used internally
     public IStateBitSet copy() {
         //if (!sizeIsSticky.get()) trimToSize();
         OneWordS64BitSet result = new OneWordS64BitSet(environment, this.size());

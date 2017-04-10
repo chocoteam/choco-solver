@@ -76,6 +76,7 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     @Override
+    @Deprecated // never used internally
     public BitSet copyToBitSet() {
         BitSet view = new BitSet(this.size());
         for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
@@ -106,6 +107,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @since 1.4
      */
     @Override
+    @Deprecated // never used internally
     public void flip(int bitIndex) {
         if (bitIndex < 0)
             throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
@@ -128,6 +130,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @since 1.4
      */
     @Override
+    @Deprecated // never used internally
     public void flip(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -390,6 +393,7 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     @Override
+    @Deprecated // never used internally
     public int capacity() {
         return BITS_PER_WORD;
     }
@@ -441,6 +445,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param setI a bit set.
      */
     @Override
+    @Deprecated // never used internally
     public void and(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -455,6 +460,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param setI a bit set.
      */
     @Override
+    @Deprecated // never used internally
     public void or(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -474,6 +480,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param setI a bit set.
      */
     @Override
+    @Deprecated // never used internally
     public void xor(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -487,6 +494,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @since 1.2
      */
     @Override
+    @Deprecated // never used internally
     public void andNot(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -502,6 +510,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @since 1.4
      */
     @Override
+    @Deprecated // never used internally
     public boolean intersects(IStateBitSet setI) {
         throw new UnsupportedOperationException();
     }
@@ -539,6 +548,7 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     @Override
+    @Deprecated // never used internally
     public IStateBitSet copy() {
         OneWordS32BitSet result = new OneWordS32BitSet(environment, this.size());
         result.word.set(word.get());
