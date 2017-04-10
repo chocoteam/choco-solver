@@ -50,6 +50,7 @@ public abstract class IStateDouble  {
      * @param delta increment value
      * @return the new value
      */
+    @Deprecated // never used
     public final double add(double delta) {
         double res = currentValue + delta;
         set(res);
@@ -72,10 +73,12 @@ public abstract class IStateDouble  {
      *
      * @return a double
      */
+    @Deprecated // never used
     public final double deepCopy() {
         return currentValue;
     }
 
+    @Deprecated // never used
     public int getTimeStamp() {
         return timeStamp;
     }
@@ -87,6 +90,7 @@ public abstract class IStateDouble  {
     /**
      * Retrieving the environment
      */
+    @Deprecated // never used
     public IEnvironment getEnvironment() {
         return environment;
     }

@@ -65,6 +65,7 @@ public abstract class IStateIntVector  {
         this.size = env.makeInt(initialSize);
     }
 
+    @Deprecated // never used
     protected IStateIntVector(IEnvironment environment) {
         this.environment = environment;
     }
@@ -76,6 +77,7 @@ public abstract class IStateIntVector  {
     /**
      * Returns the current size of the stored search vector.
      */
+    @Deprecated // never used
     public int size() {
         return size.get();
     }
@@ -84,6 +86,7 @@ public abstract class IStateIntVector  {
     /**
      * Checks if the vector is empty.
      */
+    @Deprecated // never used
     public boolean isEmpty() {
         return size.get() == 0;
     }
@@ -95,7 +98,7 @@ public abstract class IStateIntVector  {
      */
     public abstract void add(int i);
 
-
+    @Deprecated // never used
     public boolean contains(int val) {
         int ssize = size.get();
         for (int i = 0; i < ssize; i++) {
@@ -109,6 +112,7 @@ public abstract class IStateIntVector  {
      *
      * @param i The search to remove.
      */
+    @Deprecated // never used
     public abstract void remove(int i);
 
 
@@ -116,11 +120,13 @@ public abstract class IStateIntVector  {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
+    @Deprecated // never used
     public abstract void removeLast();
 
     /**
      * Returns the <code>index</code>th element of the vector.
      */
+    @Deprecated // never used
     public int get(int index) {
         if (rangeCheck(index)) {
             return elementData[index];
@@ -154,6 +160,7 @@ public abstract class IStateIntVector  {
      */
     public abstract int quickSet(int index, int val);
 
+    @Deprecated // never used
     public int[] deepCopy() {
         int[] ret = new int[size.get()];
         System.arraycopy(elementData, 0, ret, 0, size.get());

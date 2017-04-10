@@ -44,6 +44,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param environment bactrackable environment
      */
+    @Deprecated // never used
     public OneWordS64BitSet(IEnvironment environment) {
         this.environment = environment;
         word = this.environment.makeLong(0);
@@ -71,6 +72,7 @@ public class OneWordS64BitSet implements IStateBitSet {
     }
 
     @SuppressWarnings({"unchecked"})
+    @Deprecated // never used
     public static <T> T[] copyOf(T[] original, int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }
@@ -215,6 +217,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Deprecated // never used
     public void set(int fromIndex, int toIndex, boolean value) {
         if (value)
             set(fromIndex, toIndex);
@@ -300,6 +303,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * @since 1.4
      */
     @SuppressWarnings("UnusedParameters")
+    @Deprecated // never used
     public OneWordS64BitSet get(int fromIndex, int toIndex) {
         throw new UnsupportedOperationException();
     }

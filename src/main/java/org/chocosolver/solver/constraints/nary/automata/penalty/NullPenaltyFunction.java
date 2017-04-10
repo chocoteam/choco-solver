@@ -16,6 +16,7 @@ import org.chocosolver.solver.variables.IntVar;
  * Date: May 3, 2010
  * Time: 6:50:02 PM
  */
+@Deprecated // never used
 public class NullPenaltyFunction extends AbstractPenaltyFunction {
     @Override
     public int penalty(int value) {

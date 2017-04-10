@@ -60,10 +60,12 @@ public abstract class IStateBool  {
      *
      * @return a boolean
      */
+    @Deprecated // never used
     public final boolean deepCopy() {
         return currentValue;
     }
 
+    @Deprecated // never used
     public int getTimeStamp() {
         return timeStamp;
     }
@@ -75,6 +77,7 @@ public abstract class IStateBool  {
     /**
      * Retrieving the environment
      */
+    @Deprecated // never used
     public IEnvironment getEnvironment() {
         return environment;
     }

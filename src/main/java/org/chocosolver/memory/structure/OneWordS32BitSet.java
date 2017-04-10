@@ -61,6 +61,7 @@ public class OneWordS32BitSet implements IStateBitSet {
     }
 
     @SuppressWarnings({"unchecked"})
+    @Deprecated // never used
     public static <T> T[] copyOf(T[] original, int newLength) {
         return (T[]) copyOf(original, newLength, original.getClass());
     }

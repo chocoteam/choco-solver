@@ -50,6 +50,7 @@ public abstract class IStateLong  {
      * @param delta increment value
      * @return the new value
      */
+    @Deprecated // never used
     public final long add(long delta) {
         long res = currentValue + delta;
         set(res);
@@ -72,10 +73,12 @@ public abstract class IStateLong  {
      *
      * @return a long
      */
+    @Deprecated // never used
     public final long deepCopy() {
         return currentValue;
     }
 
+    @Deprecated // never used
     public int getTimeStamp() {
         return timeStamp;
     }
@@ -87,6 +90,7 @@ public abstract class IStateLong  {
     /**
      * Retrieving the environment
      */
+    @Deprecated // never used
     public IEnvironment getEnvironment() {
         return environment;
     }

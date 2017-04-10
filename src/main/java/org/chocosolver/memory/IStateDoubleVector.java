@@ -66,6 +66,7 @@ public abstract class IStateDoubleVector  {
     /**
      * Returns the current size of the stored search vector.
      */
+    @Deprecated // never used
     public final int size() {
         return size.get();
     }
@@ -74,6 +75,7 @@ public abstract class IStateDoubleVector  {
     /**
      * Checks if the vector is empty.
      */
+    @Deprecated // never used
     public final boolean isEmpty() {
         return size.get() == 0;
     }
@@ -83,6 +85,7 @@ public abstract class IStateDoubleVector  {
      *
      * @param i The search to add.
      */
+    @Deprecated // never used
     public abstract void add(double i);
 
 
@@ -91,6 +94,7 @@ public abstract class IStateDoubleVector  {
      *
      * @param i The search to remove.
      */
+    @Deprecated // never used
     public abstract void remove(int i);
 
 
@@ -98,6 +102,7 @@ public abstract class IStateDoubleVector  {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
+    @Deprecated // never used
     public abstract void removeLast();
 
 
@@ -130,6 +135,7 @@ public abstract class IStateDoubleVector  {
      * Assigns a new value <code>val</code> to the element <code>index</code> and returns
      * the old value
      */
+    @Deprecated // never used
     public abstract double set(int index, double val);
 
     /**
@@ -141,7 +147,7 @@ public abstract class IStateDoubleVector  {
      */
     public abstract double quickSet(int index, double val);
 
-
+    @Deprecated // never used
     public double[] deepCopy() {
         double[] ret = new double[size.get()];
         System.arraycopy(elementData, 0, ret, 0, size.get());

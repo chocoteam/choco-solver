@@ -72,10 +72,12 @@ public abstract class IStateInt  {
      *
      * @return a int
      */
+    @Deprecated // never used
     public final int deepCopy() {
         return currentValue;
     }
 
+    @Deprecated // never used
     public int getTimeStamp() {
         return timeStamp;
     }
@@ -87,6 +89,7 @@ public abstract class IStateInt  {
     /**
      * Retrieving the environment
      */
+    @Deprecated // never used
     public IEnvironment getEnvironment() {
         return environment;
     }

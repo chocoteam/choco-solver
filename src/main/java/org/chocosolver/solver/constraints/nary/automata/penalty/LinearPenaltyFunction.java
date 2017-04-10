@@ -14,6 +14,7 @@ package org.chocosolver.solver.constraints.nary.automata.penalty;
  * Date: May 3, 2010
  * Time: 5:49:24 PM
  */
+@Deprecated // never used
 public class LinearPenaltyFunction extends AbstractPenaltyFunction {
 
     /**
@@ -45,7 +46,6 @@ public class LinearPenaltyFunction extends AbstractPenaltyFunction {
      * unit violation cost of the soft maximum value (= 0 if not soft).
      */
     private int maxPenalty;
-
 
     public LinearPenaltyFunction(int min, int minPref, int minPenalty, int max, int maxPref, int maxPenalty) {
         this.min = min;

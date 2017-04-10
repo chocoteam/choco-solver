@@ -14,6 +14,7 @@ package org.chocosolver.solver.constraints.nary.automata.penalty;
  * Date: Apr 27, 2010
  * Time: 11:31:07 AM
  */
+@Deprecated // never used
 public class IsoPenaltyFunction extends AbstractPenaltyFunction {
 
     private int factor;
