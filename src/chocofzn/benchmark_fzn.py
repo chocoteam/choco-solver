@@ -90,7 +90,7 @@ parser.add_argument(
 parser.add_argument(
     "-n", "--name",
     help='Benchmark name',
-    default='explanations',
+    default='machlearn',
 )
 
 parser.add_argument(
@@ -99,6 +99,10 @@ parser.add_argument(
     nargs='+',
     default=[
         '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2013.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2014.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2016.txt',
     ]
 )
 parser.add_argument(
@@ -122,14 +126,14 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'CMP:-stat -p 1',
+        'ML:-stat',
     ]
 )
 parser.add_argument(
     "-tl", "--timelimit",
     help='Time limit in seconds for the resolutions.',
     type=int,
-    default=300
+    default=900
 )
 parser.add_argument(
     "-jargs",

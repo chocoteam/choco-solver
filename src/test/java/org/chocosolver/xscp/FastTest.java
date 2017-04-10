@@ -30,11 +30,11 @@ public class FastTest {
         execute(name,nbsol,bval,nbnod,complet,false);
     }
 
-    @Test(groups = "2012,close<1m,xcsp,cbj", timeOut = 180000, dataProvider = "close<1m")
-    public void testFastCBJ(String name, int nbsol, int bval, int nbnod, boolean complet) throws Exception {
-        System.out.println("solving with explanation");
-        execute(name,nbsol,bval,nbnod,complet,true);
-    }
+//    @Test(groups = "2012,close<1m,xcsp,cbj", timeOut = 180000, dataProvider = "close<1m")
+//    public void testFastCBJ(String name, int nbsol, int bval, int nbnod, boolean complet) throws Exception {
+//        System.out.println("solving with explanation");
+//        execute(name,nbsol,bval,nbnod,complet,true);
+//    }
 
     private void execute(String name, int nbsol, int bval, int nbnod, boolean complet, boolean exp) throws Exception {
         ClassLoader cl = this.getClass().getClassLoader();
@@ -142,7 +142,7 @@ public class FastTest {
                 {basics + "Queens-0008-m1.xml.lzma", 1, -1, 112, true},
                 {basics + "qwh-o30-h374-01.xml.lzma", 1, -1, 68053, true},
                 {basics + "RadarSurveillance-8-24-3-2-00.xml.lzma", 1, -1, 84, true},
-                {basics + "Ramsey-12.xml.lzma", 1, 1, 1442, true},
+                {basics + "Ramsey-12.xml.lzma", 2, 2, 1442, true},
                 {basics + "RoomMate-sr0050-int.xml.lzma", 1, -1, 7, true},
                 {basics + "Sat-flat200-00-clause.xml.lzma", 1, -1, 3337, true},
                 {basics + "SocialGolfers-4-3-4-cp.xml.lzma", 1, -1, 153, true},

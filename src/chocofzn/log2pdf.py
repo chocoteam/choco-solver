@@ -11,24 +11,20 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2016.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/2012/20160630'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/bestbound/20170117'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'C4PAR',
-        'C4DFS',
-        'C4DFS+LC',
-        'C4DFS+COS',
-        'C4LDS+COS',
-        'C4CBJ+LC',
+        'BASIC',
+        'BBOUND',
         ]
 )
 parser.add_argument(
@@ -36,7 +32,7 @@ parser.add_argument(
     help='Output format type: true is when version < 3.3.2, false otherwise, \'name:options\'',
     nargs='+',
     default=[
-        False,False,False,False,False,False
+        False,False
         ]
 )
 
