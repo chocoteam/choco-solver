@@ -46,7 +46,7 @@ public final class StoredDoubleVector extends IStateDoubleVector {
         this.myTrail = env.getDoubleVectorTrail();
     }
 
-
+    @Deprecated // never used
     public StoredDoubleVector(EnvironmentTrailing env, double[] entries) {
         super(env, entries);
         int initialSize = entries.length;

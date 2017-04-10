@@ -309,6 +309,7 @@ public class StoredValuedDirectedMultiGraph {
         }
     }
 
+    @Deprecated // never used
     public void updateSPFT(int nid, TIntStack toRemove, Propagator<IntVar> propagator) {
 
         double tempPval = Double.POSITIVE_INFINITY;
@@ -348,6 +349,7 @@ public class StoredValuedDirectedMultiGraph {
         }
     }
 
+    @Deprecated // never used
     public void updateLPFT(int nid, TIntStack toRemove, Propagator<IntVar> propagator) {
         double tempPval = Double.NEGATIVE_INFINITY;
         int tempP = Integer.MIN_VALUE;
@@ -437,6 +439,7 @@ public class StoredValuedDirectedMultiGraph {
         }
     }
 
+    @Deprecated // never used
     public void updateSPFS(int nid, TIntStack toRemove, Propagator<IntVar> propagator) {
 
         double tempPval = Double.POSITIVE_INFINITY;
@@ -475,6 +478,7 @@ public class StoredValuedDirectedMultiGraph {
         }
     }
 
+    @Deprecated // never used 
     public void updateLPFS(int nid, TIntStack toRemove, Propagator<IntVar> propagator) {
 
         double tempPval = Double.NEGATIVE_INFINITY;

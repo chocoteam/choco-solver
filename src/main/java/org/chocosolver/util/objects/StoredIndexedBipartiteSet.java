@@ -97,14 +97,17 @@ public class StoredIndexedBipartiteSet {
     }
 
     @SuppressWarnings("UnusedParameters")
+    @Deprecated // never used
     public final void add(final int i) {
         throw new UnsupportedOperationException("adding element is not permitted in this structure (the list is only meant to decrease during search)");
     }
 
+    @Deprecated // never used
     public final void clear() {
         last.set(-1);
     }
 
+    @Deprecated // never used
     public final void removeLast() {
         remove(list[last.get()]);
     }
@@ -126,6 +129,7 @@ public class StoredIndexedBipartiteSet {
     }
 
     //we assume that the object belongs to the list
+    @Deprecated // never used
     public final void remove(final IndexedObject object) {
         remove(object.getObjectIdx());
     }
@@ -134,15 +138,18 @@ public class StoredIndexedBipartiteSet {
         return position[object] <= last.get();
     }
 
+    @Deprecated // never used
     public final boolean contains(final IndexedObject object) {
         return contains(object.getObjectIdx());
     }
 
+    @Deprecated // never used
     public final int get(final int index) {
         return list[index];
     }
 
     @SuppressWarnings("UnusedParameters")
+    @Deprecated // never used
     public final int set(final int index, final int val) {
         throw new SolverException("setting an element is not permitted on this structure");
     }
@@ -166,6 +173,7 @@ public class StoredIndexedBipartiteSet {
     //a is not in the list, returns its index k in the table from
     //the end of the list.
     //It basically means that a was the k element to be removed
+    @Deprecated // never used
     public final int findIndexOfInt(final int a) {
         return list.length - position[a];
     }

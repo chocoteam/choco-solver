@@ -100,6 +100,7 @@ public class StoredBoolTrail implements IStoredBoolTrail {
     /**
      * Returns the current size of the stack.
      */
+    @Deprecated // never used
     public int getSize() {
         return currentLevel;
     }

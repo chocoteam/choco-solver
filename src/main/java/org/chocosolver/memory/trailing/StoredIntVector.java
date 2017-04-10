@@ -48,7 +48,7 @@ public final class StoredIntVector extends IStateIntVector {
         this.myTrail = env.getIntVectorTrail();
     }
 
-
+    @Deprecated // never used
     public StoredIntVector(EnvironmentTrailing env, int[] entries) {
         super(env, entries);
         int initialCapacity = Math.max(MIN_CAPACITY, entries.length);

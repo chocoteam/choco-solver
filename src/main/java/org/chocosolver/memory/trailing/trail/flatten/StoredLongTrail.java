@@ -100,6 +100,7 @@ public class StoredLongTrail implements IStoredLongTrail {
     /**
      * Returns the current size of the stack.
      */
+    @Deprecated // never used
     public int getSize() {
         return currentLevel;
     }
