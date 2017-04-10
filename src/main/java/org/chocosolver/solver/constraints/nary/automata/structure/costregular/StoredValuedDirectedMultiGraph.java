@@ -478,7 +478,7 @@ public class StoredValuedDirectedMultiGraph {
         }
     }
 
-    @Deprecated // never used 
+    @Deprecated // never used
     public void updateLPFS(int nid, TIntStack toRemove, Propagator<IntVar> propagator) {
 
         double tempPval = Double.NEGATIVE_INFINITY;

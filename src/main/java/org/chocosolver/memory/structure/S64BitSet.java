@@ -352,6 +352,7 @@ public class S64BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Deprecated // never used
     public void set(int fromIndex, int toIndex, boolean value) {
         if (value)
             set(fromIndex, toIndex);
@@ -482,6 +483,7 @@ public class S64BitSet implements IStateBitSet {
      *                                   larger than <tt>toIndex</tt>.
      * @since 1.4
      */
+    @Deprecated // never used
     public S64BitSet get(int fromIndex, int toIndex) {
         checkRange(fromIndex, toIndex);
 
@@ -716,6 +718,7 @@ public class S64BitSet implements IStateBitSet {
      *         the specified <code>BitSet</code>.
      * @since 1.4
      */
+    @Deprecated // never used
     public boolean intersects(S64BitSet set) {
         for (int i = Math.min(wordsInUse.get(), set.wordsInUse.get()) - 1; i >= 0; i--)
             if ((words[i].get() & set.words[i].get()) != 0)
