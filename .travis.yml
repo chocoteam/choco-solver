@@ -52,7 +52,7 @@ addons:
     condition: $GROUP = 1s
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- travis-ping chocoteam/choco-parsers --branch develop --token ${GH_TOKEN}
+- travis-ping chocoteam/choco-parsers --branch master --token ${GH_TOKEN}
 
 before_deploy:
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
