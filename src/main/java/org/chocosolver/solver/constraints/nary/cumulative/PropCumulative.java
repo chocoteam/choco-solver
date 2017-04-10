@@ -44,7 +44,6 @@ public class PropCumulative extends Propagator<IntVar> {
     protected CumulFilter[] filters;
     protected ISet allTasks;
     protected final IStateInt lastCapaMax;
-    protected final Cumulative.Filter[] _filters;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,7 +65,6 @@ public class PropCumulative extends Propagator<IntVar> {
         this.h = Arrays.copyOfRange(vars, n * 3, n * 4);
         this.capa = this.vars[4 * n];
         this.filters = new CumulFilter[filters.length];
-        _filters = filters;
         for (int f = 0; f < filters.length; f++) {
             this.filters[f] = filters[f].make(n, this);
         }

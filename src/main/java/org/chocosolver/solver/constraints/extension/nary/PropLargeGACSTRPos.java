@@ -204,12 +204,4 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
         maintainList();
         pruningPhase();
     }
-
-    private double getCartesianProduct() {
-        double cp = 1d;
-        for (int i = 0; i < arity; i++) {
-            cp *= vars[i].getDomainSize();
-        }
-        return cp;
-    }
 }

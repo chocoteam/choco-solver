@@ -135,11 +135,6 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
         return resultat;
     }
 
-    // Get Last(x_i, val)
-    private int[] lastSupport(int indexVar, int value) {
-        return getUBport(indexVar, value);
-    }
-
     /**
      * seek a new support for (variable, value), the smallest tuple greater than currentSupport
      * the search is made through valid tuples until and allowed one is found.
