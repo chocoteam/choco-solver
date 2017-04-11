@@ -372,7 +372,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
         Propagator prop;
-        int pindice;
+        int mask = type.getMask();
         EvtScheduler si = variable._schedIter();
         //noinspection unchecked
         si.init(type);
@@ -381,31 +381,32 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
             int t = variable.getDindex(si.next());
             for (; p < t; p++) {
                 prop = vpropagators[p];
-                pindice = vindices[p];
                 if (cause != prop && prop.isActive()) {
-                    int aid = p2i.get(prop.getId());
-                    if (prop.reactToFineEvent()) {
-                        boolean needSched = (eventmasks[aid][pindice] == 0);
-                        eventmasks[aid][pindice] |= type.getMask();
-                        if (needSched) {
-                            //assert !event_f[aid].get(pindice);
-                            if (DEBUG) {
-                                IPropagationEngine.Trace.printFineSchedule(prop);
-                            }
-                            event_f[aid].addLast(pindice);
-                        }
-                    }
-                    if (!schedule_f[aid]) {
-                        PropagatorPriority prio = prop.getPriority();
-                        int q = match_f[prio.priority - 1];
-                        pro_queue_f[q].addLast(prop);
-                        schedule_f[aid] = true;
-                        notEmpty = notEmpty | (1 << q);
-                        if (DEBUG) {
-                            IPropagationEngine.Trace.printCoarseSchedule(prop);
-                        }
-                    }
+                    schedule(prop, vindices[p], mask);
                 }
+            }
+        }
+    }
+
+    private void schedule(Propagator prop, int pindice, int mask) {
+        int aid = p2i.get(prop.getId());
+        if (prop.reactToFineEvent()) {
+            if (eventmasks[aid][pindice] == 0) {
+                if (DEBUG) {
+                    IPropagationEngine.Trace.printFineSchedule(prop);
+                }
+                event_f[aid].addLast(pindice);
+            }
+            eventmasks[aid][pindice] |= mask;
+        }
+        if (!schedule_f[aid]) {
+            PropagatorPriority prio = prop.getPriority();
+            int q = match_f[prio.priority - 1];
+            pro_queue_f[q].addLast(prop);
+            schedule_f[aid] = true;
+            notEmpty = notEmpty | (1 << q);
+            if (DEBUG) {
+                IPropagationEngine.Trace.printCoarseSchedule(prop);
             }
         }
     }

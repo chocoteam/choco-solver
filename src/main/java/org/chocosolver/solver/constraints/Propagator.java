@@ -75,22 +75,22 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Status of this propagator on creation.
      */
-    protected static final short NEW = 0;
+    private static final short NEW = 0;
 
     /**
      * Status of this propagagator when reified.
      */
-    protected static final short REIFIED = 1;
+    private static final short REIFIED = 1;
 
     /**
      * Status of the propagator when activated (ie, after initial propagation).
      */
-    protected static final short ACTIVE = 2;
+    private static final short ACTIVE = 2;
 
     /**
      * Status of the propagator when entailed.
      */
-    protected static final short PASSIVE = 3;
+    private static final short PASSIVE = 3;
 
     /**
      * Unique ID of this propagator.
@@ -107,6 +107,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Backtrackable operations to maintain the status on backtrack.
      */
     private IOperation[] operations;
+
+    /**
+     * On propagator passivation, should this propagator be swapped from active to passive in its
+     * variables' propagators list.
+     */
+    private final boolean swapOnPassivate;
 
     /**
      * Priority of this propagator.
@@ -148,12 +154,16 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
      * This is the responsibility of the propagator's developer to take care of that point.
      *
-     * @param vars           variables of the propagator. Their modification will trigger filtering
-     * @param priority       priority of this propagator (lowest priority propagators are called first)
-     * @param reactToFineEvt indicates whether or not this propagator must be informed of every variable
-     *                       modification, i.e. if it should be incremental or not
+     * @param vars            variables of the propagator. Their modification will trigger
+     *                        filtering
+     * @param priority        priority of this propagator (lowest priority propagators are called
+     *                        first)
+     * @param reactToFineEvt  indicates whether or not this propagator must be informed of every
+     *                        variable modification, i.e. if it should be incremental or not
+     * @param swapOnPassivate indicates if, on propagator passivation, the propagator should be
+     *                        ignored in its variables' propagators list.
      */
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt, boolean swapOnPassivate) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
@@ -168,26 +178,28 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         }
         this.vindices = new int[vars.length];
         ID = model.nextId();
-        operations = new IOperation[]{
-                new IOperation() {
-                    @Override
-                    public void undo() {
-                        state = NEW;
-                    }
-                },
-                new IOperation() {
-                    @Override
-                    public void undo() {
-                        state = REIFIED;
-                    }
-                },
-                new IOperation() {
-                    @Override
-                    public void undo() {
-                        state = ACTIVE;
-                    }
-                }
-        };
+        this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
+        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
+        operations[0] = () -> state = NEW;
+        operations[1] = () -> state = REIFIED;
+        operations[2] = () -> state = ACTIVE;
+    }
+
+    /**
+     * Creates a new propagator to filter the domains of vars.
+     * <p>
+     * <br/>
+     * To limit memory consumption, the array of variables is <b>referenced directly</b> (no clone).
+     * This is the responsibility of the propagator's developer to take care of that point.
+     *
+     * @param vars           variables of the propagator. Their modification will trigger filtering
+     * @param priority       priority of this propagator (lowest priority propagators are called
+     *                       first)
+     * @param reactToFineEvt indicates whether or not this propagator must be informed of every
+     *                       variable modification, i.e. if it should be incremental or not
+     */
+    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+        this(vars, priority, reactToFineEvt, false);
     }
 
     /**
@@ -246,9 +258,9 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param c the constraint containing this propagator
      * @throws SolverException if the propagator is declared in more than one constraint
      */
-    public void defineIn(Constraint c) throws SolverException{
-        if((constraint != null && constraint.getStatus() != Constraint.Status.FREE)
-            || (c.getStatus() != Constraint.Status.FREE)){
+    void defineIn(Constraint c) throws SolverException {
+        if ((constraint != null && constraint.getStatus() != Constraint.Status.FREE)
+                || (c.getStatus() != Constraint.Status.FREE)) {
             throw new SolverException("This propagator is already defined in a constraint. " +
                     "This happens when a constraint is reified and posted.");
         }
@@ -351,13 +363,13 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * informs that this propagator is now active. Should not be called by the user.
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
-    public void setActive() throws SolverException{
-        if(isStateLess()) {
+    public void setActive() throws SolverException {
+        if (isStateLess()) {
             state = ACTIVE;
             model.getEnvironment().save(operations[NEW]);
-        }else{
+        } else {
             throw new SolverException("Try to activate a propagator already active, passive or reified.\n" +
-                this + " of "+ this.getConstraint());
+                    this + " of " + this.getConstraint());
         }
     }
 
@@ -365,13 +377,13 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * informs that this reified propagator must hold. Should not be called by the user.
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
-    public void setReifiedTrue() throws SolverException{
-        if(isReifiedAndSilent()) {
+    public void setReifiedTrue() throws SolverException {
+        if (isReifiedAndSilent()) {
             state = ACTIVE;
             model.getEnvironment().save(operations[REIFIED]);
-        }else{
+        } else {
             throw new SolverException("Reification process tries to force activation of a propagator already active or passive.\n" +
-                    this + " of "+ this.getConstraint());
+                    this + " of " + this.getConstraint());
         }
     }
 
@@ -379,12 +391,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * informs that this reified propagator may not hold. Should not be called by the user.
      * @throws SolverException if the propagator cannot be reified due to its current state
      */
-    public void setReifiedSilent() throws SolverException{
+    public void setReifiedSilent() throws SolverException {
         if (isStateLess() || isReifiedAndSilent()) {
             state = REIFIED;
         } else {
             throw new SolverException("Reification process try to reify a propagator already active or posted.\n" +
-                    this + " of "+ this.getConstraint());
+                    this + " of " + this.getConstraint());
         }
     }
 
@@ -394,17 +406,30 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     @SuppressWarnings({"unchecked"})
-    public void setPassive() throws SolverException{
+    public void setPassive() throws SolverException {
         // Note: calling isCompletelyInstantiated() to avoid next steps may lead to error when
         // dealing with reification and dynamic addition.
-        if(isActive()){
+        if (isActive()) {
             state = PASSIVE;
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
-        }else{
-            throw new SolverException("Try to passivate a propagator already passive or reified.\n"+
-                    this + " of "+ this.getConstraint());
+            if (swapOnPassivate) {
+                if (operations[3] == null) {
+                    for (int i = 0; i < vars.length; i++) {
+                        int finalI = i;
+                        operations[3 + i] = () -> vindices[finalI] = vars[finalI].link(this, finalI);
+                    }
+                }
+                for (int i = 0; i < vars.length; i++) {
+                    vars[i].unlink(this, i);
+                    model.getEnvironment().save(operations[3 + i]);
+
+                }
+            }
+        } else {
+            throw new SolverException("Try to passivate a propagator already passive or reified.\n" +
+                    this + " of " + this.getConstraint());
         }
     }
 
@@ -416,8 +441,8 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *     <li>this propagator's internal structure has changed (eg. this acts as a cut)</li>
      * </ul>
      */
-    protected void forcePropagationOnBacktrack(){
-        if(isPassive()){ // force activation on backtrack, because something can have changed on our back
+    protected void forcePropagationOnBacktrack() {
+        if (isPassive()) { // force activation on backtrack, because something can have changed on our back
             state = ACTIVE;
         }
         model.getSolver().getEngine().propagateOnBacktrack(this);
@@ -621,9 +646,9 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         StringBuilder st = new StringBuilder();
         st.append(getClass().getSimpleName()).append("(");
         int i = 0;
-        if(vars.length>=3)st.append(vars[i++].getName()).append(", ");
-        if(vars.length>=2)st.append(vars[i++].getName()).append(", ");
-        if(vars.length>=1)st.append(vars[i++].getName());
+        if (vars.length >= 3) st.append(vars[i++].getName()).append(", ");
+        if (vars.length >= 2) st.append(vars[i++].getName()).append(", ");
+        if (vars.length >= 1) st.append(vars[i++].getName());
         if (i < vars.length) {
             if (vars.length > 4) {
                 st.append(", ...");

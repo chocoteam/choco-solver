@@ -516,4 +516,31 @@ public class ModelTest {
 		System.out.println(s.getIntVal(ticks[0]));
 		System.out.println(s.getIntVal(p));
 	}
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSwapOnPassivate() {
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean swapOnPassivate() {
+                return true;
+            }
+        });
+        int n = 11;
+        IntVar[] vars = new IntVar[n];
+        for (int i = 0; i < vars.length; i++) {
+            vars[i] = model.intVar("Q_" + i, 1, n, false);
+        }
+        model.addHook("vars", vars);
+        for (int i = 0; i < n - 1; i++) {
+            for (int j = i + 1; j < n; j++) {
+                int k = j - i;
+                model.arithm(vars[i], "!=", vars[j]).post();
+                model.arithm(vars[i], "!=", vars[j], "+", -k).post();
+                model.arithm(vars[i], "!=", vars[j], "+", k).post();
+            }
+        }
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2680);
+    }
 }

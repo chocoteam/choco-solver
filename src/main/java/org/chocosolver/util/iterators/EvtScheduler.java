@@ -16,6 +16,10 @@ import org.chocosolver.solver.variables.events.IEventType;
  */
 public interface EvtScheduler<E extends IEventType> extends IntIterator {
 
+    /**
+     * Initializes the scheduler with an event defined by 'type'.
+     * @param type event received
+     */
     void init(E type);
 
     int select(int mask);

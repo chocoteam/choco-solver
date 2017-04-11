@@ -99,10 +99,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
      * since the last propagation of propagator j.
      */
     private int[][] eventmasks;
-    /**
-     * Per propagator: counter of events to be propagated
-     */
-    private int[] pendingEvt;
 
     /**
      * A specific object to deal with first propagation
@@ -153,7 +149,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             }
 
             scheduled = new short[size];
-            pendingEvt = new int[size];
             eventsets = new IntCircularQueue[size];
             eventmasks = new int[size][];
             for (int i = 0; i < size; i++) {
@@ -200,8 +195,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                         // clear event
                         mask = eventmasks[aid][v];
                         eventmasks[aid][v] = 0;
-                        assert (pendingEvt[aid] > 0) : "number of enqueued records is <= 0 " + this;
-                        pendingEvt[aid]--;
                         // run propagation on the specific event
                         lastProp.propagate(v, mask);
                     }
@@ -259,7 +252,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 eventmasks[aid][v] = 0;
             }
             evtset.clear();
-            pendingEvt[aid] = 0;
         }
         scheduled[aid] = 0;
     }
@@ -272,7 +264,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
         Propagator prop;
-        int pindice;
+        int mask = type.getMask();
         EvtScheduler si = variable._schedIter();
         //noinspection unchecked
         si.init(type);
@@ -282,34 +274,34 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             for (; p < t; p++) {
                 prop = vpropagators[p];
                 if (prop.isActive() && cause != prop) {
-                    int aid = p2i.get(prop.getId());
-                    if (prop.reactToFineEvent()) {
-                        pindice = vindices[p];
-                        boolean needSched = (eventmasks[aid][pindice] == 0);
-                        eventmasks[aid][pindice] |= type.getMask();
-                        if (needSched) {
-                            if (DEBUG) {
-                                IPropagationEngine.Trace.printFineSchedule(prop);
-                            }
-                            assert (pendingEvt[aid] >= 0) : "number of enqueued records is < 0 " + this;
-                            pendingEvt[aid]++;
-                            eventsets[aid].addLast(pindice);
-                        }
-                    }
-                    if (scheduled[aid] == 0) {
-                        int prio = /*dynamic ? prop.dynPriority() :*/ prop.getPriority().priority;
-                        pro_queue[prio].addLast(prop);
-                        scheduled[aid] = (short) (prio + 1);
-//                    notEmpty.set(prio);
-                        notEmpty = notEmpty | (1 << prio);
-                        if (DEBUG) {
-                            IPropagationEngine.Trace.printCoarseSchedule(prop);
-                        }
-                    }
+                    schedule(prop, vindices[p], mask);
                 }
             }
         }
     }
+
+    private void schedule(Propagator prop, int pindice, int mask) {
+        int aid = p2i.get(prop.getId());
+        if (prop.reactToFineEvent()) {
+            if (eventmasks[aid][pindice] == 0) {
+                if (DEBUG) {
+                    IPropagationEngine.Trace.printFineSchedule(prop);
+                }
+                eventsets[aid].addLast(pindice);
+            }
+            eventmasks[aid][pindice] |= mask;
+        }
+        if (scheduled[aid] == 0) {
+            int prio = prop.getPriority().priority;
+            pro_queue[prio].addLast(prop);
+            scheduled[aid] = (short) (prio + 1);
+            notEmpty = notEmpty | (1 << prio);
+            if (DEBUG) {
+                IPropagationEngine.Trace.printCoarseSchedule(prop);
+            }
+        }
+    }
+
 
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
@@ -337,7 +329,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     eventmasks[aid][v] = 0;
                 }
                 evtset.clear();
-                pendingEvt[aid] = 0;
             }
         }
     }
@@ -373,10 +364,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             short[] _scheduled = scheduled;
             scheduled = new short[nsize];
             System.arraycopy(_scheduled, 0, scheduled, 0, osize);
-
-            int[] _pendingEvt = pendingEvt;
-            pendingEvt = new int[nsize];
-            System.arraycopy(_pendingEvt, 0, pendingEvt, 0, osize);
 
             IntCircularQueue[] _eventsets = eventsets;
             eventsets = new IntCircularQueue[nsize];
@@ -442,7 +429,6 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                 propagators[idtd] = toMove;
                 p2i.put(toMove.getId(), idtd);
                 scheduled[idtd] = scheduled[idtm];
-                pendingEvt[idtd] = pendingEvt[idtm];
                 assert !toDelete.reactToFineEvent() || eventsets[idtd].isEmpty() : "try to delete a propagator which has events to propagate (fine)";
                 eventsets[idtd] = eventsets[idtm];
                 eventmasks[idtd] = eventmasks[idtm];

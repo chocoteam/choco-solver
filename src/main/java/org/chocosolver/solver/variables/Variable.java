@@ -189,8 +189,8 @@ public interface Variable extends Identity, Comparable<Variable> {
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
      *
-     * @param idxInProp  index of the variable in the propagator
      * @param propagator the propagator to remove
+     * @param idxInProp  index of the variable in the propagator
      *
      */
     void unlink(Propagator propagator, int idxInProp);

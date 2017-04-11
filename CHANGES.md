@@ -11,6 +11,7 @@ NEXT MILESTONE
 - add logical operator to expression (#520). Now it is possible, f-ex., to declare expression like:
 ```x.eq(y.add(1)).or(x.eq(y).and(x.eq(1)))```
 - add new API to `Solver` to print features in a single line
+- enable ignoring passivate propagators when iterating over propagators of a modified variable (false by default; see Settings)
 
 ### Deprecated API (to be removed in next release):
 - `IPropagationEngine.fails(c,v,m)` is replaced by `Solver.throwsException(c,v,m)` (#524)

@@ -233,4 +233,12 @@ public interface Settings  {
         return false;
     }
 
+    /**
+     * @return <i>true</i> if, on propagator passivation, the propagator is swapped from active to passive in its variables' propagators list.
+     * <i>false</i> if, on propagator passivation, only the propagator's state is set to PASSIVE.
+     */
+    default boolean swapOnPassivate(){
+        return false;
+    }
+
 }
