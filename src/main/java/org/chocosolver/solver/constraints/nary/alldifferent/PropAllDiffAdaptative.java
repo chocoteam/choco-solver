@@ -14,14 +14,10 @@ import org.chocosolver.solver.variables.IntVar;
 import java.util.Random;
 
 /**
- * Propagator for AllDifferent AC constraint for integer variables
- * <p>
- * Uses Regin algorithm
- * Runs in O(m.n) worst case time for the initial propagation
- * but has a good average behavior in practice
- * <p>
- * Runs incrementally for maintaining a matching
- * <p>
+ * Probabilistic Propagator for AllDifferent AC constraint for integer variables introduced
+ * to avoid loosing too much time in AC propagation when BC is sufficientss
+ * The more this propagator triggers filtering and failure, the more likely it will be called
+ * If it does not bring improvement, this propagator will be called less during search
  *
  * @author Jean-Guillaume Fages
  */

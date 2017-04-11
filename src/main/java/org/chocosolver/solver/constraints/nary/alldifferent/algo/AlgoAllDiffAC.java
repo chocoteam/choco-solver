@@ -21,6 +21,15 @@ import java.util.BitSet;
 
 /**
  * Algorithm of Alldifferent with AC
+ *
+ * Uses Regin algorithm
+ * Runs in O(m.n) worst case time for the initial propagation
+ * but has a good average behavior in practice
+ * <p/>
+ * Keeps track of previous matching for further calls
+ * <p/>
+ * 
+ * @author Jean-Guillaume Fages
  */
 public class AlgoAllDiffAC {
 
