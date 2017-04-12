@@ -258,7 +258,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     public final void unlinkVariables() {
         for (int v = 0; v < vars.length; v++) {
             if(!vars[v].isAConstant()) {
-                vars[v].unlink(this, vindices[v]);
+                vars[v].unlink(this, v);
             }
         }
     }
