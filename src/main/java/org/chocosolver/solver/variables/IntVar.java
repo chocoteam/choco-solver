@@ -405,11 +405,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      */
     boolean isBool();
 
-    /**
-     * @return true iff the variable is a constant (created with a singleton domain)
-     */
-    boolean isAConstant();
-
 
     @Override
     default boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {

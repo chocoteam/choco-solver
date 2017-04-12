@@ -290,6 +290,11 @@ public interface Variable extends Identity, Comparable<Variable> {
     int getTypeAndKind();
 
     /**
+     * @return true iff the variable is a constant (created with a singleton domain)
+     */
+    boolean isAConstant();
+
+    /**
      * For scheduling purpose only
      * @return the scheduler
      */
