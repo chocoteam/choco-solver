@@ -179,10 +179,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         this.vindices = new int[vars.length];
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
-        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
-        operations[0] = () -> state = NEW;
-        operations[1] = () -> state = REIFIED;
-        operations[2] = () -> state = ACTIVE;
+        operations = new IOperation[]{
+                () -> state = NEW,
+                () -> state = REIFIED,
+                () -> state = ACTIVE
+        };
     }
 
     /**
@@ -246,6 +247,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public final void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
+            // todo : skip constants
             vindices[v] = vars[v].link(this, v);
         }
     }
@@ -415,16 +417,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
             if (swapOnPassivate) {
-                if (operations[3] == null) {
-                    for (int i = 0; i < vars.length; i++) {
-                        int finalI = i;
-                        operations[3 + i] = () -> vindices[finalI] = vars[finalI].link(this, finalI);
-                    }
-                }
                 for (int i = 0; i < vars.length; i++) {
-                    vars[i].unlink(this, i);
-                    model.getEnvironment().save(operations[3 + i]);
-
+                    // ignore instantiated variables, they can't generate new events
+                    if(!vars[i].isInstantiated()){
+                        vars[i].moveToPassive(this, i, model.getEnvironment());
+                    }
                 }
             }
         } else {

@@ -18,8 +18,8 @@ import org.chocosolver.util.iterators.EvtScheduler;
 public class SetEvtScheduler implements EvtScheduler<SetEventType> {
 
     private final int[] DIS = new int[]{
-            0, 1, 2, 3, -1, // ADD_TO_KER
-            1, 3, -1, // REM_FROM_ENV
+            0,1, 4,5, -1, // ADD_TO_KER
+            2,3, 4,5, -1, // REM_FROM_ENV
     };
     private int i = 0;
     private static final int[] IDX = new int[]{-1, 0, 5};
@@ -34,10 +34,10 @@ public class SetEvtScheduler implements EvtScheduler<SetEventType> {
             case 1: // instantiate
                 return 0;
             case 2: // lb or more
-                return 1;
+                return 2;
             case 3:
             case 255: // all
-                return 2;
+                return 4;
             default:
                 throw new UnsupportedOperationException("Unknown case");
         }

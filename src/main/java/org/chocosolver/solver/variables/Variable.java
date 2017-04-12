@@ -196,6 +196,18 @@ public interface Variable extends Identity, Comparable<Variable> {
     void unlink(Propagator propagator, int idxInProp);
 
     /**
+     * Informs this variable that 'propagator' is set to passive.
+     * This method helps reducing iteration over this' propagators on modification by moving
+     * the propagator in the list.
+     * The new position is then returned.
+     * @param propagator the propagator set to passive
+     * @param idxInProp the index of the propagator in the variable list
+     * @param environment to undo this operation on backtrack
+     * @return the new position of the propagator in this's propagators list
+     */
+    void moveToPassive(Propagator propagator, int idxInProp, IEnvironment environment);
+
+    /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
      * Each observer has its update method.
      *

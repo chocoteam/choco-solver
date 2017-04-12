@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
@@ -141,7 +142,7 @@ public abstract class AbstractVariable implements Variable {
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
-        this.dindices = new int[6];
+        this.dindices = new int[11];
         this.ID = this.model.nextId();
         this.model.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
@@ -173,14 +174,14 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public final int link(Propagator propagator, int idxInProp) {
         // 1. ensure capacity
-        if (dindices[5] == propagators.length) {
+        if (dindices[10] == propagators.length) {
             Propagator[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, dindices[5]);
+            System.arraycopy(tmp, 0, propagators, 0, dindices[10]);
 
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, dindices[5]);
+            System.arraycopy(itmp, 0, pindices, 0, dindices[10]);
             if(pindices.length != propagators.length){
                 throw new UnsupportedOperationException("error: pindices.length != propagators.length in "+this);
             }
@@ -195,19 +196,44 @@ public abstract class AbstractVariable implements Variable {
         return pos;
     }
 
-    private void move(int from, int to){
-        if (propagators[from] != null) {
+    /**
+     * Move a propagator from position 'from' to position 'to' in {@link #propagators}.
+     * The element at position 'from' will then be 'null'.
+     * @param from a position in {@link #propagators}
+     * @param to a position in {@link #propagators}
+     */
+    private void replace(int from, int to){
+        if (from != to) {
             propagators[to] = propagators[from];
             pindices[to] = pindices[from];
             propagators[to].setVIndices(pindices[from], to);
-            propagators[from] = null;
+        }
+        propagators[from] = null;
+    }
+
+    /**
+     * Swap two propagators, one at position 'from', the other at position 'to' in {@link #propagators}
+     * @param from a position in {@link #propagators}
+     * @param to a position in {@link #propagators}
+     */
+    private void swap(int from, int to){
+        if(from != to) {
+            Propagator ptmp = propagators[to];
+            propagators[to] = propagators[from];
+            propagators[from] = ptmp;
+            int itmp = pindices[to];
+            pindices[to] = pindices[from];
+            propagators[to].setVIndices(pindices[from], to);
+            pindices[from] = itmp;
+            propagators[from].setVIndices(itmp, from);
         }
     }
 
     int subscribe(Propagator p, int ip, int i) {
-        int j = 4;
-        for (; j >= i; j--) {
-            move(dindices[j], dindices[j + 1]);
+        int j = 9;
+        for (; j > i; j-=2) {
+            replace(dindices[j - 1], dindices[j]);
+            dindices[j]++;
             dindices[j + 1]++;
         }
         propagators[dindices[i]] = p;
@@ -225,12 +251,25 @@ public abstract class AbstractVariable implements Variable {
 
     void cancel(int pp, int i) {
         // start moving the other ones
-        move(dindices[i + 1] - 1, pp);
-        for (int j = i + 1; j < 5; j++) {
-            move(dindices[j + 1] - 1, dindices[j] - 1);
+        replace(dindices[i + 1] - 1, pp);
+        dindices[i + 1]--;
+        dindices[i + 2]--;
+        for (int j = i + 3; j < 10; j+=2) {
+            replace(dindices[j] - 1, dindices[j - 1]);
+            dindices[j + 1]--;
             dindices[j]--;
         }
-        dindices[5]--;
+    }
+
+    @Override
+    public void moveToPassive(Propagator propagator, int idxInProp, IEnvironment environment) {
+        int i = propagator.getVIndice(idxInProp);
+        assert propagators[i] == propagator:"Try to passivate :\n"+propagator+"\nfrom "+this.getName()+" but found:\n"+propagators[i];
+        int pc = scheduler.select(propagator.getPropagationConditions(pindices[i])) + 1;
+        int pos = dindices[pc];
+        swap(i, pos - 1);
+        dindices[pc]--;
+        environment.save(() -> dindices[pc]++);
     }
 
     @Override
@@ -245,7 +284,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public final int getNbProps() {
-        return dindices[5];
+        return dindices[10];
     }
 
     @Override

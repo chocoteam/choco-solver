@@ -18,13 +18,13 @@ import org.chocosolver.util.iterators.EvtScheduler;
 public class IntEvtScheduler implements EvtScheduler<IntEventType> {
 
     private static final int[] DIS = new int[]{
-            4, 5, -1, //REMOVE
-            1, 2, 3, 5, -1,// INCLOW
-            2, 5, -1, // DECUPP
-            1, 5, -1, // BOUND
-            0, 5, -1, // INSTANTIATE
+            8, 9, -1, //REMOVE
+            2,3, 6,7, 8,9, -1,// INCLOW
+            4,5, 6,7, 8,9, -1, // DECUPP
+            2,3, 4,5, 6,7, 8,9, -1, // BOUND
+            0,1, 2,3, 4,5, 6,7, 8,9, -1, // INSTANTIATE
     };
-    private static final int[] IDX = new int[]{-1, 0, 3, 8, 11, 14};
+    private static final int[] IDX = new int[]{-1, 0, 3, 10, 17, 26};
     private int i = 0;
 
     public void init(IntEventType evt) {
@@ -38,17 +38,17 @@ public class IntEvtScheduler implements EvtScheduler<IntEventType> {
             case 8: // INSTANTIATE
                 return 0;
             case 4: // DECUPP and more
-                return 2;
+                return 4;
             case 2: // INCLOW (and DECUPP) or more
                 b = Integer.lowestOneBit(mask >> 2);
                 if (b == 1) { // DECUPP too
-                    return 3;
+                    return 6;
                 } else {
-                    return 1;
+                    return 2;
                 }
             default:
             case 1:  // REMOVE or more
-                return 4;
+                return 8;
         }
     }
 
