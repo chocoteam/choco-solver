@@ -179,11 +179,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         this.vindices = new int[vars.length];
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
-        operations = new IOperation[]{
-                () -> state = NEW,
-                () -> state = REIFIED,
-                () -> state = ACTIVE
-        };
+        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
+        operations[0] = () -> state = NEW;
+        operations[1] = () -> state = REIFIED;
+        operations[2] = () -> state = ACTIVE;
     }
 
     /**
@@ -247,8 +246,20 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public final void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
-            // todo : skip constants
-            vindices[v] = vars[v].link(this, v);
+            if(!vars[v].isAConstant()) {
+                vindices[v] = vars[v].link(this, v);
+            }
+        }
+    }
+
+    /**
+     * Destroy links between this propagator and its variables.
+     */
+    public final void unlinkVariables() {
+        for (int v = 0; v < vars.length; v++) {
+            if(!vars[v].isAConstant()) {
+                vars[v].unlink(this, vindices[v]);
+            }
         }
     }
 
@@ -417,10 +428,16 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
             if (swapOnPassivate) {
+                if (operations[3] == null) {
                 for (int i = 0; i < vars.length; i++) {
-                    // ignore instantiated variables, they can't generate new events
-                    if(!vars[i].isInstantiated()){
-                        vars[i].moveToPassive(this, i, model.getEnvironment());
+                        int finalI = i;
+                        operations[3 + i] = () -> vindices[finalI] = vars[finalI].link(this, finalI);
+                    }
+                }
+                for (int i = 0; i < vars.length; i++) {
+                    if(!vars[i].isInstantiated()) {
+                        vars[i].unlink(this, i);
+                        model.getEnvironment().save(operations[3 + i]);
                     }
                 }
             }

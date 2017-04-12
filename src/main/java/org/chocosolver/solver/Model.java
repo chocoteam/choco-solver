@@ -861,9 +861,7 @@ public class Model implements IModel {
                 }
                 // 4. remove the propagators of the constraint from its variables
                 for (Propagator prop : c.getPropagators()) {
-                    for (int v = 0; v < prop.getNbVars(); v++) {
-                        prop.getVar(v).unlink(prop, v);
-                    }
+                    prop.unlinkVariables();
                 }
             }
         }
