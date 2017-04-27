@@ -48,8 +48,14 @@ public class VariableUtils {
     public static int[] boundsForScalar(IntVar[] vars, int[] coeffs) {
         long[] bounds = new long[2];
         for (int i = 0; i < vars.length; i++) {
-            bounds[0] += vars[i].getLB() * coeffs[i];
-            bounds[1] += vars[i].getUB() * coeffs[i];
+            int c = coeffs[i];
+            if(c >= 0) {
+                bounds[0] += vars[i].getLB() * coeffs[i];
+                bounds[1] += vars[i].getUB() * coeffs[i];
+            }else{
+                bounds[0] += vars[i].getUB() * coeffs[i];
+                bounds[1] += vars[i].getLB() * coeffs[i];
+            }
         }
         return new int[]{MathUtils.safeCast(bounds[0]), MathUtils.safeCast(bounds[1])};
     }
@@ -296,7 +302,7 @@ public class VariableUtils {
     public static long domainCardinality(IntVar... vars) {
         long card = 1;
         for (int i = 0; i < vars.length && card < Integer.MAX_VALUE; i++) {
-            card *= vars.length;
+            card *= vars[i].getDomainSize();
         }
         return Math.min(Integer.MAX_VALUE, card);
     }
