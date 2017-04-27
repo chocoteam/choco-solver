@@ -227,11 +227,6 @@
                             <descriptors>
                                 <descriptor>src/assembly/with-dep.xml</descriptor>
                             </descriptors>
-                            <archive>
-                                <manifest>
-                                    <mainClass>org.chocosolver.parser.flatzinc.ChocoFZN</mainClass>
-                                </manifest>
-                            </archive>
                         </configuration>
                     </execution>
                 </executions>
