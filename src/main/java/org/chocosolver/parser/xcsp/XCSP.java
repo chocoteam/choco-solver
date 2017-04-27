@@ -15,6 +15,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.SearchState;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.xcsp.checker.SolutionChecker;
@@ -103,6 +105,7 @@ public class XCSP extends RegParser {
 
     public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
+        target.getSolver().setSearch(Search.intVarSearch(parser.mvars.values().toArray(new IntVar[0])));
 //        Files.move(Paths.get(instance),
 //                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
 //                StandardCopyOption.REPLACE_EXISTING);

@@ -87,6 +87,8 @@ public class BaseFlatzincListener implements ParserListener {
     public void beforeSolving() {
         System.out.println("% solve instance...");
         fznparser.getModel().getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        System.out.printf("%% ");
+        fznparser.getModel().getSolver().printShortFeatures();
     }
 
     @Override

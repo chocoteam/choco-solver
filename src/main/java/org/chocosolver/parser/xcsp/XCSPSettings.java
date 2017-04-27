@@ -15,4 +15,26 @@ import org.chocosolver.solver.Settings;
  * Project: choco-parsers.
  */
 public class XCSPSettings implements Settings {
+
+    /**
+     * Set to true to print constraint creation during parsing
+     */
+    public boolean printConstraint() {
+        return false;
+    }
+
+    @Override
+    public boolean enableTableSubstitution() {
+        return true;
+    }
+
+    @Override
+    public boolean enableSAT() {
+        return false;
+    }
+
+    @Override
+    public int getMaxTupleSizeForSubstitution() {
+        return 10000;
+    }
 }

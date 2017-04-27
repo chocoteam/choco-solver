@@ -5,24 +5,10 @@ __author__ = 'kyzrsoze'
 
 
 ## CMD LINE ARGUMENT
-parser = argparse.ArgumentParser(description='Solve a XCSP instance with Choco.')
+parser = argparse.ArgumentParser(description='Solve a XCSP3 instance with Choco.')
 parser.add_argument(
     "file",
-    help='Path of the Flatzinc file to treat.'
-)
-parser.add_argument(
-    "-a",
-    help='This causes the solver to search for and output all solutions.\n'
-         'When this option is not given the solver should search for, and output the first solution '
-         'or the best known one.',
-    action='store_true',
-    default=False
-)
-parser.add_argument(
-    "-f",
-    help="When invoked with this option the solver ignores any specified search strategy.",
-    action='store_true',
-    default=False
+    help='Path of the XCSP3 file to treat.'
 )
 parser.add_argument(
     "-p",
@@ -49,12 +35,15 @@ parser.add_argument(
     help='Choco optional arguments',
     default=''
 )
+
+m2path="~/.m2"
+pversion="4.0.2-SNAPSHOT"
+
 parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
-    default='.:'
-            '/Users/kyzrsoze/.m2/repository/choco/choco-solver/3.2.1-SNAPSHOT/choco-solver-3.2.1-SNAPSHOT-jar-with-dependencies.jar:'
-            '/Users/kyzrsoze/.m2/repository/choco/choco-parsers/3.2.1-SNAPSHOT/choco-parsers-3.2.1-SNAPSHOT.jar',
+    default='.:%s/repository/org/choco-solver/choco-parsers/%s/choco-parsers-%s-with-dependencies.jar'
+            % (m2path,pversion,pversion),
 )
 
 args = parser.parse_args()

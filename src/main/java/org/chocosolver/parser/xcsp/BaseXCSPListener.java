@@ -9,7 +9,6 @@
 package org.chocosolver.parser.xcsp;
 
 import org.chocosolver.parser.ParserListener;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 
@@ -60,7 +59,7 @@ public class BaseXCSPListener implements ParserListener {
     @Override
     public void afterParsingFile() {
 
-        if (((FznSettings) xcspparser.getModel().getSettings()).printConstraint()) {
+        if (((XCSPSettings) xcspparser.getModel().getSettings()).printConstraint()) {
             ArrayList<String> l = new ArrayList<>();
             System.out.println("c INVOLVED CONSTRAINTS (CHOCO) ");
             for (Constraint c : xcspparser.getModel().getCstrs()) {

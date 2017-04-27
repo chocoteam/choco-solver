@@ -8,8 +8,6 @@
  */
 package org.chocosolver.parser.xcsp;
 
-import org.chocosolver.parser.flatzinc.FznSettings;
-
 /**
  * Created by cprudhom on 01/09/15.
  * Project: choco-parsers.
@@ -20,7 +18,7 @@ public class ChocoXCSP {
         XCSP xscp = new XCSP();
         xscp.addListener(new BaseXCSPListener(xscp));
         xscp.setUp(args);
-        xscp.defineSettings(new FznSettings());
+        xscp.defineSettings(new XCSPSettings());
         xscp.createSolver();
         xscp.buildModel();
         xscp.configureSearch();

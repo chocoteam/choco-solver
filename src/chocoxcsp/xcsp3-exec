@@ -1,14 +1,12 @@
 #!/bin/sh
 
-STOP_AT_FIRST="yes"
-FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=10000
 JAVA_ARGS=""
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.0.0-SNAPSHOT/choco-parsers-4.0.0-SNAPSHOT-with-dependencies.jar
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.0.2-SNAPSHOT/choco-parsers-4.0.2-SNAPSHOT-with-dependencies.jar
 usage="\
 
-Usage: xcsp_choco.sh [<options>] [<file>]
+Usage: xcsp3_choco.sh [<options>] [<file>]
 
     Parse and solve <file> using Choco.
 
@@ -16,13 +14,6 @@ OPTIONS:
 
     -h, --help
         Display this message.
-
-    -a
-        This causes the solver to search for, and output all solutions.
-        When this option is not given the solver should search for, and output the first solution or the best known one.
-
-    -f
-        When invoked with this option the solver ignores any specified search strategy.
 
     -p
         When invoked with this option the solver is free to use multiple threads and/or cores during search.
@@ -32,7 +23,7 @@ OPTIONS:
         Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
 
     -jar <j>
-        Override the jar file.  (The default is JAR.)
+        Override the jar file.  (The default is $CHOCO_JAR.)
 
 
     --jargs <args>
@@ -41,10 +32,10 @@ OPTIONS:
 EXAMPLES:
 	
 	Basic command to solve a fzn model with choco:
-	$> xcsp_choco.sh ./choco.jar ./alpha.xml
+	$> xcsp3_choco.sh ./choco.jar ./alpha.xml
 
 	Additionnal arguments:
-	$> xcsp_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
+	$> xcsp3_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
 
 "
 
@@ -61,14 +52,6 @@ do
         -h|--help)
             echo "$usage"
             exit 0
-        ;;
-
-        -a)
-            STOP_AT_FIRST="no"
-        ;;
-
-        -f)
-            FREE_SEARCH="yes"
         ;;
 
         -p)
@@ -107,16 +90,6 @@ done
 
 FILE="$1"
 ARGS=" -tl $TIME_LIMIT -p $NB_NODES"
-
-if test "${STOP_AT_FIRST}" = "no"
-then
-    ARGS=$ARGS" -a"
-fi
-
-if test "${FREE_SEARCH}" = "yes"
-then
-    ARGS=$ARGS" -f"
-fi
 
 CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 

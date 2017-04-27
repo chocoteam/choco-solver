@@ -229,6 +229,8 @@ public class Datas {
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
             System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
+            System.out.printf("%% ");
+            solver.printShortFeatures();
         }
     }
 }
