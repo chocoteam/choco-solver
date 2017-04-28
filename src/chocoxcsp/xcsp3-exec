@@ -3,7 +3,7 @@
 NB_NODES=1
 TIME_LIMIT=10000
 JAVA_ARGS=""
-CHOCO_JAR=${PARSER_JAR:=~/.m2/repository/org/choco-solver/choco-parsers/4.0.2-SNAPSHOT/choco-parsers-4.0.2-SNAPSHOT-with-dependencies.jar}
+CHOCO_JAR=${PARSER_JAR:=~/.m2/repository/org/choco-solver/choco-parsers/4.0.2-SNAPSHOT/choco-parsers-4.0.2-with-dependencies.jar}
 usage="\
 
 Usage: xcsp3_choco.sh [<options>] [<file>]
