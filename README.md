@@ -9,7 +9,7 @@ This project hosts samples based on choco-solver.
 
 To run a sample, please follow the steps:
 
-1. Download the source code of [samples](https://github.com/chocoteam/samples/releases/tag/samples-4.0.4)
+1. Download the source code of [samples](https://github.com/chocoteam/samples/releases/tag/samples-4.0.5)
 2. Download [choco-solver-4.0.4.zip](https://github.com/chocoteam/choco-solver/releases/tag/4.0.4) and unzip it
 3. Go to the `samples` directory and create a directory named `lib` and another named `classes`
 4. Copy/paste `choco-solver-4.0.4-with-dependencies.jar` into `lib`
