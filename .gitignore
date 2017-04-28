@@ -3,11 +3,12 @@ out/*
 *.iml
 *.ipr
 *.iws
-*/fzn_choco/*
 *.jar
 /lib/*
 *.DS_Store
 */dependency-reduced-pom.xml
+
+*/.idea/
 
 */mysql.properties
 */logback-test.xml
