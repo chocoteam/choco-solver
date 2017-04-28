@@ -140,7 +140,7 @@ public class RLFAP extends AbstractProblem {
     @Override
     public void configureSearch() {
         model.getSolver().setSearch(domOverWDegSearch(vars));
-        model.getSolver().setLubyRestart(2, 2, new FailCounter(model, 2), 25000);
+        model.getSolver().setLubyRestart(2, new FailCounter(model, 2), 25000);
     }
 
     @Override

@@ -72,6 +72,12 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <version>6.8.8</version>
