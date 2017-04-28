@@ -1,5 +1,10 @@
 #!/bin/sh
 
+function quit() {
+    echo "ERROR: $*"
+    exit 1
+}
+
 function getVersionToRelease() {
     CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
     echo ${CURRENT_VERSION%%-SNAPSHOT}
@@ -22,10 +27,10 @@ VERSION=$(getVersionToRelease)
 NEXT=$(guess $VERSION)
 TAG="choco-parsers-${VERSION}"
 
-git fetch
-git checkout -b release || exit 1
+git fetch || quit "unable to fetch master"
+git checkout -b release || quit "unable to check master out"
 
-mvn -q dependency:purge-local-repository
+mvn -q dependency:purge-local-repository || quit "unable to purge local repo"
 
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
@@ -34,10 +39,10 @@ sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-wi
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/chocofzn/fzn-exec
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/chocoxcsp/xcsp3-exec
 #Update the poms:wq
-mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
-mvn license:format
+mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false || quit "unable to set new version"
+mvn license:format || quit "unable to format the license"
 #
-git commit -m "initiate release ${VERSION}" -a
+git commit -m "initiate release ${VERSION}" -a || quit "unable to commit initial release"
 #
 echo "Start release"
 #Extract the version

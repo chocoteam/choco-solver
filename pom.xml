@@ -279,20 +279,24 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5.2</version>
+                <configuration>
+                    <groupId>xcsp3</groupId>
+                    <artifactId>xcsp3</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                    <packaging>jar</packaging>
+                    <file>${project.basedir}/src/main/resources/xcsp-lib/xcsp3-1.0.0-SNAPSHOT.jar</file>
+                    <generatePom>true</generatePom>
+                </configuration>
                 <executions>
                     <execution>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <groupId>xcsp3</groupId>
-                            <artifactId>xcsp3</artifactId>
-                            <version>1.0.0-SNAPSHOT</version>
-                            <file>${project.basedir}/src/main/resources/xcsp-lib/xcsp3-1.0.0-SNAPSHOT.jar</file>
-                        </configuration>
+                        <id>install-jar-lib</id>
                         <goals>
                             <goal>install-file</goal>
                         </goals>
+                        <phase>validate</phase>
                     </execution>
                 </executions>
             </plugin>
