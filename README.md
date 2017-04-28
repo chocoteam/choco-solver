@@ -14,8 +14,6 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Choco-solver is not the continuation of Choco2, but a completely rewritten version and there is no backward compatibility.
-
 Current stable version is 4.0.3 (31 Mar 2017).
 
 Choco-solver comes with:
@@ -28,7 +26,7 @@ But also, facilities to interact with the search loop, factories to help modelli
 
 Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2017, Ecole des Mines de Nantes).
 
-Contact: choco@mines-nantes.fr
+Contact: [choco@mines-nantes.fr](mailto:choco@mines-nantes.fr?subject=[choco]contact)
 
 ### Overview
 
@@ -38,14 +36,18 @@ Model model = new Model("my first problem");
 // 2. Create variables
 IntVar x = model.intVar("X", 0, 5);
 IntVar y = model.intVar("Y", 0, 5);
-// 3. Create and post constraints by using constraint factories
+// 3. Create and post constraints thanks to the model
+model.element(x, new int[]{5,0,4,1,3,2}, y).post();
+// 3b. Or directly through variables
 x.add(y).lt(5).post();
-// 4. Define the search strategy
-model.getSolver().setSearch(Search.inputOrderLBSearch(x, y));
-// 5. Launch the resolution process
-model.getSolver().solve();
-// 6. Print search statistics
-model.getSolver().printStatistics();
+// 4. Get the solver
+Solver solver = model.getSolver();
+// 5. Define the search strategy
+solver.setSearch(Search.inputOrderLBSearch(x, y));
+// 6. Launch the resolution process
+solver.solve();
+// 7. Print search statistics
+solver.printStatistics();
 ```
 
 <a name="doc"></a>
@@ -187,6 +189,5 @@ If the build succeeded, the resulting jar will be automatically
 installed in your local maven repository and available in the `target` sub-folders.
 
 
-===================
 
-The Choco-solver dev team.
+_Choco-solver dev team_
