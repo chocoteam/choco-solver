@@ -90,8 +90,9 @@ extractReleaseComment ${VERSION} ${temp_file} || quit "Unable to extract release
 response=$(curl -i -sH "$AUTH" --data @${temp_file} "${GH_API}/releases") || quit "Unable to create the release"
 
 # get the asset id
-eval $(echo "$response" | grep -m 1 "id.:" | tr : = | tr -cd '[[:alnum:]]=')
-[ "$id" ] || quit "Error: Failed to get release id for tag: ${VERSION}"; echo "$response" | awk 'length($0)<100' >&2
+ID=$(echo "$response" | grep -m 1 "id.:"| tr : = | tr -cd '[[:alnum:]]=') || quit "Error: Failed to get release id for tag: ${VERSION}"; echo "$response" | awk 'length($0)<100' >&2
+ID=(${ID//=/ }) || quit "Error: Unable to split id: ${ID}"
+id=${ID[1]} || quit "Error: Unable to get id: ${ID}"
 
 # add asset
 curl -i -sH "$AUTH" -H "Content-Type: application/zip" \
@@ -104,8 +105,6 @@ curl -i -sH "$AUTH" -H "Content-Type: application/zip" \
 NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))") || quit "Unable to get next release number"
 curl -i -sH "$AUTH" --data '{ "title": '\""${NEXT}"\"'}' \
         "${GH_API}milestones"
-
-#createMilestone ${VERSION} ${GH_TOKEN}
 
 rmdir -R choco-${VERSION}
 rm ${temp_file} || quit "Unable to remove tmp file"
