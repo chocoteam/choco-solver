@@ -1,5 +1,10 @@
 #!/bin/sh
 
+function quit() {
+    echo "ERROR: $*"
+    exit 1
+}
+
 function getVersionToRelease() {
     CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
     echo ${CURRENT_VERSION%%-SNAPSHOT}
@@ -27,10 +32,10 @@ CHOCO_VERSION=$(getChocoVersion)
 NEXT=$(guess $VERSION)
 TAG="samples-${VERSION}"
 
-git fetch
-git checkout -b release || exit 1
+git fetch || quit "unable to fetch"
+git checkout -b release || quit "unable to co"
 
-mvn -q dependency:purge-local-repository
+mvn -q dependency:purge-local-repository || quit "unable to purge dep"
 
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
@@ -40,10 +45,10 @@ sedInPlace "s%2. Download.*.%2. Download [choco-solver-${CHOCO_VERSION}.zip](htt
 sedInPlace "s%choco-solver-.*-with-dependencies.jar%choco-solver-${CHOCO_VERSION}-with-dependencies.jar%"  README.md
 
 #Update the poms:wq
-mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
-mvn license:format
+mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false || quit "unable to set new version"
+mvn license:format || quit "unable to format license"
 
-git commit -m "initiate release ${VERSION}" -a
+git commit -m "initiate release ${VERSION}" -a || quit "unable to commit release"
 
 echo "Start release"
 #Extract the version
