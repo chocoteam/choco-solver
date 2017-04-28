@@ -30,7 +30,8 @@ TAG="choco-parsers-${VERSION}"
 git fetch || quit "unable to fetch master"
 git checkout -b release || quit "unable to check master out"
 
-mvn -q dependency:purge-local-repository || quit "unable to purge local repo"
+#mvn -q dependency:purge-local-repository || quit "unable to purge local repo"
+mvn clean install -DskipTests  || quit "unable to install "
 
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
