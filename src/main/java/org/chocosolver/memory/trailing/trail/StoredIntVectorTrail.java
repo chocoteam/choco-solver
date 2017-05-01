@@ -192,13 +192,4 @@ public class StoredIntVectorTrail implements IStorage {
         }
         currentLevel = writeIdx;
     }
-
-
-    /**
-     * Returns the current size of the stack.
-     */
-    @Deprecated // never used
-    public int getSize() {
-        return currentLevel;
-    }
 }

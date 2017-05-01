@@ -46,20 +46,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
         this.myTrail = env.getDoubleVectorTrail();
     }
 
-    @Deprecated // never used
-    public StoredDoubleVector(EnvironmentTrailing env, double[] entries) {
-        super(env, entries);
-        int initialSize = entries.length;
-        int initialCapacity = Math.max(MIN_CAPACITY, entries.length);
-        int w = env.getWorldIndex();
-
-        this.worldStamps = new int[initialCapacity];
-        for (int i = 0; i < initialSize; i++) {
-            this.worldStamps[i] = w;
-        }
-        this.myTrail = env.getDoubleVectorTrail();
-    }
-
     /**
      * Checks if the capacity is great enough, else the capacity
      * is extended.
@@ -87,7 +73,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      *
      * @param i The search to add.
      */
-    @Override
     public void add(double i) {
         int newsize = size.get() + 1;
         ensureCapacity(newsize);
@@ -101,7 +86,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      *
      * @param i The search to remove.
      */
-    @Override
     public void remove(int i) {
         System.arraycopy(elementData, i, elementData, i + 1, size.get());
         System.arraycopy(worldStamps, i, worldStamps, i + 1, size.get());
@@ -119,7 +103,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-    @Override
     public void removeLast() {
         int newsize = size.get() - 1;
         if (newsize >= 0)
@@ -130,7 +113,6 @@ public final class StoredDoubleVector extends IStateDoubleVector {
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.
      */
-    @Override
     public double set(int index, double val) {
         if (rangeCheck(index)) {
             //<hca> je vire cet assert en cas de postCut il n est pas vrai ok ?

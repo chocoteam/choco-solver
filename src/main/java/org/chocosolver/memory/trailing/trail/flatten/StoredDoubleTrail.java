@@ -96,16 +96,6 @@ public class StoredDoubleTrail implements IStoredDoubleTrail {
         }
     }
 
-
-    /**
-     * Returns the current size of the stack.
-     */
-    @Deprecated // never used
-    public int getSize() {
-        return currentLevel;
-    }
-
-
     /**
      * Comits a world: merging it with the previous one.
      */

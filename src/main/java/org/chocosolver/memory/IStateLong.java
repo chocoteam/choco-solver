@@ -45,19 +45,6 @@ public abstract class IStateLong  {
     public abstract void set(long y);
 
     /**
-     * modifying a StoredInt by an increment
-     *
-     * @param delta increment value
-     * @return the new value
-     */
-    @Deprecated // never used
-    public final long add(long delta) {
-        long res = currentValue + delta;
-        set(res);
-        return res;
-    }
-
-    /**
      * Modifies the value without storing the former value on the trailing stack.
      *
      * @param y      the new value
@@ -68,33 +55,9 @@ public abstract class IStateLong  {
         timeStamp = wstamp;
     }
 
-    /**
-     * Make a deep copy of this.
-     *
-     * @return a long
-     */
-    @Deprecated // never used
-    public final long deepCopy() {
-        return currentValue;
-    }
-
-    @Deprecated // never used
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
     public void overrideTimeStamp(int aTimeStamp) {
         this.timeStamp = aTimeStamp;
     }
-
-    /**
-     * Retrieving the environment
-     */
-    @Deprecated // never used
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
 
     @Override
     public String toString() {

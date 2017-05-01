@@ -60,12 +60,6 @@ public class OneWordS32BitSet implements IStateBitSet {
         word = this.environment.makeInt(0);
     }
 
-    @SuppressWarnings({"unchecked"})
-    @Deprecated // never used
-    public static <T> T[] copyOf(T[] original, int newLength) {
-        return (T[]) copyOf(original, newLength, original.getClass());
-    }
-
     @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy", "RedundantCast"})
     public static <T, U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
         T[] copy = ((Object) newType == (Object) Object[].class)

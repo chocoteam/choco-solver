@@ -55,33 +55,9 @@ public abstract class IStateBool  {
         timeStamp = wstamp;
     }
 
-    /**
-     * Make a deep copy of this.
-     *
-     * @return a boolean
-     */
-    @Deprecated // never used
-    public final boolean deepCopy() {
-        return currentValue;
-    }
-
-    @Deprecated // never used
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
     public void overrideTimeStamp(int aTimeStamp) {
         this.timeStamp = aTimeStamp;
     }
-
-    /**
-     * Retrieving the environment
-     */
-    @Deprecated // never used
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
 
     @Override
     public String toString() {

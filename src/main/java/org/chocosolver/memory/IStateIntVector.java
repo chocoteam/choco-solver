@@ -65,30 +65,8 @@ public abstract class IStateIntVector  {
         this.size = env.makeInt(initialSize);
     }
 
-    @Deprecated // never used
-    protected IStateIntVector(IEnvironment environment) {
-        this.environment = environment;
-    }
-
     protected boolean rangeCheck(int index) {
         return index < size.get() && index >= 0;
-    }
-
-    /**
-     * Returns the current size of the stored search vector.
-     */
-    @Deprecated // never used
-    public int size() {
-        return size.get();
-    }
-
-
-    /**
-     * Checks if the vector is empty.
-     */
-    @Deprecated // never used
-    public boolean isEmpty() {
-        return size.get() == 0;
     }
 
     /**
@@ -97,42 +75,6 @@ public abstract class IStateIntVector  {
      * @param i The search to add.
      */
     public abstract void add(int i);
-
-    @Deprecated // never used
-    public boolean contains(int val) {
-        int ssize = size.get();
-        for (int i = 0; i < ssize; i++) {
-            if (val == elementData[i]) return true;
-        }
-        return false;
-    }
-
-    /**
-     * Removes an int.
-     *
-     * @param i The search to remove.
-     */
-    @Deprecated // never used
-    public abstract void remove(int i);
-
-
-    /**
-     * removes the search at the end of the vector.
-     * does nothing when called on an empty vector
-     */
-    @Deprecated // never used
-    public abstract void removeLast();
-
-    /**
-     * Returns the <code>index</code>th element of the vector.
-     */
-    @Deprecated // never used
-    public int get(int index) {
-        if (rangeCheck(index)) {
-            return elementData[index];
-        }
-        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
-    }
 
     /**
      * access an element without any bound check
@@ -159,11 +101,4 @@ public abstract class IStateIntVector  {
      * @return the old value
      */
     public abstract int quickSet(int index, int val);
-
-    @Deprecated // never used
-    public int[] deepCopy() {
-        int[] ret = new int[size.get()];
-        System.arraycopy(elementData, 0, ret, 0, size.get());
-        return ret;
-    }
 }

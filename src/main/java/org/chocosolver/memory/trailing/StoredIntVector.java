@@ -48,21 +48,6 @@ public final class StoredIntVector extends IStateIntVector {
         this.myTrail = env.getIntVectorTrail();
     }
 
-    @Deprecated // never used
-    public StoredIntVector(EnvironmentTrailing env, int[] entries) {
-        super(env, entries);
-        int initialCapacity = Math.max(MIN_CAPACITY, entries.length);
-        int w = env.getWorldIndex();
-        int initialSize = entries.length;
-
-        this.worldStamps = new int[initialCapacity];
-        for (int i = 0; i < initialSize; i++) {
-            this.worldStamps[i] = w;
-        }
-        this.myTrail = env.getIntVectorTrail();
-    }
-
-
     /**
      * Checks if the capacity is great enough, else the capacity
      * is extended.
@@ -104,7 +89,6 @@ public final class StoredIntVector extends IStateIntVector {
      *
      * @param i The search to remove.
      */
-    @Override
     public void remove(int i) {
         System.arraycopy(elementData, i, elementData, i + 1, size.get());
         System.arraycopy(worldStamps, i, worldStamps, i + 1, size.get());
@@ -122,7 +106,6 @@ public final class StoredIntVector extends IStateIntVector {
      * removes the search at the end of the vector.
      * does nothing when called on an empty vector
      */
-    @Override
     public void removeLast() {
         int newsize = size.get() - 1;
         if (newsize >= 0)

@@ -67,33 +67,9 @@ public abstract class IStateInt  {
         timeStamp = wstamp;
     }
 
-    /**
-     * Make a deep copy of this.
-     *
-     * @return a int
-     */
-    @Deprecated // never used
-    public final int deepCopy() {
-        return currentValue;
-    }
-
-    @Deprecated // never used
-    public int getTimeStamp() {
-        return timeStamp;
-    }
-
     public void overrideTimeStamp(int aTimeStamp) {
         this.timeStamp = aTimeStamp;
     }
-
-    /**
-     * Retrieving the environment
-     */
-    @Deprecated // never used
-    public IEnvironment getEnvironment() {
-        return environment;
-    }
-
 
     @Override
     public String toString() {
