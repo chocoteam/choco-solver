@@ -76,14 +76,6 @@ public class OneWordS32BitSet implements IStateBitSet {
         return copy;
     }
 
-    @Override
-    @Deprecated // never used internally
-    public BitSet copyToBitSet() {
-        BitSet view = new BitSet(this.size());
-        for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
-        return view;
-    }
-
     /**
      * Checks that fromIndex ... toIndex is a valid range of bit indices.
      *
@@ -97,51 +89,6 @@ public class OneWordS32BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
-    }
-
-    /**
-     * Sets the bit at the specified index to the complement of its
-     * current value.
-     *
-     * @param bitIndex the index of the bit to flip.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
-     * @since 1.4
-     */
-    @Override
-    @Deprecated // never used internally
-    public void flip(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
-        int tmp = word.get();
-        tmp ^= (1 << bitIndex);
-        word.set(tmp);
-    }
-
-    /**
-     * Sets each bit from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the complement of its current
-     * value.
-     *
-     * @param fromIndex index of the first bit to flip.
-     * @param toIndex   index after the last bit to flip.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Override
-    @Deprecated // never used internally
-    public void flip(int fromIndex, int toIndex) {
-        checkRange(fromIndex, toIndex);
-
-        if (fromIndex == toIndex)
-            return;
-        int firstWordMask = WORD_MASK << fromIndex;
-        int lastWordMask = WORD_MASK >>> -toIndex;
-        int tmp = word.get();
-        tmp ^= (firstWordMask & lastWordMask);
-        word.set(tmp);
     }
 
     /**
@@ -393,12 +340,6 @@ public class OneWordS32BitSet implements IStateBitSet {
             return -1;
     }
 
-    @Override
-    @Deprecated // never used internally
-    public int capacity() {
-        return BITS_PER_WORD;
-    }
-
     /**
      * Returns the "logical size" of this <code>BitSet</code>: the index of
      * the highest set bit in the <code>BitSet</code> plus one. Returns zero
@@ -436,86 +377,6 @@ public class OneWordS32BitSet implements IStateBitSet {
         return Integer.bitCount(word.get());
     }
 
-    /**
-     * Performs a logical <b>AND</b> of this target bit set with the
-     * argument bit set. This bit set is modified so that each bit in it
-     * has the value <code>true</code> if and only if it both initially
-     * had the value <code>true</code> and the corresponding bit in the
-     * bit set argument also had the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Override
-    @Deprecated // never used internally
-    public void and(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if it either already had the
-     * value <code>true</code> or the corresponding bit in the bit set
-     * argument has the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Override
-    @Deprecated // never used internally
-    public void or(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Performs a logical <b>XOR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if one of the following
-     * statements holds:
-     * <ul>
-     * <li>The bit initially has the value <code>true</code>, and the
-     * corresponding bit in the argument has the value <code>false</code>.
-     * <li>The bit initially has the value <code>false</code>, and the
-     * corresponding bit in the argument has the value <code>true</code>.
-     * </ul>
-     *
-     * @param setI a bit set.
-     */
-    @Override
-    @Deprecated // never used internally
-    public void xor(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Clears all of the bits in this <code>BitSet</code> whose corresponding
-     * bit is set in the specified <code>BitSet</code>.
-     *
-     * @param setI the <code>BitSet</code> with which to mask this
-     *             <code>BitSet</code>.
-     * @since 1.2
-     */
-    @Override
-    @Deprecated // never used internally
-    public void andNot(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns true if the specified <code>BitSet</code> has any bits set to
-     * <code>true</code> that are also set to <code>true</code> in this
-     * <code>BitSet</code>.
-     *
-     * @param setI <code>BitSet</code> to intersect with
-     * @return boolean indicating whether this <code>BitSet</code> intersects
-     *         the specified <code>BitSet</code>.
-     * @since 1.4
-     */
-    @Override
-    @Deprecated // never used internally
-    public boolean intersects(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
     @Override
     public int hashCode() {
         int h = 1234;
@@ -546,14 +407,6 @@ public class OneWordS32BitSet implements IStateBitSet {
 
         // Check word in use by both BitSets
         return word == set.word;
-    }
-
-    @Override
-    @Deprecated // never used internally
-    public IStateBitSet copy() {
-        OneWordS32BitSet result = new OneWordS32BitSet(environment, this.size());
-        result.word.set(word.get());
-        return result;
     }
 
     @Override

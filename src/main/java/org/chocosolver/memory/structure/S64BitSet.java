@@ -154,13 +154,6 @@ public class S64BitSet implements IStateBitSet {
         return copy;
     }
 
-    @Deprecated // never used internally
-    public BitSet copyToBitSet() {
-        BitSet view = new BitSet(this.size());
-        for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
-        return view;
-    }
-
     /**
      * Ensures that the BitSet can accommodate a given wordIndex,
      * temporarily violating the invariants.  The caller must
@@ -190,77 +183,6 @@ public class S64BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
-    }
-
-    /**
-     * Sets the bit at the specified index to the complement of its
-     * current value.
-     *
-     * @param bitIndex the index of the bit to flip.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public void flip(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
-        int wordIndex = wordIndex(bitIndex);
-        expandTo(wordIndex);
-
-        long tmp = words[wordIndex].get();
-        tmp ^= (1L << bitIndex);
-        words[wordIndex].set(tmp);
-
-        recalculateWordsInUse();
-        if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Sets each bit from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the complement of its current
-     * value.
-     *
-     * @param fromIndex index of the first bit to flip.
-     * @param toIndex   index after the last bit to flip.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public void flip(int fromIndex, int toIndex) {
-        checkRange(fromIndex, toIndex);
-
-        if (fromIndex == toIndex)
-            return;
-
-        int startWordIndex = wordIndex(fromIndex);
-        int endWordIndex = wordIndex(toIndex - 1);
-        expandTo(endWordIndex);
-
-        long firstWordMask = WORD_MASK << fromIndex;
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        if (startWordIndex == endWordIndex) {
-            // Case 1: One word
-            long tmp = words[startWordIndex].get();
-            tmp ^= (firstWordMask & lastWordMask);
-            words[startWordIndex].set(tmp);
-        } else {
-            // Case 2: Multiple words
-            // Handle first word
-            words[startWordIndex].set(words[startWordIndex].get() ^ firstWordMask);
-
-            // Handle intermediate words, if any
-            for (int i = startWordIndex + 1; i < endWordIndex; i++)
-                words[i].set(~words[i].get());
-
-            // Handle last word
-            words[endWordIndex].set(words[endWordIndex].get() ^ lastWordMask);
-        }
-
-        recalculateWordsInUse();
-        if (CHECK) checkInvariants();
     }
 
     /**
@@ -338,26 +260,6 @@ public class S64BitSet implements IStateBitSet {
         }
 
         if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Sets the bits from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the specified value.
-     *
-     * @param fromIndex index of the first bit to be set.
-     * @param toIndex   index after the last bit to be set
-     * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Deprecated // never used
-    public void set(int fromIndex, int toIndex, boolean value) {
-        if (value)
-            set(fromIndex, toIndex);
-        else
-            clear(fromIndex, toIndex);
     }
 
     /**
@@ -469,64 +371,6 @@ public class S64BitSet implements IStateBitSet {
         int wordIndex = bitIndex >> ADDRESS_BITS_PER_WORD; //wordIndex(bitIndex);
         return (wordIndex < wordsInUse.get())
                 && ((words[wordIndex].get() & (1L << bitIndex)) != 0);
-    }
-
-    /**
-     * Returns a new <tt>BitSet</tt> composed of bits from this <tt>BitSet</tt>
-     * from <tt>fromIndex</tt> (inclusive) to <tt>toIndex</tt> (exclusive).
-     *
-     * @param fromIndex index of the first bit to include.
-     * @param toIndex   index after the last bit to include.
-     * @return a new <tt>BitSet</tt> from a range of this <tt>BitSet</tt>.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Deprecated // never used
-    public S64BitSet get(int fromIndex, int toIndex) {
-        checkRange(fromIndex, toIndex);
-
-        if (CHECK) checkInvariants();
-
-        int len = length();
-
-        // If no set bits in range return empty bitset
-        if (len <= fromIndex || fromIndex == toIndex)
-            return new S64BitSet(environment, 0);
-
-        // An optimization
-        if (toIndex > len)
-            toIndex = len;
-
-        S64BitSet result = new S64BitSet(environment, toIndex - fromIndex);
-        int targetWords = wordIndex(toIndex - fromIndex - 1) + 1;
-        int sourceIndex = wordIndex(fromIndex);
-        boolean wordAligned = ((fromIndex & BIT_INDEX_MASK) == 0);
-
-        // Process all words but the last word
-        for (int i = 0; i < targetWords - 1; i++, sourceIndex++)
-            result.words[i].set(
-                    wordAligned ? words[sourceIndex].get() :
-                            (words[sourceIndex].get() >>> fromIndex) |
-                                    (words[sourceIndex + 1].get() << -fromIndex));
-
-        // Process the last word
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        result.words[targetWords - 1].set(
-                ((toIndex - 1) & BIT_INDEX_MASK) < (fromIndex & BIT_INDEX_MASK)
-                        ? /* straddles source words */
-                        ((words[sourceIndex].get() >>> fromIndex) |
-                                (words[sourceIndex + 1].get() & lastWordMask) << -fromIndex)
-                        :
-                        ((words[sourceIndex].get() & lastWordMask) >>> fromIndex));
-
-        // Set wordsInUse correctly
-        result.wordsInUse.set(targetWords);
-        result.recalculateWordsInUse();
-        if (CHECK) result.checkInvariants();
-
-        return result;
     }
 
     /**
@@ -675,11 +519,6 @@ public class S64BitSet implements IStateBitSet {
         }
     }
 
-    @Deprecated // never used internally
-    public int capacity() {
-        return words.length * BITS_PER_WORD;
-    }
-
     /**
      * Returns the "logical size" of this <code>BitSet</code>: the index of
      * the highest set bit in the <code>BitSet</code> plus one. Returns zero
@@ -709,24 +548,6 @@ public class S64BitSet implements IStateBitSet {
     }
 
     /**
-     * Returns true if the specified <code>BitSet</code> has any bits set to
-     * <code>true</code> that are also set to <code>true</code> in this
-     * <code>BitSet</code>.
-     *
-     * @param set <code>BitSet</code> to intersect with
-     * @return boolean indicating whether this <code>BitSet</code> intersects
-     *         the specified <code>BitSet</code>.
-     * @since 1.4
-     */
-    @Deprecated // never used
-    public boolean intersects(S64BitSet set) {
-        for (int i = Math.min(wordsInUse.get(), set.wordsInUse.get()) - 1; i >= 0; i--)
-            if ((words[i].get() & set.words[i].get()) != 0)
-                return true;
-        return false;
-    }
-
-    /**
      * Returns the number of bits set to <tt>true</tt> in this
      * <code>BitSet</code>.
      *
@@ -739,146 +560,6 @@ public class S64BitSet implements IStateBitSet {
         for (int i = wordsInUse.get() - 1; i >= 0; i--)
             sum += Long.bitCount(words[i].get());
         return sum;
-    }
-
-    /**
-     * Performs a logical <b>AND</b> of this target bit set with the
-     * argument bit set. This bit set is modified so that each bit in it
-     * has the value <code>true</code> if and only if it both initially
-     * had the value <code>true</code> and the corresponding bit in the
-     * bit set argument also had the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void and(IStateBitSet setI) {
-        S64BitSet set = (S64BitSet) setI;
-        if (this == set)
-            return;
-
-        while (wordsInUse.get() > set.wordsInUse.get()) {
-            wordsInUse.add(-1);
-            words[wordsInUse.get()].set(0);
-        }
-
-        // Perform logical AND on words in common
-        for (int i = 0; i < wordsInUse.get(); i++)
-            words[i].set(words[i].get() & set.words[i].get());
-
-        recalculateWordsInUse();
-        if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if it either already had the
-     * value <code>true</code> or the corresponding bit in the bit set
-     * argument has the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void or(IStateBitSet setI) {
-        S64BitSet set = (S64BitSet) setI;
-        if (this == set)
-            return;
-
-        int wordsInCommon = Math.min(wordsInUse.get(), set.wordsInUse.get());
-
-        if (wordsInUse.get() < set.wordsInUse.get()) {
-            ensureCapacity(set.wordsInUse.get());
-            wordsInUse.set(set.wordsInUse.get());
-        }
-
-        // Perform logical OR on words in common
-        for (int i = 0; i < wordsInCommon; i++)
-            words[i].set(words[i].get() | set.words[i].get());
-
-        // Copy any remaining words
-        if (wordsInCommon < set.wordsInUse.get())
-            System.arraycopy(set.words, wordsInCommon,
-                    words, wordsInCommon,
-                    wordsInUse.get() - wordsInCommon);
-
-        // recalculateWordsInUse() is unnecessary
-        if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Performs a logical <b>XOR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if one of the following
-     * statements holds:
-     * <ul>
-     * <li>The bit initially has the value <code>true</code>, and the
-     * corresponding bit in the argument has the value <code>false</code>.
-     * <li>The bit initially has the value <code>false</code>, and the
-     * corresponding bit in the argument has the value <code>true</code>.
-     * </ul>
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void xor(IStateBitSet setI) {
-        S64BitSet set = (S64BitSet) setI;
-        int wordsInCommon = Math.min(wordsInUse.get(), set.wordsInUse.get());
-
-        if (wordsInUse.get() < set.wordsInUse.get()) {
-            ensureCapacity(set.wordsInUse.get());
-            wordsInUse.set(set.wordsInUse.get());
-        }
-
-        // Perform logical XOR on words in common
-        for (int i = 0; i < wordsInCommon; i++)
-            words[i].set(words[i].get() ^ set.words[i].get());
-
-        // Copy any remaining words
-        if (wordsInCommon < set.wordsInUse.get())
-            System.arraycopy(set.words, wordsInCommon,
-                    words, wordsInCommon,
-                    set.wordsInUse.get() - wordsInCommon);
-
-        recalculateWordsInUse();
-        if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Clears all of the bits in this <code>BitSet</code> whose corresponding
-     * bit is set in the specified <code>BitSet</code>.
-     *
-     * @param setI the <code>BitSet</code> with which to mask this
-     *             <code>BitSet</code>.
-     * @since 1.2
-     */
-    @Deprecated // never used internally
-    public void andNot(IStateBitSet setI) {
-        S64BitSet set = (S64BitSet) setI;
-        // Perform logical (a & !b) on words in common
-        for (int i = Math.min(wordsInUse.get(), set.wordsInUse.get()) - 1; i >= 0; i--)
-            words[i].set(words[i].get() & ~set.words[i].get());
-
-        recalculateWordsInUse();
-        if (CHECK) checkInvariants();
-    }
-
-    /**
-     * Returns true if the specified <code>BitSet</code> has any bits set to
-     * <code>true</code> that are also set to <code>true</code> in this
-     * <code>BitSet</code>.
-     *
-     * @param setI <code>BitSet</code> to intersect with
-     * @return boolean indicating whether this <code>BitSet</code> intersects
-     *         the specified <code>BitSet</code>.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public boolean intersects(IStateBitSet setI) {
-        S64BitSet set = (S64BitSet) setI;
-        for (int i = Math.min(wordsInUse.get(), set.wordsInUse.get()) - 1; i >= 0; i--)
-            if ((words[i].get() & set.words[i].get()) != 0)
-                return true;
-        return false;
     }
 
     public int hashCode() {
@@ -920,19 +601,6 @@ public class S64BitSet implements IStateBitSet {
                 return false;
 
         return true;
-    }
-
-    @Deprecated // never used internally
-    public IStateBitSet copy() {
-        //if (!sizeIsSticky.get()) trimToSize();
-        S64BitSet result = new S64BitSet(environment, this.size());
-        result.wordsInUse.set(wordsInUse.get());
-        //result.sizeIsSticky.set(sizeIsSticky.get());
-        for (int i = 0; i < wordsInUse.get(); i++) {
-            result.words[i].set(words[i].get());
-        }
-        if (CHECK) result.checkInvariants();
-        return result;
     }
 
     public String toString() {

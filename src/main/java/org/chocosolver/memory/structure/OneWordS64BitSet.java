@@ -40,17 +40,6 @@ public class OneWordS64BitSet implements IStateBitSet {
     private IStateLong word;
 
     /**
-     * Creates a new bit set. All bits are initially <code>false</code>.
-     *
-     * @param environment bactrackable environment
-     */
-    @Deprecated // never used
-    public OneWordS64BitSet(IEnvironment environment) {
-        this.environment = environment;
-        word = this.environment.makeLong(0);
-    }
-
-    /**
      * Creates a bit set whose initial size is large enough to explicitly
      * represent bits with indices in the range <code>0</code> through
      * <code>nbits-1</code>. All bits are initially <code>false</code>.
@@ -71,12 +60,6 @@ public class OneWordS64BitSet implements IStateBitSet {
         word = this.environment.makeLong(0);
     }
 
-    @SuppressWarnings({"unchecked"})
-    @Deprecated // never used
-    public static <T> T[] copyOf(T[] original, int newLength) {
-        return (T[]) copyOf(original, newLength, original.getClass());
-    }
-
     @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy", "RedundantCast"})
     public static <T, U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
         T[] copy = ((Object) newType == (Object) Object[].class)
@@ -85,13 +68,6 @@ public class OneWordS64BitSet implements IStateBitSet {
         System.arraycopy(original, 0, copy, 0,
                 Math.min(original.length, newLength));
         return copy;
-    }
-
-    @Deprecated // never used internally
-    public BitSet copyToBitSet() {
-        BitSet view = new BitSet(this.size());
-        for (int i = this.nextSetBit(0); i >= 0; i = this.nextSetBit(i + 1)) view.set(i, true);
-        return view;
     }
 
     /**
@@ -107,49 +83,6 @@ public class OneWordS64BitSet implements IStateBitSet {
             throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
-    }
-
-    /**
-     * Sets the bit at the specified index to the complement of its
-     * current value.
-     *
-     * @param bitIndex the index of the bit to flip.
-     * @throws IndexOutOfBoundsException if the specified index is negative.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public void flip(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
-
-        long tmp = word.get();
-        tmp ^= (1L << bitIndex);
-        word.set(tmp);
-    }
-
-    /**
-     * Sets each bit from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the complement of its current
-     * value.
-     *
-     * @param fromIndex index of the first bit to flip.
-     * @param toIndex   index after the last bit to flip.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public void flip(int fromIndex, int toIndex) {
-        checkRange(fromIndex, toIndex);
-
-        if (fromIndex == toIndex)
-            return;
-        long firstWordMask = WORD_MASK << fromIndex;
-        long lastWordMask = WORD_MASK >>> -toIndex;
-        long tmp = word.get();
-        tmp ^= (firstWordMask & lastWordMask);
-        word.set(tmp);
     }
 
     /**
@@ -203,26 +136,6 @@ public class OneWordS64BitSet implements IStateBitSet {
         long lastWordMask = WORD_MASK >>> -toIndex;
         word.set(word.get() | (firstWordMask & lastWordMask));
         //checkInvariants();
-    }
-
-    /**
-     * Sets the bits from the specified <tt>fromIndex</tt> (inclusive) to the
-     * specified <tt>toIndex</tt> (exclusive) to the specified value.
-     *
-     * @param fromIndex index of the first bit to be set.
-     * @param toIndex   index after the last bit to be set
-     * @param value     value to set the selected bits to
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @Deprecated // never used
-    public void set(int fromIndex, int toIndex, boolean value) {
-        if (value)
-            set(fromIndex, toIndex);
-        else
-            clear(fromIndex, toIndex);
     }
 
     /**
@@ -288,24 +201,6 @@ public class OneWordS64BitSet implements IStateBitSet {
 
         //checkInvariants();
         return bitIndex < 64 && ((word.get() & (1L << bitIndex)) != 0);
-    }
-
-    /**
-     * Returns a new <tt>BitSet</tt> composed of bits from this <tt>BitSet</tt>
-     * from <tt>fromIndex</tt> (inclusive) to <tt>toIndex</tt> (exclusive).
-     *
-     * @param fromIndex index of the first bit to include.
-     * @param toIndex   index after the last bit to include.
-     * @return a new <tt>BitSet</tt> from a range of this <tt>BitSet</tt>.
-     * @throws IndexOutOfBoundsException if <tt>fromIndex</tt> is negative,
-     *                                   or <tt>toIndex</tt> is negative, or <tt>fromIndex</tt> is
-     *                                   larger than <tt>toIndex</tt>.
-     * @since 1.4
-     */
-    @SuppressWarnings("UnusedParameters")
-    @Deprecated // never used
-    public OneWordS64BitSet get(int fromIndex, int toIndex) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -436,11 +331,6 @@ public class OneWordS64BitSet implements IStateBitSet {
             return -1;
     }
 
-    @Deprecated // never used internally
-    public int capacity() {
-        return BITS_PER_WORD;
-    }
-
     /**
      * Returns the "logical size" of this <code>BitSet</code>: the index of
      * the highest set bit in the <code>BitSet</code> plus one. Returns zero
@@ -476,81 +366,6 @@ public class OneWordS64BitSet implements IStateBitSet {
         return Long.bitCount(word.get());
     }
 
-    /**
-     * Performs a logical <b>AND</b> of this target bit set with the
-     * argument bit set. This bit set is modified so that each bit in it
-     * has the value <code>true</code> if and only if it both initially
-     * had the value <code>true</code> and the corresponding bit in the
-     * bit set argument also had the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void and(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Performs a logical <b>OR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if it either already had the
-     * value <code>true</code> or the corresponding bit in the bit set
-     * argument has the value <code>true</code>.
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void or(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Performs a logical <b>XOR</b> of this bit set with the bit set
-     * argument. This bit set is modified so that a bit in it has the
-     * value <code>true</code> if and only if one of the following
-     * statements holds:
-     * <ul>
-     * <li>The bit initially has the value <code>true</code>, and the
-     * corresponding bit in the argument has the value <code>false</code>.
-     * <li>The bit initially has the value <code>false</code>, and the
-     * corresponding bit in the argument has the value <code>true</code>.
-     * </ul>
-     *
-     * @param setI a bit set.
-     */
-    @Deprecated // never used internally
-    public void xor(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Clears all of the bits in this <code>BitSet</code> whose corresponding
-     * bit is set in the specified <code>BitSet</code>.
-     *
-     * @param setI the <code>BitSet</code> with which to mask this
-     *             <code>BitSet</code>.
-     * @since 1.2
-     */
-    @Deprecated // never used internally
-    public void andNot(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Returns true if the specified <code>BitSet</code> has any bits set to
-     * <code>true</code> that are also set to <code>true</code> in this
-     * <code>BitSet</code>.
-     *
-     * @param setI <code>BitSet</code> to intersect with
-     * @return boolean indicating whether this <code>BitSet</code> intersects
-     *         the specified <code>BitSet</code>.
-     * @since 1.4
-     */
-    @Deprecated // never used internally
-    public boolean intersects(IStateBitSet setI) {
-        throw new UnsupportedOperationException();
-    }
-
     public int hashCode() {
         long h = 1234;
         h ^= word.get();
@@ -581,16 +396,6 @@ public class OneWordS64BitSet implements IStateBitSet {
 
         // Check word in use by both BitSets
         return word == set.word;
-    }
-
-    @Deprecated // never used internally
-    public IStateBitSet copy() {
-        //if (!sizeIsSticky.get()) trimToSize();
-        OneWordS64BitSet result = new OneWordS64BitSet(environment, this.size());
-        //result.sizeIsSticky.set(sizeIsSticky.get());
-        result.word.set(word.get());
-        //result.checkInvariants();
-        return result;
     }
 
     public String toString() {

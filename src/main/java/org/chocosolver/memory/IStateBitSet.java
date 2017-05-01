@@ -117,36 +117,5 @@ public interface IStateBitSet  {
      */
     int prevClearBit(int fromIndex);
 
-    @Deprecated // never used internally
-    int capacity();
-
-    @Deprecated // never used internally
-    IStateBitSet copy();
-
-    @Deprecated // never used internally
-    BitSet copyToBitSet();
-
-    @Deprecated // never used internally
-    void or(IStateBitSet other);
-
-    @Deprecated // never used internally
-    void and(IStateBitSet other);
-
-    @Deprecated // never used internally
-    void xor(IStateBitSet other);
-
-    @Deprecated // never used internally
-    void andNot(IStateBitSet other);
-
-    @Deprecated // never used internally
-    boolean intersects(IStateBitSet setI);
-
-    @Deprecated // never used internally
-    void flip(int bitIndex);
-
-    @Deprecated // never used internally
-    void flip(int fromIndex, int toIndex);
-
     boolean isEmpty();
-
 }
