@@ -8,8 +8,6 @@
  */
 package org.chocosolver.solver.constraints.nary.automata.FA.utils;
 
-import org.chocosolver.solver.constraints.nary.automata.penalty.IPenaltyFunction;
-
 /**
  * Created by IntelliJ IDEA.
  * User: julien
@@ -23,51 +21,28 @@ public class Bounds {
     public class MinMax {
         public int value = Integer.MIN_VALUE;
         public int prefered = Integer.MIN_VALUE;
-        public IPenaltyFunction penalty = null;
-
-
     }
 
-    private Bounds(int minValue, int minPrefered, IPenaltyFunction minPenaltyFunction,
-                   int maxValue, int maxPrefered, IPenaltyFunction maxPenaltyFunction) {
+    private Bounds(int minValue, int minPrefered, int maxValue, int maxPrefered) {
         min = new MinMax();
         max = new MinMax();
 
         min.value = minValue;
         min.prefered = minPrefered;
-        min.penalty = minPenaltyFunction;
 
         max.value = maxValue;
         max.prefered = maxPrefered;
-        max.penalty = maxPenaltyFunction;
-
     }
 
-    public static Bounds makeBounds(int minValue, int minPrefered, IPenaltyFunction minPenaltyFunction,
-                                    int maxValue, int maxPrefered, IPenaltyFunction maxPenaltyFunction) {
-        return new Bounds(minValue, minPrefered, minPenaltyFunction, maxValue, maxPrefered, maxPenaltyFunction);
+    public static Bounds makeBounds(int minValue, int minPrefered, int maxValue, int maxPrefered) {
+        return new Bounds(minValue, minPrefered, maxValue, maxPrefered);
     }
-
-    public static Bounds makeMinBounds(int minValue, int minPrefered, IPenaltyFunction minPenaltyFunction) {
-        return new Bounds(minValue, minPrefered, minPenaltyFunction, Integer.MIN_VALUE, Integer.MIN_VALUE, null);
-    }
-
-    public static Bounds makeMaxBounds(int maxValue, int maxPrefered, IPenaltyFunction maxPenaltyFunction) {
-        return new Bounds(Integer.MIN_VALUE, Integer.MIN_VALUE, null, maxValue, maxPrefered, maxPenaltyFunction);
-    }
-
 
     public static void main(String[] args) {
-        Bounds a = new Bounds(0, 0, null, 0, 0, null);
-
-        Bounds b = new Bounds(9, 9, null, 9, 9, null);
-
+        Bounds a = new Bounds(0, 0, 0, 0);
+        Bounds b = new Bounds(9, 9, 9, 9);
 
         System.out.println(b.min.prefered);
         System.out.println(a.min.prefered);
-
-
     }
-
-
 }

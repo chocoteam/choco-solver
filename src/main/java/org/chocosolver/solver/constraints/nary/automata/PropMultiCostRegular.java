@@ -850,12 +850,6 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         return check();
     }
 
-    public boolean isSatisfied(int[] word) {
-        int first[] = new int[offset];
-        System.arraycopy(word, 0, first, 0, first.length);
-        return check(first);
-    }
-
     public boolean check(int[] word) {
         if (!pi.run(word)) {
             System.err.println("Word is not accepted by the automaton");

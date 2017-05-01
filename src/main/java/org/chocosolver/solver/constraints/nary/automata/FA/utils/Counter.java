@@ -21,7 +21,7 @@ public class Counter implements ICounter {
 
     public Counter(int[][] layer_value, int min, int max) {
         this.costs = layer_value;
-        this.bounds = Bounds.makeBounds(min, min, null, max, max, null);
+        this.bounds = Bounds.makeBounds(min, min, max, max);
 
 
     }

@@ -49,10 +49,6 @@ public class Arc extends DefaultWeightedEdge implements IndexedObject {
         return value + "";
     }
 
-    public final void setId(int id) {
-        this.id = id;
-    }
-
     @Override
     public int getObjectIdx() {
         return orig.state;

@@ -40,8 +40,6 @@ public class PropRegular extends Propagator<IntVar> {
 
     private StoredDirectedMultiGraph graph;
     private final IAutomaton automaton;
-    private static int num;
-
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
 

@@ -21,7 +21,7 @@ public class CounterState implements ICounter {
 
     public CounterState(int[][][] layer_value_state, int min, int max) {
         this.costs = layer_value_state;
-        this.bounds = Bounds.makeBounds(min, min, null, max, max, null);
+        this.bounds = Bounds.makeBounds(min, min, max, max);
     }
 
 
