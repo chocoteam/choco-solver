@@ -89,22 +89,6 @@ public interface IPropagationEngine  {
     }
 
     /**
-     * @deprecated replaced by {@link org.chocosolver.solver.Solver#throwsException(ICause, Variable, String)}
-     */
-    @Deprecated
-    default void fails(ICause cause, Variable variable, String message) throws ContradictionException {
-        throw new UnsupportedOperationException("replaced by {@link org.chocosolver.solver.Solver#throwsException(ICause, Variable, String)}");
-    }
-
-    /**
-     * @deprecated replaced by {@link Solver#getContradictionException()} ()}
-     */
-    @Deprecated
-    default ContradictionException getContradictionException() {
-        throw new UnsupportedOperationException("replaced by {@link Solver#getContradictionException()}");
-    }
-
-    /**
      * Clear internal structures
      */
     default void clear() {

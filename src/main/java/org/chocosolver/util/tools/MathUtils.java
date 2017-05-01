@@ -211,23 +211,6 @@ public final class MathUtils {
         return min;
     }
 
-    @Deprecated // will be removed in next release. Use min and max instead
-    public static Point bounds(int[] values) {
-        if (values == null || values.length == 0) {
-            return new Point(Integer.MAX_VALUE, Integer.MIN_VALUE);
-        } else {
-            final Point b = new Point(values[0], values[0]);
-            for (int i = 1; i < values.length; i++) {
-                if (values[i] < b.x) {
-                    b.x = values[i];
-                } else if (values[i] > b.y) {
-                    b.y = values[i];
-                }
-            }
-            return b;
-        }
-    }
-
     /**
      * Returns the largest (closest to positive infinity) {@code int} value that is less than or equal to a/b.
      * Adapted from {@link Math#floorDiv(int, int)}.
