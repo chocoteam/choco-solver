@@ -30,11 +30,6 @@ public class OneWordS32BitSet implements IStateBitSet {
     private static final int WORD_MASK = 0xffffffff;
 
     /**
-     * The current environment.
-     */
-    private final IEnvironment environment;
-
-    /**
      * The internal field corresponding to the serialField "bits".
      */
     private IStateInt word;
@@ -50,24 +45,13 @@ public class OneWordS32BitSet implements IStateBitSet {
      *                                    is negative.
      */
     public OneWordS32BitSet(IEnvironment environment, int nbits) {
-        this.environment = environment;
         // nbits can't be negative; size 0 is OK
         if (nbits < 0)
             throw new NegativeArraySizeException("nbits < 0: " + nbits);
         if (nbits > 32)
             throw new ArrayIndexOutOfBoundsException("nbits > 32: " + nbits);
 
-        word = this.environment.makeInt(0);
-    }
-
-    @SuppressWarnings({"unchecked", "SuspiciousSystemArraycopy", "RedundantCast"})
-    public static <T, U> T[] copyOf(U[] original, int newLength, Class<? extends T[]> newType) {
-        T[] copy = ((Object) newType == (Object) Object[].class)
-                ? (T[]) new Object[newLength]
-                : (T[]) Array.newInstance(newType.getComponentType(), newLength);
-        System.arraycopy(original, 0, copy, 0,
-                Math.min(original.length, newLength));
-        return copy;
+        word = environment.makeInt(0);
     }
 
     /**
@@ -405,8 +389,7 @@ public class OneWordS32BitSet implements IStateBitSet {
 
     @Override
     public String toString() {
-        int numBits = BITS_PER_WORD;
-        StringBuilder b = new StringBuilder(6 * numBits + 2);
+        StringBuilder b = new StringBuilder(6 * BITS_PER_WORD + 2);
         b.append('{');
 
         int i = nextSetBit(0);

@@ -28,7 +28,6 @@ public class S64BitSet implements IStateBitSet {
     */
     private final static int ADDRESS_BITS_PER_WORD = 6;
     protected final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
-    private final static int BIT_INDEX_MASK = BITS_PER_WORD - 1;
 
     /* Used to shift left or right for a partial word mask */
     protected static final long WORD_MASK = 0xffffffffffffffffL;
