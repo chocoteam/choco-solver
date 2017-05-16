@@ -11,14 +11,33 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.binary.*;
+import org.chocosolver.solver.constraints.binary.PropAbsolute;
+import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
+import org.chocosolver.solver.constraints.binary.PropEqualXY_C;
+import org.chocosolver.solver.constraints.binary.PropEqualX_Y;
+import org.chocosolver.solver.constraints.binary.PropScale;
+import org.chocosolver.solver.constraints.binary.PropSquare;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.extension.binary.*;
-import org.chocosolver.solver.constraints.extension.nary.*;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC2001;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3bitrm;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
+import org.chocosolver.solver.constraints.extension.binary.PropBinFC;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
+import org.chocosolver.solver.constraints.extension.nary.PropCompactTableStar;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeFC;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001Positive;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rm;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rmPositive;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGACSTRPos;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeMDDC;
+import org.chocosolver.solver.constraints.extension.nary.PropTableStr2;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
@@ -35,8 +54,18 @@ import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
-import org.chocosolver.solver.constraints.nary.channeling.*;
-import org.chocosolver.solver.constraints.nary.circuit.*;
+import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
+import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuitSCC;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_AntiArboFiltering;
+import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_ArboFiltering;
+import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
+import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuit;
+import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuitDominatorFilter;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
@@ -60,13 +89,18 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.*;
+import org.chocosolver.solver.constraints.ternary.PropDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
+import org.chocosolver.solver.constraints.ternary.PropMaxBC;
+import org.chocosolver.solver.constraints.ternary.PropMinBC;
+import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
@@ -1200,16 +1234,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		for (int i = 0; i < vars1.length && allEnum; i++) {
 			if (!(vars1[i].hasEnumeratedDomain() && vars2[i].hasEnumeratedDomain())) {
 				allEnum = false;
-			}
+		}
 		}
 		Propagator ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
 				: new PropInverseChannelBC(vars1, vars2, offset1, offset2);
-		return new Constraint("InverseChanneling", ArrayUtils.append(
-				allDifferent(vars1, "").getPropagators(),
-				allDifferent(vars2, "").getPropagators(),
-				new Propagator[]{ip}
-		));
-	}
+			return new Constraint("InverseChanneling", ArrayUtils.append(
+					allDifferent(vars1, "").getPropagators(),
+					allDifferent(vars2, "").getPropagators(),
+					new Propagator[]{ip}
+			));
+		}
 
 	/**
 	 * Creates an intValuePrecedeChain constraint.
@@ -1768,7 +1802,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint table(IntVar[] vars, Tuples tuples) {
 		String algo = "GAC3rm";
 		if(tuples.isFeasible()){
-			if(tuples.nbTuples()>500){
+			if(tuples.nbTuples()>500 || tuples.allowUniversalValue()){
 				algo = "CT+";
 			}else{
 				algo = "GACSTR+";
@@ -1809,9 +1843,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		if(algo.contains("+") && !tuples.isFeasible()){
 			throw new SolverException(algo+" table algorithm cannot be used with forbidden tuples.");
 		}
+		if(tuples.allowUniversalValue() && !algo.contains("CT+")){
+			throw new SolverException(algo+" table algorithm cannot be used with short tuples.");
+		}
 		Propagator p;
 		switch (algo) {
-			case "CT+": p = new PropCompactTable(vars, tuples);
+			case "CT+": {
+				if(tuples.allowUniversalValue()) {
+					p = new PropCompactTableStar(vars, tuples);
+				}else{
+					p = new PropCompactTable(vars, tuples);
+				}
+			}
 				break;
 			case "MDD+": p = new PropLargeMDDC(new MultivaluedDecisionDiagram(vars, tuples), vars);
 				break;
@@ -1879,28 +1922,34 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return the list of values in the domains of vars
 	 */
 	default int[] getDomainUnion(IntVar... vars) {
-        int m = vars[0].getLB(), M = vars[0].getUB(), j, k;
-        for(int i  = 1; i < vars.length; i++){
-            if(m > (k = vars[i].getLB())){
-                m = k;
-            }
-            if(M < (j = vars[i].getUB())){
-                M = j;
-            }
-        }
-        BitSet values = new BitSet(M - m +1);
-        for (IntVar v : vars) {
-            int lb = v.getLB();
-            for (int i = v.getUB(); i >= lb; i = v.previousValue(i)) {
-                values.set(i - m);
-            }
-        }
+		int m = vars[0].getLB(), M = vars[0].getUB(), j, k;
+		for(int i  = 1; i < vars.length; i++){
+			if(m > (k = vars[i].getLB())){
+				m = k;
+			}
+			if(M < (j = vars[i].getUB())){
+				M = j;
+			}
+		}
+		BitSet values = new BitSet(M - m +1);
+		DisposableRangeIterator rit;
+		for (IntVar v : vars) {
+			rit = v.getRangeIterator(true);
+			while(rit.hasNext()){
+				int from = rit.min();
+     			int to = rit.max();
+     			// operate on range [from,to] here
+				values.set(from - m, to - m + 1);
+				rit.next();
+			}
+			rit.dispose();
+		}
 
-        int[] vs = new int[values.cardinality()];
-        k = 0;
-        for(int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i+1)){
-            vs[k++] = i + m;
-        }
-        return vs;
+		int[] vs = new int[values.cardinality()];
+		k = 0;
+		for(int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i+1)){
+			vs[k++] = i + m;
+		}
+		return vs;
 	}
 }

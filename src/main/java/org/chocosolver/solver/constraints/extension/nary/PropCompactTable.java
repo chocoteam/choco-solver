@@ -27,6 +27,7 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
  * Only for feasible Tuples
  *
  * @author Jean-Guillaume FAGES
+ * @author Charles Prud'homme
  * @since 28/04/2016
  */
 public class PropCompactTable extends Propagator<IntVar> {
@@ -35,13 +36,13 @@ public class PropCompactTable extends Propagator<IntVar> {
    	// VARIABLES
    	//***********************************************************************************
 
-    private RSparseBitSet currTable;
-    private Tuples tuples;
-    private long[][][] supports;
-    private int[][] residues;
-    private int[] offset;
-    private IIntDeltaMonitor[] monitors;
-    private UnaryIntProcedure<Integer> onValRem;
+    protected RSparseBitSet currTable;
+    protected Tuples tuples;
+    protected long[][][] supports;
+    protected int[][] residues;
+    protected int[] offset;
+    protected IIntDeltaMonitor[] monitors;
+    protected UnaryIntProcedure<Integer> onValRem;
 
     //***********************************************************************************
    	// CONSTRUCTOR
@@ -61,7 +62,15 @@ public class PropCompactTable extends Propagator<IntVar> {
         for (int i = 0; i < vars.length; i++) {
             monitors[i] = vars[i].monitorDelta(this);
         }
-        onValRem = new UnaryIntProcedure<Integer>() {
+        onValRem = makeProcedure();
+    }
+
+    //***********************************************************************************
+   	// INITIALIZATION
+   	//***********************************************************************************
+
+    protected UnaryIntProcedure<Integer> makeProcedure(){
+        return new UnaryIntProcedure<Integer>() {
             int var, off;
             @Override
             public UnaryIntProcedure set(Integer o) {
@@ -71,22 +80,18 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
             @Override
             public void execute(int i) throws ContradictionException {
-                currTable.addToMask(supports[var][i - off]);
+                currTable.addToMask((supports[var][i - off]));
             }
         };
     }
 
-    //***********************************************************************************
-   	// INITIALIZATION
-   	//***********************************************************************************
-
-    private void copyValidTuples(Tuples tuples) {
+    protected void copyValidTuples(Tuples tuples) {
         this.tuples = new Tuples(tuples.isFeasible());
         for (int ti = 0; ti < tuples.nbTuples(); ti++) {
             int[] tuple = tuples.get(ti);
             boolean valid = true;
             for (int i = 0; i < vars.length && valid; i++) {
-                if (!vars[i].contains(tuple[i])) valid = false;
+                valid = vars[i].contains(tuple[i]);
             }
             if (valid) {
                 this.tuples.add(tuple);
@@ -95,7 +100,7 @@ public class PropCompactTable extends Propagator<IntVar> {
         currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
     }
 
-    private void computeSupports() {
+    protected void computeSupports() {
         int n = vars.length;
         offset = new int[n];
         supports = new long[n][][];
@@ -111,7 +116,7 @@ public class PropCompactTable extends Propagator<IntVar> {
                 int wI = 0;
                 int bI = 63;
                 for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-                    if (tuples.get(ti)[i] == v) {
+                    if (tuples.get(ti)[i] == v || tuples.get(ti)[i] == v) {
                         tmp[wI] |= 1L << (bI);
                     }
                     bI--;
@@ -240,13 +245,13 @@ public class PropCompactTable extends Propagator<IntVar> {
    	// RSparseBitSet
    	//***********************************************************************************
 
-    private class RSparseBitSet {
-        private IStateLong[] words;
+    protected class RSparseBitSet {
+        protected IStateLong[] words;
         private int[] index;
         private IStateInt limit;
         private long[] mask;
 
-		private RSparseBitSet(IEnvironment environment, int nbBits) {
+        protected RSparseBitSet(IEnvironment environment, int nbBits) {
             int nw = nbBits / 64;
             if (nw * 64 < nbBits) nw++;
             index = new int[nw];
@@ -263,21 +268,21 @@ public class PropCompactTable extends Propagator<IntVar> {
             return limit.get() == -1;
         }
 
-		private void clearMask() {
+		protected void clearMask() {
             for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 mask[offset] = 0L;
             }
         }
 
-		private void reverseMask() {
+		protected void reverseMask() {
             for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 mask[offset] = ~mask[offset];
             }
         }
 
-		private void addToMask(long[] wordsToAdd) {
+		protected void addToMask(long[] wordsToAdd) {
             for (int i = limit.get(); i >= 0; i--) {
                 int offset = index[i];
                 mask[offset] = mask[offset] | wordsToAdd[offset];

@@ -508,4 +508,42 @@ public class TableTest {
 		Assert.assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
 		Assert.assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
 	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testST1(){
+		Model model = new Model();
+		IntVar x = model.intVar(1,3);
+		IntVar y = model.intVar(1,3);
+		IntVar z = model.intVar(1,3);
+		Tuples ts = new Tuples(true);
+		int ST = 99;
+		ts.setUniversalValue(ST);
+		ts.add(3,ST,1);
+		ts.add(1,2,3);
+		ts.add(2,3,2);
+		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
+
+		Solver solver = model.getSolver();
+		solver.showDecisions();
+		solver.findAllSolutions();
+		Assert.assertEquals(solver.getSolutionCount(), 5);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testST2(){
+		Model model = new Model();
+		IntVar x = model.intVar(1,3);
+		IntVar y = model.intVar(1,3);
+		IntVar z = model.intVar(1,3);
+		Tuples ts = new Tuples(true);
+		int ST = 99;
+		ts.setUniversalValue(ST);
+		ts.add(ST,ST,ST);
+		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
+
+		Solver solver = model.getSolver();
+		solver.showDecisions();
+		solver.findAllSolutions();
+		Assert.assertEquals(solver.getSolutionCount(), 27);
+	}
 }

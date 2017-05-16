@@ -8,6 +8,7 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Compact-Table now deals with short tuples (#531)
 
 ### Deprecated API (to be removed in next release):
 

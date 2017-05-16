@@ -35,6 +35,8 @@ public class Tuples {
 	protected final List<int[]> tuples;
 	private int arity;
 	private int[] ranges;
+	private boolean allowStar;
+	private int star;
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -42,7 +44,9 @@ public class Tuples {
 
     /**
      * Create a list of tuples which represents all allowed tuples if feasible=true
-     * or a set of forbidden tuples if feasible=false
+     * or a set of forbidden tuples if feasible=false.
+	 * Lately, one can allow the presence of universal values, calling {@link #setUniversalValue(int)},
+	 * meaning that some variables can take any values from their domain.
      *
      * @param values list of tuples
      * @param feasible indicates whether the tuples are allowed or forbidden
@@ -78,6 +82,31 @@ public class Tuples {
 	//***********************************************************************************
 
 	/**
+	 * One can allow the presence of universal values,
+	 * meaning that some variables can take any values from their domain.
+	 * @param star the universal value that can appear in any tuple.
+	 */
+	public void setUniversalValue(int star){
+		this.star = star;
+		this.allowStar = true;
+	}
+
+	/**
+	 * @return <i>true</i> if the presence of universal values is allowed.
+	 */
+	public boolean allowUniversalValue(){
+		return this.allowStar;
+	}
+
+	/**
+	 * @return the value of the symbol which denotes that
+	 * some variables can take any values from their domain.
+	 */
+	public int getStarValue(){
+		return this.star;
+	}
+
+	/**
 	 * Checks entailment of a table constraint over vars with this Tuples object
 	 * @param vars set of integer variables to test
 	 * @return an ESat object indicating the entailement of the table over vars and this
@@ -101,7 +130,7 @@ public class Tuples {
 			int[] tuple = tuples.get(ti);
 			boolean valid = true;
 			for (int i = 0; i < values.length && valid; i++) {
-				if (tuple[i] != values[i]) valid = false;
+				valid = tuple[i] == values[i] || (allowStar && tuple[i] == star);
 			}
 			if (valid) {
 				return isFeasible()? ESat.TRUE: ESat.FALSE;

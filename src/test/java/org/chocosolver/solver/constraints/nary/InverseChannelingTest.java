@@ -10,9 +10,11 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -116,4 +118,14 @@ public class InverseChannelingTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void test00() {
+        Model model = new Model();
+        IntVar[] X = model.intVarArray("X", 4, 0, 3);
+        model.inverseChanneling(X, X).post();
+        Solver solver = model.getSolver();
+        solver.showSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(10, solver.getSolutionCount());
+    }
 }
