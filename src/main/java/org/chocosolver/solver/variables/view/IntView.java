@@ -402,6 +402,11 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     }
 
     @Override
+    public void notify(IEventType event) throws ContradictionException {
+        super.notifyPropagators(transformEvent(event), this);
+    }
+
+    @Override
     public IEventType transformEvent(IEventType evt){
         return evt;
     }

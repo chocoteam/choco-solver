@@ -296,12 +296,12 @@ public abstract class AbstractVariable implements Variable {
         assert cause != null;
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].notifyPropagators(event, cause);
+                views[i].notify(event);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].notifyPropagators(event, cause);
+                    views[i].notify(event);
                 }
             }
         }

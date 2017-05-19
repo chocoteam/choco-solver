@@ -130,7 +130,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
+    public void notify(IEventType event) throws ContradictionException {
         super.notifyPropagators(transformEvent((IntEventType) event), this);
     }
 
