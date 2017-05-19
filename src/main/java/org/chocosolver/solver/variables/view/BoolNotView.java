@@ -51,20 +51,12 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
-        if (var.setToFalse(this)) {
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return true;
-        }
-        return false;
+        return instantiateTo(1, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
-        if (var.setToTrue(this)) {
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return true;
-        }
-        return false;
+        return instantiateTo(0, cause);
     }
 
     @Override
@@ -113,42 +105,25 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        if (!this.contains(value)) {
         model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
-        if (var.instantiateTo(1 - value, this)) {
+            this.contradiction(cause, MSG_INST);
+        }else if (!isInstantiated()){
+            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return true;
-        }else{
-            model.getSolver().getExplainer().undo();
+            var.instantiateTo(1 - value, this);
         }
         return false;
     }
 
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        if (value > 0) {
-            model.getSolver().getExplainer().updateLowerBound(this, value, getLB(), cause);
-            if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(IntEventType.INSTANTIATE, cause);
-                return true;
-            }else{
-                model.getSolver().getExplainer().undo();
-            }
-        }
-        return false;
+        return value > 0 && instantiateTo(value, cause);
     }
 
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        if (value < 1) {
-            model.getSolver().getExplainer().updateUpperBound(this, value, getUB(), cause);
-            if (var.instantiateTo(1 - value, this)) {
-                notifyPropagators(IntEventType.INSTANTIATE, cause);
-                return true;
-            }else{
-                model.getSolver().getExplainer().undo();
-            }
-        }
-        return false;
+        return value < 1 && instantiateTo(value, cause);
     }
 
     @Override
@@ -208,12 +183,15 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int nextValueOut(int v) {
-        if(var.isInstantiated() && v == getValue() - 1){
-            return getValue() + 1;
-        }else if(-1 <= v && v <= 1){
-            return 2;
+        int lb = 0, ub = 1;
+        if(var.isInstantiated()){
+            lb = ub = getValue();
         }
+        if (lb - 1 <= v && v <= ub) {
+            return ub + 1;
+        }else{
         return v + 1;
+    }
     }
 
     @Override
@@ -226,12 +204,15 @@ public final class BoolNotView extends IntView implements BoolVar {
 
     @Override
     public int previousValueOut(int v) {
-        if(var.isInstantiated() && v == getValue() + 1){
-            return getValue() - 1;
-        }else if(0 <= v && v <= 2){
-            return -1;
+        int lb = 0, ub = 1;
+        if(var.isInstantiated()){
+            lb = ub = getValue();
         }
+        if (lb <= v && v <= ub + 1) {
+            return lb - 1;
+        }else{
         return v - 1;
+    }
     }
 
     @Override
@@ -250,7 +231,7 @@ public final class BoolNotView extends IntView implements BoolVar {
     }
 
     public String toString() {
-        return "not(" + var.getName() + ")";
+        return "not(" + var + ")";
     }
 
     @Override

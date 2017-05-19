@@ -315,7 +315,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         assert cause != null;
-        if(lb>ub)contradiction(cause,"");
         int olb = this.getLB();
         int oub = this.getUB();
         boolean hasChanged = false;
@@ -400,11 +399,6 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);
         }
-    }
-
-    @Override
-    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
-        super.notifyPropagators(transformEvent(event), this);
     }
 
     @Override

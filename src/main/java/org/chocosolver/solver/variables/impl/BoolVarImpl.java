@@ -65,7 +65,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private IntVarValueIterator _javaIterator;
     /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which reacts
      * on value removal
@@ -183,10 +183,11 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
-        if (!this.contains(value)) {
+        boolean inst = !notInstanciated.contains(offset);
+        if ((inst && mValue != value) || (value < 0 || value > 1)){
             model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        } else if (!isInstantiated()){
+        } else if (!inst){
             IntEventType e = IntEventType.INSTANTIATE;
             assert notInstanciated.contains(offset);
             notInstanciated.swap(offset);
@@ -362,12 +363,15 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public int nextValueOut(int v) {
-        if(!notInstanciated.contains(offset) && v == mValue - 1){
-            return mValue + 1;
-        }else if(-1 <= v && v <= 1){
-            return 2;
+        int lb = 0, ub = 1;
+        if(!notInstanciated.contains(offset)){ // if this is instantiated
+            lb = ub = mValue;
         }
+        if (lb - 1 <= v && v <= ub) {
+            return ub + 1;
+        }else{
         return v + 1;
+    }
     }
 
     @Override
@@ -379,12 +383,15 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public int previousValueOut(int v) {
-        if(!notInstanciated.contains(offset) && v == mValue + 1){
-            return mValue - 1;
-        }else if(0 <= v && v <= 2){
-            return -1;
+        int lb = 0, ub = 1;
+        if(!notInstanciated.contains(offset)){ // if this is instantiated
+            lb = ub = mValue;
         }
+        if (lb <= v && v <= ub + 1) {
+            return lb - 1;
+        }else{
         return v - 1;
+    }
     }
 
     @Override
@@ -468,6 +475,9 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public Iterator<Integer> iterator() {
+        if(_javaIterator == null){
+            _javaIterator = new IntVarValueIterator(this);
+        }
         _javaIterator.reset();
         return _javaIterator;
     }
