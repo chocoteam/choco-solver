@@ -75,8 +75,8 @@ The cut is an additional constraint which states that the next solution must be 
 To solve an optimization problem, you must specify which variable to optimize and in which direction: ::
 
    // to maximize X
-   model.setObjectives(Model.MAXIMIZE, X);
-   // or model.setObjectives(Model.MINIMIZE, X); to minimize X
+   model.setObjective(Model.MAXIMIZE, X);
+   // or model.setObjective(Model.MINIMIZE, X); to minimize X
    while(solver.solve()){
        // an improving solution has been found
    }
@@ -103,7 +103,7 @@ For instance, one may want to indicate that the value of the objective variable 
         IntVar OBJ = model.intVar("objective", 0, 999);
         model.scalar(new IntVar[]{X,Y}, new int[]{3,4}, OBJ)).post();
         // Specify objective
-        model.setObjectives(Model.MAXIMIZE, OBJ);
+        model.setObjective(Model.MAXIMIZE, OBJ);
         // Compute optimum
         model.getSolver().solve();
 
