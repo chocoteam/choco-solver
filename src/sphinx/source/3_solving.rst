@@ -205,7 +205,7 @@ Recording solutions
 A solution can be stored through a ``Solution`` object which maps every variable with its current value.
 It can be created as follows: ::
 
-        Solution solution = new Solution(model());
+        Solution solution = new Solution(model);
 
 By default, a solution records the value of every variable, but you can specify a smaller scope in the ``Solution`` constructor.
 
@@ -222,14 +222,14 @@ To record other variables (e.g. an objective variables) you have two options:
 
 You can record the last solution found as follows : ::
 
-    Solution solution = new Solution(model());
+    Solution solution = new Solution(model);
     while (solver.solve()) {
         solution.record();
     }
 
 You can also use a monitor as follows: ::
 
-    Solution solution = new Solution(model());
+    Solution solution = new Solution(model);
     solver.plugMonitor(new IMonitorSolution() {
           @Override
           public void onSolution() {
@@ -239,7 +239,7 @@ You can also use a monitor as follows: ::
 
 Or with lambdas: ::
 
-    Solution solution = new Solution(model());
+    Solution solution = new Solution(model);
     solver.plugMonitor((IMonitorSolution) () -> s.record());
 
 Note that the solution is erased on each new recording.
