@@ -442,7 +442,7 @@ public enum ArrayUtils {
      * @param <T> the class of the objects in the returned array
      * @return an array from element in <i>list</i>
      */
-    public static <T> T[] toArray(ArrayList<T> list) {
+    public static <T> T[] toArray(List<T> list) {
         return toArray(list.get(0).getClass(), list);
     }
 
