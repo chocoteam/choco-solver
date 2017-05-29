@@ -15,6 +15,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -25,6 +27,18 @@ import java.util.List;
  * @since 15/12/2015.
  */
 public class ArrayUtilsTest {
+
+    @Test(groups="1s", timeOut=60000)
+    public void toArray() throws Exception {
+        List<Integer> l = new LinkedList<>();
+		l.add(1);
+		l.add(5);
+		Assert.assertEquals(ArrayUtils.toArray(l), new int[]{1,5});
+		l = new ArrayList<>();
+		l.add(1);
+		l.add(5);
+		Assert.assertEquals(ArrayUtils.toArray(l), new int[]{1,5});
+    }
 
     @Test(groups="1s", timeOut=60000)
     public void testZeroToN() throws Exception {
