@@ -91,28 +91,34 @@ public class PropCompactTable extends Propagator<IntVar> {
         offset = new int[n];
         supports = new long[n][][];
         residues = new int[n][];
-        for (int i = 0; i < n; i++) {
+		for (int i = 0; i < n; i++) {
             int lb = vars[i].getLB();
             int ub = vars[i].getUB();
             offset[i] = lb;
             supports[i] = new long[ub - lb + 1][currTable.words.length];
             residues[i] = new int[ub - lb + 1];
-            for (int v=lb ; v<=ub; v=vars[i].nextValue(v)) {
-                long[] tmp = supports[i][v - lb];
-                int wI = 0;
-                int bI = 63;
-                for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-                    if (tuples.get(ti)[i] == v) {
-                        tmp[wI] |= 1L << (bI);
-                    }
-                    bI--;
-                    if (bI < 0) {
-                        bI = 63;
-                        wI++;
-                    }
-                }
-            }
         }
+		long[] tmp;
+		for (int i = 0; i < n; i++) {
+			int lb = vars[i].getLB();
+			int ub = vars[i].getUB();
+			offset[i] = lb;
+			for (int v=lb ; v<=ub; v=vars[i].nextValue(v)) {
+				tmp = supports[i][v - lb];
+				int wI = 0;
+				int bI = 63;
+				for (int ti = 0; ti < tuples.nbTuples(); ti++) {
+					if (tuples.get(ti)[i] == v) {
+						tmp[wI] |= 1L << (bI);
+					}
+					bI--;
+					if (bI < 0) {
+						bI = 63;
+						wI++;
+					}
+				}
+			}
+		}
     }
 
     //***********************************************************************************
