@@ -102,7 +102,7 @@ public class PropCompactTable extends Propagator<IntVar> {
                 int wI = 0;
                 int bI = 63;
                 for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-                    if (tuples.get(ti)[i] == v || tuples.get(ti)[i] == v) {
+                    if (tuples.get(ti)[i] == v) {
                         tmp[wI] |= 1L << (bI);
                     }
                     bI--;
