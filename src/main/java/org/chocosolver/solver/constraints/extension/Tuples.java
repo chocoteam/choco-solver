@@ -103,6 +103,7 @@ public class Tuples {
 	 * some variables can take any values from their domain.
 	 */
 	public int getStarValue(){
+		assert allowUniversalValue();
 		return this.star;
 	}
 

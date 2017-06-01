@@ -62,6 +62,22 @@ public class TableTest {
 		}
 	}
 
+	@Test(groups="1s", timeOut=300000)
+	private void testTuples(){
+		Model m = new Model();
+		IntVar x = m.intVar(0,4);
+		IntVar y = m.boolVar();
+		IntVar z = m.boolVar();
+		Tuples t = new Tuples();
+		t.add(0,-1,1);
+		t.add(0,0,1);
+		t.add(5,-1,1);
+		t.add(1,0,1);
+		m.table(new IntVar[]{x,y,z},t,"CT+").post();
+		m.getSolver().showSolutions();
+		while (m.getSolver().solve());
+		m.getSolver().printStatistics();
+	}
 
 	private void allEquals(Model model, IntVar[] vars, int algo) {
 		if (algo > -1) {

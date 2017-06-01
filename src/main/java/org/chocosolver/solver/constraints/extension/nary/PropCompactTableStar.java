@@ -20,6 +20,7 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
  * It deals with short tuples.
  *
  * @author Charles Prud'homme
+ * @author Jean-Guillaume FAGES
  * @since 16/05/2017
  */
 public class PropCompactTableStar extends PropCompactTable {
@@ -28,7 +29,6 @@ public class PropCompactTableStar extends PropCompactTable {
    	// VARIABLES
    	//***********************************************************************************
 
-    private int star;
     private long[][][] inc_supports;
 
     //***********************************************************************************
@@ -43,7 +43,7 @@ public class PropCompactTableStar extends PropCompactTable {
      */
     public PropCompactTableStar(IntVar[] vars, Tuples tuples) {
         super(vars, tuples);
-
+        assert tuples.allowUniversalValue();
     }
 
     //***********************************************************************************
@@ -67,26 +67,7 @@ public class PropCompactTableStar extends PropCompactTable {
         };
     }
 
-    protected void copyValidTuples(Tuples tuples) {
-        // main reason we re-wrote the class
-        this.star = tuples.getStarValue();
-        this.tuples = new Tuples(tuples.isFeasible());
-        this.tuples.setUniversalValue(this.star);
-        for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-            int[] tuple = tuples.get(ti);
-            boolean valid = true;
-            for (int i = 0; i < vars.length && valid; i++) {
-                // main reason we re-wrote the class
-                valid = vars[i].contains(tuple[i]) || tuple[i] == star;
-            }
-            if (valid) {
-                this.tuples.add(tuple);
-            }
-        }
-        currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
-    }
-
-    protected void computeSupports() {
+    protected void computeSupports(Tuples tuples) {
         int n = vars.length;
         offset = new int[n];
         supports = new long[n][][];
@@ -111,7 +92,7 @@ public class PropCompactTableStar extends PropCompactTable {
                         // main reason we re-wrote the class
                         inc_tmp[wI] |= index;
                         tmp[wI] |= index;
-                    }else if(val == star){
+                    }else if(val == tuples.getStarValue()){
                         // main reason we re-wrote the class
                         tmp[wI] |= index;
                     }

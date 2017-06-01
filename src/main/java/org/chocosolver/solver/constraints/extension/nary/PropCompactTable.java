@@ -37,7 +37,7 @@ public class PropCompactTable extends Propagator<IntVar> {
    	//***********************************************************************************
 
     protected RSparseBitSet currTable;
-    protected Tuples tuples;
+    protected Tuples tuples; // only for checker
     protected long[][][] supports;
     protected int[][] residues;
     protected int[] offset;
@@ -56,8 +56,9 @@ public class PropCompactTable extends Propagator<IntVar> {
      */
     public PropCompactTable(IntVar[] vars, Tuples tuples) {
         super(vars, PropagatorPriority.QUADRATIC, true);
-        copyValidTuples(tuples);
-        computeSupports();
+		this.tuples = tuples;
+		this.currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
+        computeSupports(tuples);
         monitors = new IIntDeltaMonitor[vars.length];
         for (int i = 0; i < vars.length; i++) {
             monitors[i] = vars[i].monitorDelta(this);
@@ -85,22 +86,7 @@ public class PropCompactTable extends Propagator<IntVar> {
         };
     }
 
-    protected void copyValidTuples(Tuples tuples) {
-        this.tuples = new Tuples(tuples.isFeasible());
-        for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-            int[] tuple = tuples.get(ti);
-            boolean valid = true;
-            for (int i = 0; i < vars.length && valid; i++) {
-                valid = vars[i].contains(tuple[i]);
-            }
-            if (valid) {
-                this.tuples.add(tuple);
-            }
-        }
-        currTable = new RSparseBitSet(model.getEnvironment(), this.tuples.nbTuples());
-    }
-
-    protected void computeSupports() {
+    protected void computeSupports(Tuples tuples) {
         int n = vars.length;
         offset = new int[n];
         supports = new long[n][][];
