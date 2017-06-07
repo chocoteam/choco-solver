@@ -33,11 +33,11 @@ public class PropXneYReif extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (vars[2].getLB() == 1) {
             if (vars[0].isInstantiated()) {
-                if (vars[1].removeValue(vars[0].getValue(), this)) {
+                if (vars[1].removeValue(vars[0].getValue(), this) || !vars[1].contains(vars[0].getValue())) {
                     setPassive();
                 }
             } else if (vars[1].isInstantiated()) {
-                if (vars[0].removeValue(vars[1].getValue(), this)) {
+                if (vars[0].removeValue(vars[1].getValue(), this) || !vars[0].contains(vars[1].getValue())) {
                     setPassive();
                 }
             }
