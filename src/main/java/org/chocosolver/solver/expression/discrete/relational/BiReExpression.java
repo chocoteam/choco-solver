@@ -26,7 +26,7 @@ import java.util.Map;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class BiReExpression extends ReExpression {
+public class BiReExpression implements ReExpression {
 
     /**
      * The model in which the expression is declared

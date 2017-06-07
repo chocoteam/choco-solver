@@ -19,7 +19,7 @@ import org.chocosolver.solver.variables.BoolVar;
  * @author Charles Prud'homme
  * @since 04/04/2017.
  */
-public abstract class LoExpression extends ReExpression {
+public abstract class LoExpression implements ReExpression {
 
     /**
      * List of available operator for relational expression

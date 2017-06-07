@@ -11,7 +11,10 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.util.ESat;
+
+import java.util.HashSet;
 
 /**
  * <br/>
@@ -20,7 +23,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 18 nov. 2010
  */
-public interface BoolVar extends IntVar, ILogical {
+public interface BoolVar extends IntVar, ILogical, ReExpression {
 
     ESat getBooleanValue();
 
@@ -33,4 +36,19 @@ public interface BoolVar extends IntVar, ILogical {
 	boolean hasNot();
 
     void _setNot(BoolVar not);
+
+    @Override
+    default IntVar intVar() {
+        return boolVar();
+    }
+
+    @Override
+    default BoolVar boolVar(){
+        return this;
+    }
+
+    @Override
+    default void extractVar(HashSet<IntVar> variables){
+        variables.add(this);
+    }
 }

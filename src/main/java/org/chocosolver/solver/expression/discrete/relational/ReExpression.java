@@ -34,12 +34,12 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public abstract class ReExpression implements ArExpression {
+public interface ReExpression extends ArExpression {
 
     /**
      * List of available operator for relational expression
      */
-    public enum Operator {
+    enum Operator {
         /**
          * less than
          */
@@ -103,16 +103,16 @@ public abstract class ReExpression implements ArExpression {
      *
      * @return a Model object
      */
-    public abstract Model getModel();
+    Model getModel();
 
     /**
      * @return the relational expression as an {@link BoolVar}.
      * If necessary, it creates intermediary variable and posts intermediary constraints
      */
-    public abstract BoolVar boolVar();
+    BoolVar boolVar();
 
     @Override
-    public IntVar intVar() {
+    default IntVar intVar() {
         return boolVar();
     }
 
@@ -120,12 +120,12 @@ public abstract class ReExpression implements ArExpression {
      * Extract the variables from this expression
      * @param variables set of variables
      */
-    public abstract void extractVar(HashSet<IntVar> variables);
+    void extractVar(HashSet<IntVar> variables);
 
     /**
      * Post the decomposition of this expression in the solver
      */
-    public void post() {
+    default void post() {
         decompose().post();
     }
 
@@ -133,12 +133,14 @@ public abstract class ReExpression implements ArExpression {
      * @return the topmost constraint representing the expression. If needed, a call to this method
      * creates additional variables and posts additional constraints.
      */
-    public abstract Constraint decompose();
+    default Constraint decompose(){
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return a TABLE constraint that captures the expression
      */
-    public final Constraint extension() {
+    default Constraint extension() {
         HashSet<IntVar> avars = new LinkedHashSet<>();
         extractVar(avars);
         IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
@@ -148,10 +150,19 @@ public abstract class ReExpression implements ArExpression {
         return getModel().table(uvars, tuples);
     }
 
-    public abstract boolean beval(int[] values, Map<IntVar, Integer> map);
+    /**
+     * @param values int values to evaluate
+     * @param map mapping between variables of the topmost expression and position in <i>values</i>
+     * @return an evaluation of this relational expression based on a tuple
+     */
+    @SuppressWarnings("SuspiciousMethodCalls")
+    default boolean beval(int[] values, Map<IntVar, Integer> map){
+        assert this instanceof BoolVar;
+        return values[map.get(this)] == 1;
+    }
 
     @Override
-    public int ieval(int[] values, Map<IntVar, Integer> map) {
+    default int ieval(int[] values, Map<IntVar, Integer> map) {
         return beval(values, map)?1:0;
     }
 
@@ -159,7 +170,7 @@ public abstract class ReExpression implements ArExpression {
      * @param y some relational expressions
      * @return return the expression "x &and; y_1 &and; y_2 &and; ..." where this is "x"
      */
-    public final ReExpression and(ReExpression... y) {
+    default ReExpression and(ReExpression... y) {
         return new NaLoExpression(LoExpression.Operator.AND, this, y);
     }
 
@@ -167,7 +178,7 @@ public abstract class ReExpression implements ArExpression {
      * @param y some relational expressions
      * @return return the expression "x &or; y_1 &or; y_2 &or; ..." where this is "x"
      */
-    public final ReExpression or(ReExpression... y) {
+    default ReExpression or(ReExpression... y) {
         return new NaLoExpression(LoExpression.Operator.OR, this, y);
     }
 
@@ -175,7 +186,7 @@ public abstract class ReExpression implements ArExpression {
      * @param y a relational expression
      * @return return the expression "x &oplus; y" where this is "x"
      */
-    public final ReExpression xor(ReExpression y) {
+    default ReExpression xor(ReExpression y) {
         return new BiLoExpression(LoExpression.Operator.XOR, this, y);
     }
 
@@ -183,7 +194,7 @@ public abstract class ReExpression implements ArExpression {
      * @param y a relational expression
      * @return return the expression "x &rArr; y" where this is "x"
      */
-    public final ReExpression imp(ReExpression y) {
+    default ReExpression imp(ReExpression y) {
         return new BiLoExpression(LoExpression.Operator.IMP, this, y);
     }
 
@@ -191,14 +202,14 @@ public abstract class ReExpression implements ArExpression {
      * @param y a relational expression
      * @return return the expression "x &hArr; y_1 &hArr; y_2 &hArr; ..." where this is "x"
      */
-    public final ReExpression iff(ReExpression... y) {
+    default ReExpression iff(ReExpression... y) {
         return new NaLoExpression(LoExpression.Operator.IFF, this, y);
     }
 
     /**
      * @return return the expression "&not;x" where this is "x"
      */
-    public final ReExpression not() {
+    default ReExpression not() {
         return new UnLoExpression(LoExpression.Operator.NOT, this);
     }
 }

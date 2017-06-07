@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public class NaReExpression extends ReExpression {
+public class NaReExpression implements ReExpression {
 
     /**
      * The model in which the expression is declared

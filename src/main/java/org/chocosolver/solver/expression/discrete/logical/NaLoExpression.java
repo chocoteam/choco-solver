@@ -130,9 +130,9 @@ public class NaLoExpression extends LoExpression {
 
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
-        boolean eval = true;
+        boolean eval = es[0].beval(values, map);
         for(int i = 1; i < es.length; i++){
-            eval &= op.eval(es[0].beval(values, map), es[i].beval(values, map));
+            eval = op.eval(eval, es[i].beval(values, map));
         }
         return eval;
     }
