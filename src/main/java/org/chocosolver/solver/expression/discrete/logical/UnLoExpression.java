@@ -29,21 +29,6 @@ import java.util.Map;
 public class UnLoExpression extends LoExpression {
 
     /**
-     * The model in which the expression is declared
-     */
-    Model model;
-
-    /**
-     * Lazy creation of the underlying variable
-     */
-    BoolVar me = null;
-
-    /**
-     * Operator of the arithmetic expression
-     */
-    Operator op = null;
-
-    /**
      * The first expression this expression relies on
      */
     private ReExpression e;
@@ -54,8 +39,7 @@ public class UnLoExpression extends LoExpression {
      * @param e an expression
      */
     public UnLoExpression(Operator op, ReExpression e) {
-        this.model = e.getModel();
-        this.op = op;
+        super(e.getModel(), op);
         this.e = e;
     }
 

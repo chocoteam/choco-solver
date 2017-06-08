@@ -29,21 +29,6 @@ import java.util.Map;
 public class BiLoExpression extends LoExpression {
 
     /**
-     * The model in which the expression is declared
-     */
-    Model model;
-
-    /**
-     * Lazy creation of the underlying variable
-     */
-    BoolVar me = null;
-
-    /**
-     * Operator of the arithmetic expression
-     */
-    Operator op = null;
-
-    /**
      * The first expression this expression relies on
      */
     private ReExpression e1;
@@ -60,8 +45,7 @@ public class BiLoExpression extends LoExpression {
      * @param e2 an expression
      */
     public BiLoExpression(Operator op, ReExpression e1, ReExpression e2) {
-        this.model = e1.getModel();
-        this.op = op;
+        super(e1.getModel(), op);
         this.e1 = e1;
         this.e2 = e2;
     }

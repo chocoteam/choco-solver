@@ -9,11 +9,17 @@ NEXT MILESTONE
 
 ### Major features:
 - Compact-Table now deals with short tuples (#531)
+- Checking if a created constraint is free (neither posted or reified) is now possible with `Settings.checkDeclaredConstraints()`
+- Improvements on BoolVarImpl and BoolNotView.
+- Remove code deprecated in last release.
+- Fix error in Views.
+- Add scalar detection in `BiReExpression`
 
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
 
+\#531.
 
 4.0.4 - 28 Apr 2017
 -------------------

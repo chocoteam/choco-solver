@@ -73,6 +73,26 @@ public abstract class LoExpression implements ReExpression {
 
 
     /**
+     * The model in which the expression is declared
+     */
+    protected final Model model;
+
+    /**
+     * Lazy creation of the underlying variable
+     */
+    protected BoolVar me = null;
+
+    /**
+     * Operator of the arithmetic expression
+     */
+    protected final Operator op;
+
+    public LoExpression(Model model, Operator op) {
+        this.model = model;
+        this.op = op;
+    }
+
+    /**
      * Return the associated model
      *
      * @return a Model object

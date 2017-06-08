@@ -30,18 +30,6 @@ import java.util.Map;
 public interface ArExpression {
 
     /**
-     * A default empty array
-     */
-    ArExpression[] NO_CHILD = new ArExpression[0];
-
-    /**
-     * Return the associated model
-     *
-     * @return a Model object
-     */
-    Model getModel();
-
-    /**
      * List of available operator for arithmetic expression
      */
     enum Operator {
@@ -269,6 +257,22 @@ public interface ArExpression {
             int identity() {
                 return Integer.MIN_VALUE;
             }
+        },
+        NOP{
+            @Override
+            int eval(int i1) {
+                return 0;
+            }
+
+            @Override
+            int eval(int i1, int i2) {
+                return 0;
+            }
+
+            @Override
+            int identity() {
+                return 0;
+            }
         };
 
         abstract int eval(int i1);
@@ -277,6 +281,18 @@ public interface ArExpression {
 
         abstract int identity();
     }
+
+    /**
+     * A default empty array
+     */
+    ArExpression[] NO_CHILD = new ArExpression[0];
+
+    /**
+     * Return the associated model
+     *
+     * @return a Model object
+     */
+    Model getModel();
 
     /**
      * @return the arithmetic expression as an {@link IntVar}.
@@ -316,6 +332,12 @@ public interface ArExpression {
         return values[map.get(this)];
     }
 
+    /**
+     * @return the child of this expression, or null if thid
+     */
+    default int getNoChild(){
+        return 0;
+    }
 
     /**
      * @return the child of this expression, or null if thid

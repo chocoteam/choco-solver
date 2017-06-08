@@ -468,6 +468,11 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
     @Override
+    default int getNoChild() {
+        return 1;
+    }
+
+    @Override
     default boolean isExpressionLeaf() {
         return true;
     }

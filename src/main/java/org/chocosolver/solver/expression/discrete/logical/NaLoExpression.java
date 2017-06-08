@@ -30,21 +30,6 @@ import java.util.Map;
 public class NaLoExpression extends LoExpression {
 
     /**
-     * The model in which the expression is declared
-     */
-    Model model;
-
-    /**
-     * Lazy creation of the underlying variable
-     */
-    BoolVar me = null;
-
-    /**
-     * Operator of the arithmetic expression
-     */
-    Operator op = null;
-
-    /**
      * The expressions this expression relies on
      */
     private ReExpression[] es;
@@ -56,9 +41,8 @@ public class NaLoExpression extends LoExpression {
      * @param es some expressions
      */
     public NaLoExpression(Operator op, ReExpression... es) {
-        this.op = op;
+        super(es[0].getModel(), op);
         this.es = es;
-        this.model = es[0].getModel();
     }
 
     /**
@@ -79,7 +63,7 @@ public class NaLoExpression extends LoExpression {
     @Override
     public BoolVar boolVar() {
         if (me == null) {
-            BoolVar[] vs = Arrays.stream(es).map(e -> e.boolVar()).toArray(BoolVar[]::new);
+            BoolVar[] vs = Arrays.stream(es).map(ReExpression::boolVar).toArray(BoolVar[]::new);
             me = model.boolVar(model.generateName(op + "_exp_"));
             switch (op) {
                 case AND:
@@ -111,7 +95,7 @@ public class NaLoExpression extends LoExpression {
 
     @Override
     public Constraint decompose() {
-        BoolVar[] vs = Arrays.stream(es).map(e -> e.boolVar()).toArray(BoolVar[]::new);
+        BoolVar[] vs = Arrays.stream(es).map(ReExpression::boolVar).toArray(BoolVar[]::new);
         switch (op) {
             case AND:
                 return model.sum(vs, "=", vs.length);

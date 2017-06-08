@@ -12,11 +12,18 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.BiArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Map;
+
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.ADD;
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.NOP;
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.SUB;
 
 /**
  * Binary relational expression
@@ -27,6 +34,8 @@ import java.util.Map;
  * @since 28/04/2016.
  */
 public class BiReExpression implements ReExpression {
+
+    private static final EnumSet<ArExpression.Operator> ALLOWED = EnumSet.of(ADD, SUB, NOP);
 
     /**
      * The model in which the expression is declared
@@ -109,26 +118,95 @@ public class BiReExpression implements ReExpression {
         e2.extractVar(variables);
     }
 
+    private static ArExpression.Operator detectOperator(ArExpression e){
+        int nochild = e.getNoChild();
+        if(nochild == 1){
+            return NOP;
+        }
+        ArExpression.Operator o = null;
+        ArExpression[] child = e.getExpressionChild();
+        boolean madeOfLeaves = true;
+        for(int i = 0 ; madeOfLeaves && i < nochild; i++){
+            madeOfLeaves = child[i].isExpressionLeaf();
+        }
+        if(madeOfLeaves) {
+            if (nochild == 2) {
+                o = ((BiArExpression) e).getOp();
+            } else {
+                o = ((NaArExpression) e).getOp();
+            }
+        }
+        return o;
+    }
+
     @Override
     public Constraint decompose() {
-        IntVar v1 = e1.intVar();
-        IntVar v2 = e2.intVar();
-        Model model = v1.getModel();
-        switch (op) {
-            case LT:
-                return model.arithm(v1, "<", v2);
-            case LE:
-                return model.arithm(v1, "<=", v2);
-            case GE:
-                return model.arithm(v1, ">=", v2);
-            case GT:
-                return model.arithm(v1, ">", v2);
-            case NE:
-                return model.arithm(v1, "!=", v2);
-            case EQ:
-                return model.arithm(v1, "=", v2);
+        ArExpression.Operator o1 = detectOperator(e1);
+        ArExpression.Operator o2 = detectOperator(e2);
+        if(ALLOWED.contains(o1) && ALLOWED.contains(o2)) {
+            IntVar[] vars = new IntVar[e1.getNoChild() + e2.getNoChild()];
+            int[] coefs = new int[e1.getNoChild() + e2.getNoChild()];
+            fill(vars, coefs, e1, o1, 0, 1);
+            fill(vars, coefs, e2, o2, e1.getNoChild(), -1);
+            Model model = vars[0].getModel();
+            org.chocosolver.solver.constraints.Operator ope = null;
+            switch (op) {
+                case LT:
+                    ope = org.chocosolver.solver.constraints.Operator.LT;
+                    break;
+                case LE:
+                    ope = org.chocosolver.solver.constraints.Operator.LE;
+                    break;
+                case GE:
+                    ope = org.chocosolver.solver.constraints.Operator.GE;
+                    break;
+                case GT:
+                    ope = org.chocosolver.solver.constraints.Operator.GT;
+                    break;
+                case NE:
+                    ope = org.chocosolver.solver.constraints.Operator.NQ;
+                    break;
+                case EQ:
+                    ope = org.chocosolver.solver.constraints.Operator.EQ;
+                    break;
+            }
+            return model.scalar(vars, coefs, ope.toString(), 0);
+        }else {
+            IntVar v1 = e1.intVar();
+            IntVar v2 = e2.intVar();
+            Model model = v1.getModel();
+            switch (op) {
+                case LT:
+                    return model.arithm(v1, "<", v2);
+                case LE:
+                    return model.arithm(v1, "<=", v2);
+                case GE:
+                    return model.arithm(v1, ">=", v2);
+                case GT:
+                    return model.arithm(v1, ">", v2);
+                case NE:
+                    return model.arithm(v1, "!=", v2);
+                case EQ:
+                    return model.arithm(v1, "=", v2);
+            }
+            throw new SolverException("Unexpected case");
         }
-        throw new SolverException("Unexpected case");
+    }
+
+    private static void fill(IntVar[] vars, int[] coefs,
+                             ArExpression e, ArExpression.Operator o1, int o, int m) {
+        ArExpression[] child = e.getExpressionChild();
+        if(e.isExpressionLeaf() || child.length == 1){
+            vars[o] = e.intVar();
+        }else {
+            vars[o] = child[0].intVar();
+        }
+        coefs[o] =  m;
+        for(int i = 1; i < child.length; i++){
+            vars[o + i] = child[i].intVar();
+            assert ALLOWED.contains(o1);
+            coefs[o + i] =  (o1 == ADD ? 1 : -1) * m;
+        }
     }
 
     @Override

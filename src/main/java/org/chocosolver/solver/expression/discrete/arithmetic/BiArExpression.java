@@ -69,6 +69,11 @@ public class BiArExpression implements ArExpression {
         return model;
     }
 
+
+    public Operator getOp() {
+        return op;
+    }
+
     @Override
     public IntVar intVar() {
         if (me == null) {
@@ -128,6 +133,11 @@ public class BiArExpression implements ArExpression {
     @Override
     public int ieval(int[] values, Map<IntVar, Integer> map) {
         return op.eval(e1.ieval(values, map), e2.ieval(values, map));
+    }
+
+    @Override
+    public int getNoChild() {
+        return 2;
     }
 
     @Override

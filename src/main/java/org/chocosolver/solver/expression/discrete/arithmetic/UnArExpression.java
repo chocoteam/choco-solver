@@ -61,6 +61,15 @@ public class UnArExpression implements ArExpression {
         return model;
     }
 
+    public Operator getOp() {
+        return op;
+    }
+
+    @Override
+    public int getNoChild() {
+        return 1;
+    }
+
     @Override
     public ArExpression[] getExpressionChild() {
         return new ArExpression[]{e};

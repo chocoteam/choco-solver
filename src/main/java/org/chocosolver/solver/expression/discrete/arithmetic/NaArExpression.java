@@ -73,6 +73,10 @@ public class NaArExpression implements ArExpression {
         return model;
     }
 
+    public Operator getOp() {
+        return op;
+    }
+
     @Override
     public IntVar intVar() {
         if (me == null) {
@@ -118,6 +122,11 @@ public class NaArExpression implements ArExpression {
         return Arrays.stream(es)
                 .mapToInt(e -> e.ieval(values, map))
                 .reduce(op.identity(), (e1, e2) -> op.eval(e1, e2));
+    }
+
+    @Override
+    public int getNoChild() {
+        return es.length;
     }
 
     @Override
