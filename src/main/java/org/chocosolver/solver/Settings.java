@@ -241,4 +241,13 @@ public interface Settings  {
         return false;
     }
 
+    /**
+     * @return <i>true</i> (default value) to check if all declared constraints are not free anymore,
+     * that is either posted or reified, before running the resolution.
+     * <i>false</i> to skip the control.
+     */
+    default boolean checkDeclaredConstraints(){
+        return true;
+    }
+
 }

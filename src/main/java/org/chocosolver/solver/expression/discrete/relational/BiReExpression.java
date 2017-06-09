@@ -130,11 +130,11 @@ public class BiReExpression implements ReExpression {
             madeOfLeaves = child[i].isExpressionLeaf();
         }
         if(madeOfLeaves) {
-            if (nochild == 2) {
+            if (nochild == 2 && e instanceof BiArExpression){
                 o = ((BiArExpression) e).getOp();
-            } else {
+            } else if(e instanceof NaArExpression) {
                 o = ((NaArExpression) e).getOp();
-            }
+            }// todo: deal with NaLoExpression
         }
         return o;
     }

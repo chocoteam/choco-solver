@@ -105,6 +105,15 @@ public class Constraint {
         for (Propagator propagator : propagators) {
             propagator.defineIn(this);
         }
+        Model model = propagators[0].getModel();
+        if(model.getSettings().checkDeclaredConstraints()) {
+            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+            if(instances == null){
+                instances = Collections.newSetFromMap(new WeakHashMap<Constraint, Boolean>());
+                model.addHook("cinstances", instances);
+            }
+            instances.add(this);
+        }
     }
 
     //***********************************************************************************

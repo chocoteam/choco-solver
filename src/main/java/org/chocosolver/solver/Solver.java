@@ -48,9 +48,17 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
-import static org.chocosolver.solver.Solver.Action.*;
-import static org.chocosolver.util.ESat.*;
+import static org.chocosolver.solver.Solver.Action.extend;
+import static org.chocosolver.solver.Solver.Action.initialize;
+import static org.chocosolver.solver.Solver.Action.propagate;
+import static org.chocosolver.solver.Solver.Action.repair;
+import static org.chocosolver.solver.Solver.Action.validate;
+import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
 
 /**
  * This class is inspired from :
@@ -356,6 +364,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * - initialize the Move and the search strategy
      */
     protected void initialize() {
+        if (mModel.getSettings().checkDeclaredConstraints() && mModel.getSettings().warnUser()) {
+            Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
+            instances
+                    .stream()
+                    .filter(c -> c.getStatus() == FREE)
+                    .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.getName()));
+        }
+
         // for fast construction of "external" constraint, they are initialized once for all
         if(mModel.getHook(Model.MINISAT_HOOK_NAME) != null){
             SatConstraint minisat = (SatConstraint) mModel.getHook(Model.MINISAT_HOOK_NAME);
@@ -372,7 +388,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
         // end note
-
 
         mMeasures.startStopwatch();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
