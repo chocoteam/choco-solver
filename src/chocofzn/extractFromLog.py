@@ -12,7 +12,7 @@ unsa = '=====UNSATISFIABLE=====\n'
 unkn = '=====UNKNOWN=====\n'
 unbo = '=====UNBOUNDED=====\n'
 
-maxtime=300.
+maxtime=900.
 
 def read(dir, fname, opt, old):
     """

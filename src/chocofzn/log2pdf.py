@@ -11,20 +11,24 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2016.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/bestbound/20170117'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/learn/20170524'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'BASIC',
-        'BBOUND',
+        'DFLT',
+        'EXP1',
+        # 'EXP2',
+        # 'EXP3',
+        # 'EXP4',
+        # 'EXP5',
         ]
 )
 parser.add_argument(
@@ -33,10 +37,11 @@ parser.add_argument(
     nargs='+',
     default=[
         False,False
+        # ,False,False,False,False,False
         ]
 )
 
-maxtime=300.
+maxtime=900.
 
 def addPlots(doc, options, coords):
     with doc.create(Subsection('Plot')):

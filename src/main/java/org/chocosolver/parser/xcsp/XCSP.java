@@ -15,6 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.SearchState;
+import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Argument;
@@ -23,6 +24,8 @@ import org.xcsp.checker.SolutionChecker;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -38,7 +41,7 @@ public class XCSP extends RegParser {
     public String instance;
 
     @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker")
-    protected boolean cs = false;
+    private boolean cs = false;
 
     /**
      * Needed to print the last solution found
@@ -97,7 +100,7 @@ public class XCSP extends RegParser {
                 System.out.printf("c %s\n", e.getMessage());
                 userinterruption = false;
                 e.printStackTrace();
-                System.exit(-1);
+                throw new RuntimeException("UNSUPPORTED");
             }
         }
         listeners.forEach(ParserListener::afterParsingFile);
@@ -105,7 +108,12 @@ public class XCSP extends RegParser {
 
     public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
-        target.getSolver().setSearch(Search.intVarSearch(parser.mvars.values().toArray(new IntVar[0])));
+        IntVar[] vars = parser.mvars.values().toArray(new IntVar[parser.mvars.size()]);
+        Arrays.sort(vars, Comparator.comparingInt(IntVar::getId));
+        Solver solver = target.getSolver();
+        solver.setSearch(/*Search.lastConflict*/(Search.intVarSearch(vars)));
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setLubyRestart(100, new FailCounter(target, 0), 1000);
 //        Files.move(Paths.get(instance),
 //                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
 //                StandardCopyOption.REPLACE_EXISTING);
@@ -128,8 +136,10 @@ public class XCSP extends RegParser {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
-        solver.getOut().print("c ");
-        solver.printShortFeatures();
+        if (stat) {
+            solver.getOut().print("c ");
+            solver.printShortFeatures();
+        }
         if (enumerate) {
             while (solver.solve()) {
                 onSolution(solver, parsers[0]);
@@ -160,14 +170,22 @@ public class XCSP extends RegParser {
         finalOutPut(getModel().getSolver());
     }
 
+
     private void onSolution(Solver solver, XCSPParser parser){
         if (solver.getObjectiveManager().isOptimization()){
-            System.out.printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
+            solver.getOut().printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
         }
         output.setLength(0);
         output.append(parser.printSolution());
         if (stat) {
-            System.out.printf("c %s \n", solver.getMeasures().toOneLineString());
+            solver.getOut().printf("c %s \n", solver.getMeasures().toOneLineString());
+        }
+        if(cs) {
+            try {
+                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()));
+            } catch (Exception e) {
+                throw new RuntimeException("wrong solution found twice");
+            }
         }
     }
 
@@ -184,9 +202,9 @@ public class XCSP extends RegParser {
         } else {
             output.insert(0, "s UNKNOWN\n");
         }
-        System.out.printf("%s", output);
+        solver.getOut().printf("%s", output);
         if (stat) {
-            System.out.printf("c %s \n", solver.getMeasures().toOneLineString());
+            solver.getOut().printf("c %s \n", solver.getMeasures().toOneLineString());
         }
         if(cs) {
             try {

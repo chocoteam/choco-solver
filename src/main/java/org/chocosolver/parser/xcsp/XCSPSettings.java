@@ -16,11 +16,12 @@ import org.chocosolver.solver.Settings;
  */
 public class XCSPSettings implements Settings {
 
+    boolean DEBUG = false;
     /**
      * Set to true to print constraint creation during parsing
      */
     public boolean printConstraint() {
-        return false;
+        return DEBUG;
     }
 
     @Override
@@ -30,11 +31,21 @@ public class XCSPSettings implements Settings {
 
     @Override
     public boolean enableSAT() {
-        return false;
+        return true;
     }
 
     @Override
     public int getMaxTupleSizeForSubstitution() {
         return 10000;
+    }
+
+    @Override
+    public boolean warnUser() {
+        return DEBUG;
+    }
+
+    @Override
+    public boolean checkDeclaredConstraints() {
+        return DEBUG;
     }
 }

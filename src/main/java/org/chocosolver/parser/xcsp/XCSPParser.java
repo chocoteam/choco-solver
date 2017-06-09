@@ -38,6 +38,7 @@ import org.xcsp.parser.XCallbacks2;
 import org.xcsp.parser.entries.XConstraints;
 import org.xcsp.parser.entries.XVariables;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -47,6 +48,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static org.xcsp.common.Constants.STAR_INT;
 
 /**
  * <p>
@@ -80,7 +83,12 @@ public class XCSPParser implements XCallbacks2 {
         this.model = model;
         this.mvars = new HashMap<>();
         this.implem = new Implem(this);
-        loadInstance(instance);
+        File file = new File(instance);
+        if(file.exists()){
+            loadInstance(instance);
+        }else{
+            throw new RuntimeException("FILE DOES NOT EXIST");
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,6 +125,11 @@ public class XCSPParser implements XCallbacks2 {
 
     private ReExpression buildRe(XNode<XVariables.XVarInteger> tree) {
         Types.TypeExpr type = tree.type;
+        if (type == Types.TypeExpr.VAR) {
+            return (BoolVar)var(tree.firstVar());
+        } else if (type == Types.TypeExpr.LONG) {
+            return (BoolVar)model.intVar(tree.firstVal());
+        }
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)tree).sons;
         switch (type) {
             // relationnal
@@ -129,6 +142,8 @@ public class XCSPParser implements XCallbacks2 {
             case GT:
                 return buildAr(sons[0]).gt(buildAr(sons[1]));
             case NE:
+                return buildAr(sons[0]).ne(buildAr(sons[1]));
+            case IN:
                 return buildAr(sons[0]).ne(buildAr(sons[1]));
             case EQ:
                 if(sons.length == 2){
@@ -167,7 +182,7 @@ public class XCSPParser implements XCallbacks2 {
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
         ArExpression[] aes = null;
         ReExpression[] res = null;
-        if(type.isLogicalOperator() || type.equals(Types.TypeExpr.NOT)){
+        if(type.isNonUnaryLogicalOperator() || type.equals(Types.TypeExpr.NOT)){
             res = extractRe(sons);
         }else{
             aes = extractAr(sons);
@@ -284,14 +299,18 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrExtension(String id, XVariables.XVarInteger[] list, int[][] tuples, boolean positive, Set<Types.TypeFlag> flags) {
-        if (flags.contains(Types.TypeFlag.STARRED_TUPLES)) {
-            // can you manage tables with symbol * ?
-            throw new ParserException("Tables with symbol * are not supported");
-        }
         if (flags.contains(Types.TypeFlag.UNCLEAN_TUPLES)) {
             // do you have to clean the tuples, so as to remove those that cannot be built from variable domains ?
         }
-        model.table(vars(list), new Tuples(tuples, positive)).post();
+        Tuples mTuples = new Tuples(tuples, positive);
+        if (flags.contains(Types.TypeFlag.STARRED_TUPLES)) {
+            if(!positive){
+                // can you manage tables with symbol * ?
+                throw new ParserException("Negative tables with symbol * are not supported");
+            }
+            mTuples.setUniversalValue(STAR_INT);
+        }
+        model.table(vars(list), mTuples).post();
     }
 
     @Override
@@ -391,16 +410,40 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeConditionOperatorRel op, int k) {
-        rel(var(x), op, k).post();
+        switch (op){
+            case LT:
+                model.arithm(var(x), "<", k).post();
+                break;
+            case LE:
+                model.arithm(var(x), "<=", k).post();
+                break;
+            case GE:
+                model.arithm(var(x), ">=", k).post();
+                break;
+            case GT:
+                model.arithm(var(x), ">", k).post();
+                break;
+            case NE:
+                model.arithm(var(x), "!=", k).post();
+                break;
+            case EQ:
+                model.arithm(var(x), "=", k).post();
+                break;
+            default:
+                rel(var(x), op, k).post();
+                break;
+        }
     }
 
     @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeArithmeticOperator opa, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, int k) {
+        // TODO
         rel(ari(var(x), opa, var(y)), op, k).post();
     }
 
     @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeArithmeticOperator opa, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, XVariables.XVarInteger z) {
+        // TODO
         rel(ari(var(x), opa, var(y)), op, var(z)).post();
     }
 
@@ -490,11 +533,31 @@ public class XCSPParser implements XCallbacks2 {
         if (except.length == 0) {
             model.allDifferent(vars(list)).post();
         } else if (except.length == 1) {
-            model.allDifferentUnderCondition(vars(list), x -> !x.contains(except[0]), true);
+            model.allDifferentUnderCondition(vars(list), x -> !x.contains(except[0]), true).post();
         } else {
             IntIterableRangeSet set = new IntIterableRangeSet(except);
-            model.allDifferentUnderCondition(vars(list), x -> !IntIterableSetUtils.intersect(x, set), true);
+            model.allDifferentUnderCondition(vars(list), x -> !IntIterableSetUtils.intersect(x, set), true).post();
         }
+    }
+
+    @Override
+    public void buildCtrAllDifferentList(String id, XVariables.XVarInteger[][] lists) {
+        int d1 = lists.length;
+        for (int i = 0; i < d1; i++) {
+            for (int j = i + 1 ; j < d1; j++) {
+                buildDistinctVectors(vars(lists[i]), vars(lists[j]));
+            }
+        }
+    }
+
+
+    private void buildDistinctVectors(IntVar[] t1, IntVar[] t2) {
+        int k = t1.length;
+        BoolVar[] diffs = model.boolVarArray(k);
+        for (int i = 0; i < k; i++) {
+            model.reifyXneY(t1[i], t2[i], diffs[i]);
+        }
+        model.addClausesBoolOrArrayEqualTrue(diffs);
     }
 
     @Override

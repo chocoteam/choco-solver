@@ -84,15 +84,15 @@ parser.add_argument(
     default=#'.:'
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
     # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170111/choco-parsers.jar',
+    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170524/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170602/choco-parsers.jar',
 )
 
 parser.add_argument(
     "-n", "--name",
     help='Benchmark name',
-    default='machlearn',
+    default='learn',
 )
-
 parser.add_argument(
     "-fl", "--filelists",
     help='Files containing name of flatzinc files to solve.',
@@ -105,6 +105,7 @@ parser.add_argument(
         '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2016.txt',
     ]
 )
+
 parser.add_argument(
     "-d", "--directory",
     help="Flatzinc files directory.",
@@ -119,14 +120,19 @@ parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=4
+    default=6
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'ML:-stat',
+        'DFLT:-stat',
+        'EXP1:-stat -x 1',
+        # 'EXP2:-stat -x 2',
+        # 'EXP3:-stat -x 3',
+        # 'EXP4:-stat -x 4',
+        # 'EXP5:-stat -x 5',
     ]
 )
 parser.add_argument(
@@ -146,13 +152,13 @@ parser.add_argument(
     default=False
 )
 
-cmd = 'java %s -jar %s -tl %s %s %s'
+cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'
 
 # start here
 args = parser.parse_args()
 
 if args.print:
-    print("python3.4 ./benchmark_fzn.py -cp %s -n %s -fl %s -p %s -c %s -tl %s;" %
+    print("python3.4 ./benchmark_fzn.py -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -n %s -fl %s -p %s -c %s -tl %s;" %
           (args.classpath, args.name, args.filelist, args.process, args.configurations, args.timelimit)
           )
     exit(0)

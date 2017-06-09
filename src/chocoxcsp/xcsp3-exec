@@ -1,9 +1,13 @@
 #!/bin/sh
 
 NB_NODES=1
-TIME_LIMIT=10000
-JAVA_ARGS=""
-CHOCO_JAR=${PARSER_JAR:=~/.m2/repository/org/choco-solver/choco-parsers/4.0.2-SNAPSHOT/choco-parsers-4.0.3-with-dependencies.jar}
+TIME_LIMIT=500
+MEM_LIMIT=500
+DIR=./
+TDIR=./
+SEED=0
+JAR_NAME=choco-parsers.jar
+CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
 
 Usage: xcsp3_choco.sh [<options>] [<file>]
@@ -15,24 +19,43 @@ OPTIONS:
     -h, --help
         Display this message.
 
-    -p
-        When invoked with this option the solver is free to use multiple threads and/or cores during search.
-        The argument n specifies the number of cores that are available.  (The default is $NB_NODES.)
+    -dir <s>
+        Stands for the directory where the uploaded files reside.
+        The default is ${DIR}.
 
     -tl <n>
-        Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
+        Stands for the maximum CPU time given to solver (in seconds).
+        The default is ${TIME_LIMIT}.
+
+    -p  <n>
+        Stands for the number of processing units allocated to the solver.
+        The default is ${NB_NODES}.
+
+    -ml <n>
+        Stands for the maximum memory that the solver may use (in MiB).
+        The default is ${MEM_LIMIT}.
+
+    -tdir <s>
+        Ignored for now.
+        The directory where the solver is allowed to create temporary files.
+        The default is ${TDIR}.
+
+    -seed <n>
+        Ignored for now.
+        Stands for a random seed to be used by the solver.
+        The default is ${SEED}.
 
     -jar <j>
         Override the jar file.  (The default is $CHOCO_JAR.)
 
-
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
-		
+
 EXAMPLES:
-	
+
 	Basic command to solve a fzn model with choco:
-	$> xcsp3_choco.sh ./choco.jar ./alpha.xml
+	$> ./xcsp3-exec alpha.xml
+
 
 	Additionnal arguments:
 	$> xcsp3_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
@@ -54,13 +77,33 @@ do
             exit 0
         ;;
 
-        -p)
-            NB_NODES="$2"
+        -dir)
+            DIR="$2"
             shift
         ;;
 
         -tl)
             TIME_LIMIT="$2"
+            shift
+        ;;
+
+        -p)
+            NB_NODES="$2"
+            shift
+        ;;
+
+        -ml)
+            MEM_LIMIT="$2"
+            shift
+        ;;
+
+        -tdir)
+            TDIR="$2"
+            shift
+        ;;
+
+        -seed)
+            SEED="$2"
             shift
         ;;
 
@@ -89,10 +132,10 @@ do
 done
 
 FILE="$1"
-ARGS=" -tl $TIME_LIMIT -p $NB_NODES"
+ARGS=" -tl '${TIME_LIMIT}s' -p $NB_NODES"
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
+CMD="java -server -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 
-echo "% $CMD"
+echo "c $CMD"
 eval ${CMD}
 
