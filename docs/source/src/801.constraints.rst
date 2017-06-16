@@ -1,0 +1,132 @@
+=====================
+Creating a constraint
+=====================
+
+In this part, we are going to see how to create a constraint to be used by Choco.
+The work will be based on the sum constraint, more specifically:
+:math:`\sum{i = 1}^{n} x_i \leq b`
+where :math:`x_i = [\underline{x_i},\overline{x_i}]` are distinct variables
+and where :math:`b` is a constant.
+
+`Bounds Consistency Techniques for Long Linear Constraint <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.8.8962>_` by
+W.Harvey and J.Schimpf described in details how such a constraint is implemented
+and will serve as a basis of this tutorials.
+
+The first filtering algorithm they depicted in the article is roughly the follwowing:
+
+.. math::
+
+    F = b - \sum{i = 1}^{n} \underline{x_i}
+    \forall i \in [1,n], x_i \leq F + \underline{x_i}
+
+Note that if :math:`F < 0` the constraint is unsatisfiable.
+
+A first implementation
+======================
+
+When one needs to declare its own constraint, actually, he needs to create a propagator.
+Indeed, in choco, a constraint is a container which is composed of propagators,
+and each propagator has the right to eliminate values from domain variables.
+So the first step will be to create a java class that extends `Propagator<IntVar>`.
+The generic parameter `<IntVar>` indicates that the propagator only manages integer variable.
+Set it to `BoolVar`, `SetVar` or `Variable` are possible alternatives.
+
+Once the class is created, a constructor is needed plus two methods :
+
+- `public void propagate(int evtmask) throws ContradictionException` where the filtering algorithm will be applied,
+- `public ESat isEntailed()` where the entailment/satisfaction of the propagator is checked.
+
+We now describe how these two methods can be implemented, a constructor parametrization and some optional yet
+key methods can be defined.
+
+Entailment
+----------
+
+This method is used either on a solution to check that the propagator is satisfied or to reify the propagator.
+The former is mainly used when implementing the constraint to make sure that it constructs solutions.
+The latter is called to valuate the boolean variable attached to a propagator when it is reified.
+The method returns `ESat.TRUE`, `ESat.FALSE` or `ESat.UNDEFINED` when respectively
+with respect to the current domain of the variables,
+the propagator can always be satisfied however they are instantiated,
+the propagator can never be satisfied and
+nothing can be deduced.
+
+For example, consider the constraint :math:`c = (x_1 + x_2 \leq 10)` and the three following states:
+
+- :math:`x_1 = [1,2], x_2 = [1,2]` : the method returns `ESat.TRUE` since any instantations satisfies c,
+- :math:`x_1 = [22,23], x_2 = [10,12]` : the method returns `ESat.FALSE` since any instantations unsatisfies c and
+- :math:`x_1 = [1,10], x_2 = [1,10]` : the method returns `ESat.UNDEFINED` since some instantiations satisfy c, other don't.
+
+
+.. important::
+
+    When an instance of this propagator is created,
+    its array of variables, named `vars`, is automatically created too.
+
+The method can be implemented as is:
+
+.. code-block:: java
+    :linenos:
+
+    Override
+    public ESat isEntailed() {
+       int sumUB = 0, sumLB = 0;
+       for (int i = 0; i < n; i++) {
+           sumLB += vars[i].getLB();
+           sumUB += vars[i].getUB();
+       }
+       if (sumUB <= b) {
+           return ESat.TRUE;
+       }
+       if (sumLB > b) {
+           return ESat.FALSE;
+       }
+       return ESat.UNDEFINED;
+    }
+
+
+Filtering algorithm
+-------------------
+
+This method is used to remove, from variables domain, values that cannot belong to any solutions.
+This method bases its deductions on the current domain of the variables and can update their domain on the fly.
+When a contradiction occurs, restoring the previous domains is managed by the solver,
+thus can safely be ignored when creating a propagator.
+
+In the case of the sum constraint, `F` is computed first,
+then fast check of `F` is made and
+finally a loop is operated over the variables to make
+sure that each upper bound is correct wrt to `F`.
+A simple loop is enough since `F` is computed reading :math:`\overline{x_i}` and writing :math:`\underline{x_i}`.
+
+Note that the method can throw an exception.
+An exception denotes that a failure is detected and the execution has to be stopped.
+In our case, if `F < 0` an exception should be thrown.
+In other cases, the methods that modify the variables domain can thrown such an exception too,
+when for example, the domain becomes empty.
+
+
+
+
+
+
+Constructor
+-----------
+
+Propagation conditions
+----------------------
+
+
+A more complex version
+======================
+
+Incrementally update F
+----------------------
+
+React to fine events
+--------------------
+
+
+
+
+
