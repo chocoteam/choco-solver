@@ -180,25 +180,14 @@ public class Search {
 
     /**
      * Builds a default search heuristics of integer variables
-     * Relies on {@link #domOverWDegSearch(IntVar...)}
+     * Variable selection relies on {@link #domOverWDegSearch(IntVar...)}
+     * Value selection relies on InDomainBest for optimization and InDomainMin for satisfaction
      * @param vars         variables to branch on
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
-        // sets booleans to 1 and intvar to upper bound for maximisation
-        // branch on lower bound otherwise
-        boolean satOrMin = vars[0].getModel().getResolutionPolicy()!= ResolutionPolicy.MAXIMIZE;
-        IntValueSelector valSel = new IntValueSelector() {
-            @Override
-            public int selectValue(IntVar var) {
-                if(var.isBool() || !satOrMin){
-                    return var.getUB();
-                }else {
-                    return var.getLB();
-                }
-            }
-        };
-        return new DomOverWDeg(vars, 0, valSel);
+        boolean isSat = vars[0].getModel().getResolutionPolicy()== ResolutionPolicy.SATISFACTION;
+        return new DomOverWDeg(vars, 0, isSat?new IntDomainMin():new IntDomainBest());
     }
 
     /**
