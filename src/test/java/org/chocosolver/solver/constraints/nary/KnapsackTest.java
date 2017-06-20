@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.variables.Largest;
 import org.chocosolver.solver.variables.BoolVar;
@@ -54,6 +55,29 @@ public class KnapsackTest {
 		IntVar[] xCost = new IntVar[N];
 		for(int i=0;i<N;i++)xCost[i] = m.intScaleView(x[i],c[i]);
 		s.setSearch(Search.intVarSearch(new Largest(),new IntDomainMax(),xCost));
+		while (s.solve());
+		s.printShortStatistics();
+		Assert.assertEquals(16537,s.getBestSolutionValue());
+	}
+
+	@Test(groups="10s", timeOut=60000)
+	public void knapsackTestBestValue() {
+		Model m = new Model();
+		BoolVar[] x = m.boolVarArray(N);
+		IntVar[] bVar = new IntVar[M];
+		for(int i=0;i<M;i++){
+			bVar[i] = m.intVar(0,b[i]);
+		}
+		IntVar objective = m.intVar(0, N*MathUtils.max(c));
+		m.setObjective(Model.MAXIMIZE,objective);
+		m.scalar(x,c,"=",objective).post();
+		for(int i=0;i<M;i++){
+			m.knapsack(x,bVar[i],objective,a[i],c).post();
+		}
+		Solver s = m.getSolver();
+		IntVar[] xCost = new IntVar[N];
+		for(int i=0;i<N;i++)xCost[i] = m.intScaleView(x[i],c[i]);
+		s.setSearch(Search.intVarSearch(new Largest(),new IntDomainBest(),xCost));
 		while (s.solve());
 		s.printShortStatistics();
 		Assert.assertEquals(16537,s.getBestSolutionValue());
