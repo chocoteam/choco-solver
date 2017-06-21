@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -39,6 +40,8 @@ public final class IntDomainBest implements IntValueSelector {
      */
     private DecisionOperator<IntVar> dop;
 
+    private byte ss = 0b00;
+
     /**
      * Create a value selector that returns the best value wrt to the objective to optimize. When an
      * enumerated variable domain exceeds {@link #maxdom}, {@link #altern} value selector is used.
@@ -52,6 +55,8 @@ public final class IntDomainBest implements IntValueSelector {
         this.maxdom = maxdom;
         this.altern = altern;
         this.dop = dop;
+        ss |= (dop == DecisionOperatorFactory.makeIntSplit() ? 0b10 : 0b00);
+        ss |= (dop == DecisionOperatorFactory.makeIntReverseSplit() ? 0b01 : 0b00);
     }
 
     /**
@@ -64,7 +69,8 @@ public final class IntDomainBest implements IntValueSelector {
             if (var.getDomainSize() < maxdom) {
                 int bestCost = Integer.MAX_VALUE;
                 int ub = var.getUB();
-                int bestV = ub;
+                // if decision is '<=', default value is LB, UB in any other cases
+                int bestV = (ss & 0b10) != 0 ? var.getLB() : ub;
                 for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
                     int bound = bound(var, v);
                     if (bound < bestCost) {
@@ -79,13 +85,23 @@ public final class IntDomainBest implements IntValueSelector {
         } else {
             int lbB = bound(var, var.getLB());
             int ubB = bound(var, var.getUB());
-            return lbB < ubB ? var.getLB() : var.getUB();
+            // if values are equivalent
+            if(lbB == ubB){
+                // if decision is '<=', default value is LB, UB in any other cases
+                return (ss & 0b10) != 0 ? var.getLB() : var.getUB();
+            }else {
+                return lbB < ubB ? var.getLB() : var.getUB();
+            }
         }
     }
 
     private int bound(IntVar var, int val) {
         Model model = var.getModel();
         int cost;
+        // // if decision is '<=' ('>='), UB (LB) should be ignored to avoid infinite loop
+        if(ss == 0b10 && val == var.getUB() || ss == 0b01 && val == var.getLB()){
+            return Integer.MAX_VALUE;
+        }
         model.getEnvironment().worldPush();
         try {
             dop.apply(var, val, Cause.Null);
