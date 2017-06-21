@@ -62,7 +62,7 @@ public class IntDecision extends Decision<IntVar> {
         } else if (branch == 2) {
             modif = assignment.unapply(var, value, this);
         }
-        assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
+        // TODO #538 assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
     }
 
     /**
