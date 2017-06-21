@@ -13,9 +13,34 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.selectors.values.*;
-import org.chocosolver.solver.search.strategy.selectors.variables.*;
-import org.chocosolver.solver.search.strategy.strategy.*;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.RealValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.SetValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
+import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
+import org.chocosolver.solver.search.strategy.selectors.variables.GeneralizedMinDomVarSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.selectors.variables.Random;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.ConflictOrderingSearch;
+import org.chocosolver.solver.search.strategy.strategy.GreedyBranching;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.search.strategy.strategy.LastConflict;
+import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
+import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -186,8 +211,15 @@ public class Search {
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
-        boolean isSat = vars[0].getModel().getResolutionPolicy()== ResolutionPolicy.SATISFACTION;
-        return new DomOverWDeg(vars, 0, isSat?new IntDomainMin():new IntDomainBest());
+        ResolutionPolicy policy = vars[0].getModel().getResolutionPolicy();
+        boolean isSat = policy == ResolutionPolicy.SATISFACTION;
+        return new DomOverWDeg(vars, 0, isSat ?
+                new IntDomainMin() :
+                new IntDomainBest(100,
+                        policy == ResolutionPolicy.MAXIMIZE ?
+                                new IntDomainMax() :
+                                new IntDomainMin(),
+                        DecisionOperatorFactory.makeIntEq()));
     }
 
     /**

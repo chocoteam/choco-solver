@@ -172,15 +172,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         //FIXME can not serialize decision 
 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateUpperBound(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalLB = value + 1;
             //            model.getResolver().getObjectiveManager().updateLB(globalLB);
-            var.updateLowerBound(globalLB, cause);
+            return var.updateLowerBound(globalLB, cause);
         }
 
         @Override
@@ -197,15 +197,15 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
         //FIXME can not serialize decision 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateLowerBound(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
             globalUB = value - 1;
             //            model.getResolver().getObjectiveManager().updateUB(globalUB);
-            var.updateUpperBound(globalUB, cause);
+            return var.updateUpperBound(globalUB, cause);
         }
 
         @Override

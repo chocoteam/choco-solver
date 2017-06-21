@@ -24,9 +24,9 @@ import java.io.Serializable;
  */
 public interface DecisionOperator<V extends Variable> extends Serializable {
 
-    void apply(V var, int value, ICause cause) throws ContradictionException;
+    boolean apply(V var, int value, ICause cause) throws ContradictionException;
 
-    void unapply(V var, int value, ICause cause) throws ContradictionException;
+    boolean unapply(V var, int value, ICause cause) throws ContradictionException;
 
     DecisionOperator<V> opposite();
 

@@ -56,11 +56,13 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public void apply() throws ContradictionException {
+        boolean modif = true;
         if (branch == 1) {
-            assignment.apply(var, value, this);
+            modif = assignment.apply(var, value, this);
         } else if (branch == 2) {
-            assignment.unapply(var, value, this);
+            modif = assignment.unapply(var, value, this);
         }
+        assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
     }
 
     /**

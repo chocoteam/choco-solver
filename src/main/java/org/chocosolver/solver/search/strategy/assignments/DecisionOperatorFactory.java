@@ -70,13 +70,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.instantiateTo(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.removeValue(value, cause);
         }
 
         @Override
@@ -109,13 +109,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.removeValue(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.removeValue(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.instantiateTo(value, cause);
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.instantiateTo(value, cause);
         }
 
         @Override
@@ -143,13 +143,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateUpperBound(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value + 1, cause);
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateLowerBound(value + 1, cause);
         }
 
         @Override
@@ -186,13 +186,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateLowerBound(value, cause);
+        public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateLowerBound(value, cause);
         }
 
         @Override
-        public void unapply(IntVar var, int value, ICause cause) throws ContradictionException {
-            var.updateUpperBound(value - 1, cause);
+        public boolean unapply(IntVar var, int value, ICause cause) throws ContradictionException {
+            return var.updateUpperBound(value - 1, cause);
         }
 
         @Override
@@ -230,13 +230,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.force(element, cause);
+        public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            return var.force(element, cause);
         }
 
         @Override
-        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.remove(element, cause);
+        public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            return var.remove(element, cause);
         }
 
         @Override
@@ -272,13 +272,13 @@ public final class DecisionOperatorFactory {
         }
 
         @Override
-        public void apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.remove(element, cause);
+        public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            return var.remove(element, cause);
         }
 
         @Override
-        public void unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            var.force(element, cause);
+        public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            return var.force(element, cause);
         }
 
         @Override
