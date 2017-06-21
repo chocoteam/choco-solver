@@ -26,14 +26,9 @@ public final class IntDomainBest implements IntValueSelector {
 
     /**
      * Maximum enumerated domain size this selector falls into.
-     * Otherwise, {@link #altern} is used.
+     * Otherwise, only bounds are considered.
      */
     private int maxdom;
-
-    /**
-     * Alternative value selector when an enumerated variable domain exceeds {@link #maxdom}.
-     */
-    private IntValueSelector altern;
 
     /**
      * The decision operator used to make the decision
@@ -46,63 +41,64 @@ public final class IntDomainBest implements IntValueSelector {
 
     private Dec dec;
 
-    /**
-     * Create a value selector that returns the best value wrt to the objective to optimize. When an
-     * enumerated variable domain exceeds {@link #maxdom}, {@link #altern} value selector is used.
-     *
-     * @param maxdom a maximum domain size to satisfy to use this value selector.
-     * @param altern value selector to use when an enumerated variable domain exceed {@link
-     *               #maxdom}.
-     * @param dop    the decision operator used to make the decision
-     */
-    public IntDomainBest(int maxdom, IntValueSelector altern, DecisionOperator<IntVar> dop) {
-        this.maxdom = maxdom;
-        this.altern = altern;
-        this.dop = dop;
-        if(dop == DecisionOperatorFactory.makeIntSplit()){
-            dec = Dec.SPLIT;
-        }else if(dop == DecisionOperatorFactory.makeIntReverseSplit()){
-            dec = Dec.RSPLIT;
-        }else{
-            dec = Dec.OTHER;
-        }
-    }
+	/**
+	 * Create a value selector that returns the best value wrt to the objective to optimize.
+	 * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
+	 *
+	 * @param maxdom a maximum domain size to satisfy to use this value selector.
+	 * @param dop    the decision operator used to make the decision
+	 */
+	public IntDomainBest(int maxdom, DecisionOperator<IntVar> dop) {
+		this.maxdom = maxdom;
+		this.dop = dop;
+		if(dop == DecisionOperatorFactory.makeIntSplit()){
+			dec = Dec.SPLIT;
+		}else if(dop == DecisionOperatorFactory.makeIntReverseSplit()){
+			dec = Dec.RSPLIT;
+		}else{
+			dec = Dec.OTHER;
+		}
+	}
+
+	/**
+	 * Create a value selector for assignments that returns the best value wrt to the objective to optimize.
+	 * When an enumerated variable domain exceeds 100, only bounds are considered.
+	 */
+	public IntDomainBest() {
+		this(100, DecisionOperatorFactory.makeIntEq());
+	}
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public int selectValue(IntVar var) {
-        assert var.getModel().getObjective() != null;
-        if (var.hasEnumeratedDomain()) {
-            if (var.getDomainSize() < maxdom) {
-                int bestCost = Integer.MAX_VALUE;
-                int ub = var.getUB();
-                // if decision is '<=', default value is LB, UB in any other cases
-                int bestV = dec.equals(Dec.SPLIT) ? var.getLB() : ub;
-                for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
-                    int bound = bound(var, v);
-                    if (bound < bestCost) {
-                        bestCost = bound;
-                        bestV = v;
-                    }
-                }
-                return bestV;
-            } else {
-                return altern.selectValue(var);
-            }
-        } else {
-            int lbB = bound(var, var.getLB());
-            int ubB = bound(var, var.getUB());
-            // if values are equivalent
-            if(lbB == ubB){
-                // if decision is '<=', default value is LB, UB in any other cases
-                return dec.equals(Dec.SPLIT) ? var.getLB() : var.getUB();
-            }else {
-                return lbB < ubB ? var.getLB() : var.getUB();
-            }
-        }
-    }
+	@Override
+	public int selectValue(IntVar var) {
+		assert var.getModel().getObjective() != null;
+		if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
+			int bestCost = Integer.MAX_VALUE;
+			int ub = var.getUB();
+			// if decision is '<=', default value is LB, UB in any other cases
+			int bestV = dec.equals(Dec.SPLIT) ? var.getLB() : ub;
+			for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
+				int bound = bound(var, v);
+				if (bound < bestCost) {
+					bestCost = bound;
+					bestV = v;
+				}
+			}
+			return bestV;
+		} else {
+			int lbB = bound(var, var.getLB());
+			int ubB = bound(var, var.getUB());
+			// if values are equivalent
+			if(lbB == ubB){
+				// if decision is '<=', default value is LB, UB in any other cases
+				return dec.equals(Dec.SPLIT) ? var.getLB() : var.getUB();
+			}else {
+				return lbB < ubB ? var.getLB() : var.getUB();
+			}
+		}
+	}
 
     private int bound(IntVar var, int val) {
         Model model = var.getModel();

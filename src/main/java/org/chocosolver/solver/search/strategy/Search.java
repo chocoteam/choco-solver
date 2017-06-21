@@ -213,13 +213,7 @@ public class Search {
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
         ResolutionPolicy policy = vars[0].getModel().getResolutionPolicy();
         boolean isSat = policy == ResolutionPolicy.SATISFACTION;
-        return new DomOverWDeg(vars, 0, isSat ?
-                new IntDomainMin() :
-                new IntDomainBest(100,
-                        policy == ResolutionPolicy.MAXIMIZE ?
-                                new IntDomainMax() :
-                                new IntDomainMin(),
-                        DecisionOperatorFactory.makeIntEq()));
+        return new DomOverWDeg(vars, 0, isSat ?new IntDomainMin():new IntDomainBest());
     }
 
     /**
