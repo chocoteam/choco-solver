@@ -16,6 +16,7 @@ import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
@@ -318,6 +319,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
+		boolean defaultS = _me().getSearch()==null;// best bound (in default) is only for optim
         _me().findOptimalSolution(objective, maximize);
         if (!_me().isStopCriterionMet()
                 && _me().getSolutionCount() > 0) {
@@ -326,6 +328,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             _me().reset();
             _me().getModel().clearObjective();
             _me().getModel().arithm(objective, "=", opt).post();
+			if(defaultS)_me().setSearch(Search.defaultSearch(_me().getModel()));// best bound (in default) is only for optim
             return findAllSolutions(stop);
         } else {
             _me().removeStopCriterion(stop);
@@ -381,6 +384,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         _me().addStopCriterion(stop);
+        boolean defaultS = _me().getSearch()==null;// best bound (in default) is only for optim
         _me().findOptimalSolution(objective, maximize);
         if (!_me().isStopCriterionMet()
                 && _me().getSolutionCount() > 0) {
@@ -389,6 +393,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             _me().reset();
             _me().getModel().clearObjective();
             _me().getModel().arithm(objective, "=", opt).post();
+            if(defaultS)_me().setSearch(Search.defaultSearch(_me().getModel()));// best bound (in default) is only for optim
             return streamSolutions(stop);
         } else {
             _me().removeStopCriterion(stop);
@@ -508,8 +513,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * Explore the model, calling a {@link BiConsumer} for each {@link Solution} with its corresponding {@link IMeasures}.
      * <p>
      * The {@link Solution} and the {@link IMeasures} provided by the Biconsumer are always the same reference, consider
-     * either extracting values from them or copy them. See {@link IMeasures#copyMeasures()} and
-     * {@link Solution#copySolution()}
+     * either extracting values from them or copy them. See {@link IMeasures} and {@link Solution#copySolution()}
      * </p>
      * <p>
      * The consumer and the criterion should not be linked ; instead use {@link ACounter} sub-classes.
