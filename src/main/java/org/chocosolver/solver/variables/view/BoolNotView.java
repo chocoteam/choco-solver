@@ -111,7 +111,7 @@ public final class BoolNotView extends IntView implements BoolVar {
         }else if (!isInstantiated()){
             model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
-            var.instantiateTo(1 - value, this);
+            return var.instantiateTo(1 - value, this);
         }
         return false;
     }
