@@ -79,7 +79,7 @@ public class KnapsackTest {
 		Solver s = m.getSolver();
 		IntVar[] xCost = new IntVar[N];
 		for(int i=0;i<N;i++)xCost[i] = m.intScaleView(x[i],c[i]);
-		s.setSearch(Search.intVarSearch(new Largest(),new IntDomainBest(100, new IntDomainMin(), DecisionOperatorFactory.makeIntEq()),xCost));
+		s.setSearch(Search.intVarSearch(new Largest(),new IntDomainBest(100, DecisionOperatorFactory.makeIntEq()),xCost));
 		while (s.solve());
 		s.printShortStatistics();
 		Assert.assertEquals(16537,s.getBestSolutionValue());
