@@ -46,4 +46,11 @@ Practicals
    src/501.description
    src/601.description
    src/701.description
-   src/801.description
+
+Customize
+=========
+
+.. toctree::
+   :maxdepth: 1
+
+   src/801.constraints
