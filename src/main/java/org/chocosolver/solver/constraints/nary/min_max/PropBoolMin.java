@@ -98,7 +98,11 @@ public class PropBoolMin extends Propagator<BoolVar> {
         int b2 = vars[x2].isInstantiated()? vars[x2].getValue():2;
         int bn = vars[n].isInstantiated()? vars[n].getValue():2;
 
-        if(b1 == 1 && b2 == 1){
+        if(bn == 1) {
+            for (int i = 0; i < n; i++) {
+                vars[i].instantiateTo(1, this);
+            }
+        }else if(b1 == 1 && b2 == 1){
             setPassive();
             vars[n].instantiateTo(1, this);
         }else if(bn == 0){
@@ -106,10 +110,6 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 vars[x2].instantiateTo(0, this);
             }else if(b2 == 1){
                 vars[x1].instantiateTo(0, this);
-            }
-        }else if(bn == 1) {
-            for (int i = 0; i < n; i++) {
-                vars[i].instantiateTo(1, this);
             }
         }
     }
