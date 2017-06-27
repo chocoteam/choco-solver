@@ -16,6 +16,7 @@ import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
@@ -56,6 +57,7 @@ public class SolverTest {
         m.getSolver().reset();
         m.clearObjective();
    		m.unpost(x_lesser_y);
+        m.getSolver().setSearch(Search.defaultSearch(m));
         while (m.getSolver().solve());
         assertEquals(m.getSolver().getSolutionCount(),20);
    	}

@@ -60,7 +60,7 @@ public final class IntDomainBest implements IntValueSelector {
      */
 	@Override
 	public int selectValue(IntVar var) {
-		assert var.getModel().getObjective() != null;
+		assert var.getModel().getObjective() != null : "IntDomainBest heuristic is only for optimization models";
 		if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
 			int bestCost = Integer.MAX_VALUE;
 			int ub = var.getUB();

@@ -30,9 +30,7 @@ import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -346,8 +344,10 @@ public class ModelTest {
         model.setObjective(Model.MAXIMIZE, v[0]);
         model.getSolver().solve();
         assertTrue(v[0].isInstantiated());
-        model.getSolver().solve();
-        assertTrue(v[0].isInstantiatedTo(1));
+        if(model.getSolver().solve())
+            assertTrue(v[0].isInstantiatedTo(1));
+        else
+            assertFalse(v[0].isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)

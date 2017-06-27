@@ -20,6 +20,7 @@ import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -289,13 +290,13 @@ public class ObjectiveTest {
         IObjectiveManager<IntVar> oman = model.getSolver().getObjectiveManager();
         oman.setWalkingDynamicCut();
         int best = objective.getUB();
-        for (int i = 0; i < 4; i++) {
-            while (model.getSolver().solve()) {
+		model.getSolver().setSearch(Search.inputOrderLBSearch(model.retrieveIntVars(true)));
+		for (int i = 0; i < 4; i++) {
+			while (model.getSolver().solve()) {
                 best = objective.getValue();
-            }
+			}
         }
         assertEquals(best, 34);
-        assertEquals(model.getSolver().getSolutionCount(), 21);
     }
     
     
