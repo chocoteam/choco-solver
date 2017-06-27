@@ -77,7 +77,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         this.model = ivariables[0].getModel();
         this.aging = alpha;
         this.split = (int) Math.pow(2, split);
-        this.searchSpaceSize = model.getEnvironment().makeFloat();
+        this.searchSpaceSize = model.getEnvironment().makeFloat(1D);
         random = new Random(seed);
         this.nodeImpact = nodeImpact;
         if (!initOnly) model.getSolver().plugMonitor(this);
@@ -102,7 +102,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             assert vars[currentVar] == variable;
         }
         bests.clear();
-        double bestImpact = 1.0;
+        double bestImpact = Double.POSITIVE_INFINITY;
         if (variable.hasEnumeratedDomain()) {
             DisposableValueIterator it = variable.getValueIterator(true);
             int o = offsets[currentVar];
@@ -133,10 +133,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         IntVar best = null;
         // 1. first select the variable with the largest impact
         bests.clear();
-        double bestImpact = -Double.MAX_VALUE;
+        double bestImpact = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < vars.length; i++) {
             if (!vars[i].isInstantiated()) {
                 double imp = computeImpact(i);
+                assert !Double.isNaN(imp);
                 if (imp > bestImpact) {
                     bests.clear();
                     bests.add(i);
@@ -344,6 +345,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         double impact = Ilabel[varIdx][valIdx] * (aging - 1);
         impact += nImpact;
         impact /= aging;
+        assert !Double.isNaN(impact);
         Ilabel[varIdx][valIdx] = impact;
     }
 
@@ -354,11 +356,10 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      */
     private double searchSpaceSize() {
         double size = 1;
-        for (int i = 0; i < vars.length; i++) {
+        for (int i = 0; i < vars.length && size > 0; i++) {
             size *= vars[i].getDomainSize();
-            assert size > 0 : "Search space is not correct!";
         }
-        if (size == Double.POSITIVE_INFINITY) {
+        if(size  <= 0 || size == Double.POSITIVE_INFINITY) {
             size = Double.MAX_VALUE;
         }
         return size;
@@ -379,6 +380,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                             while (it.hasNext()) {
                                 int a = it.next();
                                 double im = computeImpact(v, a, before);
+                                assert !Double.isNaN(im);
                                 updateImpact(im, i, a);
                             }
                             it.dispose();
@@ -394,6 +396,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                                 } else {
                                     im = Ilabel[i][a - 1 - offset];
                                 }
+                                assert !Double.isNaN(im);
                                 updateImpact(im, i, a);
                                 step++;
                             }
@@ -404,7 +407,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         double i1 = computeImpact(v, v.getLB(), before);
                         double i2 = computeImpact(v, v.getUB(), before);
                         double i3 = computeImpact(v, (v.getLB() + v.getUB()) / 2, before);
-                        updateImpact((i1 + i2 + i3) / 3d, i, 0);
+                        double im = (i1 + i2 + i3) / 3d;
+                        assert !Double.isNaN(im);
+                        updateImpact(im, i, 0);
                     }
                 }
             }
