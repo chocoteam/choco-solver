@@ -12,6 +12,11 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -25,7 +30,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.realVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
 
 /**
  *
@@ -314,62 +322,65 @@ public class ParallelPortfolio {
         // set heuristic
         switch (workerID) {
             case 0:
-                // original (custom or default)
+                // DWD  + fast restart + LC (+ B2V)
+                solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), 0,
+                        policy == ResolutionPolicy.SATISFACTION ? new IntDomainMin(): new IntDomainBest()));
+                solver.setNoGoodRecordingFromRestarts();
+                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 1:
-                // custom + LC (or default + LC)
-                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("LastConflict")) {
-                    solver.setSearch(lastConflict(solver.getSearch()));
-                }else{
-                    solver.setSearch(lastConflict(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
-                }
+                // ABS  + fast restart + LC
+                solver.setSearch(Search.activityBasedSearch(worker.retrieveIntVars(true)));
+                solver.setNoGoodRecordingFromRestarts();
+                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 2:
-                // custom + COS (or default + COS)
-                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("ConflictOrderingSearch")) {
-                    solver.setSearch(conflictOrderingSearch(solver.getSearch()));
-                }else{
-                    solver.setSearch(conflictOrderingSearch(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
-                }
+                // input order + LC
+                solver.setSearch(Search.inputOrderLBSearch(worker.retrieveIntVars(true)));
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 3:
-                // default + LC (or input order is already default) + LNS if optim
-                if(customSearch) {
-                    solver.setSearch(lastConflict(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
+                if(policy == ResolutionPolicy.SATISFACTION) {
+                    // occurrence + LC
+                    solver.setSearch(Search.intVarSearch(new Occurrence<>(), new IntDomainMin(), worker.retrieveIntVars(true)));
+                    solver.setSearch(lastConflict(solver.getSearch()));
                 }else{
-                    solver.setSearch(inputOrderLBSearch(ivars));
-                }
-                if(policy!=ResolutionPolicy.SATISFACTION){
+                    // input order + LC + LNS
+                    solver.setSearch(Search.inputOrderLBSearch(worker.retrieveIntVars(true)));
+                    solver.setSearch(lastConflict(solver.getSearch()));
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
-                }else{
-                    solver.setNoGoodRecordingFromRestarts();
                 }
                 break;
             case 4:
-                // custom + LDS(+infty) + COS (or default + LDS(+infty) + COS)
-                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("ConflictOrderingSearch")) {
-                    solver.setLDS(Integer.MAX_VALUE);
-                    solver.setSearch(conflictOrderingSearch(solver.getSearch()));
-                }else{
-                    solver.setLDS(Integer.MAX_VALUE);
-                    solver.setSearch(conflictOrderingSearch(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
-                }
+                // DWD  + fast restart + COS
+                solver.setSearch(Search.conflictOrderingSearch(Search.domOverWDegSearch(worker.retrieveIntVars(true))));
+                solver.setNoGoodRecordingFromRestarts();
+                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 5:
-                // custom + CBJ + LC (or default + CBJ + LC)
-                if (customSearch && !solver.getSearch().getClass().getSimpleName().contains("LastConflict")) {
-                    solver.setCBJLearning(false, false);
-                    solver.setSearch(lastConflict(solver.getSearch()));
-                }else{
-                    solver.setCBJLearning(false, false);
-                    solver.setSearch(lastConflict(intVarSearch(ivars)));
-                    solver.setGeometricalRestart(ivars.length * 3, 2.0d, new FailCounter(solver.getModel(), 1000), 1000);
-                }
+                // input order + LC
+                solver.setSearch(Search.minDomUBSearch(worker.retrieveIntVars(true)));
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
+            case 6:
+                // input order + LDS
+                solver.setSearch(Search.inputOrderLBSearch(worker.retrieveIntVars(true)));
+                solver.setLDS(Integer.MAX_VALUE);
+                break;
+            case 7:
+                if(policy == ResolutionPolicy.SATISFACTION) {
+                    // DWD  + very fast restart
+                    solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), 0, new IntDomainMin()));
+                    solver.setNoGoodRecordingFromRestarts();
+                    solver.setLubyRestart(100, new FailCounter(worker, 0), 1000);
+                }else{
+                    // occurrence + LC
+                    solver.setSearch(Search.intVarSearch(new Occurrence<>(), new IntDomainMin(), worker.retrieveIntVars(true)));
+                    solver.setSearch(lastConflict(solver.getSearch()));
+                }
             default:
                 // random search (various seeds) + LNS if optim
                 solver.setSearch(lastConflict(randomSearch(ivars,workerID)));

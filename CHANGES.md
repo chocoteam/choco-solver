@@ -16,6 +16,7 @@ NEXT MILESTONE
 - Add scalar detection in `BiReExpression`
 - fix errors in Impact-based Search
 - update Search.intVarSearch() + Search.defaultSearch(Model)
+- update ParallelPortfolio default strategies
 
 ### Deprecated API (to be removed in next release):
 
