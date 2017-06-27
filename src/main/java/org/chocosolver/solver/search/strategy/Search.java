@@ -13,7 +13,6 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
@@ -211,9 +210,20 @@ public class Search {
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
-        ResolutionPolicy policy = vars[0].getModel().getResolutionPolicy();
-        boolean isSat = policy == ResolutionPolicy.SATISFACTION;
-        return new DomOverWDeg(vars, 0, isSat ?new IntDomainMin():new IntDomainBest());
+        // sets booleans to 1 and intvar to upper bound for maximisation
+        // branch on lower bound otherwise
+        boolean satOrMin = vars[0].getModel().getResolutionPolicy()!= ResolutionPolicy.MAXIMIZE;
+        IntValueSelector valSel = new IntValueSelector() {
+            @Override
+            public int selectValue(IntVar var) {
+                if(var.isBool() || !satOrMin){
+                    return var.getUB();
+                }else {
+                    return var.getLB();
+                }
+            }
+        };
+        return new DomOverWDeg(vars, 0, valSel);
     }
 
     /**

@@ -14,6 +14,8 @@ NEXT MILESTONE
 - Remove code deprecated in last release.
 - Fix error in Views.
 - Add scalar detection in `BiReExpression`
+- fix errors in Impact-based Search
+- update Search.intVarSearch() + Search.defaultSearch(Model)
 
 ### Deprecated API (to be removed in next release):
 

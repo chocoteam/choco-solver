@@ -35,64 +35,64 @@ public final class IntDomainBest implements IntValueSelector {
      */
     private DecisionOperator<IntVar> dop;
 
-	/**
+    /**
 	 * Create a value selector that returns the best value wrt to the objective to optimize.
 	 * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
-	 *
-	 * @param maxdom a maximum domain size to satisfy to use this value selector.
-	 * @param dop    the decision operator used to make the decision
-	 */
+     *
+     * @param maxdom a maximum domain size to satisfy to use this value selector.
+     * @param dop    the decision operator used to make the decision
+     */
 	public IntDomainBest(int maxdom, DecisionOperator<IntVar> dop) {
-		this.maxdom = maxdom;
-		this.dop = dop;
-	}
+        this.maxdom = maxdom;
+        this.dop = dop;
+    }
 
-	/**
-	 * Create a value selector for assignments that returns the best value wrt to the objective to optimize.
-	 * When an enumerated variable domain exceeds 100, only bounds are considered.
-	 */
-	public IntDomainBest() {
+    /**
+     * Create a value selector for assignments that returns the best value wrt to the objective to
+     * optimize. When an enumerated variable domain exceeds 100, only bounds are considered.
+     */
+    public IntDomainBest() {
 		this(100, DecisionOperatorFactory.makeIntEq());
-	}
+    }
 
     /**
      * {@inheritDoc}
      */
-	@Override
-	public int selectValue(IntVar var) {
-		assert var.getModel().getObjective() != null : "IntDomainBest heuristic is only for optimization models";
-		if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
-			int bestCost = Integer.MAX_VALUE;
-			int ub = var.getUB();
-			// if decision is '<=', default value is LB, UB in any other cases
-			int bestV = dop == DecisionOperatorFactory.makeIntSplit() ? var.getLB() : ub;
-			for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
-				int bound = bound(var, v);
-				if (bound < bestCost) {
-					bestCost = bound;
-					bestV = v;
-				}
-			}
-			return bestV;
-		} else {
-			int lbB = bound(var, var.getLB());
-			int ubB = bound(var, var.getUB());
-			// if values are equivalent
-			if(lbB == ubB){
-				// if decision is '<=', default value is LB, UB in any other cases
-				return dop == DecisionOperatorFactory.makeIntSplit() ? var.getLB() : var.getUB();
-			}else {
-				return lbB < ubB ? var.getLB() : var.getUB();
-			}
-		}
-	}
+    @Override
+    public int selectValue(IntVar var) {
+        assert var.getModel().getObjective() != null;
+        if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
+            int bestCost = Integer.MAX_VALUE;
+            int ub = var.getUB();
+            // if decision is '<=', default value is LB, UB in any other cases
+            int bestV = dop == DecisionOperatorFactory.makeIntReverseSplit() ? ub : var.getLB();
+            for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
+                int bound = bound(var, v);
+                if (bound < bestCost) {
+                    bestCost = bound;
+                    bestV = v;
+                }
+            }
+            return bestV;
+        } else {
+            int lbB = bound(var, var.getLB());
+            int ubB = bound(var, var.getUB());
+            // if values are equivalent
+            if (lbB == ubB) {
+                // if decision is '<=', default value is LB, UB in any other cases
+                return dop == DecisionOperatorFactory.makeIntReverseSplit() ? var.getUB() : var.getLB();
+            } else {
+                return lbB < ubB ? var.getLB() : var.getUB();
+            }
+        }
+    }
 
     private int bound(IntVar var, int val) {
         Model model = var.getModel();
         int cost;
         // // if decision is '<=' ('>='), UB (LB) should be ignored to avoid infinite loop
-        if(dop == DecisionOperatorFactory.makeIntSplit() && val == var.getUB()
-				|| dop == DecisionOperatorFactory.makeIntReverseSplit() && val == var.getLB()){
+        if (dop == DecisionOperatorFactory.makeIntSplit() && val == var.getUB()
+                || dop == DecisionOperatorFactory.makeIntReverseSplit() && val == var.getLB()) {
             return Integer.MAX_VALUE;
         }
         model.getEnvironment().worldPush();
