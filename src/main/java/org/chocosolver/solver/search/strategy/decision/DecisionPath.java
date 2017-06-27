@@ -208,4 +208,13 @@ public class DecisionPath extends DecisionMaker implements Serializable {
 
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(decisions.get(0));
+        for(int i = 1; i < decisions.size(); i++){
+            sb.append(" and ").append(decisions.get(i));
+        }
+        return sb.toString();
+    }
 }
