@@ -485,43 +485,43 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             if (olb < lb) model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
             if (oub > ub) model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
             IntEventType e = null;
-            if (oub < lb) {
-                this.contradiction(cause, MSG_LOW);
-            } else if (olb < lb) {
-                e = IntEventType.INCLOW;
-                int aLB = lb - OFFSET;
-                if (reactOnRemoval) {
-                    //BEWARE: this loop significantly decreases performances
-                    for (int i = olb - OFFSET; i < aLB; i = VALUES.nextSetBit(i + 1)) {
-                        delta.add(i + OFFSET, cause);
+            if (oub >= lb && olb <= ub) {
+                if (olb < lb) {
+                    e = IntEventType.INCLOW;
+                    int aLB = lb - OFFSET;
+                    if (reactOnRemoval) {
+                        //BEWARE: this loop significantly decreases performances
+                        for (int i = olb - OFFSET; i < aLB; i = VALUES.nextSetBit(i + 1)) {
+                            delta.add(i + OFFSET, cause);
+                        }
                     }
+                    VALUES.clear(olb - OFFSET, aLB);
+                    olb = VALUES.nextSetBit(aLB); // olb is used as a temporary variable
+                    LB.set(olb);
+                    olb += OFFSET; // required because we will treat upper bound just after
                 }
-                VALUES.clear(olb - OFFSET, aLB);
-                olb = VALUES.nextSetBit(aLB); // olb is used as a temporary variable
-                LB.set(olb);
-                olb += OFFSET; // required because we will treat upper bound just after
-            }
-            if (olb > ub) {
-                this.contradiction(cause, MSG_UPP);
-            } else if (oub > ub) {
-                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                int aUB = ub - OFFSET;
-                if (reactOnRemoval) {
-                    //BEWARE: this loop significantly decreases performances
-                    for (int i = oub - OFFSET; i > aUB; i = VALUES.prevSetBit(i - 1)) {
-                        delta.add(i + OFFSET, cause);
+                if (oub > ub) {
+                    e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                    int aUB = ub - OFFSET;
+                    if (reactOnRemoval) {
+                        //BEWARE: this loop significantly decreases performances
+                        for (int i = oub - OFFSET; i > aUB; i = VALUES.prevSetBit(i - 1)) {
+                            delta.add(i + OFFSET, cause);
+                        }
                     }
+                    VALUES.clear(aUB + 1, oub - OFFSET + 1);
+                    UB.set(VALUES.prevSetBit(aUB));
                 }
-                VALUES.clear(aUB + 1, oub - OFFSET + 1);
-                UB.set(VALUES.prevSetBit(aUB));
+                assert SIZE.get() > VALUES.cardinality();
+                SIZE.set(VALUES.cardinality());
+                if (isInstantiated()) {
+                    e = IntEventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+                update = true;
+            }else{
+                this.contradiction(cause, oub < lb ? MSG_LOW : MSG_UPP);
             }
-            assert SIZE.get() > VALUES.cardinality();
-            SIZE.set(VALUES.cardinality());
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
-            update = true;
         }
         return update;
     }

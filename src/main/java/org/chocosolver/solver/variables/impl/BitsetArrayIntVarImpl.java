@@ -9,6 +9,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
@@ -494,46 +495,45 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             }
             IntEventType e = null;
             int index, b;
-            if (oub < aLB) {
-                this.contradiction(cause, MSG_LOW);
-            } else if (olb < aLB) {
-                e = IntEventType.INCLOW;
-                b = LB.get();
-                index = indexOfLowerBound(aLB, lb, ub);
-                assert index >= 0 && VALUES[index] >= aLB;
-                if (reactOnRemoval) {
-                    //BEWARE: this loop significantly decreases performances
-                    for (int i = b; i >= 0 && i < index; i = INDICES.nextSetBit(i + 1)) {
-                        delta.add(VALUES[i], cause);
+            if (oub >= lb && olb <= ub) {
+                if (olb < aLB) {
+                    e = IntEventType.INCLOW;
+                    b = LB.get();
+                    index = indexOfLowerBound(aLB, lb, ub);
+                    assert index >= 0 && VALUES[index] >= aLB;
+                    if (reactOnRemoval) {
+                        //BEWARE: this loop significantly decreases performances
+                        for (int i = b; i >= 0 && i < index; i = INDICES.nextSetBit(i + 1)) {
+                            delta.add(VALUES[i], cause);
+                        }
                     }
+                    INDICES.clear(b, index);
+                    LB.set(index);
                 }
-                INDICES.clear(b, index);
-                LB.set(index);
-                olb = VALUES[index];
-            }
-            if (olb > aUB) {
-                this.contradiction(cause, MSG_UPP);
-            } else if (oub > aUB) {
-                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                b = UB.get();
-                index = indexOfUpperBound(aUB, lb, ub);
-                assert index >= 0 && VALUES[index] <= aUB;
-                if (reactOnRemoval) {
-                    //BEWARE: this loop significantly decreases performances
-                    for (int i = b; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
-                        delta.add(VALUES[i], cause);
+                if (oub > aUB) {
+                    e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                    b = UB.get();
+                    index = indexOfUpperBound(aUB, lb, ub);
+                    assert index >= 0 && VALUES[index] <= aUB;
+                    if (reactOnRemoval) {
+                        //BEWARE: this loop significantly decreases performances
+                        for (int i = b; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
+                            delta.add(VALUES[i], cause);
+                        }
                     }
+                    INDICES.clear(index + 1, b + 1);
+                    UB.set(index);
                 }
-                INDICES.clear(index + 1, b + 1);
-                UB.set(index);
+                assert SIZE.get() > INDICES.cardinality();
+                SIZE.set(INDICES.cardinality());
+                if (isInstantiated()) {
+                    e = IntEventType.INSTANTIATE;
+                }
+                this.notifyPropagators(e, cause);
+                update = true;
+            }else{
+                this.contradiction(cause, oub < lb ? MSG_LOW : MSG_UPP);
             }
-            assert SIZE.get() > INDICES.cardinality();
-            SIZE.set(INDICES.cardinality());
-            if (isInstantiated()) {
-                e = IntEventType.INSTANTIATE;
-            }
-            this.notifyPropagators(e, cause);
-            update = true;
         }
         return update;
     }
