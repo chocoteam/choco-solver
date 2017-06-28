@@ -278,4 +278,16 @@ public class RealTest {
         solver.solve();
         model.getIbex().release();
     }
+
+    @Test(groups = "ignored")
+    public void testPG1() throws Exception {
+        Model model = new Model();
+        RealVar rv = model.realVar(0,5,0.1d);
+        BoolVar bv = model.realIbexGenericConstraint("{0}=4",rv).reify();
+        model.arithm(bv,"=",0).post();
+        model.getSolver().showSolutions();
+        while(model.getSolver().solve());
+        System.out.println(bv.getValue() + " " + rv.getUB());
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 64);
+    }
 }

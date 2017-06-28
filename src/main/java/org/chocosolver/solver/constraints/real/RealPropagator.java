@@ -114,7 +114,7 @@ public class RealPropagator extends Propagator<RealVar> {
         for (int i = 0; i < vars.length; i++) {
             // if current domain is larger than domain after contraction
             if (vars[i].getLB() < domains[2 * i] || vars[i].getUB() > domains[2 * i + 1]) {
-                if (!vars[i].isInstantiated() && domains[2 * i + 1] - domains[2 * i] >= vars[i].getPrecision()) {
+                if (!vars[i].isInstantiated() && domains[2 * i + 1] - domains[2 * i] <= vars[i].getPrecision()) {
                     return ESat.UNDEFINED;
                 }
             }
