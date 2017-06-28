@@ -8,15 +8,27 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import dk.brics.automaton.Automaton;
+import dk.brics.automaton.RegExp;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -309,5 +321,87 @@ public class RegularTest {
 
     }
 
+    @DataProvider(name = "two")
+    public Object[][] two(){
+        return new Object[][]{{true},{false}};
+    }
+
+
+    @Test(groups = "10s", dataProvider = "two")
+    public void testRG11(boolean which) throws Exception {
+        Model model = new Model();
+        int n = 30;
+        IntVar[] x = model.intVarArray("x", n, 0,2);
+        IntVar[] x1 = new IntVar[n];
+        System.arraycopy(x, n / 3, x1, 0, 2 * n / 3);
+        System.arraycopy(x, 0, x1, 2 * n / 3, n / 3);
+        IntVar[] x2 = new IntVar[n];
+        System.arraycopy(x, 2 * n / 3, x2, 0, n / 3);
+        System.arraycopy(x, 0, x2, n / 3, 2 * n / 3);
+
+//
+        IntVar[] d = model.intVarArray("d", 3, 0,20);
+
+
+        d[0].ge(4).post();
+        d[1].ge(2).post();
+        d[2].ge(3).post();
+//
+        for(int i = 0 ; i < 3; i++) {
+            model.count(i, Arrays.copyOfRange(x, n / 3, 2 * n / 3), d[i]).post();
+        }
+        FiniteAutomaton auto = makeAuto(which);
+
+        model.regular(x, auto.clone()).post();
+        model.regular(x1, auto.clone()).post();
+        model.regular(x2, auto.clone()).post();
+
+        Solver solver = model.getSolver();
+        solver.showSolutions(()->{
+            StringBuffer st = new StringBuffer();
+            for(int i = 0; i < n; i++){
+                st.append(x[i].getValue()).append(" ");
+            }
+            return st.toString();
+        });
+        solver.setSearch(Search.inputOrderUBSearch(x));
+        solver.showShortStatistics();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 272315);
+    }
+
+    private FiniteAutomaton makeAuto(boolean which){
+        if(which){
+            TIntHashSet alphabet = new TIntHashSet();
+            alphabet.add(0);
+            alphabet.add(1);
+            alphabet.add(2);
+            RegExp r1 = new RegExp("(\u0001|\u0002){0,4}(\u0000(\u0001|\u0002){0,4})*");
+            RegExp r2 = new RegExp("(\u0000|\u0002){0,3}(\u0001(\u0000|\u0002){0,3})*");
+            RegExp r3 = new RegExp("(\u0000|\u0001){0,2}(\u0002(\u0000|\u0001){0,2})*");
+            Automaton a = r1.toAutomaton().intersection(r2.toAutomaton()).intersection(r3.toAutomaton());
+            Constructor<FiniteAutomaton> constructor = null;
+            try {
+                constructor = FiniteAutomaton.class.getDeclaredConstructor(Automaton.class, TIntHashSet.class);
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+            constructor.setAccessible(true);
+            try {
+                return constructor.newInstance(a, alphabet);
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }else{
+            FiniteAutomaton auto = new FiniteAutomaton("(1|2){0,4}(0(1|2){0,4})*", 0,2);
+            auto = auto.intersection(new FiniteAutomaton("(0|2){0,3}(1(0|2){0,3})*", 0,2));
+            return auto.intersection(new FiniteAutomaton("(0|1){0,2}(2(0|1){0,2})*", 0,2));
+        }
+        return null;
+    }
 
 }
