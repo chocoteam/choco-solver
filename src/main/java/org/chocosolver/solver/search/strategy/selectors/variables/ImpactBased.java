@@ -53,6 +53,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private Model model;
 
+    private boolean initOnly;
+
     private boolean asgntFailed; // does the assignment leads to a failure
 
     private boolean learnsAndFails; // does the learning pahse leads to a failure
@@ -80,11 +82,12 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         this.searchSpaceSize = model.getEnvironment().makeFloat(1D);
         random = new Random(seed);
         this.nodeImpact = nodeImpact;
+        this.initOnly = initOnly;
         if (!initOnly) model.getSolver().plugMonitor(this);
     }
 
     public ImpactBased(IntVar[] vars, boolean initOnly){
-        this(vars,2,3,10,0,initOnly);
+        this(vars,2,512,2048,0,initOnly);
     }
 
     @Override
@@ -130,6 +133,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     @Override
     public Decision<IntVar> getDecision() {
+        reevaluateImpact();
         IntVar best = null;
         // 1. first select the variable with the largest impact
         bests.clear();
@@ -252,12 +256,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         asgntFailed = true;
     }
 
-
-
-    @Override
-    public void beforeDownBranch(boolean left) {
-    }
-
     @Override
     public void afterDownBranch(boolean left) {
         if(left){
@@ -273,7 +271,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             asgntFailed = false; // to handle cases where a contradiction was thrown, but the decision was computed outside
         }
-        reevaluateImpact();
     }
 
     /**
@@ -366,7 +363,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     private void reevaluateImpact() {
-        if (nodeImpact > 0 && model.getSolver().getNodeCount() % nodeImpact == 0) {
+        if (!initOnly && nodeImpact > 0 && model.getSolver().getNodeCount() % nodeImpact == 0) {
             double before = searchSpaceSize.get();
             learnsAndFails = false;
             for (int i = 0; i < vars.length; i++) {
