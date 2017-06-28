@@ -487,53 +487,54 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int oub = VALUES[ub];
         boolean update = false;
         if (olb < aLB || oub > aUB) {
-            if (olb < aLB){
+            if (olb < aLB) {
                 model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
             }
-            if (oub > aUB){
+            if (oub > aUB) {
                 model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
             }
             IntEventType e = null;
             int index, b;
-            if (oub >= lb && olb <= ub) {
-                if (olb < aLB) {
-                    e = IntEventType.INCLOW;
-                    b = LB.get();
-                    index = indexOfLowerBound(aLB, lb, ub);
-                    assert index >= 0 && VALUES[index] >= aLB;
-                    if (reactOnRemoval) {
-                        //BEWARE: this loop significantly decreases performances
-                        for (int i = b; i >= 0 && i < index; i = INDICES.nextSetBit(i + 1)) {
-                            delta.add(VALUES[i], cause);
-                        }
+            if (oub < aLB) {
+                this.contradiction(cause, MSG_LOW);
+            } else if (olb < aLB) {
+                e = IntEventType.INCLOW;
+                b = LB.get();
+                index = indexOfLowerBound(aLB, lb, ub);
+                assert index >= 0 && VALUES[index] >= aLB;
+                if (reactOnRemoval) {
+                    //BEWARE: this loop significantly decreases performances
+                    for (int i = b; i >= 0 && i < index; i = INDICES.nextSetBit(i + 1)) {
+                        delta.add(VALUES[i], cause);
                     }
-                    INDICES.clear(b, index);
-                    LB.set(index);
                 }
-                if (oub > aUB) {
-                    e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                    b = UB.get();
-                    index = indexOfUpperBound(aUB, lb, ub);
-                    assert index >= 0 && VALUES[index] <= aUB;
-                    if (reactOnRemoval) {
-                        //BEWARE: this loop significantly decreases performances
-                        for (int i = b; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
-                            delta.add(VALUES[i], cause);
-                        }
-                    }
-                    INDICES.clear(index + 1, b + 1);
-                    UB.set(index);
-                }
-                assert SIZE.get() > INDICES.cardinality();
+                INDICES.clear(b, index);
+                LB.set(index);
                 SIZE.set(INDICES.cardinality());
-                if (isInstantiated()) {
-                    e = IntEventType.INSTANTIATE;
-                }
-                this.notifyPropagators(e, cause);
-                update = true;
-            }else{
-                this.contradiction(cause, oub < lb ? MSG_LOW : MSG_UPP);
+                olb = VALUES[index];
             }
+            if (olb > aUB) {
+                this.contradiction(cause, MSG_UPP);
+            } else if (oub > aUB) {
+                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                b = UB.get();
+                index = indexOfUpperBound(aUB, lb, ub);
+                assert index >= 0 && VALUES[index] <= aUB;
+                if (reactOnRemoval) {
+                    //BEWARE: this loop significantly decreases performances
+                    for (int i = b; i >= 0 && i > index; i = INDICES.prevSetBit(i - 1)) {
+                        delta.add(VALUES[i], cause);
+                    }
+                }
+                INDICES.clear(index + 1, b + 1);
+                UB.set(index);
+                SIZE.set(INDICES.cardinality());
+            }
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
+            this.notifyPropagators(e, cause);
+            update = true;
         }
         return update;
     }

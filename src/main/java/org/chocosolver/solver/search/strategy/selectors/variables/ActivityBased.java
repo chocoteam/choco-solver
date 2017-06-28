@@ -12,11 +12,11 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntDoubleHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
-import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveRestart;
@@ -45,7 +45,7 @@ import static java.lang.Integer.MAX_VALUE;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart, IMonitorInitialize,
+public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
         IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     private static final double ONE = 1.0f;
@@ -126,9 +126,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private Move rfMove;
 
-    // enables to detect that the heuristic has been removed
-    private boolean hasBeenInitiaized;
-
     public ActivityBased(final Model model, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
         this.model = model;
@@ -157,14 +154,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
         model.getSolver().setRestartOnSolutions();
-        if (restartAfterEachFail) {
-            rfMove = new MoveRestart(model.getSolver().getMove(),
-                    new MonotonicRestartStrategy(1),
-                    new FailCounter(model.getSolver().getModel(), 1),
-                    MAX_VALUE);
-            model.getSolver().setMove(rfMove);
-        }
-        model.getSolver().plugMonitor(this);
 //        init(vars);
     }
 
@@ -174,7 +163,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public boolean init() {
-        hasBeenInitiaized = true;
+        if (restartAfterEachFail) {
+            rfMove = new MoveRestart(model.getSolver().getMove(),
+                    new MonotonicRestartStrategy(1),
+                    new FailCounter(model.getSolver().getModel(), 1),
+                    MAX_VALUE);
+            model.getSolver().setMove(rfMove);
+        }
+        model.getSolver().plugMonitor(this);
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
@@ -185,14 +181,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             }
         }
         return true;
-    }
-
-    @Override
-    public void afterInitialize(){
-        if(!hasBeenInitiaized){
-            // the strategy has been erased
-            model.getSolver().unplugMonitor(this);
-        }
     }
 
     @Override
@@ -252,7 +240,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public Decision<IntVar> getDecision() {
-        assert hasBeenInitiaized;
         IntVar best = null;
         bests.clear();
         double bestVal = -1.0d;
