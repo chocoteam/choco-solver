@@ -297,6 +297,7 @@ public class ObjectiveTest {
 			}
         }
         assertEquals(best, 34);
+        assertEquals(model.getSolver().getSolutionCount(), 23);
     }
     
     

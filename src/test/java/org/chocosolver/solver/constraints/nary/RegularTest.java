@@ -357,13 +357,6 @@ public class RegularTest {
         model.regular(x2, auto.clone()).post();
 
         Solver solver = model.getSolver();
-        solver.showSolutions(()->{
-            StringBuffer st = new StringBuffer();
-            for(int i = 0; i < n; i++){
-                st.append(x[i].getValue()).append(" ");
-            }
-            return st.toString();
-        });
         solver.setSearch(Search.inputOrderUBSearch(x));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 272315);

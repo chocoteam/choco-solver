@@ -59,7 +59,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private boolean learnsAndFails; // does the learning pahse leads to a failure
 
-    private long timeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private long initTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+
+    private long reevalTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+
+    private int idx = 0;
 
     /**
      * Create an Impact-based search strategy with Node Impact strategy.
@@ -159,15 +163,31 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         return computeDecision(best);
     }
 
-    public void setTimeLimit(long timeLimit) {
+    /**
+     * Define a time limit on initialisation phase.
+     * When the limit is reached, computing impacts on ROOT node stops and the search can start.
+     * @param timeLimit in milliseconds
+     */
+    public void setInitialisationTimeLimit(long timeLimit) {
         if (timeLimit > -1) {
-            this.timeLimit = timeLimit;
+            this.initTimeLimit = timeLimit;
+        }
+    }
+
+    /**
+     * Define a time limit on reevaluation phase (done every {@link #nodeImpact} nodes).
+     * When the limit is reached, reevaluting impacts stops and the search can go on.
+     * @param timeLimit in milliseconds
+     */
+    public void setReevaluationTimeLimit(long timeLimit) {
+        if (timeLimit > -1) {
+            this.reevalTimeLimit = timeLimit;
         }
     }
 
     @Override
     public boolean init(){
-        long tl = System.currentTimeMillis() + this.timeLimit;
+        long tl = System.currentTimeMillis() + this.initTimeLimit;
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
         offsets = new int[vars.length];
@@ -200,20 +220,21 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                     } else { // estimate per subdomains
                         int step = 0;
                         int size = dsz / split;
+                        int a, b;
                         DisposableValueIterator it = v.getValueIterator(true);
                         while (it.hasNext()) {
                             if (System.currentTimeMillis() > tl) {
                                 break loop;
                             }
-                            int a = it.next();
-                            double im;
-                            if (step % size == 0) {
-                                im = computeImpact(v, a, before);
-                            } else {
-                                im = Ilabel[i][a - 1 - offset];
+                            a = b = it.next();
+                            while(step < size && it.hasNext()) {
+                                b = it.next();
+                                step++;
                             }
-                            Ilabel[i][a - offset] = im;
-                            step++;
+                            double im =  computeImpactB(v, a, b, before);
+                            for(int j = a; j <=b; j++){
+                                Ilabel[i][j - offset] = im;
+                            }
                         }
                         it.dispose();
                     }
@@ -331,6 +352,40 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     }
 
     /**
+     * Compute the impact of an <b>assignment</b>
+     *
+     * @param v      the variable
+     * @param a      the value
+     * @param before search space size before the assignment
+     * @return the impact I(v = a)
+     */
+    private double computeImpactB(IntVar v, int a, int b, double before) {
+        model.getEnvironment().worldPush();
+        double after;
+        try {
+            v.updateBounds(a, b, this);
+            model.getSolver().getEngine().propagate();
+            after = searchSpaceSize();
+            return 1.0d - (after / before);
+        } catch (ContradictionException e) {
+            model.getSolver().getEngine().flush();
+            model.getEnvironment().worldPop();
+            model.getEnvironment().worldPush();
+            // if the value leads to fail, then the value can be removed from the domain
+            try {
+                v.removeInterval(a, b, this);
+                model.getSolver().getEngine().propagate();
+            } catch (ContradictionException ex) {
+                learnsAndFails = true;
+                model.getSolver().getEngine().flush();
+            }
+            return 1.0d;
+        }finally {
+            model.getEnvironment().worldPop();
+        }
+    }
+
+    /**
      * Update the impact of an assignment I(v=a)
      *
      * @param nImpact new impact
@@ -364,13 +419,21 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private void reevaluateImpact() {
         if (!initOnly && nodeImpact > 0 && model.getSolver().getNodeCount() % nodeImpact == 0) {
+//            System.out.printf("[r] ...");
+            long tl = System.currentTimeMillis() + this.reevalTimeLimit;
             double before = searchSpaceSize.get();
             learnsAndFails = false;
-            for (int i = 0; i < vars.length; i++) {
-                IntVar v = vars[i];
+            for (int i = 0; idx < vars.length; idx++, i++) {
+                IntVar v = vars[idx];
                 int dsz = v.getDomainSize();
+                if (System.currentTimeMillis() > tl) {
+//                    System.out.printf(".. %.2f%%\n", (i * 100D /  vars.length));
+                    if (learnsAndFails) {
+                        learnsAndFails = false;
+                    }
+                    return;
+                }
                 if (!v.isInstantiated()) { // if the variable is not instantiated
-                    int offset = v.getLB();
                     if (v.hasEnumeratedDomain()) {
                         if (v.getDomainSize() < split) { // try each value
                             DisposableValueIterator it = v.getValueIterator(true);
@@ -378,24 +441,24 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                                 int a = it.next();
                                 double im = computeImpact(v, a, before);
                                 assert !Double.isNaN(im);
-                                updateImpact(im, i, a);
+                                updateImpact(im, idx, a);
                             }
                             it.dispose();
                         } else { // estimate per subdomains
                             int step = 0;
                             int size = dsz / split;
+                            int a,b;
                             DisposableValueIterator it = v.getValueIterator(true);
                             while (it.hasNext()) {
-                                int a = it.next();
-                                double im;
-                                if (step % size == 0) {
-                                    im = computeImpact(v, a, before);
-                                } else {
-                                    im = Ilabel[i][a - 1 - offset];
+                                a = b = it.next();
+                                while(step < size && it.hasNext()) {
+                                    b = it.next();
+                                    step++;
                                 }
-                                assert !Double.isNaN(im);
-                                updateImpact(im, i, a);
-                                step++;
+                                double im =  computeImpactB(v, a, b, before);
+                                for(int j = a; j <=b; j++){
+                                    updateImpact(im, idx, j);
+                                }
                             }
                             it.dispose();
                         }
@@ -406,13 +469,17 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         double i3 = computeImpact(v, (v.getLB() + v.getUB()) / 2, before);
                         double im = (i1 + i2 + i3) / 3d;
                         assert !Double.isNaN(im);
-                        updateImpact(im, i, 0);
+                        updateImpact(im, idx, 0);
                     }
                 }
+            }
+            if(idx == vars.length){
+                idx = 0;
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
             }
+//            System.out.printf(".. 100%%\n");
         }
     }
 }
