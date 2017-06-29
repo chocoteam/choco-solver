@@ -88,7 +88,7 @@ import static org.chocosolver.util.ESat.UNDEFINED;
 public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** Define the possible actions of SearchLoop */
-    protected enum Action {
+    public enum Action {
         /**
          * Initialization step
          */
@@ -126,78 +126,78 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private transient PrintStream err = System.err;
 
     /** The propagate component of this search loop */
-    private Propagate P;
+    protected Propagate P;
 
     /** The learning component of this search loop */
-    private Learn L;
+    protected Learn L;
 
     /** The moving component of this search loop */
-    private Move M;
+    protected Move M;
 
     /** The declaring model */
-    private Model mModel;
+    protected Model mModel;
 
     /** The objective manager declare */
-    private IObjectiveManager objectivemanager;
+    protected IObjectiveManager objectivemanager;
 
     /** The next action to execute in the search <u>loop</u> */
-    private Action action;
+    protected Action action;
 
     /** The measure recorder to keep up to date */
-    private MeasuresRecorder mMeasures;
+    protected MeasuresRecorder mMeasures;
 
     /** The current decision */
-    private DecisionPath dpath;
+    protected DecisionPath dpath;
 
     /**
      * Index of the initial world, before initialization.
      * May be different from 0 if some external backups have been made.
      */
-    private int rootWorldIndex = 0;
+    protected int rootWorldIndex = 0;
 
     /** Index of the world where the search starts, after initialization. */
-    private int searchWorldIndex = 0;
+    protected int searchWorldIndex = 0;
 
     /**
      * List of stopping criteria.
      * When at least one is satisfied, the search loop ends.
      */
-    private List<Criterion> criteria;
+    protected List<Criterion> criteria;
 
     /** Indicates if the default search loop is in use (set to <tt>true</tt> in that case). */
-    private boolean defaultSearch = false;
+    protected boolean defaultSearch = false;
 
     /** Indicates if a complementary search strategy should be added (set to <tt>true</tt> in that case). */
-    private boolean completeSearch = false;
+    protected boolean completeSearch = false;
 
     /** An explanation engine */
-    private IExplanationEngine explainer;
+    protected IExplanationEngine explainer;
 
     /** List of search monitors attached to this search loop */
-    private SearchMonitorList searchMonitors;
+    protected SearchMonitorList searchMonitors;
 
     /** The propagation engine to use */
-    private IPropagationEngine engine;
+    protected IPropagationEngine engine;
     /**
      * Internal unique contradiction exception, used on propagation failures
      */
-    private final ContradictionException exception;
+    protected final ContradictionException exception;
     /**
      * Problem feasbility:
      * - UNDEFINED if unknown,
      * - TRUE if satisfiable,
      * - FALSE if unsatisfiable
      */
-    private ESat feasible = ESat.UNDEFINED;
+    protected ESat feasible = ESat.UNDEFINED;
 
     /** Counter that indicates how many world should be rolled back when backtracking */
-    private int jumpTo;
+    protected int jumpTo;
 
     /** Set to <tt>true</tt> to stop the search loop **/
-    private boolean stop;
+    protected boolean stop;
 
     /** Set to <tt>true</tt> when no more reparation can be achieved, ie entire search tree explored. */
-    private boolean canBeRepaired = true;
+    protected boolean canBeRepaired = true;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -274,7 +274,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Executes the search loop
      * @return <tt>true</tt> if ends on a solution, <tt>false</tt> otherwise
      */
-    private boolean searchLoop() {
+    public boolean searchLoop() {
         boolean solution = false;
         boolean left = true;
         Thread th = Thread.currentThread();
@@ -291,58 +291,18 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 case initialize:
                     throw new UnsupportedOperationException("should not initialize during search loop");
                 case propagate:
-                    searchMonitors.beforeDownBranch(left);
-                    mMeasures.incDepth();
-                    try {
-                        P.execute(this);
-                        action = extend;
-                    } catch (ContradictionException ce) {
-                        engine.flush();
-                        mMeasures.incFailCount();
-                        jumpTo = 1;
-                        action = repair;
-                        searchMonitors.onContradiction(ce);
-                    }
-                    searchMonitors.afterDownBranch(left);
+                    propagate(left);
                     break;
                 case extend:
                     left = true;
-                    searchMonitors.beforeOpenNode();
-                    mMeasures.incNodeCount();
-                    if (!M.extend(this)) {
-                        action = validate;
-                    } else {
-                        action = propagate;
-                    }
-                    searchMonitors.afterOpenNode();
+                    extend();
                     break;
                 case repair:
                     left = false;
-                    L.record(this);
-                    searchMonitors.beforeUpBranch();
-                    // this is done before the reparation,
-                    // since restart is a move which can stop the search if the cut fails
-                    action = propagate;
-                    canBeRepaired = M.repair(this);
-                    searchMonitors.afterUpBranch();
-                    if (!canBeRepaired) {
-                        stop = true;
-                    } else {
-                        L.forget(this);
-                    }
+                    repair();
                     break;
                 case validate:
-                    if (!getModel().getSettings().checkModel(this)) {
-                        throw new SolverException("The current solution does not satisfy the checker.\n" +
-                                Reporting.fullReport(mModel));
-                    }
-                    feasible = TRUE;
-                    mMeasures.incSolutionCount();
-                    objectivemanager.updateBestSolution();
-                    searchMonitors.onSolution();
-                    jumpTo = 1;
-                    action = repair;
-                    stop = solution = true;
+                    stop = solution = validate();
                     break;
                 default:
                     throw new SolverException("Invalid Solver loop action " + action);
@@ -441,11 +401,81 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Search loop propagation phase. This needs to be distinguished from {@link #propagate()}
+     * @param left true if we are branching on the left false otherwise
+     */
+    protected void propagate(boolean left){
+        searchMonitors.beforeDownBranch(left);
+        mMeasures.incDepth();
+        try {
+            P.execute(this);
+            action = extend;
+        } catch (ContradictionException ce) {
+            engine.flush();
+            mMeasures.incFailCount();
+            jumpTo = 1;
+            action = repair;
+            searchMonitors.onContradiction(ce);
+        }
+        searchMonitors.afterDownBranch(left);
+    }
+
+    /**
+     * Search loop extend phase
+     */
+    protected void extend(){
+        searchMonitors.beforeOpenNode();
+        mMeasures.incNodeCount();
+        if (!M.extend(this)) {
+            action = validate;
+        } else {
+            action = propagate;
+        }
+        searchMonitors.afterOpenNode();
+    }
+
+    /**
+     * Search loop repair phase
+     */
+    protected void repair(){
+        L.record(this);
+        searchMonitors.beforeUpBranch();
+        // this is done before the reparation,
+        // since restart is a move which can stop the search if the cut fails
+        action = propagate;
+        canBeRepaired = M.repair(this);
+        searchMonitors.afterUpBranch();
+        if (!canBeRepaired) {
+            stop = true;
+        } else {
+            L.forget(this);
+        }
+    }
+
+    /**
+     * Search loop validate phase
+     * @return <code>true</code> if a solution is found
+     */
+    protected boolean validate(){
+        if (!getModel().getSettings().checkModel(this)) {
+            throw new SolverException("The current solution does not satisfy the checker.\n" +
+                    Reporting.fullReport(mModel));
+        }
+        feasible = TRUE;
+        mMeasures.incSolutionCount();
+        objectivemanager.updateBestSolution();
+        searchMonitors.onSolution();
+        jumpTo = 1;
+        action = repair;
+        return true;
+    }
+
+    /**
      * Close the search:
      * - set satisfaction
      * - update statistics
      */
-    private void closeSearch() {
+    protected void closeSearch() {
         if(mMeasures.getSearchState() == SearchState.RUNNING){
             mMeasures.setSearchState(SearchState.TERMINATED);
         }
