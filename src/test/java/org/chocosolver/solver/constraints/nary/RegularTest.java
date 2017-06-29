@@ -365,7 +365,6 @@ public class RegularTest {
             return st.toString();
         });
         solver.setSearch(Search.inputOrderUBSearch(x));
-        solver.showShortStatistics();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 272315);
     }
