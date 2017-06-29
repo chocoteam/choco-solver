@@ -23,6 +23,8 @@ import org.chocosolver.util.objects.IntList;
 
 import java.util.Random;
 
+import static org.chocosolver.util.tools.VariableUtils.searchSpaceSize;
+
 /**
  * Implementation of the search described in:
  * "Impact-Based Search Strategies for Constraint Programming",
@@ -192,7 +194,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         Ilabel = new double[vars.length][];
         offsets = new int[vars.length];
         // 1. Estimation of assignment and variable impacts
-        double before = searchSpaceSize();
+        double before = searchSpaceSize(vars);
         searchSpaceSize.set(before);
         learnsAndFails = false;
         loop:
@@ -284,7 +286,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 if (asgntFailed) {
                     updateImpact(1.0d, currentVar, currentVal);
                 } else {
-                    double sssz = searchSpaceSize();
+                    double sssz = searchSpaceSize(vars);
                     updateImpact(sssz / searchSpaceSize.get(), currentVar, currentVal);
                     searchSpaceSize.set(sssz);
                 }
@@ -331,7 +333,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         try {
             v.instantiateTo(a, this);
             model.getSolver().getEngine().propagate();
-            after = searchSpaceSize();
+            after = searchSpaceSize(vars);
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
             model.getSolver().getEngine().flush();
@@ -365,7 +367,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         try {
             v.updateBounds(a, b, this);
             model.getSolver().getEngine().propagate();
-            after = searchSpaceSize();
+            after = searchSpaceSize(vars);
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
             model.getSolver().getEngine().flush();
@@ -399,22 +401,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         impact /= aging;
         assert !Double.isNaN(impact);
         Ilabel[varIdx][valIdx] = impact;
-    }
-
-    /**
-     * Compute the search space size
-     *
-     * @return search space size
-     */
-    private double searchSpaceSize() {
-        double size = 1;
-        for (int i = 0; i < vars.length && size > 0; i++) {
-            size *= vars[i].getDomainSize();
-        }
-        if(size  <= 0 || size == Double.POSITIVE_INFINITY) {
-            size = Double.MAX_VALUE;
-        }
-        return size;
     }
 
     private void reevaluateImpact() {

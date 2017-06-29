@@ -308,6 +308,22 @@ public class VariableUtils {
     }
 
     /**
+     * Compute the search space size
+     *
+     * @return search space size
+     */
+    public static double searchSpaceSize(IntVar[] vars) {
+        double size = 1;
+        for (int i = 0; i < vars.length && size > 0; i++) {
+            size *= vars[i].getDomainSize();
+        }
+        if(size  <= 0 || size == Double.POSITIVE_INFINITY) {
+            size = Double.MAX_VALUE;
+        }
+        return size;
+    }
+
+    /**
      * @param x an int variable
      * @param y another int variable
      * @return true if the two domains intersect

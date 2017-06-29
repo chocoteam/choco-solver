@@ -1,8 +1,8 @@
 /**
  * This file is part of choco-solver, http://choco-solver.org/
- * <p>
+ *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
- * <p>
+ *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
