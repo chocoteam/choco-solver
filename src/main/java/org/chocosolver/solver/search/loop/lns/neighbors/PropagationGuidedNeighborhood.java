@@ -1,8 +1,8 @@
 /**
  * This file is part of choco-solver, http://choco-solver.org/
- *
+ * <p>
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
- *
+ * <p>
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
@@ -17,10 +17,12 @@ import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.List;
 import java.util.Random;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A Propagation Guided LNS
@@ -32,6 +34,7 @@ import java.util.TreeMap;
  * @since 08/04/13
  */
 public class PropagationGuidedNeighborhood implements INeighbor {
+
 
     /**
      * Number of variables
@@ -72,11 +75,12 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     /**
      * Store the modified variables
      */
-    protected SortedMap<Integer, Integer> all;
+    protected int[] all;
     /**
      * Store the variable elligible for propagation
      */
-    protected SortedMap<Integer, Integer> candidate;
+    protected List<Integer> candidates;
+
     /**
      * Indicate which variables are selected in a fragment
      */
@@ -88,24 +92,22 @@ public class PropagationGuidedNeighborhood implements INeighbor {
 
     /**
      * Create a propagation-guided neighbor for LNS
-     * @param vars set of variables to consider
+     *
+     * @param vars     set of variables to consider
      * @param fgmtSize initial size of the fragment
      * @param listSize number of modified variable to store while propagating
-     * @param seed for randomness
+     * @param seed     for randomness
      */
     public PropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
         this.mModel = vars[0].getModel();
-
         this.n = vars.length;
         this.vars = vars.clone();
-
         this.rd = new Random(seed);
         this.bestSolution = new int[n];
         this.fgmtSize = fgmtSize;
         this.listSize = listSize;
-
-        this.all = new TreeMap<>();
-        this.candidate = new TreeMap<>();
+        this.all = new int[n];
+        this.candidates = new ArrayList<>();
         this.fragment = new BitSet(n);
     }
 
@@ -149,42 +151,39 @@ public class PropagationGuidedNeighborhood implements INeighbor {
 
     /**
      * Create the fragment
+     *
      * @param decisionPath the decision path to feed
      * @throws ContradictionException if the fragment is trivially infeasible
      */
     protected void update(DecisionPath decisionPath) throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
-            all.clear();
             // 1. pick a variable
             int id = selectVariable();
-
-            // 2. fix it to its solution value
+            // 2. fix it to its solution value and propagate
             if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
                 impose(id, decisionPath);
                 mModel.getSolver().propagate();
                 fragment.clear(id);
-
                 logSum = 0;
+                // 3. compute domain reductions & update logSum
                 for (int i = 0; i < n; i++) {
                     int ds = vars[i].getDomainSize();
                     logSum += Math.log(ds);
                     if (fragment.get(i)) { // if not frozen until now
-                        if (ds == 1) { // if fixed by side effect
+                        if (ds == 1) {       // if fixed by side effect
                             fragment.clear(i); // set it has fixed
                         } else if (dsize[i] - ds > 0) {
-                            all.put(i, Integer.MAX_VALUE - (dsize[i] - ds)); // add it to candidate list
+                            all[i] = dsize[i] - ds; // add it to candidate list
                         }
                     }
                 }
-                candidate.clear();
-                int k = 0;
-                while (!all.isEmpty() && candidate.size() < listSize) {
-                    int first = all.firstKey();
-                    all.remove(first);
-                    if (fragment.get(first)) {
-                        candidate.put(first, k++);
-                    }
-                }
+                // 4. update variable list
+                candidates = IntStream.range(0, n)
+                        .filter(i -> fragment.get(i) || all[i] == 0)
+                        .boxed()
+                        .sorted((i, j) -> all[i] - all[j])
+                        .limit(listSize)//.mapToInt(i -> i.intValue())
+                        .collect(Collectors.toList());
             } else {
                 fragment.clear(id);
                 logSum -= Math.log(vars[id].getDomainSize());
@@ -194,7 +193,8 @@ public class PropagationGuidedNeighborhood implements INeighbor {
 
     /**
      * Impose a decision to be part of the fragment
-     * @param id variable id in {@link #vars}
+     *
+     * @param id           variable id in {@link #vars}
      * @param decisionPath the current decision path
      * @throws ContradictionException if the application of the decision fails
      */
@@ -202,7 +202,6 @@ public class PropagationGuidedNeighborhood implements INeighbor {
         IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperatorFactory.makeIntEq(), bestSolution[id]);
         decision.setRefutable(false);
         decisionPath.pushDecision(decision);
-
         vars[id].instantiateTo(bestSolution[id], Cause.Null);
     }
 
@@ -212,14 +211,13 @@ public class PropagationGuidedNeighborhood implements INeighbor {
      */
     protected int selectVariable() {
         int id;
-        if (candidate.isEmpty()) {
+        if (candidates.isEmpty()) {
             int cc = rd.nextInt(fragment.cardinality());
             for (id = fragment.nextSetBit(0); id >= 0 && cc > 0; id = fragment.nextSetBit(id + 1)) {
                 cc--;
             }
         } else {
-            id = candidate.firstKey();
-            candidate.remove(id);
+            id = candidates.remove(0).intValue();
         }
         return id;
     }
