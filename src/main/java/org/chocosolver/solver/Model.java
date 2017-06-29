@@ -25,12 +25,14 @@ import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * The <code>Model</code> is the header component of Constraint Programming.
@@ -65,6 +67,8 @@ public class Model implements IModel {
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
+
+    public static final String SOLVER_HOOK_NAME = "H_SOLVER";
 
     /**
      * Settings to use with this solver
@@ -117,11 +121,6 @@ public class Model implements IModel {
      * Environment, based of the search tree (trailing or copying)
      */
     private final IEnvironment environment;
-
-    /**
-     * Resolver of the model, controls propagation and search
-     */
-    private final Solver solver;
 
     /**
      * Variable to optimize, possibly null.
@@ -190,7 +189,6 @@ public class Model implements IModel {
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
         this.hooks = new HashMap<>();
-        this.solver = new Solver(this);
     }
 
     /**
@@ -280,10 +278,13 @@ public class Model implements IModel {
     /**
      * Returns the unique and internal propagation and search object to solve this model.
      *
-     * @return the unique and internal <code>Resolver</code> object.
+     * @return the unique and internal <code>solver</code> object.
      */
     public Solver getSolver() {
-        return solver;
+        if (getHook(SOLVER_HOOK_NAME) == null) {
+            addHook(SOLVER_HOOK_NAME, new Solver(this));
+        }
+        return (Solver) getHook(SOLVER_HOOK_NAME);
     }
 
     /**
@@ -573,6 +574,7 @@ public class Model implements IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
     /**
      * Defines the variable to optimize (maximize or minimize)
@@ -877,16 +879,32 @@ public class Model implements IModel {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder(256);
-        st.append(String.format("\n Model[%s]\n", name));
-        st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
+        st.append(String.format("Model[%s]\n", name));
+        st.append(String.format("[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
         st.append(String.format("Feasability: %s\n", getSolver().isFeasible()));
+        st.append(varsToString()).append("\n");
+        st.append(constraintsToString());
+        return st.toString();
+    }
+
+    public String varsToString() {
+        StringBuffer st = new StringBuffer();
         st.append("== variables ==\n");
         for (int v = 0; v < vIdx; v++) {
             st.append(vars[v].toString()).append('\n');
         }
+        return st.toString();
+    }
+
+    /**
+     *
+     * @return
+     */
+    public String constraintsToString() {
+        StringBuffer st = new StringBuffer();
         st.append("== constraints ==\n");
         for (int c = 0; c < cIdx; c++) {
-            st.append(cstrs[c].toString()).append('\n');
+            st.append(String.format("C%02d: %s\n", cstrs[c].getCidxInModel(), cstrs[c]));
         }
         return st.toString();
     }

@@ -205,15 +205,14 @@ public class DecisionPath extends DecisionMaker implements Serializable {
             );
         }
         return st.toString();
-
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(String.format("Path[%s]: ", decisions.size()));
         sb.append(decisions.get(0));
         for(int i = 1; i < decisions.size(); i++){
-            sb.append(" and ").append(decisions.get(i));
+            sb.append(", ").append(decisions.get(i));
         }
         return sb.toString();
     }
