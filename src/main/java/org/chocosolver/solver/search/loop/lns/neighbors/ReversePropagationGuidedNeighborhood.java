@@ -69,7 +69,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                 }
                 mModel.getEnvironment().worldPop();
                 candidates = IntStream.range(0, n)
-                        .filter(i -> fragment.get(i) || all[i] == 0)
+                        .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
                         .sorted(Comparator.comparingInt(i -> all[i]))
                         .limit(listSize)
