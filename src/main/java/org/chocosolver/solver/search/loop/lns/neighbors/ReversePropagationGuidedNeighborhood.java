@@ -13,6 +13,10 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.Comparator;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 /**
  * A Propagation Guided LNS
  * <p/>
@@ -38,7 +42,6 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
     @Override
     protected void update(DecisionPath decisionPath) throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
-            all.clear();
             // 1. pick a variable
             int id = selectVariable();
 
@@ -59,21 +62,18 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                             int closeness = (int) ((dsize[i] - ds) / (dsize[i] * 1.) * 100);
                             //                            System.out.printf("%d -> %d :%d\n", dsize[i], ds, closeness);
                             if (closeness > 0) {
-                                all.put(i, Integer.MAX_VALUE - closeness); // add it to candidate list
+                                all[i] = closeness; // add it to candidate list
                             }
                         }
                     }
                 }
                 mModel.getEnvironment().worldPop();
-                candidate.clear();
-                int k = 1;
-                while (!all.isEmpty() && candidate.size() < listSize) {
-                    int first = all.firstKey();
-                    all.remove(first);
-                    if (fragment.get(first)) {
-                        candidate.put(first, k++);
-                    }
-                }
+                candidates = IntStream.range(0, n)
+                        .filter(i -> fragment.get(i) || all[i] == 0)
+                        .boxed()
+                        .sorted(Comparator.comparingInt(i -> all[i]))
+                        .limit(listSize)
+                        .collect(Collectors.toList());
                 logSum = 0;
                 for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
                     logSum += Math.log(vars[i].getDomainSize());

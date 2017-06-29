@@ -19,6 +19,7 @@ import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
 import java.util.BitSet;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -181,8 +182,8 @@ public class PropagationGuidedNeighborhood implements INeighbor {
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) || all[i] == 0)
                         .boxed()
-                        .sorted((i, j) -> all[i] - all[j])
-                        .limit(listSize)//.mapToInt(i -> i.intValue())
+                        .sorted(Comparator.comparingInt(i -> all[i]))
+                        .limit(listSize)
                         .collect(Collectors.toList());
             } else {
                 fragment.clear(id);

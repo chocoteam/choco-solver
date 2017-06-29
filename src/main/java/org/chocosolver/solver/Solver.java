@@ -1107,16 +1107,4 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public PrintStream getErr() {
         return out;
     }
-
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder(256);
-        st.append(String.format("Model[%s]\n", getModelName()));
-        st.append(String.format("[ %d vars -- %d cstrs ]\n", mModel.getNbVars(), mModel.getNbCstrs()));
-        st.append(String.format("Feasability: %s\n", isFeasible()));
-        st.append(getDecisionPath()).append("\n");
-        st.append(mModel.varsToString()).append("\n");
-        st.append(mModel.constraintsToString());
-        return st.toString();
-    }
 }
