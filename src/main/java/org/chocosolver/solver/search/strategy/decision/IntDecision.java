@@ -141,32 +141,40 @@ public class IntDecision extends Decision<IntVar> {
 
     @Override
     public String toString() {
-        if (assignment.equals(DecisionOperatorFactory.makeIntEq())) {
-            return String.format("%s %s {%d}",
+        boolean nonrefuted = ((branch < max_branching) || (max_branching == 1 && branch == max_branching));
+        if (assignment.getClass().equals(DecisionOperatorFactory.makeIntEq().getClass())) {
+            return String.format("d_%d:%s%s%d",
+                    getPosition(),
                     var.getName(),
-                    branch < 1 ? "=" : '\\',
+                    nonrefuted ? "=": '\\',
                     value);
-        } else if (assignment.equals(DecisionOperatorFactory.makeIntNeq())) {
-            return String.format("%s %s {%d}",
+        } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntNeq().getClass())) {
+            return String.format("d_%d:%s%s%d",
+                    getPosition(),
                     var.getName(),
-                    branch < 1 ? '\\' : "=",
+                    nonrefuted ? "\u2260" : '=',
                     value);
-        } else if (assignment.equals(DecisionOperatorFactory.makeIntSplit())) {
-            return String.format("%s in %s%d,%d]",
+        } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntSplit().getClass())) {
+            return String.format("d_%d:%s%s%s%d,%d]",
+                    getPosition(),
                     var.getName(),
-                    branch < 1 ? '[' : ']',
-                    branch < 1 ? var.getLB() : value,
-                    branch < 1 ? value : var.getUB());
-        } else if (assignment.equals(DecisionOperatorFactory.makeIntReverseSplit())) {
-            return String.format("%s in [%d,%d%s",
+                    "\u2208",
+                    nonrefuted ? '[' : ']',
+                    nonrefuted ? var.getLB() : value,
+                    nonrefuted ? value : var.getUB());
+        } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntReverseSplit().getClass())) {
+            return String.format("d_%d:%s%s[%d,%d%s",
+                    getPosition(),
                     var.getName(),
-                    branch < 1 ? value : var.getLB(),
-                    branch < 1 ? var.getUB() : value,
-                    branch < 1 ? ']' : '[');
+                    "\u2208",
+                    nonrefuted ? value : var.getLB(),
+                    nonrefuted ? var.getUB() : value,
+                    nonrefuted ? ']' : '[');
         } else {
-            return String.format("%s %s {%s}",
+            return String.format("d_%d:%s%s{%s}",
+                    getPosition(),
                     var.getName(),
-                    branch < 1 ? assignment.toString() : assignment.opposite().toString(),
+                    nonrefuted ? assignment.toString() : assignment.opposite().toString(),
                     value);
         }
     }
