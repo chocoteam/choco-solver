@@ -143,13 +143,15 @@ public class PropagationTrigger  {
         if (perm_propagators.size() > 0) {
             int cw = environment.getWorldIndex(); // get current index
             int p = perm_propagators.size() - 1;
-            while (p >= 0 && perm_world.getQuick(p) >= cw) {
-                execute(perm_propagators.get(p), engine);
-                perm_world.replaceQuick(p, cw);
-                p--;
+            while (p >= 0) {
+                if (perm_world.getQuick(p) >= cw) {
+                    execute(perm_propagators.get(p), engine);
+                    perm_world.replaceQuick(p, cw);
+                }
+                --p;
             }
         }
-    }
+	}
 
     public static void execute(Propagator toPropagate, IPropagationEngine engine) throws ContradictionException {
         if (toPropagate.isStateLess()) {
