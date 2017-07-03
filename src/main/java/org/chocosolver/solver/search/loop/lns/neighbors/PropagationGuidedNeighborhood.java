@@ -180,7 +180,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
                 }
                 // 4. update variable list
                 candidates = IntStream.range(0, n)
-                        .filter(i -> fragment.get(i) || all[i] == 0)
+                        .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
                         .sorted(Comparator.comparingInt(i -> all[i]))
                         .limit(listSize)
