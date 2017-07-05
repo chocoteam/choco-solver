@@ -141,14 +141,14 @@ public class IntMap {
      * key == k)}, then this method returns {@code v}; otherwise
      * it returns {@code -1}.  (There can be at most one such mapping.)
      * <p>
-     * <p>A return value of {@code -1} <i>necessarily</i>
+     * <p>A return value of {@code #FREE} <i>necessarily</i>
      * indicate that the map contains no mapping for the key.
      *
      * @see #put(int, int)
      */
     public int get(int key) {
         if (key <= 0 || key >= elements.length) {
-            return -1;
+            return FREE;
         }
         return elements[key];
     }
