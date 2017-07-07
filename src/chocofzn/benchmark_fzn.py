@@ -82,27 +82,23 @@ parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
     default=#'.:'
-    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20150730/choco-parsers.jar',
-    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20160624/choco-parsers.jar',
-    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170524/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170602/choco-parsers.jar',
+@    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170616/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/compet/choco-parsers.jar',
 )
 
 parser.add_argument(
     "-n", "--name",
     help='Benchmark name',
-    default='learn',
+    default='bbound',
 )
 parser.add_argument(
     "-fl", "--filelists",
     help='Files containing name of flatzinc files to solve.',
     nargs='+',
     default=[
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt',
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2013.txt',
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2014.txt',
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015.txt',
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2016.txt',
+        # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALL.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLOPT.txt',
+        # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLSAT.txt',
     ]
 )
 
@@ -120,19 +116,21 @@ parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=6
+    default=4
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'DFLT:-stat',
-        'EXP1:-stat -x 1',
-        # 'EXP2:-stat -x 2',
-        # 'EXP3:-stat -x 3',
-        # 'EXP4:-stat -x 4',
-        # 'EXP5:-stat -x 5',
+        # 'FIX:-stat',
+        # 'FRE:-stat -f',
+        # 'DWD:-stat -bb 1',
+        # 'ABS:-stat -bb 3',
+        # 'IBS:-stat -bb 4',
+        'HBFS1:-stat -bb 1 -hbfs',
+        'HBFS2:-stat -bb 2 -hbfs',
+        # 'PAR:-stat -p 8',
     ]
 )
 parser.add_argument(

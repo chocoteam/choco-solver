@@ -97,5 +97,5 @@ def read(dir, fname, opt, old):
     else:
         solution = [0, maxtime, 999999999, 'UNK', 0, 'unknown', opt]
 
-    print(solution)
+    # print(solution)
     return solution

@@ -297,7 +297,7 @@
                 <configuration>
                     <groupId>xcsp3</groupId>
                     <artifactId>xcsp3</artifactId>
-                    <version>1.0.0-SNAPSHOT</version>
+                    <version>1.0.1-SNAPSHOT</version>
                     <packaging>jar</packaging>
                     <file>${project.basedir}/src/main/resources/xcsp-lib/xcsp3-${xcsp3.version}.jar</file>
                     <generatePom>true</generatePom>

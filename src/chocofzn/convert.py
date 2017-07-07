@@ -51,8 +51,8 @@ parser = argparse.ArgumentParser(description='Convert MiniZinc files in FlatZinc
 parser.add_argument(
     "-G", "--globals",
     help='Directory wherein global constraints supported by Choco are given.',
-    # default='/Users/cprudhom/Sources/choco/extensions/choco-parsers/src/chocofzn/globals',
-    default='/Users/cprudhom/Sources/Sandbox/chuffed/trunk/chuffed/flatzinc/mznlib/'
+    default='/Users/cprudhom/Sources/choco/extensions/choco-parsers/src/chocofzn/globals',
+    # default='/Users/cprudhom/Sources/Sandbox/chuffed/trunk/chuffed/flatzinc/mznlib/'
 )
 parser.add_argument(
     "-d", "--directory",

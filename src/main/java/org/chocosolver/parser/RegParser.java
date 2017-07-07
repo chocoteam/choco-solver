@@ -15,7 +15,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
@@ -43,22 +47,25 @@ public abstract class RegParser implements IParser {
      */
     private final String parser_cmd;
 
-    @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.", required = false)
+    @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.")
     protected String tl = "-1";
 
-    @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).", required = false)
+    @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).")
     protected boolean stat = false;
 
-    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ", required = false)
+    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
 
-    @Option(name = "-cos", usage = "set to true to use free + COS, false to use free+LC", required = false)
-    protected boolean cos = false;
+    @Option(name = "-x", usage ="Define the explanation strategy to apply [0, 5] (default: 0).")
+    public int exp = 0;
 
-    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).", required = false)
+    @Option(name = "-bb", usage ="Set the search strategy to a black-box one.")
+    public int bbox = 0;
+
+    @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     protected boolean all = false;
 
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).", required = false)
+    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;
     /**
      * Default time limit, as long, in ms
@@ -88,11 +95,17 @@ public abstract class RegParser implements IParser {
     protected final Thread statOnKill;
 
     /**
+     * Execution time
+     */
+    long time;
+
+    /**
      * Create a default regular parser
      * @param parser_cmd name of the parser
      *
      */
     protected RegParser(String parser_cmd) {
+        this.time = System.currentTimeMillis();
         this.parser_cmd = parser_cmd;
         statOnKill = actionOnKill();
         Runtime.getRuntime().addShutdownHook(statOnKill);
@@ -139,7 +152,7 @@ public abstract class RegParser implements IParser {
      *
      * @param m a Model
      */
-    protected static void makeComplementarySearch(Model m) {
+    private static void makeComplementarySearch(Model m) {
         Solver solver = m.getSolver();
         if(solver.getSearch() != null) {
             IntVar[] ovars = new IntVar[m.getNbVars()];
@@ -161,13 +174,31 @@ public abstract class RegParser implements IParser {
     @Override
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
-        if(nb_cores == 1 && free){ // add last conflict
-            Solver solver = portfolio.getModels().get(0).getSolver();
-            if(cos) {
-                solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
-            }else {
-                solver.setSearch(lastConflict(solver.getSearch()));
+        Solver solver = portfolio.getModels().get(0).getSolver();
+        if(bbox>0) {
+            switch (bbox) {
+                case 1:
+                    solver.setSearch(Search.domOverWDegSearch(getModel().retrieveIntVars(true)));
+                    break;
+                case 2:
+                    solver.setSearch(new DomOverWDeg(getModel().retrieveIntVars(true), 0, new IntDomainBest()));
+                    break;
+                case 3:
+                    solver.setSearch(Search.activityBasedSearch(getModel().retrieveIntVars(true)));
+                    break;
+                case 4:
+                    ImpactBased ibs = new ImpactBased(getModel().retrieveIntVars(true), 2, 1024, 2048, 0, false);
+                    solver.setSearch(ibs);
             }
+            solver.setNoGoodRecordingFromRestarts();
+            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
+            solver.setSearch(lastConflict(solver.getSearch()));
+
+        }else if(nb_cores == 1 && free){ // add last conflict
+            solver.setSearch(Search.defaultSearch(solver.getModel()));
+            solver.setNoGoodRecordingFromRestarts();
+            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
+            solver.setSearch(lastConflict(solver.getSearch()));
         }
         for (int i = 0; i < nb_cores; i++) {
             if (tl_ > -1)portfolio.getModels().get(i).getSolver().limitTime(tl);
@@ -193,5 +224,10 @@ public abstract class RegParser implements IParser {
             }
         }
         return -1;
+    }
+
+    protected boolean runInTime(){
+        long rtime = (System.currentTimeMillis() - time) ;
+        return tl_ < 0 || rtime < tl_;
     }
 }

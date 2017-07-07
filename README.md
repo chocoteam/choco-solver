@@ -5,6 +5,14 @@ choco-parsers
 It provides a parser for the FlatZinc language, a low-level solver input language that is the target language for [MiniZinc](http://www.minizinc.org/) 
 and a parser for [XCSP3](http://xcsp.org), an intermediate integrated XML-based format.
 
+
+## Maven-based installation
+
+To build the sources, do not forget the `validate` phase to install XCSP3 dependency jar.
+For example, one can run:
+
+`mvn validate clean install -DskipTests`
+
 * [Download](https://github.com/chocoteam/choco-parsers/releases/latest)
 * [MiniZinc](#mzn)
 * [XCSP3](#xcsp)

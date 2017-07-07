@@ -11,33 +11,35 @@ parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of flatzinc files to pretty.',
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2012.txt'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLOPT.txt'
+    # default='/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/list2015OPT.txt'
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
-    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/learn/20170524'
+    default='/Users/cprudhom/Sources/MiniZinc/Challenges/logs/bbound/20170705'
 )
 parser.add_argument(
     "-c", "--configurations",
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'DFLT',
-        'EXP1',
-        # 'EXP2',
+        # 'FC',
+        # 'FR',
+        # 'DWD',
+        # 'ABS',
+        # 'DWB',
+        # 'IBS',
+        'HBFS1',
+        'HBFS2',
+        # 'IBS4',
+        # 'DWI',
+        # 'DWrI',
+        # 'PR',
+        # 'B2S',
         # 'EXP3',
         # 'EXP4',
         # 'EXP5',
-        ]
-)
-parser.add_argument(
-    "-of", "--oldformat",
-    help='Output format type: true is when version < 3.3.2, false otherwise, \'name:options\'',
-    nargs='+',
-    default=[
-        False,False
-        # ,False,False,False,False,False
         ]
 )
 
@@ -57,7 +59,6 @@ args = parser.parse_args()
 optPerSol = {}
 fnames = []
 options = args.configurations
-oldformat = args.oldformat
 best = {}  # store the best know values
 # analyse all solutions from all configurations
 with open(args.filelist, 'r') as f:
@@ -68,7 +69,7 @@ with open(args.filelist, 'r') as f:
         optPerSol[fname] = []
         best[fname] = 999999999
         for o in range(len(options)):
-            solution = read(args.directory, fname, options[o],oldformat[o])
+            solution = read(args.directory, fname, options[o],False)
             optPerSol[fname].append(solution)
             print(solution)
             if solution[3] != 'SAT':
