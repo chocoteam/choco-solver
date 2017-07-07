@@ -9,6 +9,8 @@
 package org.chocosolver.parser.flatzinc.ast.searches;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
@@ -17,7 +19,6 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
 import org.chocosolver.solver.search.strategy.selectors.variables.AntiFirstFail;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
@@ -44,22 +45,24 @@ public class IntSearch {
     private IntSearch() {
     }
 
-    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
-        VariableSelector<IntVar> varsel = variableSelector(varChoice, solver);
+    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model model) {
+        VariableSelector<IntVar> varsel = variableSelector(varChoice, model);
         if (varsel == null) { // free search
-            return new ActivityBased(solver, variables, 0.999d, 0.02d, 8, 1, seed);
+            model.getSolver().setNoGoodRecordingFromRestarts();
+            model.getSolver().setLubyRestart(500, new FailCounter(model, 0), 500);
+            return Search.intVarSearch(variables);
         }
         return valueSelector(variables, varsel, assignment);
     }
 
-    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice, Model solver) {
+    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice, Model model) {
         switch (varChoice) {
             case input_order:
-                return new InputOrder<>(solver);
+                return new InputOrder<>(model);
             case first_fail:
-                return new FirstFail(solver);
+                return new FirstFail(model);
             case anti_first_fail:
-                return new AntiFirstFail(solver);
+                return new AntiFirstFail(model);
             case smallest:
                 return new Smallest();
             case largest:
