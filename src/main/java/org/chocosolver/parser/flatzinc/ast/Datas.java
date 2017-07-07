@@ -9,6 +9,7 @@
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.map.hash.THashMap;
+
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
@@ -19,7 +20,6 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -211,10 +211,10 @@ public class Datas {
         return vars.toArray(new Variable[0]);
     }
 
-    public void doFinalOutPut() {
+    public void doFinalOutPut(boolean complete) {
         Solver solver = model.getSolver();
         // TODO there used to be "isComplete" (e.g. in case LNS stops)
-        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
+//        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
         if(nbSolution>0){
             if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
                 System.out.printf("==========\n");

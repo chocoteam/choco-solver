@@ -22,7 +22,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.kohsuke.args4j.Argument;
-import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,6 +48,8 @@ public class Flatzinc extends RegParser {
 
     // Contains mapping with variables and output prints
     public Datas[] datas;
+
+
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -77,7 +78,7 @@ public class Flatzinc extends RegParser {
         return new Thread() {
             public void run() {
                 if (userinterruption) {
-                    datas[bestModelID()].doFinalOutPut();
+                    datas[bestModelID()].doFinalOutPut(false);
                     System.out.printf("%% Unexpected resolution interruption!");
                 }
             }
@@ -160,7 +161,7 @@ public class Flatzinc extends RegParser {
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
-        datas[0].doFinalOutPut();
+        datas[0].doFinalOutPut(!userinterruption && runInTime());
     }
 
     private void manyThread(){
@@ -176,6 +177,6 @@ public class Flatzinc extends RegParser {
         }
         userinterruption = false;
         Runtime.getRuntime().removeShutdownHook(statOnKill);
-        datas[bestModelID()].doFinalOutPut();
+        datas[bestModelID()].doFinalOutPut(!userinterruption && runInTime());
     }
 }

@@ -17,7 +17,6 @@ import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.parser.flatzinc.ast.propagators.PropBoolSumEq0Reif;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
@@ -28,20 +27,17 @@ import org.chocosolver.solver.constraints.nary.geost.externalConstraints.Externa
 import org.chocosolver.solver.constraints.nary.geost.externalConstraints.NonOverlapping;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.List;
 
 /*
@@ -569,6 +565,22 @@ public enum FConstraint {
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
             if (bs.length > 0) {
+                if (bs.length == 1) {
+                    if (as[0] == 1 || as[0] == -1) {
+                        model.arithm(bs[0], "!=", as[0] * c.getValue()).reifyWith(r);
+                        return;
+                    }
+                }
+                if (bs.length == 2 && c.isInstantiatedTo(0)) {
+                    if (as[0] == 1 && as[1] == -1) {
+                        model.reifyXneY(bs[0], bs[1], r);
+                        return;
+                    }
+                    if (as[0] == -1 && as[1] == 1) {
+                        model.reifyXneY(bs[0], bs[1], r);
+                        return;
+                    }
+                }
                 model.scalar(bs, as, "!=", c).reifyWith(r);
             }
 
