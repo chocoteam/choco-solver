@@ -13,6 +13,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
@@ -51,33 +52,33 @@ import java.util.List;
 public class Search {
 
     // ************************************************************************************
-   	// GENERIC PATTERNS
-   	// ************************************************************************************
+    // GENERIC PATTERNS
+    // ************************************************************************************
 
     /**
-   	 * Use the last conflict heuristic as a pluggin to improve a former search heuristic
-   	 * Should be set after specifying a search strategy.
-   	 * @return last conflict strategy
-   	 */
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic
+     * Should be set after specifying a search strategy.
+     * @return last conflict strategy
+     */
     public static AbstractStrategy lastConflict(AbstractStrategy formerSearch) {
-   		return lastConflict(formerSearch, 1);
-   	}
+        return lastConflict(formerSearch, 1);
+    }
 
-	/**
-	 * Search heuristic combined with a constraint performing strong consistency on the next decision variable
-	 * and branching on the value with the best objective bound (for optimization) and branches on the lower bound for SAT problems.
-	 *
-	 * BEWARE: ONLY FOR INTEGERS (lets the former search work for other variable types)
-	 *
-	 * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
-	 * @return best bound strategy
-	 */
-   	public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch){
-   		if(formerSearch == null) {
-   			throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
-		}
-   		return new BoundSearch(formerSearch);
-	}
+    /**
+     * Search heuristic combined with a constraint performing strong consistency on the next decision variable
+     * and branching on the value with the best objective bound (for optimization) and branches on the lower bound for SAT problems.
+     *
+     * BEWARE: ONLY FOR INTEGERS (lets the former search work for other variable types)
+     *
+     * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
+     * @return best bound strategy
+     */
+    public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch){
+        if(formerSearch == null) {
+            throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+        }
+        return new BoundSearch(formerSearch);
+    }
 
     /**
      * Use the last conflict heuristic as a pluggin to improve a former search heuristic
@@ -86,9 +87,9 @@ public class Search {
      * @return last conflict strategy
      */
     public static AbstractStrategy lastConflict(AbstractStrategy formerSearch, int k) {
-		if(formerSearch == null) {
-			throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
-		}
+        if(formerSearch == null) {
+            throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+        }
         return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
     }
 
@@ -101,18 +102,18 @@ public class Search {
         return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(), formerSearch);
     }
 
-   	/**
-   	 * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
-   	 * @param search a search heuristic building branching decisions
-   	 * @return a greedy form of search
-   	 */
+    /**
+     * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
+     * @param search a search heuristic building branching decisions
+     * @return a greedy form of search
+     */
     public static AbstractStrategy greedySearch(AbstractStrategy search){
-   		return new GreedyBranching(search);
-   	}
+        return new GreedyBranching(search);
+    }
 
     public static AbstractStrategy sequencer(AbstractStrategy... searches){
-   		return new StrategiesSequencer(searches);
-   	}
+        return new StrategiesSequencer(searches);
+    }
 
     // ************************************************************************************
     // SETVAR STRATEGIES
@@ -124,7 +125,7 @@ public class Search {
      * @param varS         variable selection strategy
      * @param valS         integer  selection strategy
      * @param enforceFirst branching order true = enforce first; false = remove first
-	 * @param sets         SetVar array to branch on
+     * @param sets         SetVar array to branch on
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
@@ -180,9 +181,9 @@ public class Search {
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-                                     IntValueSelector valSelector,
-                                     DecisionOperator<IntVar> decisionOperator,
-                                     IntVar... vars) {
+                                           IntValueSelector valSelector,
+                                           DecisionOperator<IntVar> decisionOperator,
+                                           IntVar... vars) {
         return new IntStrategy(vars, varSelector, valSelector, decisionOperator);
     }
 
@@ -197,8 +198,8 @@ public class Search {
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-                                     IntValueSelector valSelector,
-                                     IntVar... vars) {
+                                           IntValueSelector valSelector,
+                                           IntVar... vars) {
         return intVarSearch(varSelector, valSelector, DecisionOperatorFactory.makeIntEq(), vars);
     }
 
@@ -210,20 +211,9 @@ public class Search {
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
-        // sets booleans to 1 and intvar to upper bound for maximisation
-        // branch on lower bound otherwise
-        boolean satOrMin = vars[0].getModel().getResolutionPolicy()!= ResolutionPolicy.MAXIMIZE;
-        IntValueSelector valSel = new IntValueSelector() {
-            @Override
-            public int selectValue(IntVar var) {
-                if(var.isBool() || !satOrMin){
-                    return var.getUB();
-                }else {
-                    return var.getLB();
-                }
-            }
-        };
-        return new DomOverWDeg(vars, 0, valSel);
+        return new DomOverWDeg(vars, 0,
+                vars[0].getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION ?
+                        new IntDomainMin(): new IntDomainBest());
     }
 
     /**
