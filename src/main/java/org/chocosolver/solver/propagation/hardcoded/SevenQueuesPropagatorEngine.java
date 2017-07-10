@@ -41,6 +41,8 @@ import java.util.List;
  */
 public class SevenQueuesPropagatorEngine implements IPropagationEngine {
 
+    public static boolean CHECK_SCOPE = false;
+
     /**
      * Mask to deal with emptiness (see {@link #notEmpty})
      */
@@ -260,6 +262,15 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         if (DEBUG) {
             IPropagationEngine.Trace.printModification(variable, type, cause);
+        }
+        if(CHECK_SCOPE && Propagator.class.isAssignableFrom(cause.getClass())){
+            // make sure the variable appears in prop scope
+            Propagator p = (Propagator)cause;
+            boolean found = false;
+            for(int i = 0; i< p.getNbVars() && !found; i++) {
+                found = (p.getVar(i) == variable);
+            }
+            assert found: variable + " not in scope of " + cause;
         }
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();

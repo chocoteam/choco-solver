@@ -24,6 +24,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.BitSet;
 
@@ -48,7 +49,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropSubcircuit(IntVar[] variables, int offset, IntVar length) {
-        super(variables, PropagatorPriority.UNARY, true);
+        super(ArrayUtils.append(variables, new IntVar[]{length}), PropagatorPriority.UNARY, true);
         n = variables.length;
         this.offset = offset;
         this.length = length;
@@ -66,6 +67,8 @@ public class PropSubcircuit extends Propagator<IntVar> {
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
+
+
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
@@ -137,7 +140,11 @@ public class PropSubcircuit extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.instantiation();
+        if(vIdx < n) {
+            return IntEventType.instantiation();
+        }else{
+            return IntEventType.VOID.getMask();
+        }
     }
 
     @Override

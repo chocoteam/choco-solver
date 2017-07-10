@@ -35,7 +35,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
     }
 
     private PropDivXYZ(IntVar x, IntVar y, IntVar z, IntVar ax, IntVar ay, IntVar az) {
-        super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{x, y, z, ax, ay, az}, PropagatorPriority.TERNARY, false);
         this.X = x;
         this.Y = y;
         this.Z = z;

@@ -14,8 +14,12 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 
 /**
  * Propagator for a Bin Packing constraint
@@ -77,7 +81,7 @@ public class PropItemToLoad extends Propagator<IntVar> {
 	 * @param offset index offset: binOfItem[i] = k means item i is in bin k-offset
 	 */
 	public PropItemToLoad(IntVar[] binOfItem, int[] itemSize, IntVar[] binLoad, int offset) {
-		super(binOfItem, PropagatorPriority.LINEAR, true);
+		super(ArrayUtils.append(binOfItem, binLoad), PropagatorPriority.LINEAR, true);
 		this.nbItems = binOfItem.length;
 		this.nbAvailableBins = binLoad.length;
 		this.itemSize = itemSize;
@@ -93,6 +97,15 @@ public class PropItemToLoad extends Propagator<IntVar> {
 		for(int b=0;b<nbAvailableBins;b++){
 			minLoad[b] = model.getEnvironment().makeInt(0);
 			maxLoad[b] = model.getEnvironment().makeInt(0);
+		}
+	}
+
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		if(vIdx < nbItems) {
+			return ALL_EVENTS;
+		}else{
+			return IntEventType.VOID.getMask();
 		}
 	}
 
