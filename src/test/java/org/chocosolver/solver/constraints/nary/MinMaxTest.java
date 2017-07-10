@@ -11,7 +11,9 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -485,6 +487,58 @@ public class MinMaxTest {
                 e.printStackTrace();
             }
             Assert.assertTrue(bvars[i].isInstantiatedTo(1));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMax30(){
+        int l = 299;
+        int s = 17;
+        Random rnd = new Random(0L);
+        for(int n = 2; n < s; n++) {
+            for (int i = 0; i < l; i++) {
+                rnd.setSeed(i * s + n);
+                Model model = new Model();
+                BoolVar[] bvars = new BoolVar[n];
+                for (int j = 0; j < n; j++) {
+                    bvars[j] = DomainBuilder.makeBoolVar(model, rnd, j);
+                }
+                BoolVar target = DomainBuilder.makeBoolVar(model, rnd, n+1);
+
+                model.max(target, bvars).post();
+                Solver solver = model.getSolver();
+                long nbsol = solver.findAllSolutions().size();
+                solver.reset();
+                solver.setLubyRestart(4, new BacktrackCounter(model, 0), 100);
+                solver.setNoGoodRecordingFromRestarts();
+                Assert.assertEquals(solver.findAllSolutions().size(), nbsol);
+            }
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMin30(){
+        int l = 299;
+        int s = 17;
+        Random rnd = new Random(0L);
+        for(int n = 2; n < s; n++) {
+            for (int i = 0; i < l; i++) {
+                rnd.setSeed(i * s + n);
+                Model model = new Model();
+                BoolVar[] bvars = new BoolVar[n];
+                for (int j = 0; j < n; j++) {
+                    bvars[j] = DomainBuilder.makeBoolVar(model, rnd, j);
+                }
+                BoolVar target = DomainBuilder.makeBoolVar(model, rnd, n+1);
+
+                model.min(target, bvars).post();
+                Solver solver = model.getSolver();
+                long nbsol = solver.findAllSolutions().size();
+                solver.reset();
+                solver.setLubyRestart(4, new BacktrackCounter(model, 0), 100);
+                solver.setNoGoodRecordingFromRestarts();
+                Assert.assertEquals(solver.findAllSolutions().size(), nbsol);
+            }
         }
     }
 

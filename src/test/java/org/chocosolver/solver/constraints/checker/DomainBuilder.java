@@ -8,6 +8,8 @@
  */
 package org.chocosolver.solver.constraints.checker;
 
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
@@ -20,6 +22,11 @@ import java.util.Random;
  * @since 1 oct. 2010
  */
 public class DomainBuilder {
+
+
+    private static final int MIN_LOW_BND = -15;
+
+    private static final int MAX_DOM_SIZE = 30;
 
     public static int[][] buildFullDomains(int nbVar, int minV, int maxV) {
         int sizeMax = maxV - minV + 1;
@@ -111,6 +118,63 @@ public class DomainBuilder {
             }
         }
         return domains;
+    }
+
+    public static Integer makeInt(Random rnd) {
+        return MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE);
+    }
+
+    public static IntVar makeIntVar(Model model, Random rnd, int pos) {
+        IntVar var;
+        String name = "X_" + pos;
+        switch (rnd.nextInt(3)) {
+            default:
+            case 0: // bounded
+                int lb = rnd.nextInt(MAX_DOM_SIZE) - MIN_LOW_BND;
+                int ub = rnd.nextInt(MAX_DOM_SIZE) - MIN_LOW_BND;
+                if (lb < ub) {
+                    var = model.intVar(name, lb, ub);
+                } else {
+                    var = model.intVar(name, ub, lb);
+                }
+                break;
+            case 1: // enumerated
+                int[] values = rnd.ints(1 + rnd.nextInt(MAX_DOM_SIZE - 1), MIN_LOW_BND, MIN_LOW_BND + MAX_DOM_SIZE).toArray();
+                var = model.intVar(name, values);
+                break;
+            case 2: // boolean
+                int v = rnd.nextInt(5);
+                switch (v) {
+                    case 0:
+                        var = model.boolVar(name, false);
+                        break;
+                    case 1:
+                        var = model.boolVar(name, true);
+                        break;
+                    default:
+                        var = model.boolVar(name);
+                }
+                break;
+
+        }
+        return var;
+    }
+
+    public static BoolVar makeBoolVar(Model model, Random rnd, int pos) {
+        BoolVar var;
+        String name = "B_" + pos;
+        int v = rnd.nextInt(5);
+        switch (v) {
+            case 0:
+                var = model.boolVar(name, false);
+                break;
+            case 1:
+                var = model.boolVar(name, true);
+                break;
+            default:
+                var = model.boolVar(name);
+        }
+        return var;
     }
 
 }

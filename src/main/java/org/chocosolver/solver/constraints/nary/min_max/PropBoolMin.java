@@ -24,33 +24,42 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropBoolMin extends Propagator<BoolVar> {
 
     private final int n;
-    private int x1, x2;
+    private int[] lits;
 
-    public PropBoolMin(BoolVar[] variables, BoolVar maxVar) {
-        super(ArrayUtils.concat(variables, maxVar), PropagatorPriority.UNARY, true);
+    public PropBoolMin(BoolVar[] variables, BoolVar minVar) {
+        super(ArrayUtils.concat(variables, minVar), PropagatorPriority.UNARY, true);
         n = variables.length;
-        x1 = -1;
-        x2 = -1;
+        lits = new int[]{n-1, 0};
         assert n > 0;
+    }
+
+    private void find(int l) throws ContradictionException {
+        int last = lits[l];
+        int otl = lits[1-l];
+        int last_cache = last;
+        do{
+            last++;
+            if(last >= n){
+                last = 0;
+            }
+            if(otl != last &&
+                    (!vars[last].isInstantiated() || vars[last].isInstantiatedTo(0))){
+                lits[l] = last;
+                return;
+            }
+        }while(last != last_cache);
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x1 = 0;
-        x2 = 1;
-        int c = 2;
-        for (int i = 0; i < n; i++) {
-            if (c>0 && !vars[i].isInstantiated()) {
-                if (c == 2) {
-                    x1 = i;
-                    if(x2 == i){
-                        x2++;
-                    }
-                } else{// if(i > 1){
-                    x2 = i;
-                }
-                c--;
-            } else if (vars[i].isInstantiatedTo(0)) {
+        if(vars[n].isInstantiatedTo(1)) {
+            for (int i = 0; i < n; i++) {
+                vars[i].instantiateTo(1, this);
+            }
+            return;
+        }
+        for(int i = 0; i < n; i++){
+            if (vars[i].isInstantiatedTo(0)) {
                 vars[n].instantiateTo(0, this);
                 if (vars[n].isInstantiatedTo(0)) {
                     setPassive();
@@ -58,6 +67,8 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 }
             }
         }
+        find(0);
+        find(1);
         filter();
     }
 
@@ -70,23 +81,16 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 if (vars[n].isInstantiatedTo(0)) {
                     setPassive();
                 }
-            } else if (idxVarInProp == x1 || idxVarInProp == x2) {
-                if (idxVarInProp == x1) {
-                    int t = x1;
-                    x1 = x2;
-                    x2 = t;
+            } else if (idxVarInProp == lits[0]){
+                find(0);
+                if(vars[lits[1]].isInstantiated()){
+                    find(1);
                 }
-                for (int i = 0; i < n; i++) {
-                    if (i != x1 && !vars[i].isInstantiated()) {
-                        x2 = i;
-                        break;
-                    }else if (vars[i].isInstantiatedTo(0)) {
-                        vars[n].instantiateTo(0, this);
-                        if (vars[n].isInstantiatedTo(0)) {
-                            setPassive();
-                            return;
-                        }
-                    }
+                filter();
+            } else if(idxVarInProp == lits[1]) {
+                find(1);
+                if(vars[lits[0]].isInstantiated()){
+                    find(0);
                 }
                 filter();
             }
@@ -94,8 +98,10 @@ public class PropBoolMin extends Propagator<BoolVar> {
     }
 
     public void filter() throws ContradictionException {
-        int b1 = vars[x1].isInstantiated()? vars[x1].getValue():2;
-        int b2 = vars[x2].isInstantiated()? vars[x2].getValue():2;
+        int l0 = lits[0];
+        int l1 = lits[1];
+        int b1 = vars[l0].isInstantiated()? vars[l0].getValue():2;
+        int b2 = vars[l1].isInstantiated()? vars[l1].getValue():2;
         int bn = vars[n].isInstantiated()? vars[n].getValue():2;
 
         if(bn == 1) {
@@ -103,13 +109,13 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 vars[i].instantiateTo(1, this);
             }
         }else if(b1 == 1 && b2 == 1){
-            setPassive();
+            if(!isPassive())setPassive();
             vars[n].instantiateTo(1, this);
         }else if(bn == 0){
             if(b1 == 1){
-                vars[x2].instantiateTo(0, this);
+                vars[l1].instantiateTo(0, this);
             }else if(b2 == 1){
-                vars[x1].instantiateTo(0, this);
+                vars[l0].instantiateTo(0, this);
             }
         }
     }

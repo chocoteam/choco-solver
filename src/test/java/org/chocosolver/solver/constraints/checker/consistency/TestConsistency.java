@@ -177,7 +177,7 @@ public class TestConsistency {
     // MAX *******************************************************
 
     @Test(groups="10s", timeOut=60000)
-     public void testMAX() {
+    public void testMAX() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
             checkConsistency(Modeler.modelmaxbc, 5, -5, 5, null, seed + i, "bc");
