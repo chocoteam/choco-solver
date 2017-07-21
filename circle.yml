@@ -1,10 +1,10 @@
 machine:
   java:
-    version: openjdk8
+    version: oraclejdk8
 
 test:
   override:
-    - mvn test -Dgroups="1s,10s"
+    - mvn -e test -Dgroups="1s,10s"
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
