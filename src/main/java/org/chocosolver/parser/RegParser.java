@@ -31,8 +31,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.Search.greedySearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
@@ -55,9 +53,6 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
-
-    @Option(name = "-x", usage ="Define the explanation strategy to apply [0, 5] (default: 0).")
-    public int exp = 0;
 
     @Option(name = "-bb", usage ="Set the search strategy to a black-box one.")
     public int bbox = 0;
@@ -166,7 +161,7 @@ public abstract class RegParser implements IParser {
             }
             // do not enumerate on the complementary search (greedy assignment)
             if(k>0) {
-                solver.setSearch(solver.getSearch(), greedySearch(inputOrderLBSearch(Arrays.copyOf(ovars, k))));
+                solver.setSearch(solver.getSearch(), Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
             }
         }
     }
@@ -198,7 +193,6 @@ public abstract class RegParser implements IParser {
             solver.setSearch(Search.defaultSearch(solver.getModel()));
             solver.setNoGoodRecordingFromRestarts();
             solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
-            solver.setSearch(lastConflict(solver.getSearch()));
         }
         for (int i = 0; i < nb_cores; i++) {
             if (tl_ > -1)portfolio.getModels().get(i).getSolver().limitTime(tl);

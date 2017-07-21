@@ -64,6 +64,9 @@ public final class EIdentifier extends Expression {
 
     @Override
     public IntVar intVarValue(Model model) {
+        if(Integer.class.isInstance(object)){
+            return model.intVar(intValue());
+        }
         return (IntVar) object;
     }
 

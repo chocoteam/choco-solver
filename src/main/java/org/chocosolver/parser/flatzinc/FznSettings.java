@@ -9,6 +9,7 @@
 package org.chocosolver.parser.flatzinc;
 
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 
 /**
  * Basic settings for Fzn
@@ -44,5 +45,15 @@ public class FznSettings implements Settings {
     @Override
     public int getMaxTupleSizeForSubstitution() {
         return 10000;
+    }
+
+    @Override
+    public boolean checkDeclaredConstraints(){
+        return false;
+    }
+
+    @Override
+    public boolean checkModel(Solver solver) {
+        return true;
     }
 }

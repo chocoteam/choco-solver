@@ -27,8 +27,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
-
 /**
  * Created by cprudhom on 01/09/15.
  * Project: choco-parsers.
@@ -117,8 +115,7 @@ public class XCSP extends RegParser {
         Solver solver = target.getSolver();
         solver.setSearch(Search.defaultSearch(target));
         solver.setNoGoodRecordingFromRestarts();
-        solver.setLubyRestart(100, new FailCounter(target, 0), 1000);
-        solver.setSearch(lastConflict(solver.getSearch()));
+        solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
 //        Files.move(Paths.get(instance),
 //                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
 //                StandardCopyOption.REPLACE_EXISTING);
