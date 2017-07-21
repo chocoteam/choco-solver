@@ -82,22 +82,21 @@ parser.add_argument(
     "-cp", "--classpath",
     help='Classpath for Choco (choco-parsers and choco-solver)',
     default=#'.:'
-@    # '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170616/choco-parsers.jar',
-    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/compet/choco-parsers.jar',
+    '/Users/cprudhom/Sources/MiniZinc/Challenges/jars/20170616/choco-parsers.jar',
 )
 
 parser.add_argument(
     "-n", "--name",
     help='Benchmark name',
-    default='bbound',
+    default='20170616',
 )
 parser.add_argument(
     "-fl", "--filelists",
     help='Files containing name of flatzinc files to solve.',
     nargs='+',
     default=[
-        # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALL.txt',
-        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLOPT.txt',
+        '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALL.txt',
+        # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLOPT.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/listALLSAT.txt',
     ]
 )
@@ -123,14 +122,7 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        # 'FIX:-stat',
-        # 'FRE:-stat -f',
-        # 'DWD:-stat -bb 1',
-        # 'ABS:-stat -bb 3',
-        # 'IBS:-stat -bb 4',
-        'HBFS1:-stat -bb 1 -hbfs',
-        'HBFS2:-stat -bb 2 -hbfs',
-        # 'PAR:-stat -p 8',
+        'FIX:-stat',
     ]
 )
 parser.add_argument(

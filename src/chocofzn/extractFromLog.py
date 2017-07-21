@@ -12,7 +12,8 @@ unsa = '=====UNSATISFIABLE=====\n'
 unkn = '=====UNKNOWN=====\n'
 unbo = '=====UNBOUNDED=====\n'
 
-maxtime=900.
+maxtime=898.
+maxobj=999999999
 
 def read(dir, fname, opt, old):
     """
@@ -29,7 +30,7 @@ def read(dir, fname, opt, old):
     try:
         logfile = open(os.path.join(dir, fname + '+' + opt + '.log'), 'r', encoding='utf8')
     except FileNotFoundError:
-        return [0, maxtime, 999999999, 'UNK', 0, 'unknown', opt]
+        return [0, maxtime, maxobj, 'UNK', 0, 'unknown', opt]
     sndlast = ""
     last = ""
     rstat = ""
@@ -95,7 +96,7 @@ def read(dir, fname, opt, old):
         if solution[1] >= maxtime:
             solution[1] = float(maxtime)
     else:
-        solution = [0, maxtime, 999999999, 'UNK', 0, 'unknown', opt]
+        solution = [0, maxtime, maxobj, 'UNK', 0, 'unknown', opt]
 
     # print(solution)
     return solution
