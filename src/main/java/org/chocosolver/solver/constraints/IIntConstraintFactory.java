@@ -107,6 +107,7 @@ import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.stream.IntStream;
 
 import static java.lang.Math.abs;
 
@@ -1802,7 +1803,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint table(IntVar[] vars, Tuples tuples) {
 		String algo = "GAC3rm";
 		if(tuples.isFeasible()){
-			if(tuples.nbTuples()>500 || tuples.allowUniversalValue()){
+			if(tuples.nbTuples() > 512 &&
+					(IntStream.range(0, vars.length)
+							.map(i -> tuples.max(i) - tuples.min(i))
+							.max().getAsInt()) < 256|| tuples.allowUniversalValue()){
 				algo = "CT+";
 			}else{
 				algo = "GACSTR+";
