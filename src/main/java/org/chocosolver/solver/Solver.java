@@ -605,7 +605,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Has an immediate effect
      */
     public void restoreRootNode() {
-        mModel.getEnvironment().worldPopUntil(searchWorldIndex); // restore state after initial propagation
+        IEnvironment environment = mModel.getEnvironment();
+        while (environment.getWorldIndex() > searchWorldIndex) {
+            getMeasures().incBackTrackCount();
+            getMeasures().decDepth();
+            environment.worldPop();
+        }
         dpath.synchronize();
     }
 
