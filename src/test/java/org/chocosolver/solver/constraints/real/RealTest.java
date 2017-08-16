@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
@@ -18,9 +19,12 @@ import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.LinkedList;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.real.Ibex.HC4;
@@ -275,8 +279,11 @@ public class RealTest {
             System.out.println("weldingCurrent LB=" + current.getLB() + " UB=" + current.getUB());
             System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
         });
-        solver.solve();
-        model.getIbex().release();
+        try {
+            solver.solve();
+        }finally {
+            model.getIbex().release();
+        }
     }
 
     @Test(groups = "ignored")
@@ -286,8 +293,59 @@ public class RealTest {
         BoolVar bv = model.realIbexGenericConstraint("{0}=4",rv).reify();
         model.arithm(bv,"=",0).post();
         model.getSolver().showSolutions();
-        while(model.getSolver().solve());
+        Solver solver = model.getSolver();
+        solver.showDecisions();
+        while(solver.solve());
         System.out.println(bv.getValue() + " " + rv.getUB());
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 64);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 63);
+    }
+
+    @Test(groups = "ignored")
+    public void testJiiTee1() throws Exception {
+        Model model = new Model("model");
+        RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
+        IntVar ll = model.intVar("ll", 1, 5, false);
+        BoolVar[] dim_A_guards = new BoolVar[5];
+        dim_A_guards[0] = model.realIbexGenericConstraint("{0} = 150.0", dim_A).reify();
+        dim_A_guards[1] = model.realIbexGenericConstraint("{0} = 195.0", dim_A).reify();
+        dim_A_guards[2] = model.realIbexGenericConstraint("{0} = 270.0", dim_A).reify();
+        dim_A_guards[3] = model.realIbexGenericConstraint("{0} = 370.0", dim_A).reify();
+        dim_A_guards[4] = model.realIbexGenericConstraint("{0} = 470.0", dim_A).reify();
+
+        Constraint bigA = model.realIbexGenericConstraint("{0} > 300", dim_A);
+        Constraint smallA = model.realIbexGenericConstraint("{0} < 200", dim_A);
+
+        // The following or does not work.
+        // the first 'and' within 'or' works, the second does not
+        // if the order is reversed, also the results change: the results of the first 'and' are found
+        // How to get these both?
+        model.or(
+                model.and(
+                        bigA,
+                        model.arithm(ll, "<", 3)),
+                model.and(
+                        smallA,
+                        model.arithm(ll, ">=", 3))
+        ).post();
+        model.sum(dim_A_guards, "=", 1).post();
+        LinkedList<Variable> printVars = new LinkedList<Variable>();
+        printVars.add(dim_A);
+        printVars.add(ll);
+        Solver solver = model.getSolver();
+        solver.showDecisions();
+    /*try {
+        model.getSolver().propagate();
+    } catch (ContradictionException e) {
+        e.printStackTrace();
+    }*/
+        int i = 0;
+        while (solver.solve()) {
+            i++;
+            System.out.print("Solution " + i + " found :");
+            for (Variable v : printVars) System.out.print(v + ", ");
+            System.out.println("");
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 10);
+        model.getIbex().release();
     }
 }
