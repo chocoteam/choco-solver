@@ -380,18 +380,28 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
 		Propagator p;
-		switch (algo) {
-			case "AC2001": p = new PropBinAC2001(var1, var2, tuples);
-				break;
-			case "FC": p = new PropBinFC(var1, var2, tuples);
-				break;
-			case "AC3": p = new PropBinAC3(var1, var2, tuples);
-				break;
-			case "AC3rm": p = new PropBinAC3rm(var1, var2, tuples);
-				break;
-			case "AC3bit+rm": p = new PropBinAC3bitrm(var1, var2, tuples);
-				break;
-			default: throw new SolverException("Table algorithm "+algo+" is unkown");
+		if(tuples.allowUniversalValue()) {
+			p = new PropCompactTableStar(new IntVar[]{var1,var2}, tuples);
+		}else {
+			switch (algo) {
+				case "AC2001":
+					p = new PropBinAC2001(var1, var2, tuples);
+					break;
+				case "FC":
+					p = new PropBinFC(var1, var2, tuples);
+					break;
+				case "AC3":
+					p = new PropBinAC3(var1, var2, tuples);
+					break;
+				case "AC3rm":
+					p = new PropBinAC3rm(var1, var2, tuples);
+					break;
+				case "AC3bit+rm":
+					p = new PropBinAC3bitrm(var1, var2, tuples);
+					break;
+				default:
+					throw new SolverException("Table algorithm " + algo + " is unkown");
+			}
 		}
 		return new Constraint("TableBin(" + algo + ")", p);
 	}
@@ -1841,7 +1851,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param algo to choose among {"TC+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
 	 */
 	default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
-		if (vars.length == 2) {
+		if (!tuples.allowUniversalValue() && vars.length == 2) {
 			return table(vars[0], vars[1], tuples);
 		}
 		if(algo.contains("+") && !tuples.isFeasible()){
