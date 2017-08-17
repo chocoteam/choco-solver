@@ -21,6 +21,9 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
+- fix bug in `PropNogoods` when dealing with negative values (impact `solver..setNoGoodRecordingFromRestarts()` and `solver..setNoGoodRecordingFromSolutions(...)`)
+- fix bug in `model.sum(...)` and `model.scalar(...)` when dealing with arity greater than 100 and all operators except `=`
+- fix bug in `model.table(...)` with binary scope and universal value  
 
 \#531.
 

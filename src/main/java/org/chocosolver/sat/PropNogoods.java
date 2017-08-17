@@ -45,9 +45,13 @@ public class PropNogoods extends Propagator<IntVar> {
 
     /**
      * Mask to signed value.
-     * The 32^th bit is set to 0 for "= value" and to 1 for "<= value".
+     * The 33^th bit is set to 0 for "= value" and to 1 for "<= value".
      */
-    private static final long BITOP = 1L << 32L;
+    private static final long BITOP = 1L << 33L;
+    /**
+     * Frontier between "= value" (below) and "<= value" (above)
+     */
+    private static final long FRONTIER = BITOP - Integer.MAX_VALUE;
     /**
      * The underlying SAT solver
      */
@@ -271,8 +275,8 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param v a value
      * @return <tt>true</tt> if the value encodes '=', <tt>false</tt> if it encodes '&le;'.
      */
-    private static boolean iseq(long v) {
-        return (v & BITOP) == 0;
+    static boolean iseq(long v) {
+        return v < FRONTIER;
     }
 
     /**
@@ -280,7 +284,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @return <code>v</code> with `&le;' information encoded into it
      */
     protected static long leq(int v) {
-        return (v ^ BITOP);
+        return v + BITOP;
     }
 
     /**
@@ -288,7 +292,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @return the value without the '=' or '&le;' information.
      */
     protected static int ivalue(long v) {
-        return (int) (v & ~ BITOP);
+        return (int)(iseq(v)?v:v - BITOP);
     }
 
 

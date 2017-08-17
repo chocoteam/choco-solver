@@ -78,7 +78,7 @@ public class IntLinCombFactory {
                         Arrays.copyOfRange(COEFFS, i, size),
                         "=", intermVar[z]).post();
             }
-            return model.sum(intermVar, "=", SCALAR);
+            return model.sum(intermVar, OPERATOR.toString(), SCALAR);
         }
         IntVar[] NVARS;
         int[] NCOEFFS;

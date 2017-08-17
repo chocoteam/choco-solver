@@ -25,6 +25,11 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.Random;
+
+import static org.chocosolver.sat.PropNogoods.*;
+import static org.chocosolver.sat.PropNogoods.leq;
+
 /**
  * Test class for PropNogoods
  * Created by cprudhom on 25/11/2015.
@@ -271,9 +276,9 @@ public class PropNogoodsTest {
         int[] values = {0, 1, -1, 10, -10, 181, -181, 210, -210};
         for(int value: values) {
             long eqvalue = value;
-            long ltvalue = PropNogoods.leq(value);
-            Assert.assertEquals(PropNogoods.ivalue(eqvalue), value, "ivalue eq: " + value + ", " + eqvalue + "");
-            Assert.assertEquals(PropNogoods.ivalue(ltvalue), value, "ivalue leq: " + value + ", " + eqvalue + "");
+            long ltvalue = leq(value);
+            Assert.assertEquals(ivalue(eqvalue), value, "ivalue eq: " + value + ", " + eqvalue + "");
+            Assert.assertEquals(ivalue(ltvalue), value, "ivalue leq: " + value + ", " + ltvalue + "");
         }
     }
 
@@ -286,6 +291,21 @@ public class PropNogoodsTest {
             Assert.assertTrue(var.isInstantiatedTo(-1));
         }catch (ContradictionException c){
             Assert.fail();
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testIseq(){
+        Model model = new Model("nogoods");
+        PNG = model.getNogoodStore().getPropNogoods();
+        Random rnd = new Random();
+        for(int i = 0 ; i < 1_000_000; i++){
+            rnd.setSeed(i);
+            int value = rnd.nextInt() * (1-rnd.nextInt(2));
+            boolean eq = rnd.nextBoolean();
+            long lvalue = eq ? value : leq(value);
+            Assert.assertEquals(iseq(lvalue), eq);
+            Assert.assertEquals(ivalue(lvalue), value);
         }
     }
 }

@@ -1106,4 +1106,94 @@ public class IntLinCombTest {
 			assertEquals(c1,18);
         }
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsEQ(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, "=", 5).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 252);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsGE(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, ">=", 8).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 56);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsGT(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, ">", 7).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 56);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsLE(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, "<=", 2).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 56);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsLT(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, "<", 3).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 56);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testSmallSumsNE(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public int getMinCardForSumDecomposition() {
+                return 5;
+            }
+        });
+        BoolVar[] bvars = model.boolVarArray("x",10);
+        model.sum(bvars, "!=", 5).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 772);
+    }
 }
