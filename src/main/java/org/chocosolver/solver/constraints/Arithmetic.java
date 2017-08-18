@@ -42,7 +42,7 @@ public class Arithmetic extends Constraint {
 	}
 
 	public Arithmetic(IntVar var, Operator op, int cste) {
-		super("ArithmeticUnary",createProp(var,op,cste));
+		super("X "+op+" c",createProp(var,op,cste));
 		this.vars = new IntVar[]{var};
 		this.op1 = op;
 		this.op2 = Operator.NONE;
@@ -69,7 +69,7 @@ public class Arithmetic extends Constraint {
 	}
 
 	public Arithmetic(IntVar var1, Operator op, IntVar var2) {
-		super("ArithmeticBinary",createProp(var1,op,var2));
+		super("X "+op+" Y",createProp(var1,op,var2));
 		this.vars = new IntVar[]{var1,var2};
 		this.op1 = op;
 		this.op2 = Operator.PL;
@@ -96,7 +96,7 @@ public class Arithmetic extends Constraint {
 	}
 
 	public Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
-		super("ArithmeticBinary",createProp(var1,op1,var2,op2,cste));
+		super("X "+op1+" Y "+op2+" c",createProp(var1,op1,var2,op2,cste));
 		this.vars = new IntVar[]{var1,var2};
 		this.op1 = op1;
 		this.op2 = op2;
@@ -130,38 +130,29 @@ public class Arithmetic extends Constraint {
 				default:
 					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
 			}
-		} else if (op1 == Operator.MN) {
-			switch (op2) {
+		} else{
+			Operator op = op2;
+			if (op1 != Operator.MN) {
+				cste *= (op2 == Operator.PL ? 1 : -1);
+				op = op1;
+			}
+			switch (op) {
 				case EQ: // X-Y = C --> X = Y+C
+					if(cste == 0)return new PropEqualX_Y(vars[0], vars[1]);
 					return new PropEqualX_YC(vars, cste);
 				case NQ: // X-Y != C --> X != Y+C
+					if(cste == 0)return new PropNotEqualX_Y(vars[0], vars[1]);
 					return new PropNotEqualX_YC(vars, cste);
 				case GE: // X-Y >= C --> X >= Y+C
+					if(cste == 0)return new PropGreaterOrEqualX_Y(vars);
 					return new PropGreaterOrEqualX_YC(vars, cste);
 				case GT: // X-Y > C --> X >= Y+C+1
 					return new PropGreaterOrEqualX_YC(vars, cste + 1);
 				case LE:// X-Y <= C --> Y >= X-C
+					if(cste == 0)return new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1});
 					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste);
 				case LT:// X-Y < C --> Y >= X-C+1
 					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1);
-				default:
-					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
-			}
-		} else {
-			int _cste = cste * (op2 == Operator.PL ? 1 : -1);
-			switch (op1) {
-				case EQ:// X = Y + C
-					return new PropEqualX_YC(vars, _cste);
-				case NQ:// X =/= Y + C
-					return new PropNotEqualX_YC(vars, _cste);
-				case GE:// X >= Y + C
-					return new PropGreaterOrEqualX_YC(vars, _cste);
-				case GT:// X > Y + C --> X >= Y + C + 1
-					return new PropGreaterOrEqualX_YC(vars, _cste + 1);
-				case LE:// X <= Y + C --> Y >= X - C
-					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste);
-				case LT:// X < Y + C --> Y > X - C + 1
-					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -_cste + 1);
 				default:
 					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");
 			}
