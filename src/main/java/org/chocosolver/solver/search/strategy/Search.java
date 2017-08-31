@@ -211,8 +211,10 @@ public class Search {
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
+        Model model = vars[0].getModel();
         return new DomOverWDeg(vars, 0,
-                vars[0].getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION ?
+                model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(model.getObjective() instanceof IntVar) ?
                         new IntDomainMin(): new IntDomainBest());
     }
 

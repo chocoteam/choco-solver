@@ -24,7 +24,10 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Random;
+import java.util.stream.Collectors;
 
 import static java.lang.System.out;
 import static org.chocosolver.solver.constraints.real.Ibex.HC4;
@@ -347,5 +350,39 @@ public class RealTest {
         }
         Assert.assertEquals(solver.getSolutionCount(), 10);
         model.getIbex().release();
+    }
+
+    @Test(groups="ignored", timeOut=60000)
+    public void testPeter() {
+        Random ds = new Random();
+        Model model = new Model();
+        RealVar[] rv1 = model.realVarArray(10, 0, 10, 0.1d);
+        RealVar[] rv2 = model.realVarArray(10, 0, 10, 0.1d);
+        RealVar opt = model.realVar(0, 100, 0.1d);
+        RealVar srv1 = model.realVar(0, 100, 0.1d);
+        RealVar srv2 = model.realVar(0, 100, 0.1d);
+        BoolVar[] bv1 = model.boolVarArray(10);
+        BoolVar[] bv2 = model.boolVarArray(10);
+        model.realIbexGenericConstraint("{0}={1}+{2}+{3}+{4}+{5}+{6}+{7}+{8}+{9}+{10}",
+                srv1, rv1[0], rv1[1], rv1[2], rv1[3], rv1[4], rv1[5], rv1[6], rv1[7], rv1[8], rv1[9]).post();
+
+        model.realIbexGenericConstraint("{0}={1}+{2}+{3}+{4}+{5}+{6}+{7}+{8}+{9}+{10}",
+                srv2, rv2[0], rv2[1], rv2[2], rv2[3], rv2[4], rv2[5], rv2[6], rv2[7], rv2[8], rv2[9]).post();
+
+        for (int i = 0; i < 10; ++i) {
+            model.ifThenElse(bv1[i], model.realIbexGenericConstraint("{0}=" + ds.nextDouble() * 10.0, rv1[i]), model.realIbexGenericConstraint("{0}=0.0", rv1[i]));
+            model.ifThenElse(bv2[i], model.realIbexGenericConstraint("{0}=" + ds.nextDouble() * 10.0, rv2[i]), model.realIbexGenericConstraint("{0}=0.0", rv2[i]));
+            model.arithm(bv1[i], "!=", bv2[i]).post();
+        }
+       //NO CRASH
+        //	model.realIbexGenericConstraint("{0}={1}+{2}", opt, srv1, srv2).post();
+        //CRASH
+        model.realIbexGenericConstraint("{0}=max({1},{2})", opt, srv1, srv2).post();
+        model.setObjective(false, opt);
+        model.getSolver().showStatistics();
+        while (model.getSolver().solve()) {
+            System.out.println(Arrays.stream(rv1).map(x -> String.format("%.2f ", x.getUB())).collect(Collectors.toList()));
+            System.out.println(Arrays.stream(rv2).map(x -> String.format("%.2f ", x.getUB())).collect(Collectors.toList()));
+        }
     }
 }
