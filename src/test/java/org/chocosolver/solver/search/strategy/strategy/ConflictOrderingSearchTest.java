@@ -166,4 +166,18 @@ public class ConflictOrderingSearchTest {
         model.getSolver().findSolution();
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testM2(){
+        Model model = new Model();
+        IntVar x = model.intVar(0,1);
+        x.eq(0).post();
+        x.eq(1).post();
+        model.getSolver().setSearch(Search.conflictOrderingSearch(
+                Search.domOverWDegSearch(model.retrieveIntVars(
+                        true
+                ))
+        ));
+        model.getSolver().findSolution();
+    }
+
 }

@@ -11,10 +11,12 @@ package org.chocosolver.solver.search.strategy.strategy;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayList;
@@ -117,7 +119,10 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        stampIt(model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable());
+        Decision dec = model.getSolver().getDecisionPath().getLastDecision();
+        if(dec != RootDecision.ROOT) {
+            stampIt(dec.getDecisionVariable());
+        }
     }
 
     void stampIt(Variable cftVar) {
