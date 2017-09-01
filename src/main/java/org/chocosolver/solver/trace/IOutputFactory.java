@@ -64,6 +64,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Print (succint) features of the solver given in argument
      */
     default void printFeatures() {
+        _me().getMeasures().setReadingTimeCount(System.nanoTime() - _me().getModel().getCreationTime());
         _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
         _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
         _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
@@ -76,6 +77,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Print (succint) features of the solver given in argument in a single line.
      */
     default void printShortFeatures() {
+        _me().getMeasures().setReadingTimeCount(System.nanoTime() - _me().getModel().getCreationTime());
         StringBuilder st = new StringBuilder(256);
         st.append("Model[").append(_me().getModelName()).append("], ");
         st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
@@ -150,10 +152,22 @@ public interface IOutputFactory extends ISelf<Solver> {
         _me().plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
-                getOut().println(_me().getMeasures().toOneLineString());
+                printShortStatistics();
             }
         });
     }
+
+
+    /**
+     * Calls {@link #printShortStatistics()} before the program ends (normally or not)?
+     * This adds a shutdown hook.
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     */
+    default void showShortStatisticsOnShutdown(){
+        Runtime.getRuntime().addShutdownHook(new Thread(()->_me().printShortStatistics()));
+    }
+
 
     /**
      * Plug a search monitor which outputs {@code message} on each solution.

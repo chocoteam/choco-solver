@@ -9,7 +9,6 @@
 package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -88,6 +87,12 @@ public interface IPropagationEngine  {
     default void flush() {
     }
 
+    /**
+     * Reset the propagation engine.
+     */
+    default void reset(){
+
+    }
     /**
      * Clear internal structures
      */

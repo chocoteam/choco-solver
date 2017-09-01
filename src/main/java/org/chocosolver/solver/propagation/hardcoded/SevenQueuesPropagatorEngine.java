@@ -345,6 +345,12 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     }
 
     @Override
+    public void reset() {
+        trigger.clear();
+        flush();
+    }
+
+    @Override
     public void clear() {
         propagators = null;
         trigger.clear();

@@ -437,6 +437,12 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     }
 
     @Override
+    public void reset() {
+        trigger.clear();
+        flush();
+    }
+
+    @Override
     public void clear() {
         propagators = null;
         p2i = null;

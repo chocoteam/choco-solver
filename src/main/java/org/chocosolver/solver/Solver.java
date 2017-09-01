@@ -521,7 +521,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         searchWorldIndex = 0;
         action = initialize;
         mMeasures.reset();
-        engine.flush();
+        engine.reset();
         dpath.synchronize();
         objectivemanager.resetBestBounds();
         removeAllStopCriteria();

@@ -102,12 +102,14 @@ public class PropagationTrigger  {
         int idx = sta_propagators.indexOf(propagator);
         if (idx > -1) {
             sta_propagators.remove(idx);
+            size--;
         }
         // 2. then, if necessary look for permanent one
         idx = perm_propagators.indexOf(propagator);
         if (idx > -1) {
             perm_propagators.remove(idx);
             perm_world.removeAt(idx);
+            size--;
         }
     }
 
@@ -131,24 +133,25 @@ public class PropagationTrigger  {
      */
     public void propagate() throws ContradictionException {
         if (sta_propagators.size() > 0) {
-            for (int p = 0; p < sta_propagators.size(); p++) {
-                if (DEBUG) {
-                    IPropagationEngine.Trace.printFirstPropagation(sta_propagators.get(p));
+            try {
+                for (int p = 0; p < sta_propagators.size(); p++) {
+                    if (DEBUG) {
+                        IPropagationEngine.Trace.printFirstPropagation(sta_propagators.get(p));
+                    }
+                    execute(sta_propagators.get(p), engine);
                 }
-                execute(sta_propagators.get(p), engine);
+            }finally {
+                size -= sta_propagators.size();
+                sta_propagators.clear();
             }
-            size -= sta_propagators.size();
-            sta_propagators.clear();
         }
         if (perm_propagators.size() > 0) {
             int cw = environment.getWorldIndex(); // get current index
-            int p = perm_propagators.size() - 1;
-            while (p >= 0) {
+            for(int p = 0; p < perm_propagators.size(); p++){
                 if (perm_world.getQuick(p) >= cw) {
                     execute(perm_propagators.get(p), engine);
                     perm_world.replaceQuick(p, cw);
                 }
-                --p;
             }
         }
 	}

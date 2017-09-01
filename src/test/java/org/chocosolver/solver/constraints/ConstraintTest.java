@@ -19,6 +19,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Random;
+
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
@@ -302,6 +304,79 @@ public class ConstraintTest {
         Assert.assertEquals(propagators[2].getVIndices(), new int[]{2});
         Assert.assertEquals(propagators[3].getVIndices(), new int[]{3});
 
+    }
+
+    @Test(groups="1s", timeOut=6000000)
+    public void testJiTee1(){
+        Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
+        Model model = new Model("model");
+        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
+        IntVar dim_A = model.intVar("dim_A", new int[] {150, 195, 270, 370, 470});
+        model.arithm(dim_A, "<=", 271).post();
+        model.arithm(load, ">", 400).post();
+        model.getEnvironment().worldPush();
+        Constraint c = null;
+        //Repeatedly post / unpost. This is unstable on Windows, Ibex crashes quite often. But main concern is to make this work!
+        //I cannot understand why solutions are lost after the first contradiction has been found, even when propagation is not on!
+        for (int round = 0; round < 350; round++) {
+            //a constraint at each round: post and unpost
+            int reqInt = (round % 100);
+            if(c!=null)model.unpost(c);
+            c = model.arithm(dim_A, ">", 5 * reqInt);
+            c.post();
+            while (model.getSolver().solve()) {}
+            Assert.assertEquals(model.getSolver().getSolutionCount()>0, 5 * reqInt < 270);
+            model.getEnvironment().worldPopUntil(0);
+            model.getSolver().hardReset();
+            model.getEnvironment().worldPush();
+        }
+
+    }
+    @Test(groups="1s", timeOut=6000000)
+    public void testJiTee2(){
+        Constraint stickyCstr = null;
+        Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
+        Model model = new Model("model");
+        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
+        IntVar dim_A = model.intVar("dim_A", new int[] {150, 195, 270, 370, 470});
+        model.arithm(dim_A, "<=", 271).post();
+        model.arithm(load, ">", 400).post();
+        model.getEnvironment().worldPush();
+        int reqLoad = 0;
+        //Repeatedly post / unpost. This is unstable on Windows, Ibex crashes quite often. But main concern is to make this work!
+        //I cannot understand why solutions are lost after the first contradiction has been found, even when propagation is not on!
+        for (int round = 0; round < 350; round++) {
+            //Randomly unpost a sticky constraint that remains between iterations. Probability of unpost() annd permanent removal is higher than creation and post()
+            if (stickyCstr != null) {
+                int r = rr.nextInt(100);
+                if (r <=12 ) {
+                    model.unpost(stickyCstr);
+                    stickyCstr = null;
+                }
+            }
+            //a constraint at each round: post and unpost
+            Constraint c;
+            int reqInt = (round % 100) * 5;
+            c = model.arithm(dim_A, ">", reqInt);
+            c.post();
+
+            //Randomly post a sticky constraint that remains between iterations. Probability to post() is lower than unpost()
+            int r = 0;
+            if (stickyCstr == null) {
+                r = rr.nextInt(100);
+                if (r <=7) {
+                    stickyCstr = model.arithm(load ,"=", r*100 );
+                    reqLoad = r * 100;
+                    model.post(stickyCstr);
+                }
+            }
+            while (model.getSolver().solve()) {}
+            Assert.assertEquals(model.getSolver().getSolutionCount() == 0, reqInt >= 270 || (stickyCstr != null && reqLoad < 500) , ""+round);
+            model.unpost(c);
+            model.getEnvironment().worldPopUntil(0);
+            model.getSolver().hardReset();
+            model.getEnvironment().worldPush();
+        }
     }
 
 }
