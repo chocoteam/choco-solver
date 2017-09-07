@@ -202,7 +202,13 @@ public class Ibex {
      */
     public native void release();
 
-	public int getContractorCount() {
+    @Override
+    protected void finalize() throws Throwable {
+        this.release();
+        super.finalize();
+    }
+
+    public int getContractorCount() {
 		return contractorCount;
 	}
 }

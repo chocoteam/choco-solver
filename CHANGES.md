@@ -7,6 +7,9 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+The current release was submitted to [MiniZinc Challenge 2017](http://www.minizinc.org/challenge2017/results2017.html) 
+and at [XCSP3 Competition 2017](http://www.cril.univ-artois.fr/XCSP17/) and won medals.
+
 ### Major features:
 - Compact-Table now deals with short tuples (#531)
 - Checking if a created constraint is free (neither posted or reified) is now possible with `Settings.checkDeclaredConstraints()`
@@ -24,6 +27,7 @@ NEXT MILESTONE
 - fix bug in `PropNogoods` when dealing with negative values (impact `solver..setNoGoodRecordingFromRestarts()` and `solver..setNoGoodRecordingFromSolutions(...)`)
 - fix bug in `model.sum(...)` and `model.scalar(...)` when dealing with arity greater than 100 and all operators except `=`
 - fix bug in `model.table(...)` with binary scope and universal value  
+- fix bug related to Ibex and GC.
 
 \#531.
 

@@ -130,11 +130,4 @@ public class RealConstraint extends Constraint {
     private static RealPropagator createPropagator(String functions, int option, RealVar... rvars) {
     	return new RealPropagator(functions, rvars, option);
     }
-
-    @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-		if(propagators.length == 0)throw new UnsupportedOperationException("Empty RealConstraint");
-		propagators[0].getModel().getIbex().release();
-    }
 }
