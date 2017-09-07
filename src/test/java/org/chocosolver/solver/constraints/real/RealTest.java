@@ -385,4 +385,27 @@ public class RealTest {
             System.out.println(Arrays.stream(rv2).map(x -> String.format("%.2f ", x.getUB())).collect(Collectors.toList()));
         }
     }
+
+    @Test(groups="ignored", timeOut=60000)
+    public void testJiTee1() throws ContradictionException {
+        double [] posA= new double[] {150.0, 195.0, 270.0, 370.0, 470.0};
+        Model model = new Model("model");
+        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
+        double min = 150.0;
+        double max = 470.0;
+        RealVar dim_A= model.realVar("dim_A", min, max,1.0E-5);
+        BoolVar[] rVarGuards =new BoolVar[posA.length];
+        for (int i = 0; i< posA.length; i++) {
+            rVarGuards[i] = model.realIbexGenericConstraint("{0} = " + posA[i], dim_A).reify();
+        }
+        model.sum(rVarGuards, "=" , 1).post();
+
+        model.realIbexGenericConstraint("{0}<=271.", dim_A).post();
+        model.arithm(load, ">", 400).post();
+        for(int i  = 0; i < 50_000; i++) {
+            model.realIbexGenericConstraint("{0} > " + i, dim_A);
+            System.gc();
+        }
+        model.getSolver().findSolution();
+    }
 }
