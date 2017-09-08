@@ -4,6 +4,9 @@ os:
 - linux
 jdk:
 - oraclejdk8
+cache:
+  directories:
+    - $HOME/.m2
 env:
   global:
   # COVERITY_SCAN_TOKEN=...
@@ -16,6 +19,7 @@ env:
   - GROUP=1s
   - GROUP=10s
 before_install:
+- /bin/sh ./.travis/install-ibex.sh
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 install:
@@ -39,7 +43,7 @@ notifications:
     on_failure: always
     on_start: never
 script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then mvn clean install -DtestFailureIgnore=true
-  -Dgroups=$GROUP ; fi
+  -Dgroups=$GROUP -Djava.library.path=${TRAVIS_BUILD_DIR}/ibex-2.3.4/__build__/plugins/java; fi
 addons:
   coverity_scan:
     project:

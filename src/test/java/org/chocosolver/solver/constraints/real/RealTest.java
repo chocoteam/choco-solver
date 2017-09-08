@@ -386,7 +386,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testJiTee1() throws ContradictionException {
         double [] posA= new double[] {150.0, 195.0, 270.0, 370.0, 470.0};
         Model model = new Model("model");
