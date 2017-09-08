@@ -24,7 +24,11 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.IntMap;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This engine handles two sets of queues.
@@ -439,7 +443,9 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     @Override
     public void reset() {
         trigger.clear();
-        trigger.addAll(propagators);
+        if (size > 0) {
+            trigger.addAll(Arrays.copyOfRange(propagators, 0, size));
+        }
         flush();
     }
 
@@ -450,6 +456,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
         trigger.clear();
         max_f = 0;
         max_c = 0;
+        size = 0;
         pro_queue_f = null;
         schedule_f = null;
         pro_queue_c = null;

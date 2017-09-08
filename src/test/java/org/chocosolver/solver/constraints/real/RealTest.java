@@ -49,7 +49,7 @@ public class RealTest {
     }
 
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         for(int i=0;i<10;i++) {
             Ibex ibex = new Ibex();
@@ -74,7 +74,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         for(int i=0;i<10;i++) {
             Ibex ibex = new Ibex();
@@ -112,7 +112,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         for(int i=0;i<10;i++) {
             Ibex ibex = new Ibex();
@@ -140,7 +140,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void test4() {
         for(int i=0;i<10;i++) {
             Model model = new Model();
@@ -158,7 +158,6 @@ public class RealTest {
             model.getSolver().solve();
             assertEquals(x.getValue(), 2);
             assertEquals(y.getValue(), 4);
-            model.getIbex().release();
         }
     }
 
@@ -188,10 +187,9 @@ public class RealTest {
 
             foundSolution = model.getSolver().solve();
         }
-        model.getIbex().release();
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testFreemajb2() {
         Model model = new Model();
 
@@ -208,10 +206,9 @@ public class RealTest {
         }
         out.printf("%s\n", model.toString());
         model.getSolver().printStatistics();
-        model.getIbex().release();
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testFreemajb3() {
         Model model = new Model();
 
@@ -238,7 +235,7 @@ public class RealTest {
         };
     }
 
-    @Test(groups="ignored", timeOut=60000, dataProvider = "coeffs")
+    @Test(groups="1s", timeOut=60000, dataProvider = "coeffs")
     public void testHM1(String coeffs) {
         Model model = new Model("Test model");
         double precision = 1.e-6;
@@ -289,7 +286,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "ignored")
+    @Test(groups = "1s")
     public void testPG1() throws Exception {
         Model model = new Model();
         RealVar rv = model.realVar(0,5,0.1d);
@@ -303,7 +300,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 63);
     }
 
-    @Test(groups = "ignored")
+    @Test(groups = "1s")
     public void testJiiTee1() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
@@ -352,7 +349,7 @@ public class RealTest {
         model.getIbex().release();
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups="1s", timeOut=60000)
     public void testPeter() {
         Random ds = new Random();
         Model model = new Model();

@@ -237,4 +237,16 @@ public class PropEngineTest {
         solver.getEngine().clear();
         solver.reset(); // error (null)
     }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "env")
+    public void testJG3(PropagationEngineFactory ef){
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        IntVar[] variables=model.intVarArray("s", 3, 0, 2);
+        solver.setEngine(ef.make(model));
+        solver.findAllSolutions();
+
+        solver.getEngine().clear();
+        solver.reset(); // error (null)
+    }
 }

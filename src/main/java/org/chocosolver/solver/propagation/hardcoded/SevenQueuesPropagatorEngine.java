@@ -347,7 +347,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     @Override
     public void reset() {
         trigger.clear();
-        trigger.addAll(propagators);
+        if (size > 0) {
+            trigger.addAll(Arrays.copyOfRange(propagators, 0, size));
+        }
         flush();
     }
 
@@ -362,6 +364,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
         scheduled = null;
         eventsets = null;
         eventmasks = null;
+        size = 0;
         notEmpty = 0;
         init = false;
         lastProp = null;
