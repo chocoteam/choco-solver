@@ -14,4 +14,4 @@ sudo ./waf install
 mv __build__ ../ibex
 cd ..
 sudo rm -r ibex-2.3.4/
-find ./ibex -name "*.java" -exec rm {} \;
+sudo find ./ibex -name "*.java" -exec rm {} \;
