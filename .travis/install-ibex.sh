@@ -13,5 +13,5 @@ sudo ./waf install
 # to avoid error with LICENSE header update
 mv __build__ ../ibex
 cd ..
-rm -r ibex-2.3.4/
+sudo rm -r ibex-2.3.4/
 find ./ibex -name "*.java" -exec rm {} \;
