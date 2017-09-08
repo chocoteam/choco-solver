@@ -43,7 +43,7 @@ notifications:
     on_failure: always
     on_start: never
 before_script:
-- mvn validate
+- mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then mvn clean install -DtestFailureIgnore=true
   -Dgroups=$GROUP -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java; fi
 addons:
