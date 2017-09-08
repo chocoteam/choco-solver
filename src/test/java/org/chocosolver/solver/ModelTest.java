@@ -545,4 +545,24 @@ public class ModelTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2680);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJuTii1(){
+        Model model = new Model("model");
+        IntVar b = model.intVar("b", 2, 6);
+        model.arithm(b, ">",3).post();
+        Assert.assertEquals(b.getLB(), 2);
+        Assert.assertTrue(model.getSolver().solve());
+        model.getSolver().reset();
+        model.getSolver().getEnvironment().worldPush();
+        try {
+            Assert.assertEquals(b.getLB(), 2);
+            model.getSolver().propagate();
+            Assert.assertEquals(b.getLB(), 4);
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        model.getSolver().getEnvironment().worldPop();
+        Assert.assertEquals(b.getLB(), 2);
+    }
 }

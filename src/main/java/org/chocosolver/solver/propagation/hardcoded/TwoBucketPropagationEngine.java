@@ -439,6 +439,7 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     @Override
     public void reset() {
         trigger.clear();
+        trigger.addAll(propagators);
         flush();
     }
 
