@@ -83,6 +83,7 @@ public class Ibex {
         try{
             System.loadLibrary("ibex-java");
         }catch (UnsatisfiedLinkError e){
+            e.printStackTrace();
             throw new SolverException("Ibex is not correctly installed (see http://www.emn.fr/z-info/ibex/).");
         }
     }
