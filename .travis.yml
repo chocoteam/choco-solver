@@ -43,7 +43,7 @@ notifications:
     on_failure: always
     on_start: never
 script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then mvn clean install -DtestFailureIgnore=true
-  -Dgroups=$GROUP -Djava.library.path=${TRAVIS_BUILD_DIR}/ibex-2.3.4/__build__/plugins/java; fi
+  -Dgroups=$GROUP -Djava.library.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java; fi
 addons:
   coverity_scan:
     project:

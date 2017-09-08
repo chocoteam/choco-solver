@@ -10,6 +10,8 @@ tar -xzvf ibex-java-ibex2.3.tar.gz
 cd ..
 ./waf configure --enable-shared --with-jni --with-java-package=org.chocosolver.solver.constraints.real
 sudo ./waf install
-echo "parameters:"
-pwd
-echo ${TRAVIS_BUILD_DIR}
+# to avoid error with LICENSE header update
+mv __build__ ../ibex
+cd ..
+rm -r ibex-2.3.4/
+find ./ibex -name "*.java" -exec rm {} \;
