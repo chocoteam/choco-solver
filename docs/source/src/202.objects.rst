@@ -165,7 +165,7 @@ and is equipped with *filtering algorithms* that ensure conditions induced by th
 
 A filtering algorithm, or *propagator*, removes from variables' domain values that cannot appear in any solution.
 A propagator has a *filtering strength* and a time complexity to achieve it.
-The filtering strength, or *level of consistency*, determines how accurate a propagator is when values to removed are detected,
+The filtering strength, or *level of consistency*, determines how accurate a propagator is when values to be removed are detected.
 
 Posting a constraint
 ++++++++++++++++++++
