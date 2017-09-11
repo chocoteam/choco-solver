@@ -56,7 +56,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <ibex.path></ibex.path><!-- should be defined externally with "-Dibex.path=..." -->
+        <ext.lib.path></ext.lib.path><!-- should be defined externally with "-Dext.lib.path=..." -->
     </properties>
 
     <dependencies>
@@ -224,7 +224,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.19.1</version>
                 <configuration>
-                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=${ibex.path}</argLine>
+                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=${ext.lib.path}</argLine>
                     <properties>
                         <property>
                             <name>listener</name>
@@ -249,8 +249,8 @@
                         </goals>
                         <configuration>
                             <tasks>
-                                <echo>Displaying value of 'ibex.path' property</echo>
-                                <echo>[ibex.path] ${ibex.path}</echo>
+                                <echo>Displaying value of 'ext.lib.path' property</echo>
+                                <echo>[ext.lib.path] ${ext.lib.path}</echo>
                             </tasks>
                         </configuration>
                     </execution>
