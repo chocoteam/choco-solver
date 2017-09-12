@@ -51,4 +51,4 @@ predicate tableChoco(array[int] of var int: x, array[int, int] of int: t);
 predicate bin_packingChoco(int: c, array[int] of var int: bin, array[int] of int: w);
 predicate bin_packing_loadChoco(array[int] of var int: load, array[int] of var int: bin, array[int] of int: w);
 predicate bin_packing_capaChoco(array[int] of int: c, array[int] of var int: bin, array[int] of int: w);
-predicate value_precede_chain_intChoco(array[int] of int: c, array[int] of var int: x)
+predicate value_precede_chain_intChoco(array[int] of int: c, array[int] of var int: x);

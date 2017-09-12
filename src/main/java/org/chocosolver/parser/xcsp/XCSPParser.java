@@ -707,10 +707,10 @@ public class XCSPParser implements XCallbacks2 {
                     model.scalar(res, coeffs, "<=", condV(condition)).post();
                     break;
                 case GE:
-                    model.scalar(res, coeffs, ">", condV(condition)).post();
+                    model.scalar(res, coeffs, ">=", condV(condition)).post();
                     break;
                 case GT:
-                    model.scalar(res, coeffs, ">=", condV(condition)).post();
+                    model.scalar(res, coeffs, ">", condV(condition)).post();
                     break;
                 case NE:
                     model.scalar(res, coeffs, "!=", condV(condition)).post();
@@ -815,11 +815,11 @@ public class XCSPParser implements XCallbacks2 {
             switch (conditionRel.operator) {
                 case LT: {
                     //TODO
-                    model.atMostNValues(vars(list), model.intOffsetView(condV(condition), 1), false).post();
+                    model.atMostNValues(vars(list), model.intOffsetView(condV(condition), -1), false).post();
                 }
                 return;
                 case LE: {
-                    model.atMostNValues(vars(list), model.intOffsetView(condV(condition), 1), false).post();
+                    model.atMostNValues(vars(list), condV(condition), false).post();
                 }
                 return;
                 case GE: {
@@ -829,7 +829,7 @@ public class XCSPParser implements XCallbacks2 {
                 return;
                 case GT: {
                     //TODO
-                    model.atLeastNValues(vars(list), model.intOffsetView(condV(condition), -1), false).post();
+                    model.atLeastNValues(vars(list), model.intOffsetView(condV(condition), 1), false).post();
                 }
                 return;
                 case NE: {

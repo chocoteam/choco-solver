@@ -96,7 +96,7 @@ public class XCSP extends RegParser {
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
             try {
-                parse(models.get(i), parsers[i]);
+                parse(models.get(i), parsers[i], i);
             } catch (Exception e) {
                 System.out.printf("s UNSUPPORTED\n");
                 System.out.printf("c %s\n", e.getMessage());
@@ -108,14 +108,16 @@ public class XCSP extends RegParser {
         listeners.forEach(ParserListener::afterParsingFile);
     }
 
-    public void parse(Model target, XCSPParser parser) throws Exception {
+    public void parse(Model target, XCSPParser parser, int i) throws Exception {
         parser.model(target, instance);
-        IntVar[] vars = parser.mvars.values().toArray(new IntVar[parser.mvars.size()]);
-        Arrays.sort(vars, Comparator.comparingInt(IntVar::getId));
-        Solver solver = target.getSolver();
-        solver.setSearch(Search.defaultSearch(target));
-        solver.setNoGoodRecordingFromRestarts();
-        solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+        if (i == 0) {
+            IntVar[] vars = parser.mvars.values().toArray(new IntVar[parser.mvars.size()]);
+            Arrays.sort(vars, Comparator.comparingInt(IntVar::getId));
+            Solver solver = target.getSolver();
+            solver.setSearch(Search.defaultSearch(target));
+            solver.setNoGoodRecordingFromRestarts();
+            solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+        }
 //        Files.move(Paths.get(instance),
 //                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
 //                StandardCopyOption.REPLACE_EXISTING);
