@@ -70,8 +70,8 @@ Outgoing transition from :math:`i_1` goes to :math:`i_2` and produces `0` (fourt
 Two transitions outgoes from :math:`i_2`:
 one goes to itself (fifth transition, producing `0`),
 one goes to :math:`i_3` (sixth transition, producing `1`).
-:math:`i_3` goes to :math:`i_4`(seventh transition) and produce `1`.
-:math:`i_4` goes to :math:`i_5`(eighth transition) and produce `0`.
+:math:`i_3` goes to :math:`i_4` (seventh transition) and produce `1`.
+:math:`i_4` goes to :math:`i_5` (eighth transition) and produce `0`.
 And so on.
 
 .. code-block::java
