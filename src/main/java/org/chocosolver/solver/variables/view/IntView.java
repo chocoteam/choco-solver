@@ -37,12 +37,12 @@ import java.util.Iterator;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView extends AbstractVariable implements IView, IntVar {
+public abstract class IntView<I extends IntVar> extends AbstractVariable implements IView, IntVar {
 
     /**
      * Observed variable
      */
-    protected final IntVar var;
+    protected final I var;
 
     /**
      * To store removed values
@@ -52,12 +52,12 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
     /**
      * Value iterator
      */
-    protected DisposableValueIterator _viterator;
+    DisposableValueIterator _viterator;
 
     /**
      * Range iterator
      */
-    protected DisposableRangeIterator _riterator;
+    DisposableRangeIterator _riterator;
 
     /**
      * Value iterator allowing for(int i:this) loops
@@ -69,7 +69,7 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
      * @param name name of the view
      * @param var observed variable
      */
-    protected IntView(String name, IntVar var) {
+    IntView(String name, I var) {
         super(name, var.getModel());
         this.var = var;
         this.delta = NoDelta.singleton;
@@ -394,7 +394,8 @@ public abstract class IntView extends AbstractVariable implements IView, IntVar 
         return this.getId() - o.getId();
     }
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
             monitors[i].onUpdate(this, event);

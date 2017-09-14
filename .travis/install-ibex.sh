@@ -3,7 +3,7 @@
 set -ex
 curl http://www.ibex-lib.org/sites/default/files/ibex-2.3.4.tgz > ibex-2.3.4.tgz
 curl http://www.ibex-lib.org/sites/default/files/ibex-java-ibex2.3.tar.gz > ibex-java-ibex2.3.tar.gz
-tar -xzvf ibex-2.3.4.tgz ibex-2.3.4/
+tar -xzf ibex-2.3.4.tgz ibex-2.3.4/
 HIBEX=`pwd`
 mv ibex-java-ibex2.3.tar.gz ibex-2.3.4/plugins/ibex-java-ibex2.3.tar.gz
 cd ibex-2.3.4/plugins

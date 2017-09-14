@@ -31,7 +31,7 @@ import static org.chocosolver.solver.variables.events.IntEventType.*;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView {
+public class MinusView extends IntView<IntVar> {
 
 
     /**

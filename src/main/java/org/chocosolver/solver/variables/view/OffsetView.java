@@ -28,7 +28,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends IntView {
+public final class OffsetView extends IntView<IntVar> {
 
     /**
      * A constant value
