@@ -49,7 +49,7 @@ A model
     model.scalar(ArrayUtils.append(open, cost), coeffs, "=", tot_cost).post();
 
 
-The last parameter of the element constraints (line 19 and 21) indicates an offset
+The last parameter of the element constraints (line 19 and 21) indicates an offset.
 It enables to adapt the index range wrt to the domain of the variable: here supplier variables lower bound is 1.
 But, open array index starts at 0 and an offset is needed to match supplier with open array.
 In other words, first *element* constraint states that `open[supplier[s] - o] = 1` where `o` is set to 1.
@@ -104,7 +104,7 @@ This method attempts to find the optimal solution.
     search limits was defined).
     The cut process is entirely managed by the solver.
 
-Alternatively, the search loop can be unfold
+Alternatively, the search loop can be unfold.
 
 .. code-block:: java
     :linenos:
@@ -238,7 +238,7 @@ The entire code
     // then post it
     model.scalar(ArrayUtils.append(open, cost), coeffs, "=", tot_cost).post();
 
-    model.setObjective(ResolutionPolicy.MINIMIZE, tot_cost);
+    model.setObjective(Model.MINIMIZE, tot_cost);
     Solver solver = model.getSolver();
     solver.setSearch(Search.intVarSearch(
         new VariableSelectorWithTies<>(

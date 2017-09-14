@@ -286,7 +286,7 @@ The entire code
               .min((v1, v2) -> closest(v2, map) - closest(v1, map))
               .orElse(null),
         var -> closest(var, map),
-        DecisionOperator.int_eq,
+        DecisionOperatorFactory.makeIntEq(),
         planes
     ));
     solver.showShortStatistics();

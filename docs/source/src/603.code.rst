@@ -65,16 +65,45 @@ We note :math:`s_i` the initial state.
 The first character can either be a 0 or a 1, there will be two transitions outgoing from :math:`s_i`.
 Then, transition from :math:`s_i` producing `0` will go to :math:`i_0` (first transition).
 And transition from :math:`s_i` producing `1` will go to :math:`i_1` (second transition).
-:math:`i_0` points to itself providing `0`s (third transition).
+:math:`i_0` points to itself providing `0` (third transition).
 Outgoing transition from :math:`i_1` goes to :math:`i_2` and produces `0` (fourth transition).
 Two transitions outgoes from :math:`i_2`:
 one goes to itself (fifth transition, producing `0`),
 one goes to :math:`i_3` (sixth transition, producing `1`).
-:math:`i_3` goes to :math:`i_4`(seventh transition) and produce `1`.
-:math:`i_4` goes to :math:`i_5`(eighth transition) and produce `0`.
-And so on.
+:math:`i_3` goes to :math:`i_4` (seventh transition) and produce `1`.
+:math:`i_4` goes to :math:`i_5` (eighth transition) and produce `0`.
+And so on. Below is a graph illustrating the process for the sequence {1, 2}.
 
-.. code-block::java
+.. graphviz::
+
+    digraph g {
+        rankdir = LR;
+        {
+            start [label="" shape=none width=0];
+            si [label=<s<sub>i</sub>> width=0.5];
+            i0 [label=<i<sub>0</sub>> width=0.5];
+            i1 [label=<i<sub>1</sub>> width=0.5];
+            i2 [label=<i<sub>2</sub>> width=0.5];
+            i3 [label=<i<sub>3</sub>> width=0.5];
+            i4 [label=<i<sub>4</sub> (= s<sub>f</sub>)> width=0.5];
+            end [label="" shape=none width=0];
+        }
+        start -> si;
+        si -> i0 [label=0];
+        i0 -> i0 [label=0];
+        si -> i1 [label=1];
+        i0 -> i1 [label=1];
+        i1 -> i2 [label=0];
+        i2 -> i2 [label=0];
+        i2 -> i3 [label=1];
+        i3 -> i4 [label=1];
+        i4 -> i4 [label=0];
+        i4 -> end;
+    }
+
+And here the code for building such a DFA for any sequence:
+
+.. code-block:: java
     :linenos:
 
     private void dfa2(BoolVar[] cells, int[] seq, Model model) {
