@@ -13,6 +13,7 @@ cd ..
 sudo ./waf install
 ls -la /usr/local/lib/libibex*
 cd __build__/plugins/java/src
+ldd /usr/local/lib/libibex-java.so
 java -Djava.library.path=/usr/local/lib Test
 cd ${HIBEX}/
 sudo rm -r ibex-2.3.4.tgz
