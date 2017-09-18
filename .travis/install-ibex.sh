@@ -17,6 +17,8 @@ sudo cp __build__/src/libibex.so /usr/local/lib/libibex.so
 sudo cp __build__/plugins/java/libibex-java.so /usr/local/lib/libibex-java.so
 cat /etc/ld.so.conf
 ldd /usr/local/lib/libibex-java.so
+ldconfig -v
+ldd /usr/local/lib/libibex-java.so
 cd __build__/plugins/java/src
 java -Djava.library.path=/usr/local/lib Test
 cd ${HIBEX}/
