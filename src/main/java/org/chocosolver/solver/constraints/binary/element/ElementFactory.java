@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.binary.element;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -66,6 +67,6 @@ public class ElementFactory {
             assert TABLE[0] == TABLE[TABLE.length - 1];
             return VALUE.getModel().arithm(VALUE, "=", TABLE[0]);
         }
-        return new Constraint("Element", new PropElement(VALUE, TABLE, INDEX, OFFSET));
+        return new Constraint(ConstraintsName.ELEMENT, new PropElement(VALUE, TABLE, INDEX, OFFSET));
     }
 }

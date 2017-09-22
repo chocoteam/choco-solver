@@ -167,7 +167,7 @@ public interface IReificationFactory {
 	default void reifyXeqC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X = C)<=>B", new PropXeqCReif(X, C, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqCReif(X, C, B)));
 	}
 
 	/**
@@ -185,7 +185,7 @@ public interface IReificationFactory {
 		}else {
 			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint("(X = Y)<=>B", new PropXeqYReif(X, Y, B)));
+			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYReif(X, Y, B)));
 		}
 	}
 
@@ -199,7 +199,7 @@ public interface IReificationFactory {
 	default void reifyXneC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X != C)<=>B", new PropXneCReif(X, C, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXneCReif(X, C, B)));
 	}
 
 	/**
@@ -217,7 +217,7 @@ public interface IReificationFactory {
 		}else {
 			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint("(X != Y)<=>B", new PropXneYReif(X, Y, B)));
+			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXneYReif(X, Y, B)));
 		}
 	}
 
@@ -231,7 +231,7 @@ public interface IReificationFactory {
 	default void reifyXltC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X < C)<=>B", new PropXltCReif(X, C, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
 	}
 
 	/**
@@ -249,7 +249,7 @@ public interface IReificationFactory {
 		}else {
 			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint("(X < Y)<=>B", new PropXltYReif(X, Y, B)));
+			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYReif(X, Y, B)));
 		}
 	}
 
@@ -263,7 +263,7 @@ public interface IReificationFactory {
 	default void reifyXleY(IntVar X, IntVar Y, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X <= Y)<=>B", new PropXltYCReif(X, Y, 1, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, 1, B)));
 	}
 
 	/**
@@ -277,7 +277,7 @@ public interface IReificationFactory {
 	default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X < Y + C)<=>B", new PropXltYCReif(X, Y, C, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
 	}
 
 	/**
@@ -290,7 +290,7 @@ public interface IReificationFactory {
 	default void reifyXgtC(IntVar X, int C, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X > C)<=>B", new PropXgtCReif(X, C, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
 	}
 
 	/**
@@ -303,7 +303,7 @@ public interface IReificationFactory {
 	default void reifyXinS(IntVar X, IntIterableRangeSet S, BoolVar B){
 		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint("(X ∈ S)<=>B", new PropXinSReif(X, S, B)));
+		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B)));
 	}
 
 

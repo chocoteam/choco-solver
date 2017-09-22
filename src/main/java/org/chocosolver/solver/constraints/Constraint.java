@@ -9,13 +9,16 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.reification.PropOpposite;
+import org.chocosolver.solver.constraints.reification.Opposite;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 /**
  * A Constraint is basically a set of <code>Propagator</code>.
@@ -182,10 +185,7 @@ public class Constraint {
      */
     public final void reifyWith(BoolVar bool) {
         Model s = propagators[0].getModel();
-        if (opposite == null) {
-            opposite = makeOpposite();
-            opposite.opposite = this;
-        }
+        getOpposite();
         if (boolReif == null) {
             boolReif = bool;
             assert opposite.boolReif == null;
@@ -194,7 +194,7 @@ public class Constraint {
                 this.post();
             }else if(boolReif.isInstantiatedTo(0)){
                 this.opposite.post();
-            }else{
+            }else {
                 new ReificationConstraint(boolReif, this, opposite).post();
             }
         } else if (bool != boolReif) {
@@ -299,10 +299,14 @@ public class Constraint {
      */
     public Constraint getOpposite() {
         if (opposite == null) {
-            opposite = makeOpposite();
-            opposite.opposite = this;
+            setOpposite(makeOpposite());
         }
         return opposite;
+    }
+
+    protected void setOpposite(Constraint opp){
+        opposite = opp;
+        opposite.opposite = this;
     }
 
     /**
@@ -311,17 +315,7 @@ public class Constraint {
      * but it can be overridden to provide better constraint negations
      */
     protected Constraint makeOpposite() {
-        Variable[] vars;
-        if (propagators.length == 1) {
-            vars = propagators[0].vars;
-        } else {
-            Set<Variable> allvars = new HashSet<>();
-            for (Propagator p : propagators) {
-                Collections.addAll(allvars, p.vars);
-            }
-            vars = allvars.toArray(new Variable[allvars.size()]);
-        }
-        return new Constraint("DefaultOppositeOf" + name, new PropOpposite(this, vars));
+        return new Opposite(this);
     }
 
     /**

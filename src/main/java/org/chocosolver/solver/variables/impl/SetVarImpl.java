@@ -12,6 +12,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.set.PropCardinality;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -164,7 +165,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 			if(ubc==lbc) cardinality = model.intVar(ubc);
 			else{
 				cardinality = model.intVar(name+".card", lbc, ubc);
-				new Constraint("SetCard", new PropCardinality(this, cardinality)).post();
+				new Constraint(ConstraintsName.SETCARD, new PropCardinality(this, cardinality)).post();
 			}
 		}
 		return cardinality;
@@ -179,7 +180,7 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
 	public void setCard(IntVar card) {
 		if(!hasCard()){
 			cardinality=card;
-			new Constraint("SetCard", new PropCardinality(this, card)).post();
+			new Constraint(ConstraintsName.SETCARD, new PropCardinality(this, card)).post();
 		} else {
 			model.arithm(cardinality, "=", card).post();
 		}

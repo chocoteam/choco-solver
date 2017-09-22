@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
 import org.chocosolver.solver.variables.IntVar;
@@ -26,7 +27,7 @@ public class AllDifferent extends Constraint {
     public static final String DEFAULT= "DEFAULT";
 
     public AllDifferent(IntVar[] vars, String type) {
-        super("AllDifferent", createPropagators(vars, type));
+        super(ConstraintsName.ALLDIFFERENT, createPropagators(vars, type));
     }
 
     private static Propagator[] createPropagators(IntVar[] VARS, String consistency) {

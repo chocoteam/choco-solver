@@ -9,6 +9,8 @@
 package org.chocosolver.solver.constraints.unary;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -23,20 +25,23 @@ public class Member extends Constraint {
 	private final int[] values;
 	private final int lb, ub;
 
-    public Member(IntVar var, int[] values) {
-        super("Member",new PropMemberEnum(var, values));
+
+	// for JSON
+	@SuppressWarnings("WeakerAccess")
+	protected Member(IntVar var, int lb, int ub, int[] values, Propagator prop){
+		super(ConstraintsName.MEMBER, prop);
 		this.var = var;
-        this.values = values;
-        lb = 0;
-        ub = 0;
+		this.values = values;
+		this.lb = lb;
+		this.ub = ub;
+	}
+
+    public Member(IntVar var, int[] values) {
+        this(var,0,0,values, new PropMemberEnum(var, values));
     }
 
     public Member(IntVar var, int lowerbound, int upperbound) {
-        super("Member",new PropMemberBound(var, lowerbound, upperbound));
-        this.values = null;
-		this.var = var;
-        this.lb = lowerbound;
-        this.ub = upperbound;
+		this(var,lowerbound,upperbound,null, new PropMemberBound(var, lowerbound, upperbound));
     }
 
 	@Override

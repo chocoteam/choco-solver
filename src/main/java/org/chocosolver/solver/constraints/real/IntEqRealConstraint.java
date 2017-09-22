@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.real;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -43,7 +44,7 @@ public class IntEqRealConstraint extends Constraint {
      * @param epsilon  precision parameter
      */
     public IntEqRealConstraint(IntVar[] intVars, RealVar[] realVars, double epsilon) {
-        super("IntEqReal", new PropIntEqReal(intVars, realVars, epsilon));
+        super(ConstraintsName.INTEQREAL, new PropIntEqReal(intVars, realVars, epsilon));
     }
 
     /**

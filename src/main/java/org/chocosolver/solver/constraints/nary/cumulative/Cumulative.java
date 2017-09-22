@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.nary.cumulative;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -45,7 +46,7 @@ public class Cumulative extends Constraint {
 	 *
 	 */
 	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, Filter... filters) {
-		super("Cumulative",createPropagators(tasks, heights, capacity, graphBased, filters));
+		super(ConstraintsName.CUMULATIVE,createPropagators(tasks, heights, capacity, graphBased, filters));
 	}
 
 	//***********************************************************************************

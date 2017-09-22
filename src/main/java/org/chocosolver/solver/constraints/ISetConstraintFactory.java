@@ -37,7 +37,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>union</i> = {x | x in <i>ints</i>}
 	 */
 	default Constraint union(IntVar[] ints, SetVar union) {
-		return new Constraint("SetIntValuesUnion"
+		return new Constraint(ConstraintsName.SETINTVALUESUNION
 				, new PropSetIntValuesUnion(ints, union)
 				, new PropSetIntValuesUnion(ints, union)
 		);
@@ -51,7 +51,7 @@ public interface ISetConstraintFactory {
 	 * @return A constraint ensuring that the union of <i>sets</i> is equal to <i>unionSet</i>
 	 */
 	default Constraint union(SetVar[] sets, SetVar unionSet) {
-		return new Constraint("SetUnion", new PropUnion(sets, unionSet), new PropUnion(sets, unionSet));
+		return new Constraint(ConstraintsName.SETUNION, new PropUnion(sets, unionSet), new PropUnion(sets, unionSet));
 	}
 
 	/**
@@ -78,13 +78,13 @@ public interface ISetConstraintFactory {
 			throw new IllegalArgumentException("The intersection of zero sets is undefined.");
 		}
 		if (boundConsistent) {
-			return new Constraint("SetIntersection",
+			return new Constraint(ConstraintsName.SETINTERSECTION,
 				new PropIntersection(sets, intersectionSet),
 				sets.length == 1
 					? new PropAllEqual(new SetVar[]{sets[0], intersectionSet})
 					: new PropIntersectionFilterSets(sets, intersectionSet));
 		} else {
-			return new Constraint("SetIntersection", new PropIntersection(sets, intersectionSet));
+			return new Constraint(ConstraintsName.SETINTERSECTION, new PropIntersection(sets, intersectionSet));
 		}
 	}
 
@@ -99,7 +99,7 @@ public interface ISetConstraintFactory {
 		for (int i = 0; i < sets.length - 1; i++) {
 			props[i] = new PropSubsetEq(sets[i], sets[i + 1]);
 		}
-		return new Constraint("SetSubsetEq", props);
+		return new Constraint(ConstraintsName.SETSUBSETEQ, props);
 	}
 
 	/**
@@ -123,7 +123,7 @@ public interface ISetConstraintFactory {
 	 * @return A constraint ensuring that |{s in <i>sets</i> where |s|=0}| = <i>nbEmpty</i>
 	 */
 	default Constraint nbEmpty(SetVar[] sets, IntVar nbEmpty) {
-		return new Constraint("SetNbEmpty", new PropNbEmpty(sets, nbEmpty));
+		return new Constraint(ConstraintsName.SETNBEMPTY, new PropNbEmpty(sets, nbEmpty));
 	}
 
 	/**
@@ -136,7 +136,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that x in <i>set1</i> <=> x+<i>offset</i> in <i>set2</i>
 	 */
 	default Constraint offSet(SetVar set1, SetVar set2, int offset) {
-		return new Constraint("SetOffset", new PropOffSet(set1, set2, offset));
+		return new Constraint(ConstraintsName.SETOFFSET, new PropOffSet(set1, set2, offset));
 	}
 
 	/**
@@ -146,7 +146,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>set</i> is not empty
 	 */
 	default Constraint notEmpty(SetVar set) {
-		return new Constraint("SetNotEmpty", new PropNotEmpty(set));
+		return new Constraint(ConstraintsName.SETNOTEMPTY, new PropNotEmpty(set));
 	}
 
 	//***********************************************************************************
@@ -195,7 +195,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that sum{<i>weights</i>[i-<i>offset</i>] | i in <i>indices</i>} = <i>sum</i>
 	 */
 	default Constraint sumElements(SetVar indices, int[] weights, int offset, IntVar sum) {
-		return new Constraint("SetSum", new PropSumOfElements(indices, weights, offset, sum));
+		return new Constraint(ConstraintsName.SETSUM, new PropSumOfElements(indices, weights, offset, sum));
 	}
 
 	//***********************************************************************************
@@ -232,9 +232,9 @@ public interface ISetConstraintFactory {
 	 */
 	default Constraint max(SetVar indices, int[] weights, int offset, IntVar maxElementValue, boolean notEmpty) {
 		if (notEmpty) {
-			return new Constraint("SetMax_NotEmpty", new PropNotEmpty(indices), new PropMaxElement(indices, weights, offset, maxElementValue, true));
+			return new Constraint(ConstraintsName.SETMAX, new PropNotEmpty(indices), new PropMaxElement(indices, weights, offset, maxElementValue, true));
 		} else {
-			return new Constraint("SetMax", new PropMaxElement(indices, weights, offset, maxElementValue, false));
+			return new Constraint(ConstraintsName.SETMAX, new PropMaxElement(indices, weights, offset, maxElementValue, false));
 		}
 	}
 
@@ -268,9 +268,9 @@ public interface ISetConstraintFactory {
 	 */
 	default Constraint min(SetVar indices, int[] weights, int offset, IntVar minElementValue, boolean notEmpty) {
 		if (notEmpty) {
-			return new Constraint("SetMin_NotEmpty", new PropNotEmpty(indices), new PropMinElement(indices, weights, offset, minElementValue, true));
+			return new Constraint(ConstraintsName.SETMIN, new PropNotEmpty(indices), new PropMinElement(indices, weights, offset, minElementValue, true));
 		} else {
-			return new Constraint("SetMin", new PropMinElement(indices, weights, offset, minElementValue, false));
+			return new Constraint(ConstraintsName.SETMIN, new PropMinElement(indices, weights, offset, minElementValue, false));
 		}
 	}
 
@@ -302,7 +302,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that i in <i>set</i> <=> <i>bools</i>[i-<i>offset</i>] = TRUE
 	 */
 	default Constraint setBoolsChanneling(BoolVar[] bools, SetVar set, int offset) {
-		return new Constraint("SetBoolChanneling", new PropBoolChannel(set, bools, offset));
+		return new Constraint(ConstraintsName.SETBOOLCHANNELING, new PropBoolChannel(set, bools, offset));
 	}
 
 	/**
@@ -332,7 +332,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that x in <i>sets</i>[y-<i>offset1</i>] <=> <i>ints</i>[x-<i>offset2</i>] = y
 	 */
 	default Constraint setsIntsChanneling(SetVar[] sets, IntVar[] ints, int offset1, int offset2) {
-		return new Constraint("SetIntChanneling",
+		return new Constraint(ConstraintsName.SETINTCHANNELING,
 				new PropIntChannel(sets, ints, offset1, offset2),
 				new PropIntChannel(sets, ints, offset1, offset2), new PropAllDisjoint(sets)
 		);
@@ -362,7 +362,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>sets</i> are all disjoint (empty intersection)
 	 */
 	default Constraint allDisjoint(SetVar... sets) {
-		return new Constraint("SetAllDisjoint", new PropAllDisjoint(sets));
+		return new Constraint(ConstraintsName.SETALLDISJOINT, new PropAllDisjoint(sets));
 	}
 
 	/**
@@ -373,7 +373,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>sets</i> are all different
 	 */
 	default Constraint allDifferent(SetVar... sets) {
-		return new Constraint("SetAllDifferent", new PropAllDiff(sets),
+		return new Constraint(ConstraintsName.SETALLDIFFERENT, new PropAllDiff(sets),
 				new PropAllDiff(sets), new PropAtMost1Empty(sets)
 		);
 	}
@@ -385,7 +385,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that all sets in <i>sets</i> are equal
 	 */
 	default Constraint allEqual(SetVar... sets) {
-		return new Constraint("SetAllEqual", new PropAllEqual(sets));
+		return new Constraint(ConstraintsName.SETALLEQUAL, new PropAllEqual(sets));
 	}
 
 	/**
@@ -398,7 +398,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint which ensures that <i>sets</i> forms a partition of <i>universe</i>
 	 */
 	default Constraint partition(SetVar[] sets, SetVar universe) {
-		return new Constraint("SetPartition", ArrayUtils.append(
+		return new Constraint(ConstraintsName.SETPARTITION, ArrayUtils.append(
 				allDisjoint(sets).getPropagators(),
 				new Propagator[]{new PropUnion(sets, universe), new PropUnion(sets, universe)}
 		));
@@ -419,7 +419,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that x in <i>sets</i>[y-<i>offset1</i>] <=> y in <i>invSets</i>[x-<i>offset2</i>]
 	 */
 	default Constraint inverseSet(SetVar[] sets, SetVar[] invSets, int offset1, int offset2) {
-		return new Constraint("SetInverse", new PropInverse(sets, invSets, offset1, offset2));
+		return new Constraint(ConstraintsName.SETINVERSE, new PropInverse(sets, invSets, offset1, offset2));
 	}
 
 	/**
@@ -444,7 +444,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that x in <i>sets</i>[y-<i>offset</i>] <=> y in <i>sets</i>[x-<i>offset</i>]
 	 */
 	default Constraint symmetric(SetVar[] sets, int offset) {
-		return new Constraint("SetSymmetric", new PropSymmetric(sets, offset));
+		return new Constraint(ConstraintsName.SETSYMMETRIC, new PropSymmetric(sets, offset));
 	}
 
 	/**
@@ -473,7 +473,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>sets</i>[<i>index</i>-<i>offset</i>] = <i>set</i>
 	 */
 	default Constraint element(IntVar index, SetVar[] sets, int offset, SetVar set) {
-		return new Constraint("SetElement", new PropElement(index, sets, offset, set), new PropElement(index, sets, offset, set));
+		return new Constraint(ConstraintsName.SETELEMENT, new PropElement(index, sets, offset, set), new PropElement(index, sets, offset, set));
 	}
 
 	/**
@@ -499,7 +499,7 @@ public interface ISetConstraintFactory {
 		if(intVar.isInstantiated()){
 			return member(intVar.getValue(),set);
 		}else {
-			return new Constraint("SetMember",
+			return new Constraint(ConstraintsName.SETMEMBER,
 					intVar.hasEnumeratedDomain() ?
 							new PropIntEnumMemberSet(set, intVar) :
 							new PropIntBoundedMemberSet(set, intVar)) {
@@ -519,7 +519,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>cst</i> is in <i>set</i>
 	 */
 	default Constraint member(final int cst, final SetVar set) {
-		return new Constraint("SetMember",new PropIntCstMemberSet(set, cst)) {
+		return new Constraint(ConstraintsName.SETMEMBER,new PropIntCstMemberSet(set, cst)) {
 			@Override
 			public Constraint makeOpposite() {
 				return notMember(cst, set);
@@ -544,7 +544,7 @@ public interface ISetConstraintFactory {
 				integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
 				s.arithm(integer, "=", intVar).post();
 			}
-			return new Constraint("SetNotMember",
+			return new Constraint(ConstraintsName.SETNOTMEMBER,
 					new PropNotMemberIntSet(integer, set),
 					new PropNotMemberSetInt(integer, set)) {
 				@Override
@@ -563,7 +563,7 @@ public interface ISetConstraintFactory {
 	 * @return a constraint ensuring that <i>cst</i> is not in <i>set</i>
 	 */
 	default Constraint notMember(final int cst, final SetVar set) {
-		return new Constraint("SetNotMember",new PropIntCstNotMemberSet(set, cst)) {
+		return new Constraint(ConstraintsName.SETNOTMEMBER,new PropIntCstNotMemberSet(set, cst)) {
 			@Override
 			public Constraint makeOpposite() {
 				return member(cst, set);

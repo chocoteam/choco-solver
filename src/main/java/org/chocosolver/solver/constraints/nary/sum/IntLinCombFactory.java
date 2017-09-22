@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.sum;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
@@ -216,19 +217,19 @@ public class IntLinCombFactory {
                     // deal with X + Y = Z
                     if ((COEFFS[0] == 1 && COEFFS[1] == 1 && COEFFS[2] == -1)
                             || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
-                        return new Constraint("X + Y = Z",
+                        return new Constraint(ConstraintsName.SUM,
                                 new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
                     }
                     // deal with X + Z  = Y
                     if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
                             || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
-                        return new Constraint("X + Y = Z",
+                        return new Constraint(ConstraintsName.SUM,
                                 new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
                     }
                     // deal with Y + Z  = X
                     if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
                             || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
-                        return new Constraint("X + Y = Z",
+                        return new Constraint(ConstraintsName.SUM,
                                 new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
                     }
                 }

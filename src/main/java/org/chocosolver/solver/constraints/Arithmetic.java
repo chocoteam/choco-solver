@@ -34,19 +34,26 @@ import org.chocosolver.solver.variables.IntVar;
 public class Arithmetic extends Constraint {
 
 	private final Operator op1, op2; // operators.
-	private final int cste;
+    // required visibility to allow exportation
+	protected final int cste;
 	private final IntVar[] vars;
 
 	private static boolean isOperation(Operator operator) {
 		return operator.equals(Operator.PL) || operator.equals(Operator.MN);
 	}
 
-	public Arithmetic(IntVar var, Operator op, int cste) {
-		super("X "+op+" c",createProp(var,op,cste));
-		this.vars = new IntVar[]{var};
-		this.op1 = op;
-		this.op2 = Operator.NONE;
+	// for JSON
+	@SuppressWarnings("WeakerAccess")
+	protected Arithmetic(String name, IntVar[] vars, Operator op1, Operator op2, int cste, Propagator prop){
+		super(name, prop);
+		this.vars = vars;
+		this.op1 = op1;
+		this.op2 = op2;
 		this.cste = cste;
+	}
+
+	Arithmetic(IntVar var, Operator op, int cste) {
+		this(ConstraintsName.ARITHM, new IntVar[]{var}, op, Operator.NONE, cste, createProp(var,op,cste));
 	}
 
 	private static Propagator createProp(IntVar var, Operator op, int cste) {
@@ -68,12 +75,8 @@ public class Arithmetic extends Constraint {
 		}
 	}
 
-	public Arithmetic(IntVar var1, Operator op, IntVar var2) {
-		super("X "+op+" Y",createProp(var1,op,var2));
-		this.vars = new IntVar[]{var1,var2};
-		this.op1 = op;
-		this.op2 = Operator.PL;
-		this.cste = 0;
+	Arithmetic(IntVar var1, Operator op, IntVar var2) {
+		this(ConstraintsName.ARITHM, new IntVar[]{var1,var2}, op, Operator.PL, 0, createProp(var1,op,var2));
 	}
 
 	private static Propagator createProp(IntVar var1, Operator op, IntVar var2) {
@@ -95,15 +98,11 @@ public class Arithmetic extends Constraint {
 		}
 	}
 
-	public Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
-		super("X "+op1+" Y "+op2+" c",createProp(var1,op1,var2,op2,cste));
-		this.vars = new IntVar[]{var1,var2};
-		this.op1 = op1;
-		this.op2 = op2;
-		if (isOperation(op1) == isOperation(op2)) {
-			throw new SolverException("Incorrect formula; operators must be different!");
-		}
-		this.cste = cste;
+	Arithmetic(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
+		this(ConstraintsName.ARITHM, new IntVar[]{var1,var2}, op1, op2, cste, createProp(var1,op1,var2,op2,cste));
+        if (isOperation(op1) == isOperation(op2)) {
+            throw new SolverException("Incorrect formula; operators must be different!");
+        }
 	}
 
 	private static Propagator createProp(IntVar var1, Operator op1, IntVar var2, Operator op2, int cste) {
@@ -147,11 +146,13 @@ public class Arithmetic extends Constraint {
 					if(cste == 0)return new PropGreaterOrEqualX_Y(vars);
 					return new PropGreaterOrEqualX_YC(vars, cste);
 				case GT: // X-Y > C --> X >= Y+C+1
+                    if(cste  == -1)return new PropGreaterOrEqualX_Y(vars);
 					return new PropGreaterOrEqualX_YC(vars, cste + 1);
 				case LE:// X-Y <= C --> Y >= X-C
 					if(cste == 0)return new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1});
 					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste);
 				case LT:// X-Y < C --> Y >= X-C+1
+                    if(cste == 1) return new PropGreaterOrEqualX_Y(new IntVar[]{var2, var1});
 					return new PropGreaterOrEqualX_YC(new IntVar[]{var2, var1}, -cste + 1);
 				default:
 					throw new SolverException("Incorrect formula; operator should be one of those:{=, !=, >=, >, <=, <}");

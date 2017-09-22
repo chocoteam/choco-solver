@@ -12,6 +12,7 @@ import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
 import org.chocosolver.solver.constraints.nary.automata.structure.costregular.Arc;
@@ -37,7 +38,7 @@ import static org.chocosolver.util.tools.ArrayUtils.concat;
 public class CostRegular extends Constraint {
 
     public CostRegular(IntVar[] ivars, IntVar cost, ICostAutomaton cautomaton) {
-		super("CostRegular",new PropCostRegular(
+		super(ConstraintsName.COSTREGULAR,new PropCostRegular(
 				ArrayUtils.concat(ivars, cost),
 				cautomaton,
 				initGraph(concat(ivars, cost), cautomaton)

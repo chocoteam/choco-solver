@@ -12,6 +12,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
@@ -265,7 +266,7 @@ public class Model implements IModel {
      * @return a "true" constraint
      */
     public Constraint trueConstraint() {
-        return new Constraint("TRUE cstr", new PropTrue(boolVar(true)));
+        return new Constraint(ConstraintsName.TRUE, new PropTrue(boolVar(true)));
     }
 
     /**
@@ -274,7 +275,7 @@ public class Model implements IModel {
      * @return a "false" constraint
      */
     public Constraint falseConstraint() {
-        return new Constraint("FALSE cstr", new PropFalse(boolVar(false)));
+        return new Constraint(ConstraintsName.FALSE, new PropFalse(boolVar(false)));
     }
 
     /**
@@ -879,7 +880,11 @@ public class Model implements IModel {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
         st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
-        st.append(String.format("Feasability: %s\n", getSolver().isFeasible()));
+        st.append(policy.name().toLowerCase()).append(" ");
+        if (objective != null) {
+            st.append(objective.getName()).append(" ");
+        }
+        st.append(" : ").append(getSolver().isFeasible().name().toLowerCase()).append("\n");
         st.append("== variables ==\n");
         for (int v = 0; v < vIdx; v++) {
             st.append(vars[v].toString()).append('\n');

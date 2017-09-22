@@ -35,11 +35,14 @@ public class ReificationConstraint extends Constraint {
     //***********************************************************************************
 
     // boolean variable of the reification
-    private final BoolVar bool;
+    // required visibility to allow exportation
+    protected final BoolVar bool;
     // constraint to apply if bool = true
-    private final Constraint trueCons;
+    @SuppressWarnings("WeakerAccess") // required visibility to allow exportation
+    protected final Constraint trueCons;
     // constraint to apply if bool = false
-    private final Constraint falseCons;
+    @SuppressWarnings("WeakerAccess") // required visibility to allow exportation
+    protected final Constraint falseCons;
     // indices of propagators
     private int[] indices;
     // reification propagator;
@@ -50,7 +53,7 @@ public class ReificationConstraint extends Constraint {
     //***********************************************************************************
 
     protected ReificationConstraint(BoolVar bVar, Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
-        super("ReificationConstraint", createProps(bVar, consIfBoolTrue, consIfBoolFalse));
+        super(ConstraintsName.REIFICATIONCONSTRAINT, createProps(bVar, consIfBoolTrue, consIfBoolFalse));
         this.propReif = (PropReif) propagators[0];
         propReif.setReifCons(this);
         trueCons = consIfBoolTrue;
@@ -77,7 +80,7 @@ public class ReificationConstraint extends Constraint {
         );
     }
 
-    private static void prepareConstraint(BoolVar bVar, Constraint c, Set<Variable> setOfVars){
+    private static void prepareConstraint(BoolVar bVar, Constraint c, Set<Variable> setOfVars) {
         for (Propagator p : c.getPropagators()) {
             for (Variable v : p.getVars()) {
                 if (v != bVar) {

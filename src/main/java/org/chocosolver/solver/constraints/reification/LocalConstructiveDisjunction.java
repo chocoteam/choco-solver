@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -31,7 +32,7 @@ public class LocalConstructiveDisjunction extends Constraint {
      * @param constraints set of constraints in disjunction
      */
     public LocalConstructiveDisjunction(Constraint... constraints) {
-        super("LocalConstructiveDisjunction", createProps(constraints));
+        super(ConstraintsName.LOCALCONSTRUCTIVEDISJUNCTION, createProps(constraints));
     }
 
     private static Propagator[] createProps(Constraint... constraints) {

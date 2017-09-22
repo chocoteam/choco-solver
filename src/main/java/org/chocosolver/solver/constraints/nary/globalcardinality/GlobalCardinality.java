@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.globalcardinality;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -27,7 +28,7 @@ import java.util.List;
 public class GlobalCardinality extends Constraint {
 
     public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
-        super("GCC", createProp(vars, values, cards));
+        super(ConstraintsName.GCC, createProp(vars, values, cards));
     }
 
 	private static Propagator createProp(IntVar[] vars, int[] values, IntVar[] cards) {

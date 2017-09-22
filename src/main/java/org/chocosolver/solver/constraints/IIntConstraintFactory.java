@@ -203,7 +203,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint absolute(IntVar var1, IntVar var2) {
 		assert var1.getModel() == var2.getModel();
-		return new Constraint("Absolute", new PropAbsolute(var1, var2));
+		return new Constraint(ConstraintsName.ABSOLUTE, new PropAbsolute(var1, var2));
 	}
 
 	/**
@@ -320,7 +320,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
 			}
 		}
-		return new Constraint("DistanceXYC " + operator.name(), new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
+		return new Constraint(ConstraintsName.DISTANCE, new PropDistanceXYC(ArrayUtils.toArray(var1, var2), operator, cste));
 	}
 
 	/**
@@ -351,7 +351,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint square(IntVar var1, IntVar var2) {
 		assert var1.getModel() == var2.getModel();
-		return new Constraint("Square", new PropSquare(var1, var2));
+		return new Constraint(ConstraintsName.SQUARE, new PropSquare(var1, var2));
 	}
 
 	/**
@@ -403,7 +403,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 					throw new SolverException("Table algorithm " + algo + " is unkown");
 			}
 		}
-		return new Constraint("TableBin(" + algo + ")", p);
+		return new Constraint(ConstraintsName.TABLE, p);
 	}
 
 	/**
@@ -421,7 +421,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		} else if (Y < 0) {
 			return times(X.getModel().intMinusView(X), -Y, Z);
 		} else {
-			return new Constraint("Times", new PropScale(X, Y, Z));
+			return new Constraint(ConstraintsName.TIMES, new PropScale(X, Y, Z));
 		}
 	}
 
@@ -527,7 +527,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		if (oper != Operator.EQ && oper != Operator.GT && oper != Operator.LT) {
 			throw new SolverException("Unexpected operator for distance");
 		}
-		return new Constraint("DistanceXYZ " + op, new PropDistanceXYZ(ArrayUtils.toArray(var1,var2,var3), oper));
+		return new Constraint(ConstraintsName.DISTANCE, new PropDistanceXYZ(ArrayUtils.toArray(var1,var2,var3), oper));
 	}
 
 	/**
@@ -540,7 +540,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param result   result
 	 */
 	default Constraint div(IntVar dividend, IntVar divisor, IntVar result) {
-		return new Constraint("DivisionEucl", new PropDivXYZ(dividend, divisor, result));
+		return new Constraint(ConstraintsName.DIVISION, new PropDivXYZ(dividend, divisor, result));
 	}
 
 	/**
@@ -552,7 +552,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param var2 a variable
 	 */
 	default Constraint max(IntVar max, IntVar var1, IntVar var2) {
-		return new Constraint("Max", new PropMaxBC(max, var1, var2));
+		return new Constraint(ConstraintsName.MAX, new PropMaxBC(max, var1, var2));
 	}
 
 	/**
@@ -564,7 +564,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param var2 a variable
 	 */
 	default Constraint min(IntVar min, IntVar var1, IntVar var2) {
-		return new Constraint("Min", new PropMinBC(min, var1, var2));
+		return new Constraint(ConstraintsName.MIN, new PropMinBC(min, var1, var2));
 	}
 
 	/**
@@ -609,7 +609,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		} else if (TuplesFactory.canBeTupled(X, Y, Z)) {
 			return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
 		} else {
-			return new Constraint("Times",new PropTimesNaive(X, Y, Z));
+			return new Constraint(ConstraintsName.TIMES,new PropTimesNaive(X, Y, Z));
 		}
 	}
 
@@ -667,12 +667,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean singleCondition) {
 		if (singleCondition) {
-			return new Constraint("AllDifferent" + condition,
+			return new Constraint(ConstraintsName.ALLDIFFERENT,
 					new PropCondAllDiffInst(vars, condition, singleCondition),
 					new PropCondAllDiff_AC(vars, condition)
 			);
 		}
-		return new Constraint("AllDifferent" + condition, new PropCondAllDiffInst(vars, condition, singleCondition));
+		return new Constraint(ConstraintsName.ALLDIFFERENT, new PropCondAllDiffInst(vars, condition, singleCondition));
 	}
 
 	/**
@@ -722,7 +722,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint among(IntVar nbVar, IntVar[] vars, int[] values) {
 		int[] vls = new TIntHashSet(values).toArray(); // remove double occurrences
 		Arrays.sort(vls);                              // sort
-		return new Constraint("Among", new PropAmongGAC(ArrayUtils.concat(vars, nbVar), vls));
+		return new Constraint(ConstraintsName.AMONG, new PropAmongGAC(ArrayUtils.concat(vars, nbVar), vls));
 	}
 
 	/**
@@ -766,10 +766,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
 		int[] vals = getDomainUnion(vars);
 		if (AC) {
-			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues),
+			return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, vals, nValues),
 					new PropAtLeastNValues_AC(vars, vals, nValues));
 		} else {
-			return new Constraint("AtLeastNValues", new PropAtLeastNValues(vars, vals, nValues));
+			return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, vals, nValues));
 		}
 	}
 
@@ -793,10 +793,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		if (STRONG) {
 			Gci gci = new Gci(vars);
 			R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
-			return new Constraint("AtMostNValues", new PropAtMostNValues(vars, vals, nValues),
+			return new Constraint(ConstraintsName.ATMOSTNVALUES, new PropAtMostNValues(vars, vals, nValues),
 					new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));
 		} else {
-			return new Constraint("AtMostNValues", new PropAtMostNValues(vars, vals, nValues));
+			return new Constraint(ConstraintsName.ATMOSTNVALUES, new PropAtMostNValues(vars, vals, nValues));
 		}
 	}
 
@@ -823,7 +823,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		for (int is : itemSize) {
 			sum += is;
 		}
-		return Constraint.merge("BinPacking", new Constraint("BinPacking",
+		return Constraint.merge(ConstraintsName.BINPACKING, new Constraint(ConstraintsName.BINPACKING,
 				new PropItemToLoad(itemBin,itemSize,binLoad, offset),
 				new PropLoadToItem(itemBin,itemSize,binLoad, offset)),
 				model.sum(binLoad, "=", sum)
@@ -842,10 +842,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint boolsIntChanneling(BoolVar[] bVars, IntVar var, int offset) {
 		if (var.hasEnumeratedDomain()) {
-			return new Constraint("DomainChanneling", new PropEnumDomainChanneling(bVars, var, offset));
+			return new Constraint(ConstraintsName.DOMAINCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
 		} else {
 			IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
-			return new Constraint("BoolChanneling",
+			return new Constraint(ConstraintsName.BOOLCHANNELING,
 					new PropEnumDomainChanneling(bVars, enumV, offset),
 					new PropEqualX_Y(var, enumV)
 			);
@@ -865,7 +865,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param var  the numeric value
 	 */
 	default Constraint bitsIntChanneling(BoolVar[] bits, IntVar var) {
-		return new Constraint("bitsIntChanneling", new PropBitChanneling(var, bits));
+		return new Constraint(ConstraintsName.BITSINTCHANNELING, new PropBitChanneling(var, bits));
 	}
 
 	/**
@@ -881,7 +881,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param lVars array of LQ boolean variables
 	 */
 	default Constraint clausesIntChanneling(IntVar var, BoolVar[] eVars, BoolVar[] lVars) {
-		return new Constraint("clausesIntChanneling", new PropClauseChanneling(var, eVars, lVars));
+		return new Constraint(ConstraintsName.CLAUSESINTCHANNELING, new PropClauseChanneling(var, eVars, lVars));
 	}
 
 	/**
@@ -952,7 +952,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 					new PropCircuitSCC(vars, offset, conf)
 			};
 		}
-		return new Constraint("Circuit", ArrayUtils.append(allDifferent(vars, "AC").propagators, props));
+		return new Constraint(ConstraintsName.CIRCUIT, ArrayUtils.append(allDifferent(vars, "AC").propagators, props));
 	}
 
 	/**
@@ -982,7 +982,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param limit a variable
 	 */
 	default Constraint count(int value, IntVar[] vars, IntVar limit) {
-		return new Constraint("Count", new PropCount_AC(vars, value, limit));
+		return new Constraint(ConstraintsName.COUNT, new PropCount_AC(vars, value, limit));
 	}
 
 	/**
@@ -999,11 +999,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		if (value.isInstantiated()) {
 			return count(value.getValue(), vars, limit);
 		} else if (value.hasEnumeratedDomain()) {
-			return new Constraint("Count", new PropCountVar(vars, value, limit));
+			return new Constraint(ConstraintsName.COUNT, new PropCountVar(vars, value, limit));
 		} else {
 			Model model = value.getModel();
 			IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
-			return new Constraint("Count",
+			return new Constraint(ConstraintsName.COUNT,
 					new PropEqualX_Y(Evalue, value),
 					new PropCountVar(vars, Evalue, limit));
 		}
@@ -1102,7 +1102,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint diffN(IntVar[] X, IntVar[] Y, IntVar[] width, IntVar[] height, boolean addCumulativeReasoning) {
 		Model model = X[0].getModel();
 		Constraint diffNCons = new Constraint(
-				"DiffN",
+				ConstraintsName.DIFFN,
 				new PropDiffN(X, Y, width, height, false),
 				new PropDiffN(X, Y, width, height, false)
 		);
@@ -1131,7 +1131,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			IntVar maxY = model.intVar(model.generateName("diffN_"), miny, maxy, true);
 			IntVar minY = model.intVar(model.generateName("diffN_"), miny, maxy, true);
 			IntVar diffY = model.intVar(model.generateName("diffN_"), 0, maxy - miny, true);
-			return Constraint.merge("DiffNWithCumulative",
+			return Constraint.merge(ConstraintsName.DIFFNWITHCUMULATIVE,
 					diffNCons,
 					min(minX, X), max(maxX, EX), scalar(new IntVar[]{maxX, minX}, new int[]{1, -1}, "=", diffX),
 					cumulative(TX, height, diffY),
@@ -1155,7 +1155,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	default Constraint element(IntVar value, IntVar[] table, IntVar index, int offset) {
 		// uses two propagator to perform a fix point
 		return new Constraint(
-				"Element",
+				ConstraintsName.ELEMENT,
 				new PropElementV_fast(value, table, index, offset, true));
 	}
 
@@ -1249,7 +1249,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		}
 		Propagator ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
 				: new PropInverseChannelBC(vars1, vars2, offset1, offset2);
-			return new Constraint("InverseChanneling", ArrayUtils.append(
+			return new Constraint(ConstraintsName.INVERSECHANNELING, ArrayUtils.append(
 					allDifferent(vars1, "").getPropagators(),
 					allDifferent(vars2, "").getPropagators(),
 					new Propagator[]{ip}
@@ -1266,7 +1266,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param T another value
 	 */
 	default Constraint intValuePrecedeChain(IntVar[] X, int S, int T) {
-		return new Constraint("int_value_precede", new PropIntValuePrecedeChain(X, S, T));
+		return new Constraint(ConstraintsName.INT_VALUE_PRECEDE, new PropIntValuePrecedeChain(X, S, T));
 	}
 
 	/**
@@ -1290,7 +1290,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				values.add(V[i]);
 				ps[i - 1] = new PropIntValuePrecedeChain(X, V[i - 1], V[i]);
 			}
-			return new Constraint("int_value_precede", ps);
+			return new Constraint(ConstraintsName.INT_VALUE_PRECEDE, ps);
 		} else {
 			return _me().trueConstraint();
 		}
@@ -1324,7 +1324,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint knapsack(IntVar[] occurrences, IntVar weightSum, IntVar energySum,
 								int[] weight, int[] energy) {
-		return new Constraint("Knapsack", ArrayUtils.append(
+		return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
 				scalar(occurrences, weight, "=",weightSum).propagators,
 				scalar(occurrences, energy, "=", energySum).propagators,
 				new Propagator[]{new PropKnapsack(occurrences, weightSum, energySum, weight, energy)}
@@ -1358,7 +1358,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				PERMvars[p] = vars[0][0].getModel().intVar("p_" + (p + 1), 1, n, true);
 			}
 		}
-		return new Constraint("keySort", new PropKeysorting(vars, SORTEDvars, PERMvars, K));
+		return new Constraint(ConstraintsName.KEYSORT, new PropKeysorting(vars, SORTEDvars, PERMvars, K));
 	}
 
 	/**
@@ -1369,7 +1369,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars collection of vectors of variables
 	 */
 	default Constraint lexChainLess(IntVar[]... vars) {
-		return new Constraint("LexChain(<) ", new PropLexChain(vars, true));
+		return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
 	}
 
 	/**
@@ -1380,7 +1380,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars collection of vectors of variables
 	 */
 	default Constraint lexChainLessEq(IntVar[]... vars) {
-		return new Constraint("LexChain(<=)", new PropLexChain(vars, false));
+		return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
 	}
 
 	/**
@@ -1391,7 +1391,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars2 vector of variables
 	 */
 	default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
-		return new Constraint("Lex(<)", new PropLex(vars1, vars2, true));
+		return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, true));
 	}
 
 	/**
@@ -1402,7 +1402,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars2 vector of variables
 	 */
 	default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
-		return new Constraint("Lex(<=)", new PropLex(vars1, vars2, false));
+		return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, false));
 	}
 
 	/**
@@ -1416,7 +1416,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if(vars.length == 2){
             return max(max, vars[0], vars[1]);
         }else {
-            return new Constraint("Max", new PropMax(vars, max));
+            return new Constraint(ConstraintsName.MAX, new PropMax(vars, max));
         }
 	}
 
@@ -1428,7 +1428,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint max(BoolVar max, BoolVar[] vars) {
-		return new Constraint("MaxOverBools", new PropBoolMax(vars, max));
+		return new Constraint(ConstraintsName.MAX, new PropBoolMax(vars, max));
 	}
 
 	/**
@@ -1439,7 +1439,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param MDD  the multi-valued decision diagram encoding solutions
 	 */
 	default Constraint mddc(IntVar[] vars, MultivaluedDecisionDiagram MDD) {
-		return new Constraint("mddc", new PropLargeMDDC(MDD, vars));
+		return new Constraint(ConstraintsName.MDDC, new PropLargeMDDC(MDD, vars));
 	}
 
 	/**
@@ -1453,7 +1453,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		if(vars.length == 2) {
             return min(min, vars[0], vars[1]);
         }else{
-            return new Constraint("Min", new PropMin(vars, min));
+            return new Constraint(ConstraintsName.MIN, new PropMin(vars, min));
         }
 	}
 
@@ -1465,7 +1465,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint min(BoolVar min, BoolVar[] vars) {
-		return new Constraint("MinOverBools", new PropBoolMin(vars, min));
+		return new Constraint(ConstraintsName.MIN, new PropBoolMin(vars, min));
 	}
 
 	/**
@@ -1481,7 +1481,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 *                   Can be built from method CostAutomaton.makeMultiResources(...)
 	 */
 	default Constraint multiCostRegular(IntVar[] vars, IntVar[] costVars, ICostAutomaton costAutomaton) {
-		return new Constraint("MultiCostRegular", new PropMultiCostRegular(vars, costVars, costAutomaton));
+		return new Constraint(ConstraintsName.MULTICOSTREGULAR, new PropMultiCostRegular(vars, costVars, costAutomaton));
 	}
 
 	/**
@@ -1502,7 +1502,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		int[] vals = getDomainUnion(vars);
 		Gci gci = new Gci(vars);
 		R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
-		return new Constraint("nValue",
+		return new Constraint(ConstraintsName.NVALUES,
 				// at least
 				new PropAtLeastNValues(vars, vals, nValues),
 				// at most
@@ -1575,7 +1575,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			case 0:
 				throw new SolverException("|vars| Should be strictly greater than 0");
 			case 1:
-				return Constraint.merge("path",
+				return Constraint.merge(ConstraintsName.PATH,
 						arithm(start, "=", offset),
 						arithm(end, "=", offset),
 						arithm(vars[0], "=", 1 + offset)
@@ -1584,7 +1584,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				if (start == end) {
 					return start.getModel().falseConstraint();
 				} else {
-					return Constraint.merge("path",
+					return Constraint.merge(ConstraintsName.PATH,
 							arithm(start, "!=", end),
 							circuit(ArrayUtils.concat(vars, start), offset),
 							element(end.getModel().intVar(vars.length + offset), vars, end, offset)
@@ -1604,7 +1604,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param automaton a deterministic finite automaton defining the regular language
 	 */
 	default Constraint regular(IntVar[] vars, IAutomaton automaton) {
-		return new Constraint("Regular", new PropRegular(vars, automaton));
+		return new Constraint(ConstraintsName.REGULAR, new PropRegular(vars, automaton));
 	}
 
 	/**
@@ -1688,7 +1688,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		int n = vars.length;
 		Model model = vars[0].getModel();
 		IntVar nbLoops = model.intVar("nLoops", 0, n, true);
-		return new Constraint("SubCircuit", ArrayUtils.append(
+		return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
 				allDifferent(vars, "AC").getPropagators(),
 				ArrayUtils.toArray(
 						new PropEqualXY_C(new IntVar[]{nbLoops, subCircuitLength}, n),
@@ -1723,14 +1723,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			case 0:
 				throw new SolverException("|vars| Should be strictly greater than 0");
 			case 1:
-				return Constraint.merge("subPath",
+				return Constraint.merge(ConstraintsName.SUBPATH,
 						arithm(start, "=", offset),
 						arithm(end, "=", offset),
 						arithm(vars[0], "=", 1 + offset),
 						arithm(SIZE, "=", 1)
 				);
 			default:
-				return Constraint.merge("subPath",
+				return Constraint.merge(ConstraintsName.SUBPATH,
 						arithm(start, "<", vars.length + offset),
 						subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intOffsetView(SIZE, 1)),
 						element(end.getModel().intVar(vars.length + offset), vars, end, offset)
@@ -1888,7 +1888,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 				break;
 			default: throw new SolverException("Table algorithm "+algo+" is unkown");
 		}
-		return new Constraint("Table(" + algo + ")", p);
+		return new Constraint(ConstraintsName.TABLE, p);
 	}
 
 	/**
@@ -1924,7 +1924,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a tree constraint
 	 */
 	default Constraint tree(IntVar[] succs, IntVar nbTrees, int offset) {
-		return new Constraint("tree",
+		return new Constraint(ConstraintsName.TREE,
 				new PropAntiArborescences(succs, offset, false),
 				new PropKLoops(succs, offset, nbTrees)
 		);
