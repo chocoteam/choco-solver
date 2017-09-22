@@ -112,7 +112,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test3() {
         for(int i=0;i<10;i++) {
             Ibex ibex = new Ibex();
@@ -140,7 +140,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void test4() {
         for(int i=0;i<10;i++) {
             Model model = new Model();
@@ -280,7 +280,7 @@ public class RealTest {
         solver.solve();
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ignored")
     public void testPG1() throws Exception {
         Model model = new Model();
         RealVar rv = model.realVar(0,5,0.1d);
@@ -342,7 +342,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testPeter() {
         Random ds = new Random();
         Model model = new Model();
