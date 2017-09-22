@@ -189,7 +189,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignore", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testFreemajb2() {
         Model model = new Model();
 
@@ -208,7 +208,7 @@ public class RealTest {
         model.getSolver().printStatistics();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testFreemajb3() {
         Model model = new Model();
 
@@ -234,7 +234,7 @@ public class RealTest {
         };
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "coeffs")
+    @Test(groups="ignored", timeOut=60000, dataProvider = "coeffs")
     public void testHM1(String coeffs) {
         Model model = new Model("Test model");
         double precision = 1.e-6;
@@ -294,7 +294,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 63);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ignored")
     public void testJiiTee1() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
@@ -376,7 +376,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="ignored", timeOut=60000)
     public void testJiTee1() throws ContradictionException {
         double [] posA= new double[] {150.0, 195.0, 270.0, 370.0, 470.0};
         Model model = new Model("model");
