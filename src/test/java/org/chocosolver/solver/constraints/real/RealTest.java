@@ -224,7 +224,6 @@ public class RealTest {
         }
         out.printf("%s\n", model.toString());
         model.getSolver().printStatistics();
-        model.getIbex().release();
     }
 
     @DataProvider(name="coeffs")
@@ -258,7 +257,6 @@ public class RealTest {
         });
         solver.showDecisions();
         while (solver.solve()) ;
-        model.getIbex().release();
     }
 
     @Test(groups="ignored", timeOut=600000)
@@ -279,11 +277,7 @@ public class RealTest {
             System.out.println("weldingCurrent LB=" + current.getLB() + " UB=" + current.getUB());
             System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
         });
-        try {
-            solver.solve();
-        }finally {
-            model.getIbex().release();
-        }
+        solver.solve();
     }
 
     @Test(groups = "1s")
@@ -346,7 +340,6 @@ public class RealTest {
             System.out.println("");
         }
         Assert.assertEquals(solver.getSolutionCount(), 10);
-        model.getIbex().release();
     }
 
     @Test(groups="1s", timeOut=60000)
