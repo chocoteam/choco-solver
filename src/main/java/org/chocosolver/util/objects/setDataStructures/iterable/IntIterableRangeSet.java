@@ -120,6 +120,21 @@ public class IntIterableRangeSet implements IntIterableSet {
         return st.toString();
     }
 
+    public String toSmartString() {
+        StringBuilder st = new StringBuilder();
+        st.append("{");
+        for (int i = 0; i < SIZE - 1; i += 2) {
+            if (ELEMENTS[i] == ELEMENTS[i + 1]) {
+                st.append(ELEMENTS[i]).append(',');
+            } else {
+                st.append(ELEMENTS[i]).append("..").append(ELEMENTS[i + 1]).append(',');
+            }
+        }
+        if (SIZE > 0) st.deleteCharAt(st.length() - 1);
+        st.append("}");
+        return st.toString();
+    }
+
     @Override
     public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
@@ -262,6 +277,98 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
         }
         return CARDINALITY < c;
+    }
+
+    public boolean addBetween(int a, int b){
+        if(a > b){
+            throw new IndexOutOfBoundsException("Incorrect bounds ["+a+","+b+"]");
+        }
+        boolean change = false;
+        int s1 = SIZE >> 1;
+        int s2 = a <= b ? 1 : 0;
+        if (s1 > 0 && s2 > 0) {
+            int i = 0, j = 0;
+            int s = 0, c = 0;
+            int[] e = new int[SIZE];
+            int lbi, ubi, lbj, ubj, lb, ub;
+            lb = lbi = ELEMENTS[0];
+            ub = ubi = ELEMENTS[1];
+            lbj = a;
+            ubj = b;
+            if (lb > lbj) {
+                lb = lbj;
+                ub = ubj;
+            }
+            boolean extend;
+            // TODO: replace while loop with rangeOf
+            while (i < s1 || j < s2) {
+                extend = false;
+                if (lb - 1 <= lbi && lbi <= ub + 1) {
+                    ub = Math.max(ub, ubi);
+                    extend = i < s1;
+                    if (++i < s1) {
+                        lbi = ELEMENTS[i << 1];
+                        ubi = ELEMENTS[(i << 1) + 1];
+                    }
+                }
+                if (lb - 1 <= lbj && lbj <= ub + 1) {
+                    ub = Math.max(ub, ubj);
+                    extend |= j < s2;
+                    j++;
+                }
+                if (!extend) {
+                    if (s + 2 > e.length) {
+                        // overflow-conscious code
+                        int oldCapacity = e.length;
+                        int newCapacity = oldCapacity + (oldCapacity >> 1);
+                        if (newCapacity < s + 2)
+                            newCapacity = s + 2;
+                        // minCapacity is usually close to size, so this is a win:
+                        e = Arrays.copyOf(e, newCapacity);
+                    }
+                    e[s++] = lb;
+                    e[s++] = ub;
+                    c += ub - lb + 1;
+                    if (i < s1) {
+                        lb = lbi;
+                        ub = ubi;
+                        if (j < s2 && lbi > lbj) {
+                            lb = lbj;
+                            ub = ubj;
+                        }
+                    } else if (j < s2) {
+                        lb = lbj;
+                        ub = ubj;
+                    }
+                }
+            }
+            if (s + 2 > e.length) {
+                // overflow-conscious code
+                int oldCapacity = e.length;
+                int newCapacity = oldCapacity + (oldCapacity >> 1);
+                if (newCapacity < s + 2)
+                    newCapacity = s + 2;
+                // minCapacity is usually close to size, so this is a win:
+                e = Arrays.copyOf(e, newCapacity);
+            }
+            e[s++] = lb;
+            e[s++] = ub;
+            c += ub - lb + 1;
+            ELEMENTS = e;
+            SIZE = s;
+            change |= (CARDINALITY != c);
+            CARDINALITY = c;
+        } else {
+            if(s2 > 0){
+                grow(1);
+                ELEMENTS[0] = a;
+                ELEMENTS[1] = b;
+                SIZE = 2;
+                CARDINALITY = Math.addExact(b + 1, -a);
+                change = true;
+            }
+        }
+        return change;
     }
 
     @Override
@@ -542,4 +649,6 @@ public class IntIterableRangeSet implements IntIterableSet {
         ELEMENTS[SIZE++] = ub;
         CARDINALITY += ub - lb + 1;
     }
+
+
 }
