@@ -189,7 +189,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ignore", timeOut=60000)
     public void testFreemajb2() {
         Model model = new Model();
 
@@ -383,7 +383,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testJiTee1() throws ContradictionException {
         double [] posA= new double[] {150.0, 195.0, 270.0, 370.0, 470.0};
         Model model = new Model("model");
@@ -399,7 +399,7 @@ public class RealTest {
 
         model.realIbexGenericConstraint("{0}<=271.", dim_A).post();
         model.arithm(load, ">", 400).post();
-        for(int i  = 0; i < 50_000; i++) {
+        for(int i  = 0; i < 1_000; i++) {
             model.realIbexGenericConstraint("{0} > " + i, dim_A);
             System.gc();
         }
