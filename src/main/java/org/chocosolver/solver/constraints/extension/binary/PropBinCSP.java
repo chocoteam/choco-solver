@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.extension.binary;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -61,5 +62,13 @@ public abstract class PropBinCSP extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return null;
+    }
+
+    /**
+     * Extract the tuples from this internal data structure
+     * @return a tuples object
+     */
+    public Tuples extractTuples(){
+        return relation.convert();
     }
 }

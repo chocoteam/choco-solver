@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
 
@@ -35,4 +36,10 @@ public abstract class LargeRelation  {
         }
         return true;
     }
+
+    /**
+     * Convert this relation into 'Tuples'
+     * @return
+     */
+    public abstract Tuples convert();
 }

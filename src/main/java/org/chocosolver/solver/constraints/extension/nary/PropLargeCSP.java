@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
@@ -56,5 +57,14 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
         }
         sb.append("})");
         return sb.toString();
+    }
+
+
+    /**
+     * Extract the tuples from this internal data structure
+     * @return a tuples object
+     */
+    public Tuples extractTuples(){
+        return relation.convert();
     }
 }

@@ -98,4 +98,20 @@ public class TuplesTable extends LargeRelation {
         }
         table.set(address);
     }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(feasible);
+        int[] tt = new int[upperbounds.length];
+        for(int add = table.nextSetBit(0); add > -1; add = table.nextSetBit(add + 1)){
+            int address = add;
+            for (int i = (n - 1); i >= 0; i--) {
+                int t = address / blocks[i];
+                tt[i] = t + lowerbounds[i];
+                address -= (t * blocks[i]);
+            }
+            tuples.add(tt);
+        }
+        return tuples;
+    }
 }

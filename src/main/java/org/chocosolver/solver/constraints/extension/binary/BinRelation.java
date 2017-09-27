@@ -8,6 +8,8 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
+import org.chocosolver.solver.constraints.extension.Tuples;
+
 public abstract class BinRelation {
 
     /**
@@ -29,4 +31,10 @@ public abstract class BinRelation {
      * @return true if (x,y) is a consistent couple
      */
     public abstract boolean isConsistent(int x, int y);
+
+    /**
+     * Convert this relation into 'Tuples'
+     * @return
+     */
+    public abstract Tuples convert();
 }

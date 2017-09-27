@@ -73,4 +73,13 @@ public class TuplesList extends LargeRelation {
     public boolean isConsistent(int[] tuple) {
         return Arrays.binarySearch(tuplesIndexes, tuple, TCOMP) >= 0;
     }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(true);
+        for(int[] t: tuplesIndexes){
+            tuples.add(t);
+        }
+        return tuples;
+    }
 }

@@ -155,7 +155,7 @@ public class Tuples {
 		} else if (arity != tuple.length) {
 			throw new SolverException("The given tuple does not match the arity: " + arity);
 		}
-		tuples.add(tuple);
+		tuples.add(tuple.clone());
 		for (int i = 0; i < arity; i++) {
 			ranges[i] = Math.min(ranges[i], tuple[i]);
 			ranges[i + arity] = Math.max(ranges[i + arity], tuple[i]);

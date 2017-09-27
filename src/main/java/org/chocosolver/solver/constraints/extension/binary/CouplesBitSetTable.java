@@ -96,4 +96,15 @@ class CouplesBitSetTable extends BinRelation {
         }
         return true;
     }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(true);
+        for(int i = 0; i < table[0].length; i++) {
+            for (int b = table[0][i].nextSetBit(0); b > -1; b = table[0][i].nextSetBit(b + 1)) {
+                tuples.add(i + offsets[0], b + offsets[1]);
+            }
+        }
+        return tuples;
+    }
 }

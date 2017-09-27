@@ -52,4 +52,15 @@ class CouplesTable extends BinRelation {
     public boolean checkCouple(int x, int y) {
         return table.get((x - offset1) * range2 + y - offset2);
     }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(feasible);
+        for (int b = table.nextSetBit(0); b > -1; b = table.nextSetBit(b + 1)) {
+            int v1 = (b / range2) + offset1;
+            int v2 = (b % range2) + offset2;
+            tuples.add(v1, v2);
+        }
+        return tuples;
+    }
 }

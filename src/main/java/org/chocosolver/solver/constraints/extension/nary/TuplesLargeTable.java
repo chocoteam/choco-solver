@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -46,8 +47,8 @@ public class TuplesLargeTable extends LargeRelation {
     private final boolean feasible;
 
     /**
-     * in order to speed up the computation of the index of a tuple
-     * in the table, blocks[i] stores the product of the size of variables j with j < i.
+     * in order to speed up the computation of the index of a tuple in the table, blocks[i] stores
+     * the product of the size of variables j with j < i.
      */
     private long[] blocks;
 
@@ -112,5 +113,22 @@ public class TuplesLargeTable extends LargeRelation {
             tables.put(t, ts);
         }
         ts.add(a);
+    }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(feasible);
+        int[] tt = new int[lowerbounds.length];
+        for (TIntSet set : tables.valueCollection()) {
+            for (int add : set.toArray()) {
+                for (int i = (n - 1); i >= 0; i--) {
+                    long t = add / blocks[i];
+                    tt[i] = (int) (t + lowerbounds[i]);
+                    add -= t;
+                }
+            }
+            tuples.add(tt);
+        }
+        return tuples;
     }
 }

@@ -9,13 +9,13 @@
 package org.chocosolver.solver.constraints.extension.nary;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
- * A LargeRelation for cases where domain are too big to be stored in a single array.
- * Then, we store it in a chunk bitsets
- * <br/>
+ * A LargeRelation for cases where domain are too big to be stored in a single array. Then, we store
+ * it in a chunk bitsets <br/>
  *
  * @author Charles Prud'homme
  * @since 08/06/11
@@ -73,4 +73,24 @@ public class TuplesVeryLargeTable extends LargeRelation {
             current = _current;
         }
     }
+
+    @Override
+    public Tuples convert() {
+        Tuples tuples = new Tuples(feasible);
+        int[] tt = new int[n];
+        tuple(supports, tt, 0, tuples);
+        return tuples;
+    }
+
+    private void tuple(TIntObjectHashMap<TIntObjectHashMap> current, int[] tt, int p, Tuples tuples) {
+        if (current.isEmpty()) {
+            tuples.add(tt);
+        } else {
+            for (int k : current.keys()) {
+                tt[p] = k;
+                tuple(current.get(k), tt, p + 1, tuples);
+            }
+        }
+    }
+
 }
