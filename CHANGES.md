@@ -10,6 +10,9 @@ NEXT MILESTONE
 The current release was submitted to [MiniZinc Challenge 2017](http://www.minizinc.org/challenge2017/results2017.html) 
 and at [XCSP3 Competition 2017](http://www.cril.univ-artois.fr/XCSP17/) and won medals.
 
+[choco-parsers](https://github.com/chocoteam/choco-parsers) provides utility to export a `Model` to JSON format
+and or import JSON data into a `Model`.
+
 ### Major features:
 - Compact-Table now deals with short tuples (#531)
 - Checking if a created constraint is free (neither posted or reified) is now possible with `Settings.checkDeclaredConstraints()`
