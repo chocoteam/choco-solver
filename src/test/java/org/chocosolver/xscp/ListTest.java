@@ -71,7 +71,7 @@ public class ListTest {
     }
 
 
-    @Test(groups="1s", timeOut=300000, dataProvider = "cspList")
+    @Test(groups="ignored", timeOut=300000, dataProvider = "cspList")
     public void testCSP(String file, int nbSol) throws SetUpException {
         XCSP xscp = new XCSP();
         xscp.addListener(new BaseXCSPListener(xscp));
@@ -121,7 +121,7 @@ public class ListTest {
     }
 
 
-    @Test(groups="1s", timeOut=300000, dataProvider = "copList")
+    @Test(groups="ignored", timeOut=300000, dataProvider = "copList")
     public void testCOP(String file, int opt) throws SetUpException {
         XCSP xscp = new XCSP();
         xscp.addListener(new BaseXCSPListener(xscp));
