@@ -256,24 +256,24 @@ public class IntLinCombFactory {
                 Model model = VARS[0].getModel();
                 if (nbools == VARS.length) {
                     if (model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new SumConstraint("FullBoolSum", new PropSumFullBoolIncr(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
+                        return new SumConstraint(new PropSumFullBoolIncr(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
                     } else {
-                        return new SumConstraint("FullBoolSum", new PropSumFullBool(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
+                        return new SumConstraint(new PropSumFullBool(model.toBoolVar(tmpV), b, OPERATOR, RESULT));
                     }
                 }
                 if (nbools == VARS.length - 1 && !tmpV[tmpV.length - 1].isBool() && COEFFS[VARS.length - 1] == -1) {
                     // the large domain variable is on the last idx
                     if (model.getSettings().enableIncrementalityOnBoolSum(tmpV.length)) {
-                        return new SumConstraint("BoolSum", new PropSumBoolIncr(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new SumConstraint(new PropSumBoolIncr(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     } else {
-                        return new SumConstraint("BoolSum", new PropSumBool(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
+                        return new SumConstraint(new PropSumBool(model.toBoolVar(Arrays.copyOf(tmpV, tmpV.length - 1)),
                                 b, OPERATOR, tmpV[tmpV.length - 1], RESULT));
 
                     }
                 }
-                return new SumConstraint("Sum", new PropSum(tmpV, b, OPERATOR, RESULT));
+                return new SumConstraint( new PropSum(tmpV, b, OPERATOR, RESULT));
         }
     }
 
@@ -329,7 +329,7 @@ public class IntLinCombFactory {
             OPERATOR = Operator.LE;
             RESULT--;
         }
-        return new SumConstraint("ScalarProduct", new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
+        return new SumConstraint(new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

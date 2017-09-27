@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 
 /**
@@ -22,11 +23,10 @@ public class SumConstraint extends Constraint {
     /**
      * Make a new constraint defined as a set of given propagators
      *
-     * @param name name of the constraint
      * @param propagator propagator defining the constraint
      */
-    public SumConstraint(String name, Propagator propagator) {
-        super(name, propagator);
+    public SumConstraint(Propagator propagator) {
+        super(ConstraintsName.SUM, propagator);
     }
 
     /**
@@ -38,7 +38,7 @@ public class SumConstraint extends Constraint {
     protected Constraint makeOpposite() {
         if (propagators[0] instanceof PropSum) {
             PropSum me = (PropSum) propagators[0];
-            return new SumConstraint("not ("+ this.getName()+")", me.opposite());
+            return new SumConstraint(me.opposite());
         } else
             return super.makeOpposite();
     }
