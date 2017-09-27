@@ -13,7 +13,9 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.ESat;
 
 /**
@@ -21,7 +23,7 @@ import org.chocosolver.util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNotMemberIntSet extends Propagator<IntVar> {
+public class PropNotMemberIntSet extends Propagator<Variable> {
 
     //***********************************************************************************
     // VARIABLES
@@ -35,7 +37,7 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
     //***********************************************************************************
 
     public PropNotMemberIntSet(IntVar iv, SetVar sv) {
-        super(new IntVar[]{iv}, PropagatorPriority.UNARY, true);
+        super(new Variable[]{iv, sv}, PropagatorPriority.UNARY, true);
         this.iv = iv;
         this.sv = sv;
     }
@@ -46,7 +48,11 @@ public class PropNotMemberIntSet extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vidx) {
-        return IntEventType.instantiation();
+        if(vidx == 0) {
+            return IntEventType.instantiation();
+        }else{
+            return SetEventType.VOID.getMask();
+        }
     }
 
     @Override

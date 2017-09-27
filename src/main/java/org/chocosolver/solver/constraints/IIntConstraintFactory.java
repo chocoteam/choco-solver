@@ -16,8 +16,6 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.PropAbsolute;
 import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
-import org.chocosolver.solver.constraints.binary.PropEqualXY_C;
-import org.chocosolver.solver.constraints.binary.PropEqualX_Y;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.binary.PropSquare;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
@@ -842,12 +840,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 */
 	default Constraint boolsIntChanneling(BoolVar[] bVars, IntVar var, int offset) {
 		if (var.hasEnumeratedDomain()) {
-			return new Constraint(ConstraintsName.DOMAINCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
+			return new Constraint(ConstraintsName.BOOLCHANNELING, new PropEnumDomainChanneling(bVars, var, offset));
 		} else {
 			IntVar enumV = var.getModel().intVar(var.getName() + "_enumImage", var.getLB(), var.getUB(), false);
+			enumV.eq(var).post();
 			return new Constraint(ConstraintsName.BOOLCHANNELING,
-					new PropEnumDomainChanneling(bVars, enumV, offset),
-					new PropEqualX_Y(var, enumV)
+					new PropEnumDomainChanneling(bVars, enumV, offset)
 			);
 		}
 	}
@@ -1003,8 +1001,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		} else {
 			Model model = value.getModel();
 			IntVar Evalue = model.intVar(model.generateName("COUNT_"), value.getLB(), value.getUB(), false);
+			Evalue.eq(value).post();
 			return new Constraint(ConstraintsName.COUNT,
-					new PropEqualX_Y(Evalue, value),
 					new PropCountVar(vars, Evalue, limit));
 		}
 	}
@@ -1688,10 +1686,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 		int n = vars.length;
 		Model model = vars[0].getModel();
 		IntVar nbLoops = model.intVar("nLoops", 0, n, true);
+		nbLoops.add(subCircuitLength).eq(n).post();
 		return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
 				allDifferent(vars, "AC").getPropagators(),
 				ArrayUtils.toArray(
-						new PropEqualXY_C(new IntVar[]{nbLoops, subCircuitLength}, n),
 						new PropKLoops(vars, offset, nbLoops),
 						new PropSubcircuit(vars, offset, subCircuitLength),
 						new PropSubcircuitDominatorFilter(vars, offset,true)

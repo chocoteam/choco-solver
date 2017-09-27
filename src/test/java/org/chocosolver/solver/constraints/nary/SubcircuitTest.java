@@ -36,6 +36,15 @@ public class SubcircuitTest {
 		assertEquals(1, model.getSolver().getSolutionCount());
 	}
 
+	@Test(groups="1s", timeOut=6000000)
+	public static void test11() {
+		Model model = new Model();
+		IntVar[] x = model.intVarArray("x", 5, 0, 8, true);
+		model.subCircuit(x, 0, model.intVar("length", 0, x.length - 1, true)).post();
+		model.getSolver().findAllSolutions();
+		assertEquals(61, model.getSolver().getSolutionCount());
+	}
+
 	@Test(groups="1s", timeOut=60000)
 	public static void test2() {
 		Model model = new Model();

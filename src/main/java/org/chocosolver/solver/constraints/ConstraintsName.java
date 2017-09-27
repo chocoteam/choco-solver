@@ -54,8 +54,6 @@ public class ConstraintsName {
 
     public static final String BINPACKING = "BINPACKING";
 
-    public static final String DOMAINCHANNELING = "DOMAINCHANNELING";
-
     public static final String BOOLCHANNELING = "BOOLCHANNELING";
 
     public static final String BITSINTCHANNELING = "BITSINTCHANNELING";
@@ -86,11 +84,7 @@ public class ConstraintsName {
 
     public static final String LEX = "LEX";
 
-    public static final String MAXOVERBOOLS = "MAXOVERBOOLS";
-
     public static final String MDDC = "MDDC";
-
-    public static final String MINOVERBOOLS = "MINOVERBOOLS";
 
     public static final String MULTICOSTREGULAR = "MULTICOSTREGULAR";
 
@@ -161,8 +155,6 @@ public class ConstraintsName {
     public static final String NOGOODCONSTRAINT = "NOGOODCONSTRAINT";
 
     public static final String SUM = "SUM";
-
-    public static final String SCALAR = "SCALAR";
 
     public static final String INTEQREAL = "INTEQREAL";
 
