@@ -138,7 +138,7 @@ public abstract class RegParser implements IParser {
     }
 
     @Override
-    public final void defineSettings(Settings defaultSettings) {
+    public void defineSettings(Settings defaultSettings) {
         this.defaultSettings = defaultSettings;
     }
 

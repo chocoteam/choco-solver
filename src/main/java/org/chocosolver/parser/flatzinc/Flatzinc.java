@@ -75,14 +75,12 @@ public class Flatzinc extends RegParser {
 
     @Override
     public Thread actionOnKill() {
-        return new Thread() {
-            public void run() {
-                if (userinterruption) {
-                    datas[bestModelID()].doFinalOutPut(false);
-                    System.out.printf("%% Unexpected resolution interruption!");
-                }
+        return new Thread(() -> {
+            if (userinterruption) {
+                datas[bestModelID()].doFinalOutPut(false);
+                System.out.printf("%% Unexpected resolution interruption!");
             }
-        };
+        });
     }
 
     //***********************************************************************************
