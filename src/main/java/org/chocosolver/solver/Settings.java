@@ -33,7 +33,7 @@ public interface Settings  {
      * @return the welcome message
      */
     default String getWelcomeMessage() {
-        return "** Choco 4.0.4 (2017-04) : Constraint Programming Solver, Copyleft (c) 2010-2017";
+        return "** Choco 4.0.5 (2017-09) : Constraint Programming Solver, Copyleft (c) 2010-2017";
     }
 
     /**
