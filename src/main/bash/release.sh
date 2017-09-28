@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -ex
+
 function quit() {
     echo "ERROR: $*"
     exit 1
