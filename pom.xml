@@ -8,13 +8,14 @@
     See LICENSE file in the project root for full license information.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.choco-solver</groupId>
     <artifactId>choco-parsers</artifactId>
-    <version>4.0.4</version>
+    <version>4.0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>A FlatZinc parser for Choco3</name>
 
@@ -51,7 +52,8 @@
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco-parsers.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco-parsers</url>
-        <developerConnection>scm:git:git@github.com:chocoteam/choco-parsers.git</developerConnection>
+        <developerConnection>scm:git:git@github.com:chocoteam/choco-parsers.git
+        </developerConnection>
         <tag>HEAD</tag>
     </scm>
 
@@ -139,16 +141,14 @@
     </repositories>
 
     <distributionManagement>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
         <snapshotRepository>
-            <uniqueVersion>true</uniqueVersion>
-            <id>sonatype-snapshots</id>
+            <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <layout>default</layout>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
 
     <profiles>
@@ -184,15 +184,18 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.1</version>
                         <configuration>
-                            <doctitle>${project.groupId}-${project.artifactId} ${project.version} API</doctitle>
-                            <windowtitle>${project.groupId}-${project.artifactId} ${project.version} API</windowtitle>
+                            <doctitle>${project.groupId}-${project.artifactId} ${project.version}
+                                API
+                            </doctitle>
+                            <windowtitle>${project.groupId}-${project.artifactId} ${project.version}
+                                API
+                            </windowtitle>
                             <!--<quiet />-->
                             <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
-                                <phase>verify</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
@@ -224,7 +227,7 @@
                 <version>1.6.7</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>sonatype</serverId>
+                    <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
@@ -317,7 +320,9 @@
                     <artifactId>xcsp3</artifactId>
                     <version>1.0.1-SNAPSHOT</version>
                     <packaging>jar</packaging>
-                    <file>${project.basedir}/src/main/resources/xcsp-lib/xcsp3-${xcsp3.version}.jar</file>
+                    <file>
+                        ${project.basedir}/src/main/resources/xcsp-lib/xcsp3-${xcsp3.version}.jar
+                    </file>
                     <generatePom>true</generatePom>
                 </configuration>
                 <executions>

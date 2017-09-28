@@ -27,7 +27,7 @@ function sedInPlace() {
 
 VERSION=$(getVersionToRelease)
 NEXT=$(guess $VERSION)
-TAG="choco-parsers-${VERSION}"
+TAG="${VERSION}"
 
 git fetch || quit "unable to fetch master"
 git checkout -b release || quit "unable to check master out"
@@ -78,7 +78,7 @@ git push origin master ||quit "Unable to push master"
 
 #    #Deploy the artifacts
 #echo "** Deploying the artifacts **"
-mvn -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
+mvn -s ~/.m2/settings.xml -P release clean javadoc:jar source:jar deploy -DskipTests ||quit "Unable to deploy"
 
 #Set the next development version
 #echo "** Prepare develop for the next version **"
