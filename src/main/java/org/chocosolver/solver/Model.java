@@ -122,7 +122,7 @@ public class Model implements IModel {
     /**
      * Resolver of the model, controls propagation and search
      */
-    private final Solver solver;
+    private Solver solver;
 
     /**
      * Variable to optimize, possibly null.
@@ -191,7 +191,7 @@ public class Model implements IModel {
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
         this.hooks = new HashMap<>();
-        this.solver = new Solver(this);
+        setSolver(new Solver(this));
     }
 
     /**
@@ -574,6 +574,15 @@ public class Model implements IModel {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * Overrides the default solver instance attached to the model
+     * @param solver the solver instance
+     */
+    public void setSolver(Solver solver) {
+        this.solver = solver;
+    }
 
     /**
      * Defines the variable to optimize (maximize or minimize)
