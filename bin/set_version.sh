@@ -13,7 +13,7 @@ else
 fi
 echo "New version is ${VERSION}"
 #Update the poms
-mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
+mvn -q versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 
 if test "${NEXTMIL}" = "yes"
 then

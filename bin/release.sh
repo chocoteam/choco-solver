@@ -3,7 +3,7 @@
 source bin/commons.sh
 
 function getVersionToRelease() {
-    CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
+    CURRENT_VERSION=`mvn -q ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
     echo ${CURRENT_VERSION%%-SNAPSHOT}
 }
 
@@ -35,6 +35,3 @@ git commit -m "Prepare the code for the next version" -a ||quit "Unable to commi
 
 #Push changes on develop, with the tag
 git push origin master ||quit "Unable to push to master"
-
-# git checkout -
-./bin/package.sh ${VERSION}
