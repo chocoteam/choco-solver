@@ -10,7 +10,7 @@ and a parser for [XCSP3](http://xcsp.org), an intermediate integrated XML-based 
 It also provides utilities to export a model written with Choco to a JSON format 
 and to import a JSON format file into a `Model`.
 
-* [Download](https://github.com/chocoteam/choco-parsers/releases/latest)
+* [Download](https://github.com/chocoteam/choco-parsers/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers)
 * [MiniZinc](./MINIZINC.md)
 * [XCSP3](./XCSP3.md)
 * [JSON](./JSON.md)
