@@ -32,7 +32,7 @@ and or import JSON data into a `Model`.
 - fix bug in `model.table(...)` with binary scope and universal value  
 - fix bug related to Ibex and GC.
 
-\#531.
+\#531 ,#545, #546.
 
 4.0.4 - 28 Apr 2017
 -------------------

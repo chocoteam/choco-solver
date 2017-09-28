@@ -22,18 +22,12 @@ And run license check:
 
     $ mvn license:format
 
-3. Generate PDF documentation
-
-    $ cd src/sphinx/
-
-    $ make latexpdf
-
-4. Check that ALL issues are reported in **CHANGES.md** files
+3. Check that ALL issues are reported in **CHANGES.md** files
 
 
     $ ltag=`git describe --abbrev=0 --tags`;git log ${ltag}..master | grep "#[0-9]"
 
-5. Now you can run the command: 
+4. Now you can run the command: 
 
 
     $ ./bin/release.sh
@@ -42,7 +36,7 @@ However, deployment and zip file (jar files, user guide and javadoc) need to be 
 
     ./bin/package.sh X.Y.Z
 
-6. Upload the zip file onto the website
+5. Upload the zip file onto the website
 
 ===================
 The Choco-solver dev team.
