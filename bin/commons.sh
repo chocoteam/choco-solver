@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -ex
+
 function guess() {
     v=$1
     if [[ $v == *-SNAPSHOT ]]; then

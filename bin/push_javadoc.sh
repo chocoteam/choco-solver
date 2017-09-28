@@ -1,4 +1,6 @@
 #!/bin/bash
+set -ex
+
 LOCAL=`mktemp -d -t choco.XXX`
 REMOTE=$1
 VERSION=$2

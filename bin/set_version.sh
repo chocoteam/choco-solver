@@ -2,6 +2,8 @@
 source bin/commons.sh
 #Script to notify the website about a release
 
+set -ex
+
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)
     NEXTMIL="no"

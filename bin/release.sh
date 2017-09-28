@@ -7,6 +7,8 @@ function getVersionToRelease() {
     echo ${CURRENT_VERSION%%-SNAPSHOT}
 }
 
+set -ex
+
 VERSION=$(getVersionToRelease)
 git checkout master || quit "unable to check master out"
 git pull --rebase origin master || quit "unable to pull master"
