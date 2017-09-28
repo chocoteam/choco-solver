@@ -3,12 +3,13 @@
  *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
@@ -70,8 +71,7 @@ public class Model implements IModel {
     /**
      * Settings to use with this solver
      */
-    private Settings settings = new Settings() {
-    };
+    private Settings settings;
 
     /**
      * A map to cache constants (considered as fixed variables)
@@ -179,8 +179,9 @@ public class Model implements IModel {
      *
      * @param environment a backtracking environment to allow search
      * @param name        The name of the model (for logging purpose)
+     * @param settings settings to use
      */
-    public Model(IEnvironment environment, String name) {
+    public Model(IEnvironment environment, String name, Settings settings) {
         this.name = name;
         this.vars = new Variable[32];
         this.vIdx = 0;
@@ -191,7 +192,19 @@ public class Model implements IModel {
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
         this.hooks = new HashMap<>();
-        this.solver = new Solver(this);
+        this.settings = settings;
+        this.solver = settings.initSolver(this);
+    }
+
+    /**
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
+     *
+     * @param environment a backtracking environment to allow search
+     * @param name        The name of the model (for logging purpose)
+     */
+    public Model(IEnvironment environment, String name) {
+        this(environment, name, new Settings() {});
     }
 
     /**
@@ -199,17 +212,17 @@ public class Model implements IModel {
      * The model is named <code>name</code> and uses the default (trailing) backtracking environment.
      *
      * @param name The name of the model (for logging purpose)
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
+     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name);
+        this(new EnvironmentBuilder().fromFlat().build(), name, new Settings(){});
     }
 
     /**
      * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
      * The model uses the default (trailing) backtracking environment.
      *
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String)
+     * @see Model#Model(String)
      */
     public Model() {
         this("Model-" + nextModelNum());
@@ -323,8 +336,8 @@ public class Model implements IModel {
      * @param includeBoolVar indicates whether or not to include {@link BoolVar}
      * @return the number of {@link IntVar} of the model involved in <code>this</code>
      */
-    public int getNbIntVar(boolean includeBoolVar){
-        return nbIntVar + (includeBoolVar?nbBoolVar:0);
+    public int getNbIntVar(boolean includeBoolVar) {
+        return nbIntVar + (includeBoolVar ? nbBoolVar : 0);
     }
 
     /**
@@ -355,7 +368,7 @@ public class Model implements IModel {
      *
      * @return the number of {@link BoolVar} of the model involved in <code>this</code>
      */
-    public int getNbBoolVar(){
+    public int getNbBoolVar() {
         return nbBoolVar;
     }
 
@@ -384,7 +397,7 @@ public class Model implements IModel {
      *
      * @return the number of {@link SetVar} of the model involved in <code>this</code>
      */
-    public int getNbSetVar(){
+    public int getNbSetVar() {
         return nbSetVar;
     }
 
@@ -413,7 +426,7 @@ public class Model implements IModel {
      *
      * @return the number of {@link RealVar} of the model involved in <code>this</code>
      */
-    public int getNbRealVar(){
+    public int getNbRealVar() {
         return nbRealVar;
     }
 
@@ -528,7 +541,7 @@ public class Model implements IModel {
     /**
      * Unpost minisat constraint from model, if any.
      */
-    public void removeMinisat(){
+    public void removeMinisat() {
         if (getHook(MINISAT_HOOK_NAME) != null) {
             SatConstraint minisat = (SatConstraint) getHook(MINISAT_HOOK_NAME);
             unpost(minisat);
@@ -554,7 +567,7 @@ public class Model implements IModel {
     /**
      * Unpost nogood store constraint from model, if any.
      */
-    public void removeNogoodStore(){
+    public void removeNogoodStore() {
         if (getHook(NOGOODS_HOOK_NAME) != null) {
             NogoodConstraint nogoods = (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
             unpost(nogoods);
@@ -689,7 +702,7 @@ public class Model implements IModel {
             System.arraycopy(tmp, 0, vars, 0, vIdx);
         }
         vars[vIdx++] = variable;
-        switch ((variable.getTypeAndKind() & Variable.KIND)){
+        switch ((variable.getTypeAndKind() & Variable.KIND)) {
             case Variable.INT:
                 nbIntVar++;
                 break;
@@ -721,7 +734,7 @@ public class Model implements IModel {
         }
         System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
         vars[--vIdx] = null;
-        switch ((variable.getTypeAndKind() & Variable.KIND)){
+        switch ((variable.getTypeAndKind() & Variable.KIND)) {
             case Variable.INT:
                 nbIntVar--;
                 break;

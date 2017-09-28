@@ -10,6 +10,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.search.strategy.Search;
@@ -250,4 +251,13 @@ public interface Settings  {
         return true;
     }
 
+    /**
+     * This method is called in {@link Model#Model(IEnvironment, String, Settings)} to create the
+     * solver to associate with a model.
+     * @param model a model to initialize with a solver
+     * @return the new solver
+     */
+    default Solver initSolver(Model model){
+        return new Solver(model);
+    }
 }
