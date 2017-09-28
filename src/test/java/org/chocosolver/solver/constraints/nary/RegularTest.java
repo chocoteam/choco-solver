@@ -320,9 +320,16 @@ public class RegularTest {
 
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void testregExp9(){
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 30, new int[]{0, 20, 127436});
+        model.regular(CS, new FiniteAutomaton("(0|<10>|<20>)*(0|<127436>)")).post();
+    }
+
 
     @Test(groups="1s", timeOut=60000)
-    public void testregExp9() {
+    public void testregExp10() {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 6, 0, 4, false);
         model.regular(CS, new FiniteAutomaton("0*[^0]{4,}?0*",0,4)).post();
@@ -330,6 +337,15 @@ public class RegularTest {
 //        model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 6913);
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = IndexOutOfBoundsException.class)
+    public void testregExp11(){
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 30, new int[]{0, 20, 127436});
+
+        FiniteAutomaton auto = new FiniteAutomaton();
+        auto.addTransition(0, 1, 2);
     }
 
     @DataProvider(name = "two")
