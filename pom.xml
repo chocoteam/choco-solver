@@ -14,7 +14,7 @@
 
     <groupId>org.choco-solver</groupId>
     <artifactId>choco-parsers</artifactId>
-    <version>4.0.4-SNAPSHOT</version>
+    <version>4.0.4</version>
     <packaging>jar</packaging>
     <name>A FlatZinc parser for Choco3</name>
 
@@ -63,7 +63,7 @@
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>4.0.5-SNAPSHOT</version>
+            <version>4.0.5</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
