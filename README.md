@@ -67,7 +67,7 @@ As far as possible, provide a [Minimal Working Example](https://en.wikipedia.org
 ## Contributing
 
 Anyone can contribute to the project, from the **source code** to the **documentation**.
-In order to ease the process, we established a [contribution guide](CONTRIBUTION.md)
+In order to ease the process, we established a [contribution guide](CONTRIBUTING.md)
 that should be reviewed before starting any contribution as
 it lists the requirements and good practices to ease the contribution process.
 
