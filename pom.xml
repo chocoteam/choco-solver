@@ -44,7 +44,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <choco.version>4.0.4</choco.version>
+        <choco.version>4.0.5</choco.version>
     </properties>
 
     <scm>
