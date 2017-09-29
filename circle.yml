@@ -4,7 +4,7 @@ machine:
 
 test:
   override:
-    - export MAVEN_OPTS="-XX:UseLoopPredicate" && mvn test -Dgroups="1s,10s"
+    - export MAVEN_OPTS="-XX:-UseLoopPredicate" && mvn test -Dgroups="1s,10s"
   post:
     - mkdir -p $CIRCLE_TEST_REPORTS/junit/
     - find . -type f -regex ".*/target/surefire-reports/.*xml" -exec cp {} $CIRCLE_TEST_REPORTS/junit/ \;
