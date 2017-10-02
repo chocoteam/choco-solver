@@ -10,6 +10,7 @@ NEXT MILESTONE
 ### Major features:
 
 ### Deprecated API (to be removed in next release):
+- `RealView` will be removed in next release, Ibex managed this concept (int to real)
 
 ### Closed issues and pull requests:
 

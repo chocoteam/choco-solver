@@ -23,11 +23,9 @@ import static java.lang.Math.ceil;
 import static java.lang.Math.floor;
 
 /**
- * Channeling constraint between integers and reals, to avoid views
- *
- * @author Jean-Guillaume Fages
- * @since 07/04/2014
+ * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
  */
+@Deprecated
 public class IntEqRealConstraint extends Constraint {
 
     //***********************************************************************************
@@ -35,26 +33,17 @@ public class IntEqRealConstraint extends Constraint {
     //***********************************************************************************
 
     /**
-     * Channeling between integer variables intVars and real variables realVars.
-     * Thus, for any i in [0,intVars.length-1], |intVars[i]-realVars[i]|< epsilon.
-     * intVars.length must be equal to realVars.length.
-     *
-     * @param intVars  integer variables
-     * @param realVars real variables
-     * @param epsilon  precision parameter
+     * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
      */
+    @Deprecated
     public IntEqRealConstraint(IntVar[] intVars, RealVar[] realVars, double epsilon) {
         super(ConstraintsName.INTEQREAL, new PropIntEqReal(intVars, realVars, epsilon));
     }
 
     /**
-     * Channeling between an integer variable intVar and a real variable realVar.
-     * Thus, |intVar-realVar|< epsilon.
-     *
-     * @param intVar  integer variable
-     * @param realVar real variable
-     * @param epsilon precision parameter
+     * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
      */
+    @Deprecated
     public IntEqRealConstraint(final IntVar intVar, final RealVar realVar, final double epsilon) {
         this(new IntVar[]{intVar}, new RealVar[]{realVar}, epsilon);
     }

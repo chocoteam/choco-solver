@@ -9,7 +9,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.constraints.real.RealConstraint;
-import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * Interface to make constraints over RealVar
@@ -39,7 +39,29 @@ public interface IRealConstraintFactory {
 	 * @param functions	list of functions, separated by a semi-colon
 	 * @param rvars     a list of real variables
 	 */
-	default RealConstraint realIbexGenericConstraint(String functions, RealVar... rvars) {
+	default RealConstraint realIbexGenericConstraint(String functions, Variable... rvars) {
 		return new RealConstraint(functions, rvars);
+	}
+
+	/**
+	 * Creates a RealConstraint to model one or more continuous functions, separated with semi-colon ";"
+	 * <br/>
+	 * A function is a string declared using the following format:
+	 * <br/>- the '{i}' tag defines a variable, where 'i' is an explicit index the array of variables <code>vars</code>,
+	 * <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max( ),min( ),abs( ),cos( ), sin( ),...'
+	 * <br/> A complete list is available in the documentation of IBEX.
+	 * <p/>
+	 *
+	 * Example to express the system:
+	 * <br/>x*y + sin(x) = 1;
+	 * <br/>ln(x)+[-0.1,0.1] >=2.6;
+	 * <br/>
+	 * <br/>realIbexGenericConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
+	 *
+	 * @param functions	list of functions, separated by a semi-colon
+	 * @param rvars     a list of real variables
+	 */
+	default RealConstraint ibex(String functions, Variable... rvars) {
+		return realIbexGenericConstraint(functions, rvars);
 	}
 }
