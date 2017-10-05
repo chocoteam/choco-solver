@@ -7,7 +7,14 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+Move to Ibex-2.5.
+
 ### Major features:
+- Ibex instance is no longer static, that offers better stability and reduce
+memory consumption when adding/removing functions. Reification no longer managed by Choco but 
+delegated to Ibex. 
+- `Search.realVarSearch(...)` offers possibility to define minimal range size, known as `epsilon`
+- `Search.ibexSolving(model)` let Ibex iterates over solutions **once all integer variables are instantiated**
 - add detection of min/max sub-cases
 
 ### Deprecated API (to be removed in next release):
