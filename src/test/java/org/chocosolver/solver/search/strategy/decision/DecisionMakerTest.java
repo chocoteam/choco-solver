@@ -46,9 +46,9 @@ public class DecisionMakerTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testMakeRealDecision() throws Exception {
-        RealDecision d = dm.makeRealDecision(model.realVar(1d, 3d), 1.5);
+        RealDecision d = dm.makeRealDecision(model.realVar(1d, 3d), 1.5, Double.MIN_VALUE);
         d.free();
-        d = dm.makeRealDecision(model.realVar(2d, 4d), 2.5);
+        d = dm.makeRealDecision(model.realVar(2d, 4d), 2.5, Double.MIN_VALUE * 2);
         d.free();
     }
 

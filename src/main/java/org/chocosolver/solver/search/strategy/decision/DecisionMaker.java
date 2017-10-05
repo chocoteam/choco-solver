@@ -64,17 +64,20 @@ public class DecisionMaker {
     }
 
     /**
-     * Creates and returns an {@link RealDecision}: "{@code var} &le; {@code value}".
+     * Creates and returns an {@link RealDecision}: "{@code var} &le; {@code value}"
+     * <br/>
+     * which is refuted as "{@code var} &ge; {@code value} + {@code epsilon}".
      * @param var a real variable
      * @param value a value
-     * @return an IntDecision
+     * @param epsilon gap for refutation
+     * @return an RealDecision
      */
-    public RealDecision makeRealDecision(RealVar var, double value) {
+    public RealDecision makeRealDecision(RealVar var, double value, double epsilon) {
         RealDecision d = realDecisionPool.getE();
         if (d == null) {
             d = new RealDecision(realDecisionPool);
         }
-        d.set(var, value);
+        d.set(var, value, epsilon);
         return d;
     }
 

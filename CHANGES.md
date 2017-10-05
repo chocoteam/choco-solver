@@ -8,9 +8,11 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- add detection of min/max sub-cases
 
 ### Deprecated API (to be removed in next release):
-- `RealView` will be removed in next release, Ibex managed this concept (int to real)
+- `IntEqRealConstraint` will be removed in next release, Ibex managed this concept (int to real)
+- `Model.getIbex()` should not be used. A `IbexHandler` manages Ibex instances (one per model).
 
 ### Closed issues and pull requests:
 

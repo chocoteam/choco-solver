@@ -13,6 +13,8 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IbexDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
@@ -73,8 +75,8 @@ public class Search {
      * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
      * @return best bound strategy
      */
-    public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch){
-        if(formerSearch == null) {
+    public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch) {
+        if (formerSearch == null) {
             throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new BoundSearch(formerSearch);
@@ -87,7 +89,7 @@ public class Search {
      * @return last conflict strategy
      */
     public static AbstractStrategy lastConflict(AbstractStrategy formerSearch, int k) {
-        if(formerSearch == null) {
+        if (formerSearch == null) {
             throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
@@ -107,11 +109,11 @@ public class Search {
      * @param search a search heuristic building branching decisions
      * @return a greedy form of search
      */
-    public static AbstractStrategy greedySearch(AbstractStrategy search){
+    public static AbstractStrategy greedySearch(AbstractStrategy search) {
         return new GreedyBranching(search);
     }
 
-    public static AbstractStrategy sequencer(AbstractStrategy... searches){
+    public static AbstractStrategy sequencer(AbstractStrategy... searches) {
         return new StrategiesSequencer(searches);
     }
 
@@ -147,19 +149,75 @@ public class Search {
     // ************************************************************************************
 
     /**
-     * Generic strategy to branch on real variables, based on domain splitting
+     * Generic strategy to branch on real variables, based on domain splitting.
+     * A real decision is like:
+     * <ul>
+     *     <li>left branch: X &le; v</li>
+     *     <li>right branch: X &ge; v + e</li>
+     * </ul>
+     * where 'e' is given by epsilon.
+     * </p>
+     *
+     * @param varS  variable selection strategy
+     * @param valS  strategy to select where to split domains
+     * @param epsilon gap for refutation
+     * @param rvars RealVar array to branch on
+     * @return a strategy to instantiate reals
+     */
+    public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
+                                             double epsilon, RealVar... rvars) {
+        return new RealStrategy(rvars, varS, valS, epsilon);
+    }
+
+    /**
+     * strategy to branch on real variables by choosing sequentially the next variable domain
+     * to split in two, wrt the middle value.
+     * A real decision is like:
+     * <ul>
+     *     <li>left branch: X &le; v</li>
+     *     <li>right branch: X &ge; v + e</li>
+     * </ul>
+     * where 'e' is given by epsilon.
+     * </p>
+     *
+     * @param epsilon gap for refutation
+     * @param reals variables to branch on
+     * @return a strategy to instantiate real variables
+     */
+    public static RealStrategy realVarSearch(double epsilon, RealVar... reals) {
+        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), epsilon, reals);
+    }
+
+    /**
+     * Generic strategy to branch on real variables, based on domain splitting.
+     *
+     * A real decision is like:
+     * <ul>
+     *     <li>left branch: X &le; v</li>
+     *     <li>right branch: X &ge; v + {@link Double#MIN_VALUE}</li>
+     * </ul>
+     * </p>
+     *
      * @param varS  variable selection strategy
      * @param valS  strategy to select where to split domains
      * @param rvars RealVar array to branch on
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
-        return new RealStrategy(rvars, varS, valS);
+        return realVarSearch(varS, valS, Double.MIN_VALUE, rvars);
     }
 
     /**
      * strategy to branch on real variables by choosing sequentially the next variable domain
-     * to split in two, wrt the middle value
+     * to split in two, wrt the middle value.
+     *
+     * A real decision is like:
+     * <ul>
+     *     <li>left branch: X &le; v</li>
+     *     <li>right branch: X &ge; v + {@link Double#MIN_VALUE}</li>
+     * </ul>
+     * </p>
+     *
      * @param reals variables to branch on
      * @return a strategy to instantiate real variables
      */
@@ -215,7 +273,7 @@ public class Search {
         return new DomOverWDeg(vars, 0,
                 model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
                         || !(model.getObjective() instanceof IntVar) ?
-                        new IntDomainMin(): new IntDomainBest());
+                        new IntDomainMin() : new IntDomainBest());
     }
 
     /**
@@ -314,7 +372,7 @@ public class Search {
      *
      * @param model a model requiring a default search strategy
      */
-    public static AbstractStrategy defaultSearch(Model model){
+    public static AbstractStrategy defaultSearch(Model model) {
         Solver r = model.getSolver();
 
         // 1. retrieve variables, keeping the declaration order, and put them in four groups:
@@ -329,10 +387,17 @@ public class Search {
                 int kind = type & Variable.KIND;
                 switch (kind) {
                     case Variable.BOOL:
-                    case Variable.INT: livars.add((IntVar) var); break;
-                    case Variable.SET: lsvars.add((SetVar) var); break;
-                    case Variable.REAL: lrvars.add((RealVar) var); break;
-                    default: break; // do not throw exception to allow ad hoc variable kinds
+                    case Variable.INT:
+                        livars.add((IntVar) var);
+                        break;
+                    case Variable.SET:
+                        lsvars.add((SetVar) var);
+                        break;
+                    case Variable.REAL:
+                        lrvars.add((RealVar) var);
+                        break;
+                    default:
+                        break; // do not throw exception to allow ad hoc variable kinds
                 }
             }
         }
@@ -340,9 +405,9 @@ public class Search {
         // 2. extract the objective variable if any (to avoid branching on it)
         if (r.getObjectiveManager().isOptimization()) {
             objective = r.getObjectiveManager().getObjective();
-            if((objective.getTypeAndKind() & Variable.REAL) != 0){
+            if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
                 lrvars.remove(objective);// real var objective
-            }else{
+            } else {
                 assert (objective.getTypeAndKind() & Variable.INT) != 0;
                 livars.remove(objective);// bool/int var objective
             }
@@ -363,9 +428,9 @@ public class Search {
         // 4. lexico LB/UB branching for the objective variable
         if (objective != null) {
             boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
-            if((objective.getTypeAndKind() & Variable.REAL) != 0){
-                strats.add(realVarSearch(new Cyclic<>(), max?new RealDomainMax():new RealDomainMin(), (RealVar) objective));
-            }else{
+            if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
+                strats.add(realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(), (RealVar) objective));
+            } else {
                 strats.add(max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
             }
         }
@@ -377,5 +442,41 @@ public class Search {
 
         // 6. add last conflict
         return lastConflict(sequencer(strats.toArray(new AbstractStrategy[strats.size()])));
+    }
+
+    /**
+     * <p>
+     * Create a strategy which lets Ibex terminates the solving process for the CSP,
+     * <b>once all integer variables have been instantiated</b>.
+     * </p><p>
+     * Note that if the system is not constrained enough,
+     * there can be an infinite number of solutions.
+     * </p><p>
+     * For example, solving the function
+     * <br/>
+     * x,y in [0.0,1.0] with
+     * <br/>
+     * x + y = 1.0
+     * <br/>
+     * will return x,y in [0.0,1.0] and not a single solution.
+     * </p><p>
+     * If one wants a unique solution,
+     * calling {@link #realVarSearch(RealVar...)} should be considered.
+     * </p>
+     * @param model declaring model
+     * @return a strategy that lets Ibex terminates the solving process.
+     */
+    public static AbstractStrategy ibexSolving(Model model) {
+        return new AbstractStrategy<Variable>(model.getVars()) {
+            IbexDecision dec = new IbexDecision(model);
+            @Override
+            public Decision<Variable> getDecision() {
+                if (dec.inUse()) {
+                    return null;
+                } else {
+                    return dec;
+                }
+            }
+        };
     }
 }

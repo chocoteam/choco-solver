@@ -32,11 +32,36 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
      * How a value is selected
      */
     private RealValueSelector valueIterator;
+    /**
+     * Gap when refuting a decision
+     */
+    private final double epsilon;
 
-    public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector, RealValueSelector valueIterator) {
+    /**
+     * Create a real strategy which generates decision over real variables.
+     * <p>
+     * A real decision is like:
+     * <ul>
+     *     <li>left branch: X &le; v</li>
+     *     <li>right branch: X &ge; v + e</li>
+     * </ul>
+     * where e is 'epsilon'
+     * </p>
+     * @param scope variables to be managed with this strategy
+     * @param varselector how to select the next variable to branch on
+     * @param valueIterator on to select the value
+     * @param epsilon gap value for refutation
+     */
+    public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector,
+                        RealValueSelector valueIterator,
+                        double epsilon) {
         super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
+        if(epsilon < Double.MIN_VALUE){
+            throw new IllegalArgumentException("'epsilon' should be greater or equal to Double.MIN_VALUE");
+        }
+        this.epsilon = epsilon;
     }
 
     @Override
@@ -50,7 +75,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value);
+        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value, epsilon);
     }
 
     @SuppressWarnings({"unchecked"})

@@ -65,7 +65,7 @@ public class Constraint {
     /**
      * BoolVar that reifies this constraint, unique.
      */
-    private BoolVar boolReif;
+    protected BoolVar boolReif;
 
     /**
      * Opposite constraint of this constraint, unique.
@@ -183,7 +183,7 @@ public class Constraint {
      *
      * @param bool the variable to reify with
      */
-    public final void reifyWith(BoolVar bool) {
+    public void reifyWith(BoolVar bool) {
         Model s = propagators[0].getModel();
         getOpposite();
         if (boolReif == null) {

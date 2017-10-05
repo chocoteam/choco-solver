@@ -372,4 +372,13 @@ public class VariableUtils {
         return (var.getTypeAndKind() & Variable.VIEW) != 0;
     }
 
+    /**
+     * @param var a variable
+     * @return <i>true</i> if the variable is a real variable, based on its kind,
+     * <i>false</i> otherwise
+     */
+    public static boolean isReal(Variable var) {
+        return (var.getTypeAndKind() & Variable.REAL) !=0;
+    }
+
 }

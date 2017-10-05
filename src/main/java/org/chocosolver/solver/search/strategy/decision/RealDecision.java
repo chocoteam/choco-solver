@@ -13,7 +13,9 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.PoolManager;
 
 /**
- * A decision based on a {@link RealVar}
+ * A decision based on a {@link RealVar} that splits the domain in two ranges.
+ * The lower range is evaluated first, then the upper range.
+
  * <br/>
  *
  * @author Charles Prud'homme
@@ -26,6 +28,10 @@ public class RealDecision extends Decision<RealVar> {
      * The decision value
      */
     private double value;
+    /**
+     * The step value
+     */
+    private double epsilon;
     /**
      * Decision pool manager, to recycle decisions
      */
@@ -51,7 +57,7 @@ public class RealDecision extends Decision<RealVar> {
         if (branch == 1) {
             modif = var.updateUpperBound(value, this);
         } else if (branch == 2) {
-            modif = var.updateLowerBound(value, this);
+            modif = var.updateLowerBound(value + epsilon, this);
         }
         assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
     }
@@ -60,10 +66,13 @@ public class RealDecision extends Decision<RealVar> {
      * Instantiate this decision with the parameters
      * @param v a variable
      * @param value a value
+     * @param epsilon gap between value as upper bound and as lower bound (to simulate strictness)
      */
-    public void set(RealVar v, double value) {
+    public void set(RealVar v, double value, double epsilon) {
+        assert epsilon>=Double.MIN_VALUE:"epsilon should be greater or equal to Double.MIN_VALUE";
         super.set(v);
         this.value = value;
+        this.epsilon = epsilon;
     }
 
     @Override

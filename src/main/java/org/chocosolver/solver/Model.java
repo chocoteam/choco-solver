@@ -20,6 +20,7 @@ import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.Ibex;
+import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
@@ -27,7 +28,11 @@ import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.propagation.PropagationTrigger;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -67,6 +72,8 @@ public class Model implements IModel {
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
+
+    public static final String IBEX_HOOK_NAME = "H_IBEX";
 
     /**
      * Settings to use with this solver
@@ -153,11 +160,6 @@ public class Model implements IModel {
      * Counter used to name variables created internally
      */
     private int nameId = 1;
-
-    /**
-     * An Ibex (continuous constraint model) instance
-     */
-    private Ibex ibex;
 
     /**
      * Enable attaching hooks to a model.
@@ -576,6 +578,20 @@ public class Model implements IModel {
     }
 
     /**
+     * Return a constraint embedding an instance of Ibex (continuous solver).
+     * A call to this method will create and post the constraint if it does not exist already.
+     *
+     * @return the Ibex constraint
+     */
+    public IbexHandler getIbexHandler() {
+        if (getHook(IBEX_HOOK_NAME) == null) {
+            IbexHandler ibexHnadler = new IbexHandler();
+            addHook(IBEX_HOOK_NAME, ibexHnadler);
+        }
+        return (IbexHandler) getHook(IBEX_HOOK_NAME);
+    }
+
+    /**
      * Return the current settings for the solver
      *
      * @return a {@link org.chocosolver.solver.Settings}
@@ -918,17 +934,11 @@ public class Model implements IModel {
      * Creates one if none
      *
      * @return the ibex reference
+     * @deprecated see {@link #getIbexHandler()} ()}`
      */
+    @Deprecated
     public Ibex getIbex() {
-        if (ibex == null) {
-            try {
-                ibex = new Ibex();
-            } catch (ExceptionInInitializerError ini) {
-                throw new SolverException("Choco cannot initialize Ibex.\n" +
-                        "The following option should be passed as VM argument: \"-Djava.library.path=/path/to/ibex/dynlib\"");
-            }
-        }
-        return ibex;
+        return null;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -13,13 +13,12 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
-import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -30,7 +29,6 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static java.lang.System.out;
-import static org.chocosolver.solver.constraints.real.Ibex.HC4;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -45,16 +43,16 @@ public class RealTest {
     public void cmpDomains(double[] a1, double[] a2) {
         double DELTA = 1e-10;
         for (int i = 0; i < a1.length; i++)
-            Assert.assertEquals(a1[i], a2[i], DELTA);
+            assertEquals(a1[i], a2[i], DELTA);
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
-        for(int i=0;i<10;i++) {
-            Ibex ibex = new Ibex();
+        for (int i = 0; i < 10; i++) {
+            Ibex ibex = new Ibex(new double[]{0.001, 0.001});
 
-            ibex.add_contractor(2, "{0}+{1}=3", Ibex.COMPO);
+            ibex.add_ctr("{0}+{1}=3");
 
             double domains[] = {1.0, 10.0, 1.0, 10.0};
             System.out.println("Before contract:");
@@ -74,94 +72,95 @@ public class RealTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() {
-        for(int i=0;i<10;i++) {
-            Ibex ibex = new Ibex();
-            ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
+        for (int i = 0; i < 10; i++) {
+            Ibex ibex = new Ibex(new double[]{0.001, 0.001});
+            ibex.add_ctr("{0}^2+{1}^2<=1");
 
             double[] domains;
             double vv = Math.sqrt(2.) / 2.;
 
             // CASE 1: the boolean is set to TRUE
-            Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.TRUE), Ibex.FAIL);
-            Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE), Ibex.ENTAILED);
+            assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.TRUE), Ibex.FAIL);
+            assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.TRUE), Ibex.ENTAILED);
             domains = new double[]{-2., 1., -2., 1.};
-            Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
+            assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
             cmpDomains(domains, new double[]{-1., 1., -1., 1.});
-            Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
+            assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
 
 
             // CASE 2: the boolean is set to FALSE
-            Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE), Ibex.FAIL);
-            Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE), Ibex.ENTAILED);
-            Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOTHING);
+            assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE), Ibex.FAIL);
+            assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE), Ibex.ENTAILED);
+            assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE), Ibex.NOTHING);
             domains = new double[]{0., 2., -vv, vv};
-            Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.CONTRACT);
+            assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.CONTRACT);
             cmpDomains(domains, new double[]{vv, 2., -vv, vv});
 
             // CASE 3: the boolean is set to UNKNOWN
-            Assert.assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
-            Assert.assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
-            Assert.assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+            assertEquals(ibex.contract(0, new double[]{2., 3., 2., 3.}, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
+            assertEquals(ibex.contract(0, new double[]{-.5, .5, -.5, .5}, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
+            assertEquals(ibex.contract(0, new double[]{-2., 1., -2., -1.}, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
             domains = new double[]{0., 2., -vv, vv};
-            Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+            assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
             cmpDomains(domains, new double[]{0., 2., -vv, vv});
 
             ibex.release();
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test3() {
-        for(int i=0;i<10;i++) {
-            Ibex ibex = new Ibex();
-            ibex.add_contractor(2, "{0}^2+{1}^2<=1", Ibex.COMPO);
+        for (int i = 0; i < 10; i++) {
+            Ibex ibex = new Ibex(new double[]{0.001, 0.001});
+            ibex.add_ctr("{0}^2+{1}^2<=1");
 
             double[] domains;
 
             domains = new double[]{0., 1., 0., 1.};
-            Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
-            Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.FULL_INFLATE);
+            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
+            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.FULL_INFLATE);
             domains = new double[]{1., 2., 1., 2.};
-            Assert.assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.BAD_POINT);
+            assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.BAD_POINT);
             domains = new double[]{0., 1., -1., 0.};
-            Assert.assertEquals(ibex.inflate(0, new double[]{1., 0.}, domains, true), Ibex.NOT_SIGNIFICANT);
+            assertEquals(ibex.inflate(0, new double[]{1., 0.}, domains, true), Ibex.NOT_SIGNIFICANT);
 
             domains = new double[]{-1., 0., -1., 0.};
-            Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.INFLATE);
-            Assert.assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.FULL_INFLATE);
+            assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.INFLATE);
+            assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.FULL_INFLATE);
             domains = new double[]{0., .5, 0., .5};
-            Assert.assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
+            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
             domains = new double[]{0., 1.01, -1., 0.};
-            Assert.assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
+            assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
 
             ibex.release();
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s")
     public void test4() {
-        for(int i=0;i<10;i++) {
+        for (int i = 0; i < 10; i++) {
             Model model = new Model();
-            double precision = 0.00000001;
             IntVar x = model.intVar("x", 0, 9, true);
             IntVar y = model.intVar("y", 0, 9, true);
-            RealVar[] vars = model.realIntViewArray(new IntVar[]{x, y}, precision);
+            IntVar[] vars = {x, y};
+//            RealVar[] vars = model.realIntViewArray(new IntVar[]{x, y}, precision);
             // Actually ,we need the calculated result like these :
             // x : [2.000000, 2.000000], y : [4.000000, 4.000000]
             // or x : [1.000000, 1.000000], y : [8.000000, 8.000000]
             // but it always like this : x : [2.418267, 2.418267], y : [3.308154, 3.308154]
 //        rcons.discretize(x,y);
             model.realIbexGenericConstraint("{0} * {1} = 8", vars).post();
-            model.getSolver().setSearch(new RealStrategy(vars, new Cyclic(), new RealDomainMiddle()));
-            model.getSolver().solve();
-            assertEquals(x.getValue(), 2);
-            assertEquals(y.getValue(), 4);
+            Solver solver = model.getSolver();
+            solver.setSearch(Search.randomSearch(vars, i));
+            solver.findAllSolutions();
+            assertEquals(solver.getSolutionCount(), 4);
+//            assertEquals(y.getValue(), 1);
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFreemajb1() {
         Model model = new Model();
 
@@ -189,16 +188,15 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFreemajb2() {
         Model model = new Model();
 
         RealVar x = model.realVar("x", 0.0, 5.0, 0.001);
         out.println("Before solving:");
 
-        RealConstraint newRange = new RealConstraint("newRange", "1.4142<{0};{0}<3.1416", HC4, x);
+        RealConstraint newRange = new RealConstraint("1.4142<{0};{0}<3.1416", x);
         newRange.post();
-
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -208,7 +206,7 @@ public class RealTest {
         model.getSolver().printStatistics();
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testFreemajb3() {
         Model model = new Model();
 
@@ -226,15 +224,15 @@ public class RealTest {
         model.getSolver().printStatistics();
     }
 
-    @DataProvider(name="coeffs")
-    public Object[][] provideCoeffs(){
+    @DataProvider(name = "coeffs")
+    public Object[][] provideCoeffs() {
         return new String[][]{
                 {"{0}*0.5) = {1}"},
                 {"{0}/2) = {1}"},
         };
     }
 
-    @Test(groups="ignored", timeOut=60000, dataProvider = "coeffs")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "coeffs")
     public void testHM1(String coeffs) {
         Model model = new Model("Test model");
         double precision = 1.e-6;
@@ -245,21 +243,21 @@ public class RealTest {
         RealVar MTBF_MT = model.realVar("MTBF_MT", MIN_VALUE, MAX_VALUE, precision);
         RealVar global_min = model.realVar("global_min", MIN_VALUE, MAX_VALUE, precision);
         Solver solver = model.getSolver();
-        model.realIbexGenericConstraint("("+coeffs+";{0}+100={2};min({1},{2}) ={3}", weldingCurrent, MTBF_WS, MTBF_MT, global_min).post();
+        model.realIbexGenericConstraint("(" + coeffs + ";{0}+100={2};min({1},{2}) ={3}", weldingCurrent, MTBF_WS, MTBF_MT, global_min).post();
         model.setPrecision(precision);
         model.setObjective(false, global_min);
-        model.getSolver().plugMonitor((IMonitorSolution) () -> {
+        solver.plugMonitor((IMonitorSolution) () -> {
             out.println("*******************");
             System.out.println("weldingCurrent LB=" + weldingCurrent.getLB() + " UB=" + weldingCurrent.getUB());
             System.out.println("MTBF_WS LB=" + MTBF_WS.getLB() + " UB=" + MTBF_WS.getUB());
             System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
             System.out.println("global_min LB=" + global_min.getLB() + " UB=" + global_min.getUB());
         });
-        solver.showDecisions();
+        solver.showDecisions(() -> "" + solver.getNodeCount());
         while (solver.solve()) ;
     }
 
-    @Test(groups="ignored", timeOut=600000)
+    @Test(groups = "1s", timeOut = 600000)
     public void testHM2() {
         Model model = new Model("Default model");
         double precision = 1.e-1;
@@ -280,21 +278,41 @@ public class RealTest {
         solver.solve();
     }
 
-    @Test(groups = "ignored")
-    public void testPG1() throws Exception {
-        Model model = new Model();
-        RealVar rv = model.realVar(0,5,0.1d);
-        BoolVar bv = model.realIbexGenericConstraint("{0}=4",rv).reify();
-        model.arithm(bv,"=",0).post();
-        model.getSolver().showSolutions();
-        Solver solver = model.getSolver();
-        solver.showDecisions();
-        while(solver.solve());
-        System.out.println(bv.getValue() + " " + rv.getUB());
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 63);
+    @Test(groups = "1s", timeOut = 60000)
+    public void testHM21() {
+        Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-1});
+        ibex.add_ctr("932.6-(8.664*{0})+(0.02678*({0}^2))-(0.000028*({0}^3)) = {1}");
+        ibex.add_ctr("min(20,{1}) = {2}");
+        int result = ibex.contract(0, new double[]{121., 248., 0., 200.}, Ibex.TRUE);
+        System.out.printf("Expected: %d, found: %d\n", Ibex.NOTHING, result);
     }
 
-    @Test(groups = "ignored")
+    @Test(groups = "1s")
+    public void testPG1() throws Exception {
+        Model model = new Model();
+        RealVar rv = model.realVar(0, 5, 4.E-2);
+        BoolVar bv = model.realIbexGenericConstraint("{0}=4", rv).reify();
+        model.arithm(bv, "=", 0).post();
+        Solver solver = model.getSolver();
+        solver.showSolutions();
+        solver.showDecisions();
+        solver.setSearch(
+                Search.inputOrderLBSearch(bv),
+                Search.realVarSearch(4.E-2, rv));
+        while (solver.solve()) ;
+        ;
+        assertEquals(model.getSolver().getSolutionCount(), 63);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJJ35() {
+        Ibex ibex = new Ibex(new double[]{1.0E-1});
+        ibex.add_ctr("{0} = 4");
+        double domains[] = {0., 5.};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
+    }
+
+    @Test(groups = "1s")
     public void testJiiTee1() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
@@ -339,10 +357,10 @@ public class RealTest {
             for (Variable v : printVars) System.out.print(v + ", ");
             System.out.println("");
         }
-        Assert.assertEquals(solver.getSolutionCount(), 10);
+        assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPeter() {
         Random ds = new Random();
         Model model = new Model();
@@ -364,7 +382,7 @@ public class RealTest {
             model.ifThenElse(bv2[i], model.realIbexGenericConstraint("{0}=" + ds.nextDouble() * 10.0, rv2[i]), model.realIbexGenericConstraint("{0}=0.0", rv2[i]));
             model.arithm(bv1[i], "!=", bv2[i]).post();
         }
-       //NO CRASH
+        //NO CRASH
         //	model.realIbexGenericConstraint("{0}={1}+{2}", opt, srv1, srv2).post();
         //CRASH
         model.realIbexGenericConstraint("{0}=max({1},{2})", opt, srv1, srv2).post();
@@ -376,26 +394,301 @@ public class RealTest {
         }
     }
 
-    @Test(groups="ignored", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testJiTee1() throws ContradictionException {
-        double [] posA= new double[] {150.0, 195.0, 270.0, 370.0, 470.0};
+        double[] posA = new double[]{150.0, 195.0, 270.0, 370.0, 470.0};
         Model model = new Model("model");
-        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
+        IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
         double min = 150.0;
         double max = 470.0;
-        RealVar dim_A= model.realVar("dim_A", min, max,1.0E-5);
-        BoolVar[] rVarGuards =new BoolVar[posA.length];
-        for (int i = 0; i< posA.length; i++) {
+        RealVar dim_A = model.realVar("dim_A", min, max, 1.0E-5);
+        BoolVar[] rVarGuards = new BoolVar[posA.length];
+        for (int i = 0; i < posA.length; i++) {
             rVarGuards[i] = model.realIbexGenericConstraint("{0} = " + posA[i], dim_A).reify();
         }
-        model.sum(rVarGuards, "=" , 1).post();
+        model.sum(rVarGuards, "=", 1).post();
 
         model.realIbexGenericConstraint("{0}<=271.", dim_A).post();
         model.arithm(load, ">", 400).post();
-        for(int i  = 0; i < 1_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             model.realIbexGenericConstraint("{0} > " + i, dim_A);
             System.gc();
         }
         model.getSolver().findSolution();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPostUnpost() {
+        LinkedList<Variable> printVars = new LinkedList<Variable>();
+        Constraint stickyCstr = null;
+        Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
+        double[] posA = new double[]{150.0, 195.0, 270.0, 370.0, 470.0};
+        Model model = new Model("model");
+        IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
+        RealVar dim_A = addEnumReal(model, "dim_A", posA);
+
+        model.and(
+                model.realIbexGenericConstraint("{0}<=271.", dim_A),
+                model.arithm(load, ">", 400)).post();
+
+        printVars.add(dim_A);
+        printVars.add(load);
+
+
+        int sameRoundPostUnpost = 0;
+        //Repeatedly post / unpost. This is unstable on Windows, Ibex crashes quite often. But main concern is to make this work!
+        //I cannot understand why solutions are lost after the first contradiction has been found, even when propagation is not on!
+        for (int round = 0; round < 350; round++) {
+            System.out.print("round:" + round + ", getNbCstrs()=" + model.getNbCstrs() + " ");
+            model.getSolver().reset();
+            model.getEnvironment().worldPush();
+            System.out.print(load);
+            System.out.print(" ");
+            System.out.print(dim_A);
+
+            //Randomly unpost a sticky constraint that remains between iterations. Probability of unpost() annd permanent removal is higher than creation and post()
+            boolean unPostedNow = false;
+            if (stickyCstr != null) {
+                int r = rr.nextInt(100);
+                if (r <= 12) {
+                    model.unpost(stickyCstr);
+                    System.out.print(", Unposted: " + stickyCstr + " ");
+                    stickyCstr = null;
+                    unPostedNow = true;
+                }
+            }
+
+            //a constraint at each round: post and unpost
+            Constraint c;
+            int reqInt = (round % 100);
+            c = model.realIbexGenericConstraint("{0} > " + 5 * reqInt, dim_A);
+            c.post();
+
+            //Randomly post a sticky constraint that remains between iterations. Probability to post() is lower than unpost()
+            boolean postedNow = false;
+            if (stickyCstr == null) {
+                int r = rr.nextInt(100);
+                if (r <= 7) {
+                    stickyCstr = model.arithm(load, "=", r * 100);
+                    model.post(stickyCstr);
+                    System.out.print(", Posted: " + stickyCstr + " ");
+                    postedNow = true;
+                }
+            }
+
+            System.out.print(", sticky is posted: " + (stickyCstr != null));
+            if (postedNow && unPostedNow) {
+                System.out.print(", UnpostPost BOTH on same ROUND");
+                sameRoundPostUnpost++;
+            }
+            System.out.println();
+
+            boolean propagate = false;
+            if (propagate) {
+                model.getSolver().getEnvironment().worldPush();
+                try {
+                    model.getSolver().propagate();
+                } catch (ContradictionException e) {
+                    System.out.println("CONTRADICTION found");
+                    e.printStackTrace();
+                }
+                model.getSolver().getEnvironment().worldPop();
+            }
+
+            int i = 0;
+            while (model.getSolver().solve()) {
+                i++;
+                System.out.print("Solution " + i + " found :");
+                for (Variable v : printVars) System.out.print(v + ", ");
+                System.out.println("");
+            }
+            model.unpost(c);
+        }
+
+
+        System.out.println("sameRoundPostUnpost=" + sameRoundPostUnpost);
+
+    }
+
+    private static RealVar addEnumReal(Model model, String name, double[] possibles) {
+        double min = possibles[0];
+        double max = possibles[possibles.length - 1];
+        RealVar rVar = model.realVar(name, min, max, 1.0E-5);
+        BoolVar[] rVarGuards = new BoolVar[possibles.length];
+        for (int i = 0; i < possibles.length; i++)
+            rVarGuards[i] = model.realIbexGenericConstraint("{0} = " + possibles[i], rVar).reify();
+        model.sum(rVarGuards, "=", 1).post();
+        return rVar;
+
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testDetec() {
+        Model model = new Model();
+
+        RealVar x = model.realVar("x", 0.0, 5.0, 0.001);
+        RealVar y = model.realVar("y", 0.0, 5.0, 0.001);
+        RealVar z = model.realVar("z", 0.0, 5.0, 0.001);
+
+        RealConstraint newRange = new RealConstraint("1.4142<{0};{2}<3.1416;{1}>{0};{2}*2<{0}", x, y, z);
+        assertEquals(newRange.toString(),
+                "REALCONSTRAINT ([" +
+                        "RealPropagator(x) ->(\"1.4142<{0}\"), " +
+                        "RealPropagator(z) ->(\"{0}<3.1416\"), " +
+                        "RealPropagator(y, x) ->(\"{0}>{1}\"), " +
+                        "RealPropagator(z, x) ->(\"{0}*2<{1}\")])");
+
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJJ1() {
+        Ibex ibex = new Ibex(new double[]{1.0E-5});
+        ibex.add_ctr("{0}<=200.0");
+        double domains[] = {150., 470.};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
+        Assert.assertEquals(domains[0], 150.);
+        Assert.assertEquals(domains[1], 200.);
+        domains[0] = 150.;
+        domains[1] = 470.;
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.CONTRACT);
+        Assert.assertEquals(domains[0], 200.);
+        Assert.assertEquals(domains[1], 470.);
+        domains[0] = 150.;
+        domains[1] = 470.;
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.NOTHING);
+        Assert.assertEquals(domains[0], 150.);
+        Assert.assertEquals(domains[1], 470.);
+
+        domains[0] = 201.;
+        domains[1] = 470.;
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.FAIL);
+        Assert.assertEquals(domains[0], 201.);
+        Assert.assertEquals(domains[1], 470.);
+
+        domains[0] = 150.;
+        domains[1] = 199.;
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE_OR_TRUE), Ibex.ENTAILED);
+        Assert.assertEquals(domains[0], 150.);
+        Assert.assertEquals(domains[1], 199.);
+
+        domains[0] = 201.;
+        domains[1] = 470.;
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.FAIL);
+        Assert.assertEquals(domains[0], 201.);
+        Assert.assertEquals(domains[1], 470.);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJJ2() {
+        Ibex ibex = new Ibex(new double[]{1.0E-5});
+        ibex.add_ctr("{0}=150.0");
+        double domains[] = {150., 150.};
+        Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
+        Assert.assertEquals(domains[0], 150.);
+        Assert.assertEquals(domains[1], 150.);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJJ3() {
+        Ibex ibex = new Ibex(new double[]{1.0E-5});
+        ibex.add_ctr("{0} < 150.0");
+        double domains[] = {140., 151.};
+        Assert.assertEquals(ibex.start_solve(domains), Ibex.STARTED);
+        while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) {
+            System.out.printf("%s\n", Arrays.toString(domains));
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMove1() {
+        Model model = new Model();
+        RealVar[] x = model.realVarArray(3, 0., 5., 1.E-2);
+        RealVar m = model.realVar(0.0, 5.0, 1.E-2);
+        model.realIbexGenericConstraint(
+                "({0} + {1} + {2})/ 3 = {3};",
+                ArrayUtils.append(x, new RealVar[]{m})
+        ).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.ibexSolving(model));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMove2() {
+        Model model = new Model();
+        IntVar[] x = model.intVarArray(3, 0, 5);
+        RealVar m = model.realVar(0.0, 5.0, 1.E-2);
+        RealVar n = model.realVar(0.0, 5.0, 1.E-2);
+        model.realIbexGenericConstraint(
+                "({0} + {1} + {2})/ 3 = {3};",
+                ArrayUtils.append(x, new RealVar[]{m})
+        ).post();
+        model.realIbexGenericConstraint(
+                "{0} + {1} = 2.6",
+                m, n
+        ).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(x, 0), Search.ibexSolving(model));
+        solver.showSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 108);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJJ34() {
+        Ibex ibex = new Ibex(new double[]{-1.0, -1.0, -1.0, 1.0E-2, 1.0E-2});
+        ibex.add_ctr("({0} + {1} + {2}) / 3 = {3}");
+        ibex.add_ctr("{3} + {4} < 4.5");
+        double domains[] = {0., 5., 0., 5., 0., 5., 0., 5., 0., 5.};
+        Assert.assertEquals(ibex.contract(1, domains, Ibex.TRUE), Ibex.CONTRACT);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMove3() {
+        Model model = new Model();
+        RealVar[] x = model.realVarArray(3, -10., 10., 1.E-2);
+        model.realIbexGenericConstraint(
+                " {0}^2*{1}^2*{2}^2=1;\n" +
+                        " {0}^2={1}^2;\n" +
+                        " abs({0})=abs({2});",
+                x).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.ibexSolving(model));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s"/*, timeOut = 60000*/)
+    public void testMove4() {
+        Model model = new Model();
+        RealVar[] y = model.realVarArray(3, -10., 10., 1.E-5);
+        model.realIbexGenericConstraint(
+                "{0}^2*{1}^2*{2}^2=1;\n" +
+                        "{0}^2={1}^2;\n" +
+                        "abs({0})=abs({2});",
+                y).post();
+        Solver solver = model.getSolver();
+        solver.showSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMove5() {
+        Model model = new Model();
+        RealVar y = model.realVar(-10., 10., 1.E-1);
+        BoolVar b = model.boolVar();
+        String f1 = "{0}>= 1.";
+        String f2 = "{0}<= 2.";
+        model.realIbexGenericConstraint(
+                f1+";"+f2,
+                y).reifyWith(b);
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.realVarSearch(1.E-1, y));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 100);
     }
 }

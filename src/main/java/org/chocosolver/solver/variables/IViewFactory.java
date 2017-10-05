@@ -10,8 +10,11 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
-import org.chocosolver.solver.variables.view.*;
+import org.chocosolver.solver.variables.view.BoolNotView;
+import org.chocosolver.solver.variables.view.MinusView;
+import org.chocosolver.solver.variables.view.OffsetView;
+import org.chocosolver.solver.variables.view.RealView;
+import org.chocosolver.solver.variables.view.ScaleView;
 
 import static java.lang.Math.max;
 
@@ -208,9 +211,12 @@ public interface IViewFactory extends ISelf<Model> {
     //*************************************************************************************
 
     /**
-     * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
+     * Creates a real view of <i>var</i>, i.e. a RealVar of domain equal to the domain of <i>var</i>.
+     * This should be used to include an integer variable in an expression/constraint requiring RealVar
+     * @param var the integer variable to be viewed as a RealVar
+     * @param precision double precision (e.g., 0.00001d)
+     * @return a RealVar of domain equal to the domain of <i>var</i>
      */
-    @Deprecated
     default RealVar realIntView(IntVar var, double precision) {
         if (_me().getSettings().enableViews()) {
             return new RealView(var, precision);
@@ -218,15 +224,18 @@ public interface IViewFactory extends ISelf<Model> {
             double lb = var.getLB();
             double ub = var.getUB();
             RealVar rv = _me().realVar("(real)" + var.getName(), lb, ub, precision);
-            new IntEqRealConstraint(var, rv, precision).post();
+            _me().realIbexGenericConstraint("{0} = {1}", rv, var).post();
             return rv;
         }
     }
 
     /**
-     * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
+     * Creates an array of real views for a set of integer variables
+     * This should be used to include an integer variable in an expression/constraint requiring RealVar
+     * @param ints the array of integer variables to be viewed as real variables
+     * @param precision double precision (e.g., 0.00001d)
+     * @return a real view of <i>ints</i>
      */
-    @Deprecated
     default RealVar[] realIntViewArray(IntVar[] ints, double precision) {
         RealVar[] reals = new RealVar[ints.length];
         if (_me().getSettings().enableViews()) {
@@ -238,8 +247,8 @@ public interface IViewFactory extends ISelf<Model> {
                 double lb = ints[i].getLB();
                 double ub = ints[i].getUB();
                 reals[i] = _me().realVar("(real)" + ints[i].getName(), lb, ub, precision);
+                _me().realIbexGenericConstraint("{0} = {1}", reals[i], ints[i]).post();
             }
-            new IntEqRealConstraint(ints, reals, precision).post();
         }
         return reals;
     }
@@ -247,9 +256,12 @@ public interface IViewFactory extends ISelf<Model> {
     // MATRIX
 
     /**
-     * @deprecated see {@link org.chocosolver.solver.constraints.IRealConstraintFactory#realIbexGenericConstraint(String, Variable...)} instead
+     * Creates a matrix of real views for a matrix of integer variables
+     * This should be used to include an integer variable in an expression/constraint requiring RealVar
+     * @param ints the matrix of integer variables to be viewed as real variables
+     * @param precision double precision (e.g., 0.00001d)
+     * @return a real view of <i>ints</i>
      */
-    @Deprecated
     default RealVar[][] realIntViewMatrix(IntVar[][] ints, double precision) {
         RealVar[][] vars = new RealVar[ints.length][ints[0].length];
         for (int i = 0; i < ints.length; i++) {
