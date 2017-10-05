@@ -1411,7 +1411,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint max(IntVar max, IntVar[] vars) {
-        if(vars.length == 2){
+		if(vars.length == 1){
+			return max.eq(vars[0]).decompose();
+		}else if(vars.length == 2){
             return max(max, vars[0], vars[1]);
         }else {
             return new Constraint(ConstraintsName.MAX, new PropMax(vars, max));
@@ -1426,7 +1428,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint max(BoolVar max, BoolVar[] vars) {
-		return new Constraint(ConstraintsName.MAX, new PropBoolMax(vars, max));
+		if(vars.length == 1){
+			return max.eq(vars[0]).decompose();
+		}else if(vars.length == 2) {
+			return max(max, vars[0], vars[1]);
+		}else {
+			return new Constraint(ConstraintsName.MAX, new PropBoolMax(vars, max));
+		}
 	}
 
 	/**
@@ -1448,7 +1456,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of variables, of size > 0
 	 */
 	default Constraint min(IntVar min, IntVar[] vars) {
-		if(vars.length == 2) {
+		if(vars.length == 1){
+			return min.eq(vars[0]).decompose();
+		}else if(vars.length == 2) {
             return min(min, vars[0], vars[1]);
         }else{
             return new Constraint(ConstraintsName.MIN, new PropMin(vars, min));
@@ -1463,7 +1473,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars a vector of boolean variables, of size > 0
 	 */
 	default Constraint min(BoolVar min, BoolVar[] vars) {
-		return new Constraint(ConstraintsName.MIN, new PropBoolMin(vars, min));
+		if(vars.length == 1){
+			return min.eq(vars[0]).decompose();
+		}else if(vars.length == 2) {
+			return min(min, vars[0], vars[1]);
+		}else {
+			return new Constraint(ConstraintsName.MIN, new PropBoolMin(vars, min));
+		}
 	}
 
 	/**
