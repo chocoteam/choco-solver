@@ -6,8 +6,7 @@ The developments are pushed on the master branch, so this is the most up-to-date
 
 The issue tracker is the preferred channel for [bug reports](#bug), [feature requests](#feat)
 and [submitting pull requests](#pull).
-If you need a personal support request, use the [forum](http://choco-solver.org/?q=Forum),
-most support requests are answered very fast.
+If you need a personal support request, use our [Gitter chatroom](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) or [google-group](https://groups.google.com/forum/#!forum/choco-solver). Most support requests are answered very fast.
 
 
 <a name="bug"></a>
