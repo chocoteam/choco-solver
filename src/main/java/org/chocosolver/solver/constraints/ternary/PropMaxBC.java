@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.constraints.ternary;
 
@@ -74,7 +74,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[2].getValue();
                 if (val > vars[1].getUB()) { // => X = Z
-                    if(vars[0].instantiateTo(val, this)) {
+                    if (vars[0].instantiateTo(val, this)) {
                         setPassive();
                     }
                 } else {
@@ -99,7 +99,7 @@ public class PropMaxBC extends Propagator<IntVar> {
             {
                 int val = vars[1].getValue();
                 if (val > vars[2].getUB()) { // => X = Y
-                    if(vars[0].instantiateTo(val, this)) {
+                    if (vars[0].instantiateTo(val, this)) {
                         setPassive();
                     }
                 } else { // val in Z
@@ -114,11 +114,11 @@ public class PropMaxBC extends Propagator<IntVar> {
                     fails(); // TODO: could be more precise, for explanation purpose
                 }
                 if (vars[1].getUB() < best) {
-                    if(vars[2].instantiateTo(best, this)) {
+                    if (vars[2].instantiateTo(best, this)) {
                         setPassive();
                     }
                 } else if (vars[2].getUB() < best) {
-                    if(vars[1].instantiateTo(best, this)) {
+                    if (vars[1].instantiateTo(best, this)) {
                         setPassive();
                     }
                 } else {
@@ -132,7 +132,8 @@ public class PropMaxBC extends Propagator<IntVar> {
             case 0: // otherwise
                 _filter();
                 break;
-            default: throw new SolverException("Unexpected mask "+c);
+            default:
+                throw new SolverException("Unexpected mask " + c);
         }
     }
 
@@ -154,12 +155,19 @@ public class PropMaxBC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            if (BST.getValue() != Math.max(v1.getValue(), v2.getValue())) {
-                return ESat.FALSE;
-            } else {
-                return ESat.TRUE;
-            }
+        int ub = vars[0].getUB();
+        if (vars[1].getLB() > ub || vars[2].getLB() > ub) {
+            return ESat.FALSE;
+        }
+        if (Math.max(vars[1].getUB(), vars[2].getUB()) < vars[0].getLB()) {
+            return ESat.FALSE;
+        }
+        if (vars[1].getUB() > ub || vars[2].getUB() > ub) {
+            return ESat.UNDEFINED;
+        }
+        if (vars[0].isInstantiated()
+                && (vars[1].isInstantiatedTo(ub) || vars[2].isInstantiatedTo(ub))) {
+            return ESat.TRUE;
         }
         return ESat.UNDEFINED;
     }
@@ -172,9 +180,9 @@ public class PropMaxBC extends Propagator<IntVar> {
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if(var == null){
+        if (var == null) {
             super.why(ruleStore, null, evt, value);
-        }else if (var == vars[0]) {
+        } else if (var == vars[0]) {
             if (IntEventType.isInstantiate(evt.getMask())) {
                 if (vars[1].isInstantiated()) {
                     newrules |= ruleStore.addFullDomainRule(vars[1]);

@@ -154,10 +154,18 @@ public class PropMinBC extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            if (BST.getValue() != Math.min(v1.getValue(), v2.getValue())) {
-                return ESat.FALSE;
-            } else {
+        int lb = vars[0].getLB();
+        if (vars[1].getUB() < lb || vars[2].getUB() < lb) {
+            return ESat.FALSE;
+        }
+        if (Math.min(vars[1].getLB(), vars[2].getLB()) > vars[0].getUB()) {
+            return ESat.FALSE;
+        }
+        if (vars[1].getLB() < lb || vars[2].getLB() < lb) {
+            return ESat.UNDEFINED;
+        }
+        if (vars[0].isInstantiated()) {
+            if (vars[1].isInstantiatedTo(lb) || vars[2].isInstantiatedTo(lb)) {
                 return ESat.TRUE;
             }
         }
