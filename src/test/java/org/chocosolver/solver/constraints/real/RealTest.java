@@ -110,34 +110,6 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test3() {
-        for (int i = 0; i < 10; i++) {
-            Ibex ibex = new Ibex(new double[]{0.001, 0.001});
-            ibex.add_ctr("{0}^2+{1}^2<=1");
-
-            double[] domains;
-
-            domains = new double[]{0., 1., 0., 1.};
-            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.INFLATE);
-            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, true), Ibex.FULL_INFLATE);
-            domains = new double[]{1., 2., 1., 2.};
-            assertEquals(ibex.inflate(0, new double[]{1., 1.}, domains, true), Ibex.BAD_POINT);
-            domains = new double[]{0., 1., -1., 0.};
-            assertEquals(ibex.inflate(0, new double[]{1., 0.}, domains, true), Ibex.NOT_SIGNIFICANT);
-
-            domains = new double[]{-1., 0., -1., 0.};
-            assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.INFLATE);
-            assertEquals(ibex.inflate(0, new double[]{-1., -1.}, domains, false), Ibex.FULL_INFLATE);
-            domains = new double[]{0., .5, 0., .5};
-            assertEquals(ibex.inflate(0, new double[]{0., 0.}, domains, false), Ibex.BAD_POINT);
-            domains = new double[]{0., 1.01, -1., 0.};
-            assertEquals(ibex.inflate(0, new double[]{1.01, 0.}, domains, false), Ibex.NOT_SIGNIFICANT);
-
-            ibex.release();
-        }
-    }
-
     @Test(groups = "1s")
     public void test4() {
         for (int i = 0; i < 10; i++) {
@@ -410,7 +382,7 @@ public class RealTest {
 
         model.realIbexGenericConstraint("{0}<=271.", dim_A).post();
         model.arithm(load, ">", 400).post();
-        for (int i = 0; i < 1_000; i++) {
+        for (int i = 0; i < 500; i++) {
             model.realIbexGenericConstraint("{0} > " + i, dim_A);
             System.gc();
         }
