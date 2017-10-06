@@ -712,7 +712,8 @@ public enum ArrayUtils {
     }
 
     /**
-     * Adapted from java.util.Arrays#binarySearch0, it returns the value greater or equal to key in an increasing order value array
+     * Adapted from {@link java.util.Arrays#binarySearch0(int[], int, int, int)} ,
+     * it returns the value greater or equal to key in an increasing order value array
      * If the key exists in a, it returns the index of key in a,
      * otherwise it returns the index of the closest value greater than key when gq is set to true,
      * or the index of the closest value smaller than key when gq is set to false.

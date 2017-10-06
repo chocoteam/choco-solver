@@ -54,7 +54,7 @@ function extractReleaseComment(){
     FROM=$(expr ${ARRAY[0]} + 1)
     TO=$(expr ${ARRAY[1]} - 2)
     CHANGES=$(cat ./CHANGES.md | sed -n "${FROM},${TO}p" | perl -p -e 's/  /\\t/' | perl -p -e 's/(\#)([0-9])/\\#\2/' | perl -p -e 's/\n/\\n/g')
-    echo '{"tag_name":'\""${VERSION}"\"',"target_commitish":"master","name":'\""${VERSION}"\"',"body":'\""$CHANGES"\"',"draft": false,"prerelease": false}' > $2
+    echo '{"tag_name":'\""${VERSION}"\"',"target_commitish":"master","name":'\""${VERSION}"\"',"body":'\""$CHANGES"\"',"draft": true,"prerelease": false}' > $2
 }
 
 if [ "$#" -ne 1 ] ; then

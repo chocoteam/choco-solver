@@ -8,9 +8,6 @@
  */
 package org.chocosolver.util.tools;
 
-import java.awt.*;
-
-
 /**
  * various mathematics utilities. The functions do not exist in the basic math package Math.*
  *
@@ -222,12 +219,7 @@ public final class MathUtils {
         if (y == 0) {
             return Integer.MAX_VALUE;
         } else {
-            int r = x / y;
-            // if the signs are different and modulo not zero, round down
-            if ((x ^ y) < 0 && (r * y != x)) {
-                r--;
-            }
-            return r;
+            return Math.floorDiv(x,y);
         }
     }
 
