@@ -44,8 +44,7 @@ notifications:
     on_start: never
 before_script:
 - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
-script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib && mvn clean install -DtestFailureIgnore=true
-  -Dgroups=$GROUP -Dext.lib.path=/usr/local/lib; fi
+script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib && mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP; fi
 addons:
   coverity_scan:
     project:
