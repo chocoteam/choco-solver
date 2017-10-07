@@ -371,7 +371,7 @@ On a call to ``solver.printVersion()``, the following message will be printed:
 
     ** Choco 4.0.5 (2017-09) : Constraint Programming Solver, Copyleft (c) 2010-2017
 
-On a call to ``solver.printVersion()``, the following message will be printed:
+On a call to ``solver.printStatistics()``, the following message will be printed:
 
 .. code-block:: none
 
