@@ -174,7 +174,10 @@ The required dependencies for compilation are:
 
 
 
-They are available on Maven Repository (http://mvnrepository.com/).
+They are available on [Maven Repository](http://mvnrepository.com/).
+
+To declare continuous constraints, [Ibex-2.6.0](http://www.ibex-lib.org/download) needs to be installed
+(instructions are given on Ibex website).
 
 
 ### Building from sources ###
