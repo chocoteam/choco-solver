@@ -458,7 +458,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     protected boolean validate(){
         if (!getModel().getSettings().checkModel(this)) {
-            throw new SolverException("The current solution does not satisfy the checker.\n" +
+            throw new SolverException("The current solution does not satisfy the checker." +
+                    "Either (a) the search strategy is not complete or " +
+                    "(b) the model is not constrained enough or " +
+                    "(c) a constraint's checker (\"isSatisfied()\") is not correct or " +
+                    "(d) some constraints' filtering algorithm (\"propagate(...)\") is not correct.\n" +
                     Reporting.fullReport(mModel));
         }
         feasible = TRUE;
@@ -781,7 +785,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             for (Constraint c : mModel.getCstrs()) {
                 ESat satC = c.isSatisfied();
                 if (ESat.FALSE == satC) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                    if(getModel().getSettings().warnUser()) {
+                        System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                    }
                     return ESat.FALSE;
                 } else if (ESat.TRUE == satC) {
                     OK++;
