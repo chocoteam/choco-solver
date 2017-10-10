@@ -663,4 +663,33 @@ public class RealTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 100);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJuha1() {
+        Model model = new Model("model");
+        IntVar foo = model.intVar("foo", 0, 20);
+        IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
+        RealVar rfoo = model.realIntView(foo, 1E-5);
+        RealVar rwow = model.realIntView(wow, 1E-5);
+        model.realIbexGenericConstraint("{0} / {1} = 4.5", rfoo, rwow).reify();
+        model.arithm(foo, "!=", 10).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(foo, wow));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 60);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJuha2() {
+        Model model = new Model("model");
+        IntVar foo = model.intVar("foo", new int[]{0,15, 20});
+        IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
+        RealVar rfoo = model.realIntView(foo, 1E-5);
+        RealVar rwow = model.realIntView(wow, 1E-5);
+        model.realIbexGenericConstraint("{0} / {1} = 4.5", rfoo, rwow).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(foo, wow));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
 }

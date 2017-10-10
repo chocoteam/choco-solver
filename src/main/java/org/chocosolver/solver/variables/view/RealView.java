@@ -131,7 +131,9 @@ public class RealView extends AbstractVariable implements IView, RealVar {
 
     @Override
     public void notify(IEventType event) throws ContradictionException {
-        super.notifyPropagators(transformEvent((IntEventType) event), this);
+        if (event != IntEventType.REMOVE) { // there is no real event matching remove value
+            super.notifyPropagators(transformEvent((IntEventType) event), this);
+        }
     }
 
     public IEventType transformEvent(IntEventType evt) {
