@@ -2,31 +2,37 @@
 Choco-solver in practice
 ========================
 
-[![Build Status](https://travis-ci.org/chocoteam/samples.svg?branch=master)](https://travis-ci.org/chocoteam/samples)
 
+This project hosts samples based on [choco-solver-4.0.5](https://github.com/chocoteam/choco-solver/releases/tag/4.0.5).
+This is mainly a source projet and no executable jar provided.
+To easily play around with choco-solver, one needs:
+- [Java Development Kit 8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+- [Maven3](http://maven.apache.org/download.cgi) _(optional but recommended)_
+- on IDE (eclipse, IntelliJ IDEA, etc)
 
-This project hosts samples based on choco-solver.
+Easy way (with maven)
+---------------------
 
-To run a sample, please follow the steps:
-
-1. Download the source code of [samples](https://github.com/chocoteam/samples/releases/tag/samples-4.0.6)
-2. Download [choco-solver-4.0.5.zip](https://github.com/chocoteam/choco-solver/releases/tag/4.0.5) and unzip it
-3. Go to the `samples` directory and create a directory named `lib` and another named `classes`
-4. Copy/paste `choco-solver-4.0.5-with-dependencies.jar` into `lib`
-6. In a console, compile a sample, for instance `Nonogram.java`:
-
+1. Download the [latest source code](https://github.com/chocoteam/samples/releases/latest) (zip or tar.gz).
+2. Un-archive the file and go to samples directory.
+3. Open a terminal and run the maven command:
     ```bash
-    javac -d classes \
-           -sourcepath ./src/main/java/ \
-           -cp .:\
-               lib/choco-solver-4.0.5-with-dependencies.jar \
-           src/main/java/org/chocosolver/samples/integer/Nonogram.java
+    mvn clean install -DskipTests
     ```
-   
-6. Then run the resolution, with the optional arguments `-f -d rabbit` :
-                
-    ```bash
-    java -cp classes:\
-             lib/choco-solver-4.0.5-with-dependencies.jar \
-            org.chocosolver.samples.integer.Nonogram -f -d rabbit
-    ```            
+4. Then open the samples project with your IDE.
+Depending on your IDE, maven provides commands to configure your environment.
+For example, `mvn idea:idea` will generate _*.ipr_ file.
+
+To run a sample, select it `org.chocosolver.samples.*` subpackages and call the main method.
+For example, select `org.chocosolver.samples.integer.Nonogram` 
+and run the class with the following program arguments `-f -d rabbit`.
+
+
+Alternative to step 3. (without maven)
+--------------------------------------
+
+Create a new project based on samples source and downloads required dependencies:
+- [choco-solver-4.0.5](http://mvnrepository.com/artifact/org.choco-solver/choco-solver/4.0.5)
+- [pf4cs-1.0.5](http://mvnrepository.com/artifact/org.choco-solver/pf4cs/1.0.5)
+- [args4j-2.33](http://mvnrepository.com/artifact/args4j/args4j/2.33)
+Add them to the classpath of the new project.

@@ -40,9 +40,8 @@ mvn -q dependency:purge-local-repository || quit "unable to purge dep"
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
 sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
-sedInPlace "s%1. Download.*.%1. Download the source code of [samples](https://github.com/chocoteam/samples/releases/tag/samples-${VERSION})%"  README.md
-sedInPlace "s%2. Download.*.%2. Download [choco-solver-${CHOCO_VERSION}.zip](https://github.com/chocoteam/choco-solver/releases/tag/${CHOCO_VERSION}) and unzip it%"  README.md
-sedInPlace "s%choco-solver-.*-with-dependencies.jar%choco-solver-${CHOCO_VERSION}-with-dependencies.jar%"  README.md
+sedInPlace "This project hosts.*.%This project hosts samples based on [choco-solver-${CHOCO_VERSION}](https://github.com/chocoteam/choco-solver/releases/tag/${CHOCO_VERSION}).%"
+sedInPlace "- [choco-solver-4.0.5].*%- [choco-solver-${CHOCO_VERSION}](http://mvnrepository.com/artifact/org.choco-solver/choco-solver/4${CHOCO_VERSION})%"
 
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false || quit "unable to set new version"
