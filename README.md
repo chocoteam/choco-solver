@@ -35,4 +35,5 @@ Create a new project based on samples source and downloads required dependencies
 - [choco-solver-4.0.5](http://mvnrepository.com/artifact/org.choco-solver/choco-solver/4.0.5)
 - [pf4cs-1.0.5](http://mvnrepository.com/artifact/org.choco-solver/pf4cs/1.0.5)
 - [args4j-2.33](http://mvnrepository.com/artifact/args4j/args4j/2.33)
+
 Add them to the classpath of the new project.
