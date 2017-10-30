@@ -8,9 +8,11 @@
  */
 package org.chocosolver.solver.constraints;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import static java.lang.Math.abs;
+
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.stream.IntStream;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
@@ -46,10 +48,10 @@ import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondA
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
-import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
-import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
+import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
@@ -89,6 +91,11 @@ import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.PropDistanceXYZ;
 import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
+import org.chocosolver.solver.constraints.ternary.PropEQDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropGEDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropGTDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropLEDistanceXYZ;
+import org.chocosolver.solver.constraints.ternary.PropLTDistanceXYZ;
 import org.chocosolver.solver.constraints.ternary.PropMaxBC;
 import org.chocosolver.solver.constraints.ternary.PropMinBC;
 import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
@@ -103,11 +110,9 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.IntStream;
-
-import static java.lang.Math.abs;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Interface to make constraints over BoolVar and IntVar
@@ -526,6 +531,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 			throw new SolverException("Unexpected operator for distance");
 		}
 		return new Constraint(ConstraintsName.DISTANCE, new PropDistanceXYZ(ArrayUtils.toArray(var1,var2,var3), oper));
+	}
+	
+	default Constraint distance2(IntVar var1, IntVar var2, String op, IntVar var3) {
+		switch(Operator.get(op)) {
+		case EQ: return new Constraint(ConstraintsName.DISTANCE, new PropEQDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
+		case LE: return new Constraint(ConstraintsName.DISTANCE, new PropLEDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
+		case GE: return new Constraint(ConstraintsName.DISTANCE, new PropGEDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
+		case LT: return new Constraint(ConstraintsName.DISTANCE, new PropLTDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
+		case GT: return new Constraint(ConstraintsName.DISTANCE, new PropGTDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
+		default: throw new SolverException("Unexpected operator for distance: "+op);
+		}
 	}
 
 	/**
