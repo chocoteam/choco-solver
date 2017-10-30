@@ -8,7 +8,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -31,21 +30,13 @@ public abstract class AbstractPropDistanceXYZ extends Propagator<IntVar> {
 	public final static int Y = 1;
 	public final static int Z = 2;
 
-	//TODO The operator is almost useless (only used for building the string !)
-	private final Operator operator;
-
 	/**
 	 * Enforces |X - Y| op Z
 	 *
 	 * @param vars variable
-	 * @param op the relation operator in {=, <=, <, >=, >}
 	 */
-	public AbstractPropDistanceXYZ(final IntVar[] vars, final Operator op) {
+	public AbstractPropDistanceXYZ(final IntVar[] vars) {
 		super(vars, PropagatorPriority.TERNARY, true);
-		this.operator = op;
-		if(operator == Operator.NQ || operator == Operator.NONE || operator == Operator.PL || operator == Operator.MN) {
-			throw new SolverException("Unsupported operator for the distance constraint");
-		}
 	}
 
 	@Override
@@ -136,9 +127,7 @@ public abstract class AbstractPropDistanceXYZ extends Propagator<IntVar> {
 
 	protected abstract boolean isEntailed(final int distance, final int value);
 	
-	protected String getOperator() {
-		return operator.toString();
-	}
+	protected abstract String getOperator();
 
 	@Override
 	public ESat isEntailed() {

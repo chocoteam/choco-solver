@@ -89,7 +89,6 @@ import org.chocosolver.solver.constraints.nary.nValue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.PropDistanceXYZ;
 import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
 import org.chocosolver.solver.constraints.ternary.PropEQDistanceXYZ;
 import org.chocosolver.solver.constraints.ternary.PropGEDistanceXYZ;
@@ -526,14 +525,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param var3 resulting variable
 	 */
 	default Constraint distance(IntVar var1, IntVar var2, String op, IntVar var3) {
-		Operator oper = Operator.get(op);
-		if (oper != Operator.EQ && oper != Operator.GT && oper != Operator.LT) {
-			throw new SolverException("Unexpected operator for distance");
-		}
-		return new Constraint(ConstraintsName.DISTANCE, new PropDistanceXYZ(ArrayUtils.toArray(var1,var2,var3), oper));
-	}
-	
-	default Constraint distance2(IntVar var1, IntVar var2, String op, IntVar var3) {
 		switch(Operator.get(op)) {
 		case EQ: return new Constraint(ConstraintsName.DISTANCE, new PropEQDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));
 		case LE: return new Constraint(ConstraintsName.DISTANCE, new PropLEDistanceXYZ(ArrayUtils.toArray(var1,var2,var3)));

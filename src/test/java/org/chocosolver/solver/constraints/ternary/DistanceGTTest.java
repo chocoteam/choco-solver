@@ -30,7 +30,7 @@ public class DistanceGTTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Model model) {
-        return model.distance2(vars[0], vars[1], ">", vars[2]);
+        return model.distance(vars[0], vars[1], ">", vars[2]);
     }
      
     @Test(groups="1s", timeOut=60000)
@@ -39,7 +39,7 @@ public class DistanceGTTest extends AbstractTernaryTest {
     	IntVar x = model.intVar("x", -1, 5); 
     	IntVar y = model.intVar("y", -3, 3);
     	IntVar z = model.intVar("z", 5, 10);
-    	Constraint ct = model.distance2(x, y, ">", z);
+    	Constraint ct = model.distance(x, y, ">", z);
     	model.post(ct);
     	model.getSolver().propagate();
     	assertDomainIn(x, 3, 5);

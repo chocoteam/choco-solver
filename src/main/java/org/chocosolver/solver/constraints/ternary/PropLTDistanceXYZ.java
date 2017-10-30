@@ -8,7 +8,6 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -20,7 +19,7 @@ public final class PropLTDistanceXYZ extends AbstractPropDistanceXYZ {
 
 	
 	public PropLTDistanceXYZ(IntVar[] vars) {
-		super(vars, Operator.LT);
+		super(vars);
 	}
 	
 	@Override
@@ -47,6 +46,11 @@ public final class PropLTDistanceXYZ extends AbstractPropDistanceXYZ {
 	@Override
 	protected boolean isEntailed(int distance, int value) {
 		return distance < value;
+	}
+	
+	@Override
+	protected String getOperator() {
+		return "<";
 	}
 
 }
