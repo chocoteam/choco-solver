@@ -29,6 +29,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.Variable;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -242,15 +243,29 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
                         jparams.get(2).getAsDouble());
                 break;
             case "realcstr":
-                c = model.realIbexGenericConstraint(
-                        jparams.get(1).getAsString(),
-                        extractRealVarArray(jparams.get(0).getAsJsonArray())
-                );
+                c = makeRealConstraint(jparams, model);
                 break;
             default:
                 throw new JsonParseException("Unknown type : " + type);
         }
         return c;
+    }
+
+    private Constraint makeRealConstraint(JsonArray jparams, Model model) {
+        if(jparams.size() == 2) {
+            return model.realIbexGenericConstraint(
+                    jparams.get(1).getAsString(),
+                    extractVarArray(jparams.get(0).getAsJsonArray())
+            );
+        }else{
+            Variable[] params= extractVarArray(jparams.get(0).getAsJsonArray());
+            Constraint c = model.realIbexGenericConstraint(
+                    jparams.get(1).getAsString(),
+                    Arrays.copyOfRange(params, 0, params.length-1)
+            );
+            c.reifyWith(ModelDeserializer.getBoolVar(jparams.get(2).getAsString()));
+            return null;
+        }
     }
 
     private int[] extractIntArray(JsonArray jarray) {
@@ -289,6 +304,14 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
         RealVar[] array = new RealVar[jarray.size()];
         for (int i = 0; i < jarray.size(); i++) {
             array[i] = ModelDeserializer.getRealVar(jarray.get(i).getAsString());
+        }
+        return array;
+    }
+
+    private Variable[] extractVarArray(JsonArray jarray) {
+        Variable[] array = new Variable[jarray.size()];
+        for (int i = 0; i < jarray.size(); i++) {
+            array[i] = ModelDeserializer.getVar(jarray.get(i).getAsString());
         }
         return array;
     }

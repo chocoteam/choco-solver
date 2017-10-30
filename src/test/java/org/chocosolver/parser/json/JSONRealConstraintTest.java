@@ -10,6 +10,7 @@ package org.chocosolver.parser.json;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.annotations.Test;
@@ -35,11 +36,50 @@ public class JSONRealConstraintTest extends JSONConstraintTest{
     @Test(groups="1s", timeOut=60000)
     public void testRealCstr(){
         Model model = new Model();
-        RealVar x = model.realVar(0., 1.2, 0.01);
-        RealVar y = model.realVar(.8, 2.2, 0.01);
+        RealVar x = model.realVar(0., 1.2, 1.E-1);
+        RealVar y = model.realVar(.8, 2.2, 1.E-1);
         model.realIbexGenericConstraint(
-                "{0}^2+{1}^2<=1; {0} < {1}", x, y
+                "{0}^2+{1}^2<=1;", x, y
+        ).post();
+        model.realIbexGenericConstraint(
+                "{0} < {1}", x, y
         ).post();
         eval(model, false);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRealCstr2(){
+        Model model = new Model();
+        RealVar x = model.realVar(0., 1.2, 1.E-1);
+        RealVar y = model.realVar(.8, 2.2, 1.E-1);
+        BoolVar b = model.boolVar();
+        model.realIbexGenericConstraint(
+                "{0} < {1}", x, y
+        ).reifyWith(b);
+        eval(model, false);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRealCstr3(){
+        Model model = new Model();
+        RealVar x = model.realVar(0., 1.2, 1.E-1);
+        RealVar y = model.realVar(.8, 2.2, 1.E-1);
+        model.realIbexGenericConstraint(
+                "{0}^2+{1}^2<=1;{0} < {1}", x, y
+        ).post();
+        eval(model, true);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testRealCstr4(){
+        Model model = new Model();
+        RealVar x = model.realVar(.8, 1.2, 1.E-1);
+        RealVar y = model.realVar(.8, 2.2, 1.E-1);
+        BoolVar b = model.boolVar();
+        model.realIbexGenericConstraint(
+                "{0}^2+{1}^2<=1;{0} < {1}", x, y
+        ).reifyWith(b);
+        eval(model, true);
+    }
 }
+

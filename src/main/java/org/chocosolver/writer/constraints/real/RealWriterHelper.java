@@ -8,9 +8,10 @@
  */
 package org.chocosolver.writer.constraints.real;
 
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
-import org.chocosolver.solver.constraints.Propagator;
 
 import java.io.IOException;
 import java.util.stream.IntStream;
@@ -40,11 +41,20 @@ public class RealWriterHelper {
     }
 
     public static void writeRealConstraint(ConstraintWriter writer, Propagator[] propagators) throws IOException {
-        Propagator prop0 = propagators[0];
-        String functions = Reflection.getObj(prop0, "functions");
-        writer.writeRealConstraint(
-                IntStream.range(0, prop0.getNbVars()).map(i -> prop0.getVar(i).getId()).toArray(),
-                functions
-        );
+        for(Propagator prop : propagators) {
+            String functions = Reflection.getObj(prop, "functions");
+            BoolVar boolVar = Reflection.getObj(prop, "reified");
+            if(boolVar == null) {
+                writer.writeRealConstraint(
+                        IntStream.range(0, prop.getNbVars()).map(i -> prop.getVar(i).getId()).toArray(),
+                        functions
+                );
+            }else{
+                writer.writeRealConstraint(
+                        IntStream.range(0, prop.getNbVars()).map(i -> prop.getVar(i).getId()).toArray(),
+                        functions, boolVar.getId()
+                );
+            }
+        }
     }
 }

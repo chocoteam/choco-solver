@@ -1000,9 +1000,17 @@ public abstract class ConstraintWriter {
     /**
      * Encodes a constraint over reals
      * @param rids variables' ID
-     * @param functions functions to satisfy
+     * @param function function to satisfy
      */
-    public abstract void writeRealConstraint(int[] rids, String functions) throws IOException;
+    public abstract void writeRealConstraint(int[] rids, String function) throws IOException;
+
+    /**
+     * Encodes a constraint over reals which is reified
+     * @param rids variables' ID
+     * @param function a function to satisfy
+     * @param bid variable's ID
+     */
+    public abstract void writeRealConstraint(int[] rids, String function, int bid) throws IOException;
 
     /**
      * Encodes a basic reification, like "(x o c) <=> b"

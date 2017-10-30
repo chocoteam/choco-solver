@@ -1019,14 +1019,28 @@ public class JSONConstraintWriter extends ConstraintWriter {
     }
 
     @Override
-    public void writeRealConstraint(int[] rids, String functions) throws IOException {
+    public void writeRealConstraint(int[] rids, String function) throws IOException {
         writer.beginObject();
         writer.name("type");
         writer.value("realcstr");
         writer.name("params");
         writer.beginArray();
         writeVarArray(rids);
-        writer.value(functions);
+        writer.value(function);
+        writer.endArray();
+        writer.endObject();
+    }
+
+    @Override
+    public void writeRealConstraint(int[] rids, String function, int bid) throws IOException {
+        writer.beginObject();
+        writer.name("type");
+        writer.value("realcstr");
+        writer.name("params");
+        writer.beginArray();
+        writeVarArray(rids);
+        writer.value(function);
+        writeVar(bid);
         writer.endArray();
         writer.endObject();
     }
