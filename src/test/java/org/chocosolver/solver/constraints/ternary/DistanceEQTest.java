@@ -33,7 +33,7 @@ public class DistanceEQTest extends AbstractTernaryTest {
 
     @Override
     protected Constraint make(IntVar[] vars, Model model) {
-        return model.distance2(vars[0], vars[1], "=", vars[2]);
+        return model.distance(vars[0], vars[1], "=", vars[2]);
     }
     
     public final static void assertDomainIn(IntVar v, int lb, int ub) {
@@ -47,7 +47,7 @@ public class DistanceEQTest extends AbstractTernaryTest {
     	IntVar x = model.intVar("x", 0, 10); 
     	IntVar y = model.intVar("y", 12, 20);
     	IntVar z = model.intVar("z", 0, 5);
-    	Constraint ct = model.distance2(x, y, "=", z);
+    	Constraint ct = model.distance(x, y, "=", z);
     	model.post(ct);
     	model.getSolver().propagate();
     	assertDomainIn(x, 7, 10);
