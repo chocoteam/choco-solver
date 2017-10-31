@@ -54,7 +54,7 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
         IEnvironment environment = model.getEnvironment();
         for (int i = 0; i < arity; i++) {
             offsets[i] = vs[i].getLB();
-            this.supports[i] = new IStateInt[vars[i].getDomainSize()];
+            this.supports[i] = new IStateInt[vars[i].getRange()];
             for (int j = 0; j < supports[i].length; j++) {
                 this.supports[i][j] = environment.makeInt(0);
             }

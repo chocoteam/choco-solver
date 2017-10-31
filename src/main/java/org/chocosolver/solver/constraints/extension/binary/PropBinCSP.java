@@ -61,7 +61,7 @@ public abstract class PropBinCSP extends Propagator<IntVar> {
         } else if (nbCons == vars[0].getDomainSize() * vars[1].getDomainSize()) {
             return ESat.TRUE;
         }
-        return null;
+        return ESat.UNDEFINED;
     }
 
     /**

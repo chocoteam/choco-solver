@@ -562,4 +562,39 @@ public class TableTest {
 		solver.findAllSolutions();
 		Assert.assertEquals(solver.getSolutionCount(), 27);
 	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testJuha1(){
+		for (String a : BIN_ALGOS) {
+			Model model = new Model("Table MWE");
+			IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
+			IntVar bar = model.intVar("bar", 1, 2, false);
+			Tuples allowed = new Tuples(true);
+			allowed.add(1, 2);
+			allowed.add(2, 2);
+			allowed.add(3, 2);
+			BoolVar b = model.boolVar("b");
+			Constraint table = model.table(foo, bar, allowed, a);
+			table.reifyWith(b);
+			Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
+		}
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testJuha2(){
+		for (String a : ALGOS) {
+			Model model = new Model("Table MWE");
+			IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
+			IntVar foo1 = model.intVar("foo1", new int[]{1, 3, 7});
+			IntVar bar = model.intVar("bar", 1, 2, false);
+			Tuples allowed = new Tuples(true);
+			allowed.add(1, 1, 2);
+			allowed.add(2, 2, 2);
+			allowed.add(3, 7, 2);
+			BoolVar b = model.boolVar("b");
+			Constraint table = model.table(new IntVar[]{foo, foo1, bar}, allowed, a);
+			table.reifyWith(b);
+			Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
+		}
+	}
 }
