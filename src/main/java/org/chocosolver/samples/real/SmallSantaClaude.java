@@ -87,7 +87,5 @@ public class SmallSantaClaude {
         model.setObjective(false, average_deviation);
         model.setPrecision(precision);
         while (model.getSolver().solve()) ;
-        // free IBEX structures from memory
-        model.getIbex().release();
     }
 }

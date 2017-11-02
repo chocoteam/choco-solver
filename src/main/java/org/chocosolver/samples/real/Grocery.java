@@ -67,7 +67,6 @@ public class Grocery extends AbstractProblem {
     @Override
     public void solve() {
         model.getSolver().solve();
-        model.getIbex().release();
 
         System.out.println("*******");
         int sum = 0;

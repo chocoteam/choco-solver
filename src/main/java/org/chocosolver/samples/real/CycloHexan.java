@@ -74,7 +74,6 @@ public class CycloHexan extends AbstractProblem {
             out.println(st.toString());
         });
         while (model.getSolver().solve()) ;
-        model.getIbex().release();
     }
 
     public static void main(String[] args) {

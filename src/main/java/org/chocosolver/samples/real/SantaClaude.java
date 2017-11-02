@@ -93,7 +93,6 @@ public class SantaClaude extends AbstractProblem {
             out.println(format("Average: [%.3f,%.3f] euros", average.getLB(), average.getUB()));
         });
         while (model.getSolver().solve()) ;
-        model.getIbex().release();
     }
 
     public static void main(String[] args) {
