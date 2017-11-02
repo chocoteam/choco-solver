@@ -56,7 +56,7 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
         this.supports = new int[arity][];
         for (int i = 0; i < arity; i++) {
             this.offsets[i] = vars[i].getLB();
-            this.supports[i] = new int[vars[i].getDomainSize()];
+            this.supports[i] = new int[vars[i].getRange()];
         }
         this.tab = relation.getTableLists();
         int[][] tt = relation.getTupleTable();
