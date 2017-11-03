@@ -53,7 +53,7 @@ public class RealTest {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
 
             ibex.add_ctr("{0}+{1}=3");
-
+            ibex.build();
             double domains[] = {1.0, 10.0, 1.0, 10.0};
             System.out.println("Before contract:");
             System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
@@ -77,7 +77,7 @@ public class RealTest {
         for (int i = 0; i < 10; i++) {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
             ibex.add_ctr("{0}^2+{1}^2<=1");
-
+            ibex.build();
             double[] domains;
             double vv = Math.sqrt(2.) / 2.;
 
@@ -281,6 +281,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.0E-1});
         ibex.add_ctr("{0} = 4");
         double domains[] = {0., 5.};
+        ibex.build();
         Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
     }
 
@@ -517,6 +518,7 @@ public class RealTest {
     public void testJJ1() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}<=200.0");
+        ibex.build();
         double domains[] = {150., 470.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
         Assert.assertEquals(domains[0], 150.);
@@ -555,6 +557,7 @@ public class RealTest {
     public void testJJ2() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}=150.0");
+        ibex.build();
         double domains[] = {150., 150.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
         Assert.assertEquals(domains[0], 150.);
@@ -565,6 +568,7 @@ public class RealTest {
     public void testJJ3() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0} < 150.0");
+        ibex.build();
         double domains[] = {140., 151.};
         Assert.assertEquals(ibex.start_solve(domains), Ibex.STARTED);
         while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) {
@@ -613,6 +617,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{-1.0, -1.0, -1.0, 1.0E-2, 1.0E-2});
         ibex.add_ctr("({0} + {1} + {2}) / 3 = {3}");
         ibex.add_ctr("{3} + {4} < 4.5");
+        ibex.build();
         double domains[] = {0., 5., 0., 5., 0., 5., 0., 5., 0., 5.};
         Assert.assertEquals(ibex.contract(1, domains, Ibex.TRUE), Ibex.CONTRACT);
     }
@@ -691,5 +696,25 @@ public class RealTest {
         solver.setSearch(Search.inputOrderLBSearch(foo, wow));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
+
+    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    public void testJuha3(){
+        Model model = new Model("model" + Thread.currentThread().getId());
+        IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
+        RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
+        BoolVar[] dim_A_guards = new BoolVar[5];
+        dim_A_guards[0] = new RealConstraint("{0} = 150.0", dim_A).reify();
+        dim_A_guards[1] = new RealConstraint("{0} = 195.0", dim_A).reify();
+        dim_A_guards[2] = new RealConstraint("{0} = 270.0", dim_A).reify();
+        dim_A_guards[3] = new RealConstraint("{0} = 370.0", dim_A).reify();
+        dim_A_guards[4] = new RealConstraint("{0} = 470.0", dim_A).reify();
+        model.sum(dim_A_guards, "=", 1).post();
+        RealVar dim_H_asReal = model.realIntView(dim_H, 1.0E-5);
+        model.realIbexGenericConstraint("{0}+{1} > 2500", dim_A, dim_H_asReal).post();
+        model.getSolver().showSolutions();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 }

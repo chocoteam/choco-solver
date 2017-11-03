@@ -8,6 +8,15 @@
  */
 package org.chocosolver.solver.constraints.real;
 
+//============================================================================
+//                                  I B E X
+// File        : Ibex.java.in
+// Author      : Gilles Chabert
+// Copyright   : IMT Atlantique (France)
+// License     : See the LICENSE file
+// Created     : Jul 18, 2012
+// Last Update : Nov 02, 2017
+//============================================================================
 public class Ibex {
 
     /* A contraction is considered as
@@ -44,8 +53,8 @@ public class Ibex {
     public static final int FALSE_OR_TRUE = 2;
 
     /* Other error codes */
-    public static final int SYNTAX_ERROR  = -1;
     public static final int BAD_DOMAIN    = -2;
+    public static final int NOT_BUILT     = -3;
 
 
     static {
@@ -62,7 +71,7 @@ public class Ibex {
      *               Each double indicates whether a variable is integral or not, and in the
      *               case of a real variable, the precision required. More precisely:
      *
-     *               _prec[i]==-1 => the ith variable is integral.
+     *                prec[i]==-1 => the ith variable is integral.
      *                prec[i]>=0  => the ith variable is real and the precision is prec[i].
      *
      */
@@ -71,15 +80,33 @@ public class Ibex {
     }
 
     /**
-     * Add a new IBEX constraint with a default contractor.
+     * Add a new constraint.
      *
-     * The default contractor is Forward/backward.
+     * Important: The "build()" method has to be called once
+     *            all constraints are added.
      *
      * Example: add_ctr({0}={1}) will add the constraint x=y.
      *
      * @param syntax - The constraint
+     *
+     * @return
+     *
+     *   true     - OK (success)
+     *
+     *   false    - error: build() has already been called.
      */
-    public native void add_ctr(String syntax);
+    public native boolean add_ctr(String syntax);
+
+    /**
+     * Build the object (with all constraints added via add_ctr(...))
+     *
+     * @return
+     *
+     *   true     - OK (success)
+     *
+     *   false    - error: one constraint has not been parsed successfully.
+     */
+    public native boolean build();
 
     /**
      * Call the contractor associated to a constraint or its negation.
@@ -118,12 +145,11 @@ public class Ibex {
      *
      *   NOTHING         - No bound has been reduced and nothing could be proven.
      *
-     *   SYNTAX_ERROR    - One constraint has not been parsed successfully.
-     *
      *   BAD_DOMAIN      - The domain has not the expected number of dimensions.
+     *
+     *   NOT_BUILT       - Object not built (build() must be called before)
      */
     public native int contract(int i, double bounds[], int reif);
-
 
     /**
      * Inflate a point to a box with respect to a constraint or its negation.
@@ -169,12 +195,11 @@ public class Ibex {
      *   UNKWOWN_POINT   - No inflation at all could be done and it could even not be decided
      *                     whether p is inside or outside the constraint.
      *
-     *   SYNTAX_ERROR    - One constraint has not been parsed successfully.
-     *
      *   BAD_DOMAIN      - The domain has not the expected number of dimensions.
+     *
+     *   NOT_BUILT       - Object not built (build() must be called before)
      */
     public native int inflate(int i, double p[], double bounds[], boolean in);
-
 
     /**
      * Same as contract(int, double bounds[], int reif) with reif=TRUE.
@@ -185,8 +210,8 @@ public class Ibex {
      * Let IBEX terminates the solving process for the CSP, once all the integer
      * variables have been instanciated.
      *
-     * This function initializes the solving process. Each solution is then retreived
-     * in turn via a call to next_solution().
+     * This function initializes the solving process. Each solution is then retrieved
+     * in turn via a call to next_solution(...).
      *
      * @param
      *
@@ -195,18 +220,21 @@ public class Ibex {
      *
      * @return
      *
-     *   STARTED                 _ - OK (success)
+     *   SUCCESS                 _ - OK
      *
      *   DISCRETE_NOT_INSTANCIATED - One discrete variable is not instanciated
      *
-     *   SYNTAX_ERROR              - One constraint has not been parsed successfully.
-     *
      *   BAD_DOMAIN                - The domain has not the expected number of dimensions.
+     *
+     *   NOT_BUILT                 - Object not built (build() must be called before))
      */
     public native int start_solve(double bounds[]);
 
     /**
      * Look up for the next solution.
+     *
+     * The first call to solution(...) in a given solving process must be preceded by a
+     * call to start_solve(...).
      *
      *   domains     - (output argument): array in which the solution will
      *                 be stored (if any)
@@ -218,9 +246,9 @@ public class Ibex {
      *
      *   SEARCH_OVER - No more solution
      *
-     *   NOT_STARTED - A call to start_solve is missing
-     *
      *   BAD_DOMAIN  - The domain has not the expected number of dimensions.
+     *
+     *   NOT_BUILT   - Object not built (build() must be called before))
      */
     public native int next_solution(double sol[]);
 

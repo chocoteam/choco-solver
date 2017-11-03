@@ -82,6 +82,15 @@ public class IbexHandler {
     private byte startSolve = 0;
 
     /**
+     * build Ibex instance.
+     * Since Ibex' parser is not thread safe, this method is synchronized
+     * @param ibex ibex instance to build.
+     */
+    private synchronized static void build(Ibex ibex){
+        ibex.build();
+    }
+
+    /**
      * Add new functions to Ibex
      *
      * @param prop propagator that manages the function
@@ -163,7 +172,7 @@ public class IbexHandler {
             case Ibex.STARTED: // success, a solution was found
                 break;
             case Ibex.DISCRETE_NOT_INSTANCIATED:
-            case Ibex.SYNTAX_ERROR:
+            case Ibex.NOT_BUILT:
             case Ibex.BAD_DOMAIN:
                 throw new IllegalStateException("Ibex cannot initialize the solving, error #" + result + " is thrown");
         }
@@ -298,6 +307,8 @@ public class IbexHandler {
         }
         domains = new double[vars.size() * 2];
         hasChanged = false;
+        // build is synchronized because Ibex parser is not thread safe
+        IbexHandler.build(ibex);
     }
 
 
