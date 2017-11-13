@@ -77,7 +77,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         }
         power.updateLowerBound(maxPower, this);
         if (remainingCapacity < 0) {
-            fails();
+            power.updateUpperBound(power.getLB() - 1, this); // fails
         } else {
             int idx;
             for (int i = 0; i < n; i++) {
@@ -124,7 +124,7 @@ public class PropKnapsack extends Propagator<IntVar> {
     @Override
     public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
         boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        assert var == this.power;
+        assert var == this.power: "Expected "+power+", found "+var;
         if (IntEventType.isInclow(evt.getMask())) {
             for (int i = 0; i < n; i++) {
                 newrules |= ruleStore.addLowerBoundRule(vars[i]);

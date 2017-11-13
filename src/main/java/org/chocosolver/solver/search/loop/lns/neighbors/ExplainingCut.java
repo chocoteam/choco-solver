@@ -212,9 +212,9 @@ public class ExplainingCut implements INeighbor {
         mDecisionPath.clear();
         mDecisionPath.add(null); // to
         DecisionPath dp = mModel.getSolver().getDecisionPath();
-        int last = dp.size();
-        while (last > 1) {
-            addToPath(dp.getDecision(--last));
+        int id = 1;
+        while (id < dp.size()) {
+            addToPath(dp.getDecision(id++));
         }
 //        Collections.reverse(path);
     }
@@ -248,12 +248,12 @@ public class ExplainingCut implements INeighbor {
         // 1. make a backup
         mModel.getEnvironment().worldPush();
         DecisionPath dp = mModel.getSolver().getDecisionPath();
-        int i = 0;
+        int i = -1;
         try {
             assert mModel.getSolver().getDecisionPath().size() == 1;
             // 2. apply the decisions
             mModel.getSolver().getObjectiveManager().postDynamicCut();
-            for (i = mDecisionPath.size() - 1; i > 0; i--) {
+            for (i = 1; i < mDecisionPath.size(); i++) {
                 dp.pushDecision(mDecisionPath.get(i).duplicate());
                 dp.apply();
                 mModel.getSolver().propagate();
@@ -278,13 +278,13 @@ public class ExplainingCut implements INeighbor {
 
                 unrelated.clear();
                 unrelated.or(related);
-                unrelated.flip(0, i);
+                unrelated.flip(0, related.length());
                 unrelated.clear(0); // clear ROOT decision
 
                 // 4. remove all decisions above i in path
-                while (i > 1) {
-                    mDecisionPath.remove(1);
-                    i--;
+                int j = mDecisionPath.size()-1;
+                while (i < j) {
+                    mDecisionPath.remove(j--);
                 }
 
             } else {
