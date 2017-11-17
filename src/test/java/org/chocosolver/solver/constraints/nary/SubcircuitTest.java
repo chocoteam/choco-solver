@@ -18,6 +18,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
@@ -26,6 +27,39 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class SubcircuitTest {
+
+	@Test(groups="1s", timeOut=60000)
+	public void test() {
+		// test from Anthony Palmieri
+		int[][] listAdj={
+				{0,2},//0
+				{1,2},  //1
+				{0,1,2,3,4},//2
+				{2,3},//3
+				{2,4,5}};//4
+		Model m = new Model();
+		IntVar nodes[]= new IntVar[5];
+		for (int i = 0; i < listAdj.length; i++) {
+			nodes[i]=m.intVar(listAdj[i]);
+		}
+
+		IntVar start = m.intVar(0);
+		IntVar end = m.intVar(4);
+		m.subPath(nodes, start,end, 0, m.intVar(1,14)).post();
+
+		int sol=0;
+		m.getSolver().showContradiction();
+		while(m.getSolver().solve()){
+			sol++;
+		}
+
+		m.getSolver().reset();
+		int solAfterReset=0;
+		while(m.getSolver().solve()){
+			solAfterReset++;
+		}
+		Assert.assertEquals(sol,solAfterReset);
+	}
 
 	@Test(groups="1s", timeOut=60000)
 	public static void test1() {
