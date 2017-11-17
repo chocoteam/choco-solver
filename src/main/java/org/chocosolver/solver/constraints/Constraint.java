@@ -17,8 +17,8 @@ import org.chocosolver.util.ESat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * A Constraint is basically a set of <code>Propagator</code>.
@@ -112,7 +112,7 @@ public class Constraint {
         if(model.getSettings().checkDeclaredConstraints()) {
             Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
             if(instances == null){
-                instances = Collections.newSetFromMap(new WeakHashMap<Constraint, Boolean>());
+                instances = new HashSet();
                 model.addHook("cinstances", instances);
             }
             instances.add(this);

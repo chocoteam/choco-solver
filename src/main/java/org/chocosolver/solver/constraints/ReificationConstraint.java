@@ -66,6 +66,8 @@ public class ReificationConstraint extends Constraint {
         for (int i = 1; i < propagators.length; i++) {
             propagators[i].setReifiedSilent();
         }
+        trueCons.declareAs(Status.REIFIED, -1);
+        falseCons.declareAs(Status.REIFIED, -1);
     }
 
     private static Propagator[] createProps(BoolVar bVar, Constraint trueCons, Constraint falseCons) {

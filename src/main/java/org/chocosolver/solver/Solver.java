@@ -329,7 +329,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             instances
                     .stream()
                     .filter(c -> c.getStatus() == FREE)
-                    .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.getName()));
+                    .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.toString()));
         }
 
         // for fast construction of "external" constraint, they are initialized once for all

@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -379,4 +380,33 @@ public class ConstraintTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testAmIMeYet(){
+        Model model = new Model();
+        model.set(new Settings() {
+            @Override
+            public boolean warnUser() {
+                return true;
+            }
+            @Override
+            public boolean checkDeclaredConstraints() {
+                return true;
+            }
+        });
+
+        IntVar varA = model.intVar("A", 0, 1);
+        IntVar varB = model.intVar("B", 0, 1);
+        IntVar varC = model.intVar("C", 0, 1);
+        IntVar varD = model.intVar("D", 0, 1);
+
+        Constraint eq = model.arithm(varA, "=", varB);
+        model.ifThen(eq, model.arithm(varC, "=", 1));
+        model.ifThen(eq, model.arithm(varD, "=", 0));
+
+        Solver solver = model.getSolver();
+        solver.showSolutions();
+        solver.findAllSolutions();
+    }
+
 }
+
