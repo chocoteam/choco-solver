@@ -94,7 +94,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private IntVarValueIterator _javaIterator;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -190,21 +190,19 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             return false;
         }
         int i;
-        if (nlb == olb) {
-            // look for the new lb
-            do {
-                i = INDICES.nextSetBit(V2I.get(olb) + 1);
-                olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
-                nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+        // look for the new lb
+        while (nlb == olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+            i = INDICES.nextSetBit(V2I.get(olb) + 1);
+            olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
+            nlb = values.nextValue(olb - 1);
         }
-        if (nub == oub) {
+        if(nlb <= nub) {
             // look for the new ub
-            do {
+            while (nub == oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
                 i = INDICES.prevSetBit(V2I.get(oub) - 1);
                 oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
                 nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+            }
         }
         // the new bounds are now known, delegate to the right method
         boolean hasChanged = updateBounds(olb, oub, cause);
@@ -242,21 +240,19 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int nlb = values.nextValue(olb - 1);
         int nub = values.previousValue(oub + 1);
         int i;
-        if (nlb != olb) {
-            // look for the new lb
-            do {
-                i = INDICES.nextSetBit(V2I.get(olb) + 1);
-                olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
-                nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb != olb);
+        // look for the new lb
+        while (nlb != olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+            i = INDICES.nextSetBit(V2I.get(olb) + 1);
+            olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
+            nlb = values.nextValue(olb - 1);
         }
-        if (nub != oub) {
+        if(nlb <= nub) {
             // look for the new ub
-            do {
+            while (nub != oub && olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE) {
                 i = INDICES.prevSetBit(V2I.get(oub) - 1);
                 oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
                 nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub != oub);
+            }
         }
         // the new bounds are now known, delegate to the right method
         boolean hasChanged = updateBounds(nlb, nub, cause);
@@ -487,17 +483,13 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int oub = VALUES[ub];
         boolean update = false;
         if (olb < aLB || oub > aUB) {
-            if (olb < aLB) {
-                model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
-            }
-            if (oub > aUB) {
-                model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
-            }
             IntEventType e = null;
             int index, b;
             if (oub < aLB) {
+                model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < aLB) {
+                model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
                 e = IntEventType.INCLOW;
                 b = LB.get();
                 index = indexOfLowerBound(aLB, lb, ub);
@@ -514,8 +506,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 olb = VALUES[index];
             }
             if (olb > aUB) {
+                model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > aUB) {
+                model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 b = UB.get();
                 index = indexOfUpperBound(aUB, lb, ub);
@@ -914,6 +908,9 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public Iterator<Integer> iterator() {
+        if(_javaIterator == null){
+            _javaIterator =  new IntVarValueIterator(this);
+        }
         _javaIterator.reset();
         return _javaIterator;
     }

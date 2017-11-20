@@ -67,7 +67,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private IntVarValueIterator _javaIterator;
 
     /**
      * Create a bounded domain IntVar : [min,max]
@@ -106,39 +106,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-//        records.forEachRemVal(beforeModification.set(this, EventType.REMOVE, cause));
-        int inf = getLB();
-        int sup = getUB();
-        if (value == inf && value == sup) {
-            model.getSolver().getExplainer().removeValue(this, value, cause);
-            this.contradiction(cause, MSG_REMOVE);
-        } else if (inf == value || value == sup) {
-            IntEventType e;
-            if (value == inf) {
-                if (reactOnRemoval) {
-                    delta.add(value, value, cause);
-                }
-                SIZE.add(-1);
-                LB.set(value + 1);
-                e = IntEventType.INCLOW;
-            } else {
-                if (reactOnRemoval) {
-                    delta.add(value, value, cause);
-                }
-                SIZE.add(-1);
-                UB.set(value - 1);
-                e = IntEventType.DECUPP;
-            }
-            model.getSolver().getExplainer().removeValue(this, value, cause);
-            if (SIZE.get() > 0) {
-                if (this.isInstantiated()) {
-                    e = IntEventType.INSTANTIATE;
-                }
-                this.notifyPropagators(e, cause);
-            } else {
-                this.contradiction(cause, MSG_EMPTY);
-            }
-            return true;
+        if (value == getLB()){
+            return updateLowerBound(value + 1, cause);
+        }
+        else if(value == getUB()) {
+            return updateUpperBound(value - 1, cause);
         }
         return false;
     }
@@ -325,40 +297,38 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int oub = this.getUB();
         boolean update = false;
         if (olb < lb || ub < oub) {
-            if (olb < lb){
+            IntEventType e = null;
+            int d = 0;
+            if (oub < lb) {
                 model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
+                this.contradiction(cause, MSG_LOW);
+            } else if (olb < lb) {
+                model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
+                e = IntEventType.INCLOW;
+                if (reactOnRemoval) {
+                    if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
+                }
+                d += olb - lb;
+                LB.set(lb);
             }
-            if (oub > ub){
+            if (olb > ub) {
                 model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
+                this.contradiction(cause, MSG_UPP);
+            } else if (oub > ub) {
+                model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
+                e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
+                if (reactOnRemoval) {
+                    if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);
+                }
+                d += ub - oub;
+                UB.set(ub);
             }
-            if (oub >= lb && olb <= ub) {
-                int d = 0;
-                IntEventType e = null;
-                if (olb < lb) {
-                    if (reactOnRemoval) {
-                        if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
-                    }
-                    d += olb - lb;
-                    LB.set(lb);
-                    e = IntEventType.INCLOW;
-                }
-                if (ub < oub) {
-                    if (reactOnRemoval) {
-                        if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);
-                    }
-                    d += ub - oub;
-                    UB.set(ub);
-                    e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                }
-                SIZE.add(d);
-                if (isInstantiated()) {
-                    e = IntEventType.INSTANTIATE;
-                }
-                this.notifyPropagators(e, cause);
-                update = true;
-            } else { // fails
-                this.contradiction(cause, oub < lb?MSG_LOW:MSG_UPP);
+            SIZE.add(d);
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
             }
+            this.notifyPropagators(e, cause);
+            update = true;
         }
         return update;
     }
@@ -545,6 +515,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public Iterator<Integer> iterator() {
+        if(_javaIterator == null){
+            _javaIterator = new IntVarValueIterator(this);
+        }
         _javaIterator.reset();
         return _javaIterator;
     }
