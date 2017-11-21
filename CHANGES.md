@@ -16,6 +16,7 @@ delegated to Ibex.
 - `Search.realVarSearch(...)` offers possibility to define minimal range size, known as `epsilon`
 - `Search.ibexSolving(model)` let Ibex iterates over solutions **once all integer variables are instantiated**
 - add detection of min/max sub-cases
+- add simple dashboard in Swing to show resolution statistics, see `solver.showDashboard()`
 
 ### Deprecated API (to be removed in next release):
 - `IntEqRealConstraint` will be removed in next release, Ibex managed this concept (int to real)

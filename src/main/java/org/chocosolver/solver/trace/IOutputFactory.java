@@ -10,12 +10,19 @@ package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.*;
+import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
+import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
+import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
+import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.trace.frames.StatisticsPanel;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
 
 import java.io.PrintStream;
+
+import javax.swing.*;
 
 /**
  * This aims at simplifying resolution trace output by providing
@@ -235,6 +242,40 @@ public interface IOutputFactory extends ISelf<Solver> {
         if (f > 0) {
             _me().plugMonitor(new LogStatEveryXXms(_me(), f));
         }
+    }
+
+
+    /**
+     * Create and show a simple dashboard that render resolution statistics every 100 milliseconds.
+     */
+    default void showDashboard(){
+        this.showDashboard(100L);
+    }
+
+    /**
+     * Create and show a simple dashboard that render resolution statistics every 'refresh' milliseconds.
+     * Note that a low refresh rate will slow down the entire process.
+
+     * @param refresh frequency rate, in milliseconds.
+     */
+    default void showDashboard(long refresh){
+        //Make sure we have nice window decorations.
+        JFrame.setDefaultLookAndFeelDecorated(true);
+
+        //Create and set up the window.
+        JFrame frame = new JFrame("Dashboard");
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+
+
+        //Create and set up the content pane.
+        JComponent newContentPane = new StatisticsPanel(_me(), refresh);
+        newContentPane.setOpaque(true); //content panes must be opaque
+        frame.setContentPane(newContentPane);
+
+        //Display the window.
+        frame.pack();
+//        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
 
