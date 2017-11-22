@@ -7,7 +7,7 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
-Move to Ibex-2.6.2.
+Move to Ibex-2.6.3.
 
 ### Major features:
 - Ibex instance is no longer static, that offers better stability and reduce

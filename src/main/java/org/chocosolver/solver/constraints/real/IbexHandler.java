@@ -273,7 +273,7 @@ public class IbexHandler {
     /**
      * Create the instance of Ibex
      */
-    private void createInstance() {
+    private synchronized void createInstance() {
         RealPropagator[] props = ibexCtr.keySet()
                 .stream()
                 .sorted(Comparator.comparingInt(Propagator::getId))

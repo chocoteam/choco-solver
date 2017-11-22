@@ -265,5 +265,6 @@ public class Ibex {
     private native void init(double[] prec);
 
     // Internal: do not modify!
-    private int id;
+    // This is a pointer to native c++ data
+    private long data;
 };

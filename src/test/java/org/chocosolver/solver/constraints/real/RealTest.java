@@ -717,4 +717,36 @@ public class RealTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
+
+    private static synchronized void build(Ibex ibex){
+        ibex.build();
+    }
+
+
+    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    public void testJuha4(){
+        double eps=1e-7;
+        Ibex ibex = new Ibex(new double[]{eps,eps,eps,eps,eps,eps,eps,eps});
+        ibex.add_ctr("3*{0}*({1}-2*{0})+{1}^2/4=0");
+        ibex.add_ctr("3*{1}*({2}-2*{1}+{0})+({2}-{0})^2/4=0");
+        ibex.add_ctr("3*{2}*({3}-2*{2}+{1})+({3}-{1})^2/4=0");
+        ibex.add_ctr("3*{3}*({4}-2*{3}+{2})+({4}-{2})^2/4=0");
+        ibex.add_ctr("3*{4}*({5}-2*{4}+{3})+({5}-{3})^2/4=0");
+        ibex.add_ctr("3*{5}*({6}-2*{5}+{4})+({6}-{4})^2/4=0");
+        ibex.add_ctr("3*{6}*({7}-2*{6}+{5})+({7}-{5})^2/4=0");
+        ibex.add_ctr("3*{7}*(20-2*{7}+{6})+(20-{6})^2/4=0");
+        build(ibex);
+        double L=1e8;
+        double domains[]={-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L};
+        ibex.start_solve(domains);
+        for (int i=0; i<256; i++) {
+            if (ibex.next_solution(domains)!=Ibex.SOLUTION) {
+                ibex.release();
+                Assert.fail();
+            }
+        }
+        ibex.next_solution(domains);
+        ibex.release();
+    }
+
 }
