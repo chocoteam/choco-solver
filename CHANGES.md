@@ -23,7 +23,7 @@ delegated to Ibex.
 - `Model.getIbex()` should not be used. A `IbexHandler` manages Ibex instances (one per model).
 
 ### Closed issues and pull requests:
-\#561, #566, #568, #570
+\#558, #561, #565, #566, #568, #570
 
 4.0.5 - 28 Sep 2017
 -------------------

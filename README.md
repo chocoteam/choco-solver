@@ -165,7 +165,7 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     dk.brics.automaton:automaton:1.11-8
-    org.javabits.jgrapht:jgrapht-core:0.9.3
+    org.jgrapht:jgrapht-core:1.1.0
     org.choco-solver:cutoffseq:1.0.2
     org.choco-solver:choco-sat:1.0.2
     net.sf.trove4j:trove4j:3.0.3
