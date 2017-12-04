@@ -7,11 +7,11 @@ Please consider the following before submitting an issue:
 Provide a general summary of the issue in the Title above prefixed by [BUG] or [FEATURE].
 -->
 
-### Expected behavior
+## Expected behavior
 <!--- If you're describing a bug, tell us what should happen -->
 <!--- If you're suggesting a change/improvement, tell us how it should work -->
 
-### Actual behavior
+## Actual behavior
 <!--- If describing a bug, tell us what happens instead of the expected behavior -->
 <!--- If suggesting a change/improvement, explain the difference from current behavior -->
 
