@@ -1,11 +1,39 @@
+<!--
+Please consider the following before submitting an issue:
+
+- Issues are reserved for BUG reports and FEATURE requests, DO NOT create issues for questions or support requests. Use Google group (https://groups.google.com/forum/#!forum/choco-solver) or Gitter chat (https://gitter.im/chocoteam/choco-solver?utm_source=share-link&utm_medium=link&utm_campaign=share-link) for such purpose.
+- Bug reports MUST be submitted with a Minimal Working Example n interactive example (https://stackoverflow.com/help/mcve).
+
+Provide a general summary of the issue in the Title above prefixed by [BUG] or [FEATURE].
+-->
+
 ### Expected behavior
+<!--- If you're describing a bug, tell us what should happen -->
+<!--- If you're suggesting a change/improvement, tell us how it should work -->
 
 ### Actual behavior
+<!--- If describing a bug, tell us what happens instead of the expected behavior -->
+<!--- If suggesting a change/improvement, explain the difference from current behavior -->
 
-### Minimal Working Example
+## Possible Solution
+<!--- Not obligatory, but suggest a fix/reason for the bug, -->
+<!--- or ideas how to implement the addition or change -->
 
-Experienced with choco-solver-_*{version here}*_
+## Steps to Reproduce (for bugs)
+<!--- Provide a link to a live example, or an unambiguous set of steps to -->
+<!--- reproduce this bug. Include code to reproduce, if relevant -->
+<!--- when adding code, consider syntax highlighting (https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet#code)-->
+1.
+2.
+3.
+4.
 
-```java
-{your hava code here}
-```
+## Context
+<!--- How has this issue affected you? What are you trying to accomplish? -->
+<!--- Providing context helps us come up with a solution that is most useful in the real world -->
+
+## Environment
+<!--- Include as many relevant details about the environment you experienced the bug in -->
+* Choco-solver version:
+* Java version:
+* Link to your project:
