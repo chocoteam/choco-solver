@@ -7,6 +7,8 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+Add a PayPal button for donations.
+
 ### Major features:
 
 ### Deprecated API (to be removed in next release):

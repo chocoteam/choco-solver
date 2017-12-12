@@ -1,5 +1,6 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/src/resources/png/ChocoLogo-160x135.png)
 
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![Documentation Status](https://readthedocs.org/projects/choco-solver/badge/?version=latest)](http://choco-solver.readthedocs.io/en/latest/?badge=latest)
 
@@ -98,6 +99,13 @@ Please meet our team of cho-coders :
 - [@jgFages](https://github.com/jgFages) (Jean-Guillaume Fages)
 - [@cprudhom](https://github.com/cprudhom) (Charles Prud'homme)
 
+
+##### Donating is contributing too!
+
+Supporting Choco with financial aid favors a long-term support and development.
+Our expenses are varied: fees (GitHub organization, Domain name, etc), funding PhD students or internships, conferences, hardware renewal, ...
+
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
 
 
 <a name="dow"></a>
