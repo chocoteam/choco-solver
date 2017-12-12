@@ -102,7 +102,7 @@ Please meet our team of cho-coders :
 
 ##### Donating is contributing too!
 
-Supporting Choco with financial aid favors a long-term support and development.
+Supporting Choco with financial aid favors long-term support and development.
 Our expenses are varied: fees (GitHub organization, Domain name, etc), funding PhD students or internships, conferences, hardware renewal, ...
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
