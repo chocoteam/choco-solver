@@ -165,9 +165,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param costvariables cost variables
      * @param cauto         finite automaton with costs
      */
-    public PropMultiCostRegular(IntVar[] variables, final IntVar[] costvariables, ICostAutomaton cauto) {
+    public PropMultiCostRegular(IntVar[] variables, final IntVar[] costvariables, ICostAutomaton cauto, double precision) {
         super(ArrayUtils.append(variables, costvariables), PropagatorPriority.CUBIC, true);
-        _MCR_DECIMAL_PREC = model.getSettings().getMCRDecimalPrecision();
+        _MCR_DECIMAL_PREC = precision;
         this.vs = Arrays.copyOfRange(vars, 0, variables.length);
         this.offset = vs.length;
         this.z = Arrays.copyOfRange(vars, offset, vars.length);

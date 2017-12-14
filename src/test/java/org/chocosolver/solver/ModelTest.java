@@ -30,7 +30,10 @@ import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
 import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
 
 /**
  * <br/>
@@ -521,13 +524,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean swapOnPassivate() {
-                return true;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setSwapOnPassivate(true));
         int n = 11;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {

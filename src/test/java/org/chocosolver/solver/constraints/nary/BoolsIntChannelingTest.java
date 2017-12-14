@@ -25,8 +25,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testNominal(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar intVar = makeVariable(model, 0, 4, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
@@ -36,8 +35,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testTwoTrue(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[] {
                 model.boolVar(true),
                 model.boolVar(true),
@@ -52,8 +50,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testAllFalse(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[5];
         for (int i = 0; i < boolVars.length; i++) {
             boolVars[i] = model.boolVar(false);
@@ -66,8 +63,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testInstantiatedIndex(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar variable = makeVariable(model, 2, 2, bounded);
         model.boolsIntChanneling(boolVars, variable, 0).post();
@@ -78,8 +74,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testOutOfBoundsOK(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(3);
         IntVar intVar = makeVariable(model, 0, 3, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();
@@ -88,8 +83,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testOutOfBoundsKO(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = new BoolVar[] {
                 model.boolVar(false),
                 model.boolVar(false),
@@ -103,8 +97,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testDifferentDomains(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(5);
         IntVar var = makeVariable(model, 5, 10, bounded);
         model.boolsIntChanneling(boolVars, var, 0).post();
@@ -115,8 +108,7 @@ public class BoolsIntChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testEmptyArray(boolean bounded, Settings viewPolicy) {
-        Model model = new Model();
-        model.set(viewPolicy);
+        Model model = new Model(viewPolicy);
         BoolVar[] boolVars = model.boolVarArray(0);
         IntVar intVar = makeVariable(model, 0, 100, bounded);
         model.boolsIntChanneling(boolVars, intVar, 0).post();

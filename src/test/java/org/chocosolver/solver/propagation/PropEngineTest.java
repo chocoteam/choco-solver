@@ -8,8 +8,8 @@
  */
 package org.chocosolver.solver.propagation;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -33,7 +33,9 @@ import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.IntEventType.VOID;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.fail;
 
 /**
  * <br/>
@@ -103,13 +105,7 @@ public class PropEngineTest {
     // test clone in propagators
     @Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
     public void testClone() throws ContradictionException {
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean cloneVariableArrayInPropagator() {
-                return false;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setCloneVariableArrayInPropagator(false));
         IntVar[] vars = model.intVarArray("V", 3, 0, 4, false);
         model.allDifferent(vars).post();
         sort(vars, (o1, o2) -> o2.getId() - o1.getId());

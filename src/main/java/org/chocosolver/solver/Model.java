@@ -78,7 +78,7 @@ public class Model implements IModel {
     /**
      * Settings to use with this solver
      */
-    private Settings settings;
+    private final Settings settings;
 
     /**
      * A map to cache constants (considered as fixed variables)
@@ -206,7 +206,18 @@ public class Model implements IModel {
      * @param name        The name of the model (for logging purpose)
      */
     public Model(IEnvironment environment, String name) {
-        this(environment, name, new Settings() {});
+        this(environment, name, new DefaultSettings());
+    }
+
+    /**
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
+     *
+     * @param name        The name of the model (for logging purpose)
+     * @param settings settings to use
+     */
+    public Model(String name, Settings settings) {
+        this(new EnvironmentBuilder().fromFlat().build(), name, settings);
     }
 
     /**
@@ -217,7 +228,18 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, new Settings(){});
+        this(new EnvironmentBuilder().fromFlat().build(), name, new DefaultSettings());
+    }
+
+    /**
+     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
+     * The model is uses the default (trailing) backtracking environment.
+     *
+     * @param settings settings to use
+     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
+     */
+    public Model(Settings settings) {
+        this(new EnvironmentBuilder().fromFlat().build(), "Model-" + nextModelNum(), settings);
     }
 
     /**
@@ -656,12 +678,12 @@ public class Model implements IModel {
     }
 
     /**
-     * Override the default {@link org.chocosolver.solver.Settings} object.
-     *
-     * @param defaults new settings
+     * @deprecated will be removed in version > 4.0.7
+     * @see #Model(String, Settings)
+     * @see #Model(IEnvironment, String, Settings)
      */
+    @Deprecated
     public void set(Settings defaults) {
-        this.settings = defaults;
     }
 
     /**

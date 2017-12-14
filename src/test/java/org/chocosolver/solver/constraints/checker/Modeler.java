@@ -10,8 +10,9 @@ package org.chocosolver.solver.constraints.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
+
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nValue.PropAtMostNValues_BC;
@@ -839,13 +840,7 @@ public interface Modeler {
     Modeler modelplusac = new Modeler() {
         @Override
         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Model s = new Model("plus" + n);
-            s.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
+            Model s = new Model("plus" + n, new DefaultSettings().setEnableACOnTernarySum(true));
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i]);

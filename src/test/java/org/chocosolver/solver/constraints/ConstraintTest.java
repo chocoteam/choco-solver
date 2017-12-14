@@ -8,8 +8,8 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -382,17 +382,7 @@ public class ConstraintTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAmIMeYet(){
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean warnUser() {
-                return true;
-            }
-            @Override
-            public boolean checkDeclaredConstraints() {
-                return true;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setWarnUser(true).setCheckDeclaredConstraints(true));
 
         IntVar varA = model.intVar("A", 0, 1);
         IntVar varB = model.intVar("B", 0, 1);
@@ -410,13 +400,7 @@ public class ConstraintTest {
 
     @Test(groups="1s", timeOut=6000000)
     public void testJitee2(){
-        Model model = new Model("model");
-        model.set(new Settings() {
-            @Override
-            public boolean checkDeclaredConstraints() {
-                return false;
-            }
-        });
+        Model model = new Model("model", new DefaultSettings().setCheckDeclaredConstraints(false));
         IntVar a= model.intVar("a", 0, 100000, false);
         IntVar b= model.intVar("b", 0, 100, false);
 

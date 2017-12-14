@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Settings;
 import org.testng.annotations.DataProvider;
 
@@ -18,12 +19,7 @@ public class TestData {
 
 
     private final static Settings buildSettings(final boolean withViews) {
-        return new Settings() {
-            @Override
-            public boolean enableViews() {
-                return withViews;
-            }
-        };
+        return new DefaultSettings().setEnableViews(withViews);
     }
 
     @DataProvider(name = "boundsAndViews")

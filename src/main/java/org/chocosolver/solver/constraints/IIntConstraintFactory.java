@@ -8,11 +8,9 @@
  */
 package org.chocosolver.solver.constraints;
 
-import static java.lang.Math.abs;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.IntStream;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
@@ -48,10 +46,10 @@ import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondA
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
-import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
-import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
+import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
+import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
@@ -109,9 +107,11 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.stream.IntStream;
+
+import static java.lang.Math.abs;
 
 /**
  * Interface to make constraints over BoolVar and IntVar
@@ -1502,7 +1502,26 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 *                   Can be built from method CostAutomaton.makeMultiResources(...)
 	 */
 	default Constraint multiCostRegular(IntVar[] vars, IntVar[] costVars, ICostAutomaton costAutomaton) {
-		return new Constraint(ConstraintsName.MULTICOSTREGULAR, new PropMultiCostRegular(vars, costVars, costAutomaton));
+		return multiCostRegular(vars, costVars, costAutomaton, _me().getSettings().getMCRDecimalPrecision());
+	}
+
+	/**
+	 * Creates a regular constraint that supports a multiple cost function.
+	 * Ensures that the assignment of a sequence of vars is recognized by costAutomaton, a deterministic finite automaton,
+	 * and that the sum of the cost vector associated to each assignment is bounded by the variable vector costVars.
+	 * This version allows to specify different costs according to the automaton state at which the assignment occurs
+	 * (i.e. the transition starts)
+	 *
+	 * @param vars       sequence of variables
+	 * @param costVars      cost variables
+	 * @param costAutomaton a deterministic finite automaton defining the regular language and the costs
+	 *                   Can be built from method CostAutomaton.makeMultiResources(...)
+	 * @param precision the smallest used double for MCR algorithm
+	 */
+	default Constraint multiCostRegular(IntVar[] vars, IntVar[] costVars,
+										ICostAutomaton costAutomaton, double precision) {
+		return new Constraint(ConstraintsName.MULTICOSTREGULAR,
+				new PropMultiCostRegular(vars, costVars, costAutomaton, precision));
 	}
 
 	/**
@@ -1638,10 +1657,24 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a scalar constraint
 	 */
 	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, int scalar) {
+		return scalar(vars, coeffs, operator, scalar, _me().getSettings().getMinCardForSumDecomposition());
+	}
+
+	/**
+	 * Creates a scalar constraint which ensures that Sum(vars[i]*coeffs[i]) operator scalar
+	 *
+	 * @param vars     a collection of IntVar
+	 * @param coeffs   a collection of int, for which |vars|=|coeffs|
+	 * @param operator an operator in {"=", "!=", ">","<",">=","<="}
+	 * @param scalar   an integer
+	 * @param minCardForDecomp minimum number of cardinality threshold to a sum constraint to be decomposed
+	 * @return a scalar constraint
+	 */
+	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, int scalar, int minCardForDecomp) {
 		assert vars.length>0;
 		Model s = vars[0].getModel();
 		IntVar scalarVar = s.intVar(scalar);
-		return scalar(vars,coeffs,operator,scalarVar);
+		return scalar(vars, coeffs,operator, scalarVar, minCardForDecomp);
 	}
 
 	/**
@@ -1654,10 +1687,26 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a scalar constraint
 	 */
 	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, IntVar scalar) {
+		return scalar(vars, coeffs, operator, scalar,
+                _me().getSettings().getMinCardForSumDecomposition());
+	}
+
+	/**
+	 * Creates a scalar constraint which ensures that Sum(vars[i]*coeffs[i]) operator scalar
+	 *
+	 * @param vars     a collection of IntVar
+	 * @param coeffs   a collection of int, for which |vars|=|coeffs|
+	 * @param operator an operator in {"=", "!=", ">","<",">=","<="}
+	 * @param scalar   an IntVar
+     * @param minCardForDecomp minimum number of cardinality threshold to a sum constraint to be decomposed
+	 * @return a scalar constraint
+	 */
+	default Constraint scalar(IntVar[] vars, int[] coeffs, String operator, IntVar scalar,
+							  int minCardForDecomp) {
 		if(vars.length!=coeffs.length) {
 			throw new SolverException("vars and coeffs arrays should have same size");
 		}
-		return IntLinCombFactory.reduce(vars, coeffs, Operator.get(operator), scalar);
+		return IntLinCombFactory.reduce(vars, coeffs, Operator.get(operator), scalar, minCardForDecomp);
 	}
 
 	/**
@@ -1769,11 +1818,38 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a sum constraint
 	 */
 	default Constraint sum(IntVar[] vars, String operator, int sum) {
-		assert vars.length>0;
-		Model s = vars[0].getModel();
-		IntVar sumVar = s.intVar(sum);
-		return IntLinCombFactory.reduce(vars, Operator.get(operator), sumVar);
+		return sum(vars, operator, sum, _me().getSettings().getMinCardForSumDecomposition());
 	}
+
+    /**
+     * Creates a sum constraint.
+     * Enforces that &#8721;<sub>i in |vars|</sub>vars<sub>i</sub> operator sum.
+     *
+     * @param vars     a collection of IntVar
+     * @param operator operator in {"=", "!=", ">","<",">=","<="}
+     * @param sum      an integer
+     * @param minCardForDecomp minimum number of cardinality threshold to a sum constraint to be decomposed
+     * @return a sum constraint
+     */
+    default Constraint sum(IntVar[] vars, String operator, int sum, int minCardForDecomp) {
+        assert vars.length>0;
+        Model s = vars[0].getModel();
+        IntVar sumVar = s.intVar(sum);
+        return IntLinCombFactory.reduce(vars, Operator.get(operator), sumVar, minCardForDecomp);
+    }
+
+    /**
+     * Creates a sum constraint.
+     * Enforces that &#8721;<sub>i in |vars|</sub>vars<sub>i</sub> operator sum.
+     *
+     * @param vars     a collection of IntVar
+     * @param operator operator in {"=", "!=", ">","<",">=","<="}
+     * @param sum      an IntVar
+     * @return a sum constraint
+     */
+    default Constraint sum(IntVar[] vars, String operator, IntVar sum) {
+        return sum(vars, operator, sum, _me().getSettings().getMinCardForSumDecomposition());
+    }
 
 	/**
 	 * Creates a sum constraint.
@@ -1782,10 +1858,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param vars     a collection of IntVar
 	 * @param operator operator in {"=", "!=", ">","<",">=","<="}
 	 * @param sum      an IntVar
+     * @param minCardForDecomp minimum number of cardinality threshold to a sum constraint to be decomposed
 	 * @return a sum constraint
 	 */
-	default Constraint sum(IntVar[] vars, String operator, IntVar sum) {
-		return IntLinCombFactory.reduce(vars, Operator.get(operator), sum);
+	default Constraint sum(IntVar[] vars, String operator, IntVar sum, int minCardForDecomp) {
+		return IntLinCombFactory.reduce(vars, Operator.get(operator), sum, minCardForDecomp);
 	}
 
 	/**
@@ -1812,15 +1889,28 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param sum  a variable
 	 */
 	default Constraint sum(BoolVar[] vars, String operator, IntVar sum) {
-		if(sum.getModel().getSettings().enableDecompositionOfBooleanSum()){
-			int[] bounds = VariableUtils.boundsForAddition(vars);
-			IntVar p = sum.getModel().intVar(sum.getModel().generateName("RSLT_"), bounds[0], bounds[1], true);
-			IntLinCombFactory.reduce(vars, Operator.EQ, p).post();
-			return arithm(p, operator, sum);
-		}else {
-            return IntLinCombFactory.reduce(vars, Operator.get(operator), sum);
-        }
+		return sum(vars, operator, sum, _me().getSettings().getMinCardForSumDecomposition());
 	}
+
+    /**
+     * Creates a sum constraint.
+     * Enforces that &#8721;<sub>i in |vars|</sub>vars<sub>i</sub> operator sum.
+     * This constraint is much faster than the one over integer variables
+     *
+     * @param vars a vector of boolean variables
+     * @param sum  a variable
+     * @param minCardForDecomp minimum number of cardinality threshold to a sum constraint to be decomposed
+     */
+    default Constraint sum(BoolVar[] vars, String operator, IntVar sum, int minCardForDecomp) {
+        if(sum.getModel().getSettings().enableDecompositionOfBooleanSum()){
+            int[] bounds = VariableUtils.boundsForAddition(vars);
+            IntVar p = sum.getModel().intVar(sum.getModel().generateName("RSLT_"), bounds[0], bounds[1], true);
+            IntLinCombFactory.reduce(vars, Operator.EQ, p, minCardForDecomp).post();
+            return arithm(p, operator, sum);
+        }else {
+            return IntLinCombFactory.reduce(vars, Operator.get(operator), sum, minCardForDecomp);
+        }
+    }
 
 	/**
 	 * Creates a table constraint specifying that the sequence of variables vars must belong to the list of tuples

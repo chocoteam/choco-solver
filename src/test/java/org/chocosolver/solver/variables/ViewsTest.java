@@ -60,13 +60,7 @@ public class ViewsTest {
 //        int seed = 5;
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model();
-            model.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
+            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -297,13 +291,7 @@ public class ViewsTest {
         // Z = X - Y
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model();
-            model.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
+            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -330,13 +318,7 @@ public class ViewsTest {
     @Test(groups="1s", timeOut=60000)
     public void testTernArithmBC() {
         // note did not pass because PropXplusYeqZ did not reach a fix point
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableACOnTernarySum() {
-                return true;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
         IntVar x = model.intVar("x", 0, 2, false);
         IntVar y = model.intVar("y", 0, 2, false);
         IntVar z = model.intVar("Z", -2, 2, false);
@@ -671,13 +653,7 @@ public class ViewsTest {
     }
 
     private static Model makeModel(final boolean withViews){
-        Model m = new Model("with"+(withViews?"":"out")+" views");
-        m.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return withViews;
-            }
-        });
+        Model m = new Model("with"+(withViews?"":"out")+" views", new DefaultSettings().setEnableViews(withViews));
         return m;
     }
 
