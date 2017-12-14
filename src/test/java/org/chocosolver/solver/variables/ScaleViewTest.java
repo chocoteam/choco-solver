@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
@@ -218,4 +219,17 @@ public class ScaleViewTest {
         Assert.assertFalse(s.solve());
 
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testCP01(){
+        Model m = new Model(new DefaultSettings().setEnableViews(true));
+        IntVar i = m.intVar("i", 0, 4);
+        m.arithm(m.intScaleView(i, -3), "<", -7).post();
+
+        Solver s = m.getSolver();
+        Assert.assertEquals(s.findAllSolutions().size(), 2);
+
+    }
+
+
 }

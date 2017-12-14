@@ -142,36 +142,42 @@ public interface IViewFactory extends ISelf<Model> {
         if (cste == -1) {
             return intMinusView(var);
         }
-        if (cste < 0) {
-            throw new UnsupportedOperationException("scale requires a coefficient >= -1 (found "+cste+")");
+        IntVar v2;
+        if (cste == 0) {
+            v2 = _me().intVar(0);
+        } else if (cste == 1) {
+            v2 = var;
         } else {
-            IntVar v2;
-            if (cste == 0) {
-                v2 = _me().intVar(0);
-            } else if (cste == 1) {
-                v2 = var;
-            } else {
-                if(var.isInstantiated()) {
-                    return _me().intVar(var.getValue() * cste);
-                }
-                if (_me().getSettings().enableViews()) {
-                    v2 = new ScaleView(var, cste);
-                } else {
-                    int lb = var.getLB() * cste;
-                    int ub = var.getUB() * cste;
-                    String name = "(" + var.getName() + "*" + cste + ")";
-                    IntVar ov;
-                    if (var.hasEnumeratedDomain()) {
-                        ov = _me().intVar(name, lb, ub, false);
-                    } else {
-                        ov = _me().intVar(name, lb, ub, true);
-                    }
-                    _me().times(var, cste, ov).post();
-                    return ov;
-                }
+            if(var.isInstantiated()) {
+                return _me().intVar(var.getValue() * cste);
             }
-            return v2;
+            if (_me().getSettings().enableViews()) {
+                if(cste>0) {
+                    v2 = new ScaleView(var, cste);
+                }else{
+                    v2 = new MinusView(new ScaleView(var, -cste));
+                }
+            } else {
+                int lb, ub;
+                if(cste > 0) {
+                    lb = var.getLB() * cste;
+                    ub = var.getUB() * cste;
+                }else{
+                    lb = var.getUB() * cste;
+                    ub = var.getLB() * cste;
+                }
+                String name = "(" + var.getName() + "*" + cste + ")";
+                IntVar ov;
+                if (var.hasEnumeratedDomain()) {
+                    ov = _me().intVar(name, lb, ub, false);
+                } else {
+                    ov = _me().intVar(name, lb, ub, true);
+                }
+                _me().times(var, cste, ov).post();
+                return ov;
+            }
         }
+        return v2;
     }
 
     /**
@@ -203,6 +209,23 @@ public interface IViewFactory extends ISelf<Model> {
             }
             _me().absolute(abs, var).post();
             return abs;
+        }
+    }
+
+    /**
+     * Creates an affine view over <i>x</i> such that: <i>a.x + b</i>.
+     * <p>
+     *
+     * @param a a coefficient
+     * @param x an integer variable.
+     * @param b a constant
+     * @return an IntVar equal to the absolute value of <i>var</i>
+     */
+    default IntVar intAffineView(int a, IntVar x, int b) {
+        if (x.isInstantiated()) {
+            return _me().intVar(a * x.getValue() + b);
+        } else {
+            return intOffsetView(intScaleView(x, a), b);
         }
     }
 
