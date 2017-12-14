@@ -67,7 +67,8 @@ public class IntLinCombFactory {
     public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR) {
         // 0. normalize data
         Model model = SCALAR.getModel();
-        if (VARS.length > model.getSettings().getMinCardForSumDecomposition()) {
+        if (VARS.length > model.getSettings().getMinCardForSumDecomposition()
+                && OPERATOR.equals(Operator.EQ)) {
             int k = VARS.length;
             int d1 = (int) Math.sqrt(k);
             int d2 = k / d1 + (k % d1 == 0?0:1);
