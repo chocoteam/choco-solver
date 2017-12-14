@@ -40,7 +40,7 @@ public class DefaultSettings implements Settings {
 
     private Predicate<Solver> modelChecker = s -> !ESat.FALSE.equals(s.isSatisfied());
 
-    private boolean enableViews = false;
+    private boolean enableViews = true;
 
     private int maxDomSizeForEnumerated = 32_768;
 
