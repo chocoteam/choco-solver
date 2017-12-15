@@ -7,12 +7,21 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+Add a PayPal button for donations.
+
 ### Major features:
 
+- Revamp `Settings`: no default method anymore, add setters. A concrete class `DefaultSettings` provides
+the default behavior.
+- `IViewFactory.intScaleView` now manages negative constants,
+- `IViewFactory.intAffineView` is now available
+
 ### Deprecated API (to be removed in next release):
+-  `Model.set(Settings)` is deprecated. Now settings are declared in the `Model` constructor.
+
 
 ### Closed issues and pull requests:
-
+\#527, #569, #578
 
 4.0.6 - 23 Nov 2017
 -------------------

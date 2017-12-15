@@ -26,8 +26,7 @@ public class InverseChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testNominal(boolean bounded, Settings settings) {
-        Model model = new Model();
-        model.set(settings);
+        Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 5, 0, 4, bounded);
         IntVar[] intVars2 = makeArray(model, 5, 0, 4, bounded);
         model.inverseChanneling(intVars1, intVars2).post();
@@ -37,8 +36,7 @@ public class InverseChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testNoSolution(boolean bounded, Settings settings) {
-        Model model = new Model();
-        model.set(settings);
+        Model model = new Model(settings);
         IntVar[] intVars1 = new IntVar[] {
                 makeVariable(model, 1, 1, bounded),
                 makeVariable(model, 0, 1, bounded)
@@ -56,8 +54,7 @@ public class InverseChannelingTest {
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testDomainsFiltering(boolean bounded, Settings settings) {
-        Model model = new Model();
-        model.set(settings);
+        Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 2, 0, 6, bounded);
         IntVar[] intVars2 = makeArray(model, 2, 0, 6, bounded);
         model.inverseChanneling(intVars1, intVars2).post();
@@ -67,8 +64,7 @@ public class InverseChannelingTest {
     @Test(groups = "1s", timeOut=60000, expectedExceptions = SolverException.class,
             dataProvider = "boundsAndViews", dataProviderClass = TestData.class)
     public void testLengthsDiffer(boolean bounded, Settings settings) {
-        Model model = new Model();
-        model.set(settings);
+        Model model = new Model(settings);
         IntVar[] intVars1 = makeArray(model, 3, 0, 4, bounded);
         IntVar[] intVars2 = makeArray(model, 4, 0, 4, bounded);
         model.inverseChanneling(intVars1, intVars2).post();

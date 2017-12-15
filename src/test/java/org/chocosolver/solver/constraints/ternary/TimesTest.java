@@ -9,8 +9,8 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.memory.EnvironmentBuilder;
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -116,13 +116,7 @@ public class TimesTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL6() {
-		Model s = new Model();
-		s.set(new Settings() {
-			@Override
-			public boolean enableTableSubstitution() {
-				return false;
-			}
-		});
+		Model s = new Model(new DefaultSettings().setEnableTableSubstitution(false));
 		IntVar i1 = s.intVar("i1", new int[]{1, 55000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 55000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 55000});
@@ -131,13 +125,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJL7() {
-		Model s = new Model();
-		s.set(new Settings() {
-			@Override
-			public boolean enableTableSubstitution() {
-				return true;
-			}
-		});
+		Model s = new Model(new DefaultSettings().setEnableTableSubstitution(false));
 		IntVar i1 = s.intVar("i1", new int[]{1, 10000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 10000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 10000});

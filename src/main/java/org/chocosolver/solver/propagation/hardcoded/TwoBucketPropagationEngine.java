@@ -79,12 +79,12 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     /**
      * Fine events priority binding.
      */
-    private final short[] match_f;
+    private final short[] match_f = new short[]{0, 0, 0, 1, 2, 2, 2};
 
     /**
      * Coarse events priority binding.
      */
-    private final short[] match_c;
+    private final short[] match_c = new short[]{0, 0, 0, 0, 1, 2, 3};
 
     /**
      * Number of active priorities for fine events.
@@ -167,10 +167,6 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     public TwoBucketPropagationEngine(Model model) {
         this.trigger = new PropagationTrigger(this, model);
         this.model = model;
-
-        match_f = model.getSettings().getFineEventPriority();
-        match_c = model.getSettings().getCoarseEventPriority();
-
         this.DEBUG = model.getSettings().debugPropagation();
     }
 

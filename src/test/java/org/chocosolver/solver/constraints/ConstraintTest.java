@@ -8,8 +8,8 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
@@ -382,17 +382,7 @@ public class ConstraintTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testAmIMeYet(){
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean warnUser() {
-                return true;
-            }
-            @Override
-            public boolean checkDeclaredConstraints() {
-                return true;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setWarnUser(true).setCheckDeclaredConstraints(true));
 
         IntVar varA = model.intVar("A", 0, 1);
         IntVar varB = model.intVar("B", 0, 1);
@@ -406,6 +396,44 @@ public class ConstraintTest {
         Solver solver = model.getSolver();
         solver.showSolutions();
         solver.findAllSolutions();
+    }
+
+    @Test(groups="1s", timeOut=6000000)
+    public void testJitee2(){
+        Model model = new Model("model", new DefaultSettings().setCheckDeclaredConstraints(false));
+        IntVar a= model.intVar("a", 0, 100000, false);
+        IntVar b= model.intVar("b", 0, 100, false);
+
+
+        System.out.println(model);
+
+        IntVar ten = model.intVar(10);
+        Constraint modC = model.mod(a, ten, b);
+        modC.post();
+
+        int i=0;
+
+        long timeMs = System.currentTimeMillis();
+        long newTimeMs = System.currentTimeMillis();
+        for (int aNow =a.getLB(); aNow<a.getUB(); aNow++) {
+            Constraint ra = model.arithm(a, "=", aNow);
+            model.post(ra);
+            for (int bNow =b.getLB(); bNow < b.getUB(); bNow++) {
+                Constraint rb = model.arithm(b, "=", bNow);
+                model.post(rb);
+                while (model.getSolver().solve()) {
+                    i++;
+                    newTimeMs = System.currentTimeMillis();
+                    System.out.print("Solution " + i + " found :" + (newTimeMs-timeMs) + " ms. ");
+                    timeMs = newTimeMs;
+                    System.out.println("");
+                }
+                model.unpost(rb);
+                model.getSolver().reset();
+            }
+            model.unpost(ra);
+            model.getSolver().reset();
+        }
     }
 
 }

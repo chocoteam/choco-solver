@@ -6,72 +6,15 @@ Miscellaneous
 Settings
 ********
 
-A ``Settings`` object is attached to each ``Solver``.
+A ``Settings`` object is attached to each ``Model``.
 It declares default behavior for various purposes: from general purpose (such as the welcome message), modelling purpose (such as enabling views) or solving purpose (such as the search binder).
 
-The API is:
+Default settings can be accessed through ``DefaultSettings``.
+This class can be extended to provide more settings and set to modified the default values.
 
-``String getWelcomeMessage()``
-    Return the welcome message.
+Settings are declared in a ``Model`` constructor.
+Settings are not immutable but modifying value after ``Model`` construction can lead to unexpected behavior.
 
-``Idem getIdempotencyStrategy()``
-    Define how to react when a propagator is not ensured to be idempotent.
-
-``boolean enableViews()``
-    Set to 'true' to allow the creation of views in the ``VariableFactory``. Creates new variables with channeling constraints otherwise.
-
-``int getMaxDomSizeForEnumerated()``
-    Define the maximum domain size threshold to force integer variable to be enumerated instead of bounded while calling ``VariableFactory#integer(String, int, int, Solver)``.
-
-``boolean enableTableSubstitution()``
-    Set to true to replace intension constraints by extension constraints.
-
-``int getMaxTupleSizeForSubstitution()``
-    Define the maximum domain size threshold to replace intension constraints by extension constraints. Only checked when ``enableTableSubstitution()`` is set to true.
-
-``boolean plugExplanationIn()``
-    Set to true to plug explanation engine in.
-
-``boolean enablePropagatorInExplanation()``
-    Set to true to add propagators in explanations
-
-``double getMCRPrecision()``
-    Define the rounding precision for :ref:`51_icstr_mcreg`. MUST BE < 13 as java messes up the precisions starting from 10E-12 (34.0*0.05 == 1.70000000000005).
-
-``double getMCRDecimalPrecision()``
-    Defines the smallest used double for :ref:`51_icstr_mcreg`.
-
-``short[] getFineEventPriority()``
-    Defines, for fine events, for each priority, the queue in which a propagator of such a priority should be scheduled in.
-
-``short[] getCoarseEventPriority()``
-    Defines, for coarse events, for each priority, the queue in which a propagator of such a priority should be scheduled in
-
-``ISearchBinder getSearchBinder()``
-    Return the default :ref:`31_searchbinder`.
-
-``ICondition getEnvironmentHistorySimulationCondition()``
-    Return the condition to satisfy when rebuilding history of backtrackable objects is needed.
-
-``boolean warnUser()``
-    Return true if one wants to be informed of warnings detected during modeling/solving (default value is false).
-
-``boolean enableIncrementalityOnBoolSum(int nbvars)``
-    Return true if the incrementality is enabled on boolean sum, based on the number of variables involved.
-    Default condition is : nbvars > 10.
-
-``boolean outputWithANSIColors()``
-    If your terminal support ANSI colors (Windows terminals don't), you can set this to true and decisions and solutions
-    will be output with colors.
-
-``boolean debugPropagation()``
-    When this setting returns true, a complete trace of the events is output.
-    This can be quite big, though, and it slows down the overall process.
-
-``boolean cloneVariableArrayInPropagator()``
-   If this setting is set to true (default value), a clone of the input variable array is made in any propagator constructors.
-   This prevents, for instance, wrong behavior when permutations occurred on the input array (e.g., sorting variables).
-   Setting this to false may limit the memory consumption during modelling.
 
 *******************
 Extensions of Choco

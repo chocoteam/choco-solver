@@ -53,9 +53,9 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      * @param Y an integer variable
      * @param Z an integer variable
      */
-    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z) {
+    public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z, boolean enableAC) {
         super(new IntVar[]{X,Y,Z}, PropagatorPriority.TERNARY, false);
-        allbounded = !model.getSettings().enableACOnTernarySum() || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
+        allbounded = !enableAC || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
         r1 = new IntIterableRangeSet();
         r2 = new IntIterableRangeSet();
         r3 = new IntIterableRangeSet();

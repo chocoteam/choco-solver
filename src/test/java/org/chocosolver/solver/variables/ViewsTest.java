@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.variables;
 
@@ -54,19 +54,13 @@ public class ViewsTest {
     }
 
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1() {
         // Z = X + Y
 //        int seed = 5;
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model();
-            model.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
+            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -87,7 +81,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1a() {
         // Z = X + Y (bounded)
         for (int seed = 0; seed < 9999; seed++) {
@@ -113,7 +107,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testa() {
         // Z = max(X + Y)
         for (int seed = 0; seed < 99; seed += 1) {
@@ -138,7 +132,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1b() {
         // Z = |X|
         for (int seed = 0; seed < 9999; seed++) {
@@ -161,7 +155,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1bb() {
         // Z = X + c
         for (int seed = 0; seed < 9999; seed++) {
@@ -185,7 +179,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1bbb() {
         // Z = X * c
         for (int seed = 0; seed < 9999; seed++) {
@@ -209,7 +203,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1c() {
         // Z = -X
         for (int seed = 0; seed < 9999; seed++) {
@@ -234,7 +228,7 @@ public class ViewsTest {
 
 
     @DataProvider(name = "1d")
-    public Object[][] data1D(){
+    public Object[][] data1D() {
         List<Object[]> elt = new ArrayList<>();
         for (int seed = 2; seed < 9; seed += 1) {
             elt.add(new Object[]{seed});
@@ -242,7 +236,7 @@ public class ViewsTest {
         return elt.toArray(new Object[elt.size()][1]);
     }
 
-    @Test(groups="10s", timeOut=300000, dataProvider = "1d")
+    @Test(groups = "10s", timeOut = 300000, dataProvider = "1d")
     public void test1d(int seed) {
         // Z = X + Y + ...
         Model ref = new Model();
@@ -269,7 +263,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1f() {
         // Z = MAX(X,Y)
         Model ref = new Model();
@@ -292,18 +286,12 @@ public class ViewsTest {
     }
 
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test2() {
         // Z = X - Y
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model();
-            model.set(new Settings() {
-                @Override
-                public boolean enableACOnTernarySum() {
-                    return true;
-                }
-            });
+            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -327,25 +315,19 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testTernArithmBC() {
         // note did not pass because PropXplusYeqZ did not reach a fix point
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableACOnTernarySum() {
-                return true;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
         IntVar x = model.intVar("x", 0, 2, false);
         IntVar y = model.intVar("y", 0, 2, false);
         IntVar z = model.intVar("Z", -2, 2, false);
         IntVar absZ = model.intVar("|Z|", 0, 2, false);
-        model.absolute(absZ,z).post();
-        System.out.println(model.arithm(x,"-",y, "=", z));
-        model.arithm(x,"-",y, "=", z).post(); // test passes if added twice
-        model.arithm(absZ,"=",1).post();
-        model.arithm(y,"=",0).post();
+        model.absolute(absZ, z).post();
+        System.out.println(model.arithm(x, "-", y, "=", z));
+        model.arithm(x, "-", y, "=", z).post(); // test passes if added twice
+        model.arithm(absZ, "=", 1).post();
+        model.arithm(y, "=", 0).post();
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -358,7 +340,7 @@ public class ViewsTest {
         Assert.assertTrue(x.isInstantiatedTo(1));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testTernArithmAC() {
         // note did not pass because PropXplusYeqZ did not reach a fix point
         Model model = new Model();
@@ -366,11 +348,11 @@ public class ViewsTest {
         IntVar y = model.intVar("y", 0, 2, false);
         IntVar z = model.intVar("Z", -2, 2, false);
         IntVar absZ = model.intVar("|Z|", 0, 2, false);
-        model.absolute(absZ,z).post();
-        System.out.println(model.arithm(x,"-",y, "=", z));
-        model.arithm(x,"-",y, "=", z).post(); // test passes if added twice
-        model.arithm(absZ,"=",1).post();
-        model.arithm(y,"=",0).post();
+        model.absolute(absZ, z).post();
+        System.out.println(model.arithm(x, "-", y, "=", z));
+        model.arithm(x, "-", y, "=", z).post(); // test passes if added twice
+        model.arithm(absZ, "=", 1).post();
+        model.arithm(y, "=", 0).post();
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -383,7 +365,7 @@ public class ViewsTest {
         Assert.assertTrue(x.isInstantiatedTo(1));
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test3() {
         // Z = |X - Y|
         for (int seed = 0; seed < 999; seed++) {
@@ -392,25 +374,25 @@ public class ViewsTest {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
                 IntVar z = ref.intVar("z", -2, 2, false);
-                ref.arithm(x,"-",y, "=", z).post();
+                ref.arithm(x, "-", y, "=", z).post();
                 IntVar az = ref.intVar("az", 0, 2, false);
                 ref.absolute(az, z).post();
-                ref.getSolver().setSearch(intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed),x, y, az));
+                ref.getSolver().setSearch(intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
             }
             Model model = new Model();
             {
                 IntVar x = model.intVar("x", 0, 2, false);
                 IntVar y = model.intVar("y", 0, 2, false);
                 IntVar z = model.intVar("Z", -2, 2, false);
-                model.arithm(x,"-",y, "=", z).post();
+                model.arithm(x, "-", y, "=", z).post();
                 IntVar az = model.intAbsView(z);
-                model.getSolver().setSearch(intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed),x, y, az));
+                model.getSolver().setSearch(intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
             }
             check(ref, model, seed, true, true);
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test4() {
         // Z = |X - Y| + AllDiff
         for (int seed = 0; seed < 999; seed++) {
@@ -439,7 +421,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test5() {
         // ~all-interval series
         int k = 5;
@@ -479,7 +461,7 @@ public class ViewsTest {
     }
 
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 10, false);
@@ -506,7 +488,7 @@ public class ViewsTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL1() throws ContradictionException {
         Model s = new Model();
         IntVar v1 = s.intVar("v1", -2, 2, false);
@@ -519,7 +501,7 @@ public class ViewsTest {
         assertFalse(v1.contains(1));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL2() {
         Model model = new Model();
         SetVar v1 = model.setVar("{0,1}", new int[]{0, 1});
@@ -529,7 +511,7 @@ public class ViewsTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL3() {
         Model model = new Model();
         model.arithm(
@@ -540,7 +522,7 @@ public class ViewsTest {
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL4() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
@@ -555,7 +537,7 @@ public class ViewsTest {
         assertEquals(s.getSolver().getSolutionCount(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJG() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
@@ -567,7 +549,7 @@ public class ViewsTest {
         assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJG2() throws ContradictionException {
         Model s = new Model();
         BoolVar bool = s.boolVar("bool");
@@ -579,7 +561,7 @@ public class ViewsTest {
         assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJG3() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
@@ -591,7 +573,7 @@ public class ViewsTest {
         assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJG4() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
@@ -603,7 +585,7 @@ public class ViewsTest {
         assertEquals(sum.isInstantiated(), true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testvanH() {
         Model model = new Model();
         BoolVar x1 = model.boolVar("x1");
@@ -620,47 +602,47 @@ public class ViewsTest {
         assertEquals(x3.getValue(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testScale(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testScale() {
         int n = 9;
         Model viewModel = makeModel(true);
-        scale(viewModel,n);
+        scale(viewModel, n);
         Model noViewModel = makeModel(false);
-        scale(noViewModel,n);
-        testModels(viewModel,noViewModel);
+        scale(noViewModel, n);
+        testModels(viewModel, noViewModel);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testOffset(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testOffset() {
         int n = 9;
         Model viewModel = makeModel(true);
-        offset(viewModel,n);
+        offset(viewModel, n);
         Model noViewModel = makeModel(false);
-        offset(noViewModel,n);
-        testModels(viewModel,noViewModel);
+        offset(noViewModel, n);
+        testModels(viewModel, noViewModel);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testMinus(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testMinus() {
         int n = 7;
         Model viewModel = makeModel(true);
-        minus(viewModel,n);
+        minus(viewModel, n);
         Model noViewModel = makeModel(false);
-        minus(noViewModel,n);
-        testModels(viewModel,noViewModel);
+        minus(noViewModel, n);
+        testModels(viewModel, noViewModel);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testBoolNot(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testBoolNot() {
         int n = 16;
         Model viewModel = makeModel(true);
-        boolNot(viewModel,n);
+        boolNot(viewModel, n);
         Model noViewModel = makeModel(false);
-        boolNot(noViewModel,n);
-        testModels(viewModel,noViewModel);
+        boolNot(noViewModel, n);
+        testModels(viewModel, noViewModel);
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBoolNotNot() {
         int n = 16;
         Model viewModel = makeModel(true);
@@ -670,66 +652,60 @@ public class ViewsTest {
         testModels(viewModel, noViewModel);
     }
 
-    private static Model makeModel(final boolean withViews){
-        Model m = new Model("with"+(withViews?"":"out")+" views");
-        m.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return withViews;
-            }
-        });
+    private static Model makeModel(final boolean withViews) {
+        Model m = new Model("with" + (withViews ? "" : "out") + " views", new DefaultSettings().setEnableViews(withViews));
         return m;
     }
 
-    private static void offset(Model model, int n){
-        IntVar[] x = model.intVarArray(n,0,n-1);
+    private static void offset(Model model, int n) {
+        IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.intOffsetView(x[i],42);
+        for (int i = 0; i < n; i++) {
+            y[i] = model.intOffsetView(x[i], 42);
         }
         checkDomains(true, x, y);
 
         model.allDifferent(x).post();
-        model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(Search.randomSearch(y,0));
+        model.sum(y, "<", n * 2).post();
+        model.getSolver().setSearch(Search.randomSearch(y, 0));
     }
 
-    private static void scale(Model model, int n){
-        IntVar[] x = model.intVarArray(n,0,n-1);
+    private static void scale(Model model, int n) {
+        IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
-        for(int i=0;i<n;i++){
-            y[i] = model.intScaleView(x[i],42);
+        for (int i = 0; i < n; i++) {
+            y[i] = model.intScaleView(x[i], 42);
         }
         checkDomains(false, x, y);
 
         model.allDifferent(x).post();
-        model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(Search.randomSearch(y,0));
+        model.sum(y, "<", n * 2).post();
+        model.getSolver().setSearch(Search.randomSearch(y, 0));
     }
 
-    private static void minus(Model model, int n){
-        IntVar[] x = model.intVarArray(n,0,n-1);
+    private static void minus(Model model, int n) {
+        IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
-        for(int i=0;i<n;i++){
+        for (int i = 0; i < n; i++) {
             y[i] = model.intMinusView(x[i]);
         }
         checkDomains(true, x, y);
 
         model.allDifferent(x).post();
-        model.sum(y, "<", n*2).post();
-        model.getSolver().setSearch(Search.randomSearch(y,0));
+        model.sum(y, "<", n * 2).post();
+        model.getSolver().setSearch(Search.randomSearch(y, 0));
     }
 
-    private static void boolNot(Model model, int n){
+    private static void boolNot(Model model, int n) {
         BoolVar[] x = model.boolVarArray(n);
         BoolVar[] y = new BoolVar[n];
-        for(int i=0;i<n;i++){
+        for (int i = 0; i < n; i++) {
             y[i] = model.boolNotView(x[i]);
         }
         checkDomains(true, x, y);
 
-        model.sum(x,"=",n/2).post();
-        model.getSolver().setSearch(Search.randomSearch(y,0));
+        model.sum(x, "=", n / 2).post();
+        model.getSolver().setSearch(Search.randomSearch(y, 0));
     }
 
     public static void boolNotNot(Model model, int n) {
@@ -741,15 +717,15 @@ public class ViewsTest {
         BoolVar[] z = new BoolVar[n];
         for (int i = 0; i < y.length; i++) {
             z[i] = model.boolNotView(y[i]);
-            Assert.assertTrue(z[i]==x[i]);
+            Assert.assertTrue(z[i] == x[i]);
         }
         checkDomains(true, x, y, z);
 
-        model.sum(x, "=", n/2).post();
+        model.sum(x, "=", n / 2).post();
         model.getSolver().setSearch(Search.randomSearch(z, 0));
     }
 
-    private static <T extends IntVar> void checkDomains(boolean noHoles, T[] ... vars) {
+    private static <T extends IntVar> void checkDomains(boolean noHoles, T[]... vars) {
         assert vars.length > 0;
 
         for (T[] varArray : vars) {
@@ -758,12 +734,12 @@ public class ViewsTest {
                 int prev = -1;
 
                 DisposableValueIterator it = var.getValueIterator(true);
-                for(int i = var.getLB(); i != Integer.MAX_VALUE; i = var.nextValue(i)) {
+                for (int i = var.getLB(); i != Integer.MAX_VALUE; i = var.nextValue(i)) {
                     assertTrue(it.hasNext());
-                    if(prev != -1) {
-                        if(noHoles) {
-                            assertEquals(var.nextValueOut(i), var.getUB()+1);
-                            assertEquals(var.previousValueOut(i), var.getLB()-1);
+                    if (prev != -1) {
+                        if (noHoles) {
+                            assertEquals(var.nextValueOut(i), var.getUB() + 1);
+                            assertEquals(var.previousValueOut(i), var.getLB() - 1);
                         }
                         assertTrue(it.hasPrevious());
 //                        assertEquals(it.previous(), prev);
@@ -780,21 +756,21 @@ public class ViewsTest {
 
     private static void testModels(Model... models) {
         IntVar[][] vars = new IntVar[models.length][];
-        for(int i=0;i<models.length;i++){
-            Assert.assertEquals(models[0].getResolutionPolicy(),models[i].getResolutionPolicy());
+        for (int i = 0; i < models.length; i++) {
+            Assert.assertEquals(models[0].getResolutionPolicy(), models[i].getResolutionPolicy());
             vars[i] = models[i].retrieveIntVars(true);
-            Assert.assertEquals(vars[i].length,vars[0].length);
+            Assert.assertEquals(vars[i].length, vars[0].length);
         }
         long t;
         long[] time = new long[models.length];
         boolean bc;
-        int nbSols=0;
+        int nbSols = 0;
         do {
             t = System.currentTimeMillis();
             bc = models[0].getSolver().solve();
             time[0] += System.currentTimeMillis() - t;
-            if(bc) nbSols++;
-            for(int k=1;k<models.length;k++) {
+            if (bc) nbSols++;
+            for (int k = 1; k < models.length; k++) {
                 t = System.currentTimeMillis();
                 Assert.assertEquals(bc, models[k].getSolver().solve());
                 time[k] += System.currentTimeMillis() - t;
@@ -810,7 +786,7 @@ public class ViewsTest {
                 Assert.assertEquals(
                         models[k].getSolver().getFailCount(),
                         models[0].getSolver().getFailCount());
-                if(models[0].getResolutionPolicy()!= ResolutionPolicy.SATISFACTION)
+                if (models[0].getResolutionPolicy() != ResolutionPolicy.SATISFACTION)
                     Assert.assertEquals(
                             models[k].getSolver().getBestSolutionValue(),
                             models[0].getSolver().getBestSolutionValue());
@@ -820,10 +796,37 @@ public class ViewsTest {
                     }
                 }
             }
-        }while (bc);
-        System.out.println(nbSols+" solutions");
-        for(int i=0;i<models.length;i++){
-            System.out.println(models[i].getName()+" solved in "+time[i]+" ms");
+        } while (bc);
+        System.out.println(nbSols + " solutions");
+        for (int i = 0; i < models.length; i++) {
+            System.out.println(models[i].getName() + " solved in " + time[i] + " ms");
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testCP01() {
+        for (int a = -5; a < 6; a++) {
+            for (int b = 5; b > -6; b--) {
+                Model base = new Model(new DefaultSettings().setEnableViews(false));
+                {
+                    IntVar i = base.intVar("i", -5, 5);
+                    IntVar f = base.intAffineView(a, i, b);
+                    base.arithm(f, ">", -12).post();
+                    base.arithm(f, "<", 17).post();
+                    Solver s = base.getSolver();
+                    s.findAllSolutions();
+                }
+                Model comp = new Model(new DefaultSettings().setEnableViews(true));
+                {
+                    IntVar i = comp.intVar("i", -5, 5);
+                    IntVar f = comp.intAffineView(a, i, b);
+                    comp.arithm(f, ">", -12).post();
+                    comp.arithm(f, "<", 17).post();
+                    Solver s = comp.getSolver();
+                    s.findAllSolutions();
+                }
+                Assert.assertEquals(comp.getSolver().getSolutionCount(), base.getSolver().getSolutionCount());
+            }
         }
     }
 }

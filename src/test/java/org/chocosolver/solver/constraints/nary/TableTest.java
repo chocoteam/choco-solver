@@ -13,8 +13,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -493,26 +493,14 @@ public class TableTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void test329() {
-		Model s1 = new Model();
+		Model s1 = new Model(new DefaultSettings().setMaxTupleSizeForSubstitution(0));
 		{
-			s1.set(new Settings() {
-				@Override
-				public int getMaxTupleSizeForSubstitution() {
-					return 0;
-				}
-			});
 			BoolVar[] bs = s1.boolVarArray("b", 3);
 			BoolVar r = s1.boolVar("r");
 			s1.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
 		}
-		Model s2 = new Model();
+		Model s2 = new Model(new DefaultSettings().setMaxTupleSizeForSubstitution(1000));
 		{
-			s2.set(new Settings() {
-				@Override
-				public int getMaxTupleSizeForSubstitution() {
-					return 1000;
-				}
-			});
 			BoolVar[] bs = s2.boolVarArray("b", 3);
 			BoolVar r = s2.boolVar("r");
 			s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);

@@ -9,8 +9,8 @@
 package org.chocosolver.solver.explanations;
 
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.loop.learn.LearnCBJ;
 import org.chocosolver.solver.search.loop.learn.LearnExplained;
 import org.chocosolver.solver.search.strategy.Search;
@@ -356,13 +356,7 @@ public class ExplanationTest {
 
     @Test(groups="1s", timeOut=60000, dataProvider = "params")
     public void testXP1(boolean views, int var, DecisionOperator dop) {
-        Model model = new Model();
-        model.set(new Settings() {
-            @Override
-            public boolean enableViews() {
-                return views;
-            }
-        });
+        Model model = new Model(new DefaultSettings().setEnableViews(views));
         IntVar[] vs = new IntVar[5];
         vs[0] = model.intVar("A", 0, 5);
         vs[1] = model.intOffsetView(vs[0], 1);

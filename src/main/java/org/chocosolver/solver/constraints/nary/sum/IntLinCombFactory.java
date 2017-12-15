@@ -48,10 +48,10 @@ public class IntLinCombFactory {
      * @param SUM      the resulting variable
      * @return a constraint to post or reify
      */
-    public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, IntVar SUM) {
+    public static Constraint reduce(IntVar[] VARS, Operator OPERATOR, IntVar SUM, int minCardForDecomposition) {
         int[] COEFFS = new int[VARS.length];
         Arrays.fill(COEFFS, 1);
-        return reduce(VARS, COEFFS, OPERATOR, SUM);
+        return reduce(VARS, COEFFS, OPERATOR, SUM, minCardForDecomposition);
     }
 
 
@@ -64,10 +64,11 @@ public class IntLinCombFactory {
      * @param SCALAR   the resulting variable
      * @return a constraint to post or reify
      */
-    public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR) {
+    public static Constraint reduce(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, IntVar SCALAR,
+                                    int minCardForDecomposition) {
         // 0. normalize data
         Model model = SCALAR.getModel();
-        if (VARS.length > model.getSettings().getMinCardForSumDecomposition()) {
+        if (VARS.length > minCardForDecomposition && OPERATOR.equals(Operator.EQ)) {
             int k = VARS.length;
             int d1 = (int) Math.sqrt(k);
             int d2 = k / d1 + (k % d1 == 0?0:1);
@@ -218,19 +219,22 @@ public class IntLinCombFactory {
                     if ((COEFFS[0] == 1 && COEFFS[1] == 1 && COEFFS[2] == -1)
                             || (COEFFS[0] == -1 && COEFFS[1] == -1 && COEFFS[2] == 1)) {
                         return new Constraint(ConstraintsName.SUM,
-                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2]));
+                                new PropXplusYeqZ(VARS[0], VARS[1], VARS[2],
+                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
                     }
                     // deal with X + Z  = Y
                     if ((COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == 1)
                             || (COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == -1)) {
                         return new Constraint(ConstraintsName.SUM,
-                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1]));
+                                new PropXplusYeqZ(VARS[0], VARS[2], VARS[1],
+                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
                     }
                     // deal with Y + Z  = X
                     if ((COEFFS[0] == -1 && COEFFS[1] == 1 && COEFFS[2] == 1)
                             || (COEFFS[0] == 1 && COEFFS[1] == -1 && COEFFS[2] == -1)) {
                         return new Constraint(ConstraintsName.SUM,
-                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0]));
+                                new PropXplusYeqZ(VARS[1], VARS[2], VARS[0],
+                                        VARS[0].getModel().getSettings().enableACOnTernarySum()));
                     }
                 }
             default:
