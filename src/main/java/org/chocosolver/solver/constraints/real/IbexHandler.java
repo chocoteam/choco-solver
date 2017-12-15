@@ -87,7 +87,9 @@ public class IbexHandler {
      * @param ibex ibex instance to build.
      */
     private synchronized static void build(Ibex ibex){
-        ibex.build();
+        if(!ibex.build()){
+            throw new SolverException("Malformed Ibex function");
+        }
     }
 
     /**

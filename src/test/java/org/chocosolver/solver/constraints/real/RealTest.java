@@ -12,6 +12,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
@@ -747,6 +748,34 @@ public class RealTest {
         }
         ibex.next_solution(domains);
         ibex.release();
+    }
+
+    @Test(groups="1s", timeOut=6000000)
+    public void testFN1() {
+        Model model = new Model("Environment generation problem");
+        //A
+        RealVar x_a = model.realVar("X_a", 0, 2, 1.0d);
+        RealVar y_a = model.realVar("Y_a", 0, 2, 1.0d);
+        RealVar z_a = model.realVar("Z_a", 0, 270, 90.0d);
+
+        //A
+        RealVar x_b = model.realVar("X_b", 0, 2, 1.0d);
+        RealVar y_b = model.realVar("Y_b", 0, 2, 1.0d);
+        RealVar z_b = model.realVar("Z_b", 0, 270, 90.0d);
+
+        model.post(model.realIbexGenericConstraint("{0}={1}+cos({2})", x_b, x_a, z_a));
+        model.post(model.realIbexGenericConstraint("{0}={1}+sin({2})", y_b, y_a, z_a));
+        Assert.assertNotNull(model.getSolver().findSolution());
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void testFN2(){
+        Model model = new Model("Environment generation problem");
+        RealVar x_a = model.realVar("X_a", 0, 2, 1.0d);
+        RealVar y_a = model.realVar("Y_a", 0, 2, 1.0d);
+        RealVar z_a = model.realVar("Z_a", 0, 270, 90.0d);
+        model.post(model.realIbexGenericConstraint("{0}={1}+cos{2}", y_a, x_a, z_a));
+        model.getSolver().findSolution();
     }
 
 }
