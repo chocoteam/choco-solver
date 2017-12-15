@@ -21,7 +21,7 @@ the default behavior.
 
 
 ### Closed issues and pull requests:
-\#527, #569, #578
+\#527, #569, #576, #578
 
 4.0.6 - 23 Nov 2017
 -------------------

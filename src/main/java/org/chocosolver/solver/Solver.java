@@ -10,8 +10,6 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.IExplanationEngine;
@@ -330,16 +328,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     .stream()
                     .filter(c -> c.getStatus() == FREE)
                     .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.toString()));
-        }
-
-        // for fast construction of "external" constraint, they are initialized once for all
-        if(mModel.getHook(Model.MINISAT_HOOK_NAME) != null){
-            SatConstraint minisat = (SatConstraint) mModel.getHook(Model.MINISAT_HOOK_NAME);
-            minisat.getPropSat().initialize();
-        }
-        if(mModel.getHook(Model.NOGOODS_HOOK_NAME) != null){
-            NogoodConstraint nogoods = (NogoodConstraint) mModel.getHook(Model.NOGOODS_HOOK_NAME);
-            nogoods.getPropNogoods().initialize();
         }
         // note jg : new (used to be in model)
         if (engine == NoPropagationEngine.SINGLETON) {

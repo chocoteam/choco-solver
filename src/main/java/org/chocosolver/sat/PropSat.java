@@ -96,7 +96,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        assert initialized:"PropSat is not initialized";
+        initialize();
         if (!sat_.ok_) fails();
         sat_.cancelUntil(0);
         storeEarlyDeductions();
