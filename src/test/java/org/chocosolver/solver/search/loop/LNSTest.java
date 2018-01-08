@@ -63,7 +63,7 @@ public class LNSTest {
 
         Solver r = model.getSolver();
         r.setSearch(lastConflict(domOverWDegSearch(objects)));
-        r.limitTime(900);
+//        r.limitTime(900);
         switch (lns) {
             case 0:
                 break;

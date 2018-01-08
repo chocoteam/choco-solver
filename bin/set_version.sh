@@ -34,10 +34,10 @@ then
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyleft.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR\";%"  ./src/main/java/org/chocosolver/solver/Settings.java
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        return \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./src/main/java/org/chocosolver/solver/Settings.java
 
     ## The doc
-    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyleft \(c\) 2010-$YEAR%"  ./src/sphinx/source/3_solving.rst
+    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR%"  ./src/sphinx/source/3_solving.rst
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION
