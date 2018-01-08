@@ -3,8 +3,8 @@
 set -ex
 # download Ibex and untar it
 ibexver=2.6.3
-curl https://github.com/ibex-team/ibex-lib/archive/ibex-${ibexver}.tgz > ibex-${ibexver}.tgz
-tar -xzf ibex-${ibexver}.tgz
+curl https://github.com/ibex-team/ibex-lib/archive/ibex-${ibexver}.tgz > ibex-${ibexver}.tar.gz
+tar -xzf ibex-${ibexver}.tar.gz
 # download java plugin
 curl http://www.ibex-lib.org/sites/default/files/ibex-java.tar.gz > ibex-java.tar.gz
 tar -xzf ibex-java.tar.gz -C ibex-${ibexver}/plugins
