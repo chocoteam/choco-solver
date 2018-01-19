@@ -8,6 +8,7 @@ NEXT MILESTONE
 -------------------
 
 Add a PayPal button for donations.
+Move to Ibex-2.6.5.
 
 ### Major features:
 

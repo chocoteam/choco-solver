@@ -784,7 +784,7 @@ public class RealTest {
         double precision = 1.e-4;
 
         RealVar var1 = model.realVar("var1", 0.1);
-        RealVar var2 = model.realVar("var2", 0.1);
+        RealVar var2 = model.realVar("var2", 0.2);
         RealVar var3 = model.realVar("var3", -5, 5, precision);
 
         model.realIbexGenericConstraint("{0}+{1}={2}", new RealVar[] {var1,var2,var3}).post();
@@ -792,56 +792,26 @@ public class RealTest {
         Solver solver = model.getSolver();
         solver.showSolutions();
         solver.showDecisions();
-        solver.findSolution();
-
-    }
-
-
-    @Test(groups="1s", timeOut=60000)
-    public void testRoberto2(){
-        Ibex ibex = new Ibex(new double[]{1.e-4});
-        ibex.add_ctr("0.1+0.2={0}");
-        ibex.build();
-        double domains[] = {-5.0, 5.0};
-        System.out.println("Before contract:");
-        System.out.println("([" + domains[0] + "," + domains[1] + "])");
-
-        int result = ibex.contract(0, domains);
-
-        if (result == Ibex.FAIL) {
-            System.out.println("Failed!");
-        } else if (result == Ibex.CONTRACT) {
-            System.out.println("After contract:");
-            System.out.println("([" + domains[0] + "," + domains[1] + "])");
-        } else {
-            System.out.println("Nothing.");
-        }
-        ibex.release();
+        Assert.assertTrue(solver.solve());
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testRoberto3(){
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
-        ibex.add_ctr("{0}+{1}={3}");
+        ibex.add_ctr("{0}+{1}={2}");
         ibex.build();
+        double domains[] = {0.1, 0.1, 0.2, 0.2, -5.0, 5.0};
+        Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
+        ibex.release();
+    }
+
+    @Test(groups="ignored", timeOut=60000)
+    public void testRoberto4(){
+        Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
+        ibex.add_ctr("{0}+{1}=Pi*{2}");
+        Assert.assertTrue(ibex.build());
         double domains[] = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
-        System.out.println("Before contract:");
-        System.out.println("([" + domains[0] + "," + domains[1] + "], " +
-                "[" + domains[2] + "," + domains[3] + "]," +
-                "[" + domains[4] + "," + domains[5] + "])");
-
-        int result = ibex.contract(0, domains);
-
-        if (result == Ibex.FAIL) {
-            System.out.println("Failed!");
-        } else if (result == Ibex.CONTRACT) {
-            System.out.println("After contract:");
-            System.out.println("([" + domains[0] + "," + domains[1] + "], " +
-                    "[" + domains[2] + "," + domains[3] + "]," +
-                    "[" + domains[4] + "," + domains[5] + "])");
-        } else {
-            System.out.println("Nothing.");
-        }
+        Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
     }
 }
