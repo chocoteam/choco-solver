@@ -398,10 +398,10 @@ public class ConstraintTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="10s", timeOut=60000)
     public void testJitee2(){
         Model model = new Model("model", new DefaultSettings().setCheckDeclaredConstraints(false));
-        IntVar a= model.intVar("a", 0, 100000, false);
+        IntVar a= model.intVar("a", 0, 1000, false);
         IntVar b= model.intVar("b", 0, 100, false);
 
 
@@ -424,7 +424,7 @@ public class ConstraintTest {
                 while (model.getSolver().solve()) {
                     i++;
                     newTimeMs = System.currentTimeMillis();
-                    System.out.print("Solution " + i + " found :" + (newTimeMs-timeMs) + " ms. ");
+//                    System.out.print("Solution " + i + " found :" + (newTimeMs-timeMs) + " ms. ");
                     timeMs = newTimeMs;
                     System.out.println("");
                 }
