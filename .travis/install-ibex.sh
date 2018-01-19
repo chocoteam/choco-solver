@@ -11,6 +11,6 @@ cd ibex-lib-ibex-${ibexver}
 sudo ./waf install
 export LD_LIBRARY_PATH=/usr/local/lib
 cd -
-sudo rm -r ibex-${ibexver}.tgz
+sudo rm -r ibex-${ibexver}.tar.gz
 sudo rm -r ibex-lib-ibex-${ibexver}
 
