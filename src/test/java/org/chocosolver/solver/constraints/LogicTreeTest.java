@@ -337,4 +337,26 @@ public class LogicTreeTest {
         Assert.assertTrue(b2.isInstantiatedTo(0));
         Assert.assertTrue(a.isInstantiatedTo(0));
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test18() {
+        Model model = new Model();
+
+        BoolVar a = model.boolVar("a");
+        BoolVar b = model.boolVar("b");
+        BoolVar c = model.boolVar("c");
+        BoolVar d = model.boolVar("d");
+        BoolVar e = model.boolVar("e");
+        BoolVar f = model.boolVar("f");
+
+        LogOp root = LogOp.or(
+                LogOp.and(d, b, c),
+                LogOp.and(a, e, c),
+                LogOp.and(a, b, f)
+        );
+
+        ILogical l = LogicTreeToolBox.toCNF(root, model);
+
+        Assert.assertEquals(l.toString(), "((a or b) and (a or c) and (a or d) and (b or c) and (b or e) and (c or f) and (a or b or c) and (a or b or d) and (a or b or e) and (a or b or f) and (a or c or d) and (a or c or e) and (a or c or f) and (a or d or e) and (a or d or f) and (b or c or d) and (b or c or e) and (b or c or f) and (b or d or e) and (b or e or f) and (c or d or f) and (c or e or f) and (d or e or f))");
+    }
 }

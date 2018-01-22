@@ -182,7 +182,7 @@ public class LogicTreeToolBox {
     /**
      * Detects tautologies and contradictions from <code>t</code>
      * @param t a logical expression
-     * @param model to get {@link Model#ONE} and {@link Model#ZERO}.
+     * @param model to get {@link Model#boolVar(boolean)}.
      * @return simplified logical expression
      */
     public static ILogical simplify(ILogical t, Model model) {
@@ -240,7 +240,7 @@ public class LogicTreeToolBox {
     /**
      * Remove tautologies from <code>l</code>
      * @param l logical expression
-     * @param model to get {@link Model#ONE} and {@link Model#ZERO}.
+     * @param model to get {@link Model#intVar(int)}.
      * @return simplified logical expression
      */
     public static ILogical simplifySingleton(ILogical l, Model model) {
@@ -280,7 +280,7 @@ public class LogicTreeToolBox {
         int k  = children.length-1;
         while(i < k ){
             if(sameLogical(children[i], children[i+1]) == 0){
-                System.arraycopy(children, i+1, children, i+1, children.length - i - 1);
+                System.arraycopy(children, i+1, children, i, children.length - i - 1);
                 k--;
             }else {
                 i++;
