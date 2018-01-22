@@ -63,7 +63,7 @@ public class LNSTest {
 
         Solver r = model.getSolver();
         r.setSearch(lastConflict(domOverWDegSearch(objects)));
-//        r.limitTime(900);
+        r.limitTime(900);
         switch (lns) {
             case 0:
                 break;
@@ -112,7 +112,7 @@ public class LNSTest {
     }
 
 
-    @Test(groups = "10s", timeOut = 300000, dataProvider = "lns")
+    @Test(groups = "10s", timeOut = 60000, dataProvider = "lns")
     public void test1(int lns) {
         // opt: 8372
         knapsack20(lns);
