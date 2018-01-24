@@ -3,13 +3,6 @@ XCSP3 parser
 
 This is related to [XCSP3 format](http://xcsp.org).
 
-### Maven-based installation
-
-To build the sources, do not forget the `validate` phase to install XCSP3 dependency jar.
-For example, one can run:
-
-`mvn validate clean install -DskipTests`
-
 ### Parsing and solving a XCSP3 file
 
 Then, there are two ways to parse and solve a XCSP3 file with Choco:

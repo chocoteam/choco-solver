@@ -126,9 +126,9 @@ public class XCSPParser implements XCallbacks2 {
     private ReExpression buildRe(XNode<XVariables.XVarInteger> tree) {
         Types.TypeExpr type = tree.type;
         if (type == Types.TypeExpr.VAR) {
-            return (BoolVar)var(tree.firstVar());
+            return (BoolVar)var(tree.var(0));
         } else if (type == Types.TypeExpr.LONG) {
-            return (BoolVar)model.intVar(tree.firstVal());
+            return (BoolVar)model.intVar(tree.val(0));
         }
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)tree).sons;
         switch (type) {
@@ -175,14 +175,14 @@ public class XCSPParser implements XCallbacks2 {
     private ArExpression buildAr(XNode<XVariables.XVarInteger> node) {
         Types.TypeExpr type = node.type;
         if (type == Types.TypeExpr.VAR) {
-            return var(node.firstVar());
+            return var(node.var(0));
         } else if (type == Types.TypeExpr.LONG) {
-            return model.intVar(node.firstVal());
+            return model.intVar(node.val(0));
         }
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
         ArExpression[] aes = null;
         ReExpression[] res = null;
-        if(type.isNonUnaryLogicalOperator() || type.equals(Types.TypeExpr.NOT)){
+        if(type.isLogicalOperator()&& type.arityMax>1 || type.equals(Types.TypeExpr.NOT)){
             res = extractRe(sons);
         }else{
             aes = extractAr(sons);

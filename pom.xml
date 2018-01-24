@@ -46,7 +46,6 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <xcsp3.version>1.0.1-SNAPSHOT</xcsp3.version>
     </properties>
 
     <scm>
@@ -97,9 +96,9 @@
             <version>2.33</version>
         </dependency>
         <dependency>
-            <groupId>xcsp3</groupId>
-            <artifactId>xcsp3</artifactId>
-            <version>${xcsp3.version}</version>
+            <groupId>org.xcsp</groupId>
+            <artifactId>xcsp3-tools</artifactId>
+            <version>0.9.0</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>

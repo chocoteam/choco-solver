@@ -8,7 +8,7 @@
  */
 package org.chocosolver.parser.flatzinc;
 
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Solver;
 
 /**
@@ -16,7 +16,7 @@ import org.chocosolver.solver.Solver;
  * Created by cprudhom on 08/12/14.
  * Project: choco-parsers.
  */
-public class FznSettings implements Settings {
+public class FznSettings extends DefaultSettings {
 
     /**
      * Set to true to print constraint creation during parsing

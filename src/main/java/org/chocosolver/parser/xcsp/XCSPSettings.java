@@ -8,13 +8,13 @@
  */
 package org.chocosolver.parser.xcsp;
 
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.DefaultSettings;
 
 /**
  * Created by cprudhom on 01/09/15.
  * Project: choco-parsers.
  */
-public class XCSPSettings implements Settings {
+public class XCSPSettings extends DefaultSettings {
 
     boolean DEBUG = false;
     /**

@@ -186,7 +186,7 @@ public class XCSP extends RegParser {
         }
         if(cs) {
             try {
-                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()));
+                new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
             } catch (Exception e) {
                 throw new RuntimeException("wrong solution found twice");
             }
@@ -212,7 +212,7 @@ public class XCSP extends RegParser {
         }
         if(cs) {
             try {
-                new SolutionChecker(instance, new ByteArrayInputStream(output.toString().getBytes()));
+                new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));
             } catch (Exception e) {
                 e.printStackTrace();
             }
