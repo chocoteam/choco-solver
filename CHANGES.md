@@ -16,6 +16,7 @@ Move to Ibex-2.6.5.
 the default behavior.
 - `IViewFactory.intScaleView` now manages negative constants,
 - `IViewFactory.intAffineView` is now available
+- add new constraint for mixed linear equation (over real/int variables and double/int coefficients)
 
 ### Deprecated API (to be removed in next release):
 -  `Model.set(Settings)` is deprecated. Now settings are declared in the `Model` constructor.
