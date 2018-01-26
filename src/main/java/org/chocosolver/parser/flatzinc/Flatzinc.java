@@ -99,8 +99,7 @@ public class Flatzinc extends RegParser {
         datas = new Datas[nb_cores];
         String iname = instance == null?"":Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1));
-            threadModel.set(defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, all, stat);
         }

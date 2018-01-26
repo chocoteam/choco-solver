@@ -9,6 +9,7 @@ env:
   - GROUP=1s
   - GROUP=mzn
   - GROUP=xcsp
+  - GROUP=mps
 branches:
   only:
   - master
