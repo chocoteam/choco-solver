@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.constraints.real.PropScalarMixed;
 import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.variables.Variable;
 
@@ -63,5 +64,20 @@ public interface IRealConstraintFactory {
 	 */
 	default RealConstraint ibex(String functions, Variable... rvars) {
 		return realIbexGenericConstraint(functions, rvars);
+	}
+
+	/**
+	 * Creates a linear equation constraint over RealVar, IntVar or BoolVar
+     * which ensures that Sum(vars[i]*coeffs[i]) op bound
+	 *
+	 * @param vars     a collection of variable (RealVar, IntVar, BoolVar are accepted)
+	 * @param coeffs   a collection of double, for which |vars|=|coeffs|
+	 * @param op an operator in {"=", ">=", "<="}
+	 * @param bound   a double
+	 * @return a scalar constraint
+	 */
+	default Constraint scalar(Variable[] vars, double[] coeffs, String op, double bound){
+		return new Constraint(ConstraintsName.MIXEDSCALAR,
+				new PropScalarMixed(vars, coeffs, Operator.get(op), bound));
 	}
 }

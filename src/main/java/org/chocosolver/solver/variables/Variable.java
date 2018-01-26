@@ -287,4 +287,28 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @return the scheduler
      */
     <E extends IEventType> EvtScheduler<E> _schedIter();
+
+    /**
+     * @return this cast into an IntVar.
+     * @throws ClassCastException if type is not compatible
+     */
+    IntVar asIntVar();
+
+    /**
+     * @return this cast into an BoolVar.
+     * @throws ClassCastException if type is not compatible
+     */
+    BoolVar asBoolVar();
+
+    /**
+     * @return this cast into an RealVar.
+     * @throws ClassCastException if type is not compatible
+     */
+    RealVar asRealVar();
+
+    /**
+     * @return this cast into an SetVar.
+     * @throws ClassCastException if type is not compatible
+     */
+    SetVar asSetVar();
 }

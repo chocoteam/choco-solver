@@ -162,11 +162,12 @@ public class Search {
      * @param valS  strategy to select where to split domains
      * @param epsilon gap for refutation
      * @param rvars RealVar array to branch on
+     * @param leftFirst select left range first
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
-                                             double epsilon, RealVar... rvars) {
-        return new RealStrategy(rvars, varS, valS, epsilon);
+                                             double epsilon, boolean leftFirst, RealVar... rvars) {
+        return new RealStrategy(rvars, varS, valS, epsilon, leftFirst);
     }
 
     /**
@@ -185,7 +186,7 @@ public class Search {
      * @return a strategy to instantiate real variables
      */
     public static RealStrategy realVarSearch(double epsilon, RealVar... reals) {
-        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), epsilon, reals);
+        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), epsilon, true, reals);
     }
 
     /**
@@ -194,17 +195,20 @@ public class Search {
      * A real decision is like:
      * <ul>
      *     <li>left branch: X &le; v</li>
-     *     <li>right branch: X &ge; v + {@link Double#MIN_VALUE}</li>
+     *     <li>right branch: X &ge; v + epsilon</li>
      * </ul>
+     * where epsilon is given or equal to the smallest precision among rvars divide by 10.
      * </p>
      *
      * @param varS  variable selection strategy
      * @param valS  strategy to select where to split domains
+     * @param leftFirst select left range first
      * @param rvars RealVar array to branch on
      * @return a strategy to instantiate reals
      */
-    public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS, RealVar... rvars) {
-        return realVarSearch(varS, valS, Double.MIN_VALUE, rvars);
+    public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
+                                             boolean leftFirst, RealVar... rvars) {
+        return realVarSearch(varS, valS, Double.NaN, leftFirst, rvars);
     }
 
     /**
@@ -222,7 +226,7 @@ public class Search {
      * @return a strategy to instantiate real variables
      */
     public static RealStrategy realVarSearch(RealVar... reals) {
-        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), reals);
+        return realVarSearch(new Cyclic<>(), new RealDomainMiddle(), true, reals);
     }
 
     // ************************************************************************************
@@ -429,7 +433,7 @@ public class Search {
         if (objective != null) {
             boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
-                strats.add(realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(), (RealVar) objective));
+                strats.add(realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(), !max, (RealVar) objective));
             } else {
                 strats.add(max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
             }

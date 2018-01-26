@@ -401,7 +401,7 @@ public class PropSum extends Propagator<IntVar> {
      * @param sumUB sum of upper bounds
      * @return the entailment check
      */
-    protected ESat check(int sumLB, int sumUB){
+    public ESat check(int sumLB, int sumUB){
         switch (o) {
             case NQ:
                 if (sumUB < b || sumLB > b) {
@@ -527,7 +527,7 @@ public class PropSum extends Propagator<IntVar> {
         return newrules;
     }
 
-    protected static int nb(Operator co){
+    public static int nb(Operator co){
         switch (co){
             case LE:
                 return 1;
@@ -538,7 +538,7 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
-    protected static Operator nop(Operator co){
+    public static Operator nop(Operator co){
         switch (co){
             case LE:
                 return Operator.GE;

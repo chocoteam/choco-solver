@@ -156,6 +156,8 @@ public class ConstraintsName {
 
     public static final String SUM = "SUM";
 
+    public static final String MIXEDSCALAR = "MIXEDSCALAR";
+
     public static final String INTEQREAL = "INTEQREAL";
 
     public static final String REALCONSTRAINT = "REALCONSTRAINT";

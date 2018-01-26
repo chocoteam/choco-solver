@@ -13,6 +13,8 @@ import org.chocosolver.solver.search.strategy.selectors.values.RealValueSelector
 import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.RealVar;
 
+import java.util.Arrays;
+
 /**
  * Define a strategy based on {@link RealVar}.
  * It defines how a variable is selected to be part of the next decision, and which value from its domain is selected too.
@@ -36,6 +38,10 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
      * Gap when refuting a decision
      */
     private final double epsilon;
+    /**
+     * Select left range first
+     */
+    private final boolean leftFirst;
 
     /**
      * Create a real strategy which generates decision over real variables.
@@ -51,17 +57,21 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
      * @param varselector how to select the next variable to branch on
      * @param valueIterator on to select the value
      * @param epsilon gap value for refutation
+     * @param leftFirst select left range first
      */
     public RealStrategy(RealVar[] scope, VariableSelector<RealVar> varselector,
                         RealValueSelector valueIterator,
-                        double epsilon) {
+                        double epsilon, boolean leftFirst) {
         super(scope);
         this.varselector = varselector;
         this.valueIterator = valueIterator;
-        if(epsilon < Double.MIN_VALUE){
-            throw new IllegalArgumentException("'epsilon' should be greater or equal to Double.MIN_VALUE");
+        if(Double.isNaN(epsilon)){
+            double min = Arrays.stream(scope).mapToDouble(RealVar::getPrecision).min().getAsDouble();
+            this.epsilon = min / 10;
+        }else {
+            this.epsilon = epsilon;
         }
-        this.epsilon = epsilon;
+        this.leftFirst = leftFirst;
     }
 
     @Override
@@ -75,7 +85,7 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
             return null;
         }
         double value = valueIterator.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value, epsilon);
+        return variable.getModel().getSolver().getDecisionPath().makeRealDecision(variable, value, epsilon, leftFirst);
     }
 
     @SuppressWarnings({"unchecked"})

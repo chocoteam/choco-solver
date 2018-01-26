@@ -33,6 +33,10 @@ public class RealDecision extends Decision<RealVar> {
      */
     private double epsilon;
     /**
+     * Select left range first
+     */
+    private boolean leftFirst;
+    /**
      * Decision pool manager, to recycle decisions
      */
     transient private final PoolManager<RealDecision> poolManager;
@@ -55,11 +59,19 @@ public class RealDecision extends Decision<RealVar> {
     public void apply() throws ContradictionException {
         boolean modif = true;
         if (branch == 1) {
-            modif = var.updateUpperBound(value, this);
+            if(leftFirst){
+                modif = var.updateUpperBound(value, this);
+            }else{
+                modif = var.updateLowerBound(value, this);
+            }
         } else if (branch == 2) {
-            modif = var.updateLowerBound(value + epsilon, this);
+            if(leftFirst) {
+                modif = var.updateLowerBound(value + epsilon, this);
+            }else{
+                modif = var.updateUpperBound(value - epsilon, this);
+            }
         }
-        assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
+        assert modif : "(un-)applying decision " + this + " does not modify the variable's domain.";
     }
 
     /**
@@ -67,12 +79,14 @@ public class RealDecision extends Decision<RealVar> {
      * @param v a variable
      * @param value a value
      * @param epsilon gap between value as upper bound and as lower bound (to simulate strictness)
+     * @param leftFirst select left range first
      */
-    public void set(RealVar v, double value, double epsilon) {
-        assert epsilon>=Double.MIN_VALUE:"epsilon should be greater or equal to Double.MIN_VALUE";
+    public void set(RealVar v, double value, double epsilon, boolean leftFirst) {
+        assert epsilon >= Double.MIN_VALUE : "epsilon should be greater or equal to Double.MIN_VALUE";
         super.set(v);
         this.value = value;
         this.epsilon = epsilon;
+        this.leftFirst = leftFirst;
     }
 
     @Override

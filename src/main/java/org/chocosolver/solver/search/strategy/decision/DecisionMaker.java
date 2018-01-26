@@ -70,14 +70,15 @@ public class DecisionMaker {
      * @param var a real variable
      * @param value a value
      * @param epsilon gap for refutation
+     * @param leftFirst select left range first
      * @return an RealDecision
      */
-    public RealDecision makeRealDecision(RealVar var, double value, double epsilon) {
+    public RealDecision makeRealDecision(RealVar var, double value, double epsilon, boolean leftFirst) {
         RealDecision d = realDecisionPool.getE();
         if (d == null) {
             d = new RealDecision(realDecisionPool);
         }
-        d.set(var, value, epsilon);
+        d.set(var, value, epsilon, leftFirst);
         return d;
     }
 

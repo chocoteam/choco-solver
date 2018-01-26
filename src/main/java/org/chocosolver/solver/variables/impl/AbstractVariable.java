@@ -13,7 +13,11 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IVariableMonitor;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
@@ -384,4 +388,23 @@ public abstract class AbstractVariable implements Variable {
         return scheduler;
     }
 
+    @Override
+    public IntVar asIntVar() {
+        return (IntVar)this;
+    }
+
+    @Override
+    public BoolVar asBoolVar() {
+        return (BoolVar)this;
+    }
+
+    @Override
+    public RealVar asRealVar() {
+        return (RealVar)this;
+    }
+
+    @Override
+    public SetVar asSetVar() {
+        return (SetVar)this;
+    }
 }
