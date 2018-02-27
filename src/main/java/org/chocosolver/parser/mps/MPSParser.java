@@ -68,9 +68,10 @@ public class MPSParser {
 
     private double NEG_INF;
 
-    public void model(Model model, String instance, boolean maximize, 
+    public void model(Model model, String instance, boolean maximize,
                       double ninf, double pinf,
-                      boolean ibex) throws IOException {
+                      boolean ibex,
+                      boolean noeq) throws IOException {
         ope4eq = new HashMap<>();
         coeffs4eq = new HashMap<>();
         vars4eq = new HashMap<>();
@@ -83,7 +84,7 @@ public class MPSParser {
 
         this.POS_INF = pinf;
         this.NEG_INF = ninf;
-        
+
         Reader reader = null;
         if (instance.endsWith("mps.gz")) {
             FileInputStream fin = new FileInputStream(instance);
@@ -111,7 +112,7 @@ public class MPSParser {
                 line = br.readLine();
             }
         }
-        build(model, maximize, ibex);
+        build(model, maximize, ibex, noeq);
     }
 
     private void readName(BufferedReader br) throws IOException {
@@ -175,7 +176,7 @@ public class MPSParser {
             if (values[1].equals(TAG_MARKER)) {
                 isInt = values[2].equals(TAG_INTORG);
             } else {
-                if(!decVars.containsKey(values[0])) {
+                if (!decVars.containsKey(values[0])) {
                     decVars.put(values[0], null);
                     allvars.add(values[0]);
                 }
@@ -364,7 +365,7 @@ public class MPSParser {
     }
 
 
-    private void build(Model model, boolean maximize, boolean ibex) {
+    private void build(Model model, boolean maximize, boolean ibex, boolean noeq) {
         // First, create variables
         for (int i = 0; i < allvars.size(); i++) {
             String vnam = allvars.get(i);
@@ -387,9 +388,11 @@ public class MPSParser {
         String[] cnames = vars4eq.keySet().toArray(new String[vars4eq.size()]);
         Arrays.sort(cnames); // preserve order for determinism
         boolean foundObj = false;
+        boolean unimod = true;
         for (int i = 0; i < cnames.length; i++) {
             String cnam = cnames[i];
             List<Number> coefs = coeffs4eq.get(cnam);
+            unimod &= coefs.stream().allMatch(n -> (n.getClass() == Integer.class) && Math.abs(n.intValue()) == 1);
             String op = ope4eq.get(cnam);
             Number rhs = rhs4eq.get(cnam);
             Number rng = range4eq.get(cnam);
@@ -400,9 +403,9 @@ public class MPSParser {
                     && rhs.getClass() == Integer.class
                     && (rng == null || rng.getClass() == Integer.class)) {
                 if (op == null) {
-                    foundObj = postIntObectiveFunction(model, vars, coefs, rhs, rng, maximize, foundObj);
+                    foundObj = postIntObectiveFunction(model, vars, coefs, rhs, rng, maximize, foundObj, noeq);
                 } else {
-                    postIntEquation(model, vars, coefs, op, rhs, rng);
+                    postIntEquation(model, vars, coefs, op, rhs, rng, noeq);
                 }
             } else {
                 if (ibex) {
@@ -422,17 +425,27 @@ public class MPSParser {
                 }
             }
         }
+        System.out.printf("c Unimodular: %s\n", unimod);
     }
 
     private void postIntEquation(Model model, List<String> vars, List<Number> coefs, String op,
-                                 Number rhs, Number rng) {
+                                 Number rhs, Number rng, boolean noeq) {
         switch (op) {
             case "=":
                 if (rng == null) {
                     // only made of int var, and all coeffs are int
-                    model.scalar(vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new),
-                            coefs.stream().mapToInt(Number::intValue).toArray(), op, rhs.intValue()
-                    ).post();
+                    if(noeq) {
+                        model.scalar(vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new),
+                                coefs.stream().mapToInt(Number::intValue).toArray(), "<=", rhs.intValue()
+                        ).post();
+                        model.scalar(vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new),
+                                coefs.stream().mapToInt(Number::intValue).toArray(), ">=", rhs.intValue()
+                        ).post();
+                    }else{
+                        model.scalar(vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new),
+                                coefs.stream().mapToInt(Number::intValue).toArray(), op, rhs.intValue()
+                        ).post();
+                    }
                 } else {
                     if (rng.intValue() > 0) {
                         model.scalar(vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new),
@@ -466,51 +479,68 @@ public class MPSParser {
                         rhs.intValue()
                 ).post();
                 if (rng != null) {
-
+                    String nop = ">=";
+                    int b = rhs.intValue();
+                    if (op.equals(">=")) {
+                        nop = "<=";
+                        b += Math.abs(rng.intValue());
+                    } else {
+                        b -= Math.abs(rng.intValue());
+                    }
+                    model.scalar(
+                            vars.stream()
+                                    .map(s -> (IntVar) decVars.get(s))
+                                    .toArray(IntVar[]::new),
+                            coefs.stream()
+                                    .mapToInt(Number::intValue)
+                                    .toArray(),
+                            nop,
+                            b
+                    ).post();
                 }
+
                 break;
-        }
-        if (rng != null) {
-            String nop = ">=";
-            int b = rhs.intValue();
-            if (op.equals(">=")) {
-                nop = "<=";
-                b += Math.abs(rng.intValue());
-            } else {
-                b -= Math.abs(rng.intValue());
-            }
-            model.scalar(
-                    vars.stream()
-                            .map(s -> (IntVar) decVars.get(s))
-                            .toArray(IntVar[]::new),
-                    coefs.stream()
-                            .mapToInt(Number::intValue)
-                            .toArray(),
-                    nop,
-                    b
-            ).post();
         }
     }
 
     private boolean postIntObectiveFunction(Model model, List<String> vars, List<Number> coefs,
                                             Number rhs, Number rng,
-                                            boolean maximize, boolean foundObj) {
+                                            boolean maximize, boolean foundObj, boolean noeq) {
         if (foundObj) {
             throw new ParserException("More than one objective function found");
         } else if (rng != null) {
             throw new ParserException("Range found for objective function");
         } else {
-            IntVar objective = model.intVar("OBJ", (int)Math.ceil(NEG_INF), (int)Math.floor(POS_INF));
+            IntVar objective = model.intVar("OBJ", (int) Math.ceil(NEG_INF), (int) Math.floor(POS_INF));
             model.setObjective(maximize, objective);
             IntVar[] ivars = vars.stream().map(s -> (IntVar) decVars.get(s)).toArray(IntVar[]::new);
-            model.scalar(
-                    ArrayUtils.append(ivars, new IntVar[]{objective}),
-                    ArrayUtils.concat(coefs.stream()
-                            .mapToInt(Number::intValue)
-                            .toArray(), -1),
-                    "=",
-                    rhs.intValue()
-            ).post();
+            if(noeq) {
+                model.scalar(
+                        ArrayUtils.append(ivars, new IntVar[]{objective}),
+                        ArrayUtils.concat(coefs.stream()
+                                .mapToInt(Number::intValue)
+                                .toArray(), -1),
+                        "<=",
+                        rhs.intValue()
+                ).post();
+                model.scalar(
+                        ArrayUtils.append(ivars, new IntVar[]{objective}),
+                        ArrayUtils.concat(coefs.stream()
+                                .mapToInt(Number::intValue)
+                                .toArray(), -1),
+                        ">=",
+                        rhs.intValue()
+                ).post();
+            }else{
+                model.scalar(
+                        ArrayUtils.append(ivars, new IntVar[]{objective}),
+                        ArrayUtils.concat(coefs.stream()
+                                .mapToInt(Number::intValue)
+                                .toArray(), -1),
+                        "=",
+                        rhs.intValue()
+                ).post();
+            }
         }
         return true;
     }

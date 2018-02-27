@@ -15,6 +15,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
@@ -23,8 +24,7 @@ import java.nio.file.Paths;
 import java.util.List;
 
 /**
- * Created by cprudhom on 01/09/15.
- * Project: choco-parsers.
+ * Created by cprudhom on 01/09/15. Project: choco-parsers.
  */
 public class MPS extends RegParser {
 
@@ -43,11 +43,18 @@ public class MPS extends RegParser {
     @Option(name = "-ibex", usage = "Use Ibex for non-full integer equations (default: false).")
     private boolean ibex = false;
 
-    @Option(name = "-ninf", usage = "define negative infinity (default: "+ IntVar.MIN_INT_BOUND+").")
+    @Option(name = "-ninf", usage = "define negative infinity (default: " + IntVar.MIN_INT_BOUND + ").")
     private double ninf = IntVar.MIN_INT_BOUND;
 
-    @Option(name = "-pinf", usage = "define positive infinity (default: "+ IntVar.MAX_INT_BOUND+").")
+    @Option(name = "-pinf", usage = "define positive infinity (default: " + IntVar.MAX_INT_BOUND + ").")
     private double pinf = IntVar.MAX_INT_BOUND;
+
+    @Option(name = "-noeq", usage = "Split EQ constraints into a LQ and a GQ constraint.")
+    private boolean noeq = false;
+
+    @Option(name = "-split", usage = "Split any contraints of cardinality greater than this value (default: 100).")
+    private int split = 100;
+
 
     /**
      * Needed to print the last solution found
@@ -79,7 +86,7 @@ public class MPS extends RegParser {
         listeners.forEach(ParserListener::beforeSolverCreation);
         assert nb_cores > 0;
         if (nb_cores > 1) {
-            System.out.printf("%c %s solvers in parallel\n", getCommentChar(), nb_cores );
+            System.out.printf("%c %s solvers in parallel\n", getCommentChar(), nb_cores);
         } else {
             System.out.printf("%c simple solver\n", getCommentChar());
         }
@@ -87,6 +94,7 @@ public class MPS extends RegParser {
         parsers = new MPSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
             defaultSettings.setDebugPropagation(false);
+            defaultSettings.setMinCardinalityForSumDecomposition(split);
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             threadModel.setPrecision(precision);
             portfolio.addModel(threadModel);
@@ -114,12 +122,21 @@ public class MPS extends RegParser {
     }
 
     public void parse(Model target, MPSParser parser, int i) throws Exception {
-        parser.model(target, instance, maximize, ninf, pinf, ibex);
+        parser.model(target, instance, maximize, ninf, pinf, ibex, noeq);
         if (i == 0) {
             Solver solver = target.getSolver();
-            solver.setSearch(Search.defaultSearch(target));
-//            solver.setNoGoodRecordingFromRestarts();
-            solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+            if (target.getNbRealVar() == 0) {
+                target.getSolver().setSearch(
+                        Search.intVarSearch(new FirstFail(target),
+                                /*new org.chocosolver.parser.mps.IntDomainBest()*/
+                                new org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest(),
+//                                new IntDomainMin(),
+                                target.retrieveIntVars(true))
+                );
+            } else {
+                solver.setSearch(Search.defaultSearch(target));
+                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+            }
         }
     }
 
@@ -135,7 +152,7 @@ public class MPS extends RegParser {
         listeners.forEach(ParserListener::afterSolving);
     }
 
-    private void singleThread(){
+    private void singleThread() {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
@@ -158,7 +175,7 @@ public class MPS extends RegParser {
         finalOutPut(solver);
     }
 
-    private void manyThread(){
+    private void manyThread() {
         boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
             while (portfolio.solve()) {
@@ -175,8 +192,8 @@ public class MPS extends RegParser {
     }
 
 
-    private void onSolution(Solver solver, MPSParser parser){
-        if (solver.getObjectiveManager().isOptimization()){
+    private void onSolution(Solver solver, MPSParser parser) {
+        if (solver.getObjectiveManager().isOptimization()) {
             solver.getOut().printf("o %.12f \n", solver.getObjectiveManager().getBestSolutionValue().doubleValue());
         }
         output.setLength(0);
@@ -191,7 +208,7 @@ public class MPS extends RegParser {
         if (solver.getSolutionCount() > 0) {
             if (solver.getObjectiveManager().isOptimization() && complete) {
                 output.insert(0, "s OPTIMUM FOUND\n");
-            }else{
+            } else {
                 output.insert(0, "s SATISFIABLE\n");
             }
         } else if (complete) {
@@ -201,6 +218,8 @@ public class MPS extends RegParser {
         }
         solver.getOut().printf("%s", output);
         if (stat) {
+            solver.getOut().print("c ");
+            solver.printShortFeatures();
             solver.getOut().printf("%c %s \n", getCommentChar(), solver.getMeasures().toOneLineString());
         }
     }
