@@ -81,8 +81,7 @@ public class XCSP extends RegParser {
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
-            Model threadModel = new Model(iname + "_" + (i + 1));
-            threadModel.set(defaultSettings);
+            Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
             parsers[i] = new XCSPParser();
         }
@@ -110,8 +109,11 @@ public class XCSP extends RegParser {
     public void parse(Model target, XCSPParser parser, int i) throws Exception {
         parser.model(target, instance);
         if (i == 0) {
-            IntVar[] vars = parser.mvars.values().toArray(new IntVar[parser.mvars.size()]);
-            Arrays.sort(vars, Comparator.comparingInt(IntVar::getId));
+            IntVar[] decVars = (IntVar[]) getModel().getHook("decisions");;
+            if(decVars == null){
+                decVars = parser.mvars.values().toArray(new IntVar[parser.mvars.size()]);
+            }
+            Arrays.sort(decVars, Comparator.comparingInt(IntVar::getId));
             Solver solver = target.getSolver();
             solver.setSearch(Search.defaultSearch(target));
             solver.setNoGoodRecordingFromRestarts();

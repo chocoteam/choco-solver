@@ -193,7 +193,7 @@ public class XCSPParser implements XCallbacks2 {
             case ADD:
                 return new NaArExpression(ArExpression.Operator.ADD, aes);
             case SUB:
-                return new NaArExpression(ArExpression.Operator.SUB, aes);
+                return aes[0].sub(aes[1]);
             case MUL:
                 return new NaArExpression(ArExpression.Operator.MUL, aes);
             case MIN:
@@ -513,6 +513,16 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrAllDifferent(String id, XNodeParent<XVariables.XVarInteger>[] trees) {
+        IntVar[] elts = new IntVar[trees.length];
+        int k = 0;
+        for (XNodeParent<XVariables.XVarInteger> tree : trees) {
+            elts[k++] = buildAr(tree).intVar();
+        }
+        model.allDifferent(elts).post();
+    }
+
+    @Override
     public void buildCtrAllDifferent(String id, XVariables.XVarInteger[] list) {
         model.allDifferent(vars(list)).post();
     }
@@ -640,63 +650,7 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
-    private void scalar(XVariables.XVarInteger[] list, int[] coeffs, Condition condition) {
-        if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT:
-                    model.scalar(vars(list), coeffs, "<", condV(condition)).post();
-                    break;
-                case LE:
-                    model.scalar(vars(list), coeffs, "<=", condV(condition)).post();
-                    break;
-                case GE:
-                    model.scalar(vars(list), coeffs, ">=", condV(condition)).post();
-                    break;
-                case GT:
-                    model.scalar(vars(list), coeffs, ">", condV(condition)).post();
-                    break;
-                case NE:
-                    model.scalar(vars(list), coeffs, "!=", condV(condition)).post();
-                    break;
-                case EQ:
-                    model.scalar(vars(list), coeffs, "=", condV(condition)).post();
-                    break;
-            }
-        } else if (condition instanceof Condition.ConditionSet) {
-            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            switch (conditionSet.operator) {
-                case IN: {
-                    IntVar sum;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        sum = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        sum = condV(condition);
-                    }
-                    model.scalar(vars(list), coeffs, "=", sum).post();
-                }
-                break;
-                case NOTIN: {
-                    int[] bounds = VariableUtils.boundsForScalar(vars(list), coeffs);
-                    IntVar sum = model.intVar(bounds[0], bounds[1]);
-                    notin(sum, condition);
-                    model.scalar(vars(list), coeffs, "=", sum).post();
-                }
-                break;
-            }
-        }
-    }
-
-    @Override
-    public void buildCtrSum(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] _coeffs, Condition condition) {
-        IntVar[] res = new IntVar[list.length];
-        for (int i = 0; i < list.length; i++) {
-            int[] bounds = VariableUtils.boundsForMultiplication(var(list[i]), var(_coeffs[i]));
-            res[i] = model.intVar(bounds[0], bounds[1]);
-            model.times(var(list[i]), var(_coeffs[i]), res[i]).post();
-        }
-        int[] coeffs = new int[list.length];
-        Arrays.fill(coeffs, 1);
+    private void buildSum(IntVar[] res, int[] coeffs, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
             Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
             switch (conditionRel.operator) {
@@ -733,7 +687,7 @@ public class XCSPParser implements XCallbacks2 {
                 }
                 break;
                 case NOTIN: {
-                    int[] bounds = VariableUtils.boundsForScalar(vars(list), coeffs);
+                    int[] bounds = VariableUtils.boundsForScalar(res, coeffs);
                     IntVar sum = model.intVar(bounds[0], bounds[1]);
                     notin(sum, condition);
                     model.scalar(res, coeffs, "=", sum).post();
@@ -741,6 +695,42 @@ public class XCSPParser implements XCallbacks2 {
                 break;
             }
         }
+    }
+
+
+    @Override
+    public void buildCtrSum(String id, XVariables.XVarInteger[] list, Condition condition) {
+        int[] coeffs = new int[list.length];
+        Arrays.fill(coeffs, 1);
+        buildSum(vars(list), coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrSum(String id, XVariables.XVarInteger[] list, int[] coeffs, Condition condition) {
+        buildSum(vars(list), coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrSum(String id, XNodeParent<XVariables.XVarInteger>[] trees, int[] coeffs, Condition condition) {
+        IntVar[] res = new IntVar[trees.length];
+        int k = 0;
+        for (XNodeParent<XVariables.XVarInteger> tree : trees) {
+            res[k++] = buildAr(tree).intVar();
+        }
+        buildSum(res, coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrSum(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] _coeffs, Condition condition) {
+        IntVar[] res = new IntVar[list.length];
+        for (int i = 0; i < list.length; i++) {
+            int[] bounds = VariableUtils.boundsForMultiplication(var(list[i]), var(_coeffs[i]));
+            res[i] = model.intVar(bounds[0], bounds[1]);
+            model.times(var(list[i]), var(_coeffs[i]), res[i]).post();
+        }
+        int[] coeffs = new int[list.length];
+        Arrays.fill(coeffs, 1);
+        buildSum(res, coeffs, condition);
 
     }
 
@@ -852,17 +842,6 @@ public class XCSPParser implements XCallbacks2 {
         XCallbacks2.super.buildCtrNValuesExcept(id, list, except, condition);
     }
 
-    @Override
-    public void buildCtrSum(String id, XVariables.XVarInteger[] list, Condition condition) {
-        int[] coeffs = new int[list.length];
-        Arrays.fill(coeffs, 1);
-        scalar(list, coeffs, condition);
-    }
-
-    @Override
-    public void buildCtrSum(String id, XVariables.XVarInteger[] list, int[] coeffs, Condition condition) {
-        scalar(list, coeffs, condition);
-    }
 
     @Override
     public void buildCtrRegular(String id, XVariables.XVarInteger[] list, Object[][] transitions, String startState, String[] finalStates) {
@@ -1022,6 +1001,8 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
+
+
     @Override
     public void buildCtrElement(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger value) {
         model.element(var(value), vars(list), model.intVar(0, list.length), 0).post();
@@ -1163,6 +1144,16 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, int[] lengths, Types.TypeOperatorRel operator) {
+        IntVar[] vars = vars(list);
+        IntVar[][] vectors = new IntVar[vars.length][1];
+        for (int i = 0; i < vars.length; i++) {
+            vectors[i] = new IntVar[]{vars[i].add(lengths[i]).intVar()};
+        }
+        lexCtr(vectors, operator);
+    }
+
+    @Override
     public void buildCtrLex(String id, XVariables.XVarInteger[][] lists, Types.TypeOperatorRel operator) {
         lexCtr(vars(lists), operator);
     }
@@ -1195,13 +1186,25 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrChannel(String id, XVariables.XVarInteger[] list1, int startIndex1, XVariables.XVarInteger[] list2, int startIndex2) {
-        model.inverseChanneling(vars(list1), vars(list2), startIndex1, startIndex2).post();
+        if(list1.length == list2.length) {
+            model.inverseChanneling(vars(list1), vars(list2), startIndex1, startIndex2).post();
+        }else if(list1.length < list2.length){
+            IntVar[] x = vars(list1);
+            IntVar[] y = vars(list2);
+            for(int xi = 0; xi < x.length; xi++){
+                model.element(model.intVar(xi + startIndex1), y, x[xi], startIndex2).post();
+            }
+        }else{
+            XCallbacks2.super.buildCtrChannel(id, list1, startIndex1, list2, startIndex2);
+        }
     }
 
     @Override
     public void buildCtrChannel(String id, XVariables.XVarInteger[] list, int startIndex, XVariables.XVarInteger value) {
         model.boolsIntChanneling(bools(list), var(value), startIndex).post();
     }
+
+
 
     @Override
     public void buildCtrNoOverlap(String id, XVariables.XVarInteger[] origins, int[] lengths, boolean zeroIgnored) {
@@ -1413,6 +1416,15 @@ public class XCSPParser implements XCallbacks2 {
         } else
             unimplementedCase(g);
         endGroup(g);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// ANNOTATIONS /////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public void buildAnnotationDecision(XVariables.XVarInteger[] list) {
+        model.addHook("decisions", vars(list));
     }
 
 
