@@ -59,7 +59,7 @@ public class MixedScalarTest {
         checkSolutions(coeffs, vars, 35., "=");
     }
 
-    @Test(groups = "1s", timeOut=6000000)
+    @Test(groups = "1s", timeOut=60000)
     public void testNominalBounded3() {
         double[] coeffs = new double[]{1, 5, 7, 8};
         RealVar[] vars = model.realVarArray(4, 1.2, 1.7, .1);
@@ -184,8 +184,6 @@ public class MixedScalarTest {
     private int checkSolutions(double[] coeffs, RealVar[] vars, double sum, String operator) {
         Model model = vars[0].getModel();
         int nbSol = 0;
-        model.getSolver().showSolutions();
-//        model.getSolver().showDecisions();
         while (model.getSolver().solve()) {
             nbSol++;
             double inf = 0., sup = 0.;
@@ -199,7 +197,7 @@ public class MixedScalarTest {
                     assertTrue(sum <= sup, sum + "> "+sup);
                     break;
                 case "<=":
-                    assertTrue(sup <= sum, sup + "> "+sum);
+                    assertTrue(inf <= sum, inf + "> "+sum);
             }
         }
         assertTrue(nbSol > 0);
