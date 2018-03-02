@@ -180,7 +180,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             trigger.propagate();
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-            while (!pro_queue[i].isEmpty() && nextNotEmpty(0) == i) {
+            while (!pro_queue[i].isEmpty() /*&& nextNotEmpty(0) == i*/) {
                 lastProp = pro_queue[i].pollFirst();
                 // revision of the variable
                 aid = p2i.get(lastProp.getId());
@@ -215,7 +215,9 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
                     lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
             }
-            notEmpty = notEmpty & ~(1 << i);
+            if(pro_queue[i].isEmpty()){
+                notEmpty = notEmpty & ~(1 << i);
+            }
         }
     }
 

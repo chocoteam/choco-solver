@@ -77,7 +77,7 @@ public class MixedScalarTest {
         checkSolutions(coeffs, vars, model.intVar(0), "<=");
     }
 
-    @Test(groups = "1s", timeOut=6000000)
+    @Test(groups = "1s", timeOut=60000)
     public void testNominalBoundedWithNegatives2() {
         double[] coeffs = new double[]{5, 6, 7, 9};
         RealVar[] vars = model.realVarArray(4, -1, 1, .1);
@@ -199,7 +199,7 @@ public class MixedScalarTest {
                     assertTrue(sum <= sup, sum + "> "+sup);
                     break;
                 case "<=":
-                    assertTrue(inf <= sum, inf + "> "+sum);
+                    assertTrue(sup <= sum, sup + "> "+sum);
             }
         }
         assertTrue(nbSol > 0);
