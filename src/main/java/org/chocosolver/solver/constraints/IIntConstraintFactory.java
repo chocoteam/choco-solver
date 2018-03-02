@@ -102,6 +102,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -110,6 +111,7 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.Arrays;
 import java.util.BitSet;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.lang.Math.abs;
 
@@ -1158,10 +1160,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @param offset int offset, generally 0
 	 */
 	default Constraint element(IntVar value, IntVar[] table, IntVar index, int offset) {
-		// uses two propagator to perform a fix point
-		return new Constraint(
-				ConstraintsName.ELEMENT,
-				new PropElementV_fast(value, table, index, offset, true));
+		if(Stream.of(table).allMatch(Variable::isAConstant)){
+		    return element(value, Stream.of(table).mapToInt(IntVar::getValue).toArray(), index, offset);
+        }else{
+		    // uses two propagator to perform a fix point
+            return new Constraint(
+                    ConstraintsName.ELEMENT,
+                    new PropElementV_fast(value, table, index, offset, true));
+        }
 	}
 
 	/**

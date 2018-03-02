@@ -443,7 +443,7 @@ public class PropScalarMixed extends Propagator<Variable> {
     protected ESat check(double sumLB, double sumUB) {
         switch (o) {
             case LE:
-                if (sumUB <= b) {
+                if (sumLB <= b) {
                     return ESat.TRUE;
                 }
                 if (sumLB > b) {
@@ -451,7 +451,7 @@ public class PropScalarMixed extends Propagator<Variable> {
                 }
                 return ESat.UNDEFINED;
             case GE:
-                if (sumLB >= b) {
+                if (sumUB >= b) {
                     return ESat.TRUE;
                 }
                 if (sumUB < b) {
@@ -459,7 +459,7 @@ public class PropScalarMixed extends Propagator<Variable> {
                 }
                 return ESat.UNDEFINED;
             default:
-                if (sumLB == b && sumUB == b) {
+                if (sumLB <= b && b <= sumUB) {
                     return ESat.TRUE;
                 }
                 if (sumUB < b || sumLB > b) {

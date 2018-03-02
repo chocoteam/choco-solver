@@ -47,14 +47,23 @@ public class MixedScalarTest {
         IntVar[] vars = model.intVarArray(4, 1, 6, true);
         model.scalar(vars, coeffs, "<=", 35).post();
 
-        checkSolutions(coeffs, vars, model.intVar(35));
+        checkSolutions(coeffs, vars, model.intVar(35), "<=");
     }
 
     @Test(groups = "1s", timeOut=60000)
     public void testNominalBounded2() {
         double[] coeffs = new double[]{1, 5, 7, 8};
-        RealVar[] vars = model.realVarArray(4, 1., 6., 1.);
+        RealVar[] vars = model.realVarArray(4, 1., 6., .1);
         model.scalar(vars, coeffs, "=", 35).post();
+
+        checkSolutions(coeffs, vars, 35., "=");
+    }
+
+    @Test(groups = "1s", timeOut=6000000)
+    public void testNominalBounded3() {
+        double[] coeffs = new double[]{1, 5, 7, 8};
+        RealVar[] vars = model.realVarArray(4, 1.2, 1.7, .1);
+        model.scalar(vars, coeffs, "<=", 35).post();
 
         checkSolutions(coeffs, vars, 35., "<=");
     }
@@ -68,10 +77,10 @@ public class MixedScalarTest {
         checkSolutions(coeffs, vars, model.intVar(0), "<=");
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut=6000000)
     public void testNominalBoundedWithNegatives2() {
         double[] coeffs = new double[]{5, 6, 7, 9};
-        RealVar[] vars = model.realVarArray(4, -5, 5, .1);
+        RealVar[] vars = model.realVarArray(4, -1, 1, .1);
         model.scalar(vars, coeffs, "<=", 0).post();
 
         checkSolutions(coeffs, vars, 0., "<=");
@@ -90,7 +99,7 @@ public class MixedScalarTest {
         assertEquals(nbSol, 1001);
     }
 
-    @Test(groups = "1s", timeOut=6000000)
+    @Test(groups = "1s", timeOut=60000)
     public void testCoeffAtZeroSolutions2() {
         double[] coeffs = new double[]{0, 4, 5};
         RealVar[] vars = model.realVarArray(3, 0, 1000,1.d);
@@ -161,6 +170,7 @@ public class MixedScalarTest {
                     break;
                 case "<=":
                     assertTrue(computed <= sum.getValue());
+                    break;
             }
         }
         assertTrue(nbSol > 0);
@@ -174,6 +184,8 @@ public class MixedScalarTest {
     private int checkSolutions(double[] coeffs, RealVar[] vars, double sum, String operator) {
         Model model = vars[0].getModel();
         int nbSol = 0;
+        model.getSolver().showSolutions();
+//        model.getSolver().showDecisions();
         while (model.getSolver().solve()) {
             nbSol++;
             double inf = 0., sup = 0.;
@@ -183,11 +195,11 @@ public class MixedScalarTest {
             }
             switch (operator) {
                 case "=":
-                    assertTrue(inf <= sum);
-                    assertTrue(sum <= sup);
+                    assertTrue(inf <= sum, inf + "> "+sum);
+                    assertTrue(sum <= sup, sum + "> "+sup);
                     break;
                 case "<=":
-                    assertTrue(sup <= sum);
+                    assertTrue(inf <= sum, inf + "> "+sum);
             }
         }
         assertTrue(nbSol > 0);
