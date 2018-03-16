@@ -55,11 +55,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
      */
     private IntValueSelector valueSelector;
 
-    /**
-     * Random variable selector, when no fail occurs
-     */
-    private Random<IntVar> predv;
-
     /***
      * Pointer to the last uninstantiated variable
      */
@@ -83,7 +78,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
         bests = new TIntArrayList();
         this.valueSelector = valueSelector;
         random = new java.util.Random(seed);
-        predv = new Random<>(seed);
         this.last = model.getEnvironment().makeInt(vars.length - 1);
         p2w = new IntMap(10, 0);
         init(Stream.of(model.getCstrs())
@@ -105,7 +99,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
             Propagator p = (Propagator) cex.c;
             p2w.putOrAdjust(p.getId(), 1, 1);
         }
-        predv = null;
     }
 
 
@@ -120,9 +113,6 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
 
     @Override
     public Decision<IntVar> getDecision() {
-        if (predv != null) {
-            return computeDecision(predv.getVariable(vars));
-        }
         IntVar best = null;
         bests.resetQuick();
         pid2arity.clear();
