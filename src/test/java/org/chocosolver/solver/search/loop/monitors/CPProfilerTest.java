@@ -50,7 +50,7 @@ public class CPProfilerTest {
         Model s1 = ProblemMaker.makeGolombRuler(11);
         s1.getSolver().setLNS(new RandomNeighborhood((IntVar[]) s1.getHook("ticks"), 10, 0));
         CPProfiler profiler = new CPProfiler(s1, true);
-        s1.getSolver().limitSolution(10);
+        s1.getSolver().limitSolution(9);
         while (s1.getSolver().solve()) ;
         out.println(s1.getSolver().getSolutionCount());
         profiler.close();

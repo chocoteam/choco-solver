@@ -299,7 +299,7 @@ public class LNSTest {
         in.init(); // Should this be necessary?
 
         //   Type of search within LNS neighbourhoods
-        Move innersearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 843746, new IntDomainMin()));
+        Move innersearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 0L, new IntDomainMin()));
 
         MoveLNS lns = new MoveLNS(innersearch, in, new BacktrackCounter(model, 50));
 
