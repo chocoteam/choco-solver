@@ -20,7 +20,10 @@ Common __options__ are:
 * ```-pinf``` : Define the positive infinity for unbounded variables.
 * ```-ibex``` : All non full integer equations are handled by Ibex. 
 Note that Ibex should be installed first, and VM options adapted.
-
+* ```-ninf``` : Override negative infinity (default: -21474836). 
+* ```-pinf``` : Override positive infinity (default: 21474836). 
+* ```-noeq``` : Split EQ constraints into a LQ and a GQ constraint. 
+* ```-split``` : Split any contraints of cardinality greater than this value (default: 100). 
 * other Choco-specific options may be available.
 * ```-h```: When invoked, this options will print all options available.
 

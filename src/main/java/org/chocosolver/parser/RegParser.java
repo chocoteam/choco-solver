@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -15,6 +15,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.nogood.NogoodStore;
+import org.chocosolver.solver.constraints.nary.sum.PropSum;
+import org.chocosolver.solver.explanations.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
@@ -30,6 +33,7 @@ import org.kohsuke.args4j.Option;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
@@ -54,14 +58,30 @@ public abstract class RegParser implements IParser {
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
 
+    @Option(name = "-x", usage ="Define the explanation strategy to apply [0, 5] (default: 0).")
+    public int exp = 0;
+
+    @Option(name = "-dfx", usage ="Force default explanation algorithm.")
+    public boolean dftexp = false;
+
+    @Option(name = "-oes", usage ="Override default explanations for sum constraints.")
+    public boolean sumdft = false;
+
+    @Option(name = "-sumglb", usage ="Learn permanent nogood when sum fails.")
+    public boolean sumglb = false;
+
     @Option(name = "-bb", usage ="Set the search strategy to a black-box one.")
     public int bbox = 0;
+
+    @Option(name = "-splitsum", usage ="Split sum composed of more than N elements (N = 1000 by default).")
+    public int sum = 1000;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     protected boolean all = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;
+
     /**
      * Default time limit, as long, in ms
      */
@@ -170,6 +190,34 @@ public abstract class RegParser implements IParser {
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
+        if(nb_cores == 1 && exp>0){
+            Consumer<NogoodStore> eraser = NogoodStore.makeNoEraser();
+            switch (exp){
+                case 1:
+                    break;
+                case 2:
+                    eraser = NogoodStore.makeSelectiveEraser(4096, 1024);
+                    break;
+                case 3:
+                    eraser = NogoodStore.makeSelectiveEraser(1024, 256);
+                    break;
+                case 4:
+                    eraser = NogoodStore.makeSelectiveEraser(1024, 32);
+                    break;
+                case 5:
+                    eraser = NogoodStore.makeSelectiveEraser(2048, 16);
+                    break;
+            }
+            solver.setLearningSignedClauses(eraser, Integer.MAX_VALUE);
+            ExplanationForSignedClause.DEFAULT_X = dftexp;
+            ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = () -> false;
+//            PropCumulative.DEFAULT_XP = 0;
+            PropSum.GLOBAL = sumglb;
+            PropSum.OVERRIDE = sumdft;
+        }
+//        solver.showContradiction();
+//        solver.showDecisions();
+//        solver.limitFail(10);
         if(bbox>0) {
             switch (bbox) {
                 case 1:
