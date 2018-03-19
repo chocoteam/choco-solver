@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -64,7 +64,7 @@ public class XCSP extends RegParser {
         return new Thread(() -> {
             if (userinterruption) {
                 finalOutPut(getModel().getSolver());
-                System.out.printf("c Unexpected resolution interruption!");
+                if(PRINT_LOG)System.out.printf("c Unexpected resolution interruption!");
             }
         });
     }
@@ -74,9 +74,9 @@ public class XCSP extends RegParser {
         listeners.forEach(ParserListener::beforeSolverCreation);
         assert nb_cores > 0;
         if (nb_cores > 1) {
-            System.out.printf("c %s solvers in parallel\n", nb_cores );
+            if(PRINT_LOG)System.out.printf("c %s solvers in parallel\n", nb_cores );
         } else {
-            System.out.printf("c simple solver\n");
+            if(PRINT_LOG)System.out.printf("c simple solver\n");
         }
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
@@ -96,8 +96,8 @@ public class XCSP extends RegParser {
             try {
                 parse(models.get(i), parsers[i], i);
             } catch (Exception e) {
-                System.out.printf("s UNSUPPORTED\n");
-                System.out.printf("c %s\n", e.getMessage());
+                if(PRINT_LOG)System.out.printf("s UNSUPPORTED\n");
+                if(PRINT_LOG)System.out.printf("c %s\n", e.getMessage());
                 userinterruption = false;
                 e.printStackTrace();
                 throw new RuntimeException("UNSUPPORTED");

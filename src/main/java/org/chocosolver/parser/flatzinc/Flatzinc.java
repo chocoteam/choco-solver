@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -22,6 +22,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.kohsuke.args4j.Argument;
+import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -45,6 +46,10 @@ public class Flatzinc extends RegParser {
 
     @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
     public String instance;
+
+
+    @Option(name = "-cum", aliases = {"--cumulative"}, usage = "Cumulative decomposition (default: GLB).")
+    protected String cumDecomp = "GLB";
 
     // Contains mapping with variables and output prints
     public Datas[] datas;
@@ -75,12 +80,14 @@ public class Flatzinc extends RegParser {
 
     @Override
     public Thread actionOnKill() {
-        return new Thread(() -> {
-            if (userinterruption) {
-                datas[bestModelID()].doFinalOutPut(false);
-                System.out.printf("%% Unexpected resolution interruption!");
+        return new Thread() {
+            public void run() {
+                if (userinterruption) {
+                    datas[bestModelID()].doFinalOutPut(false);
+                    if(PRINT_LOG)System.out.printf("%% Unexpected resolution interruption!");
+                }
             }
-        });
+        };
     }
 
     //***********************************************************************************
@@ -92,9 +99,9 @@ public class Flatzinc extends RegParser {
         listeners.forEach(ParserListener::beforeSolverCreation);
         assert nb_cores > 0;
         if (nb_cores > 1) {
-            System.out.printf("%% " + nb_cores + " solvers in parallel\n");
+            if(PRINT_LOG)System.out.printf("%% " + nb_cores + " solvers in parallel\n");
         } else {
-            System.out.printf("%% simple solver\n");
+            if(PRINT_LOG)System.out.printf("%% simple solver\n");
         }
         datas = new Datas[nb_cores];
         String iname = instance == null?"":Paths.get(instance).getFileName().toString();
@@ -102,6 +109,7 @@ public class Flatzinc extends RegParser {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, all, stat);
+            threadModel.addHook("CUMULATIVE", cumDecomp);
         }
         listeners.forEach(ParserListener::afterSolverCreation);
     }

@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -27,6 +27,8 @@ import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.chocosolver.parser.IParser.PRINT_LOG;
 
 /**
  * An object to maintain a link between the model and the solver, during the parsing phase.
@@ -165,7 +167,7 @@ public class Datas {
 
     public void printSolution(){
         for (int i = 0; i < output_names.size(); i++) {
-            System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
+            if(PRINT_LOG)System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
 
         }
         for (int i = 0; i < output_arrays_names.size(); i++) {
@@ -177,17 +179,17 @@ public class Datas {
                 for (int j = 1; j < ivars.length; j++) {
                     stringBuilder.append(", ").append(value(ivars[j], type));
                 }
-                System.out.printf(name, stringBuilder.toString());
+                if(PRINT_LOG)System.out.printf(name, stringBuilder.toString());
                 stringBuilder.setLength(0);
             } else {
-                System.out.printf(name);
+                if(PRINT_LOG)System.out.printf(name);
             }
         }
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
-            System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
+            if(PRINT_LOG)System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
         }
-        System.out.printf("----------\n");
+        if(PRINT_LOG)System.out.printf("----------\n");
     }
 
     public void onSolution() {
@@ -217,20 +219,20 @@ public class Datas {
 //        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
         if(nbSolution>0){
             if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
-                System.out.printf("==========\n");
+                if(PRINT_LOG)System.out.printf("==========\n");
             }
         }else{
             if(complete){
-                System.out.printf("=====UNSATISFIABLE=====\n");
+                if(PRINT_LOG)System.out.printf("=====UNSATISFIABLE=====\n");
             }else{
-                System.out.printf("=====UNKNOWN=====\n");
+                if(PRINT_LOG)System.out.printf("=====UNKNOWN=====\n");
             }
         }
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
-            System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
-            System.out.printf("%% ");
-            solver.printShortFeatures();
+            if(PRINT_LOG)System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
+            if(PRINT_LOG)System.out.printf("%% ");
+            if(PRINT_LOG)solver.printShortFeatures();
         }
     }
 }

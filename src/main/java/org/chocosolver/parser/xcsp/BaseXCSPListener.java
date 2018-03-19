@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -13,6 +13,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
+
+import static org.chocosolver.parser.IParser.PRINT_LOG;
 
 /**
  * A base listener for Flatzinc parser, dedicated to single thread resolution.
@@ -85,7 +87,7 @@ public class BaseXCSPListener implements ParserListener {
 
     @Override
     public void beforeSolving() {
-        System.out.println("c solve instance...");
+        if(PRINT_LOG)System.out.println("c solve instance...");
         xcspparser.getModel().getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
     }
 

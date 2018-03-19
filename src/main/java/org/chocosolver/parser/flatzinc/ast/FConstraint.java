@@ -1,13 +1,14 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser.flatzinc.ast;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
 
 import org.chocosolver.parser.flatzinc.FznSettings;
@@ -20,6 +21,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.geost.Constants;
 import org.chocosolver.solver.constraints.nary.geost.GeostOptions;
 import org.chocosolver.solver.constraints.nary.geost.PropGeost;
@@ -39,6 +41,13 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static java.util.stream.IntStream.range;
 
 /*
 * User : CPRUDHOM
@@ -404,7 +413,7 @@ public enum FConstraint {
 //                            model.arithm(a, "<=", b).reifyWith(r);
                     }
                 } else {
-                    model.reifyXltYC(a, b,  + 1, r);
+                    model.reifyXltYC(a, b, +1, r);
                 }
             }
         }
@@ -432,7 +441,7 @@ public enum FConstraint {
 
             if (bs.length > 0) {
                 if (((FznSettings) model.getSettings()).adhocReification()) {
-                    if(bs.length == 1){
+                    if (bs.length == 1) {
                         if (bs[0].isInstantiated() || c.isInstantiated()) {
                             IntVar x;
                             int t;
@@ -600,7 +609,7 @@ public enum FConstraint {
             // this constraint is not poster, hence not returned, because it is reified
             if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsLtVar((BoolVar) a, (BoolVar) b, r);
-            } else{
+            } else {
                 if (a.isInstantiated() || b.isInstantiated()) {
                     final IntVar var;
                     final int cste;
@@ -883,18 +892,124 @@ public enum FConstraint {
             final IntVar[] starts = exps.get(0).toIntVarArray(model);
             final IntVar[] durations = exps.get(1).toIntVarArray(model);
             final IntVar[] resources = exps.get(2).toIntVarArray(model);
-            final IntVar[] ends = new IntVar[starts.length];
-            Task[] tasks = new Task[starts.length];
             final IntVar limit = exps.get(3).intVarValue(model);
-            for (int i = 0; i < starts.length; i++) {
-                ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
-                        starts[i].getLB() + durations[i].getLB(),
-                        starts[i].getUB() + durations[i].getUB(),
-                        true);
-                tasks[i] = new Task(starts[i], durations[i], ends[i]);
-            }
-            model.cumulative(tasks, resources, limit, true).post();
+            String decomp = (String) model.getHook("CUMULATIVE");
+            int n = starts.length;
+            switch (decomp) {
+                case "GLB":
+                    final IntVar[] ends = new IntVar[n];
+                    Task[] tasks = new Task[n];
+                    for (int i = 0; i < n; i++) {
+                        ends[i] = model.intVar(starts[i].getName() + "_" + durations[i].getName(),
+                                starts[i].getLB() + durations[i].getLB(),
+                                starts[i].getUB() + durations[i].getUB(),
+                                true);
+                        tasks[i] = new Task(starts[i], durations[i], ends[i]);
+                    }
+                    model.cumulative(tasks, resources, limit, true, Cumulative.Filter.NAIVETIME).post();
+                    break;
+                case "MZN":
+                    // 1. find range of 't' parameters while creating variables
+                    int min_t = MAX_VALUE, max_t = MIN_VALUE;
+                    for (int i = 0; i < n; i++) {
+                        min_t = min(min_t, starts[i].getLB());
+                        max_t = max(max_t, starts[i].getUB() + durations[i].getValue());
+                    }
+                    for (int t = min_t; t <= max_t; t++) {
+                        BoolVar[] bit = model.boolVarArray(format("b_%s_", t), n);
+                        for (int i = 0; i < n; i++) {
+                            BoolVar[] bits = model.boolVarArray(format("b_%s_%s_", t, i), 2);
+                            model.reifyXltC(starts[i], t + 1, bits[0]);
+                            model.reifyXgtC(starts[i], t - durations[i].getValue(), bits[1]);
+                            model.addClausesBoolAndArrayEqVar(bits, bit[i]);
+                        }
+                        model.scalar(
+                                bit,
+                                range(0, n).map(i -> resources[i].getValue()).toArray(),
+                                "<=",
+                                limit.getValue()
+                        ).post();
+                    }
+                    break;
+                case "MIC":
+                    int epsilon = 1;
+                    BoolVar[][] b = new BoolVar[n][];
+                    BoolVar[][] b1 = new BoolVar[n][];
+                    BoolVar[][] b2 = new BoolVar[n][];
+                    for (int i = 0; i < n; i++) {
+                        TIntArrayList sumC = new TIntArrayList();
+                        ArrayList<IntVar> sumV = new ArrayList<>();
+                        b[i] = new BoolVar[n - 1];
+                        b1[i] = new BoolVar[n - 1];
+                        b2[i] = new BoolVar[n - 1];
 
+                        for (int j = 0, k = 0; j < n; j++) {
+                            if (i != j) {
+                                b[i][k] = model.boolVar();
+                                b1[i][k] = model.boolVar();
+                                b2[i][k] = model.boolVar();
+                                // sum constraint
+                                assert resources[j].isInstantiated() : "resources not fixed";
+                                sumC.add(resources[j].getValue());
+                                sumV.add(b[i][k]);
+                                // bij <=> bij1 and bij2
+                                model.scalar(
+                                        new BoolVar[]{b[i][k], b1[i][k]},
+                                        new int[]{1, -1},
+                                        "<=", 0
+                                ).post();
+                                model.scalar(
+                                        new BoolVar[]{b[i][k], b2[i][k]},
+                                        new int[]{1, -1},
+                                        "<=", 0
+                                ).post();
+
+                                model.scalar(
+                                        new BoolVar[]{b[i][k], b1[i][k], b2[i][k]},
+                                        new int[]{1, -1, -1},
+                                        ">=", -1
+                                ).post();
+
+                                // b1ij <=> start[j] <= start[i]
+                                int m = starts[j].getLB() - starts[i].getUB();
+                                int M = starts[j].getUB() - starts[i].getLB();
+                                model.scalar(
+                                        new IntVar[]{starts[j], starts[i], b1[i][k]},
+                                        new int[]{1, -1, M},
+                                        "<=", M
+                                ).post();
+                                model.scalar(
+                                        new IntVar[]{starts[j], starts[i], b1[i][k]},
+                                        new int[]{1, -1, -m + 1},
+                                        ">=", epsilon
+                                ).post();
+                                // b2ij <=> start[i] <= start[j] + dur[j] - epsilon
+                                //      <=> start[i] - start[j] - dur[j] <= - epsilon
+                                assert durations[j].isInstantiated() : "durations not fixed";
+                                m = starts[i].getLB() - (starts[j].getUB() + durations[j].getValue()) + epsilon;
+                                M = starts[i].getUB() - (starts[j].getLB() + durations[j].getLB()) + epsilon;
+                                //System.out.println("m = "+m+", M = "+M);
+                                model.scalar(
+                                        new IntVar[]{starts[i], starts[j], b2[i][k]},
+                                        new int[]{1, -1, M},
+                                        "<=", M - epsilon + durations[j].getValue()
+                                ).post();
+                                model.scalar(
+                                        new IntVar[]{starts[i], starts[j], b2[i][k]},
+                                        new int[]{1, -1, -m + 1},
+                                        ">=", durations[j].getValue()
+                                ).post();
+                                k++;
+                            }
+                        }
+                        model.scalar(
+                                sumV.toArray(new IntVar[sumV.size()]),
+                                sumC.toArray(),
+                                "<=",
+                                -resources[i].getValue() + limit.getValue()).post();
+                    }
+                    break;
+            }
         }
     },
     diffnChoco {
@@ -1048,7 +1163,7 @@ public enum FConstraint {
             IntVar W = exps.get(3).intVarValue(model);
             IntVar P = exps.get(4).intVarValue(model);
 
-            model.knapsack(x,W,P,w,p).post();
+            model.knapsack(x, W, P, w, p).post();
         }
     },
     lex2Choco {
@@ -1350,12 +1465,12 @@ public enum FConstraint {
             IntVar a = exps.get(0).intVarValue(model);
             BoolVar r = exps.get(2).boolVarValue(model);
             if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
-                IntIterableRangeSet set =  new IntIterableRangeSet(exps.get(1).toIntArray());
+                IntIterableRangeSet set = new IntIterableRangeSet(exps.get(1).toIntArray());
                 model.reifyXinS(a, set, r);
             } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
                 int low = ((ESetBounds) exps.get(1)).getLow();
                 int upp = ((ESetBounds) exps.get(1)).getUpp();
-                IntIterableRangeSet set =  new IntIterableRangeSet(low, upp);
+                IntIterableRangeSet set = new IntIterableRangeSet(low, upp);
                 model.reifyXinS(a, set, r);
             } else {
                 SetVar b = exps.get(1).setVarValue(model);
