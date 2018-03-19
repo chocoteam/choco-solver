@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2017, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -11,9 +11,16 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.antlr.runtime.RecognitionException;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
-import org.chocosolver.parser.flatzinc.ast.expression.*;
+import org.chocosolver.parser.flatzinc.ast.expression.EArray;
+import org.chocosolver.parser.flatzinc.ast.expression.EBool;
+import org.chocosolver.parser.flatzinc.ast.expression.EIdArray;
+import org.chocosolver.parser.flatzinc.ast.expression.EIdentifier;
+import org.chocosolver.parser.flatzinc.ast.expression.EInt;
+import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
+import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
+import org.chocosolver.parser.flatzinc.ast.expression.EString;
+import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
