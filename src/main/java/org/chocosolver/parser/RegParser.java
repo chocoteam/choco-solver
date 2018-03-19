@@ -15,9 +15,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodStore;
-import org.chocosolver.solver.constraints.nary.sum.PropSum;
-import org.chocosolver.solver.explanations.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
@@ -33,7 +30,6 @@ import org.kohsuke.args4j.Option;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.function.Consumer;
 
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
@@ -57,12 +53,6 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
-
-    @Option(name = "-x", usage ="Define the explanation strategy to apply [0, 5] (default: 0).")
-    public int exp = 0;
-
-    @Option(name = "-dfx", usage ="Force default explanation algorithm.")
-    public boolean dftexp = false;
 
     @Option(name = "-oes", usage ="Override default explanations for sum constraints.")
     public boolean sumdft = false;
@@ -190,34 +180,6 @@ public abstract class RegParser implements IParser {
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
-        if(nb_cores == 1 && exp>0){
-            Consumer<NogoodStore> eraser = NogoodStore.makeNoEraser();
-            switch (exp){
-                case 1:
-                    break;
-                case 2:
-                    eraser = NogoodStore.makeSelectiveEraser(4096, 1024);
-                    break;
-                case 3:
-                    eraser = NogoodStore.makeSelectiveEraser(1024, 256);
-                    break;
-                case 4:
-                    eraser = NogoodStore.makeSelectiveEraser(1024, 32);
-                    break;
-                case 5:
-                    eraser = NogoodStore.makeSelectiveEraser(2048, 16);
-                    break;
-            }
-            solver.setLearningSignedClauses(eraser, Integer.MAX_VALUE);
-            ExplanationForSignedClause.DEFAULT_X = dftexp;
-            ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = () -> false;
-//            PropCumulative.DEFAULT_XP = 0;
-            PropSum.GLOBAL = sumglb;
-            PropSum.OVERRIDE = sumdft;
-        }
-//        solver.showContradiction();
-//        solver.showDecisions();
-//        solver.limitFail(10);
         if(bbox>0) {
             switch (bbox) {
                 case 1:
