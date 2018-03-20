@@ -21,7 +21,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
-import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.geost.Constants;
 import org.chocosolver.solver.constraints.nary.geost.GeostOptions;
 import org.chocosolver.solver.constraints.nary.geost.PropGeost;
@@ -906,7 +905,7 @@ public enum FConstraint {
                                 true);
                         tasks[i] = new Task(starts[i], durations[i], ends[i]);
                     }
-                    model.cumulative(tasks, resources, limit, true, Cumulative.Filter.NAIVETIME).post();
+                    model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
                     break;
                 case "MZN":
                     // 1. find range of 't' parameters while creating variables
