@@ -8,7 +8,7 @@ Only file that matches [the description for MIPLib](http://miplib.zib.de/miplib3
 
 MPS file can be parsed and solve with Choco using the following command:
 
-  ```java -cp .:/path/to/choco-parsers-4.0.4-with-dependencies.jar org.chocosolver.parser.xcsp.ChocoMPS [<options>] [<file>]```
+  ```java -cp .:/path/to/choco-parsers-4.0.4-with-dependencies.jar org.chocosolver.parser.mps.ChocoMPS [<options>] [<file>]```
 
 Common __options__ are:
 * ```-a``` : This causes the solver to search for, and output all solutions in case of satisfaction problems. For optimization problems, the solver search for an optimal solution and outputs all intermediate solutions. When this option is not given the solver should search for and output only the first solution (for satisfaction problems) or the best known one (for optimization problems).
