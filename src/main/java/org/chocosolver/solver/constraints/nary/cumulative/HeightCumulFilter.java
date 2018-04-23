@@ -23,8 +23,8 @@ public class HeightCumulFilter extends SweepCumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public HeightCumulFilter(int n, Propagator<IntVar> cause){
-		super(n,cause);
+	public HeightCumulFilter(int n){
+		super(n);
 		FIXPOINT = false;
 	}
 
@@ -36,7 +36,7 @@ public class HeightCumulFilter extends SweepCumulFilter {
 	protected void pruneMin(IntVar[] s) throws ContradictionException {}
 	protected void pruneMax(IntVar[] e) throws ContradictionException {}
 
-	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT, Propagator<IntVar> aCause) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases

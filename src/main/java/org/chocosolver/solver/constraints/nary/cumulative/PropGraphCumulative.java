@@ -58,7 +58,7 @@ public class PropGraphCumulative extends PropCumulative {
      * @param filters filtering algorithm to use
      */
     public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast,
-                               Cumulative.Filter... filters) {
+                               CumulFilter... filters) {
         super(s, d, e, h, capa, true, filters);
         this.g = new UndirectedGraph(model, n, SetType.BITSET, true);
         this.tasks = SetFactory.makeBipartiteSet(0);

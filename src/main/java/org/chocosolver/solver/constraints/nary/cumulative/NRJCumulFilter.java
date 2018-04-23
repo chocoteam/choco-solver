@@ -35,8 +35,8 @@ public class NRJCumulFilter extends CumulFilter{
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public NRJCumulFilter(int n, Propagator<IntVar> cause){
-		super(n,cause);
+	public NRJCumulFilter(int n){
+		super(n);
 		sor_array = new int[n];
 		sorter = new ArraySort(n,false,true);
 		slb = new int[n];
@@ -55,7 +55,7 @@ public class NRJCumulFilter extends CumulFilter{
 	//***********************************************************************************
 
 	@Override
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
 		int idx = 0;
 		ISetIterator tIter = tasks.iterator();
 		while (tIter.hasNext()){

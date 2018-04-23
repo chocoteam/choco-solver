@@ -66,6 +66,7 @@ import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuit;
 import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuitDominatorFilter;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
+import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
@@ -1048,7 +1049,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a cumulative constraint
 	 */
 	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental) {
-		return cumulative(tasks,heights,capacity,incremental, Cumulative.Filter.DEFAULT);
+		return cumulative(tasks,heights,capacity,incremental, Cumulative.Filter.DEFAULT.make(tasks.length));
 	}
 
 	/**
@@ -1067,6 +1068,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 	 * @return a cumulative constraint
 	 */
 	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, Cumulative.Filter... filters) {
+		return cumulative(tasks,heights,capacity,incremental, Arrays.stream(filters).map(f->f.make(tasks.length)).toArray(CumulFilter[]::new));
+	}
+
+	/**
+	 * Creates a cumulative constraint: Enforces that at each point in time,
+	 * the cumulated height of the set of tasks that overlap that point
+	 * does not exceed a given limit.
+	 *
+	 * Task duration and height should be >= 0
+	 * Discards tasks whose duration or height is equal to zero
+	 *
+	 * @param tasks       Task objects containing start, duration and end variables
+	 * @param heights     integer variables representing the resource consumption of each task
+	 * @param capacity    integer variable representing the resource capacity
+	 * @param incremental specifies if an incremental propagation should be applied
+	 * @param filters	  specifies which filtering algorithms to apply
+	 * @return a cumulative constraint
+	 */
+	default Constraint cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean incremental, CumulFilter... filters) {
 		if(tasks.length!=heights.length) {
 			throw new SolverException("Tasks and heights arrays should have same size");
 		}

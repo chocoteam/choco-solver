@@ -36,8 +36,8 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepHeiSortCumulFilter(int n, Propagator<IntVar> cause){
-		super(n,cause);
+	public SweepHeiSortCumulFilter(int n){
+		super(n);
 		sortedTasks = new int[n];
 		taskSorter = new ArraySort(n,false,true);
 		comparator = (i1, i2) -> hlb[map[i2]]-hlb[map[i1]];
@@ -48,7 +48,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 	//***********************************************************************************
 
 	@Override
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
 		int size = 0;
 		ISetIterator tIter = tasks.iterator();
 		while (tIter.hasNext()){
@@ -62,14 +62,15 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		}
 		taskSorter.sort(sortedTasks,size,comparator);
 		assert checkSort(h,size);
-		super.filter(s,d,e,h,capa,tasks);
+		super.filter(s,d,e,h,capa,tasks,aCause);
 	}
 
 	//***********************************************************************************
 	// SWEEP ALGORITHM
 	//***********************************************************************************
 
-	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
+	@Override
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT, Propagator<IntVar> aCause) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases
@@ -123,6 +124,7 @@ public class SweepHeiSortCumulFilter extends SweepCumulFilter {
 		return active;
 	}
 
+	@Override
 	protected void generateMinEvents(int nbT) {
 		// no PRU events
 		nbEvents = 0;

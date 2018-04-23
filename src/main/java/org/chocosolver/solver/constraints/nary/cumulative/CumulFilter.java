@@ -25,7 +25,6 @@ public abstract class CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	protected Propagator<IntVar> aCause;
 	protected int nbMaxTasks;
 
 	//***********************************************************************************
@@ -35,11 +34,9 @@ public abstract class CumulFilter {
 	/**
 	 * An object which can filter subset of tasks for the cumulative constraint
 	 * @param nbMaxTasks	maximum number of tasks
-	 * @param cause			a cumulative propagator
 	 */
-	public CumulFilter(int nbMaxTasks, Propagator<IntVar> cause){
+	public CumulFilter(int nbMaxTasks){
 		this.nbMaxTasks = nbMaxTasks;
-		this.aCause = cause;
 	}
 
 	//***********************************************************************************
@@ -54,7 +51,8 @@ public abstract class CumulFilter {
 	 * @param h		height variables
 	 * @param capa	maximum capacity variable
 	 * @param tasks	subset of tasks to filter
+	 * @param aCause			a cumulative propagator
 	 * @throws ContradictionException
 	 */
-	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException;
+	public abstract void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException;
 }

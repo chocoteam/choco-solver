@@ -32,15 +32,15 @@ public class TimeCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public TimeCumulFilter(int nbMaxTasks, Propagator<IntVar> cause) {
-		super(nbMaxTasks, cause);
+	public TimeCumulFilter(int nbMaxTasks) {
+		super(nbMaxTasks);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
 		int min = Integer.MAX_VALUE / 2;
 		int max = Integer.MIN_VALUE / 2;
 		ISetIterator tIter = tasks.iterator();
@@ -94,17 +94,17 @@ public class TimeCumulFilter extends CumulFilter {
 				if (d[i].getLB() > 0 && h[i].getLB() > 0) {
 					// filters
 					if (s[i].getLB() + d[i].getLB() > min) {
-						filterInf(s[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax);
+						filterInf(s[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax, aCause);
 					}
 					if (e[i].getUB() - d[i].getLB() < max) {
-						filterSup(e[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax);
+						filterSup(e[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax, aCause);
 					}
 				}
 			}
 		}
 	}
 
-	protected void filterInf(IntVar start, int dlb, int hlb, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterInf(IntVar start, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
 		int nbOk = 0;
 		int sub = start.getUB();
 		for (int t = start.getLB(); t < sub; t++) {
@@ -120,7 +120,7 @@ public class TimeCumulFilter extends CumulFilter {
 		}
 	}
 
-	protected void filterSup(IntVar end, int dlb, int hlb, int min, int max, int[] time, int capaMax) throws ContradictionException {
+	protected void filterSup(IntVar end, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
 		int nbOk = 0;
 		int elb = end.getLB();
 		for (int t = end.getUB(); t > elb; t--) {

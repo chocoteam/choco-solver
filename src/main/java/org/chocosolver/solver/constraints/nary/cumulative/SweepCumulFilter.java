@@ -53,8 +53,8 @@ public class SweepCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public SweepCumulFilter(int n, Propagator<IntVar> cause){
-		super(n,cause);
+	public SweepCumulFilter(int n){
+		super(n);
 		map = new int[n];
 		slb = new int[n];
 		sub = new int[n];
@@ -81,7 +81,7 @@ public class SweepCumulFilter extends CumulFilter {
 	//***********************************************************************************
 
 	@Override
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
 		// removing tasks with a duration lower bound equal to 0
 		removeNullDurations(d, tasks);
 		int nbT = tasksToUSe.size();
@@ -103,11 +103,11 @@ public class SweepCumulFilter extends CumulFilter {
 				map[i] = t;
 				i++;
 			}
-			while (sweep(capa, h, nbT)){
+			while (sweep(capa, h, nbT, aCause)){
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneMin(s);
+			pruneMin(s, aCause);
 			// symmetric approach for the end upper bounds
 			i = 0;
 			tIter = tasksToUSe.iterator();
@@ -119,11 +119,11 @@ public class SweepCumulFilter extends CumulFilter {
 				eub[i]=-s[t].getLB()+1;
 				i++;
 			}
-			while (sweep(capa, h, nbT)){
+			while (sweep(capa, h, nbT, aCause)){
 				again = true;
 				if(!FIXPOINT)break;
 			}
-			pruneMax(e);
+			pruneMax(e, aCause);
 		}while(FIXPOINT && again);
 	}
 
@@ -138,14 +138,14 @@ public class SweepCumulFilter extends CumulFilter {
 		}
 	}
 
-	protected void pruneMin(IntVar[] s) throws ContradictionException {
+	protected void pruneMin(IntVar[] s, Propagator<IntVar> aCause) throws ContradictionException {
 		int i = 0;
 		ISetIterator tIter = tasksToUSe.iterator();
 		while (tIter.hasNext())
 			s[tIter.nextInt()].updateLowerBound(slb[i++], aCause);
 	}
 
-	protected void pruneMax(IntVar[] e) throws ContradictionException {
+	protected void pruneMax(IntVar[] e, Propagator<IntVar> aCause) throws ContradictionException {
 		int i = 0;
 		ISetIterator tIter = tasksToUSe.iterator();
 		while (tIter.hasNext())
@@ -156,7 +156,7 @@ public class SweepCumulFilter extends CumulFilter {
 	// SWEEP ALGORITHM
 	//***********************************************************************************
 
-	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT) throws ContradictionException {
+	protected boolean sweep(IntVar capamax, IntVar[] h, int nbT, Propagator<IntVar> aCause) throws ContradictionException {
 		generateMinEvents(nbT);
 		if(nbEvents==0){
 			return false;// might happen on randomly generated cases

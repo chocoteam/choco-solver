@@ -28,32 +28,53 @@ public class Cumulative extends Constraint {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	/**
-	 * Cumulative constraint
-	 *
-	 * @param tasks			task variables (embed start, duration and end variables)
-	 * @param heights		height variables (represent the consumption of each task on the resource)
-	 * @param capacity		maximal capacity of the resource (same at each point in time)
-	 * @param graphBased	parameter indicating how to filter:
-	 *                         - TRUE:	applies on subset of overlapping tasks
-	 *                         - FALSE:	applies on all tasks
-	 * @param filters			Filtering algorithm to use:
-	 *                         - TIME: filters time-table from considering each point in time
-	 *                         (efficient in practice as long as the time horizon is not too high)
-	 *                         - SWEEP: filters time-table with a sweep-based algorithm
-	 *                         - NRJ: greedy energy-based filter.
-	 *                         BEWARE: should not be used alone, use it in addition to either SWEEP or TIME.
-	 *
-	 */
-	public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, Filter... filters) {
-		super(ConstraintsName.CUMULATIVE,createPropagators(tasks, heights, capacity, graphBased, filters));
-	}
+    /**
+     * Cumulative constraint
+     *
+     * @param tasks			task variables (embed start, duration and end variables)
+     * @param heights		height variables (represent the consumption of each task on the resource)
+     * @param capacity		maximal capacity of the resource (same at each point in time)
+     * @param graphBased	parameter indicating how to filter:
+     *                         - TRUE:	applies on subset of overlapping tasks
+     *                         - FALSE:	applies on all tasks
+     * @param filters			Filtering algorithm to use:
+     *                         - TIME: filters time-table from considering each point in time
+     *                         (efficient in practice as long as the time horizon is not too high)
+     *                         - SWEEP: filters time-table with a sweep-based algorithm
+     *                         - NRJ: greedy energy-based filter.
+     *                         BEWARE: should not be used alone, use it in addition to either SWEEP or TIME.
+     *
+     */
+    public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, Filter... filters) {
+        super(ConstraintsName.CUMULATIVE,createPropagators(tasks, heights, capacity, graphBased, Arrays.stream(filters).map(f->f.make(tasks.length)).toArray(CumulFilter[]::new)));
+    }
+
+    /**
+     * Cumulative constraint
+     *
+     * @param tasks			task variables (embed start, duration and end variables)
+     * @param heights		height variables (represent the consumption of each task on the resource)
+     * @param capacity		maximal capacity of the resource (same at each point in time)
+     * @param graphBased	parameter indicating how to filter:
+     *                         - TRUE:	applies on subset of overlapping tasks
+     *                         - FALSE:	applies on all tasks
+     * @param filters			Filtering algorithm to use:
+     *                         - TIME: filters time-table from considering each point in time
+     *                         (efficient in practice as long as the time horizon is not too high)
+     *                         - SWEEP: filters time-table with a sweep-based algorithm
+     *                         - NRJ: greedy energy-based filter.
+     *                         BEWARE: should not be used alone, use it in addition to either SWEEP or TIME.
+     *
+     */
+    public Cumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean graphBased, CumulFilter... filters) {
+        super(ConstraintsName.CUMULATIVE,createPropagators(tasks, heights, capacity, graphBased, filters));
+    }
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	private static Propagator[] createPropagators(Task[] tasks, IntVar[] heights, IntVar capa, boolean graphBased, Filter... filters){
+	private static Propagator[] createPropagators(Task[] tasks, IntVar[] heights, IntVar capa, boolean graphBased, CumulFilter... filters){
 		int n = tasks.length;
 		assert n==heights.length && n > 0;
 		IntVar[] vars = extract(tasks,heights,capa);
@@ -101,8 +122,8 @@ public class Cumulative extends Constraint {
 		 * idempotent (on the given set of variables only)
 		 */
 		HEIGHTS{
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new HeightCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new HeightCumulFilter(n);
 			}
 		},
 		/**
@@ -110,8 +131,8 @@ public class Cumulative extends Constraint {
 		 * not idempotent
 		 */
 		TIME{
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new TimeCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new TimeCumulFilter(n);
 			}
 		},
 		/**
@@ -119,8 +140,8 @@ public class Cumulative extends Constraint {
 		 * idempotent (on the given set of variables only)
 		 */
 		SWEEP{
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new SweepCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new SweepCumulFilter(n);
 			}
 		},
 		/**
@@ -128,8 +149,8 @@ public class Cumulative extends Constraint {
 		 * idempotent (on the given set of variables only)
 		 */
 		SWEEP_HEI_SORT {
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new SweepHeiSortCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new SweepHeiSortCumulFilter(n);
 			}
 		},
 		/**
@@ -138,8 +159,8 @@ public class Cumulative extends Constraint {
 		 * not enough to ensure correctness (only an additional filtering)
 		 */
 		NRJ{
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new NRJCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new NRJCumulFilter(n);
 			}
 		},
 		/**
@@ -149,8 +170,8 @@ public class Cumulative extends Constraint {
 		 * not enough to ensure correctness (only an additional filtering)
 		 */
 		DISJUNCTIVE_TASK_INTERVAL {
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new DisjunctiveTaskIntervalFilter(n,cause);
+			public CumulFilter make(int n){
+				return new DisjunctiveTaskIntervalFilter(n);
 			}
 		},
 		/**
@@ -158,17 +179,16 @@ public class Cumulative extends Constraint {
 		 * not idempotent
 		 */
 		DEFAULT {
-			public CumulFilter make(int n, Propagator<IntVar> cause){
-				return new DefaultCumulFilter(n,cause);
+			public CumulFilter make(int n){
+				return new DefaultCumulFilter(n);
 			}
 		};
 
 		/**
 		 * Create an instance of the filtering algorithm
 		 * @param n		maximum number of tasks
-		 * @param cause	cause of filtering
 		 * @return an instance of the filtering algorithm
 		 */
-		public abstract CumulFilter make(int n, Propagator<IntVar> cause);
+		public abstract CumulFilter make(int n);
 	}
 }

@@ -53,7 +53,7 @@ public class PropCumulative extends Propagator<IntVar> {
      * protected constructor, should not be called by a user
      */
     protected PropCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-                             boolean reactToFineEvt, Cumulative.Filter... filters) {
+                             boolean reactToFineEvt, CumulFilter... filters) {
         super(ArrayUtils.append(s, d, e, h, new IntVar[]{capa}), PropagatorPriority.QUADRATIC, reactToFineEvt);
         this.n = s.length;
         if (!(n == d.length && n == e.length && n == h.length)) {
@@ -64,11 +64,7 @@ public class PropCumulative extends Propagator<IntVar> {
         this.e = Arrays.copyOfRange(vars, n * 2, n * 3);
         this.h = Arrays.copyOfRange(vars, n * 3, n * 4);
         this.capa = this.vars[4 * n];
-        this.filters = new CumulFilter[filters.length];
-        for (int f = 0; f < filters.length; f++) {
-            this.filters[f] = filters[f].make(n, this);
-        }
-
+        this.filters = filters;
         lastCapaMax = model.getEnvironment().makeInt(capa.getUB() + 1);
         allTasks = SetFactory.makeStoredSet(SetType.BIPARTITESET,0,getModel());
         for(int t=0;t<n;t++){
@@ -88,7 +84,7 @@ public class PropCumulative extends Propagator<IntVar> {
      * @param filters filtering algorithm to use
      */
     public PropCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa,
-                          Cumulative.Filter... filters) {
+                          CumulFilter... filters) {
         this(s, d, e, h, capa, false, filters);
     }
 
@@ -146,7 +142,7 @@ public class PropCumulative extends Propagator<IntVar> {
             }
         }
         for (CumulFilter cf : filters) {
-            cf.filter(s, d, e, h, capa, tasks);
+            cf.filter(s, d, e, h, capa, tasks, this);
         }
     }
 

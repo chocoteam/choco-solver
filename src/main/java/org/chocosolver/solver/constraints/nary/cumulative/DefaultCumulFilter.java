@@ -30,16 +30,16 @@ public class DefaultCumulFilter extends CumulFilter {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public DefaultCumulFilter(int nbMaxTasks, Propagator<IntVar> cause) {
-		super(nbMaxTasks, cause);
-		nrj = Cumulative.Filter.NRJ.make(nbMaxTasks,aCause);
+	public DefaultCumulFilter(int nbMaxTasks) {
+		super(nbMaxTasks);
+		nrj = Cumulative.Filter.NRJ.make(nbMaxTasks);
 	}
 
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
 
-	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+	public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
 		int min = Integer.MAX_VALUE;
 		int max = Integer.MIN_VALUE;
 		boolean hInst = true;
@@ -51,18 +51,18 @@ public class DefaultCumulFilter extends CumulFilter {
 			hInst &= h[t].isInstantiated();
 		}
 		if (max - min < tasks.size() * tasks.size()) {
-			getTime().filter(s, d, e, h, capa, tasks);
+			getTime().filter(s, d, e, h, capa, tasks, aCause);
 		} else {
-			getSweep().filter(s, d, e, h, capa, tasks);
+			getSweep().filter(s, d, e, h, capa, tasks, aCause);
 			if (!hInst) {
-				getHeights().filter(s, d, e, h, capa, tasks);
+				getHeights().filter(s, d, e, h, capa, tasks, aCause);
 			}
 		}
-		nrj.filter(s, d, e, h, capa, tasks);
+		nrj.filter(s, d, e, h, capa, tasks, aCause);
 		// only propagated on less than 50 tasks (too costly otherwise)
 		if (tasks.size() < 50) {
 			if (capa.isInstantiatedTo(1)) {
-				getDisjTaskInter().filter(s, d, e, h, capa, tasks);
+				getDisjTaskInter().filter(s, d, e, h, capa, tasks, aCause);
 			}
 		}
 	}
@@ -72,22 +72,22 @@ public class DefaultCumulFilter extends CumulFilter {
 	//***********************************************************************************
 
 	private CumulFilter getTime() {
-		if(time==null)time = Cumulative.Filter.TIME.make(nbMaxTasks,aCause);
+		if(time==null)time = Cumulative.Filter.TIME.make(nbMaxTasks);
 		return time;
 	}
 
 	private CumulFilter getSweep() {
-		if(sweep==null)sweep = Cumulative.Filter.SWEEP.make(nbMaxTasks,aCause);
+		if(sweep==null)sweep = Cumulative.Filter.SWEEP.make(nbMaxTasks);
 		return sweep;
 	}
 
 	private CumulFilter getHeights() {
-		if(heights==null)heights = Cumulative.Filter.HEIGHTS.make(nbMaxTasks,aCause);
+		if(heights==null)heights = Cumulative.Filter.HEIGHTS.make(nbMaxTasks);
 		return heights;
 	}
 
 	private CumulFilter getDisjTaskInter() {
-		if(disjTaskInter==null)disjTaskInter = Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL.make(nbMaxTasks,aCause);
+		if(disjTaskInter==null)disjTaskInter = Cumulative.Filter.DISJUNCTIVE_TASK_INTERVAL.make(nbMaxTasks);
 		return disjTaskInter;
 	}
 }

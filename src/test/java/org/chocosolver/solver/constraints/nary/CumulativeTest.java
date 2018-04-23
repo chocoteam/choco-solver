@@ -10,10 +10,18 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -39,6 +47,135 @@ public class CumulativeTest {
 					}
 				}
 			}
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testDur0() {
+		Model m = new Model();
+
+		Task t1 = new Task(
+				m.intVar(9),
+				m.intVar(6),
+				m.intVar(15)
+		);
+		Task t2 = new Task(
+				m.intVar(8),
+				m.intVar(new int[]{0,6}),
+				m.intVar(8,14)
+		);
+
+		m.cumulative(new Task[]{t1, t2}, new IntVar[]{m.intVar(1), m.intVar(1)}, m.intVar(1), true, new CumulFilter(2) {
+            private int[] time = new int[31];
+            @Override
+            public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
+                int min = Integer.MAX_VALUE / 2;
+                int max = Integer.MIN_VALUE / 2;
+                ISetIterator tIter = tasks.iterator();
+                while (tIter.hasNext()){
+                    int i = tIter.nextInt();
+                    if (s[i].getUB() < e[i].getLB()) {
+                        min = Math.min(min, s[i].getUB());
+                        max = Math.max(max, e[i].getLB());
+                    }
+                }
+                if (min < max) {
+                    if(max-min>time.length){
+                        time = new int[max-min];
+                    }
+                    else{
+                        Arrays.fill(time, 0, max - min, 0);
+                    }
+                    int capaMax = capa.getUB();
+                    // fill mandatory parts and filter capacity
+                    int elb,hlb;
+                    int maxC=0;
+
+                    tIter = tasks.iterator();
+                    while (tIter.hasNext()){
+                        int i = tIter.nextInt();
+                        elb = e[i].getLB();
+                        hlb = h[i].getLB();
+                        for (int t = s[i].getUB(); t < elb; t++) {
+                            time[t - min] += hlb;
+                            maxC = Math.max(maxC,time[t - min]);
+                        }
+                    }
+                    capa.updateLowerBound(maxC, aCause);
+                    // filter max height
+                    int minH;
+
+                    tIter = tasks.iterator();
+                    while (tIter.hasNext()){
+                        int i = tIter.nextInt();
+                        if(!h[i].isInstantiated()){
+                            minH = h[i].getUB();
+                            elb = e[i].getLB();
+                            hlb = h[i].getLB();
+                            for (int t = s[i].getUB(); t < elb; t++) {
+                                minH = Math.min(minH,capaMax-(time[t-min]-hlb));
+                            }
+                            h[i].updateUpperBound(minH,aCause);
+                        }
+                    }
+                    for (int i : tasks) {
+                        if (h[i].getLB() > 0) { // d[i].getLB() > 0 &&
+                            // filters
+                            System.out.println("filter "+i);
+                            if (s[i].getLB() + d[i].getLB() > min) {
+                                filterInf(s[i],e[i].getLB(),d[i].getLB(),h[i].getLB(), min, max, time, capaMax, aCause);
+                            }
+                            if (e[i].getUB() - d[i].getLB() < max) {
+                                filterSup(s[i].getUB(),e[i],d[i].getLB(),h[i].getLB(), min, max, time, capaMax, aCause);
+                            }
+                        }
+                    }
+                }
+            }
+
+            protected void filterInf(IntVar start, int elb, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
+                int nbOk = 0;
+                int sub = start.getUB();
+                for (int t = start.getLB(); t < sub; t++) {
+                    if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
+                        nbOk++;
+                        if (nbOk == dlb) {
+                            return;
+                        }
+                    } else {
+                        if(dlb==0 && t >= elb)return;
+                        nbOk = 0;
+                        start.updateLowerBound(t + 1, aCause);
+                    }
+                }
+            }
+
+            protected void filterSup(int sub, IntVar end, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
+                int nbOk = 0;
+                int elb = end.getLB();
+                for (int t = end.getUB(); t > elb; t--) {
+                    if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
+                        nbOk++;
+                        if (nbOk == dlb) {
+                            return;
+                        }
+                    } else {
+                        if(dlb==0 && t <= sub)return;
+                        nbOk = 0;
+                        end.updateUpperBound(t - 1, aCause);
+                    }
+                }
+            }
+        }).post();
+
+		Solver s = m.getSolver();
+
+		try {
+			s.propagate();
+		} catch (ContradictionException e) {
+			e.printStackTrace();
+			Assert.assertTrue(false);
+		}
+		Assert.assertTrue(t2.getDuration().isInstantiatedTo(0));
 	}
 
 	@Test(groups="1s", timeOut=60000)

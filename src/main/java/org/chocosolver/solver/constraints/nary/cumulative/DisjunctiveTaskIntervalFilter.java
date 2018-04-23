@@ -31,8 +31,8 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public DisjunctiveTaskIntervalFilter(int nbMaxTasks, Propagator<IntVar> cause) {
-        super(nbMaxTasks,cause);
+    public DisjunctiveTaskIntervalFilter(int nbMaxTasks) {
+        super(nbMaxTasks);
     }
 
     //***********************************************************************************
@@ -40,7 +40,7 @@ public class DisjunctiveTaskIntervalFilter extends CumulFilter{
     //***********************************************************************************
 
     @Override
-    public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks) throws ContradictionException {
+    public void filter(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, ISet tasks, Propagator<IntVar> aCause) throws ContradictionException {
         // filtering algorithm for disjunctive constraint
         capa.updateUpperBound(1,aCause);
         // remove tasks that do not consume any resource
