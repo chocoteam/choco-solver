@@ -10,6 +10,7 @@ package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -48,7 +49,7 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
 
     @Override
     public void updateBestSolution() {
-        assert objective.isInstantiated();
+        if(!objective.isInstantiated()) throw new SolverException("objective variable ("+objective+") is not instantiated on solution. Check constraints and/or decision variables.");
         updateBestSolution(objective.getValue());
     }
 
