@@ -125,8 +125,16 @@ public class IntLinCombFactory {
         // b. second step to remove variable with coeff set to 0
         int _k = k;
         k = 0;
+        long slb = 0, sub = 0;
         for (int i = 0; i < _k; i++) {
             if (NCOEFFS[i] != 0) {
+                if(NCOEFFS[i]>0){
+                    slb += NVARS[i].getLB() * NCOEFFS[i];
+                    sub += NVARS[i].getUB() * NCOEFFS[i];
+                }else{
+                    slb += NVARS[i].getUB() * NCOEFFS[i];
+                    sub += NVARS[i].getLB() * NCOEFFS[i];
+                }
                 if (NVARS[i].isBool()) nbools++; // count number of boolean variables
                 if (NCOEFFS[i] == 1) nones++; // count number of coeff set to 1
                 if (NCOEFFS[i] == -1) nmones++; // count number of coeff set to -1
@@ -138,6 +146,9 @@ public class IntLinCombFactory {
                 }
                 k++;
             }
+        }
+        if(slb< Integer.MIN_VALUE || slb> Integer.MAX_VALUE || sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE){
+            throw new SolverException("Consider reducing variables' domain to prevent integer under/overflow");
         }
         // b. resize arrays if needed
         if (k == 0) {
