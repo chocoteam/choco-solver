@@ -76,6 +76,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.model = model;
         this.mainStrategy = mainStrategy;
+        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         model.getSolver().plugMonitor(this);
         conflictingVariables = new Variable[k];
         nbCV = 0;
@@ -88,8 +89,6 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public boolean init(){
-
-        scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         return mainStrategy.init();
     }
 
