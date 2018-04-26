@@ -39,18 +39,18 @@ public class PropXltCReif extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (r.getLB() == 1) {
-            setPassive();
             var.updateUpperBound(cste - 1, this);
-        } else if (r.getUB() == 0) {
             setPassive();
+        } else if (r.getUB() == 0) {
             var.updateLowerBound(cste, this);
+            setPassive();
         } else {
             if (var.getUB() < cste) {
-                setPassive();
                 r.setToTrue(this);
-            } else if (var.getLB() >= cste) {
                 setPassive();
+            } else if (var.getLB() >= cste) {
                 r.setToFalse(this);
+                setPassive();
             }
         }
     }

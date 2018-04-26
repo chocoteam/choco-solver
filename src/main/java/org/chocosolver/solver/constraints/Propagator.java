@@ -416,6 +416,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * informs that this propagator is now passive : it holds but no further filtering can occur,
      * so it is useless to propagate it. Should not be called by the user.
+     *
+     * @implNote when a propagator is passive, it is not allowed to modify a variable.
+     * This is asserted in {@link org.chocosolver.solver.propagation.IPropagationEngine#onVariableUpdate(Variable, IEventType, ICause)}.
+     *
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     @SuppressWarnings({"unchecked"})

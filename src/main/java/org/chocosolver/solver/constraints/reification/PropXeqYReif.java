@@ -33,11 +33,11 @@ public class PropXeqYReif extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (vars[2].getLB() == 1) {
             if (vars[0].isInstantiated()) {
-                setPassive();
                 vars[1].instantiateTo(vars[0].getValue(), this);
-            } else if (vars[1].isInstantiated()) {
                 setPassive();
+            } else if (vars[1].isInstantiated()) {
                 vars[0].instantiateTo(vars[1].getValue(), this);
+                setPassive();
             }
         } else if (vars[2].getUB() == 0) {
             if (vars[0].isInstantiated()) {
@@ -52,27 +52,27 @@ public class PropXeqYReif extends Propagator<IntVar> {
         } else {
             if (vars[0].isInstantiated()) {
                 if (vars[1].isInstantiated()) {
-                    setPassive();
                     if (vars[0].getValue() == vars[1].getValue()) {
                         vars[2].instantiateTo(1, this);
                     } else {
                         vars[2].instantiateTo(0, this);
                     }
-                } else if (!vars[1].contains(vars[0].getValue())) {
                     setPassive();
+                } else if (!vars[1].contains(vars[0].getValue())) {
                     vars[2].instantiateTo(0, this);
+                    setPassive();
                 }
             } else {
                 if (vars[1].isInstantiated()) {
                     if (!vars[0].contains(vars[1].getValue())) {
-                        setPassive();
                         vars[2].instantiateTo(0, this);
+                        setPassive();
                     }
                 } else {
                     if (vars[0].getLB() > vars[1].getUB()
                             || vars[1].getLB() > vars[0].getUB()) {
-                        setPassive();
                         vars[2].instantiateTo(0, this);
+                        setPassive();
                     }
                 }
             }

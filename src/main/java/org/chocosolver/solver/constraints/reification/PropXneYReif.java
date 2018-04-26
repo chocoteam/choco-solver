@@ -44,11 +44,11 @@ public class PropXneYReif extends Propagator<IntVar> {
         } else {
             if (vars[2].getUB() == 0) {
                 if (vars[0].isInstantiated()) {
-                    setPassive();
                     vars[1].instantiateTo(vars[0].getValue(), this);
-                } else if (vars[1].isInstantiated()) {
                     setPassive();
+                } else if (vars[1].isInstantiated()) {
                     vars[0].instantiateTo(vars[1].getValue(), this);
+                    setPassive();
                 }
             } else {
                 if (vars[0].isInstantiated()) {

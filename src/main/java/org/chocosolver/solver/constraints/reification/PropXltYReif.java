@@ -46,11 +46,11 @@ public class PropXltYReif extends Propagator<IntVar> {
             }
         } else {
             if (vars[0].getUB() < vars[1].getLB()) {
-                setPassive();
                 vars[2].instantiateTo(1, this);
-            } else if (vars[0].getLB() >= vars[1].getUB()) {
                 setPassive();
+            } else if (vars[0].getLB() >= vars[1].getUB()) {
                 vars[2].instantiateTo(0, this);
+                setPassive();
             }
         }
     }

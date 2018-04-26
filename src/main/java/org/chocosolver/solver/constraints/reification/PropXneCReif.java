@@ -43,15 +43,15 @@ public class PropXneCReif extends Propagator<IntVar> {
                 setPassive();
             }
         } else if (r.getUB() == 0) {
-            setPassive();
             var.instantiateTo(cste, this);
+            setPassive();
         } else {
             if (!var.contains(cste)) {
-                setPassive();
                 r.setToTrue(this);
-            } else if (var.isInstantiatedTo(cste)) {
                 setPassive();
+            } else if (var.isInstantiatedTo(cste)) {
                 r.setToFalse(this);
+                setPassive();
             }
         }
     }

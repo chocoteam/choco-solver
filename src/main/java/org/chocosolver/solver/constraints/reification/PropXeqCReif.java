@@ -39,19 +39,19 @@ public class PropXeqCReif extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (r.getLB() == 1) {
-            setPassive();
             var.instantiateTo(cste, this);
+            setPassive();
         } else if (r.getUB() == 0) {
             if (var.removeValue(cste, this) || !var.contains(cste)) {
                 setPassive();
             }
         } else {
             if (var.isInstantiatedTo(cste)) {
-                setPassive();
                 r.setToTrue(this);
-            } else if (!var.contains(cste)) {
                 setPassive();
+            } else if (!var.contains(cste)) {
                 r.setToFalse(this);
+                setPassive();
             }
         }
     }

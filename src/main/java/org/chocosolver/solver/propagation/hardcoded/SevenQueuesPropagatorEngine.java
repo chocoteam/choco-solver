@@ -274,6 +274,7 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
             }
             assert found: variable + " not in scope of " + cause;
         }
+        assert !(cause instanceof Propagator) || ((Propagator)cause).isActive():"A propagator should be active to modify a variable";
         Propagator[] vpropagators = variable.getPropagators();
         int[] vindices = variable.getPIndices();
         Propagator prop;

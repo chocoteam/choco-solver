@@ -54,11 +54,11 @@ public class PropBitChanneling extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (octet.isInstantiated()) {
-            setPassive();
             int value = octet.getValue();
             for (int i = 0; i < SIZE; i++) {
                 bits[i].instantiateTo(((value & (1 << i)) != 0) ? 1 : 0, this);
             }
+            setPassive();
             return;
         }
         octet.updateBounds(0, MAX, this);
@@ -69,8 +69,8 @@ public class PropBitChanneling extends Propagator<IntVar> {
             }
         }
         if (kb == SIZE) {
-            setPassive();
             octet.instantiateTo(getValueFromBits(), this);
+            setPassive();
         } else {
             KNOW_BIT.set(kb);
             if (kb > 0) {
@@ -86,15 +86,15 @@ public class PropBitChanneling extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-            setPassive();
             int value = octet.getValue();
             for (int i = 0; i < SIZE; i++) {
                 bits[i].instantiateTo(((value & (1 << i)) != 0) ? 1 : 0, this);
             }
+            setPassive();
         } else {
             if (KNOW_BIT.add(1) == SIZE) {
-                setPassive();
                 octet.instantiateTo(getValueFromBits(), this);
+                setPassive();
             } else {
                 int i = idxVarInProp - 1;
                 if (bits[i].isInstantiated()) {

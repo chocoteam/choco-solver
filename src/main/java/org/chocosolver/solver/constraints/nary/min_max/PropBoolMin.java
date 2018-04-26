@@ -109,8 +109,8 @@ public class PropBoolMin extends Propagator<BoolVar> {
                 vars[i].instantiateTo(1, this);
             }
         }else if(b1 == 1 && b2 == 1){
-            if(!isPassive())setPassive();
             vars[n].instantiateTo(1, this);
+            if(!isPassive())setPassive();
         }else if(bn == 0){
             if(b1 == 1){
                 vars[l1].instantiateTo(0, this);

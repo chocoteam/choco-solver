@@ -39,19 +39,19 @@ public class PropXinSReif extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (r.getLB() == 1) {
-            setPassive();
             var.removeAllValuesBut(set, this);
+            setPassive();
         } else if (r.getUB() == 0) {
             if (var.removeValues(set, this) || !IntIterableSetUtils.intersect(var, set)) {
                 setPassive();
             }
         } else {
             if (IntIterableSetUtils.includedIn(var, set)) {
-                setPassive();
                 r.setToTrue(this);
-            } else if (!IntIterableSetUtils.intersect(var, set)) {
                 setPassive();
+            } else if (!IntIterableSetUtils.intersect(var, set)) {
                 r.setToFalse(this);
+                setPassive();
             }
         }
     }

@@ -91,14 +91,14 @@ public class PropAbsolute extends Propagator<IntVar> {
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (IntEventType.isInstantiate(mask)){
             if(varIdx == 1){
-                setPassive();
                 X.instantiateTo(Math.abs(Y.getValue()), this);
-            }else if(Y.hasEnumeratedDomain()){
                 setPassive();
+            }else if(Y.hasEnumeratedDomain()){
                 int val = X.getValue();
                 Y.updateBounds(-val, val, this);
                 val--;
                 Y.removeInterval(-val, val, this);
+                setPassive();
             }else{
                 setBounds();
             }

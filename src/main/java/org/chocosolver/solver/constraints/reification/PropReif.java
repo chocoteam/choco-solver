@@ -80,12 +80,12 @@ public class PropReif extends Propagator<Variable> {
         } else {
             ESat sat = trueCons.isSatisfied();
             if (sat == ESat.TRUE) {
-                setPassive();
                 bVar.setToTrue(this);
+                setPassive();
                 reifCons.activate(0);
             } else if (sat == ESat.FALSE) {
-                setPassive();
                 bVar.setToFalse(this);
+                setPassive();
                 reifCons.activate(1);
             }
 //			else {// in case the entailment has not the same implementation

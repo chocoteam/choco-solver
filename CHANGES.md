@@ -18,6 +18,7 @@ the default behavior.
 - `IViewFactory.intAffineView` is now available
 - add new constraint for mixed linear equation (over real/int variables and double/int coefficients)
 - Dow/WDeg now manages variables in a bipartite set (instantiated variables are swaped)
+- Assert that a propagator that is passive is not allowed to filter anymore
 
 ### Deprecated API (to be removed in next release):
 -  `Model.set(Settings)` is deprecated. Now settings are declared in the `Model` constructor.
