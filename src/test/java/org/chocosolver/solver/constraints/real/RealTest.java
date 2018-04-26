@@ -13,7 +13,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -24,10 +23,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import static java.lang.System.out;
 import static org.testng.Assert.assertEquals;
@@ -151,12 +148,6 @@ public class RealTest {
         boolean foundSolution = model.getSolver().solve();
         while (foundSolution) {
             numSolutions++;
-            System.out.println(String.format("Solution #%d:", numSolutions));
-            System.out.println("b1: " + attrEquals1Reification.getValue());
-            System.out.println("b2: " + attrEquals2Reification.getValue());
-            System.out.println("attr: [" + attr.getLB() + ", " + attr.getUB() + "]");
-            System.out.println();
-
             foundSolution = model.getSolver().solve();
         }
     }
@@ -219,13 +210,6 @@ public class RealTest {
         model.realIbexGenericConstraint("(" + coeffs + ";{0}+100={2};min({1},{2}) ={3}", weldingCurrent, MTBF_WS, MTBF_MT, global_min).post();
         model.setPrecision(precision);
         model.setObjective(false, global_min);
-        solver.plugMonitor((IMonitorSolution) () -> {
-            out.println("*******************");
-            System.out.println("weldingCurrent LB=" + weldingCurrent.getLB() + " UB=" + weldingCurrent.getUB());
-            System.out.println("MTBF_WS LB=" + MTBF_WS.getLB() + " UB=" + MTBF_WS.getUB());
-            System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
-            System.out.println("global_min LB=" + global_min.getLB() + " UB=" + global_min.getUB());
-        });
         solver.showDecisions(() -> "" + solver.getNodeCount());
         while (solver.solve()) ;
     }
@@ -243,11 +227,6 @@ public class RealTest {
         model.setPrecision(precision);
         model.setObjective(false, MTBF);
         solver.showDecisions();
-        solver.plugMonitor((IMonitorSolution) () -> {
-            out.println("*******************");
-            System.out.println("weldingCurrent LB=" + current.getLB() + " UB=" + current.getUB());
-            System.out.println("MTBF_MT LB=" + MTBF_MT.getLB() + " UB=" + MTBF_MT.getUB());
-        });
         solver.solve();
     }
 
@@ -327,9 +306,6 @@ public class RealTest {
         int i = 0;
         while (solver.solve()) {
             i++;
-            System.out.print("Solution " + i + " found :");
-            for (Variable v : printVars) System.out.print(v + ", ");
-            System.out.println("");
         }
         assertEquals(solver.getSolutionCount(), 10);
     }
@@ -362,10 +338,7 @@ public class RealTest {
         model.realIbexGenericConstraint("{0}=max({1},{2})", opt, srv1, srv2).post();
         model.setObjective(false, opt);
         model.getSolver().showStatistics();
-        while (model.getSolver().solve()) {
-            System.out.println(Arrays.stream(rv1).map(x -> String.format("%.2f ", x.getUB())).collect(Collectors.toList()));
-            System.out.println(Arrays.stream(rv2).map(x -> String.format("%.2f ", x.getUB())).collect(Collectors.toList()));
-        }
+        while (model.getSolver().solve()) {}
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -413,12 +386,8 @@ public class RealTest {
         //Repeatedly post / unpost. This is unstable on Windows, Ibex crashes quite often. But main concern is to make this work!
         //I cannot understand why solutions are lost after the first contradiction has been found, even when propagation is not on!
         for (int round = 0; round < 350; round++) {
-            System.out.print("round:" + round + ", getNbCstrs()=" + model.getNbCstrs() + " ");
             model.getSolver().reset();
             model.getEnvironment().worldPush();
-            System.out.print(load);
-            System.out.print(" ");
-            System.out.print(dim_A);
 
             //Randomly unpost a sticky constraint that remains between iterations. Probability of unpost() annd permanent removal is higher than creation and post()
             boolean unPostedNow = false;
@@ -426,7 +395,6 @@ public class RealTest {
                 int r = rr.nextInt(100);
                 if (r <= 12) {
                     model.unpost(stickyCstr);
-                    System.out.print(", Unposted: " + stickyCstr + " ");
                     stickyCstr = null;
                     unPostedNow = true;
                 }
@@ -445,17 +413,13 @@ public class RealTest {
                 if (r <= 7) {
                     stickyCstr = model.arithm(load, "=", r * 100);
                     model.post(stickyCstr);
-                    System.out.print(", Posted: " + stickyCstr + " ");
                     postedNow = true;
                 }
             }
 
-            System.out.print(", sticky is posted: " + (stickyCstr != null));
             if (postedNow && unPostedNow) {
-                System.out.print(", UnpostPost BOTH on same ROUND");
                 sameRoundPostUnpost++;
             }
-            System.out.println();
 
             boolean propagate = false;
             if (propagate) {
@@ -463,7 +427,6 @@ public class RealTest {
                 try {
                     model.getSolver().propagate();
                 } catch (ContradictionException e) {
-                    System.out.println("CONTRADICTION found");
                     e.printStackTrace();
                 }
                 model.getSolver().getEnvironment().worldPop();
@@ -472,16 +435,9 @@ public class RealTest {
             int i = 0;
             while (model.getSolver().solve()) {
                 i++;
-                System.out.print("Solution " + i + " found :");
-                for (Variable v : printVars) System.out.print(v + ", ");
-                System.out.println("");
             }
             model.unpost(c);
         }
-
-
-        System.out.println("sameRoundPostUnpost=" + sameRoundPostUnpost);
-
     }
 
     private static RealVar addEnumReal(Model model, String name, double[] possibles) {
@@ -572,9 +528,7 @@ public class RealTest {
         ibex.build();
         double domains[] = {140., 151.};
         Assert.assertEquals(ibex.start_solve(domains), Ibex.STARTED);
-        while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) {
-            System.out.printf("%s\n", Arrays.toString(domains));
-        }
+        while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) { }
     }
 
     @Test(groups = "1s", timeOut = 60000)

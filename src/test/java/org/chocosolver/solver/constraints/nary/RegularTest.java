@@ -333,7 +333,6 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 6, 0, 4, false);
         model.regular(CS, new FiniteAutomaton("0*[^0]{4,}?0*",0,4)).post();
-        model.getSolver().showSolutions(()->String.format("%d%d%d%d%d%d\n", CS[0].getValue(), CS[1].getValue(), CS[2].getValue(), CS[3].getValue(), CS[4].getValue(), CS[5].getValue()));
 //        model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 6913);
