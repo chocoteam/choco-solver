@@ -48,6 +48,11 @@ public class BoundSearch extends AbstractStrategy{
 	}
 
 	@Override
+	public boolean init() {
+		return definedSearch.init();
+	}
+
+	@Override
 	public Decision getDecision() {
 		if(variable == null || variable.isInstantiated()) {
 			Decision d = definedSearch.getDecision();
