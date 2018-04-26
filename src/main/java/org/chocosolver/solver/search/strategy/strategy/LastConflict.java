@@ -16,6 +16,10 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.variables.Variable;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Last Conflict heuristic
  * Composite heuristic which hacks a mainStrategy by forcing the
@@ -55,6 +59,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
      */
     protected Variable[] conflictingVariables;
 
+    protected Set<Variable> scope;
+
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -82,6 +88,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public boolean init(){
+
+        scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         return mainStrategy.init();
     }
 
@@ -110,7 +118,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     public void onContradiction(ContradictionException cex) {
         Variable curDecVar = model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
-        if (inScope(curDecVar)) {
+        if (scope.contains(curDecVar)) {
             if (nbCV < conflictingVariables.length) {
                 conflictingVariables[nbCV++] = curDecVar;
             } else {
@@ -145,17 +153,5 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
             }
         }
         return null;
-    }
-
-    private boolean inScope(Variable target) {
-        Variable[] scope = mainStrategy.vars;
-        if (target != null) {
-            for (Variable aScope : scope) {
-                if (aScope.getId() == target.getId()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 }
