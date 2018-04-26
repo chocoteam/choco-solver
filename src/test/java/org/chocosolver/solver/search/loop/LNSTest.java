@@ -308,7 +308,7 @@ public class LNSTest {
         while (solver.solve()) {
             System.out.printf("%.3fs -> %d\n", solver.getTimeCount(), optVar.getValue());
         }
-        Assert.assertEquals(solver.getObjectiveManager().getBestUB(), 318);
+        Assert.assertEquals(solver.getObjectiveManager().getBestUB(), 369);
     }
 
 }
