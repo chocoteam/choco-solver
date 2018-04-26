@@ -182,7 +182,7 @@ public class IntMap {
      * The map will be empty after this call returns.
      */
     public void clear() {
-        Arrays.fill(elements, 0, size, FREE);
+        Arrays.fill(elements, FREE);
         size = 0;
     }
 
