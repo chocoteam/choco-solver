@@ -43,7 +43,7 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
      * @param values some values
      */
     public PropNotMemberEnum(IntVar var, int[] values) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
         this.values = new TIntHashSet(values);
         vrms = new IntIterableBitSet();
         int of = Integer.MAX_VALUE;

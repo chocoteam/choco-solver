@@ -30,7 +30,7 @@ public class PropXinSReif extends Propagator<IntVar> {
     BoolVar r;
 
     public PropXinSReif(IntVar x, IntIterableRangeSet set, BoolVar r) {
-        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false);
+        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false, true);
         this.set = set;
         this.var = x;
         this.r = r;

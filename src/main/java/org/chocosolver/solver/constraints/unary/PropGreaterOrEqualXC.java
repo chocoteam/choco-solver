@@ -29,7 +29,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
     private final int constant;
 
     public PropGreaterOrEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
         this.constant = cste;
     }
 

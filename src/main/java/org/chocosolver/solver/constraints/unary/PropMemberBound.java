@@ -28,7 +28,7 @@ public class PropMemberBound extends Propagator<IntVar> {
     private final int lb, ub;
 
     public PropMemberBound(IntVar var, int lb, int ub) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
         this.lb = lb;
         this.ub = ub;
     }

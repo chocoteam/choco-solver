@@ -30,7 +30,7 @@ public class PropXgtCReif extends Propagator<IntVar> {
     BoolVar r;
 
     public PropXgtCReif(IntVar x, int c, BoolVar r) {
-        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false);
+        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false, true);
         this.cste = c;
         this.var = x;
         this.r = r;

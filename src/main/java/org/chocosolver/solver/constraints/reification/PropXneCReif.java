@@ -30,7 +30,7 @@ public class PropXneCReif extends Propagator<IntVar> {
     BoolVar r;
 
     public PropXneCReif(IntVar x, int c, BoolVar r) {
-        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false);
+        super(new IntVar[]{x, r}, PropagatorPriority.BINARY, false, true);
         this.cste = c;
         this.var = x;
         this.r = r;

@@ -32,7 +32,7 @@ public class PropMemberEnum extends Propagator<IntVar> {
     private final IntIterableBitSet vrms;
 
     public PropMemberEnum(IntVar var, int[] values) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
         this.values = new TIntHashSet(values);
         vrms = new IntIterableBitSet();
         vrms.setOffset(vars[0].getLB());
