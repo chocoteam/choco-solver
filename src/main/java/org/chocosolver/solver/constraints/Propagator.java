@@ -24,6 +24,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 
+import java.util.Arrays;
+
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
@@ -177,9 +179,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             this.vars = vars;
         }
         this.vindices = new int[vars.length];
+        Arrays.fill(vindices, -1);
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
-        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
+        operations = new IOperation[3];
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
         operations[2] = () -> state = ACTIVE;
@@ -259,6 +262,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         for (int v = 0; v < vars.length; v++) {
             if(!vars[v].isAConstant()) {
                 vars[v].unlink(this, v);
+                vindices[v] = -1;
             }
         }
     }
@@ -416,10 +420,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * informs that this propagator is now passive : it holds but no further filtering can occur,
      * so it is useless to propagate it. Should not be called by the user.
-     *
-     * @implNote when a propagator is passive, it is not allowed to modify a variable.
-     * This is asserted in {@link org.chocosolver.solver.propagation.IPropagationEngine#onVariableUpdate(Variable, IEventType, ICause)}.
-     *
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     @SuppressWarnings({"unchecked"})
@@ -431,17 +431,15 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
-            if (swapOnPassivate) {
-                if (operations[3] == null) {
+            if(swapOnPassivate) {
                 for (int i = 0; i < vars.length; i++) {
-                        int finalI = i;
-                        operations[3 + i] = () -> vindices[finalI] = vars[finalI].link(this, finalI);
-                    }
-                }
-                for (int i = 0; i < vars.length; i++) {
-                    if(!vars[i].isInstantiated()) {
-                        vars[i].unlink(this, i);
-                        model.getEnvironment().save(operations[3 + i]);
+                    if (!vars[i].isInstantiated()) {
+                        vindices[i] = vars[i].swapOnPassivate(this, i);
+                        assert vars[i].getPropagator(vindices[i]) == this;
+                        int _i = i;
+                        model.getEnvironment().save(
+                                () -> vindices[_i] = vars[_i].swapOnActivate(this, _i)
+                        );
                     }
                 }
             }
@@ -647,6 +645,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @return true iff this propagator is passive. This happens when it is entailed : the propagator still hold
      * but no more filtering can occur
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean isPassive() {
         return state == PASSIVE;
     }

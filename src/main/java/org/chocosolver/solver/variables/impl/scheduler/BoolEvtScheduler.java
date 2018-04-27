@@ -27,7 +27,11 @@ public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
 
     @Override
     public int select(int mask) {
-        return 0;
+        if(mask > 0){
+            return 0;
+        }else{
+            return 1;
+        }
     }
 
     @Override

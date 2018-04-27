@@ -38,6 +38,8 @@ public class SetEvtScheduler implements EvtScheduler<SetEventType> {
             case 3:
             case 255: // all
                 return 2;
+            case 0:
+                return 3;
             default:
                 throw new UnsupportedOperationException("Unknown case");
         }

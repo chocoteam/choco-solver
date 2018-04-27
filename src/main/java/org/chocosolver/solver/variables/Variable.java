@@ -186,6 +186,24 @@ public interface Variable extends Identity, Comparable<Variable> {
     int link(Propagator propagator, int idxInProp);
 
     /**
+     * The propagator will not be informed of any modification of this anymore.
+     *
+     * @param propagator the propagator to swap
+     * @param idxInProp  index of the variable in the propagator
+     * @return return the index of the propagator within the variable
+     */
+    int swapOnPassivate(Propagator propagator, int idxInProp);
+
+    /**
+     * The propagator will be informed back of any modification of this.
+     *
+     * @param propagator the propagator to swap
+     * @param idxInProp  index of the variable in the propagator
+     * @return return the index of the propagator within the variable
+     */
+    int swapOnActivate(Propagator propagator, int idxInProp);
+
+    /**
      * Remove a propagator from the list of propagator of <code>this</code>.
      * SHOULD BE CONTAINED IN THIS.
      *
@@ -194,6 +212,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      */
     void unlink(Propagator propagator, int idxInProp);
+
 
     /**
      * If <code>this</code> has changed, then notify all of its observers.<br/>
@@ -244,7 +263,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      */
     Model getModel();
 
-	/**
+    /**
      * @return the backtracking environment used for this variable
      */
     default IEnvironment getEnvironment(){

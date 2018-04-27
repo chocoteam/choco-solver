@@ -46,9 +46,12 @@ public class IntEvtScheduler implements EvtScheduler<IntEventType> {
                 } else {
                     return 1;
                 }
-            default:
             case 1:  // REMOVE or more
                 return 4;
+            case 0: // VOID
+                return 5;
+            default:
+                throw new UnsupportedOperationException("Unknown case");
         }
     }
 

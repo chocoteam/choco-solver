@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -30,9 +31,7 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import java.util.Arrays;
 
 /**
- * Class used to factorise code
- * The subclass must implement Variable interface
- * <br/>
+ * Class used to factorise code The subclass must implement Variable interface <br/>
  *
  * @author Jean-Guillaume Fages
  * @author Charles Prud'homme
@@ -104,6 +103,10 @@ public abstract class AbstractVariable implements Variable {
      * Dependency indices, for efficient scheduling purpose.
      */
     private int[] dindices;
+    /**
+     * Nb dependencies
+     */
+    private int dsize;
 
     /**
      * List of views based on this variable.
@@ -126,8 +129,8 @@ public abstract class AbstractVariable implements Variable {
     protected int mIdx;
 
     /**
-     * The event scheduler of this variable, for efficient scheduling purpose.
-     * It stores propagators wrt the propagation conditions.
+     * The event scheduler of this variable, for efficient scheduling purpose. It stores propagators
+     * wrt the propagation conditions.
      */
     private EvtScheduler scheduler;
 
@@ -135,7 +138,8 @@ public abstract class AbstractVariable implements Variable {
 
     /**
      * Create the shared data of any type of variable.
-     * @param name name of the variable
+     *
+     * @param name  name of the variable
      * @param model model which declares this variable
      */
     protected AbstractVariable(String name, Model model) {
@@ -145,7 +149,6 @@ public abstract class AbstractVariable implements Variable {
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
-        this.dindices = new int[6];
         this.ID = this.model.nextId();
         this.model.associates(this);
         int kind = getTypeAndKind() & Variable.KIND;
@@ -167,6 +170,8 @@ public abstract class AbstractVariable implements Variable {
                 // event scheduler may be managed using java reflexion
                 break;
         }
+        this.dsize = this.scheduler.select(0) + 1;
+        this.dindices = new int[dsize + 1];
     }
 
     @Override
@@ -177,35 +182,32 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public final int link(Propagator propagator, int idxInProp) {
         // 1. ensure capacity
-        if (dindices[5] == propagators.length) {
+        if (dindices[dsize] == propagators.length) {
             Propagator[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, dindices[5]);
+            System.arraycopy(tmp, 0, propagators, 0, dindices[dsize]);
 
             int[] itmp = pindices;
             pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, dindices[5]);
-            if(pindices.length != propagators.length){
-                throw new UnsupportedOperationException("error: pindices.length != propagators.length in "+this);
+            System.arraycopy(itmp, 0, pindices, 0, dindices[dsize]);
+            if (pindices.length != propagators.length) {
+                throw new UnsupportedOperationException("error: pindices.length != propagators.length in " + this);
             }
 
         }
         // 2. put it in the right place
         int pc = propagator.getPropagationConditions(idxInProp);
-        int pos = -1;
-        if(pc > 0) { // deal with VOID, when the propagator should not be aware of this variable's modifications
-            pos = subscribe(propagator, idxInProp, scheduler.select(pc));
-        }
-        return pos;
+        return subscribe(propagator, idxInProp, scheduler.select(pc));
     }
 
     /**
-     * Move a propagator from position 'from' to position 'to' in {@link #propagators}.
-     * The element at position 'from' will then be 'null'.
+     * Move a propagator from position 'from' to position 'to' in {@link #propagators}. The element
+     * at position 'from' will then be 'null'.
+     *
      * @param from a position in {@link #propagators}
-     * @param to a position in {@link #propagators}
+     * @param to   a position in {@link #propagators}
      */
-    private void move(int from, int to){
+    private void move(int from, int to) {
         if (propagators[from] != null) {
             propagators[to] = propagators[from];
             pindices[to] = pindices[from];
@@ -215,7 +217,7 @@ public abstract class AbstractVariable implements Variable {
     }
 
     int subscribe(Propagator p, int ip, int i) {
-        int j = 4;
+        int j = dsize - 1;
         for (; j >= i; j--) {
             move(dindices[j], dindices[j + 1]);
             dindices[j + 1]++;
@@ -226,21 +228,64 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
+    public int swapOnPassivate(Propagator propagator, int idxInProp) {
+        int pp = propagator.getVIndice(idxInProp);
+        assert pp != -1;
+        int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
+        move(dindices[i + 1] - 1, pp);
+        for (int j = i + 1; j < dsize; j++) {
+            move(dindices[j + 1] - 1, dindices[j] - 1);
+            dindices[j]--;
+        }
+        propagators[dindices[dsize] - 1] = propagator;
+        pindices[dindices[dsize] - 1] = idxInProp;
+        return dindices[dsize] - 1;
+    }
+
+    @Override
+    public int swapOnActivate(Propagator propagator, int idxInProp) {
+        int pp = propagator.getVIndice(idxInProp);
+        if(pp > -1) {
+            assert propagators[pp] == propagator;
+            assert dindices[dsize - 1] <= pp && pp <= dindices[dsize];
+            int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
+            move(--dindices[dsize], pp);
+            for (int j = dsize - 1; j >= i; j--) {
+                move(dindices[j], dindices[j + 1]);
+                dindices[j + 1]++;
+            }
+            propagators[dindices[i]] = propagator;
+            pindices[dindices[i]] = idxInProp;
+            return dindices[i];
+        }else{
+            assert propagator.getConstraint().getStatus() == Constraint.Status.FREE;
+            return -1;
+        }
+    }
+
+    @Override
     public final void unlink(Propagator propagator, int idxInProp) {
         int i = propagator.getVIndice(idxInProp); // todo deal with -1
-        assert propagators[i] == propagator:"Try to unlink :\n"+propagator+"\nfrom "+this.getName()+" but found:\n"+propagators[i];
-        // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-        cancel(i, scheduler.select(propagator.getPropagationConditions(pindices[i])));
+        if (i > -1) {
+            assert propagators[i] == propagator : "Try to unlink :\n" + propagator + "\nfrom " + this.getName() + " but found:\n" + propagators[i];
+            // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
+            int mask = 0;
+            if(i < dindices[dsize-1]){ // the position above this limit indicates a propagator that was swapped to passivate
+                mask = propagator.getPropagationConditions(pindices[i]);
+            }
+            cancel(i, scheduler.select(mask));
+            propagator.setVIndices(idxInProp, -1);
+        }
     }
 
     void cancel(int pp, int i) {
         // start moving the other ones
         move(dindices[i + 1] - 1, pp);
-        for (int j = i + 1; j < 5; j++) {
+        for (int j = i + 1; j < dsize; j++) {
             move(dindices[j + 1] - 1, dindices[j] - 1);
             dindices[j]--;
         }
-        dindices[5]--;
+        dindices[dsize]--;
     }
 
     @Override
@@ -255,7 +300,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public final int getNbProps() {
-        return dindices[5];
+        return dindices[dsize];
     }
 
     @Override
@@ -390,21 +435,21 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public IntVar asIntVar() {
-        return (IntVar)this;
+        return (IntVar) this;
     }
 
     @Override
     public BoolVar asBoolVar() {
-        return (BoolVar)this;
+        return (BoolVar) this;
     }
 
     @Override
     public RealVar asRealVar() {
-        return (RealVar)this;
+        return (RealVar) this;
     }
 
     @Override
     public SetVar asSetVar() {
-        return (SetVar)this;
+        return (SetVar) this;
     }
 }
