@@ -295,23 +295,25 @@ public class SevenQueuesPropagatorEngine implements IPropagationEngine {
     private void schedule(Propagator prop, int pindice, int mask) {
         int aid = p2i.get(prop.getId());
         if (prop.reactToFineEvent()) {
-            if (eventmasks[aid][pindice] == 0) {
-                if (DEBUG) {
-                    IPropagationEngine.Trace.printFineSchedule(prop);
-                }
-                eventsets[aid].addLast(pindice);
-            }
-            eventmasks[aid][pindice] |= mask;
+            scheduleEvt(aid, pindice, mask);
         }
         if (scheduled[aid] == 0) {
-            int prio = prop.getPriority().priority;
-            pro_queue[prio].addLast(prop);
-            scheduled[aid] = (short) (prio + 1);
-            notEmpty = notEmpty | (1 << prio);
-            if (DEBUG) {
-                IPropagationEngine.Trace.printCoarseSchedule(prop);
-            }
+            scheduleProp(prop, aid);
         }
+    }
+
+    private void scheduleEvt(int aid, int pindice, int mask) {
+        if (eventmasks[aid][pindice] == 0) {
+            eventsets[aid].addLast(pindice);
+        }
+        eventmasks[aid][pindice] |= mask;
+    }
+
+    private void scheduleProp(Propagator prop, int aid) {
+        int prio = prop.getPriority().priority;
+        pro_queue[prio].addLast(prop);
+        scheduled[aid] = (short) (prio + 1);
+        notEmpty = notEmpty | (1 << prio);
     }
 
 

@@ -392,25 +392,29 @@ public class TwoBucketPropagationEngine implements IPropagationEngine {
     private void schedule(Propagator prop, int pindice, int mask) {
         int aid = p2i.get(prop.getId());
         if (prop.reactToFineEvent()) {
-            if (eventmasks[aid][pindice] == 0) {
-                if (DEBUG) {
-                    IPropagationEngine.Trace.printFineSchedule(prop);
-                }
-                event_f[aid].addLast(pindice);
-            }
-            eventmasks[aid][pindice] |= mask;
+            scheduleFine(aid, pindice, mask);
         }
         if (!schedule_f[aid]) {
-            PropagatorPriority prio = prop.getPriority();
-            int q = match_f[prio.priority - 1];
-            pro_queue_f[q].addLast(prop);
-            schedule_f[aid] = true;
-            notEmpty = notEmpty | (1 << q);
-            if (DEBUG) {
-                IPropagationEngine.Trace.printCoarseSchedule(prop);
-            }
+            scheduleProp(prop, aid);
         }
     }
+
+    private void scheduleFine(int aid, int pindice, int mask) {
+        if (eventmasks[aid][pindice] == 0) {
+            event_f[aid].addLast(pindice);
+        }
+        eventmasks[aid][pindice] |= mask;
+    }
+
+    private void scheduleProp(Propagator prop, int aid) {
+        PropagatorPriority prio = prop.getPriority();
+        int q = match_f[prio.priority - 1];
+        pro_queue_f[q].addLast(prop);
+        schedule_f[aid] = true;
+        notEmpty = notEmpty | (1 << q);
+    }
+
+
 
     @Override
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
