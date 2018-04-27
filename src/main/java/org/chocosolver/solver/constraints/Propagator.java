@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.constraints;
 
@@ -182,7 +182,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         Arrays.fill(vindices, -1);
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
-        operations = new IOperation[3];
+        operations = new IOperation[3 + (swapOnPassivate ? vars.length : 0)];
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
         operations[2] = () -> state = ACTIVE;
@@ -249,8 +249,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public final void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
-            if(!vars[v].isAConstant()) {
+            if (!vars[v].isAConstant()) {
                 vindices[v] = vars[v].link(this, v);
+                if(swapOnPassivate) {
+                    operations[3 + v] = null;
+                }
             }
         }
     }
@@ -260,9 +263,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public final void unlinkVariables() {
         for (int v = 0; v < vars.length; v++) {
-            if(!vars[v].isAConstant()) {
+            if (!vars[v].isAConstant()) {
                 vars[v].unlink(this, v);
                 vindices[v] = -1;
+                if(swapOnPassivate) {
+                    operations[3 + v] = null;
+                }
             }
         }
     }
@@ -431,15 +437,21 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
             model.getSolver().getEngine().desactivatePropagator(this);
-            if(swapOnPassivate) {
+            if (swapOnPassivate) {
                 for (int i = 0; i < vars.length; i++) {
                     if (!vars[i].isInstantiated()) {
                         vindices[i] = vars[i].swapOnPassivate(this, i);
                         assert vars[i].getPropagator(vindices[i]) == this;
                         int _i = i;
                         model.getEnvironment().save(
-                                () -> vindices[_i] = vars[_i].swapOnActivate(this, _i)
-                        );
+                                operations[3 + i] = () -> {
+                                    // the operation was saved and set to null
+                                    // IFF the propagator was unposted (call to #unlinkVariables)
+                                    if (operations[3 + _i] != null) {
+                                        vindices[_i] = vars[_i].swapOnActivate(this, _i);
+                                        operations[3 + _i] = null;
+                                    }
+                                });
                     }
                 }
             }
