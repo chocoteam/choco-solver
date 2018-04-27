@@ -182,7 +182,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         Arrays.fill(vindices, -1);
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
-        operations = new IOperation[3 + (swapOnPassivate ? vars.length : 0)];
+        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
         operations[2] = () -> state = ACTIVE;
