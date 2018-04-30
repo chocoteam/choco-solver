@@ -11,22 +11,26 @@ and a parser for [MPS](http://miplib.zib.de/) a file format for presenting and a
 It also provides utilities to export a model written with Choco to a JSON format 
 and to import a JSON format file into a `Model`.
 
+* [Download](https://github.com/chocoteam/choco-parsers/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers)
+* [Parsing a file](#par)
+* [MiniZinc](./MINIZINC.md)
+* [XCSP3](./XCSP3.md)
+* [MPS](./MPS.md)
+* [JSON](./JSON.md)
+
+
+<a name="par"></a>
 ### Parsing a file
 
 By default, the extension of a file helps choosing the accurate parser.
 Thus, any supported file (FlatZinc, XCSP3, MPS or JSON) can be parsed and solved using the following command:
 
-  ```java -jar .:/path/to/choco-parsers-4.0.4-with-dependencies.jar [options] file```
+  ```java -jar .:/path/to/choco-parsers-4.0.4-with-dependencies.jar [options] <file>```
 
 Only the file name is mandatory.
 Alternatively, if the file has no explicit extension, the option ```-pa``` followed a digit between 1 and 4 
 can be declared to specify the parser to use; 1: FlatZinc, 2: XCSP3, 3: MPS and 4: JSON.
 
-Finally, if one can to use a specific parser directly, in that case, click on the right link below.
+A Bash file named ```parse.sh``` can also be found in `./src/main/bash/` that handles basic options.
 
-
-* [Download](https://github.com/chocoteam/choco-parsers/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers)
-* [MiniZinc](./MINIZINC.md)
-* [XCSP3](./XCSP3.md)
-* [MPS](./MPS.md)
-* [JSON](./JSON.md)
+Finally, if one can to use a specific parser directly, in that case, click on the right link above.
