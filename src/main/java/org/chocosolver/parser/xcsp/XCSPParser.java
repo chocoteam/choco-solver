@@ -1146,10 +1146,13 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, int[] lengths, Types.TypeOperatorRel operator) {
         IntVar[] vars = vars(list);
-        IntVar[][] vectors = new IntVar[vars.length][1];
-        for (int i = 0; i < vars.length; i++) {
-            vectors[i] = new IntVar[]{vars[i].add(lengths[i]).intVar()};
+        IntVar[][] vectors = new IntVar[vars.length * 2 - 1][1];
+        int k = 0;
+        for (int i = 0; i < vars.length-1; i++) {
+            vectors[k++] = new IntVar[]{vars[i]};
+            vectors[k++] = new IntVar[]{vars[i].add(lengths[i]).intVar()};
         }
+        vectors[k] = new IntVar[]{vars[vars.length-1]};
         lexCtr(vectors, operator);
     }
 

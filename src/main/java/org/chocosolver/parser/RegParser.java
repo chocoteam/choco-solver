@@ -23,6 +23,7 @@ import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
+import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -44,6 +45,18 @@ public abstract class RegParser implements IParser {
      * Name of the parser
      */
     private final String parser_cmd;
+
+    @Argument(required = true, metaVar = "file", usage = "File to parse.")
+    public String instance;
+
+    @SuppressWarnings("unused")
+    @Option(name = "-pa", aliases = {"--parser"}, usage = "Parser to use (" +
+            "0: automatic -- based on file name extension (compression is allowed), " +
+            "1: FlatZinc (.fzn)," +
+            "2: XCSP3 (.xml)," +
+            "3: MPS (.mps)," +
+            "4: JSON (.json).")
+    private int pa = 0;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.")
     protected String tl = "-1";
@@ -67,7 +80,7 @@ public abstract class RegParser implements IParser {
     public int sum = 1000;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
-    protected boolean all = false;
+    public boolean all = false;
 
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;

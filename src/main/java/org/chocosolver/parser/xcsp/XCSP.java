@@ -16,7 +16,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
-import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 import org.xcsp.checker.SolutionChecker;
 
@@ -34,9 +33,6 @@ public class XCSP extends RegParser {
 
     // Contains mapping with variables and output prints
     public XCSPParser[] parsers;
-
-    @Argument(required = true, metaVar = "file", usage = "XCSP file to parse.")
-    public String instance;
 
     @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker")
     private boolean cs = false;

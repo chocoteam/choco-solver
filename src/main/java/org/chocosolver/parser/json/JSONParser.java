@@ -14,7 +14,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.kohsuke.args4j.Argument;
 
 import java.io.File;
 import java.nio.file.Paths;
@@ -27,9 +26,6 @@ import java.nio.file.Paths;
  * @since 27/09/2017.
  */
 public class JSONParser extends RegParser{
-
-    @Argument(required = true, metaVar = "file", usage = "JSON file to parse.")
-    public String instance;
 
     /**
      * Create a default JSON parser

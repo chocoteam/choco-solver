@@ -21,7 +21,6 @@ import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
-import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
 import java.io.File;
@@ -43,10 +42,6 @@ public class Flatzinc extends RegParser {
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    @Argument(required = true, metaVar = "file", usage = "Flatzinc file to parse.")
-    public String instance;
-
 
     @Option(name = "-cum", aliases = {"--cumulative"}, usage = "Cumulative decomposition (default: GLB).")
     protected String cumDecomp = "GLB";

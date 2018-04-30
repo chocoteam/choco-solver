@@ -98,7 +98,7 @@
         <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
-            <version>0.9.0</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -245,6 +245,11 @@
                             <descriptors>
                                 <descriptor>src/assembly/with-dep.xml</descriptor>
                             </descriptors>
+                            <archive>
+                                <manifest>
+                                    <mainClass>org.chocosolver.parser.Parser</mainClass>
+                                </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>

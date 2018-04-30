@@ -17,7 +17,6 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.variables.IntVar;
-import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
 
 import java.nio.file.Paths;
@@ -30,9 +29,6 @@ public class MPS extends RegParser {
 
     // Contains mapping with variables and output prints
     public MPSParser[] parsers;
-
-    @Argument(required = true, metaVar = "file", usage = "MPS file to parse.")
-    public String instance;
 
     @Option(name = "-max", usage = "define to maximize (default: to minimize).")
     private boolean maximize = false;
