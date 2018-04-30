@@ -10,7 +10,7 @@ JAR_NAME=choco-parsers.jar
 CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
 
-Usage: xcsp3_choco.sh [<options>] [<file>]
+Usage: json_choco.sh [<options>] [<file>]
 
     Parse and solve <file> using Choco.
 
@@ -31,40 +31,26 @@ OPTIONS:
         Stands for the number of processing units allocated to the solver.
         The default is ${NB_NODES}.
 
-    -ml <n>
-        Stands for the maximum memory that the solver may use (in MiB).
-        The default is ${MEM_LIMIT}.
-
-    -tdir <s>
-        Ignored for now.
-        The directory where the solver is allowed to create temporary files.
-        The default is ${TDIR}.
-
-    -seed <n>
-        Ignored for now.
-        Stands for a random seed to be used by the solver.
-        The default is ${SEED}.
-
     -jar <j>
         Override the jar file.  (The default is $CHOCO_JAR.)
 
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
-		
+
 EXAMPLES:
-	
+
 	Basic command to solve a fzn model with choco:
-	$> ./xcsp3-exec alpha.xml
+	$> ./json-exec.sh alpha.json
 
 
 	Additionnal arguments:
-	$> xcsp3_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco.jar ./alpha.xml
+	$> json_choco.sh --jargs \"-Xmx128m\" -tl 100 ./choco-parsers.jar ./alpha.json
 
 "
 
 if test $# -eq 0
 then
-    echo "%% No XCSP file found"
+    echo "%% No JSON file found"
     exit 1
 fi
 
@@ -89,21 +75,6 @@ do
 
         -p)
             NB_NODES="$2"
-            shift
-        ;;
-
-        -ml)
-            MEM_LIMIT="$2"
-            shift
-        ;;
-
-        -tdir)
-            TDIR="$2"
-            shift
-        ;;
-
-        -seed)
-            SEED="$2"
             shift
         ;;
 
@@ -132,9 +103,9 @@ do
 done
 
 FILE="$1"
-ARGS=" -tl '${TIME_LIMIT}s' -p ${NB_NODES} -x 0"
+ARGS=" -tl '${TIME_LIMIT}s' -p $NB_NODES"
 
-CMD="java -server -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
+CMD="java -server -cp .:${CHOCO_JAR} org.chocosolver.parser.json.ChocoJSON \"${FILE}\" ${ARGS}"
 
 echo "c $CMD"
 eval ${CMD}
