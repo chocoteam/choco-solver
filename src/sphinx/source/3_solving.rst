@@ -25,7 +25,7 @@ A call to ``solver.solve()`` launches a resolution which stops on the first solu
     if(solver.solve()){
         // do something, e.g. print out variable values
     }else if(solver.hasReachedLimit()){
-        System.out.println("The could not find a solution
+        System.out.println("The solver could not find a solution
                             nor prove that none exists in the given limits");
     }else {
         System.out.println("The solver has proved the problem has no solution");
