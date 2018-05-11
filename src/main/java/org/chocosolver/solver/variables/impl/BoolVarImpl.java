@@ -8,7 +8,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
+import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -21,7 +21,11 @@ import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueBoundIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -34,22 +38,18 @@ import java.util.Iterator;
  */
 public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
-    /**
-     * The offset, that is the minimal value of the domain (stored at index 0).
-     * Thus the entry at index i corresponds to x=i+offset).
-     */
-    private final int offset;
+    private static final int kFALSE = 0;
+    private static final int kTRUE = 1;
+    private static final int kUNDEF = 2;
 
     /**
-     * indicate the value of the domain : false = 0, true = 1
+     * indicate the value of the domain : false = 0, true = 1, undef =  2
      */
     private int mValue;
-
     /**
-     * A bi partite set indicating for each value whether it is present or not.
-     * If the set contains the domain, the variable is not instanciated.
+     * To roll back mValue to its initial value
      */
-    private final BasicIndexedBipartiteSet notInstanciated;
+    private IOperation status = () -> mValue = kUNDEF;
     /**
      * To iterate over removed values
      */
@@ -88,9 +88,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     public BoolVarImpl(String name, Model model) {
         super(name, model);
-        notInstanciated = this.model.getEnvironment().getSharedBipartiteSetForBooleanVars();
-        this.offset = notInstanciated.add();
-        mValue = 0;
+        mValue = kUNDEF;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,21 +113,21 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (value == 0)
-            return instantiateTo(1, cause);
-        else if (value == 1)
-            return instantiateTo(0, cause);
+        if (value == kFALSE)
+            return instantiateTo(kTRUE, cause);
+        else if (value == kTRUE)
+            return instantiateTo(kFALSE, cause);
         return false;
     }
 
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (values.contains(0)) {
-            hasChanged = instantiateTo(1, cause);
+        if (values.contains(kFALSE)) {
+            hasChanged = instantiateTo(kTRUE, cause);
         }
-        if (values.contains(1)) {
-            hasChanged = instantiateTo(0, cause);
+        if (values.contains(kTRUE)) {
+            hasChanged = instantiateTo(kFALSE, cause);
         }
         return hasChanged;
     }
@@ -137,11 +135,11 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (!values.contains(0)) {
-            hasChanged = instantiateTo(1, cause);
+        if (!values.contains(kFALSE)) {
+            hasChanged = instantiateTo(kTRUE, cause);
         }
-        if (!values.contains(1)) {
-            hasChanged = instantiateTo(0, cause);
+        if (!values.contains(kTRUE)) {
+            hasChanged = instantiateTo(kFALSE, cause);
         }
         return hasChanged;
     }
@@ -150,12 +148,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (from <= to && from <= 1 && to >= 0) {
-            if (from == 1) {
-                hasChanged = instantiateTo(0, cause);
-            } else if (to == 0) {
-                hasChanged = instantiateTo(1, cause);
+            if (from == kTRUE) {
+                hasChanged = instantiateTo(kFALSE, cause);
+            } else if (to == kFALSE) {
+                hasChanged = instantiateTo(kTRUE, cause);
             } else {
-                model.getSolver().getExplainer().instantiateTo(this, 2, cause, 0, 1);
+                model.getSolver().getExplainer().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, MSG_UNKNOWN);
 
             }
@@ -183,19 +181,17 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
-        boolean inst = !notInstanciated.contains(offset);
-        if ((inst && mValue != value) || (value < 0 || value > 1)){
+        if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)){
             model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        } else if (!inst){
+        } else if (mValue == kUNDEF){
             IntEventType e = IntEventType.INSTANTIATE;
-            assert notInstanciated.contains(offset);
-            notInstanciated.swap(offset);
+            this.getModel().getEnvironment().save(status);
             if (reactOnRemoval) {
-                delta.add(1 - value, cause);
+                delta.add(kTRUE - value, cause);
             }
             mValue = value;
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, 0, 1);
+            model.getSolver().getExplainer().instantiateTo(this, value, cause, kFALSE, kTRUE);
             this.notifyPropagators(e, cause);
             return true;
         }
@@ -222,7 +218,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        return value > 0 && instantiateTo(value, cause);
+        return value > kFALSE && instantiateTo(value, cause);
     }
 
     /**
@@ -245,20 +241,20 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        return value < 1 && instantiateTo(value, cause);
+        return value < kTRUE && instantiateTo(value, cause);
     }
 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if (lb > 1 || ub < 0) {
-            model.getSolver().getExplainer().instantiateTo(this, 2, cause, 0, 1);
+        if (lb > kTRUE || ub < kFALSE) {
+            model.getSolver().getExplainer().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
-            if (lb == 1) {
-                hasChanged = instantiateTo(1, cause);
-            } else if (ub == 0) {
-                hasChanged = instantiateTo(0, cause);
+            if (lb == kTRUE) {
+                hasChanged = instantiateTo(kTRUE, cause);
+            } else if (ub == kFALSE) {
+                hasChanged = instantiateTo(kFALSE, cause);
             }
         }
         return hasChanged;
@@ -267,31 +263,31 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean setToTrue(ICause cause) throws ContradictionException {
         assert cause != null;
-        return instantiateTo(1, cause);
+        return instantiateTo(kTRUE, cause);
     }
 
     @Override
     public boolean setToFalse(ICause cause) throws ContradictionException {
         assert cause != null;
-        return instantiateTo(0, cause);
+        return instantiateTo(kFALSE, cause);
     }
 
     @Override
     public boolean isInstantiated() {
-        return !notInstanciated.contains(offset);
+        return mValue < kUNDEF;
     }
 
     @Override
     public boolean isInstantiatedTo(int aValue) {
-        return !notInstanciated.contains(offset) && mValue == aValue;
+        return isInstantiated() && mValue == aValue;
     }
 
     @Override
     public boolean contains(int aValue) {
-        if (!notInstanciated.contains(offset)) {
+        if (isInstantiated()) {
             return mValue == aValue;
         }
-        return aValue == 0 || aValue == 1;
+        return aValue == kFALSE || aValue == kTRUE;
     }
 
     /**
@@ -308,7 +304,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public ESat getBooleanValue() {
         if (isInstantiated()) {
-            return ESat.eval(getLB() != 0);
+            return ESat.eval(getLB() != kFALSE);
         }
         return ESat.UNDEFINED;
     }
@@ -320,10 +316,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     @Override
     public int getLB() {
-        if (!notInstanciated.contains(offset)) {
+        if (isInstantiated()) {
             return mValue;
         }
-        return 0;
+        return kFALSE;
     }
 
     /**
@@ -333,15 +329,15 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      */
     @Override
     public int getUB() {
-        if (!notInstanciated.contains(offset)) {
+        if (isInstantiated()) {
             return mValue;
         }
-        return 1;
+        return kTRUE;
     }
 
     @Override
     public int getDomainSize() {
-        return (notInstanciated.contains(offset) ? 2 : 1);
+        return (isInstantiated() ? 1 : 2);
     }
 
     @Override
@@ -351,12 +347,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public int nextValue(int v) {
-        if (!notInstanciated.contains(offset)) {
+        if (isInstantiated()) {
             final int val = mValue;
             return (val > v) ? val : Integer.MAX_VALUE;
         } else {
-            if (v < 0) return 0;
-            if (v == 0) return 1;
+            if (v < kFALSE) return kFALSE;
+            if (v == kFALSE) return kTRUE;
             return Integer.MAX_VALUE;
         }
     }
@@ -364,14 +360,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int nextValueOut(int v) {
         int lb = 0, ub = 1;
-        if(!notInstanciated.contains(offset)){ // if this is instantiated
+        if(isInstantiated()){ // if this is instantiated
             lb = ub = mValue;
         }
         if (lb - 1 <= v && v <= ub) {
             return ub + 1;
         }else{
-        return v + 1;
-    }
+            return v + 1;
+        }
     }
 
     @Override
@@ -384,14 +380,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int previousValueOut(int v) {
         int lb = 0, ub = 1;
-        if(!notInstanciated.contains(offset)){ // if this is instantiated
+        if(isInstantiated()){ // if this is instantiated
             lb = ub = mValue;
         }
         if (lb <= v && v <= ub + 1) {
             return lb - 1;
         }else{
-        return v - 1;
-    }
+            return v - 1;
+        }
     }
 
     @Override
@@ -406,7 +402,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public String toString() {
-        if (!notInstanciated.contains(offset)) {
+        if (isInstantiated()) {
             return this.name + " = " + Integer.toString(mValue);
         } else {
             return this.name + " = " + "[0,1]";
