@@ -21,6 +21,11 @@ public interface EvtScheduler<E extends IEventType> extends IntIterator {
      * @param type event received
      */
     void init(E type);
+    /**
+     * Initializes the scheduler with an event defined by 'mask'.
+     * @param mask event's mask received
+     */
+    void init(int mask);
 
     int select(int mask);
 

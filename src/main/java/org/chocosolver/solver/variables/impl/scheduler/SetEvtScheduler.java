@@ -20,12 +20,19 @@ public class SetEvtScheduler implements EvtScheduler<SetEventType> {
     private final int[] DIS = new int[]{
             0, 1, 2, 3, -1, // ADD_TO_KER
             1, 3, -1, // REM_FROM_ENV
+            0, 3, -1, // ADD_TO_KER and REM_FROM_ENV
     };
     private int i = 0;
-    private static final int[] IDX = new int[]{-1, 0, 5};
+    private static final int[] IDX = new int[]{-1, 0, 5, 8};
 
     public void init(SetEventType evt) {
         i = IDX[evt.ordinal()];
+    }
+
+    @Override
+    public void init(int mask) {
+        assert mask > 0 && mask < 4;
+        i = IDX[mask];
     }
 
     @Override

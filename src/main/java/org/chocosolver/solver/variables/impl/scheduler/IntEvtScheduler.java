@@ -25,10 +25,20 @@ public class IntEvtScheduler implements EvtScheduler<IntEventType> {
             0, 5, -1, // INSTANTIATE
     };
     private static final int[] IDX = new int[]{-1, 0, 3, 8, 11, 14};
+
+    private static final int[] MASK = new int[]{
+            -1, 0, 3, 3, 8, 8, 11, 11, 14, 14, 14, 14, 14, 14, 14, 14
+    };
+
     private int i = 0;
 
     public void init(IntEventType evt) {
         i = IDX[evt.ordinal()];
+    }
+
+    @Override
+    public void init(int mask) {
+        i = MASK[mask];
     }
 
     @Override

@@ -30,6 +30,12 @@ public class RealEvtScheduler implements EvtScheduler<RealEventType> {
     }
 
     @Override
+    public void init(int mask) {
+        assert mask > 0 && mask < 4;
+        i = IDX[mask];
+    }
+
+    @Override
     public int select(int mask) {
         switch (mask) {
             case 1: // instantiate
