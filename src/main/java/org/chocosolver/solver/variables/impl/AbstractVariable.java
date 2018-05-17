@@ -42,7 +42,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with last value removals exception.
      */
-    protected static final String MSG_REMOVE = "remove last value";
+    static final String MSG_REMOVE = "remove last value";
 
     /**
      * Message associated with domain wipe out exception.
@@ -57,22 +57,22 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Default exception message.
      */
-    protected static final String MSG_UNKNOWN = "unknown value";
+    static final String MSG_UNKNOWN = "unknown value";
 
     /**
      * Message associated with wrong upper bound exception.
      */
-    protected static final String MSG_UPP = "new lower bound is greater than upper bound";
+    static final String MSG_UPP = "new lower bound is greater than upper bound";
 
     /**
      * Message associated with wrong lower bound exception.
      */
-    protected static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    static final String MSG_LOW = "new upper bound is lesser than lower bound";
 
     /**
      * Message associated with wrong bounds exception.
      */
-    protected static final String MSG_BOUND = "new bounds are incorrect";
+    static final String MSG_BOUND = "new bounds are incorrect";
 
     /**
      * Unique ID of this variable.
@@ -97,7 +97,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Store the index of this variable in each of its propagators.
      */
-    protected int[] pindices;
+    int[] pindices;
 
     /**
      * Dependency indices, for efficient scheduling purpose.
@@ -133,6 +133,18 @@ public abstract class AbstractVariable implements Variable {
      * wrt the propagation conditions.
      */
     private EvtScheduler scheduler;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // FOR PROPAGATION PURPOSE
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * possibly aggregated event's mask
+     */
+    private int mask;
+    /**
+     * possibly aggregated event's cause
+     */
+    private ICause cause;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -452,4 +464,32 @@ public abstract class AbstractVariable implements Variable {
     public SetVar asSetVar() {
         return (SetVar) this;
     }
+
+    @Override
+    public void storeEvents(int m, ICause cause) {
+        assert cause != null:"an event's cause is not supposed to be null";
+        if(this.cause == null){
+            this.cause = cause;
+        }else{
+            this.cause = Cause.Null;
+        }
+        mask |= m;
+    }
+
+    @Override
+    public void clearEvents() {
+        this.cause = null;
+        mask = 0;
+    }
+
+    @Override
+    public int getMask() {
+        return mask;
+    }
+
+    @Override
+    public ICause getCause() {
+        return cause;
+    }
+
 }

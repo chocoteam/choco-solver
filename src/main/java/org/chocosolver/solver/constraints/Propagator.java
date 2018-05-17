@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
- * information.
+ * Licensed under the BSD 4-clause license.
+ * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints;
 
@@ -23,6 +23,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.IntCircularQueue;
+import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.Arrays;
 
@@ -149,6 +151,38 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     private int[] vindices;
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // FOR PROPAGATION PURPOSE
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * True if this is scheduled for propagation
+     */
+    private boolean scheduled;
+    /**
+     * This set of events (modified variables) to propagate next time
+     */
+    private IntCircularQueue eventsets;
+    /**
+     * This set of events' mask to propagate next time
+     */
+    private int[] eventmasks;
+    /**
+     * Position of this in the propgation engine
+     */
+    private int position;
+
+    /**
+     * A bi-int-consumer
+     */
+    private interface IntIntConsumer{
+        void accecpt(int a, int b);
+    }
+    /**
+     * Default action to do on fine event : nothing
+     */
+    private IntIntConsumer fineevt = (i, m) -> {};
+
     /**
      * Creates a new propagator to filter the domains of vars.
      * <p>
@@ -181,11 +215,23 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         this.vindices = new int[vars.length];
         Arrays.fill(vindices, -1);
         ID = model.nextId();
-        this.swapOnPassivate = model.getSettings().swapOnPassivate() | swapOnPassivate;
+        this.swapOnPassivate = model.getSettings().swapOnPassivate() & swapOnPassivate;
         operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
         operations[2] = () -> state = ACTIVE;
+        this.position = -1;
+        // for propagation purpose
+        if (reactToFineEvent()) {
+            eventsets = new IntCircularQueue(vars.length);
+            eventmasks = new int[vars.length];
+            fineevt = (i, m) -> {
+                if (eventmasks[i] == 0) {
+                    eventsets.addLast(i);
+                }
+                eventmasks[i] |= m;
+            };
+        }
     }
 
     /**
@@ -237,6 +283,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         arraycopy(itmp, 0, vindices, 0, itmp.length);
         for (int v = tmp.length; v < vars.length; v++) {
             vindices[v] = vars[v].link(this, v);
+        }
+        if(reactToFineEvt) {
+            itmp = this.eventmasks;
+            eventmasks = new int[vars.length];
+            arraycopy(itmp, 0, eventmasks, 0, itmp.length);
         }
         if (model.getSolver().getEngine() != NoPropagationEngine.SINGLETON && model.getSolver().getEngine().isInitialized()) {
             model.getSolver().getEngine().updateInvolvedVariables(this);
@@ -696,5 +747,84 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             if (vars[i] != var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
         }
         return nrules;
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    // FOR PROPAGATION PURPOSE
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @return the position of this in the propagation engine
+     */
+    public int getPosition(){
+        return position;
+    }
+
+    /**
+     * Set the position of this in the propagation engine or -1 if removed.
+     * @param p position of this in the propagation engine or -1 if removed.
+     */
+    public void setPosition(int p){
+        this.position = p;
+    }
+
+    /**
+     * Set this as unscheduled
+     */
+    public final void unschedule(){
+        scheduled = false;
+    }
+
+    private void schedule(){
+        scheduled = true;
+    }
+
+    /**
+     * Apply scheduling instruction
+     * @param queues array of queues in which this can be scheduled
+     * @return 0 if already scheduled, its priority otherwise
+     */
+    public int doSchedule(CircularQueue<Propagator>[] queues){
+        if(!scheduled) {
+            int prio = priority.priority;
+            queues[prio].addLast(this);
+            schedule();
+            return prio;
+        }
+        return 0;
+    }
+
+    public void doScheduleEvent(int pindice, int mask){
+        fineevt.accecpt(pindice, mask);
+    }
+
+    /**
+     * Apply fine event propagation of this.
+     * It iterates over pending modified variables and run propagation on each of them.
+     * @throws ContradictionException if a contradiction occurred.
+     */
+    public void doFinePropagation() throws ContradictionException {
+        while (eventsets.size() > 0) {
+            int v = eventsets.pollFirst();
+            assert isActive() : "propagator is not active:" + this;
+            // clear event
+            int mask = eventmasks[v];
+            eventmasks[v] = 0;
+            // run propagation on the specific event
+            propagate(v, mask);
+        }
+    }
+
+    /**
+     * Flush pending events
+     */
+    public void doFlush(){
+        if (reactToFineEvent()) {
+            while (eventsets.size() > 0) {
+                int v = eventsets.pollLast();
+                eventmasks[v] = 0;
+            }
+        }
+        unschedule();
     }
 }

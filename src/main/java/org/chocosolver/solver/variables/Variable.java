@@ -234,10 +234,10 @@ public interface Variable extends Identity, Comparable<Variable> {
      */
     void notifyViews(IEventType event, ICause cause) throws ContradictionException;
 
-	/**
+    /**
 	 * Get the views observing this variables
 	 * @return views observing this variables
-	 */
+     */
 	IView[] getViews();
 
     /**
@@ -330,4 +330,28 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @throws ClassCastException if type is not compatible
      */
     SetVar asSetVar();
+
+    /**
+     * Temporarily store modification events made on this.
+     * This is requiered by the propagation engine.
+     * @param mask event's mask
+     * @param cause what causes the modification (cannot be null)
+     */
+    void storeEvents(int mask, ICause cause);
+
+    /**
+     * Clear events stored temporarily by {@link #storeEvents(int, ICause)}
+     */
+    void clearEvents();
+
+    /**
+     * @return possibly aggregated mask stored through by {@link #storeEvents(int, ICause)}
+     */
+    int getMask();
+
+    /**
+     * @return cause stored through by {@link #storeEvents(int, ICause)} or {@link org.chocosolver.solver.Cause#Null}
+     * if differents causes modified this variable (this may happen when a view refers to this).
+     */
+    ICause getCause();
 }
