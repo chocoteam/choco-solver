@@ -22,12 +22,16 @@ public interface IMonitorDownBranch extends ISearchMonitor {
      * Action to perform <u>before</u> going down in the tree search
      * @param left set to <tt>true</tt> to specify that this is a left branch
      */
-    default void beforeDownBranch(boolean left){}
+    default void beforeDownBranch(boolean left){
+        // nothing to do by default
+    }
 
     /**
      * Action to perform <u>after</u> going down in the tree search
      * @param left set to <tt>true</tt> to specify that this is a left branch
      */
-    default void afterDownBranch(boolean left){}
+    default void afterDownBranch(boolean left){
+        // nothing to do by default
+    }
 
 }

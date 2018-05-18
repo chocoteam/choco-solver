@@ -17,11 +17,11 @@ import org.chocosolver.solver.Solver;
 public class LearnNothing implements Learn {
     @Override
     public void record(Solver solver) {
-
+        // nothing to do by default
     }
 
     @Override
     public void forget(Solver solver) {
-
+        // nothing to do by default
     }
 }

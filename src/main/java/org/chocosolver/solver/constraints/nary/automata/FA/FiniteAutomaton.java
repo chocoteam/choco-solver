@@ -331,6 +331,15 @@ public class FiniteAutomaton implements IAutomaton {
             return stateToIndex.get(s);
     }
 
+    public boolean isFinal(int state) {
+        try {
+            checkState(state);
+        } catch (StateNotInAutomatonException e) {
+//            LOGGER.warn("Unable to check if this state is final : " + e);
+        }
+        return states.get(state).isAccept();
+    }
+
     public boolean isNotFinal(int state) {
         try {
             checkState(state);

@@ -24,7 +24,11 @@ public interface ICondition  {
 
     boolean satisfied();
 
+    /**
+     * Set the environment of this
+     * @param environment a backtrackable environment
+     */
     default void set(IEnvironment environment) {
-
+        // nothing to do by default
     }
 }

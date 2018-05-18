@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.nary.automata.FA;
 
 import gnu.trove.set.hash.TIntHashSet;
 
+import java.util.List;
+
 /**
  * Created by IntelliJ IDEA.
  * User: julien
@@ -22,11 +24,17 @@ public interface IAutomaton extends Cloneable {
 
     IAutomaton clone() throws CloneNotSupportedException;
 
+    List<int[]> getTransitions();
+
+    List<int[]> getTransitions(int i);
+
     int getInitialState();
 
     int delta(int k, int j) throws NonDeterministicOperationException;
 
     void delta(int k, int j, TIntHashSet nexts);
+
+    boolean isFinal(int k);
 
     boolean isNotFinal(int k);
 

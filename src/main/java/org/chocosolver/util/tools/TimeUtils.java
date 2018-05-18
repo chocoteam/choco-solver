@@ -14,8 +14,6 @@ import java.util.regex.Pattern;
 
 public class TimeUtils {
 
-    private TimeUtils() {}
-
     /** To convert milliseconds in nanoseconds */
     public static final long MILLISECONDS_IN_NANOSECONDS = 1000 * 1000;
 
@@ -31,6 +29,8 @@ public class TimeUtils {
     /** Pattern for seconds */
     private static final Pattern Sp = Pattern.compile("(\\d+(\\.\\d+)?)s");
 
+    private TimeUtils() {}
+
     /**
      * Convert a string which represents a duration. It can be composed of days, hours, minutes and seconds.
      * Examples:
@@ -45,29 +45,29 @@ public class TimeUtils {
      */
     public static long convertInMilliseconds(String duration) {
         long milliseconds = 0;
-        duration = duration.replaceAll("\\s+", "");
-        Matcher matcher = Dp.matcher(duration);
+        String duration0 = duration.replaceAll("\\s+", "");
+        Matcher matcher = Dp.matcher(duration0);
         if (matcher.find() && matcher.groupCount() == 1) {
             int days = Integer.parseInt(matcher.group(1));
             milliseconds += TimeUnit.MILLISECONDS.convert(days, TimeUnit.DAYS);
         }
-        matcher = Hp.matcher(duration);
+        matcher = Hp.matcher(duration0);
         if (matcher.find() && matcher.groupCount() == 1) {
             int hours = Integer.parseInt(matcher.group(1));
             milliseconds += TimeUnit.MILLISECONDS.convert(hours, TimeUnit.HOURS);
         }
-        matcher = Mp.matcher(duration);
+        matcher = Mp.matcher(duration0);
         if (matcher.find() && matcher.groupCount() == 1) {
             int minutes = Integer.parseInt(matcher.group(1));
             milliseconds += TimeUnit.MILLISECONDS.convert(minutes, TimeUnit.MINUTES);
         }
-        matcher = Sp.matcher(duration);
+        matcher = Sp.matcher(duration0);
         if (matcher.find() && matcher.groupCount() == 2) {
             double seconds = Double.parseDouble(matcher.group(1));
             milliseconds += (int) (seconds * 1000);
         }
         if (milliseconds == 0) {
-            milliseconds = Long.parseLong(duration);
+            milliseconds = Long.parseLong(duration0);
         }
         return milliseconds;
     }

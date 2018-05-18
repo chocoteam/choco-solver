@@ -6,32 +6,26 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
+package org.chocosolver.solver.constraints.nary.nvalue.amnv.mis;
 
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 
-import java.util.BitSet;
 import java.util.Random;
 
 /**
- * Random heuristic
+ * Min Degree + Random k heuristic
  *
  * @author Jean-Guillaume Fages
  * @since 01/01/2014
  */
-public class Rk implements F {
+public class MDRk extends MD {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    /** number of random iterations **/
-    public static int defaultKValue = 30;
-
-    protected UndirectedGraph graph;
-    protected int n, k, iter;
-    protected BitSet out, inMIS;
+    protected int k, iter;
     protected Random rd;
 
     //***********************************************************************************
@@ -39,28 +33,24 @@ public class Rk implements F {
     //***********************************************************************************
 
     /**
-     * Creates an instance of the Random heuristic to compute independent sets on graph
+     * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
      *
-     * @param graph on which IS have to be computed
-     * @param k     number of iterations (i.e. number of expected IS per propagation)
+     * @param graph the grah
+     * @param k     number of random iterations
      */
-    public Rk(UndirectedGraph graph, int k) {
-        this.graph = graph;
+    public MDRk(UndirectedGraph graph, int k) {
+        super(graph);
         this.k = k;
-        n = graph.getNbMaxNodes();
-        out = new BitSet(n);
-        inMIS = new BitSet(n);
-        rd = new Random(0);
+        this.rd = new Random(0);
     }
 
     /**
-     * Creates an instance of the Random heuristic to compute independent sets on graph
-     * uses the default setting DEFAULT_K=30
+     * Creates an instance of the Min Degree + Random k heuristic to compute independent sets on graph
      *
-     * @param graph on which IS have to be computed
+     * @param graph the graph
      */
-    public Rk(UndirectedGraph graph) {
-        this(graph, defaultKValue);
+    public MDRk(UndirectedGraph graph) {
+        this(graph, Rk.defaultKValue);
     }
 
     //***********************************************************************************
@@ -75,6 +65,15 @@ public class Rk implements F {
     @Override
     public void computeMIS() {
         iter++;
+        if (iter == 1) {
+            super.computeMIS();
+        } else {
+            computeMISRk();
+        }
+    }
+
+    protected void computeMISRk() {
+        iter++;
         out.clear();
         inMIS.clear();
         while (out.cardinality() < n) {
@@ -87,19 +86,10 @@ public class Rk implements F {
             inMIS.set(idx);
             out.set(idx);
             ISetIterator nei = graph.getNeighOf(idx).iterator();
-            while (nei.hasNext()) {
+            while (nei.hasNext()){
                 out.set(nei.nextInt());
             }
         }
-    }
-
-    //***********************************************************************************
-    // ACCESSORS
-    //***********************************************************************************
-
-    @Override
-    public BitSet getMIS() {
-        return inMIS;
     }
 
     @Override

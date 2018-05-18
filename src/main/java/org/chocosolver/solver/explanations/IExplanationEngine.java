@@ -82,6 +82,7 @@ public interface IExplanationEngine {
      * @param explanation the explanation of the refutation
      */
     default void storeDecisionExplanation(Decision decision, Explanation explanation) {
+        // nothing to do by default
     }
 
     /**
@@ -92,6 +93,7 @@ public interface IExplanationEngine {
      * @param to       the new index
      */
     default void moveDecisionRefutation(Decision decision, int to) {
+        // nothing to do by default
     }
 
 
@@ -101,6 +103,7 @@ public interface IExplanationEngine {
      * @param decision the decision which is going to be forgotten
      */
     default void freeDecisionExplanation(Decision decision) {
+        // nothing to do by default
     }
 
     /**
@@ -113,6 +116,7 @@ public interface IExplanationEngine {
      * @param cause a cause
      */
     default void removeValue(IntVar var, int val, ICause cause) {
+        // nothing to do by default
     }
 
     /**
@@ -128,6 +132,7 @@ public interface IExplanationEngine {
      * @value old previous LB
      */
     default void updateLowerBound(IntVar var, int value, int old, ICause cause) {
+        // nothing to do by default
     }
 
     /**
@@ -143,6 +148,7 @@ public interface IExplanationEngine {
      * @value old previous LB
      */
     default void updateUpperBound(IntVar var, int value, int old, ICause cause) {
+        // nothing to do by default
     }
 
     /**
@@ -157,6 +163,7 @@ public interface IExplanationEngine {
      * @param oldUB previous ub
      */
     default void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
+        // nothing to do by default
     }
 
     /**
@@ -166,11 +173,13 @@ public interface IExplanationEngine {
      * @param propagator the propagator to awake.
      */
     default void activePropagator(BoolVar var, Propagator propagator) {
+        // nothing to do by default
     }
 
     /**
      * Undo the last operation done
      */
     default void undo(){
+        // nothing to do by default
     }
 }

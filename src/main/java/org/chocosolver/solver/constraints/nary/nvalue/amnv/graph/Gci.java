@@ -6,10 +6,10 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
+package org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
 
-import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.AutoDiffDetection;
-import org.chocosolver.solver.constraints.nary.nValue.amnv.differences.D;
+import org.chocosolver.solver.constraints.nary.nvalue.amnv.differences.AutoDiffDetection;
+import org.chocosolver.solver.constraints.nary.nvalue.amnv.differences.D;
 import org.chocosolver.solver.variables.IntVar;
 
 /**

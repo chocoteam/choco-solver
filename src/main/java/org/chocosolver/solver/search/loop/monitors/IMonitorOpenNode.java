@@ -17,8 +17,18 @@ package org.chocosolver.solver.search.loop.monitors;
  */
 public interface IMonitorOpenNode extends ISearchMonitor {
 
-    default void beforeOpenNode(){}
+    /**
+     * Actions to execute before opening a node
+     */
+    default void beforeOpenNode(){
+        // nothing to do by default
+    }
 
-    default void afterOpenNode(){}
+    /**
+     * Actions to execute after opening a node
+     */
+    default void afterOpenNode(){
+        // nothing to do by default
+    }
 
 }

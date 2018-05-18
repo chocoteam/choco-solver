@@ -993,7 +993,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public Solver _me() {
+    public Solver ref() {
         return this;
     }
 

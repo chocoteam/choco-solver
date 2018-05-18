@@ -17,16 +17,11 @@ import org.chocosolver.util.procedure.IntProcedure;
  */
 public interface ISetDeltaMonitor extends IDeltaMonitor {
 
+    /**
+     * Apply 'proc' on each value store
+     * @param proc a procedure
+     * @param evt event mask
+     * @throws ContradictionException if a contradiction occurs
+     */
 	void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException;
-
-	enum Default implements ISetDeltaMonitor {
-		NONE() {
-			@Override
-			public void freeze() {}
-			@Override
-			public void unfreeze() {}
-			@Override
-			public void forEach(IntProcedure proc, SetEventType eventType) throws ContradictionException {}
-		}
-	}
 }

@@ -20,5 +20,5 @@ public interface ISelf<V> {
     /**
      * @return the encapsulated type
      */
-    V _me();
+    V ref();
 }

@@ -70,8 +70,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * <pre>
      *     {@code
-     *     if(_me().solve()) {
-     *          return new Solution(_me()).record();
+     *     if(ref().solve()) {
+     *          return new Solution(ref()).record();
      *     }else{
      *          return null;
      *       }
@@ -86,12 +86,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
     default Solution findSolution(Criterion... stop) {
-    	_me().getModel().clearObjective();
-        _me().addStopCriterion(stop);
-        boolean found = _me().solve();
-        _me().removeStopCriterion(stop);
+    	ref().getModel().clearObjective();
+        ref().addStopCriterion(stop);
+        boolean found = ref().solve();
+        ref().removeStopCriterion(stop);
         if (found) {
-            return new Solution(_me().getModel()).record();
+            return new Solution(ref().getModel()).record();
         } else {
             return null;
         }
@@ -135,13 +135,13 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the found solutions.
      */
     default List<Solution> findAllSolutions(Criterion... stop) {
-		_me().getModel().clearObjective();
-        _me().addStopCriterion(stop);
+		ref().getModel().clearObjective();
+        ref().addStopCriterion(stop);
         List<Solution> solutions = new ArrayList<>();
-        while (_me().solve()) {
-            solutions.add(new Solution(_me().getModel()).record());
+        while (ref().solve()) {
+            solutions.add(new Solution(ref().getModel()).record());
         }
-        _me().removeStopCriterion(stop);
+        ref().removeStopCriterion(stop);
         return solutions;
     }
 
@@ -178,16 +178,16 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the found solutions.
      */
     default Stream<Solution> streamSolutions(Criterion... stop) {
-        _me().addStopCriterion(stop);
+        ref().addStopCriterion(stop);
         Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
-                if (_me().solve()) {
-                    action.accept(new Solution(_me().getModel()).record());
+                if (ref().solve()) {
+                    action.accept(new Solution(ref().getModel()).record());
                     return true;
                 }
-                _me().removeStopCriterion(stop);
+                ref().removeStopCriterion(stop);
                 return false;
             }
 
@@ -255,14 +255,14 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * </ul>
      */
     default Solution findOptimalSolution(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().getModel().setObjective(maximize, objective);
-        _me().addStopCriterion(stop);
-        Solution s = new Solution(_me().getModel());
-        while (_me().solve()) {
+        ref().getModel().setObjective(maximize, objective);
+        ref().addStopCriterion(stop);
+        Solution s = new Solution(ref().getModel());
+        while (ref().solve()) {
             s.record();
         }
-        _me().removeStopCriterion(stop);
-        return _me().isFeasible() == ESat.TRUE ? s : null;
+        ref().removeStopCriterion(stop);
+        return ref().isFeasible() == ESat.TRUE ? s : null;
     }
 
     /**
@@ -295,8 +295,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * This method runs the following instructions:
      * <pre>
      *     {@code
-     *     _me().findOptimalSolution(objective, maximize, stop);
-     *     if (!_me().isStopCriterionMet()  &&
+     *     ref().findOptimalSolution(objective, maximize, stop);
+     *     if (!ref().isStopCriterionMet()  &&
      *          model.getSolver().getMeasures().getSolutionCount() > 0) {
      *         int opt = _model.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
      *         model.getSolver().reset();
@@ -318,20 +318,20 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().addStopCriterion(stop);
-		boolean defaultS = _me().getSearch()==null;// best bound (in default) is only for optim
-        _me().findOptimalSolution(objective, maximize);
-        if (!_me().isStopCriterionMet()
-                && _me().getSolutionCount() > 0) {
-            _me().removeStopCriterion(stop);
-            int opt = _me().getObjectiveManager().getBestSolutionValue().intValue();
-            _me().reset();
-            _me().getModel().clearObjective();
-            _me().getModel().arithm(objective, "=", opt).post();
-			if(defaultS)_me().setSearch(Search.defaultSearch(_me().getModel()));// best bound (in default) is only for optim
+        ref().addStopCriterion(stop);
+		boolean defaultS = ref().getSearch()==null;// best bound (in default) is only for optim
+        ref().findOptimalSolution(objective, maximize);
+        if (!ref().isStopCriterionMet()
+                && ref().getSolutionCount() > 0) {
+            ref().removeStopCriterion(stop);
+            int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
+            ref().reset();
+            ref().getModel().clearObjective();
+            ref().getModel().arithm(objective, "=", opt).post();
+			if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
             return findAllSolutions(stop);
         } else {
-            _me().removeStopCriterion(stop);
+            ref().removeStopCriterion(stop);
             return Collections.emptyList();
         }
     }
@@ -361,7 +361,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * <pre>
      *     {@code
-     *     _me().findOptimalSolution(objective, maximize);
+     *     ref().findOptimalSolution(objective, maximize);
      *     if (model.getSolver().getMeasures().getSolutionCount() > 0) {
      *         int opt = _model.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
      *         model.getSolver().reset();
@@ -383,20 +383,20 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the solutions found.
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
-        _me().addStopCriterion(stop);
-        boolean defaultS = _me().getSearch()==null;// best bound (in default) is only for optim
-        _me().findOptimalSolution(objective, maximize);
-        if (!_me().isStopCriterionMet()
-                && _me().getSolutionCount() > 0) {
-            _me().removeStopCriterion(stop);
-            int opt = _me().getObjectiveManager().getBestSolutionValue().intValue();
-            _me().reset();
-            _me().getModel().clearObjective();
-            _me().getModel().arithm(objective, "=", opt).post();
-            if(defaultS)_me().setSearch(Search.defaultSearch(_me().getModel()));// best bound (in default) is only for optim
+        ref().addStopCriterion(stop);
+        boolean defaultS = ref().getSearch()==null;// best bound (in default) is only for optim
+        ref().findOptimalSolution(objective, maximize);
+        if (!ref().isStopCriterionMet()
+                && ref().getSolutionCount() > 0) {
+            ref().removeStopCriterion(stop);
+            int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
+            ref().reset();
+            ref().getModel().clearObjective();
+            ref().getModel().arithm(objective, "=", opt).post();
+            if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
             return streamSolutions(stop);
         } else {
-            _me().removeStopCriterion(stop);
+            ref().removeStopCriterion(stop);
             return Stream.empty();
         }
     }
@@ -421,7 +421,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <pre>
      * {@code
      * ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
-     * 	while (_me().solve()) {
+     * 	while (ref().solve()) {
      * 		pareto.onSolution();
      * 	}
      * 	return pareto.getParetoFront();
@@ -437,12 +437,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return a list that contained the solutions found.
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
-        _me().addStopCriterion(stop);
+        ref().addStopCriterion(stop);
         ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
-        while (_me().solve()) {
+        while (ref().solve()) {
             pareto.onSolution();
         }
-        _me().removeStopCriterion(stop);
+        ref().removeStopCriterion(stop);
         return pareto.getParetoFront();
     }
 
@@ -473,19 +473,19 @@ public interface IResolutionHelper extends ISelf<Solver> {
         if (objectives == null || objectives.length == 0) {
             return findSolution(stop);
         }
-        _me().addStopCriterion(stop);
+        ref().addStopCriterion(stop);
         Solution sol = null;
         Constraint clint = null;
         PropLexInt plint = null;
         // 1. copy objective variables and transform it if necessary
         IntVar[] mobj = new IntVar[objectives.length];
         for (int i = 0; i < objectives.length; i++) {
-            mobj[i] = maximize ? _me().getModel().intMinusView(objectives[i]) : objectives[i];
+            mobj[i] = maximize ? ref().getModel().intMinusView(objectives[i]) : objectives[i];
         }
         // 2. try to find a first solution
-        while (_me().solve()) {
+        while (ref().solve()) {
             if (sol == null) {
-                sol = new Solution(_me().getModel());
+                sol = new Solution(ref().getModel());
             }
             sol.record();
             // 3. extract values of each objective
@@ -503,9 +503,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
             }
         }
         if (clint != null) {
-            _me().getModel().unpost(clint);
+            ref().getModel().unpost(clint);
         }
-        _me().removeStopCriterion(stop);
+        ref().removeStopCriterion(stop);
         return sol;
     }
 
@@ -525,11 +525,11 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @param stop optional criterions to stop the search before finding all/best solution
      */
     default void eachSolutionWithMeasure(BiConsumer<Solution, IMeasures> cons, Criterion... stop) {
-        _me().addStopCriterion(stop);
-        Solution s = new Solution(_me().getModel());
-        while (_me().solve()) {
-            cons.accept(s.record(), _me().getMeasures());
+        ref().addStopCriterion(stop);
+        Solution s = new Solution(ref().getModel());
+        while (ref().solve()) {
+            cons.accept(s.record(), ref().getMeasures());
         }
-        _me().removeStopCriterion(stop);
+        ref().removeStopCriterion(stop);
     }
 }

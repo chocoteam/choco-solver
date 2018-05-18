@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.nValue;
+package org.chocosolver.solver.constraints.nary.nvalue;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;

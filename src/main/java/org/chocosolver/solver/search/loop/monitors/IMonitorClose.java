@@ -16,8 +16,17 @@ package org.chocosolver.solver.search.loop.monitors;
  * @since 13/12/12
  */
 public interface IMonitorClose extends ISearchMonitor {
+    /**
+     * Actions to execute before closing the search
+     */
+    default void beforeClose(){
+        // nothing to do by default
+    }
 
-    default void beforeClose(){}
-
-    default void afterClose(){}
+    /**
+     * Actions to execute after closing the search
+     */
+    default void afterClose(){
+        // nothing to do by default
+    }
 }

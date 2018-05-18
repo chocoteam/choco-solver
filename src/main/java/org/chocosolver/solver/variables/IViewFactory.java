@@ -42,13 +42,13 @@ public interface IViewFactory extends ISelf<Model> {
         } else {
             BoolVar not;
             if(bool.isInstantiated()) {
-                not = bool.getValue() == 1 ? _me().boolVar(false) : _me().boolVar(true);
+                not = bool.getValue() == 1 ? ref().boolVar(false) : ref().boolVar(true);
             }else {
-                if (_me().getSettings().enableViews()) {
+                if (ref().getSettings().enableViews()) {
                     not = new BoolNotView(bool);
                 } else {
-                    not = _me().boolVar("not(" + bool.getName() + ")");
-                    _me().arithm(not, "!=", bool).post();
+                    not = ref().boolVar("not(" + bool.getName() + ")");
+                    ref().arithm(not, "!=", bool).post();
                 }
                 not.setNot(true);
             }
@@ -74,20 +74,20 @@ public interface IViewFactory extends ISelf<Model> {
         }
         String name = "(" + var.getName() + (cste >= 0 ? "+":"-") + Math.abs(cste) + ")";
         if(var.isInstantiated()) {
-            return _me().intVar(name, var.getValue() + cste);
+            return ref().intVar(name, var.getValue() + cste);
         }
-        if (_me().getSettings().enableViews()) {
+        if (ref().getSettings().enableViews()) {
             return new OffsetView(var, cste);
         } else {
             int lb = var.getLB() + cste;
             int ub = var.getUB() + cste;
             IntVar ov;
             if (var.hasEnumeratedDomain()) {
-                ov = _me().intVar(name, lb, ub, false);
+                ov = ref().intVar(name, lb, ub, false);
             } else {
-                ov = _me().intVar(name, lb, ub, true);
+                ov = ref().intVar(name, lb, ub, true);
             }
-            _me().arithm(ov, "-", var, "=", cste).post();
+            ref().arithm(ov, "-", var, "=", cste).post();
             return ov;
         }
     }
@@ -101,9 +101,9 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default IntVar intMinusView(IntVar var) {
         if(var.isInstantiated()) {
-            return _me().intVar(-var.getValue());
+            return ref().intVar(-var.getValue());
         }
-        if (_me().getSettings().enableViews()) {
+        if (ref().getSettings().enableViews()) {
             if(var instanceof MinusView){
                 return ((MinusView)var).getVariable();
             }else {
@@ -115,11 +115,11 @@ public interface IViewFactory extends ISelf<Model> {
             String name = "-(" + var.getName() + ")";
             IntVar ov;
             if (var.hasEnumeratedDomain()) {
-                ov = _me().intVar(name, lb, ub, false);
+                ov = ref().intVar(name, lb, ub, false);
             } else {
-                ov = _me().intVar(name, lb, ub, true);
+                ov = ref().intVar(name, lb, ub, true);
             }
-            _me().arithm(ov, "+", var, "=", 0).post();
+            ref().arithm(ov, "+", var, "=", 0).post();
             return ov;
         }
     }
@@ -144,14 +144,14 @@ public interface IViewFactory extends ISelf<Model> {
         }
         IntVar v2;
         if (cste == 0) {
-            v2 = _me().intVar(0);
+            v2 = ref().intVar(0);
         } else if (cste == 1) {
             v2 = var;
         } else {
             if(var.isInstantiated()) {
-                return _me().intVar(var.getValue() * cste);
+                return ref().intVar(var.getValue() * cste);
             }
-            if (_me().getSettings().enableViews()) {
+            if (ref().getSettings().enableViews()) {
                 if(cste>0) {
                     v2 = new ScaleView(var, cste);
                 }else{
@@ -169,11 +169,11 @@ public interface IViewFactory extends ISelf<Model> {
                 String name = "(" + var.getName() + "*" + cste + ")";
                 IntVar ov;
                 if (var.hasEnumeratedDomain()) {
-                    ov = _me().intVar(name, lb, ub, false);
+                    ov = ref().intVar(name, lb, ub, false);
                 } else {
-                    ov = _me().intVar(name, lb, ub, true);
+                    ov = ref().intVar(name, lb, ub, true);
                 }
-                _me().times(var, cste, ov).post();
+                ref().times(var, cste, ov).post();
                 return ov;
             }
         }
@@ -193,7 +193,7 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default IntVar intAbsView(IntVar var) {
         if (var.isInstantiated()) {
-            return _me().intVar(Math.abs(var.getValue()));
+            return ref().intVar(Math.abs(var.getValue()));
         } else if (var.getLB() >= 0) {
             return var;
         } else if (var.getUB() <= 0) {
@@ -203,11 +203,11 @@ public interface IViewFactory extends ISelf<Model> {
             String name = "|" + var.getName() + "|";
             IntVar abs;
             if (var.hasEnumeratedDomain()) {
-                abs = _me().intVar(name, 0, ub, false);
+                abs = ref().intVar(name, 0, ub, false);
             } else {
-                abs = _me().intVar(name, 0, ub, true);
+                abs = ref().intVar(name, 0, ub, true);
             }
-            _me().absolute(abs, var).post();
+            ref().absolute(abs, var).post();
             return abs;
         }
     }
@@ -223,7 +223,7 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default IntVar intAffineView(int a, IntVar x, int b) {
         if (x.isInstantiated()) {
-            return _me().intVar(a * x.getValue() + b);
+            return ref().intVar(a * x.getValue() + b);
         } else {
             return intOffsetView(intScaleView(x, a), b);
         }
@@ -241,13 +241,13 @@ public interface IViewFactory extends ISelf<Model> {
      * @return a RealVar of domain equal to the domain of <i>var</i>
      */
     default RealVar realIntView(IntVar var, double precision) {
-        if (_me().getSettings().enableViews()) {
+        if (ref().getSettings().enableViews()) {
             return new RealView(var, precision);
         } else {
             double lb = var.getLB();
             double ub = var.getUB();
-            RealVar rv = _me().realVar("(real)" + var.getName(), lb, ub, precision);
-            _me().realIbexGenericConstraint("{0} = {1}", rv, var).post();
+            RealVar rv = ref().realVar("(real)" + var.getName(), lb, ub, precision);
+            ref().realIbexGenericConstraint("{0} = {1}", rv, var).post();
             return rv;
         }
     }
@@ -261,7 +261,7 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default RealVar[] realIntViewArray(IntVar[] ints, double precision) {
         RealVar[] reals = new RealVar[ints.length];
-        if (_me().getSettings().enableViews()) {
+        if (ref().getSettings().enableViews()) {
             for (int i = 0; i < ints.length; i++) {
                 reals[i] = realIntView(ints[i], precision);
             }
@@ -269,8 +269,8 @@ public interface IViewFactory extends ISelf<Model> {
             for (int i = 0; i < ints.length; i++) {
                 double lb = ints[i].getLB();
                 double ub = ints[i].getUB();
-                reals[i] = _me().realVar("(real)" + ints[i].getName(), lb, ub, precision);
-                _me().realIbexGenericConstraint("{0} = {1}", reals[i], ints[i]).post();
+                reals[i] = ref().realVar("(real)" + ints[i].getName(), lb, ub, precision);
+                ref().realIbexGenericConstraint("{0} = {1}", reals[i], ints[i]).post();
             }
         }
         return reals;

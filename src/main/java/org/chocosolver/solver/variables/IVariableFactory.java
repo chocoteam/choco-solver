@@ -55,12 +55,12 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default BoolVar boolVar(String name, boolean value) {
         int intVal = value?1:0;
-        if (name.equals(CSTE_NAME + intVal) && _me().getCachedConstants().containsKey(intVal)) {
-            return (BoolVar)_me().getCachedConstants().get(intVal);
+        if (name.equals(CSTE_NAME + intVal) && ref().getCachedConstants().containsKey(intVal)) {
+            return (BoolVar) ref().getCachedConstants().get(intVal);
         }
-        BoolVar cste = new FixedBoolVarImpl(name, intVal, _me());
+        BoolVar cste = new FixedBoolVarImpl(name, intVal, ref());
         if (name.equals(CSTE_NAME + intVal)) {
-            _me().getCachedConstants().put(intVal, cste);
+            ref().getCachedConstants().put(intVal, cste);
         }
         return cste;
     }
@@ -79,7 +79,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a BoolVar of domain {0, 1}
      */
     default BoolVar boolVar(String name) {
-        return new BoolVarImpl(name, _me());
+        return new BoolVarImpl(name, ref());
     }
 
     // ARRAY
@@ -192,12 +192,12 @@ public interface IVariableFactory extends ISelf<Model> {
         if (value == 0 || value == 1) {
             return boolVar(name,value==1);
         }
-        if (name.equals(CSTE_NAME + value) && _me().getCachedConstants().containsKey(value)) {
-            return _me().getCachedConstants().get(value);
+        if (name.equals(CSTE_NAME + value) && ref().getCachedConstants().containsKey(value)) {
+            return ref().getCachedConstants().get(value);
         }
-        IntVar cste = new FixedIntVarImpl(name, value, _me());
+        IntVar cste = new FixedIntVarImpl(name, value, ref());
         if (name.equals(CSTE_NAME + value)) {
-            _me().getCachedConstants().put(value, cste);
+            ref().getCachedConstants().put(value, cste);
         }
         return cste;
     }
@@ -217,9 +217,9 @@ public interface IVariableFactory extends ISelf<Model> {
         } else if (lb == 0 && ub == 1) {
             return boolVar(name);
         } else  if(boundedDomain) {
-            return new IntervalIntVarImpl(name, lb, ub, _me());
+            return new IntervalIntVarImpl(name, lb, ub, ref());
         } else {
-            return new BitsetIntVarImpl(name, lb, ub, _me());
+            return new BitsetIntVarImpl(name, lb, ub, ref());
         }
     }
 
@@ -232,7 +232,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(String name, int lb, int ub) {
-        boolean bounded = ub - lb + 1 >= _me().getSettings().getMaxDomSizeForEnumerated();
+        boolean bounded = ub - lb + 1 >= ref().getSettings().getMaxDomSizeForEnumerated();
         return intVar(name, lb, ub, bounded);
     }
 
@@ -253,9 +253,9 @@ public interface IVariableFactory extends ISelf<Model> {
         } else {
             int gap = values[values.length - 1] - values[0];
             if (gap > 30 && gap / values.length > 5) {
-                return new BitsetArrayIntVarImpl(name, values, _me());
+                return new BitsetArrayIntVarImpl(name, values, ref());
             } else {
-                return new BitsetIntVarImpl(name, values, _me());
+                return new BitsetIntVarImpl(name, values, ref());
             }
         }
     }
@@ -448,7 +448,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a task variable.
      */
     default Task taskVar(IntVar s, int p){
-        return new Task(s, _me().intVar(p), _me().intOffsetView(s, p));
+        return new Task(s, ref().intVar(p), ref().intOffsetView(s, p));
     }
 
     /**
@@ -464,7 +464,7 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default Task taskVar(IntVar s, IntVar p){
         int[] bounds = VariableUtils.boundsForAddition(s, p);
-        IntVar end = _me().intVar(bounds[0], bounds[1]);
+        IntVar end = ref().intVar(bounds[0], bounds[1]);
         return new Task(s, p, end);
     }
 
@@ -553,7 +553,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
      */
     default RealVar realVar(String name, double value) {
-        return new FixedRealVarImpl(name, value, _me());
+        return new FixedRealVarImpl(name, value, ref());
     }
 
     /**
@@ -587,7 +587,7 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default RealVar realVar(String name, double lb, double ub, double precision) {
         checkRealDomainRange(name, lb, ub);
-        return new RealVarImpl(name, lb, ub, precision, _me());
+        return new RealVarImpl(name, lb, ub, precision, ref());
     }
 
     // ARRAY
@@ -691,7 +691,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a SetVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default SetVar setVar(String name, int[] lb, int[] ub) {
-        return new SetVarImpl(name, lb, SetType.BITSET, ub, SetType.BITSET, _me());
+        return new SetVarImpl(name, lb, SetType.BITSET, ub, SetType.BITSET, ref());
     }
 
     /**
@@ -702,7 +702,7 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default SetVar setVar(String name, int... value) {
     	if(value==null) value = new int[]{};
-      return new SetVarImpl(name, value, _me());
+      return new SetVarImpl(name, value, ref());
     }
 
     // ARRAY
@@ -828,7 +828,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return generated String to name internally created variables
      */
     default String generateName() {
-        return "TMP_" + _me().nextNameId();
+        return "TMP_" + ref().nextNameId();
     }
 
     /**
@@ -839,7 +839,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return String
      */
     default String generateName(String prefix) {
-        return prefix + _me().nextNameId();
+        return prefix + ref().nextNameId();
     }
 
 }

@@ -22,8 +22,8 @@ public interface ILearnFactory extends ISelf<Solver> {
      * Indicate that no learning should be achieved during search (default configuration)
      */
     default void setNoLearning(){
-        _me().setLearner(new LearnNothing());
-        _me().setExplainer(NoExplanationEngine.SINGLETON);
+        ref().setLearner(new LearnNothing());
+        ref().setExplainer(NoExplanationEngine.SINGLETON);
     }
 
     /**
@@ -34,7 +34,7 @@ public interface ILearnFactory extends ISelf<Solver> {
      *                       (only relevant when one wants to interpret the explanation of a failure).
      */
     default void setCBJLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-        _me().setLearner(new LearnCBJ(_me().getModel(),nogoodsOn, userFeedbackOn));
+        ref().setLearner(new LearnCBJ(ref().getModel(),nogoodsOn, userFeedbackOn));
     }
 
     /**
@@ -45,6 +45,6 @@ public interface ILearnFactory extends ISelf<Solver> {
      *                       (only relevant when one wants to interpret the explanation of a failure).
      */
     default void setDBTLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-        _me().setLearner(new LearnDBT(_me().getModel(), nogoodsOn, userFeedbackOn));
+        ref().setLearner(new LearnDBT(ref().getModel(), nogoodsOn, userFeedbackOn));
     }
 }

@@ -21,18 +21,13 @@ package org.chocosolver.solver.variables.delta;
  */
 public interface IDeltaMonitor  {
 
+    /**
+     * Freeze the delta for iteration
+     */
     void freeze();
 
+    /**
+     * Release the delta
+     */
     void unfreeze();
-
-    enum Default implements IDeltaMonitor {
-        NONE() {
-
-            @Override
-            public void freeze() {}
-
-            @Override
-            public void unfreeze() {}
-        }
-    }
 }

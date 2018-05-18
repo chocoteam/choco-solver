@@ -14,6 +14,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
@@ -280,10 +281,10 @@ public class RegularTest {
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=6000000)
     public void testregExp6() {
         Model model = new Model();
-        IntVar[] CS = model.intVarArray("CS", 4, 0, 3, false);
+        IntVar[] CS = model.intVarArray("CS", 6, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
         model.getSolver().showSolutions();
         model.getSolver().showDecisions();
@@ -346,6 +347,22 @@ public class RegularTest {
         FiniteAutomaton auto = new FiniteAutomaton();
         auto.addTransition(0, 1, 2);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testregExp12() throws ContradictionException {
+        Model model = new Model();
+        IntVar[] CS = model.intVarArray("CS", 9, 3,6);
+        model.regular(CS, new FiniteAutomaton("([^56]*(44[56]{3}44){1,})*", 3,6)).post();
+        model.getSolver().propagate();
+        Arrays.stream(CS).forEach(i-> System.out.printf("%s, ", i));
+        System.out.printf("%n");
+        while (model.getSolver().solve()){
+            Arrays.stream(CS).forEach(i-> System.out.printf("%d", i.getValue()));
+            System.out.printf("%n");
+        }
+        assertEquals(model.getSolver().getSolutionCount(), 32);
+    }
+
 
     @DataProvider(name = "two")
     public Object[][] two(){

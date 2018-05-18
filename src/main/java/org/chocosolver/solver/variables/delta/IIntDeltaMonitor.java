@@ -20,7 +20,17 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  */
 public interface IIntDeltaMonitor extends IDeltaMonitor {
 
+    /**
+     * Apply 'proc' on each value removed. No filtering allowed
+     * @param proc a procedure
+     */
     void forEachRemVal(SafeIntProcedure proc);
+
+    /**
+     * Apply 'proc' on each value removed. Filtering allowed
+     * @param proc a procedure
+     * @throws ContradictionException if contradiction occurs
+     */
 
     void forEachRemVal(IntProcedure proc) throws ContradictionException;
 
@@ -36,16 +46,24 @@ public interface IIntDeltaMonitor extends IDeltaMonitor {
            		return 0;
            	}
             @Override
-            public void freeze() {}
+            public void freeze() {
+                // nothing to do by default
+            }
 
             @Override
-            public void unfreeze() {}
+            public void unfreeze() {
+                // nothing to do by default
+            }
 
             @Override
-            public void forEachRemVal(SafeIntProcedure proc) {}
+            public void forEachRemVal(SafeIntProcedure proc) {
+                // nothing to do by default
+            }
 
             @Override
-            public void forEachRemVal(IntProcedure proc) throws ContradictionException {}
+            public void forEachRemVal(IntProcedure proc) throws ContradictionException {
+                // nothing to do by default
+            }
         }
     }
 }

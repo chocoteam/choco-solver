@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.mis;
+package org.chocosolver.solver.constraints.nary.nvalue.amnv.mis;
 
 import java.util.BitSet;
 

@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.nValue.amnv.graph;
+package org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;

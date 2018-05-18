@@ -32,7 +32,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param vars array of decision variables
      */
     default void setNoGoodRecordingFromSolutions(IntVar... vars) {
-        _me().plugMonitor(new NogoodFromSolutions(vars));
+        ref().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
@@ -40,7 +40,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * scanning the same sub-search tree.
      */
     default void setNoGoodRecordingFromRestarts() {
-        _me().plugMonitor(new NogoodFromRestarts(_me().getModel()));
+        ref().plugMonitor(new NogoodFromRestarts(ref().getModel()));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +53,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param aStopCriterion the stop criterion which, when met, stops the search.
      */
     default void limitSearch(Criterion aStopCriterion) {
-        _me().addStopCriterion(aStopCriterion);
+        ref().addStopCriterion(aStopCriterion);
     }
 
     /**
@@ -62,7 +62,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param limit maximal number of nodes to open
      */
     default void limitNode(long limit) {
-       limitSearch(new NodeCounter(_me().getModel(), limit));
+       limitSearch(new NodeCounter(ref().getModel(), limit));
     }
 
     /**
@@ -72,7 +72,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      */
 
     default void limitFail(long limit) {
-        limitSearch(new FailCounter(_me().getModel(), limit));
+        limitSearch(new FailCounter(ref().getModel(), limit));
     }
 
     /**
@@ -82,7 +82,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param limit maximal number of backtracks
      */
     default void limitBacktrack(long limit) {
-        limitSearch(new BacktrackCounter(_me().getModel(), limit));
+        limitSearch(new BacktrackCounter(ref().getModel(), limit));
     }
 
     /**
@@ -91,7 +91,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param limit maximal number of solutions
      */
     default void limitSolution(long limit) {
-        limitSearch(new SolutionCounter(_me().getModel(), limit));
+        limitSearch(new SolutionCounter(ref().getModel(), limit));
     }
 
     /**
@@ -102,7 +102,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param limit  maximal resolution time in millisecond
      */
     default void limitTime(long limit) {
-        limitSearch(new TimeCounter(_me().getModel(), limit * TimeUtils.MILLISECONDS_IN_NANOSECONDS));
+        limitSearch(new TimeCounter(ref().getModel(), limit * TimeUtils.MILLISECONDS_IN_NANOSECONDS));
     }
 
     /**

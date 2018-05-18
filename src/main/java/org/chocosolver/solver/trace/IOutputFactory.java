@@ -64,35 +64,35 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Print the version message.
      */
     default void printVersion() {
-        getOut().println(_me().getModel().getSettings().getWelcomeMessage());
+        getOut().println(ref().getModel().getSettings().getWelcomeMessage());
     }
 
     /**
      * Print (succint) features of the solver given in argument
      */
     default void printFeatures() {
-        _me().getMeasures().setReadingTimeCount(System.nanoTime() - _me().getModel().getCreationTime());
-        _me().getOut().printf("- Model[%s] features:\n", _me().getModel().getName());
-        _me().getOut().printf("\tVariables : %d\n", _me().getModel().getNbVars());
-        _me().getOut().printf("\tConstraints : %d\n", _me().getModel().getNbCstrs());
-        _me().getOut().printf("\tBuilding time : %.3fs\n", _me().getMeasures().getReadingTimeCount());
-        _me().getOut().printf("\tUser-defined search strategy : %s\n", _me().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
-        _me().getOut().printf("\tComplementary search strategy : %s\n", _me().isSearchCompleted() ? "yes" : "no");
+        ref().getMeasures().setReadingTimeCount(System.nanoTime() - ref().getModel().getCreationTime());
+        ref().getOut().printf("- Model[%s] features:\n", ref().getModel().getName());
+        ref().getOut().printf("\tVariables : %d\n", ref().getModel().getNbVars());
+        ref().getOut().printf("\tConstraints : %d\n", ref().getModel().getNbCstrs());
+        ref().getOut().printf("\tBuilding time : %.3fs\n", ref().getMeasures().getReadingTimeCount());
+        ref().getOut().printf("\tUser-defined search strategy : %s\n", ref().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
+        ref().getOut().printf("\tComplementary search strategy : %s\n", ref().isSearchCompleted() ? "yes" : "no");
     }
 
     /**
      * Print (succint) features of the solver given in argument in a single line.
      */
     default void printShortFeatures() {
-        _me().getMeasures().setReadingTimeCount(System.nanoTime() - _me().getModel().getCreationTime());
+        ref().getMeasures().setReadingTimeCount(System.nanoTime() - ref().getModel().getCreationTime());
         StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(_me().getModelName()).append("], ");
+        st.append("Model[").append(ref().getModelName()).append("], ");
         st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
-                _me().getModel().getNbVars(),
-                _me().getModel().getNbCstrs(),
-                (System.nanoTime() - _me().getModel().getCreationTime())  / IMeasures.IN_SEC,
-                _me().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
-                _me().isSearchCompleted() ? "w/" : "w/o"));
+                ref().getModel().getNbVars(),
+                ref().getModel().getNbCstrs(),
+                (System.nanoTime() - ref().getModel().getCreationTime())  / IMeasures.IN_SEC,
+                ref().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
+                ref().isSearchCompleted() ? "w/" : "w/o"));
         getOut().println(st.toString());
     }
 
@@ -104,7 +104,7 @@ public interface IOutputFactory extends ISelf<Solver> {
     default void printStatistics() {
         printVersion();
         printFeatures();
-        getOut().println(_me().getMeasures().toString());
+        getOut().println(ref().getMeasures().toString());
     }
 
     /**
@@ -113,7 +113,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Recommended usage: to be called after the resolution step.
      */
     default void printShortStatistics() {
-        getOut().println(_me().getMeasures().toOneLineString());
+        getOut().println(ref().getMeasures().toOneLineString());
     }
 
     /**
@@ -124,7 +124,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * </pre>
      */
     default void printCSVStatistics() {
-        getOut().println(_me().getMeasures().toCSV());
+        getOut().println(ref().getMeasures().toCSV());
     }
 
     /**
@@ -134,7 +134,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Recommended usage: to be called before the resolution step.
      */
     default void showStatistics() {
-        _me().plugMonitor(new IMonitorInitialize() {
+        ref().plugMonitor(new IMonitorInitialize() {
 
             @Override
             public void beforeInitialize() {
@@ -142,10 +142,10 @@ public interface IOutputFactory extends ISelf<Solver> {
                 printFeatures();
             }
         });
-        _me().plugMonitor(new IMonitorClose() {
+        ref().plugMonitor(new IMonitorClose() {
             @Override
             public void afterClose() {
-                getOut().println(_me().getMeasures().toString());
+                getOut().println(ref().getMeasures().toString());
             }
         });
     }
@@ -156,7 +156,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Recommended usage: to be called before the resolution step.
      */
     default void showShortStatistics() {
-        _me().plugMonitor(new IMonitorClose() {
+        ref().plugMonitor(new IMonitorClose() {
             @Override
             public void beforeClose() {
                 printShortStatistics();
@@ -172,7 +172,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Recommended usage: to be called before the resolution step.
      */
     default void showShortStatisticsOnShutdown(){
-        Runtime.getRuntime().addShutdownHook(new Thread(()->_me().printShortStatistics()));
+        Runtime.getRuntime().addShutdownHook(new Thread(()-> ref().printShortStatistics()));
     }
 
 
@@ -184,7 +184,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @param message the message to print.
      */
     default void showSolutions(final IMessage message) {
-        _me().plugMonitor((IMonitorSolution) () -> getOut().println(message.print()));
+        ref().plugMonitor((IMonitorSolution) () -> getOut().println(message.print()));
     }
 
     /**
@@ -195,7 +195,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @see IOutputFactory.DefaultSolutionMessage
      */
     default void showSolutions() {
-        showSolutions(new DefaultSolutionMessage(_me()));
+        showSolutions(new DefaultSolutionMessage(ref()));
     }
 
     /**
@@ -205,11 +205,11 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @param message the message to print.
      */
     default void showDecisions(final IMessage message) {
-        _me().plugMonitor(new IMonitorDownBranch() {
+        ref().plugMonitor(new IMonitorDownBranch() {
             @Override
             public void beforeDownBranch(boolean left) {
-                getOut().printf("%s %s ", StringUtils.pad("", _me().getEnvironment().getWorldIndex(), "."),
-                        _me().getDecisionPath().lastDecisionToString());
+                getOut().printf("%s %s ", StringUtils.pad("", ref().getEnvironment().getWorldIndex(), "."),
+                        ref().getDecisionPath().lastDecisionToString());
                 getOut().printf(" // %s \n", message.print());
             }
         });
@@ -223,14 +223,14 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @see IOutputFactory.DefaultSolutionMessage
      */
     default void showDecisions() {
-        showDecisions(new DefaultDecisionMessage(_me()));
+        showDecisions(new DefaultDecisionMessage(ref()));
     }
 
     /**
      * Plug a search monitor which outputs the contradictions thrown during the search.
      */
     default void showContradiction() {
-        _me().plugMonitor((IMonitorContradiction) cex -> getOut().println(String.format("\t/!\\ %s", cex.toString())));
+        ref().plugMonitor((IMonitorContradiction) cex -> getOut().println(String.format("\t/!\\ %s", cex.toString())));
     }
 
     /**
@@ -240,7 +240,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      */
     default void showStatisticsDuringResolution(long f) {
         if (f > 0) {
-            _me().plugMonitor(new LogStatEveryXXms(_me(), f));
+            ref().plugMonitor(new LogStatEveryXXms(ref(), f));
         }
     }
 
@@ -268,7 +268,7 @@ public interface IOutputFactory extends ISelf<Solver> {
 
 
         //Create and set up the content pane.
-        JComponent newContentPane = new StatisticsPanel(_me(), refresh);
+        JComponent newContentPane = new StatisticsPanel(ref(), refresh);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
 

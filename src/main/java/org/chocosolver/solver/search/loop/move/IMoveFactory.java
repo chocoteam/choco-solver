@@ -32,7 +32,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * Depth-First Search algorithm with binary decisions
      */
     default void setDFS() {
-        _me().setMove(new MoveBinaryDFS(_me().getSearch()));
+        ref().setMove(new MoveBinaryDFS(ref().getSearch()));
     }
 
     /**
@@ -43,8 +43,8 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param discrepancy     the maximum discrepancy
      */
     default void setLDS(int discrepancy) {
-        IEnvironment env = _me().getEnvironment();
-        _me().setMove(new MoveBinaryLDS(_me().getSearch(), discrepancy, env));
+        IEnvironment env = ref().getEnvironment();
+        ref().setMove(new MoveBinaryLDS(ref().getSearch(), discrepancy, env));
     }
 
     /**
@@ -55,8 +55,8 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param discrepancy     the maximum discrepancy
      */
     default void setDDS(int discrepancy) {
-        IEnvironment env = _me().getEnvironment();
-        _me().setMove(new MoveBinaryDDS(_me().getSearch(), discrepancy, env));
+        IEnvironment env = ref().getEnvironment();
+        ref().setMove(new MoveBinaryDDS(ref().getSearch(), discrepancy, env));
     }
 
     /**
@@ -71,7 +71,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param N               backtrack limit for each DFS try, should be large enough to limit redundancy
      */
     default void setHBFS(double a, double b, long N) {
-        _me().setMove(new MoveBinaryHBFS(_me().getModel(), _me().getSearch(), a, b, N));
+        ref().setMove(new MoveBinaryHBFS(ref().getModel(), ref().getSearch(), a, b, N));
     }
 
     /**
@@ -85,7 +85,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param restartsLimit    number of allowed restarts
      */
     default void setRestarts(LongCriterion restartCriterion, ICutoffStrategy restartStrategy, int restartsLimit) {
-        _me().setMove(new MoveRestart(_me().getMove(), restartStrategy, restartCriterion, restartsLimit));
+        ref().setMove(new MoveRestart(ref().getMove(), restartStrategy, restartCriterion, restartsLimit));
     }
 
     /**
@@ -96,7 +96,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param restartLimit         restart limits (limit of number of restarts)
      */
     default void setLubyRestart(int scaleFactor, ICounter restartStrategyLimit, int restartLimit) {
-        _me().setRestarts(restartStrategyLimit, new LubyCutoffStrategy(scaleFactor), restartLimit);
+        ref().setRestarts(restartStrategyLimit, new LubyCutoffStrategy(scaleFactor), restartLimit);
     }
 
     /**
@@ -109,7 +109,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      */
     default void setGeometricalRestart(int scaleFactor, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        _me().setRestarts(restartStrategyLimit, new GeometricalCutoffStrategy(scaleFactor, geometricalFactor), restartLimit);
+        ref().setRestarts(restartStrategyLimit, new GeometricalCutoffStrategy(scaleFactor, geometricalFactor), restartLimit);
     }
 
     /**
@@ -117,9 +117,9 @@ public interface IMoveFactory extends ISelf<Solver> {
      * Every time a solution is found, a restart is done.
      */
     default void setRestartOnSolutions() {
-        _me().setMove(new MoveRestart(_me().getMove(),
+        ref().setMove(new MoveRestart(ref().getMove(),
                 new MonotonicRestartStrategy(1),
-                new SolutionCounter(_me().getModel(), 1),
+                new SolutionCounter(ref().getModel(), 1),
                 Integer.MAX_VALUE));
     }
 
@@ -136,7 +136,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
     default void setLNS(INeighbor neighbor, ICounter restartCounter) {
-        _me().setMove(new MoveLNS(_me().getMove(), neighbor, restartCounter));
+        ref().setMove(new MoveLNS(ref().getMove(), neighbor, restartCounter));
     }
 
 
