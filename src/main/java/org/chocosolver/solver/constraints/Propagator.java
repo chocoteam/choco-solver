@@ -16,7 +16,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -289,7 +288,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             eventmasks = new int[vars.length];
             arraycopy(itmp, 0, eventmasks, 0, itmp.length);
         }
-        if (model.getSolver().getEngine() != NoPropagationEngine.SINGLETON && model.getSolver().getEngine().isInitialized()) {
+        if (model.getSolver().getEngine().isInitialized()) {
             model.getSolver().getEngine().updateInvolvedVariables(this);
         }
     }

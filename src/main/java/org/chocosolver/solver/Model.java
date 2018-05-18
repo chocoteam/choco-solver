@@ -25,9 +25,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
-import org.chocosolver.solver.propagation.IPropagationEngine;
-import org.chocosolver.solver.propagation.NoPropagationEngine;
-import org.chocosolver.solver.propagation.PropagationTrigger;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -833,12 +831,9 @@ public class Model implements IModel {
      * @throws SolverException if a constraint is posted twice, posted although reified or reified twice.
      */
     private void _post(boolean permanent, Constraint... cs) throws SolverException {
-        boolean dynAdd = false;
+        PropagationEngine engine = getSolver().getEngine();
         // check if the resolution already started -> if true, dynamic addition
-        IPropagationEngine engine = getSolver().getEngine();
-        if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
-            dynAdd = true;
-        }
+        boolean dynAdd = engine.isInitialized();
         // then prepare storage of the constraints
         if (cIdx + cs.length >= cstrs.length) {
             int nsize = cstrs.length;
@@ -852,6 +847,9 @@ public class Model implements IModel {
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
             for (Propagator p : c.getPropagators()) {
+                if(p.isPassive()){
+                    throw new SolverException("Try to add a constraint with a passive propagator");
+                }
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
                 p.linkVariables();
             }
@@ -866,23 +864,21 @@ public class Model implements IModel {
     /**
      * Posts constraints <code>cs</code> temporary, that is, they will be unposted upon backtrack.
      *
+     * The unpost instruction is defined by an {@link org.chocosolver.memory.structure.IOperation}
+     * saved in the {@link IEnvironment}
+     *
      * @param cs a set of constraints to add
      * @throws ContradictionException if the addition of constraints <code>cs</code> detects inconsistency.
      * @throws SolverException        if a constraint is posted twice, posted although reified or reified twice.
      */
     public void postTemp(Constraint... cs) throws ContradictionException {
         for (Constraint c : cs) {
-            _post(false, c);
-            if (getSolver().getEngine() == NoPropagationEngine.SINGLETON || !getSolver().getEngine().isInitialized()) {
+            _post(true, c);
+            if (!getSolver().getEngine().isInitialized()) {
                 throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                         "A call to Model.post(Constraint) is more appropriate.");
             }
-            for (Propagator propagator : c.getPropagators()) {
-                if (settings.debugPropagation()) {
-                    IPropagationEngine.Trace.printFirstPropagation(propagator);
-                }
-                PropagationTrigger.execute(propagator, getSolver().getEngine());
-            }
+            environment.save(() -> unpost(c));
         }
     }
 
@@ -907,8 +903,8 @@ public class Model implements IModel {
                 }
                 cstrs[cIdx] = null;
                 // 3. check if the resolution already started -> if true, dynamic deletion
-                IPropagationEngine engine = getSolver().getEngine();
-                if (engine != NoPropagationEngine.SINGLETON && engine.isInitialized()) {
+                PropagationEngine engine = getSolver().getEngine();
+                if (engine.isInitialized()) {
                     engine.dynamicDeletion(c.getPropagators());
                 }
                 // 4. remove the propagators of the constraint from its variables

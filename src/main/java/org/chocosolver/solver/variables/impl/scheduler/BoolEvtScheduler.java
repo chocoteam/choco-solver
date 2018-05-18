@@ -21,10 +21,6 @@ public class BoolEvtScheduler implements EvtScheduler<IntEventType> {
     };
     private int i = 0;
 
-    public void init(IntEventType evt) {
-        i = 0;
-    }
-
     @Override
     public void init(int mask) {
         i = 0;

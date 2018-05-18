@@ -11,7 +11,6 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.propagation.PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -212,7 +211,6 @@ public class TestSolveur {
         model.arithm(vars[0], "=", vars[n - 1]).post();
 
         model.getSolver().setSearch(inputOrderLBSearch(vars));
-        TWOBUCKETPROPAGATIONENGINE.make(model);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 0, "nb sol");
         assertEquals(model.getSolver().getNodeCount(), 0, "nb nod");

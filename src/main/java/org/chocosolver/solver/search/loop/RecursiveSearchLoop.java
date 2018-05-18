@@ -11,7 +11,7 @@ package org.chocosolver.solver.search.loop;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -195,7 +195,7 @@ class RecursiveSearchLoop {
         IntVar[] X = model.intVarArray("X", 3, 0, 2, false);
 //        model.post(solver.allDifferent(X));
         Solver r = model.getSolver();
-        r.setEngine(new SevenQueuesPropagatorEngine(model));
+        r.setEngine(new PropagationEngine(model));
         r.getEngine().initialize();
 //        System.out.printf("%d solutions\n", setDFS(solver, ISF.lexico_LB(X)));
         System.out.printf("%d solutions\n", lds(model, inputOrderLBSearch(X), 3));

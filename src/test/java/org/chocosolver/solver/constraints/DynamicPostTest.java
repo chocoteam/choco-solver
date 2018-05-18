@@ -8,12 +8,10 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
-import org.chocosolver.solver.propagation.PropagationEngineFactory;
-import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
@@ -27,7 +25,9 @@ import java.util.ArrayDeque;
 import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.util.ESat.*;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -38,30 +38,19 @@ import static org.testng.Assert.assertEquals;
  */
 public class DynamicPostTest {
 
-    PropagationEngineFactory engine;
-
-    public DynamicPostTest(PropagationEngineFactory engine) {
-        this.engine = engine;
-    }
-
-    public DynamicPostTest() {
-        this(PropagationEngineFactory.DEFAULT);
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
+        @SuppressWarnings("UnusedDeclaration")
     @Test(groups="1s", timeOut=60000)
     public void test0() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
-        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="1s", timeOut=6000000)
     public void test1() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -87,7 +76,7 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        model.getSolver().setEngine(engine.make(model));
+        model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
@@ -113,7 +102,6 @@ public class DynamicPostTest {
         });
         model.getSolver().showDecisions();
         model.getSolver().showSolutions();
-        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -130,7 +118,6 @@ public class DynamicPostTest {
         c2.post();
         model.unpost(c2);
         model.unpost(c1);
-        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 8);
         assertEquals(model.getNbCstrs(), 0);
@@ -154,7 +141,6 @@ public class DynamicPostTest {
                 model.unpost(cs.pop());
             }
         });
-        model.getSolver().setEngine(engine.make(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 5);
         assertEquals(model.getNbCstrs(), 0);
@@ -171,9 +157,9 @@ public class DynamicPostTest {
         constraint.post();
     }
 
-    private void pareto(boolean clauses, boolean svnQ){
+    private void pareto(boolean clauses){
         // Objectives are to maximize "a" and maximize "b".
-        Model model = new Model();
+        Model model = new Model(new DefaultSettings().setSwapOnPassivate(false));
         IntVar a = model.intVar("a", 0, 2, false);
         IntVar b = model.intVar("b", 0, 2, false);
         IntVar c = model.intVar("c", 0, 2, false);
@@ -196,16 +182,12 @@ public class DynamicPostTest {
                 model.and(aBetter, bSBetter));
         // END extra variables/constraints for guided improvement algorithm
         Solver r = model.getSolver();
-        r.setEngine(
-                svnQ?
-                        new SevenQueuesPropagatorEngine(model):
-                        new TwoBucketPropagationEngine(model)
-        );
         r.setSearch(inputOrderLBSearch(a, b, c, lbA, lbB));
         int nbSolution = 0;
         while (model.getSolver().solve()) {
             int bestA;
             int bestB;
+            strictlyBetter.post();
             do {
                 bestA = a.getValue();
                 bestB = b.getValue();
@@ -213,11 +195,9 @@ public class DynamicPostTest {
                 popAll(stack, model);
                 push(model.arithm(lbA, "=", bestA), stack, model);
                 push(model.arithm(lbB, "=", bestB), stack, model);
-                push(strictlyBetter, stack, model);
             } while (model.getSolver().solve());
 
             popAll(stack, model);
-
             push(model.arithm(a, "=", bestA), stack, model);
             push(model.arithm(b, "=", bestB), stack, model);
             push(model.arithm(lbA, "=", bestA), stack, model);
@@ -225,6 +205,7 @@ public class DynamicPostTest {
 
             model.getSolver().getEngine().flush();
             model.getSolver().reset();
+            model.unpost(strictlyBetter);
 
             if (model.getSolver().solve()) {
                 do {
@@ -255,10 +236,8 @@ public class DynamicPostTest {
     @SuppressWarnings("UnusedDeclaration")
     @Test(groups="1s", timeOut=6000000)
     public void testJLpareto() {
-        pareto(false, true);
-        pareto(false, false);
-        pareto(true, true);
-        pareto(true, false);
+        pareto(false);
+        pareto(true);
     }
 
     @Test(groups="1s", timeOut=60000)

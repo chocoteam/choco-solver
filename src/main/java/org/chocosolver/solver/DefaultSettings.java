@@ -60,6 +60,7 @@ public class DefaultSettings implements Settings {
 
     private boolean warnUser = false;
 
+    @Deprecated
     private boolean debugPropagation = false;
 
     private boolean enableDecompositionOfBooleanSum = false;
@@ -219,6 +220,7 @@ public class DefaultSettings implements Settings {
     }
 
     @Override
+    @Deprecated
     public boolean debugPropagation() {
         return debugPropagation;
     }

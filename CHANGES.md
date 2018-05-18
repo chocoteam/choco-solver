@@ -20,9 +20,12 @@ the default behavior.
 - Dow/WDeg now manages variables in a bipartite set (instantiated variables are swaped)
 - Assert that a propagator that is passive is not allowed to filter anymore
 - An exception is thrown when a sum (or scalar) constraint is candidate for integer over/underflow (an alternative should be provided later)
+- `BoolVar` now handles modifications in different way (may impact performances)
+- Propagation engine has changed: no alternative to seven-queue one anymore + simplification of code (may impact performances)
 
 ### Deprecated API (to be removed in next release):
 -  `Model.set(Settings)` is deprecated. Now settings are declared in the `Model` constructor.
+- `Settings.debugPropagation()` is deprecated. There is no alternative.
 
 
 ### Closed issues and pull requests:

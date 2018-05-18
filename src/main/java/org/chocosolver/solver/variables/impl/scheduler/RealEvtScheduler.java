@@ -25,10 +25,6 @@ public class RealEvtScheduler implements EvtScheduler<RealEventType> {
     private int i = 0;
     private static final int[] IDX = new int[]{-1, 0, 5, 8, -1};
 
-    public void init(RealEventType evt) {
-        i = IDX[evt.ordinal()];
-    }
-
     @Override
     public void init(int mask) {
         assert mask > 0 && mask < 4;

@@ -18,7 +18,6 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
-import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
@@ -34,12 +33,17 @@ import java.util.Random;
 
 import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.propagation.NoPropagationEngine.SINGLETON;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.util.ESat.*;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
 
 /**
  * <br/>
@@ -204,9 +208,6 @@ public class ObjectiveTest {
         Solver r = model.getSolver();
 //        SMF.log(solver, true, true);
         //search.plugSearchMonitor(new LastSolutionRecorder(new Solution(), true, solver));
-        if (r.getEngine() == SINGLETON) {
-            r.setEngine(new SevenQueuesPropagatorEngine(model));
-        }
         r.getMeasures().setReadingTimeCount(nanoTime());
         int bestvalue = -1;
         while (model.getSolver().solve()) {

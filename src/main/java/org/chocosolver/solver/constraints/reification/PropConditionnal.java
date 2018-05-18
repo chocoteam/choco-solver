@@ -49,21 +49,14 @@ public abstract class PropConditionnal extends Propagator<Variable> {
         if (condition == ESat.TRUE) {
             setPassive();
             for (Constraint cstr : condTrue) {
-                postTemp(cstr);
+                model.postTemp(cstr);
             }
         } else if (condition == ESat.FALSE) {
             setPassive();
             for (Constraint cstr : condFalse) {
-                postTemp(cstr);
+                model.postTemp(cstr);
             }
         }
-    }
-
-    private void postTemp(final Constraint c) throws ContradictionException {
-        model.postTemp(c);
-        // the constraint has been added during the resolution.
-        // it should be removed on backtrack -> create a new undo operation
-        model.getEnvironment().save(() -> model.unpost(c));
     }
 
     @Override

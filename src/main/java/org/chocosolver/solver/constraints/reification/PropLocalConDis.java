@@ -9,12 +9,11 @@
 package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.propagation.IPropagationEngine;
-import org.chocosolver.solver.propagation.NoPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
@@ -74,38 +73,28 @@ public class PropLocalConDis extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        IPropagationEngine eng = model.getSolver().getEngine();
-        boolean change = false;
-        try {
-            do {
-                // a fix point needs to be reached
-                for (int i = 0; i < vars.length; i++) {
-                    cardinalities[i] = vars[i].getDomainSize();
-                    if (domains.get(i) != null) {
-                        domains.get(i).clear();
-                    }
+        do {
+            // a fix point needs to be reached
+            for (int i = 0; i < vars.length; i++) {
+                cardinalities[i] = vars[i].getDomainSize();
+                if (domains.get(i) != null) {
+                    domains.get(i).clear();
                 }
-                toUnion.clear();
-                model.getSolver().setEngine(NoPropagationEngine.SINGLETON);
-                change = false;
-                for (int i = idx.get(); i >= 0; i--) {
-                    if (propagate(propagators[i], i)) {
-                        int last = idx.add(-1) + 1;
-                        if (last > i) {
-                            Propagator<IntVar>[] tmp = propagators[i];
-                            propagators[i] = propagators[last];
-                            propagators[last] = tmp;
-                        }
-                    }else if(toUnion.cardinality() == 0){
-                        break;
+            }
+            toUnion.clear();
+            for (int i = idx.get(); i >= 0; i--) {
+                if (propagate(propagators[i], i)) {
+                    int last = idx.add(-1) + 1;
+                    if (last > i) {
+                        Propagator<IntVar>[] tmp = propagators[i];
+                        propagators[i] = propagators[last];
+                        propagators[last] = tmp;
                     }
+                }else if(toUnion.cardinality() == 0){
+                    break;
                 }
-                model.getSolver().setEngine(eng);
-                change = true;
-            } while (applyDeductions());
-        } finally {
-            if(!change)model.getSolver().setEngine(eng);
-        }
+            }
+        } while (applyDeductions());
     }
 
     /**
@@ -160,6 +149,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
             // and union is maintained as is
             fails = true;
         }
+        model.getSolver().getEngine().ignoreModifications();
         // restore backup world
         model.getEnvironment().worldPop();
         return fails;

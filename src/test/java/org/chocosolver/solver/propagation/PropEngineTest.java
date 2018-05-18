@@ -15,13 +15,10 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.propagation.hardcoded.SevenQueuesPropagatorEngine;
-import org.chocosolver.solver.propagation.hardcoded.TwoBucketPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.sort;
@@ -44,14 +41,6 @@ import static org.testng.Assert.fail;
  * @since 01/06/12
  */
 public class PropEngineTest {
-
-    @DataProvider(name = "env")
-    public Object[][] env(){
-        return new PropagationEngineFactory[][]{
-                {PropagationEngineFactory.PROPAGATORDRIVEN_7QD},
-                {PropagationEngineFactory.TWOBUCKETPROPAGATIONENGINE},
-        };
-    }
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {
@@ -96,7 +85,6 @@ public class PropEngineTest {
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 3);
         model.getSolver().reset();
-        model.getSolver().setEngine(NoPropagationEngine.SINGLETON);
         model.unpost(CSTR);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
@@ -126,15 +114,7 @@ public class PropEngineTest {
     @Test(groups="1s", timeOut=60000)
     public void test3() {
         Model model = makeNQueenWithBinaryConstraints(8);
-        model.getSolver().setEngine(new SevenQueuesPropagatorEngine(model));
-        while (model.getSolver().solve()) ;
-        assertEquals(model.getSolver().getSolutionCount(), 92);
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void test4() {
-        Model model = makeNQueenWithBinaryConstraints(8);
-        model.getSolver().setEngine(new TwoBucketPropagationEngine(model));
+        model.getSolver().setEngine(new PropagationEngine(model));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
@@ -142,7 +122,7 @@ public class PropEngineTest {
     @Test(groups="10s", timeOut=60000)
     public void test5(){
         Model model = ProblemMaker.makeGolombRuler(10);
-        model.getSolver().setEngine(new SevenQueuesPropagatorEngine(model));
+        model.getSolver().setEngine(new PropagationEngine(model));
         model.getSolver().setSearch(minDomLBSearch((IntVar[])model.getHook("ticks")));
         int obj = Integer.MAX_VALUE;
         while(model.getSolver().solve()){
@@ -152,19 +132,6 @@ public class PropEngineTest {
         Assert.assertEquals(obj, 55);
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void test6(){
-        Model model = ProblemMaker.makeGolombRuler(10);
-        model.getSolver().setEngine(new TwoBucketPropagationEngine(model));
-        model.getSolver().setSearch(minDomLBSearch((IntVar[])model.getHook("ticks")));
-        int obj = Integer.MAX_VALUE;
-        while(model.getSolver().solve()){
-            obj = ((IntVar)(model.getObjective())).getValue();
-        }
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
-        Assert.assertEquals(obj, 55);
-    }
-    
     @Test(groups="1s", timeOut=60000)
     public void testGregy41(){
         for(int i = 0 ; i < 20; i++) {
@@ -204,42 +171,39 @@ public class PropEngineTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "env")
-    public void testJG1(PropagationEngineFactory ef) {
+    @Test(groups="1s", timeOut=60000)
+    public void testJG1() {
         Model model = new Model();
         Solver solver = model.getSolver();
         IntVar[] variables = model.intVarArray("s", 3, 0, 2);
         Constraint arithm = model.arithm(variables[0], "!=", variables[1]);
 
         model.post(arithm);
-        solver.setEngine(ef.make(model));
         solver.findAllSolutions();
 
         model.unpost(arithm);
         solver.reset(); // error (-1)
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "env")
-    public void testJG2(PropagationEngineFactory ef){
+    @Test(groups="1s", timeOut=60000)
+    public void testJG2(){
         Model model = new Model();
         Solver solver = model.getSolver();
         IntVar[] variables=model.intVarArray("s", 3, 0, 2);
         Constraint arithm = model.arithm(variables[0], "!=", variables[1]);
 
         model.post(arithm);
-        solver.setEngine(ef.make(model));
         solver.findAllSolutions();
 
         solver.getEngine().clear();
         solver.reset(); // error (null)
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "env")
-    public void testJG3(PropagationEngineFactory ef){
+    @Test(groups="1s", timeOut=60000)
+    public void testJG3(){
         Model model = new Model();
         Solver solver = model.getSolver();
         IntVar[] variables=model.intVarArray("s", 3, 0, 2);
-        solver.setEngine(ef.make(model));
         solver.findAllSolutions();
 
         solver.getEngine().clear();

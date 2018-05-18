@@ -25,10 +25,6 @@ public class SetEvtScheduler implements EvtScheduler<SetEventType> {
     private int i = 0;
     private static final int[] IDX = new int[]{-1, 0, 5, 8};
 
-    public void init(SetEventType evt) {
-        i = IDX[evt.ordinal()];
-    }
-
     @Override
     public void init(int mask) {
         assert mask > 0 && mask < 4;

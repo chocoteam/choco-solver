@@ -17,9 +17,7 @@ import org.chocosolver.solver.explanations.NoExplanationEngine;
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
-import org.chocosolver.solver.propagation.IPropagationEngine;
-import org.chocosolver.solver.propagation.NoPropagationEngine;
-import org.chocosolver.solver.propagation.PropagationEngineFactory;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
@@ -146,7 +144,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** The current decision */
     protected DecisionPath dpath;
-
     /**
      * Index of the initial world, before initialization.
      * May be different from 0 if some external backups have been made.
@@ -155,7 +152,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /** Index of the world where the search starts, after initialization. */
     protected int searchWorldIndex = 0;
-
     /**
      * List of stopping criteria.
      * When at least one is satisfied, the search loop ends.
@@ -175,7 +171,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected SearchMonitorList searchMonitors;
 
     /** The propagation engine to use */
-    protected IPropagationEngine engine;
+    protected PropagationEngine engine;
     /**
      * Internal unique contradiction exception, used on propagation failures
      */
@@ -208,7 +204,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     protected Solver(Model aModel) {
         mModel = aModel;
-        engine = NoPropagationEngine.SINGLETON;
+        engine = new PropagationEngine(mModel);
         exception = new ContradictionException();
         explainer = NoExplanationEngine.SINGLETON;
         objectivemanager = ObjectiveFactory.SAT();
@@ -328,10 +324,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     .stream()
                     .filter(c -> c.getStatus() == FREE)
                     .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.toString()));
-        }
-        // note jg : new (used to be in model)
-        if (engine == NoPropagationEngine.SINGLETON) {
-            this.setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
         }
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
@@ -563,9 +555,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
      */
     public void propagate() throws ContradictionException {
-        if (engine == NoPropagationEngine.SINGLETON) {
-            setEngine(PropagationEngineFactory.DEFAULT.make(mModel));
-        }
         if (!engine.isInitialized()) {
             engine.initialize();
         }
@@ -735,7 +724,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * @return the propagation engine used in {@code this}.
      */
-    public IPropagationEngine getEngine() {
+    public PropagationEngine getEngine() {
         return engine;
     }
 
@@ -884,14 +873,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * If propagation was done "manually" (calling {@link #propagate()}, then nothing can be done.
      *
      * @param propagationEngine a propagation strategy
-     * @exception SolverException if the current propagation is not {@link NoPropagationEngine#SINGLETON}
-     * and is already initialized.
+     * @exception SolverException is already initialized.
      */
-    public void setEngine(IPropagationEngine propagationEngine) {
-        if (engine == NoPropagationEngine.SINGLETON
-                || !engine.isInitialized()
-                || getEnvironment().getWorldIndex() == rootWorldIndex
-                || propagationEngine == NoPropagationEngine.SINGLETON) {
+    public void setEngine(PropagationEngine propagationEngine) {
+        if (!engine.isInitialized()
+                || getEnvironment().getWorldIndex() == rootWorldIndex) {
+            if(engine instanceof PropagationEngine){
+                unplugMonitor(engine);
+            }
             this.engine = propagationEngine;
         }else{
             throw new SolverException("Illegal propagation engine modification.");

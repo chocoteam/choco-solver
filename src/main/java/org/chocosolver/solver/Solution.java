@@ -13,7 +13,6 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.propagation.IPropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;

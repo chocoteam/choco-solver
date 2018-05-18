@@ -207,7 +207,9 @@ public interface Settings  {
 
     /**
      * @return true if all events are output in the console
+     * @deprecated will be removed in next release
      */
+    @Deprecated
     boolean debugPropagation();
 
     /**
