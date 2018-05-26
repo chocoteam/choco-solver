@@ -176,7 +176,7 @@ public class LNSTest {
         Assert.assertEquals(bw, 1092);
     }
 
-    @Test(groups = "1s", timeOut = 6000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPN1() {
         // Instance copied from meb-inst-18-09.eprime-param
 
