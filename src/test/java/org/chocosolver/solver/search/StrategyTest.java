@@ -16,6 +16,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.LastConflict;
@@ -27,6 +28,7 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayDeque;
 
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
 import static org.testng.Assert.assertEquals;
@@ -39,6 +41,29 @@ import static org.testng.Assert.assertTrue;
  * @since 18 oct. 2010
  */
 public class StrategyTest {
+
+    @Test(groups="1s", timeOut=60000)
+    public void cosTest() {
+        Model m = new Model();
+
+        IntVar[] X = m.intVarArray("X",5,0,5);
+        IntVar[] Y = m.intVarArray("Y",5,0,5);
+        m.allDifferent(Y).post();
+        m.arithm(Y[1],"=",Y[3]).post();
+        Solver s = m.getSolver();
+        s.setSearch(
+                Search.conflictOrderingSearch(
+                        Search.intVarSearch(new InputOrder<>(m), var -> {
+                            Assert.assertFalse(var.getName().contains("Y"));
+                            return var.getLB();
+                        },X)
+                ),
+                greedySearch(inputOrderLBSearch(Y))
+        );
+        s.showSolutions();
+        while(s.solve());
+        s.printStatistics();
+    }
 
     @Test(groups="1s", timeOut=60000)
     public void AssignmentTest() {
