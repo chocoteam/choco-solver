@@ -10,8 +10,10 @@ package org.chocosolver.solver.search.strategy.strategy;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
@@ -19,6 +21,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Random;
+
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
 /**
  * <br/>
@@ -180,4 +185,26 @@ public class ConflictOrderingSearchTest {
         model.getSolver().findSolution();
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void cosTest() {
+        Model m = new Model();
+
+        IntVar[] X = m.intVarArray("X",5,0,5);
+        IntVar[] Y = m.intVarArray("Y",5,0,5);
+        m.allDifferent(Y).post();
+        m.arithm(Y[1],"=",Y[3]).post();
+        Solver s = m.getSolver();
+        s.setSearch(
+                Search.conflictOrderingSearch(
+                        Search.intVarSearch(new InputOrder<>(m), var -> {
+                            Assert.assertFalse(var.getName().contains("Y"));
+                            return var.getLB();
+                        },X)
+                ),
+                greedySearch(inputOrderLBSearch(Y))
+        );
+        s.showSolutions();
+        while(s.solve());
+        s.printStatistics();
+    }
 }
