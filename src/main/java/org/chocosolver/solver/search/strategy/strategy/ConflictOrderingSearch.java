@@ -19,8 +19,7 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.variables.Variable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Conflict Ordering Search
@@ -67,6 +66,8 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
      */
     int pcft;
 
+    protected Set<Variable> scope;
+
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -88,6 +89,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         prev = new TIntArrayList();
         next = new TIntArrayList();
         pcft = -1;
+        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
     }
 
     //***********************************************************************************
@@ -121,7 +123,9 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     public void onContradiction(ContradictionException cex) {
         Decision dec = model.getSolver().getDecisionPath().getLastDecision();
         if(dec != RootDecision.ROOT) {
-            stampIt(dec.getDecisionVariable());
+            if (scope.contains(dec.getDecisionVariable())) {
+                stampIt(dec.getDecisionVariable());
+            }
         }
     }
 
