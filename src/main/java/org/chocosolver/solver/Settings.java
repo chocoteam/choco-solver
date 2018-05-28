@@ -306,9 +306,7 @@ public interface Settings  {
      * @return <i>true</i> if, on propagator passivation, the propagator is swapped from active to passive in its variables' propagators list.
      * <i>false</i> if, on propagator passivation, only the propagator's state is set to PASSIVE.
      */
-    default boolean swapOnPassivate(){
-        return false;
-    }
+    boolean swapOnPassivate();
 
     /**
      * Define if passivation of propagator swap it in variables' list
@@ -346,4 +344,22 @@ public interface Settings  {
      * @return the current instance
      */
     Settings setInitSolver(Function<Model, Solver> initSolver);
+
+    /**
+     * @return <i>0b00<i/> if constraint-oriented propagation engine,
+     * <i>0b01<i/> if hybridization between variable and constraint oriented and
+     * <i>0b10<i/> if variable-oriented.
+     */
+    byte enableHybridizationOfPropagationEngine();
+
+    /**
+     * Define behavior of the propagation engine.
+     * @param hybrid When set to '0b00', this works as a constraint-oriented propagation engine;
+     * when set to '0b01', this workds as an hybridization between variable and constraint oriented
+     * propagation engine.
+     * when set to '0b10', this workds as a variable- oriented propagation engine.
+     * @return the current instance
+     */
+    Settings setHybridizationOfPropagationEngine(byte hybrid);
+
 }

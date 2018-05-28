@@ -16,9 +16,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
-import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.search.loop.monitors.IMonitorUpBranch;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -39,7 +36,7 @@ import java.util.List;
  * @author Charles Prud'homme
  * @since 05/07/12
  */
-public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, IMonitorRestart {
+public class PropagationEngine {
 
     public static boolean CHECK_SCOPE = false;
 
@@ -82,6 +79,13 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
      * Set to <tt>true</tt> once {@link #initialize()} has been called.
      */
     private boolean init;
+    /**
+     * When set to '0b00', this works as a constraint-oriented propagation engine;
+     * when set to '0b01', this workds as an hybridization between variable and constraint oriented
+     * propagation engine.
+     * when set to '0b10', this workds as a variable- oriented propagation engine.
+     */
+    private final byte hybrid;
 
     /**
      * A seven-queue propagation engine.
@@ -100,8 +104,8 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         this.var_queue = new CircularQueue<>(16);
         this.awake_queue = new CircularQueue<>(16);
         this.trail = new TIntArrayList();
-        this.trail.add(0);
         this.propagators = new ArrayList<>();
+        this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
     }
 
     /**
@@ -114,7 +118,6 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         if (!init) {
             notEmpty = 0;
             init = true;
-            this.model.getSolver().plugMonitor(this);
             Constraint[] constraints = model.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
                 Propagator[] cprops = constraints[c].getPropagators();
@@ -133,6 +136,7 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
                 propagators.get(i).setPosition(i);
                 awake_queue.addLast(propagators.get(i));
             }
+            this.trail.add(0);
             trail.add(propagators.size());
         }
     }
@@ -154,44 +158,58 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
      */
     @SuppressWarnings({"NullableProblems"})
     public void propagate() throws ContradictionException {
-        prepropagate();
-        manageModifications();
-        for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-            while (!pro_queue[i].isEmpty()) {
-                lastProp = pro_queue[i].pollFirst();
-                // revision of the variable
-                lastProp.unschedule();
-                delayedPropagationType = 0;
-                if (lastProp.reactToFineEvent()) {
-                    lastProp.doFinePropagation();
-                    // now we can check whether a delayed propagation has been scheduled
-                    if (delayedPropagationType > 0) {
-                        lastProp.propagate(delayedPropagationType);
+        activatePropagators();
+        do {
+            manageModifications();
+            for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
+                while (!pro_queue[i].isEmpty()) {
+                    lastProp = pro_queue[i].pollFirst();
+                    // revision of the variable
+                    lastProp.unschedule();
+                    delayedPropagationType = 0;
+                    if (lastProp.reactToFineEvent()) {
+                        lastProp.doFinePropagation();
+                        // now we can check whether a delayed propagation has been scheduled
+                        if (delayedPropagationType > 0) {
+                            lastProp.propagate(delayedPropagationType);
+                        }
+                    } else if (lastProp.isActive()) { // need to be checked due to views
+                        lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                     }
-                } else if (lastProp.isActive()) { // need to be checked due to views
-                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+                    if (hybrid > 0b00) {
+                        manageModifications();
+                    }
                 }
-                manageModifications();
+                notEmpty = notEmpty & ~(1 << i);
             }
-            notEmpty = notEmpty & ~(1 << i);
-        }
+        } while (!var_queue.isEmpty());
     }
 
-    @Override
-    public void beforeDownBranch(boolean left) {
-        for(int i = trail.getQuick(trail.size()-1); i < propagators.size(); i++){
+
+    /**
+     * Check propagators that should be activated or propagated on backtrack.
+     * This is usually managed by the Solver.
+     */
+    public void checkActivation() {
+        for (int i = trail.getQuick(trail.size() - 1); i < propagators.size(); i++) {
             awake_queue.addLast(propagators.get(i));
         }
         trail.add(propagators.size());
     }
 
-    @Override
-    public void afterUpBranch() {
-        trail.removeAt(trail.size()-1);
+
+    /**
+     * Synchronization to be done on backtrack.
+     * This may be required when
+     */
+    public void synchronizeOnBacktrack() {
+        trail.removeAt(trail.size() - 1);
     }
 
-    @Override
-    public void afterRestart() {
+    /**
+     * Synchronization to be done on backtrack
+     */
+    public void synchronizeOnRestart() {
         int fst = trail.getQuick(1);
         trail.clear();
         trail.add(0);
@@ -199,27 +217,39 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         // todo, should be connected with solver directly
     }
 
-    private void prepropagate() throws ContradictionException {
-        while(!awake_queue.isEmpty()) {
+    /**
+     * Checks if some propagators were added or have to be propagated on backtrack
+     * @throws ContradictionException if a propagation fails
+     */
+    private void activatePropagators() throws ContradictionException {
+        while (!awake_queue.isEmpty()) {
             execute(awake_queue.pollFirst());
         }
     }
 
+    /**
+     * Execute 'coarse' propagation on a newly added propagator
+     * or one that should be propagated on backtrack
+     * @param propagator a propagator to propagate
+     * @throws ContradictionException if propagation fails
+     */
     private void execute(Propagator propagator) throws ContradictionException {
         if (propagator.isStateLess()) {
             propagator.setActive();
         }
         if (propagator.isActive()) {
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-            while (!var_queue.isEmpty()){
+            while (!var_queue.isEmpty()) {
                 schedule(var_queue.pollFirst());
             }
         }
     }
 
     private void manageModifications() {
-        while (!var_queue.isEmpty()){
-            schedule(var_queue.pollFirst());
+        if (!var_queue.isEmpty()) {
+            do {
+                schedule(var_queue.pollFirst());
+            } while (hybrid > 1 && !var_queue.isEmpty());
         }
     }
 
@@ -239,7 +269,7 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         if (lastProp != null) {
             lastProp.doFlush();
         }
-        while(!var_queue.isEmpty()){
+        while (!var_queue.isEmpty()) {
             var_queue.pollLast().clearEvents();
         }
         for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
@@ -273,9 +303,9 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         variable.storeEvents(type.getMask(), cause);
     }
 
-    private void schedule(Variable variable){
+    private void schedule(Variable variable) {
         int mask = variable.getMask();
-        if(mask > 0) {
+        if (mask > 0) {
             ICause cause = variable.getCause();
             Propagator[] vpropagators = variable.getPropagators();
             int[] vindices = variable.getPIndices();
@@ -350,12 +380,11 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         propagators.clear();
         notEmpty = 0;
         init = false;
-        this.model.getSolver().unplugMonitor(this);
         lastProp = null;
     }
 
-    public void ignoreModifications(){
-        while (!var_queue.isEmpty()){
+    public void ignoreModifications() {
+        while (!var_queue.isEmpty()) {
             var_queue.pollFirst().clearEvents();
         }
     }
@@ -396,9 +425,9 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
         int idx = propagator.getPosition();
         assert propagators.get(idx) == propagator : "Try to remove the wrong propagator";
         shift(idx);
-        propagators.set(propagators.size()-1, propagator);
-        propagator.setPosition(propagators.size()-1);
-        for (int i = trail.size() -1; i >= 0 && idx < trail.getQuick(i) ; i--) {
+        propagators.set(propagators.size() - 1, propagator);
+        propagator.setPosition(propagators.size() - 1);
+        for (int i = trail.size() - 1; i >= 0 && idx < trail.getQuick(i); i--) {
             trail.setQuick(i, trail.getQuick(i) - 1);
         }
     }
@@ -424,8 +453,8 @@ public class PropagationEngine implements IMonitorDownBranch, IMonitorUpBranch, 
             // todo: improve
             shift(idx);
             propagator.setPosition(-1);
-            propagators.remove(propagators.size()-1);
-            for (int i = trail.size() -1; i >= 0 && idx < trail.getQuick(i) ; i--) {
+            propagators.remove(propagators.size() - 1);
+            for (int i = trail.size() - 1; i >= 0 && idx < trail.getQuick(i); i--) {
                 trail.setQuick(i, trail.getQuick(i) - 1);
             }
         }

@@ -79,6 +79,8 @@ public class DefaultSettings implements Settings {
 
     private boolean checkDeclaredConstraints = false;
 
+    private byte hybridEngine = 0b01;
+
     private Function<Model, Solver> initSolver = Solver::new;
 
 
@@ -328,6 +330,17 @@ public class DefaultSettings implements Settings {
     @Override
     public DefaultSettings setInitSolver(Function<Model, Solver> initSolver) {
         this.initSolver = initSolver;
+        return this;
+    }
+
+    @Override
+    public byte enableHybridizationOfPropagationEngine() {
+        return hybridEngine;
+    }
+
+    @Override
+    public Settings setHybridizationOfPropagationEngine(byte hybrid) {
+        this.hybridEngine = hybrid;
         return this;
     }
 }

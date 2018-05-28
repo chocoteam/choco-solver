@@ -387,6 +387,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected void propagate(boolean left){
         searchMonitors.beforeDownBranch(left);
         mMeasures.incDepth();
+        engine.checkActivation();
         try {
             P.execute(this);
             action = extend;
@@ -424,6 +425,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         // since restart is a move which can stop the search if the cut fails
         action = propagate;
         canBeRepaired = M.repair(this);
+        engine.synchronizeOnBacktrack();
         searchMonitors.afterUpBranch();
         if (!canBeRepaired) {
             stop = true;
@@ -570,6 +572,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         restoreRootNode();
         mModel.getEnvironment().worldPush();
         getMeasures().incRestartCount();
+        engine.synchronizeOnRestart();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
@@ -878,9 +881,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public void setEngine(PropagationEngine propagationEngine) {
         if (!engine.isInitialized()
                 || getEnvironment().getWorldIndex() == rootWorldIndex) {
-            if(engine instanceof PropagationEngine){
-                unplugMonitor(engine);
-            }
             this.engine = propagationEngine;
         }else{
             throw new SolverException("Illegal propagation engine modification.");
