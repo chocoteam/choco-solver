@@ -294,15 +294,15 @@ public class ClauseTest {
             e.worldPush();
             bs[i] = s.boolVar("b" + i);
             sat.addLearnt(sat.makeLiteral(bs[i], true));
-            s.getSolver().getSearchMonitors().beforeDownBranch(true);
+            s.getSolver().getEngine().checkActivation();
             s.getSolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }
         for (int i = n - 1; i > 0; i--) {
             e.worldPop();
             Assert.assertFalse(bs[i].isInstantiated());
-            s.getSolver().getSearchMonitors().afterUpBranch();
-            s.getSolver().getSearchMonitors().beforeDownBranch(true);
+            s.getSolver().getEngine().synchronizeOnBacktrack();
+            s.getSolver().getEngine().checkActivation();
             s.getSolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }

@@ -72,6 +72,7 @@ public class MoveBinaryDFS implements Move {
         solver.getMeasures().incBackTrackCount();
         solver.getMeasures().decDepth();
         solver.getEnvironment().worldPop();
+        solver.getEngine().synchronizeOnBacktrack();
         return rewind(solver);
     }
 
@@ -123,6 +124,7 @@ public class MoveBinaryDFS implements Move {
         solver.getMeasures().incBackTrackCount();
         solver.getMeasures().decDepth();
         solver.getEnvironment().worldPop();
+        solver.getEngine().synchronizeOnBacktrack();
         solver.getSearchMonitors().beforeUpBranch();
     }
 

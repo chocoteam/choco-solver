@@ -425,7 +425,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         // since restart is a move which can stop the search if the cut fails
         action = propagate;
         canBeRepaired = M.repair(this);
-        engine.synchronizeOnBacktrack();
         searchMonitors.afterUpBranch();
         if (!canBeRepaired) {
             stop = true;
@@ -594,6 +593,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             getMeasures().incBackTrackCount();
             getMeasures().decDepth();
             environment.worldPop();
+            engine.synchronizeOnBacktrack();
         }
         dpath.synchronize();
     }

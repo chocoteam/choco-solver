@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -561,5 +562,35 @@ public class ModelTest {
         }
         model.getSolver().getEnvironment().worldPop();
         Assert.assertEquals(b.getLB(), 2);
+    }
+
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJuTii2() {
+        Model mode = new Model();
+        IntVar r = mode.intVar("r", 1, 3);
+        org.chocosolver.solver.constraints.Constraint c = mode.member(r, new int[]{7, 6, 5, 2});
+        c.post();
+        System.out.println(mode);
+
+        for (int i = 1; i <= 3; i++) {
+            Constraint c2 = mode.arithm(r, "=", i);
+            mode.post(c2);
+            boolean propagateOK = false;
+            mode.getSolver().getEnvironment().worldPush();
+            try {
+                mode.getSolver().propagate();
+                propagateOK = true;
+            } catch (ContradictionException ex) {
+                //System.err.println(ex);
+                mode.getSolver().getEngine().flush();
+            }
+            mode.getSolver().getEngine().synchronizeOnBacktrack();
+            mode.getSolver().getEnvironment().worldPop();
+            System.out.print("i:" + i + ", " + r + ", propagateOK = " + propagateOK + " ");
+            System.out.println(mode.getSolver().solve());
+            mode.unpost(c2);
+            mode.getSolver().hardReset();
+        }
     }
 }

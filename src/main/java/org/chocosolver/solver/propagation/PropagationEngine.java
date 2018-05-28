@@ -176,7 +176,7 @@ public class PropagationEngine {
                     } else if (lastProp.isActive()) { // need to be checked due to views
                         lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                     }
-                    if (hybrid > 0b00) {
+                    if (hybrid < 0b01) {
                         manageModifications();
                     }
                 }
@@ -249,7 +249,7 @@ public class PropagationEngine {
         if (!var_queue.isEmpty()) {
             do {
                 schedule(var_queue.pollFirst());
-            } while (hybrid > 1 && !var_queue.isEmpty());
+            } while (hybrid < 2 && !var_queue.isEmpty());
         }
     }
 

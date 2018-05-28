@@ -467,4 +467,16 @@ public class ReifiedTest {
         BoolVar a2 = b2 == 2 ? m.boolVar("b2") : b2 == 1 ? m.boolVar("b2", true) : m.boolVar("b2", false);
         m.sum(row, "=", 5).reifyWith(a2);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testJuha1() throws ContradictionException {
+        Model mode = new Model();
+        IntVar r = mode.intVar("r", 1,10);
+        BoolVar b = mode.member(r, new int[]{7,6,5,2}).reify();
+        IntVar E = mode.intVar("e", 0,1);
+        b.eq(E).post();
+        E.ge(1).post();
+        System.out.printf("%s\n", mode);
+        mode.getSolver().propagate();
+    }
 }

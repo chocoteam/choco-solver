@@ -79,7 +79,7 @@ public class DefaultSettings implements Settings {
 
     private boolean checkDeclaredConstraints = false;
 
-    private byte hybridEngine = 0b01;
+    private byte hybridEngine = 0b00;
 
     private Function<Model, Solver> initSolver = Solver::new;
 
