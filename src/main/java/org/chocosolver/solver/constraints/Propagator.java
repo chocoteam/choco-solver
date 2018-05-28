@@ -118,6 +118,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     private final boolean swapOnPassivate;
 
     /**
+     * When a propagator is removed while being passivate with swap operation,
+     * this variable ensures that no side-effects occurs on backtrack
+     */
+    private boolean alive = true;
+
+    /**
      * Priority of this propagator.
      * Mix between arity and compexity.
      */
@@ -215,12 +221,26 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         Arrays.fill(vindices, -1);
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() & swapOnPassivate;
-        operations = new IOperation[3 + (this.swapOnPassivate ? vars.length : 0)];
+        if (this.swapOnPassivate) {
+            operations = new IOperation[3 + vars.length];
+            for (int i = 0; i < vars.length; i++) {
+                int i0 = i;
+                operations[3 + i] = () -> {
+                    if (alive) {
+                        doSwap(i0);
+                    }
+                };
+            }
+        } else {
+            operations = new IOperation[3];
+        }
+
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
         operations[2] = () -> state = ACTIVE;
-        this.position = -1;
+
         // for propagation purpose
+        eventmasks = new int[vars.length];
         if (reactToFineEvent()) {
             eventsets = new IntCircularQueue(vars.length);
             eventmasks = new int[vars.length];
@@ -274,6 +294,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     @SafeVarargs
     protected final void addVariable(V... nvars) {
+        assert !swapOnPassivate:"Cannot add variable to a propagator that allows being swapped on passivate";
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
@@ -301,9 +322,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         for (int v = 0; v < vars.length; v++) {
             if (!vars[v].isAConstant()) {
                 vindices[v] = vars[v].link(this, v);
-                if(swapOnPassivate) {
-                    operations[3 + v] = null;
-                }
             }
         }
     }
@@ -316,9 +334,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             if (!vars[v].isAConstant()) {
                 vars[v].unlink(this, v);
                 vindices[v] = -1;
-                if(swapOnPassivate) {
-                    operations[3 + v] = null;
-                }
+                alive = false;
             }
         }
     }
@@ -492,16 +508,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                     if (!vars[i].isInstantiated()) {
                         vindices[i] = vars[i].swapOnPassivate(this, i);
                         assert vars[i].getPropagator(vindices[i]) == this;
-                        int _i = i;
-                        model.getEnvironment().save(
-                                operations[3 + i] = () -> {
-                                    // the operation was saved and set to null
-                                    // IFF the propagator was unposted (call to #unlinkVariables)
-                                    if (operations[3 + _i] != null) {
-                                        vindices[_i] = vars[_i].swapOnActivate(this, _i);
-                                        operations[3 + _i] = null;
-                                    }
-                                });
+                        model.getEnvironment().save(operations[3 + i]);
                     }
                 }
             }
@@ -509,6 +516,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             throw new SolverException("Try to passivate a propagator already passive or reified.\n" +
                     this + " of " + this.getConstraint());
         }
+    }
+
+    private void doSwap(int i0){
+        vindices[i0] = vars[i0].swapOnActivate(this, i0);
     }
 
     /**
