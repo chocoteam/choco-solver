@@ -69,12 +69,6 @@ public final class StoredIntVector extends IStateIntVector {
         }
     }
 
-
-    /**
-     * Adds a new search at the end of the vector.
-     *
-     * @param i The search to add.
-     */
     @Override
     public void add(int i) {
         int newsize = size.get() + 1;
@@ -84,11 +78,7 @@ public final class StoredIntVector extends IStateIntVector {
         worldStamps[newsize - 1] = environment.getWorldIndex();
     }
 
-    /**
-     * Removes an int.
-     *
-     * @param i The search to remove.
-     */
+    @Override
     public void remove(int i) {
         System.arraycopy(elementData, i, elementData, i + 1, size.get());
         System.arraycopy(worldStamps, i, worldStamps, i + 1, size.get());
@@ -102,16 +92,12 @@ public final class StoredIntVector extends IStateIntVector {
             size.set(newsize);
     }
 
-    /**
-     * removes the search at the end of the vector.
-     * does nothing when called on an empty vector
-     */
+    @Override
     public void removeLast() {
         int newsize = size.get() - 1;
         if (newsize >= 0)
             size.set(newsize);
     }
-
 
     /**
      * Assigns a new value <code>val</code> to the element <code>index</code>.

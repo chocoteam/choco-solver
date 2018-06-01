@@ -70,11 +70,56 @@ public abstract class IStateIntVector  {
     }
 
     /**
+     * Returns the current size of the stored search vector.
+     */
+    public int size() {
+        return size.get();
+    }
+
+    /**
+     * Checks if the vector is empty.
+     */
+    public boolean isEmpty() {
+        return size.get() == 0;
+    }
+
+    /**
      * Adds a new search at the end of the vector.
      *
      * @param i The search to add.
      */
     public abstract void add(int i);
+
+    public boolean contains(int val) {
+        int ssize = size.get();
+        for (int i = 0; i < ssize; i++) {
+            if (val == elementData[i]) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Removes an int.
+     *
+     * @param i The search to remove.
+     */
+    public abstract void remove(int i);
+
+    /**
+     * removes the search at the end of the vector.
+     * does nothing when called on an empty vector
+     */
+    public abstract void removeLast();
+
+    /**
+     * Returns the <code>index</code>th element of the vector.
+     */
+    public int get(int index) {
+        if (rangeCheck(index)) {
+            return elementData[index];
+        }
+        throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + size.get());
+    }
 
     /**
      * access an element without any bound check
