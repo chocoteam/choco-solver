@@ -9,6 +9,7 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
@@ -73,12 +74,16 @@ public class IntLinCombFactory {
             int d1 = (int) Math.sqrt(k);
             int d2 = k / d1 + (k % d1 == 0?0:1);
             IntVar[] intermVar = new IntVar[d1];
+            IntVar[] copyV;
+            int[] copyC;
+            int[] bounds;
             for (int i = 0, z = 0; i < k; i += d2, z++) {
-                intermVar[z] = model.intVar(IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
                 int size = Math.min(i + d2, k);
-                model.scalar(Arrays.copyOfRange(VARS, i, size),
-                        Arrays.copyOfRange(COEFFS, i, size),
-                        "=", intermVar[z]).post();
+                copyV = Arrays.copyOfRange(VARS, i, size);
+                copyC = Arrays.copyOfRange(COEFFS, i, size);
+                bounds = VariableUtils.boundsForScalar(copyV, copyC);
+                intermVar[z] = model.intVar(bounds[0], bounds[1]);
+                model.scalar(copyV, copyC, "=", intermVar[z]).post();
             }
             return model.sum(intermVar, OPERATOR.toString(), SCALAR);
         }

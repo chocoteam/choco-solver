@@ -175,7 +175,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Position of this in the propgation engine
      */
-    private int position;
+    private int position = -1;
 
     /**
      * A bi-int-consumer

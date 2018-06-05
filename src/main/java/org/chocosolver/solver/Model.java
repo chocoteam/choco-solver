@@ -878,7 +878,11 @@ public class Model implements IModel {
                 throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                         "A call to Model.post(Constraint) is more appropriate.");
             }
-            environment.save(() -> unpost(c));
+            if(getSolver().getEngine().isInitialized()){
+                for (Propagator p : c.getPropagators()) {
+                    getSolver().getEngine().execute(p);
+                }
+            }
         }
     }
 

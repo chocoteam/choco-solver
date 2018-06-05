@@ -585,8 +585,8 @@ public class ModelTest {
                 //System.err.println(ex);
                 mode.getSolver().getEngine().flush();
             }
-            mode.getSolver().getEngine().synchronizeOnBacktrack();
             mode.getSolver().getEnvironment().worldPop();
+            mode.getSolver().getEngine().clear();
             System.out.print("i:" + i + ", " + r + ", propagateOK = " + propagateOK + " ");
             System.out.println(mode.getSolver().solve());
             mode.unpost(c2);

@@ -8,8 +8,6 @@
  */
 package org.chocosolver.solver.propagation;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -20,6 +18,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.IntList;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
@@ -53,6 +52,11 @@ public class PropagationEngine {
      */
     private final List<Propagator> propagators;
     /**
+     * To deal with propagators added dynamically
+     */
+    private final List<Propagator> dynPropagators;
+    private final IntList dynWorlds;
+    /**
      * The main structure of this engine: seven circular queues,
      * each of them is dedicated to store propagator to execute wrt their priority.
      */
@@ -61,8 +65,6 @@ public class PropagationEngine {
     private final CircularQueue<Variable> var_queue;
 
     private final CircularQueue<Propagator> awake_queue;
-
-    private final TIntArrayList trail;
     /**
      * The last propagator executed
      */
@@ -103,7 +105,8 @@ public class PropagationEngine {
         }
         this.var_queue = new CircularQueue<>(16);
         this.awake_queue = new CircularQueue<>(16);
-        this.trail = new TIntArrayList();
+        this.dynPropagators = new ArrayList<>(16);
+        this.dynWorlds = new IntList();
         this.propagators = new ArrayList<>();
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
     }
@@ -136,8 +139,6 @@ public class PropagationEngine {
                 propagators.get(i).setPosition(i);
                 awake_queue.addLast(propagators.get(i));
             }
-            this.trail.add(0);
-            trail.add(propagators.size());
         }
     }
 
@@ -185,43 +186,20 @@ public class PropagationEngine {
         } while (!var_queue.isEmpty());
     }
 
-
-    /**
-     * Check propagators that should be activated or propagated on backtrack.
-     * This is usually managed by the Solver.
-     */
-    public void checkActivation() {
-        for (int i = trail.getQuick(trail.size() - 1); i < propagators.size(); i++) {
-            awake_queue.addLast(propagators.get(i));
-        }
-        trail.add(propagators.size());
-    }
-
-
-    /**
-     * Synchronization to be done on backtrack.
-     * This may be required when
-     */
-    public void synchronizeOnBacktrack() {
-        trail.removeAt(trail.size() - 1);
-    }
-
-    /**
-     * Synchronization to be done on backtrack
-     */
-    public void synchronizeOnRestart() {
-        int fst = trail.getQuick(1);
-        trail.clear();
-        trail.add(0);
-        trail.add(fst); // restart always pushes a backup world
-        // todo, should be connected with solver directly
-    }
-
     /**
      * Checks if some propagators were added or have to be propagated on backtrack
      * @throws ContradictionException if a propagation fails
      */
     private void activatePropagators() throws ContradictionException {
+        if (dynPropagators.size() > 0) {
+            int cw = model.getEnvironment().getWorldIndex(); // get current index
+            for(int p = 0; p < dynPropagators.size(); p++){
+                if (dynWorlds.getQuick(p) >= cw) {
+                    awake_queue.addLast(dynPropagators.get(p));
+                    dynWorlds.replaceQuick(p, cw);
+                }
+            }
+        }
         while (!awake_queue.isEmpty()) {
             execute(awake_queue.pollFirst());
         }
@@ -233,7 +211,7 @@ public class PropagationEngine {
      * @param propagator a propagator to propagate
      * @throws ContradictionException if propagation fails
      */
-    private void execute(Propagator propagator) throws ContradictionException {
+    public void execute(Propagator propagator) throws ContradictionException {
         if (propagator.isStateLess()) {
             propagator.setActive();
         }
@@ -375,7 +353,8 @@ public class PropagationEngine {
      * Clear internal structures
      */
     public void clear() {
-        trail.clear();
+        dynPropagators.clear();
+        dynWorlds.clear();
         awake_queue.clear();
         propagators.clear();
         notEmpty = 0;
@@ -398,10 +377,12 @@ public class PropagationEngine {
      */
     public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException {
         int nbp = ps.length;
-        if (permanent) {
-            for (int i = 0; i < nbp; i++) {
+        for (int i = 0; i < nbp; i++) {
+            if (permanent) {
                 ps[i].setPosition(propagators.size());
                 propagators.add(ps[i]);
+                dynPropagators.add(ps[i]);
+                dynWorlds.add(Integer.MAX_VALUE);
             }
         }
     }
@@ -427,8 +408,12 @@ public class PropagationEngine {
         shift(idx);
         propagators.set(propagators.size() - 1, propagator);
         propagator.setPosition(propagators.size() - 1);
-        for (int i = trail.size() - 1; i >= 0 && idx < trail.getQuick(i); i--) {
-            trail.setQuick(i, trail.getQuick(i) - 1);
+        int pos = dynPropagators.indexOf(propagator);
+        if(pos>-1){
+            dynWorlds.replaceQuick(pos, Integer.MAX_VALUE);
+        }else {
+            dynPropagators.add(propagator);
+            dynWorlds.add(Integer.MAX_VALUE);
         }
     }
 
@@ -442,7 +427,14 @@ public class PropagationEngine {
             if (lastProp == toDelete) {
                 lastProp = null;
             }
-            remove(toDelete);
+            if(toDelete.getPosition()>-1) {
+                int idx = dynPropagators.indexOf(toDelete);
+                if (idx > -1) {
+                    dynPropagators.remove(idx);
+                    dynWorlds.removeAt(idx);
+                }
+                remove(toDelete);
+            }
         }
     }
 
@@ -454,9 +446,6 @@ public class PropagationEngine {
             shift(idx);
             propagator.setPosition(-1);
             propagators.remove(propagators.size() - 1);
-            for (int i = trail.size() - 1; i >= 0 && idx < trail.getQuick(i); i--) {
-                trail.setQuick(i, trail.getQuick(i) - 1);
-            }
         }
     }
 

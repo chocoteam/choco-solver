@@ -387,7 +387,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected void propagate(boolean left){
         searchMonitors.beforeDownBranch(left);
         mMeasures.incDepth();
-        engine.checkActivation();
         try {
             P.execute(this);
             action = extend;
@@ -571,7 +570,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         restoreRootNode();
         mModel.getEnvironment().worldPush();
         getMeasures().incRestartCount();
-        engine.synchronizeOnRestart();
         try {
             objectivemanager.postDynamicCut();
             P.execute(this);
@@ -593,7 +591,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             getMeasures().incBackTrackCount();
             getMeasures().decDepth();
             environment.worldPop();
-            engine.synchronizeOnBacktrack();
         }
         dpath.synchronize();
     }
