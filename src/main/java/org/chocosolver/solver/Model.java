@@ -873,7 +873,7 @@ public class Model implements IModel {
      */
     public void postTemp(Constraint... cs) throws ContradictionException {
         for (Constraint c : cs) {
-            _post(true, c);
+            _post(false, c);
             if (!getSolver().getEngine().isInitialized()) {
                 throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                         "A call to Model.post(Constraint) is more appropriate.");

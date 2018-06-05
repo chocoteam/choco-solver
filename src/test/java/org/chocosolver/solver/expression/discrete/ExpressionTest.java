@@ -419,4 +419,30 @@ public class ExpressionTest {
         eval(model, x.eq(y.eq(1).not().and(y.eq(2).not())), p, 4);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test46(int p){
+        Model model = new Model();
+        IntVar y = model.intVar(0, 3);
+        IntVar w = model.intVar(0, 3);
+        eval(model, y.eq(w.ge(2).ift(2,3)), p, 4);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test47(int p){
+        Model model = new Model();
+        IntVar y = model.intVar(0, 3);
+        IntVar t = model.intVar(0, 3);
+        IntVar w = model.intVar(0, 3);
+        eval(model, y.eq(w.ge(2).ift(t.add(1),t.sub(1))), p, 12);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test48(int p){
+        Model model = new Model();
+        IntVar y = model.intVar(0, 3);
+        IntVar t = model.intVar(0, 3);
+        BoolVar b = model.boolVar();
+        eval(model, y.eq(b.ift(t.add(1),t.sub(1))), p, 6);
+    }
+
 }

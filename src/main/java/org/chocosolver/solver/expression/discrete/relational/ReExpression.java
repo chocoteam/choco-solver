@@ -13,6 +13,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.IfArExpression;
 import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
@@ -211,5 +212,42 @@ public interface ReExpression extends ArExpression {
      */
     default ReExpression not() {
         return new UnLoExpression(LoExpression.Operator.NOT, this);
+    }
+
+    /**
+     * @param y1 an arithmetic expression
+     * @param y2 an arithmetic expression
+     * @return return "if(b,y1,y2" where this is "b"
+     */
+    default ArExpression ift(ArExpression y1, ArExpression y2) {
+        return new IfArExpression(this, y1, y2);
+    }
+
+    /**
+     * @param y1 an arithmetic expression
+     * @param y2 an int
+     * @return return a arithmetic expression that is equal to y1 if b is true, y2 otherwise.
+     */
+    default ArExpression ift(ArExpression y1, int y2) {
+        return new IfArExpression(this, y1, this.getModel().intVar(y2));
+    }
+
+    /**
+     * @param y1 an int
+     * @param y2 an arithmetic expression
+     * @return return a arithmetic expression that is equal to y1 if b is true, y2 otherwise.
+     */
+    default ArExpression ift(int y1, ArExpression y2) {
+        return new IfArExpression(this, this.getModel().intVar(y1), y2);
+    }
+
+
+    /**
+     * @param y1 an int
+     * @param y2 an int
+     * @return return a arithmetic expression that is equal to y1 if b is true, y2 otherwise.
+     */
+    default ArExpression ift(int y1, int y2) {
+        return new IfArExpression(this, this.getModel().intVar(y1), this.getModel().intVar(y2));
     }
 }
