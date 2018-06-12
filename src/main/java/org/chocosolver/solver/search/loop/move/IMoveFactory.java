@@ -91,25 +91,35 @@ public interface IMoveFactory extends ISelf<Solver> {
     /**
      * Branch a luby restart strategy to the model
      *
+     * @implNote Some counter may required an argument, as limit.
+     * This declared limit will be ignored and replaced by <i>base</i> on creation of this.
+     *
      * @param scaleFactor          scale factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
      */
-    default void setLubyRestart(int scaleFactor, ICounter restartStrategyLimit, int restartLimit) {
+    default void setLubyRestart(long scaleFactor, ICounter restartStrategyLimit, int restartLimit) {
         ref().setRestarts(restartStrategyLimit, new LubyCutoffStrategy(scaleFactor), restartLimit);
     }
 
     /**
-     * Build a geometrical restart strategy
+     * Build a geometrical restart strategy.
+     * The restartStrategyLimit is a {@link ICounter} to observe.
+     * Once this counter reaches a limit, restart occurs and the next cutoff is computed.
      *
-     * @param scaleFactor          scale factor
-     * @param geometricalFactor    increasing factor
+     * At step <i>n</i>, the next cutoff is computed with the following function : <i>b*g^n</i>.
+     *
+     * @implNote Some counter may required an argument, as limit.
+     * This declared limit will be ignored and replaced by <i>base</i> on creation of this.
+     *
+     * @param base          the initial limit
+     * @param geometricalFactor    geometrical factor
      * @param restartStrategyLimit restart trigger
      * @param restartLimit         restart limits (limit of number of restarts)
      */
-    default void setGeometricalRestart(int scaleFactor, double geometricalFactor,
+    default void setGeometricalRestart(long base, double geometricalFactor,
                                    ICounter restartStrategyLimit, int restartLimit) {
-        ref().setRestarts(restartStrategyLimit, new GeometricalCutoffStrategy(scaleFactor, geometricalFactor), restartLimit);
+        ref().setRestarts(restartStrategyLimit, new GeometricalCutoffStrategy(base, geometricalFactor), restartLimit);
     }
 
     /**

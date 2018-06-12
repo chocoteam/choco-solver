@@ -27,7 +27,7 @@ public class MonotonicRestartStrategy implements ICutoffStrategy{
     }
 
     @Override
-    public int getNextCutoff() {
+    public long getNextCutoff() {
         return gap;
     }
 }

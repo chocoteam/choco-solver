@@ -686,6 +686,12 @@ After each restart, the limit number of events is increased by the geometric fac
 
     solver.setGeometricalRestart(int base, double grow, ICounter counter, int limit)
 
+.. note::
+
+    Some counters may required an argument on constructor that defines the limit to not overpass.
+    Such an argument is ignored by a restart strategy which overrides that value with its own computed one.
+
+
 The `Luby <http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.47.5558>`_ ’s restart policy is an alternative to the geometric restart policy.
 It performs a search with restarts controlled by the number of resolution events [#f1]_ counted by ``counter``.
 The maximum number of events allowed at a given restart iteration is given by base multiplied by the Las Vegas coefficient at this iteration.
