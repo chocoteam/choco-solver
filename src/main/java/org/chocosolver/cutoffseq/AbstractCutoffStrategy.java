@@ -20,14 +20,14 @@ public abstract class AbstractCutoffStrategy implements ICutoffStrategy {
     /**
      * The scale factor, should be strictly positive
      */
-    protected final int scaleFactor;
+    protected final long scaleFactor;
 
     /**
      * Create a abstract class with the specific <i>scaleFactor</i>.
      * @param s scale factor (should be strictly positive)
      * @exception IllegalAccessException if <i>scaleFactor</i> is not strictly positive
      */
-    public AbstractCutoffStrategy(int s) {
+    public AbstractCutoffStrategy(long s) {
         super();
         if (s < 1) {
             throw new IllegalArgumentException("The scale factor of a restart strategy must be strictly positive.");

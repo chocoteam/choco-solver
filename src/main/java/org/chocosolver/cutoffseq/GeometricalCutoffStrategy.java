@@ -50,8 +50,8 @@ public final class GeometricalCutoffStrategy extends AbstractCutoffStrategy {
      * <i>s*g^n</i>
      */
     @Override
-    public int getNextCutoff() {
-        final int cutoff = (int) Math.ceil(scaleFactor * geometricalFactorPower);
+    public long getNextCutoff() {
+        final long cutoff = (int) Math.ceil(scaleFactor * geometricalFactorPower);
         geometricalFactorPower *= geometricalFactor;
         return cutoff;
     }

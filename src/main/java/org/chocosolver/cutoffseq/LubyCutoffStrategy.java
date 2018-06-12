@@ -51,8 +51,8 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
      * Credits: sat4j.
      */
     @Override
-    public int getNextCutoff() {
-        final int cutoff = scaleFactor * this.vn;
+    public long getNextCutoff() {
+        final long cutoff = scaleFactor * this.vn;
         if ((this.un & -this.un) == this.vn) {
             this.un = this.un + 1;
             this.vn = 1;

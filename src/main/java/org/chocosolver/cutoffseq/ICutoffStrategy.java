@@ -20,5 +20,5 @@ public interface ICutoffStrategy {
     /**
      * @return the next restart cutoff
      * */
-    int getNextCutoff();
+    long getNextCutoff();
 }
