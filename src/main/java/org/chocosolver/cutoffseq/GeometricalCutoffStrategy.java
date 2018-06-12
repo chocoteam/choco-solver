@@ -36,7 +36,7 @@ public final class GeometricalCutoffStrategy extends AbstractCutoffStrategy {
      * @param s scale factor
      * @param g geometrical factor
      */
-    public GeometricalCutoffStrategy(int s, double g) {
+    public GeometricalCutoffStrategy(long s, double g) {
         super(s);
         if (g <= 1) {
             throw new IllegalArgumentException("The geometrical factor of the restart strategy must be strictly greater than 1.");

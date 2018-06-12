@@ -40,7 +40,7 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
      * A Luby cutoff strategy.
      * @param s scale factor
      */
-    public LubyCutoffStrategy(int s) {
+    public LubyCutoffStrategy(long s) {
         super(s);
     }
 

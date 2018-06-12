@@ -39,6 +39,12 @@
             <organizationUrl>http://www.i3s.unice.fr/~malapert/</organizationUrl>
         </developer>
     </developers>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    </properties>
+
     <scm>
         <connection>scm:git:git@github.com:chocoteam/cutoffseq.git</connection>
         <url>scm:git:git://github.com/chocoteam/cutoffseq</url>
@@ -48,11 +54,6 @@
     <prerequisites>
         <maven>3.2.3</maven>
     </prerequisites>
-
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -64,16 +65,14 @@
     </dependencies>
 
     <distributionManagement>
-        <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-        </repository>
         <snapshotRepository>
-            <uniqueVersion>true</uniqueVersion>
-            <id>sonatype-snapshots</id>
+            <id>ossrh</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <layout>default</layout>
         </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
     </distributionManagement>
 
     <profiles>
@@ -148,7 +147,7 @@
                 <version>1.6.7</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>sonatype</serverId>
+                    <serverId>ossrh</serverId>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
@@ -163,7 +162,7 @@
                     <properties>
                         <year>${maven.build.timestamp}</year>
                         <owner>IMT Atlantique</owner>
-                        <project>${project.name}</project>
+                        <project>${project.artifactId}</project>
                         <prurl>${project.url}</prurl>
                     </properties>
                     <mapping>
