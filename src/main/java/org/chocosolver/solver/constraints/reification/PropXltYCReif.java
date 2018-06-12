@@ -102,6 +102,6 @@ public class PropXltYCReif extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + vars[0].getName() +" < " + vars[0].getName() + " + "+cste+") <=> "+vars[2].getName();
+        return "(" + vars[0].getName() +" < " + vars[1].getName() + " + "+cste+") <=> "+vars[2].getName();
     }
 }
