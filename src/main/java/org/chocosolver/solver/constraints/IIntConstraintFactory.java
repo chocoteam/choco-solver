@@ -8,7 +8,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -1680,42 +1679,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint regular(IntVar[] vars, IAutomaton automaton) {
         return new Constraint(ConstraintsName.REGULAR, new PropRegular(vars, automaton));
-    }
-
-    default Constraint regular0(IntVar[] vars, IAutomaton automaton) {
-        int n = vars.length;
-        IntVar[] states = new IntVar[n + 1];
-        Propagator[] props = new Propagator[vars.length];
-        TIntHashSet[] layer = new TIntHashSet[n + 1];
-        for (int i = 0; i <= n; i++) {
-            layer[i] = new TIntHashSet();
-        }
-        layer[0].add(automaton.getInitialState());
-        states[0] = ref().intVar("Q_0", layer[0].toArray());
-        TIntHashSet nexts = new TIntHashSet();
-        for (int i = 0; i < n; i++) {
-            int ub = vars[i].getUB();
-            Tuples tuples = new Tuples(true);
-            for (int j = vars[i].getLB(); j <= ub; j = vars[i].nextValue(j)) {
-                TIntIterator layerIter = layer[i].iterator();
-                while (layerIter.hasNext()) {
-                    int k = layerIter.next();
-                    nexts.clear();
-                    automaton.delta(k, j, nexts);
-                    for (TIntIterator it = nexts.iterator(); it.hasNext(); ) {
-                        int succ = it.next();
-                        if(i + 1 < n || automaton.isFinal(succ)) {
-                            layer[i + 1].add(succ);
-                            tuples.add(k, succ, j);
-                        }
-                    }
-                }
-            }
-            states[i + 1] = ref().intVar("Q_" + (i+1), layer[i + 1].toArray());
-            props[i] = ref().table(new IntVar[]{states[i], states[i + 1], vars[i]}, tuples).getPropagator(0);
-        }
-        //automaton.getTransitions().forEach(t -> System.out.printf("%s\n", Arrays.toString(t)));
-        return new Constraint(ConstraintsName.REGULAR, props);
     }
 
     /**
