@@ -4,8 +4,8 @@ STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
-JAVA_ARGS=""
-CHOCO_JAR=${PARSER_JAR:=~/.m2/repository/org/choco-solver/choco-parsers/4.0.5-SNAPSHOT/choco-parsers-4.0.5-with-dependencies.jar}
+JAR_NAME=choco-parsers.jar
+CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
