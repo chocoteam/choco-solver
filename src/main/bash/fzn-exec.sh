@@ -4,6 +4,7 @@ STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 NB_NODES=1
 TIME_LIMIT=900000
+DIR=./
 JAR_NAME=choco-parsers.jar
 CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
@@ -16,6 +17,10 @@ OPTIONS:
 
     -h, --help
         Display this message.
+
+    -dir <s>
+        Stands for the directory where the uploaded files reside.
+        The default is ${DIR}.
 
     -a
         This causes the solver to search for, and output all solutions.
@@ -32,8 +37,7 @@ OPTIONS:
         Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
 
     -jar <j>
-        Override the jar file.  (The default is JAR.)
-
+        Override the jar file.  (The default is $CHOCO_JAR.)
 
     --jargs <args>
 		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
@@ -61,6 +65,11 @@ do
         -h|--help)
             echo "$usage"
             exit 0
+        ;;
+
+        -dir)
+            DIR="$2"
+            shift
         ;;
 
         -a)
@@ -118,7 +127,7 @@ then
     ARGS=$ARGS" -f"
 fi
 
-CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS} -stat"
+CMD="java -server ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS} -stat"
 
 echo "% $CMD"
 eval ${CMD}
