@@ -109,7 +109,6 @@ public class MPS extends RegParser {
             } catch (Exception e) {
                 System.out.printf("s UNSUPPORTED\n");
                 System.out.printf("%c %s\n", getCommentChar(), e.getMessage());
-                userinterruption = false;
                 e.printStackTrace();
                 throw new RuntimeException("UNSUPPORTED");
             }

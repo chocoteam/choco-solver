@@ -48,6 +48,7 @@ public class XCSP extends RegParser {
     public XCSP() {
         super("ChocoXCSP");
         this.defaultSettings = new XCSPSettings(); // todo: rename or create the right one
+        if(PRINT_LOG)System.out.printf("c Choco 493a269\n");
     }
 
     @Override
@@ -94,7 +95,6 @@ public class XCSP extends RegParser {
             } catch (Exception e) {
                 if(PRINT_LOG)System.out.printf("s UNSUPPORTED\n");
                 if(PRINT_LOG)System.out.printf("c %s\n", e.getMessage());
-                userinterruption = false;
                 e.printStackTrace();
                 throw new RuntimeException("UNSUPPORTED");
             }

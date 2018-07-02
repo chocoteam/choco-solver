@@ -244,6 +244,8 @@ public class XCSPParser implements XCallbacks2 {
                 return new NaLoExpression(LoExpression.Operator.OR, res);
             case NOT:
                 return res[0].not();
+            case IF:
+                return ((ReExpression)aes[0]).ift(aes[1], aes[2]);
             default:
                 throw new UnsupportedOperationException("Unknown type : " + type);
         }
@@ -1478,6 +1480,13 @@ public class XCSPParser implements XCallbacks2 {
         return res;
     }
 
+    private IntVar optNValues(XVariables.XVarInteger[] list) {
+        IntVar[] vars = vars(list);
+        IntVar res = model.intVar("NVALUES", 0, list.length);
+        model.nValues(vars, res).post();
+        return res;
+    }
+
     @Override
     public void buildObjToMinimize(String id, Types.TypeObjective type, XVariables.XVarInteger[] list) {
         switch (type) {
@@ -1491,6 +1500,8 @@ public class XCSPParser implements XCallbacks2 {
                 model.setObjective(false, optMax(list));
                 break;
             case NVALUES:
+                model.setObjective(false, optNValues(list));
+                break;
             case EXPRESSION:
             case PRODUCT:
             case LEX:
@@ -1511,6 +1522,8 @@ public class XCSPParser implements XCallbacks2 {
                 model.setObjective(true, optMax(list));
                 break;
             case NVALUES:
+                model.setObjective(true, optNValues(list));
+                break;
             case EXPRESSION:
             case PRODUCT:
             case LEX:
