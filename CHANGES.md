@@ -7,7 +7,14 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+**JAR file names have changed**:  
+- the suffix 'with-dependencies' disappears,
+- the suffix '-no-dep' (for no dependencies) appears.
+
+This should intends to clarify the selection for new comers.
+
 Add a PayPal button for donations.
+
 Move to Ibex-2.6.5.
 
 ### Major features:
@@ -30,7 +37,7 @@ the default behavior.
 
 
 ### Closed issues and pull requests:
-\#527, #569, #576, #578, #581, #586
+\#527, #564, #569, #576, #578, #581, #586
 
 4.0.6 - 23 Nov 2017
 -------------------

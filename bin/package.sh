@@ -11,7 +11,7 @@ function makeArchive(){
     mvn -q clean install -DskipTests || quit "unable to install"
 
     mv ./target/choco-solver-${VERSION}.jar ./choco-${VERSION} || quit "unable to mv jar"
-    mv ./target/choco-solver-${VERSION}-with-dependencies.jar ./choco-${VERSION}|| quit "unable to mv dep"
+    mv ./target/choco-solver-${VERSION}-no-dep.jar ./choco-${VERSION}|| quit "unable to mv no-dep"
     mv ./target/choco-solver-${VERSION}-sources.jar ./choco-${VERSION}|| quit "unable to mv src"
 
     cp ./user_guide.pdf ./choco-${VERSION}/user_guide-${VERSION}.pdf|| quit "unable to cp user guide"

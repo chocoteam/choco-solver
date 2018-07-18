@@ -110,12 +110,12 @@ Structure of the main package
 You can download `Choco Solver <http://choco-solver.org/Download>`_ on the website of Choco Solver.
 You will get a zip file which contains the following files:
 
-choco-solver-|release|-with-dependencies.jar
+choco-solver-|release|.jar
     A ready-to-use jar file including dependencies;
     it provides tools to declare a Model, the variables, the constraints, the search strategies, etc.
     In a few words, it enables modeling and solving CP problems.
 
-choco-solver-|release|.jar
+choco-solver-|release|-no-dep.jar
     A jar file excluding all dependencies and configuration file;
     Enable using choco-solver as a dependency of an application.
     Otherwise, it provides the same code as the jar with dependencies.
@@ -140,7 +140,7 @@ Adding Choco Solver to your project
 Directly
 --------
 
-Simply add choco-solver-|release|-with-dependencies.jar to the classpath of your project (in a terminal or in your favorite IDE).
+Simply add choco-solver-|release|.jar to the classpath of your project (in a terminal or in your favorite IDE).
 
 With Maven
 ----------
@@ -157,7 +157,7 @@ To declare Choco as a dependency of your project, simply update the ``pom.xml`` 
    </dependency>
 
 where ``X.Y.Z`` is replaced by |release|.
-Note that the artifact does not include any dependencies or `logback.xml`.
+Note that the artifact does not include any dependencies.
 Please, refer to `README.md` for the list of required dependencies.
 
 With SBT

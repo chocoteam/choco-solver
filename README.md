@@ -125,7 +125,7 @@ In the following, we distinguish two usages of Choco:
 - as a standalone application: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-4.0.6-with-dependencies.jar` or `choco-solver-4.0.6.jar`.
+The name of the jar file terms the packaging: `choco-solver-4.0.6.jar` or `choco-solver-4.0.6-no-dep.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -173,8 +173,8 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     dk.brics.automaton:automaton:1.11-8
-    org.jgrapht:jgrapht-core:1.1.0
-    org.choco-solver:cutoffseq:1.0.2
+    org.jgrapht:jgrapht-core:1.2.0
+    org.choco-solver:cutoffseq:1.0.4
     org.choco-solver:choco-sat:1.0.2
     net.sf.trove4j:trove4j:3.0.3
     com.github.cp-profiler:cpprof-java:1.3.0

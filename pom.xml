@@ -72,7 +72,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.11</version>
+            <version>6.14.3</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,7 +88,7 @@
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.1.0</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.cp-profiler</groupId>
@@ -267,6 +267,7 @@
                             <addClasspath>true</addClasspath>
                         </manifest>
                     </archive>
+                    <finalName>${artifactId}-${version}-no-dep</finalName>
                 </configuration>
             </plugin>
             <plugin>
@@ -283,6 +284,8 @@
                             <descriptors>
                                 <descriptor>./src/assembly/with-dep.xml</descriptor>
                             </descriptors>
+                            <finalName>${artifactId}-${version}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
                 </executions>
