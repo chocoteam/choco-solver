@@ -69,7 +69,7 @@ public class IntLinCombFactory {
                                     int minCardForDecomposition) {
         // 0. normalize data
         Model model = SCALAR.getModel();
-        if (VARS.length > minCardForDecomposition && OPERATOR.equals(Operator.EQ)) {
+        if (VARS.length > minCardForDecomposition) {
             int k = VARS.length;
             int d1 = (int) Math.sqrt(k);
             int d2 = k / d1 + (k % d1 == 0?0:1);
