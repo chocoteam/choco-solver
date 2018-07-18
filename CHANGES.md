@@ -30,7 +30,7 @@ the default behavior.
 
 
 ### Closed issues and pull requests:
-\#527, #569, #576, #578, #586
+\#527, #569, #576, #578, #581, #586
 
 4.0.6 - 23 Nov 2017
 -------------------

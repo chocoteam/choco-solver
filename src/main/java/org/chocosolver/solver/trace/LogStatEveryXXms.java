@@ -58,8 +58,10 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
     }
 
     @Override
-    public void afterInitialize() {
-        printer.start();
+    public void afterInitialize(boolean correct) {
+        if(correct){
+            printer.start();
+        }
     }
 
     @Override

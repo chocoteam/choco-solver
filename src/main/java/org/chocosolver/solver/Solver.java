@@ -251,8 +251,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         stop = !canBeRepaired;
         if (action == initialize) {
             searchMonitors.beforeInitialize();
-            initialize();
-            searchMonitors.afterInitialize();
+            boolean ok = initialize();
+            searchMonitors.afterInitialize(ok);
         }
         // solve
         boolean newSolutionFound = searchLoop();
@@ -317,7 +317,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * - run the initial propagation,
      * - initialize the Move and the search strategy
      */
-    protected void initialize() {
+    protected boolean initialize() {
+        boolean ok = true;
         if (mModel.getSettings().checkDeclaredConstraints() && mModel.getSettings().warnUser()) {
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
             instances
@@ -355,7 +356,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             L.record(this);
             L.forget(this);
             mModel.getEnvironment().worldPop();
-            stop = true;
+            stop = ok = true;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
@@ -375,9 +376,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
-            stop = true;
+            ok = stop = true;
         }
         criteria.stream().filter(c -> c instanceof ICounter).forEach(c -> ((ICounter) c).init());
+        return ok;
     }
 
     /**

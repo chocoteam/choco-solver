@@ -79,6 +79,13 @@ public final class SearchMonitorList implements IMonitorClose, IMonitorContradic
     }
 
     @Override
+    public void afterInitialize(boolean correct) {
+        for (int i = 0; i < minit.size(); i++) {
+            minit.get(i).afterInitialize(correct);
+        }
+    }
+
+    @Override
     public void beforeOpenNode() {
         for (int i = 0; i < mopno.size(); i++) {
             mopno.get(i).beforeOpenNode();
