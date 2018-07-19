@@ -15,7 +15,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
-    <version>[WARNING]</version>
+    <version>4.0.7-SNAPSHOT</version>
     <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
     <url>http://choco-solver.org/</url>
     <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
@@ -284,7 +284,7 @@
                             <descriptors>
                                 <descriptor>./src/assembly/with-dep.xml</descriptor>
                             </descriptors>
-                            <finalName>${artifactId}-${version}</finalName>
+                            <finalName>${project.artifactId}-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
                         </configuration>
                     </execution>
