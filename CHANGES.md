@@ -39,7 +39,7 @@ the default behavior.
 - An exception is thrown when a sum (or scalar) constraint is candidate for integer over/underflow (an alternative should be provided later)
 - `BoolVar` now handles modifications in different way (may impact performances)
 - Propagation engine has changed: no alternative to seven-queue one anymore + simplification of code (may impact performances)
-- add new relation expression "ift(e1,e2)"
+- add new relation expression `ift(e1,e2)`
 
 ### Deprecated API (to be removed in next release):
 -  `Model.set(Settings)` is deprecated. Now settings are declared in the `Model` constructor.

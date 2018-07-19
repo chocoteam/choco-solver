@@ -97,7 +97,7 @@ id=${ID[1]} || quit "Error: Unable to get id: ${ID}"
 # add asset
 curl -i -sH "$AUTH" -H "Content-Type: application/zip" \
          -data-binary @choco-${VERSION}.zip \
-         "${GH_UPL}/releases/${VERSION}/assets?name=choco-${VERSION}.zip" \
+         "${GH_UPL}/releases/${id}/assets?name=choco-${VERSION}.zip" \
          || quit "Unable to add asset"
 
 
@@ -106,6 +106,6 @@ NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))") || quit "Unable to get next r
 curl -i -sH "$AUTH" --data '{ "title": '\""${NEXT}"\"'}' \
         "${GH_API}milestones"
 
-rmdir -R choco-${VERSION}
+rmdir choco-${VERSION}
 rm ${temp_file} || quit "Unable to remove tmp file"
 git checkout master
