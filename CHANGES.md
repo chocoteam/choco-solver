@@ -17,22 +17,7 @@ NEXT MILESTONE
 4.0.8 - 23 Jul 2018
 -------------------
 
-### Major features:
-
-### Deprecated API (to be removed in next release):
-
-### Closed issues and pull requests:
-
-
-4.0.8 - 23 Jul 2018
--------------------
-
-### Major features:
-
-### Deprecated API (to be removed in next release):
-
-### Closed issues and pull requests:
-
+Update DefaultSettings with right version
 
 4.0.7 - 19 Jul 2018
 -------------------
