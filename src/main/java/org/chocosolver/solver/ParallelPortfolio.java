@@ -8,6 +8,8 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
@@ -409,8 +411,12 @@ public class ParallelPortfolio {
                 throw new UnsupportedOperationException("No objective has been defined");
             }
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
-                throw new UnsupportedOperationException("ParallelPortfolio cannot deal with " +
-                        "real variable objective optimization problems");
+                for(Constraint c : models.get(0).getCstrs()){
+                    if(c instanceof RealConstraint){
+                        throw new UnsupportedOperationException("" +
+                                "Ibex is not multithread safe, ParallelPortfolio cannot be used");
+                    }
+                }
             }
         }
     }
