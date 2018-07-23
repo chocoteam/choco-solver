@@ -4,7 +4,7 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
-NEXT MILESTONE
+4.0.8 - 23 Jul 2018
 -------------------
 
 ### Major features:
