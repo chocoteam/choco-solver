@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver;
 
@@ -22,6 +22,8 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.List;
 
@@ -348,7 +350,7 @@ public class ModelTest {
         model.setObjective(Model.MAXIMIZE, v[0]);
         model.getSolver().solve();
         assertTrue(v[0].isInstantiated());
-        if(model.getSolver().solve())
+        if (model.getSolver().solve())
             assertTrue(v[0].isInstantiatedTo(1));
         else
             assertFalse(v[0].isInstantiated());
@@ -393,15 +395,15 @@ public class ModelTest {
         Assert.assertNull(m.getSolver().findSolution());
     }
 
-	@Test(groups = "1s", timeOut = 60000)
-	public void testFindAfterReset(){
-		Model m = new Model();
-		IntVar i = m.intVar("i", 0, 5);
-		Solver s = m.getSolver();
-		s.findOptimalSolution(i, false);
-		s.reset();
-		Assert.assertNotNull(s.findSolution());
-	}
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAfterReset() {
+        Model m = new Model();
+        IntVar i = m.intVar("i", 0, 5);
+        Solver s = m.getSolver();
+        s.findOptimalSolution(i, false);
+        s.reset();
+        Assert.assertNotNull(s.findSolution());
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions() {
@@ -410,15 +412,15 @@ public class ModelTest {
         Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
-	@Test(groups = "1s", timeOut = 60000)
-	public void testFindAllSolutionsAfterReset(){
-		Model m = new Model();
-		IntVar i = m.intVar("i", 0, 5);
-		Solver s = m.getSolver();
-		s.findOptimalSolution(i, false);
-		s.reset();
-		Assert.assertEquals(s.findAllSolutions().size(),6);
-	}
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutionsAfterReset() {
+        Model m = new Model();
+        IntVar i = m.intVar("i", 0, 5);
+        Solver s = m.getSolver();
+        s.findOptimalSolution(i, false);
+        s.reset();
+        Assert.assertEquals(s.findAllSolutions().size(), 6);
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutions2() {
@@ -438,11 +440,11 @@ public class ModelTest {
         m.getSolver().setSearch(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
         Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
         Assert.assertNotNull(s);
-        Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective"))==25);
+        Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective")) == 25);
         m.getEnvironment().worldPush();
         try {
             s.restore();
-        }catch (ContradictionException c){
+        } catch (ContradictionException c) {
             Assert.fail();
         }
         Assert.assertTrue(((IntVar) m.getHook("objective")).isInstantiatedTo(25));
@@ -470,10 +472,10 @@ public class ModelTest {
         IntVar[] ticks = (IntVar[]) m.getHook("ticks");
         m.clearObjective();
         m.getSolver().showSolutions();
-		List<Solution> front = m.getSolver().findParetoFront(ticks, false);
-		for(Solution s:front){
-			System.out.println(s.getIntVal(ticks[0]));
-		}
+        List<Solution> front = m.getSolver().findParetoFront(ticks, false);
+        for (Solution s : front) {
+            System.out.println(s.getIntVal(ticks[0]));
+        }
         Assert.assertEquals(front.size(), 8);
     }
 
@@ -491,37 +493,37 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
     public void testRecord() {
         Model m = ProblemMaker.makeGolombRuler(6);
-		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
-		Solution s = new Solution(m);
-		m.getSolver().solve();
-		// solution not recorded
-		System.out.println(s.getIntVal(ticks[0]));
+        IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+        Solution s = new Solution(m);
+        m.getSolver().solve();
+        // solution not recorded
+        System.out.println(s.getIntVal(ticks[0]));
     }
 
-	@Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
-	public void testRecord2() {
-		Model m = ProblemMaker.makeGolombRuler(6);
-		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
-		IntVar p = m.boolVar();
-		Solution s = new Solution(m, ticks);
-		m.getSolver().solve();
-		s.record();
-		System.out.println(s.getIntVal(ticks[0]));
-		// not recorded variable
-		System.out.println(s.getIntVal(p));
-	}
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void testRecord2() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+        IntVar p = m.boolVar();
+        Solution s = new Solution(m, ticks);
+        m.getSolver().solve();
+        s.record();
+        System.out.println(s.getIntVal(ticks[0]));
+        // not recorded variable
+        System.out.println(s.getIntVal(p));
+    }
 
-	@Test(groups = "1s", timeOut = 60000)
-	public void testRecord3() {
-		Model m = ProblemMaker.makeGolombRuler(6);
-		IntVar[] ticks = (IntVar[]) m.getHook("ticks");
-		IntVar p = m.boolVar();
-		Solution s = new Solution(m, ArrayUtils.append(ticks, new IntVar[]{p}));
-		m.getSolver().solve();
-		s.record();
-		System.out.println(s.getIntVal(ticks[0]));
-		System.out.println(s.getIntVal(p));
-	}
+    @Test(groups = "1s", timeOut = 60000)
+    public void testRecord3() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        IntVar[] ticks = (IntVar[]) m.getHook("ticks");
+        IntVar p = m.boolVar();
+        Solution s = new Solution(m, ArrayUtils.append(ticks, new IntVar[]{p}));
+        m.getSolver().solve();
+        s.record();
+        System.out.println(s.getIntVal(ticks[0]));
+        System.out.println(s.getIntVal(p));
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
@@ -544,11 +546,11 @@ public class ModelTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2680);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testJuTii1(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJuTii1() {
         Model model = new Model("model");
         IntVar b = model.intVar("b", 2, 6);
-        model.arithm(b, ">",3).post();
+        model.arithm(b, ">", 3).post();
         Assert.assertEquals(b.getLB(), 2);
         Assert.assertTrue(model.getSolver().solve());
         model.getSolver().reset();
@@ -565,7 +567,7 @@ public class ModelTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJuTii2() {
         Model mode = new Model();
         IntVar r = mode.intVar("r", 1, 3);
@@ -592,5 +594,13 @@ public class ModelTest {
             mode.unpost(c2);
             mode.getSolver().hardReset();
         }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSettings2() throws IOException {
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("DefaultSettings.properties");
+        Settings settings = new DefaultSettings().load(inStream);
+        System.out.printf("%s\n",settings.getWelcomeMessage());
+        settings.store(System.out, "Test");
     }
 }

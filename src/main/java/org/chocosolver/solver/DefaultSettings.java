@@ -222,18 +222,6 @@ public class DefaultSettings implements Settings {
     }
 
     @Override
-    @Deprecated
-    public boolean debugPropagation() {
-        return debugPropagation;
-    }
-
-    @Override
-    public DefaultSettings setDebugPropagation(boolean debugPropagation) {
-        this.debugPropagation = debugPropagation;
-        return this;
-    }
-
-    @Override
     public boolean enableDecompositionOfBooleanSum() {
         return enableDecompositionOfBooleanSum;
     }

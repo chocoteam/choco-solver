@@ -16,6 +16,10 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -30,6 +34,119 @@ import java.util.function.Predicate;
  * @author Charles Prud'homme
  */
 public interface Settings  {
+
+    /**
+     * Load <b>some</b> settings from a property file.
+     * The following settings cannot be loaded from a property file:
+     * <ul>
+     *    <li>{@link #setModelChecker(Predicate)}</li>
+     *    <li>{@link #setDefaultSearch(Function)}</li>
+     *    <li>{@link #setInitSolver(Function)}        </li>
+     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
+     *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
+     * </ul>
+     * @param properties a property file to load setting from.
+     * @return the current instance
+     */
+    default Settings load(Properties properties) {
+        this.setWelcomeMessage((String) properties.get("welcome.message"));
+        this.setEnableViews(Boolean.valueOf(properties.get("views.activate").toString()));
+        this.setMaxDomSizeForEnumerated(Integer.valueOf(properties.get("enumerated.threshold").toString()));
+        this.setMinCardinalityForSumDecomposition(Integer.valueOf(properties.get("sum.decomposition.threshold").toString()));
+        this.setEnableTableSubstitution(Boolean.valueOf(properties.get("table.substitution").toString()));
+        this.setMCRDecimalPrecision(Double.valueOf(properties.get("MCR.precision").toString()));
+        this.setMaxTupleSizeForSubstitution(Integer.valueOf(properties.get("tuple.threshold").toString()));
+        this.setSortPropagatorActivationWRTPriority(Boolean.valueOf(properties.get("propagators.sort").toString()));
+        this.setWarnUser(Boolean.valueOf(properties.get("user.warn").toString()));
+        this.setEnableDecompositionOfBooleanSum(Boolean.valueOf(properties.get("boolsum.decomposition").toString()));
+        this.setCloneVariableArrayInPropagator(Boolean.valueOf(properties.get("propagators.clonevars").toString()));
+        this.setEnableACOnTernarySum(Boolean.valueOf(properties.get("sum.AConTernary").toString()));
+        this.setDefaultPrefix((String) properties.get("variables.prefix"));
+        this.setEnableSAT(Boolean.valueOf(properties.get("satsolver.activate").toString()));
+        this.setSwapOnPassivate(Boolean.valueOf(properties.get("propagators.swap").toString()));
+        this.setCheckDeclaredConstraints(Boolean.valueOf(properties.get("constraints.check").toString()));
+        this.setHybridizationOfPropagationEngine(Byte.valueOf(properties.get("propagationEngine.hybridization").toString()));
+        return this;
+    }
+
+    /**
+     * Load <b>some</b> settings from a property file.
+     * The following settings cannot be loaded from a property file:
+     * <ul>
+     *    <li>{@link #setModelChecker(Predicate)}</li>
+     *    <li>{@link #setDefaultSearch(Function)}</li>
+     *    <li>{@link #setInitSolver(Function)}        </li>
+     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
+     *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
+     * </ul>
+     * @param      inStream   the input stream.
+     * @exception  IOException  if an error occurred when reading from the
+     *             input stream.
+     * @throws     IllegalArgumentException if the input stream contains a
+     *             malformed Unicode escape sequence.
+     * @return the current instance
+     */
+    default Settings load(InputStream inStream) throws IOException {
+        Properties properties = new Properties();
+        properties.load(inStream);
+        load(properties);
+        return this;
+    }
+
+    /**
+     * Store <b>some</b> settings into a property file.
+     * The following settings cannot be stored into a property file:
+     * <ul>
+     *    <li>{@link #setModelChecker(Predicate)}</li>
+     *    <li>{@link #setDefaultSearch(Function)}</li>
+     *    <li>{@link #setInitSolver(Function)}        </li>
+     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
+     *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
+     * </ul>
+     * @exception IOException if writing this property list to the specified
+     *             output stream throws an <tt>IOException</tt>.
+     * @return the property file
+     */
+    default Properties store(){
+        Properties properties = new Properties();
+        properties.setProperty("welcome.message", this.getWelcomeMessage());
+        properties.setProperty("views.activate", Boolean.toString(this.enableViews()));
+        properties.setProperty("enumerated.threshold", Integer.toString(this.getMaxDomSizeForEnumerated()));
+        properties.setProperty("sum.decomposition.threshold", Integer.toString(this.getMinCardForSumDecomposition()));
+        properties.setProperty("table.substitution", Boolean.toString(this.enableTableSubstitution()));
+        properties.setProperty("MCR.precision", Double.toString(this.getMCRDecimalPrecision()));
+        properties.setProperty("tuple.threshold", Integer.toString(this.getMaxTupleSizeForSubstitution()));
+        properties.setProperty("propagators.sort", Boolean.toString(this.sortPropagatorActivationWRTPriority()));
+        properties.setProperty("user.warn", Boolean.toString(this.warnUser()));
+        properties.setProperty("boolsum.decomposition", Boolean.toString(this.enableDecompositionOfBooleanSum()));
+        properties.setProperty("propagators.clonevars", Boolean.toString(this.cloneVariableArrayInPropagator()));
+        properties.setProperty("sum.AConTernary", Boolean.toString(this.enableACOnTernarySum()));
+        properties.setProperty("variables.prefix", this.defaultPrefix());
+        properties.setProperty("satsolver.activate", Boolean.toString(enableSAT()));
+        properties.setProperty("propagators.swap", Boolean.toString(swapOnPassivate()));
+        properties.setProperty("constraints.check", Boolean.toString(checkDeclaredConstraints()));
+        properties.setProperty("propagationEngine.hybridization", Byte.toString(enableHybridizationOfPropagationEngine()));
+        return properties;
+    }
+
+    /**
+     * Store <b>some</b> settings into a property file.
+     * The following settings cannot be stored into a property file:
+     * <ul>
+     *    <li>{@link #setModelChecker(Predicate)}</li>
+     *    <li>{@link #setDefaultSearch(Function)}</li>
+     *    <li>{@link #setInitSolver(Function)}        </li>
+     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
+     *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
+     * </ul>
+     * @param   out      an output stream.
+     * @param   comments   a description of the property list.
+     * @exception IOException if writing this property list to the specified
+     *             output stream throws an <tt>IOException</tt>.
+     */
+    default void store(OutputStream out, String comments) throws IOException {
+        store().store(out, comments);
+    }
 
     /**
      * @return the welcome message
@@ -153,7 +270,7 @@ public interface Settings  {
     boolean sortPropagatorActivationWRTPriority();
 
     /**
-     * Set whether propagators are sorted wrt their priority in {@link org.chocosolver.solver.propagation.PropagationTrigger} when
+     * Set whether propagators are sorted wrt their priority in {@link org.chocosolver.solver.propagation.PropagationEngine} when
      * dealing with propagator activation.
      *
      * @param sortPropagatorActivationWRTPriority {@code true} to allow sorting static propagators.
@@ -204,23 +321,6 @@ public interface Settings  {
      * @return the current instance
      */
     Settings setWarnUser(boolean warnUser);
-
-    /**
-     * @return true if all events are output in the console
-     * @deprecated will be removed in next release
-     */
-    @Deprecated
-    boolean debugPropagation();
-
-    /**
-     * When this setting returns {@code true}, a complete trace of the events is output.
-     * This can be quite big, though, and it slows down the overall process.
-     *
-     * Note that this parameter is read once at propagation engine creation and set in a final variable.
-     * @param debugPropagation {@code true} to output a complete trace of the propagated events.
-     * @return the current instance
-     */
-    Settings setDebugPropagation(boolean debugPropagation);
 
     /**
      * @return {@code true} if boolean sum should be decomposed into an equality constraint and an arithmetic constraint,

@@ -9,6 +9,9 @@ NEXT MILESTONE
 
 ### Major features:
 
+- Offer possibility to store and load `Settings` from a property file.
+- Add API for `cumulative` when only starts are variable
+
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
