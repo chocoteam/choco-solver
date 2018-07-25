@@ -136,6 +136,16 @@ public class Cumulative extends Constraint {
 			}
 		},
 		/**
+		 * time-table algorithm based on each point in time
+		 * not idempotent
+		 */
+		NAIVETIME{
+			@Override
+			public CumulFilter make(int n) {
+				return new NaiveTimeCumulFilter(n);
+			}
+		},
+		/**
 		 * time-table algorithm based on a sweep line
 		 * idempotent (on the given set of variables only)
 		 */

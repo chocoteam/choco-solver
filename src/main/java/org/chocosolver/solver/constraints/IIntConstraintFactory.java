@@ -1124,6 +1124,36 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
+     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
+     * Enforces that at each point in time,
+     * the cumulated height of the set of tasks that overlap that point
+     * does not exceed a given limit.
+     *
+     * Task duration and height should be >= 0
+     * Discards tasks whose duration or height is equal to zero
+     *
+     * @param starts   starting time of each task
+     * @param durations processing time of each task
+     * @param heights  resource consumption of each task
+     * @param capacity resource capacity
+     */
+    default void cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+        int n = starts.length;
+        final IntVar[] d = Arrays.stream(durations).mapToObj(i -> ref().intVar(durations[i])).toArray(IntVar[]::new);
+        final IntVar[] h = Arrays.stream(heights).mapToObj(i -> ref().intVar(heights[i])).toArray(IntVar[]::new);
+        final IntVar[] e = new IntVar[n];
+        Task[] tasks = new Task[n];
+        for (int i = 0; i < n; i++) {
+            e[i] = ref().intVar(starts[i].getName()+"_e",
+                    starts[i].getLB() + durations[i],
+                    starts[i].getUB() + durations[i],
+                    true);
+            tasks[i] = new Task(starts[i], d[i], e[i]);
+        }
+        ref().cumulative(tasks, h, ref().intVar(capacity), true, Cumulative.Filter.NAIVETIME).post();
+    }
+
+    /**
      * Creates a diffN constraint. Constrains each rectangle<sub>i</sub>, given by their origins X<sub>i</sub>,Y<sub>i</sub>
      * and sizes width<sub>i</sub>,height<sub>i</sub>, to be non-overlapping.
      *
