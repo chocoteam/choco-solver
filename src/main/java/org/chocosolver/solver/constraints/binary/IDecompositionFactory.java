@@ -15,7 +15,16 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+
+import java.util.stream.IntStream;
+
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
 
 /**
  * An interface dedicated to list decomposition of some constraints.
@@ -25,6 +34,42 @@ import org.chocosolver.solver.variables.IntVar;
  * @since 12/06/2018.
  */
 public interface IDecompositionFactory extends ISelf<Model> {
+
+    /**
+     * Creates and <b>posts</b> a decomposition of a cumulative constraint:
+     * associates a boolean variable to each task and each point of time sich that
+     * the scalar product of boolean variables per heights for each time never exceed capacity.
+     *
+     * @param starts   starting time of each task
+     * @param durations processing time of each task
+     * @param heights  resource consumption of each task
+     * @param capacity resource capacity
+     * @see org.chocosolver.solver.constraints.IIntConstraintFactory#cumulative(IntVar[], int[], int[], int)
+     */
+    default void cumulativeTimeDecomp(IntVar[] starts, int[] durations, int[] heights, int capacity) {
+        int n = starts.length;
+        // 1. find range of 't' parameters while creating variables
+        int min_t = MAX_VALUE, max_t = MIN_VALUE;
+        for (int i = 0; i < n; i++) {
+            min_t = min(min_t, starts[i].getLB());
+            max_t = max(max_t, starts[i].getUB() + durations[i]);
+        }
+        for (int t = min_t; t <= max_t; t++) {
+            BoolVar[] bit = ref().boolVarArray(format("b_%s_", t), n);
+            for (int i = 0; i < n; i++) {
+                BoolVar[] bits = ref().boolVarArray(format("b_%s_%s_", t, i), 2);
+                ref().reifyXltC(starts[i], t + 1, bits[0]);
+                ref().reifyXgtC(starts[i], t - durations[i], bits[1]);
+                ref().addClausesBoolAndArrayEqVar(bits, bit[i]);
+            }
+            ref().scalar(
+                    bit,
+                    IntStream.range(0, n).map(i -> heights[i]).toArray(),
+                    "<=",
+                    capacity
+            ).post();
+        }
+    }
 
     /**
      * Creates and <b>posts</b> a decomposition of a regular constraint.
