@@ -185,10 +185,10 @@ public interface ReExpression extends ArExpression {
 
     /**
      * @param y a relational expression
-     * @return return the expression "x &oplus; y" where this is "x"
+     * @return return the expression "x &oplus; y_1 &oplus; y_2 &oplus; ..." where this is "x"
      */
-    default ReExpression xor(ReExpression y) {
-        return new BiLoExpression(LoExpression.Operator.XOR, this, y);
+    default ReExpression xor(ReExpression... y) {
+        return new NaLoExpression(LoExpression.Operator.XOR, this, y);
     }
 
     /**

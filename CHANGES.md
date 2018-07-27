@@ -11,6 +11,8 @@ NEXT MILESTONE
 
 - Offer possibility to store and load `Settings` from a property file.
 - Add API for `cumulative` when only starts are variable
+- Add decomposition of cumulative: `model.cumulativeTimeDecomp(...)`
+- Logical expression XOR manages more than 2 variables
 
 ### Deprecated API (to be removed in next release):
 
