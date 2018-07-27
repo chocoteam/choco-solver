@@ -72,10 +72,20 @@ public class NaLoExpression extends LoExpression {
                 case OR:
                     model.addClausesBoolOrArrayEqVar(vs, me);
                     break;
+                case XOR:
+                    int[] values = new int[vs.length % 2 == 0 ? vs.length / 2 : (vs.length + 1) / 2];
+                    for (int i = 0, j = 1; i < values.length; i++, j += 2) {
+                        values[i] = j;
+                    }
+                    IntVar res = model.intVar(model.generateName(), 0, vs.length);
+                    model.sum(vs, "=", res).post();
+                    IntVar exres = model.intVar(model.generateName(), values);
+                    model.reifyXeqY(res, exres, me);
+                    break;
                 case IFF:
-                    if(vs.length == 2){
+                    if (vs.length == 2) {
                         model.reifyXeqY(vs[0], vs[1], me);
-                    }else {
+                    } else {
                         IntVar count = model.intVar(op + "_count_", 1, 2);
                         model.atMostNValues(vs, count, false).post();
                         model.reifyXltC(count, 2, me);
@@ -101,10 +111,17 @@ public class NaLoExpression extends LoExpression {
                 return model.sum(vs, "=", vs.length);
             case OR:
                 return model.sum(vs, ">", 0);
+            case XOR:
+                int[] values = new int[vs.length % 2 == 0 ? vs.length / 2 : (vs.length + 1) / 2];
+                for (int i = 0, j = 1; i < values.length; i++, j += 2) {
+                    values[i] = j;
+                }
+                IntVar res = model.intVar(model.generateName(), values);
+                return model.sum(vs, "=", res);
             case IFF:
-                if(vs.length == 2){
+                if (vs.length == 2) {
                     return model.arithm(vs[0], "=", vs[1]);
-                }else {
+                } else {
                     return model.allEqual(vs);
                 }
             default:
@@ -115,7 +132,7 @@ public class NaLoExpression extends LoExpression {
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         boolean eval = es[0].beval(values, map);
-        for(int i = 1; i < es.length; i++){
+        for (int i = 1; i < es.length; i++) {
             eval = op.eval(eval, es[i].beval(values, map));
         }
         return eval;

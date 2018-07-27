@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.*;
 import org.chocosolver.solver.variables.BoolVar;
@@ -23,7 +24,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Jean-Guillaume FAGES
  * @since 4.0.0
  */
-public interface IReificationFactory {
+public interface IReificationFactory extends ISelf<Model> {
 
 	//***********************************************************************************
 	// Non-reifiable reification constraints
@@ -101,15 +102,14 @@ public interface IReificationFactory {
 	default void ifThen(BoolVar ifVar, Constraint thenCstr) {
 		// PRESOLVE
 		if(ifVar.contains(1)){
-			Model s = ifVar.getModel();
 			if(ifVar.isInstantiated()) {
 				thenCstr.post();
 			}else if(thenCstr.isSatisfied() == ESat.FALSE) {
-				s.arithm(ifVar, "=", 0).post();
+				ref().arithm(ifVar, "=", 0).post();
 			}
 			// END OF PRESOLVE
 			else {
-				s.arithm(ifVar, "<=", thenCstr.reify()).post();
+				ref().arithm(ifVar, "<=", thenCstr.reify()).post();
 			}
 		}
 	}
@@ -139,7 +139,6 @@ public interface IReificationFactory {
 	 * @param cstr the constraint to be satisfied if and only if <i>var</i> = 1
 	 */
 	default void reification(BoolVar var, Constraint cstr){
-		Model s = var.getModel();
 		// PRESOLVE
 		ESat entail = cstr.isSatisfied();
 		if(var.isInstantiatedTo(1)) {
@@ -147,9 +146,9 @@ public interface IReificationFactory {
 		}else if(var.isInstantiatedTo(0)) {
 			cstr.getOpposite().post();
 		}else if(entail == ESat.TRUE) {
-			s.arithm(var, "=", 1).post();
+			ref().arithm(var, "=", 1).post();
 		}else if(entail == ESat.FALSE) {
-			s.arithm(var, "=", 0).post();
+			ref().arithm(var, "=", 0).post();
 		}
 		// END OF PRESOLVE
 		else {
@@ -165,9 +164,21 @@ public interface IReificationFactory {
      * @param B a boolean variable
      */
 	default void reifyXeqC(IntVar X, int C, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqCReif(X, C, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqCReif(X, C, B)));
+	}
+
+	/**
+	 * Posts one constraint that expresses : (x &ne; c) &hArr; b.
+	 * Bypasses the reification system.
+	 * @param X a integer variable
+	 * @param C an int
+	 * @param B a boolean variable
+	 */
+	default void reifyXneC(IntVar X, int C, BoolVar B){
+		// no check to allow addition during resolution
+//		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXneCReif(X, C, B)));
+		ref().reifyXeqC(X, C, B.not());
 	}
 
 	/**
@@ -183,23 +194,9 @@ public interface IReificationFactory {
 		}else if(Y.isAConstant()){
 			reifyXeqC(X, Y.getValue(), B);
 		}else {
-			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYReif(X, Y, B)));
+			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYReif(X, Y, B)));
 		}
-	}
-
-	/**
-	 * Posts one constraint that expresses : (x &ne; c) &hArr; b.
-	 * Bypasses the reification system.
-	 * @param X a integer variable
-	 * @param C an int
-	 * @param B a boolean variable
-	 */
-	default void reifyXneC(IntVar X, int C, BoolVar B){
-		Model model = X.getModel();
-		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXneCReif(X, C, B)));
 	}
 
 	/**
@@ -215,9 +212,8 @@ public interface IReificationFactory {
 		}else if(Y.isAConstant()){
 			reifyXneC(X, Y.getValue(), B);
 		}else {
-			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXneYReif(X, Y, B)));
+			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXneYReif(X, Y, B)));
 		}
 	}
 
@@ -229,9 +225,8 @@ public interface IReificationFactory {
 	 * @param B a boolean variable
 	 */
 	default void reifyXltC(IntVar X, int C, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
 	}
 
 	/**
@@ -247,9 +242,8 @@ public interface IReificationFactory {
 		}else if(Y.isAConstant()){
 			reifyXltC(X, Y.getValue(), B);
 		}else {
-			Model model = X.getModel();
 			// no check to allow addition during resolution
-			model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYReif(X, Y, B)));
+			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYReif(X, Y, B)));
 		}
 	}
 
@@ -261,9 +255,8 @@ public interface IReificationFactory {
 	 * @param B a boolean variable
 	 */
 	default void reifyXleY(IntVar X, IntVar Y, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, 1, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, 1, B)));
 	}
 
 	/**
@@ -275,9 +268,8 @@ public interface IReificationFactory {
 	 * @param B a boolean variable
 	 */
 	default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
 	}
 
 	/**
@@ -288,9 +280,8 @@ public interface IReificationFactory {
 	 * @param B a boolean variable
 	 */
 	default void reifyXgtC(IntVar X, int C, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
 	}
 
 	/**
@@ -301,9 +292,8 @@ public interface IReificationFactory {
 	 * @param B a boolean variable
 	 */
 	default void reifyXinS(IntVar X, IntIterableRangeSet S, BoolVar B){
-		Model model = X.getModel();
 		// no check to allow addition during resolution
-		model.post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B)));
+		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B)));
 	}
 
 
