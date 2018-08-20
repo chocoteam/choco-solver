@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.*;
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -165,6 +166,15 @@ public interface IReificationFactory extends ISelf<Model> {
      */
 	default void reifyXeqC(IntVar X, int C, BoolVar B){
 		// no check to allow addition during resolution
+        if(ref().getSolver().getSearchState() == SearchState.NEW){
+            if(X.isInstantiatedTo(C)){
+                ref().arithm(B, "=", 1).post();
+                return;
+            }else if(!X.contains(C)) {
+                ref().arithm(B, "=", 0).post();
+                return;
+            }
+        }
 		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqCReif(X, C, B)));
 	}
 
@@ -226,8 +236,17 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXltC(IntVar X, int C, BoolVar B){
 		// no check to allow addition during resolution
-		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
-	}
+        if(ref().getSolver().getSearchState() == SearchState.NEW){
+            if(X.getUB() < C){
+                ref().arithm(B, "=", 1).post();
+                return;
+            }else if(X.getLB() >= C) {
+                ref().arithm(B, "=", 0).post();
+                return;
+            }
+        }
+        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
+    }
 
 	/**
 	 * Posts one constraint that expresses : (x < y) &hArr; b.
@@ -281,7 +300,8 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXgtC(IntVar X, int C, BoolVar B){
 		// no check to allow addition during resolution
-		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
+        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
+//        reifyXltC(X, C + 1, B.not());
 	}
 
 	/**
