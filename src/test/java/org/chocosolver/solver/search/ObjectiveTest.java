@@ -300,6 +300,20 @@ public class ObjectiveTest {
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 23);
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testDefSearch() {
+        Model model = makeGolombRuler(8);
+        IntVar objective = (IntVar) model.getHook("objective");
+        model.setObjective(Model.MINIMIZE, objective);
+        int best = objective.getUB();
+        model.getSolver().showShortStatistics();
+        while (model.getSolver().solve()) {
+            best = objective.getValue();
+        }
+        assertEquals(best, 34);
+        assertEquals(model.getSolver().getSolutionCount(), 13);
+    }
     
     
     @Test(groups = "1s", timeOut = 60000)

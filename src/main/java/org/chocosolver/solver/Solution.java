@@ -367,4 +367,11 @@ public class Solution implements ICause {
         }
         model.getSolver().propagate();
     }
+
+    /**
+     * @return <i>true</i> if a solution has been recorded into this, <i>false</i> otherwise.
+     */
+    public boolean exists(){
+        return !empty;
+    }
 }
