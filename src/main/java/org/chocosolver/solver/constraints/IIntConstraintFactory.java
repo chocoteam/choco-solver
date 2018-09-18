@@ -51,8 +51,6 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
-import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
-import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
 import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
 import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
