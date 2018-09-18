@@ -46,7 +46,7 @@ public class TimeCumulFilter extends CumulFilter {
 		ISetIterator tIter = tasks.iterator();
 		while (tIter.hasNext()){
 			int i = tIter.nextInt();
-			if (s[i].getUB() < e[i].getLB()) {
+			if (s[i].getUB() < e[i].getLB() && h[i].getLB() != 0) {
 				min = Math.min(min, s[i].getUB());
 				max = Math.max(max, e[i].getLB());
 			}
@@ -66,11 +66,13 @@ public class TimeCumulFilter extends CumulFilter {
 			tIter = tasks.iterator();
 			while (tIter.hasNext()){
 				int i = tIter.nextInt();
-				elb = e[i].getLB();
 				hlb = h[i].getLB();
-				for (int t = s[i].getUB(); t < elb; t++) {
-					time[t - min] += hlb;
-					maxC = Math.max(maxC,time[t - min]);
+				if (hlb != 0) {
+					elb = e[i].getLB();
+					for (int t = s[i].getUB(); t < elb; t++) {
+						time[t - min] += hlb;
+						maxC = Math.max(maxC, time[t - min]);
+					}
 				}
 			}
 			capa.updateLowerBound(maxC, aCause);
@@ -82,9 +84,9 @@ public class TimeCumulFilter extends CumulFilter {
 				int i = tIter.nextInt();
 				if(!h[i].isInstantiated()){
 					minH = h[i].getUB();
-					elb = e[i].getLB();
+					elb = Math.min(e[i].getLB(), max);
 					hlb = h[i].getLB();
-					for (int t = s[i].getUB(); t < elb; t++) {
+					for (int t = Math.max(s[i].getUB(), min); t < elb; t++) {
 						minH = Math.min(minH,capaMax-(time[t-min]-hlb));
 					}
 					h[i].updateUpperBound(minH,aCause);
