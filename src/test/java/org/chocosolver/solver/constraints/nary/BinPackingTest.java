@@ -11,7 +11,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
+import org.chocosolver.solver.constraints.nary.binpacking.PropBinPacking;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.DataProvider;

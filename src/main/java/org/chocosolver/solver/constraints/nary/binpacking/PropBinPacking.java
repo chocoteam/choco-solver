@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.binPacking;
+package org.chocosolver.solver.constraints.nary.binpacking;
 
 import java.util.ArrayList;
 
@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Propagator for a Bin Packing constraint
@@ -51,7 +52,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 * @param offset the offset
 	 */
 	public PropBinPacking(IntVar[] items, IntVar[] loads, int[] weights, int offset) {
-		super(merge(items, loads));
+		super(ArrayUtils.append(items, loads));
 		this.items = items;
 		this.loads = loads;
 		this.weights = weights;
@@ -90,8 +91,11 @@ public class PropBinPacking extends Propagator<IntVar> {
 		if(alpha <= 0 || sum(set,weights) <= beta) {
 			return new int[]{};
 		}
-		int sumA = 0, sumB = 0, sumC = 0;
-		int k = 0, k2 = 0; // k largest items and k2 smallest items
+		int sumA = 0;
+		int sumB = 0;
+		int sumC = 0;
+		int k = 0; // k largest items
+		int k2 = 0; // k2 smallest items
 
 		while(k2 < set.size() && sumC + weights[set.get(set.size()-1-k2)] < alpha) {
 			sumC += weights[set.get(set.size()-1-k2)];
@@ -121,26 +125,6 @@ public class PropBinPacking extends Propagator<IntVar> {
 		else {
 			return new int[]{};
 		}
-	}
-
-	/**
-	 * Merges two arrays of IntVar variables.
-	 *
-	 * @param a the first array
-	 * @param b the second array
-	 * @return the merged array
-	 */
-	private static IntVar[] merge(IntVar[] a, IntVar[] b) {
-		IntVar[] t = new IntVar[a.length+b.length];
-		for(int i = 0; i<t.length; i++) {
-			if(i<a.length) {
-				t[i] = a[i];
-			}
-			else {
-				t[i] = b[i-a.length];
-			}
-		}
-		return t;
 	}
 
 	/* (non-Javadoc)
@@ -188,14 +172,16 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 */
 	private boolean loadAndSizeCoherence() throws ContradictionException { // 2.5 Load and Size Coherence
 		boolean modif = false;
-		int min = 0, max = 0;
+		int min = 0;
+		int max = 0;
 		for(int j = 0; j<loads.length; j++) {
 			min += loads[j].getLB();
 			max += loads[j].getUB();
 		}
 		for(int j = 0; j<loads.length; j++) {
 			boolean localModif = false;
-			int lb = this.totalWeight-(max-loads[j].getUB()), ub = this.totalWeight-(min-loads[j].getLB());
+			int lb = this.totalWeight-(max-loads[j].getUB());
+			int ub = this.totalWeight-(min-loads[j].getLB());
 			if(lb>loads[j].getLB()) {
 				localModif = true;
 				min = min - loads[j].getLB() + lb;
