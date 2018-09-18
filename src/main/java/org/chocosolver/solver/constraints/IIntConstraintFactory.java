@@ -50,6 +50,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
+import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
 import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
@@ -840,8 +841,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             sum += is;
         }
         return Constraint.merge(ConstraintsName.BINPACKING, new Constraint(ConstraintsName.BINPACKING,
-                        new PropItemToLoad(itemBin, itemSize, binLoad, offset),
-                        new PropLoadToItem(itemBin, itemSize, binLoad, offset)),
+                        new PropBinPacking(itemBin, binLoad, itemSize, offset)),
                 model.sum(binLoad, "=", sum)
         );
     }
