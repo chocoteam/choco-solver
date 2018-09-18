@@ -108,35 +108,63 @@ public class TimeCumulFilter extends CumulFilter {
 
 	protected void filterInf(IntVar start, int elb, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
 		int nbOk = 0;
-		int sub = start.getUB();
-		for (int t = start.getLB(); t < sub; t++) {
-			if (t < min || t >= max || hlb + time[t - min] <= capaMax) {
+		int t = start.getLB();
+		int newValue = t;
+		if (min - t > 0) {
+			nbOk = min - t;
+			t = min;
+		}
+		boolean update = false;
+		int sub = Math.min(start.getUB(), max);
+		for (; t < sub; t++) {
+			if (hlb + time[t - min] <= capaMax) {
 				nbOk++;
 				if (nbOk == dlb) {
+					if (update) {
+						start.updateLowerBound(newValue, aCause);
+					}
 					return;
 				}
 			} else {
 				if(dlb==0 && t >= elb)return;
 				nbOk = 0;
-				start.updateLowerBound(t + 1, aCause);
+				newValue = t + 1;
+				update = true;
 			}
+		}
+		if (update) {
+			start.updateLowerBound(newValue, aCause);
 		}
 	}
 
 	protected void filterSup(int sub, IntVar end, int dlb, int hlb, int min, int max, int[] time, int capaMax, Propagator<IntVar> aCause) throws ContradictionException {
 		int nbOk = 0;
-		int elb = end.getLB();
-		for (int t = end.getUB(); t > elb; t--) {
-			if (t - 1 < min || t - 1 >= max || hlb + time[t - min - 1] <= capaMax) {
+		int t = end.getUB();
+		int newValue = t;
+		if (t - max > 0) {
+			nbOk = t - max;
+			t = max;
+		}
+		boolean update = false;
+		int elb = Math.max(end.getLB(), min);
+		for (; t > elb; t--) {
+			if (hlb + time[t - min - 1] <= capaMax) {
 				nbOk++;
 				if (nbOk == dlb) {
+					if (update) {
+						end.updateUpperBound(newValue, aCause);
+					}
 					return;
 				}
 			} else {
 				if(dlb==0 && t <= sub)return;
 				nbOk = 0;
-				end.updateUpperBound(t - 1, aCause);
+				newValue = t - 1;
+				update = true;
 			}
+		}
+		if(update) {
+			end.updateUpperBound(newValue, aCause);
 		}
 	}
 }
