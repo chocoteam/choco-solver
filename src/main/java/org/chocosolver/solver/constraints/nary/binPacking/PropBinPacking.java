@@ -23,6 +23,7 @@ import org.chocosolver.util.ESat;
  * The implementation is based on the following paper :  Paul Shaw. A constraint for bin packing. In Mark Wallace, editor, CP, volume 3258 of Lecture Notes in Computer Science, pages 648–662. Springer, 2004
  *
  * @author Arthur Godet : arth.godet@gmail.com
+ * @since 18/09/18
  */
 public class PropBinPacking extends Propagator<IntVar> {
 	
