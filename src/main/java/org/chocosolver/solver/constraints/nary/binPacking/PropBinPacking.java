@@ -254,7 +254,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 				int i = C.get(j).get(k);
 				if(pj[j]+weights[i]>loads[j].getUB()) {
 					localModif = true;
-					items[i].removeValue(j, this);
+					items[i].removeValue(j+offset, this);
 					C.get(j).remove(k);
 					P.get(j).remove(new Integer(i));
 					sumPj[j] -= weights[i];
@@ -262,7 +262,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 				}
 				else if(sumPj[j]-weights[i]<loads[j].getLB()) {
 					localModif = true;
-					items[i].instantiateTo(j, this);
+					items[i].instantiateTo(j+offset, this);
 					C.get(j).remove(k);
 					R.get(j).add(i);
 					pj[j] += weights[i];
@@ -335,14 +335,14 @@ public class PropBinPacking extends Propagator<IntVar> {
 				int i = C.get(j).remove(k);
 				if(noSum(C.get(j), weights, loads[j].getLB()-pj[j]-weights[i], loads[j].getUB()-pj[j]-weights[i]).length==2) {
 					localModif = true;
-					items[i].removeValue(j, this);
+					items[i].removeValue(j+offset, this);
 					P.get(j).remove(new Integer(i));
 					sumPj[j] -= weights[i];
 					modif = true;
 				}
 				else if(noSum(C.get(j), weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j]).length==2) {
 					localModif = true;
-					items[i].instantiateTo(j, this);
+					items[i].instantiateTo(j+offset, this);
 					R.get(j).add(i);
 					pj[j] += weights[i];
 					modif = true;
