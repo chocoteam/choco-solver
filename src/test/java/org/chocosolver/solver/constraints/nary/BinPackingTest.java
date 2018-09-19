@@ -17,6 +17,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import gnu.trove.list.array.TIntArrayList;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,16 +84,20 @@ public class BinPackingTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testNoSum() {
-		ArrayList<Integer> set = new ArrayList<>();
+		TIntArrayList set = new TIntArrayList();
 		for(int i = 0; i<9; i++) {
 			set.add(i);
 		}
 		int[] weights = new int[] {10, 10, 10, 9, 9, 9, 9, 2, 1};
 		int alpha = 34, beta = 35;
-		int[] ns = PropBinPacking.noSum(set, weights, alpha, beta);
-		assertEquals(2, ns.length);
-		assertEquals(33, ns[0]);
-		assertEquals(36, ns[1]);
+		Model m = new Model();
+		IntVar[] items = m.intVarArray(9, 0, 9);
+		IntVar[] loads = m.intVarArray(9, 0, 100);
+		PropBinPacking prop = new PropBinPacking(items, loads, weights, 0);
+		boolean ns = prop.noSum(set, weights, alpha, beta);
+		assertTrue(ns);
+		assertEquals(33, prop.getA());
+		assertEquals(36, prop.getB());
 		// we could also check that k==3 and k2==2
 	}
 }

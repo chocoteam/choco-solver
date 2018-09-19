@@ -8,13 +8,15 @@
  */
 package org.chocosolver.solver.constraints.nary.binpacking;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import gnu.trove.list.array.TIntArrayList;
 
 /**
  * Propagator for a Bin Packing constraint
@@ -42,6 +44,27 @@ public class PropBinPacking extends Propagator<IntVar> {
 	
 	/** The total weight : it is the sum of all the weights. */
 	private int totalWeight;
+	
+	/** First value computed by the noSum algorithm. */
+	private int a;
+	
+	/** Second value computed by the noSum algorithm. */
+	private int b;
+	
+	/** P sets, representing the possible values that can be packed in each bin. */
+	private TIntArrayList[] P;
+	
+	/** R sets, representing the items already packed in each bin. */
+	private TIntArrayList[] R;
+	
+	/** C sets, representing P\R. */
+	private TIntArrayList[] C;
+	
+	/** Array used to compute the weights corresponding to R sets. */
+	private int[] pj;
+	
+	/** Array used to compute the weights corresponding to the P sets. */
+	private int[] sumPj;
 
 	/**
 	 * Instantiates a new propagator of the bin packing constraint.
@@ -57,10 +80,37 @@ public class PropBinPacking extends Propagator<IntVar> {
 		this.loads = loads;
 		this.weights = weights;
 		this.totalWeight = 0;
-		for(int w : weights) {
-			totalWeight += w;
-		}
 		this.offset = offset;
+		int n = items.length;
+		this.C = new TIntArrayList[items.length];
+		this.P = new TIntArrayList[items.length];
+		this.R = new TIntArrayList[items.length];
+		this.pj = new int[items.length];
+		this.sumPj = new int[items.length];
+		for(int j = 0; j<n; j++) {
+			totalWeight += weights[j];
+			C[j] = new TIntArrayList();
+			P[j] = new TIntArrayList();
+			R[j] = new TIntArrayList();
+		}
+	}
+	
+	/**
+	 * Returns the first value computed by the last call to the noSum function.
+	 *
+	 * @return the first value computed by the last call to the noSum function
+	 */
+	public int getA() {
+		return this.a;
+	}
+	
+	/**
+	 * Returns the second value computed by the last call to the noSum function.
+	 *
+	 * @return the second value computed by the last call to the noSum function
+	 */
+	public int getB() {
+		return this.b;
 	}
 
 	/**
@@ -70,10 +120,11 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 * @param weights the weights
 	 * @return the sum of the weights of the items contained in the set
 	 */
-	private static int sum(ArrayList<Integer> set, int[] weights) {
+	private static int sum(TIntArrayList set, int[] weights) {
 		int res = 0;
-		for(int i : set) {
-			res += weights[i];
+		int size = set.size();
+		for(int i = 0; i<size; i++) {
+			res += weights[set.get(i)];
 		}
 		return res;
 	}
@@ -87,43 +138,47 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 * @param beta the beta bound
 	 * @return the int[]
 	 */
-	public static int[] noSum(ArrayList<Integer> set, int[] weights, int alpha, int beta) {
+	public boolean noSum(TIntArrayList set, int[] weights, int alpha, int beta) {
 		if(alpha <= 0 || sum(set,weights) <= beta) {
-			return new int[]{};
+			return false;
 		}
 		int sumA = 0;
 		int sumB = 0;
 		int sumC = 0;
 		int k = 0; // k largest items
 		int k2 = 0; // k2 smallest items
+		
+		int size = set.size();
 
-		while(k2 < set.size() && sumC + weights[set.get(set.size()-1-k2)] < alpha) {
-			sumC += weights[set.get(set.size()-1-k2)];
+		while(k2 < size && sumC + weights[set.get(size-1-k2)] < alpha) {
+			sumC += weights[set.get(size-1-k2)];
 			k2++;
 		}
-		if(k2 == set.size()) {
+		if(k2 == size) {
 			k2--;
 		}
-		sumB = weights[set.get(set.size()-1-k2)];
+		sumB = weights[set.get(size-1-k2)];
 		while(k2 >=0 && sumA<alpha && sumB <= beta) {
 			k++;
 			sumA += weights[set.get(k-1)];
 			if(sumA < alpha) {
 				k2--;
-				sumB += weights[set.get(set.size()-1-k2)];
-				sumC -= weights[set.get(set.size()-1-k2)];
+				sumB += weights[set.get(size-1-k2)];
+				sumC -= weights[set.get(size-1-k2)];
 				while(sumA+sumC >= alpha) {
 					k2--;
-					sumC -= weights[set.get(set.size()-1-k2)];
-					sumB += (weights[set.get(set.size()-1-k2)]-weights[set.get(set.size()-1-k2-k-1)]);
+					sumC -= weights[set.get(size-1-k2)];
+					sumB += (weights[set.get(size-1-k2)]-weights[set.get(size-1-k2-k-1)]);
 				}
 			}
 		}
 		if(sumA < alpha) {
-			return new int[]{sumA+sumC,sumB};
+			a = sumA+sumC;
+			b = sumB;
+			return true;
 		}
 		else {
-			return new int[]{};
+			return false;
 		}
 	}
 
@@ -155,13 +210,13 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 * @param weights the weights
 	 * @param idx the index of the item to add
 	 */
-	public static void order(ArrayList<Integer> list, int[] weights, int idx) {
+	public static void order(TIntArrayList list, int[] weights, int idx) {
 		assert 0<=idx && idx<weights.length : "idx should be betwwen 0 (include) and weights.length (exclude)";
 		int i = 0;
 		while(i<list.size() && weights[list.get(i)]>weights[idx]) {
 			i++;
 		}
-		list.add(i, idx);
+		list.insert(i, idx);
 	}
 	
 	/**
@@ -204,12 +259,10 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/**
 	 * Load Maintenance rule.
 	 *
-	 * @param pj the pj
-	 * @param sumPj the sum pj
 	 * @return true, if a modification has been made on the items or loads variables
 	 * @throws ContradictionException the contradiction exception
 	 */
-	private boolean loadMaintenance(int[] pj, int[] sumPj) throws ContradictionException { // 2.5 Load Maintenance
+	private boolean loadMaintenance() throws ContradictionException { // 2.5 Load Maintenance
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
 			if(loads[j].getLB()<pj[j] || loads[j].getUB()>sumPj[j]) {
@@ -224,33 +277,28 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/**
 	 * Single Item Elimination and Commitment rule.
 	 *
-	 * @param C the c
-	 * @param P the p
-	 * @param R the r
-	 * @param pj the pj
-	 * @param sumPj the sum pj
 	 * @return true, if a modification has been made on the items or loads variables
 	 * @throws ContradictionException the contradiction exception
 	 */
-	private boolean singleItemEliminationAndCommitment(ArrayList<ArrayList<Integer>> C, ArrayList<ArrayList<Integer>> P, ArrayList<ArrayList<Integer>> R, int[] pj, int[] sumPj) throws ContradictionException{ // 2.5 Single Item Elimination and Commitment
+	private boolean singleItemEliminationAndCommitment() throws ContradictionException{ // 2.5 Single Item Elimination and Commitment
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
-			for(int k = 0; k<C.get(j).size(); k++) {
+			for(int k = 0; k<C[j].size(); k++) {
 				boolean localModif = false;
-				int i = C.get(j).get(k);
+				int i = C[j].get(k);
 				if(pj[j]+weights[i]>loads[j].getUB()) {
 					localModif = true;
 					items[i].removeValue(j+offset, this);
-					C.get(j).remove(k);
-					P.get(j).remove(new Integer(i));
+					C[j].removeAt(k);
+					P[j].remove(i);
 					sumPj[j] -= weights[i];
 					modif = true;
 				}
 				else if(sumPj[j]-weights[i]<loads[j].getLB()) {
 					localModif = true;
 					items[i].instantiateTo(j+offset, this);
-					C.get(j).remove(k);
-					R.get(j).add(i);
+					C[j].removeAt(k);
+					R[j].add(i);
 					pj[j] += weights[i];
 					modif = true;
 				}
@@ -265,13 +313,11 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/**
 	 * Pruning rule.
 	 *
-	 * @param C the c
-	 * @param pj the pj
 	 * @throws ContradictionException the contradiction exception
 	 */
-	private void pruningRule(ArrayList<ArrayList<Integer>> C, int[] pj) throws ContradictionException { // 3.2 Pruning Rule
+	private void pruningRule() throws ContradictionException { // 3.2 Pruning Rule
 		for(int j = 0; j<loads.length; j++) {
-			if(noSum(C.get(j), weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j]).length==2) {
+			if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j])) {
 				throw new ContradictionException();
 			}
 		}
@@ -280,22 +326,18 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/**
 	 * Tightening Bounds on Bin Load rule.
 	 *
-	 * @param C the c
-	 * @param pj the pj
 	 * @return true, if a modification has been made on the items or loads variables
 	 * @throws ContradictionException the contradiction exception
 	 */
-	private boolean tighteningBoundsOnBinLoad(ArrayList<ArrayList<Integer>> C, int[] pj) throws ContradictionException { // 3.3 Tightening Bounds on Bin Load
+	private boolean tighteningBoundsOnBinLoad() throws ContradictionException { // 3.3 Tightening Bounds on Bin Load
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
-			int[] ns = noSum(C.get(j), weights, loads[j].getLB()-pj[j], loads[j].getLB()-pj[j]);
-			if(ns.length==2) {
-				loads[j].updateLowerBound(pj[j]+ns[1], this);
+			if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getLB()-pj[j])) {
+				loads[j].updateLowerBound(pj[j]+b, this);
 				modif = true;
 			}
-			ns = noSum(C.get(j), weights, loads[j].getUB()-pj[j], loads[j].getUB()-pj[j]);
-			if(ns.length==2) {
-				loads[j].updateUpperBound(pj[j]+ns[0], this);
+			if(noSum(C[j], weights, loads[j].getUB()-pj[j], loads[j].getUB()-pj[j])) {
+				loads[j].updateUpperBound(pj[j]+a, this);
 				modif = true;
 			}
 		}
@@ -305,31 +347,26 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/**
 	 * Elimination and Commitment of Items rule.
 	 *
-	 * @param C the c
-	 * @param P the p
-	 * @param R the r
-	 * @param pj the pj
-	 * @param sumPj the sum pj
 	 * @return true, if a modification has been made on the items or loads variables
 	 * @throws ContradictionException the contradiction exception
 	 */
-	private boolean eliminationAndCommitmentOfItems(ArrayList<ArrayList<Integer>> C, ArrayList<ArrayList<Integer>> P, ArrayList<ArrayList<Integer>> R, int[] pj, int[] sumPj) throws ContradictionException { // 3.4 Elimination and Commitment of Items
+	private boolean eliminationAndCommitmentOfItems() throws ContradictionException { // 3.4 Elimination and Commitment of Items
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
-			for(int k = 0; k<C.get(j).size(); k++) {
+			for(int k = 0; k<C[j].size(); k++) {
 				boolean localModif = false;
-				int i = C.get(j).remove(k);
-				if(noSum(C.get(j), weights, loads[j].getLB()-pj[j]-weights[i], loads[j].getUB()-pj[j]-weights[i]).length==2) {
+				int i = C[j].removeAt(k);
+				if(noSum(C[j], weights, loads[j].getLB()-pj[j]-weights[i], loads[j].getUB()-pj[j]-weights[i])) {
 					localModif = true;
 					items[i].removeValue(j+offset, this);
-					P.get(j).remove(new Integer(i));
+					P[j].remove(i);
 					sumPj[j] -= weights[i];
 					modif = true;
 				}
-				else if(noSum(C.get(j), weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j]).length==2) {
+				else if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j])) {
 					localModif = true;
 					items[i].instantiateTo(j+offset, this);
-					R.get(j).add(i);
+					R[j].add(i);
 					pj[j] += weights[i];
 					modif = true;
 				}
@@ -337,7 +374,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 					k = -1;
 				}
 				else {
-					C.get(j).add(k, new Integer(i));
+					C[j].insert(k, new Integer(i));
 				}
 			}
 		}
@@ -357,43 +394,41 @@ public class PropBinPacking extends Propagator<IntVar> {
 		}
 		
 		// Building Pj and Rj and Cj for each j
-		ArrayList<ArrayList<Integer>> P = new ArrayList<ArrayList<Integer>>();
-		ArrayList<ArrayList<Integer>> R = new ArrayList<ArrayList<Integer>>();
-		ArrayList<ArrayList<Integer>> C = new ArrayList<ArrayList<Integer>>();
-		for(int j = 0; j<loads.length; j++) {
-			P.add(new ArrayList<Integer>());
-			R.add(new ArrayList<Integer>());
-			C.add(new ArrayList<Integer>());
+		for(int j = 0; j<items.length; j++) {
+			P[j].clear();
+			R[j].clear();
+			C[j].clear();
 		}
+		
 		for(int i = 0; i<items.length; i++) {
 			if(items[i].isInstantiated()) {
 				int value = items[i].getValue();
-				R.get(value-this.offset).add(i);
-				order(P.get(value-this.offset), weights, i);
+				R[value-this.offset].add(i);
+				order(P[value-this.offset], weights, i);
 			}
 			else {
 				for(int value = items[i].getLB(); value <= items[i].getUB(); value = items[i].nextValue(value)) {
-					order(P.get(value-this.offset), weights, i);
-					order(C.get(value-this.offset), weights, i);
+					order(P[value-this.offset], weights, i);
+					order(C[value-this.offset], weights, i);
 				}
 			}
 		}
-		int[] pj = new int[R.size()]; // represents the sum pj of the weights of the items in Rj
-		int[] sumPj = new int[P.size()]; // represents the sum of the weights of the items in Pj
+		Arrays.fill(pj, 0);
+		Arrays.fill(sumPj, 0);
 		for(int j = 0; j<loads.length; j++) {
-			pj[j] = sum(R.get(j), weights);
-			sumPj[j] = sum(P.get(j), weights);
+			pj[j] = sum(R[j], weights);
+			sumPj[j] = sum(P[j], weights);
 		}
 		
 		boolean modif = false;
 		do {
 			modif = false;
-			modif |= this.loadMaintenance(pj, sumPj); // 2.5 Load Maintenance
+			modif |= this.loadMaintenance(); // 2.5 Load Maintenance
 			modif |= this.loadAndSizeCoherence(); // 2.5 Load and Size Coherence
-			modif |= this.singleItemEliminationAndCommitment(C, P, R, pj, sumPj); // 2.5 Single Item Elimination and Commitment
-			this.pruningRule(C, pj); // 3.2 Pruning Rule
-			modif |= this.tighteningBoundsOnBinLoad(C, pj); // 3.3 Tightening Bounds on Bin Load
-			modif |= this.eliminationAndCommitmentOfItems(C, P, R, pj, sumPj); // 3.4 Elimination and Commitment of Items
+			modif |= this.singleItemEliminationAndCommitment(); // 2.5 Single Item Elimination and Commitment
+			this.pruningRule(); // 3.2 Pruning Rule
+			modif |= this.tighteningBoundsOnBinLoad(); // 3.3 Tightening Bounds on Bin Load
+			modif |= this.eliminationAndCommitmentOfItems(); // 3.4 Elimination and Commitment of Items
 		} while(modif);
 		
 	}
