@@ -80,15 +80,16 @@ public class PropBinPacking extends Propagator<IntVar> {
 		this.loads = loads;
 		this.weights = weights;
 		this.totalWeight = 0;
+		for(int w : weights) {
+			totalWeight += w;
+		}
 		this.offset = offset;
-		int n = items.length;
 		this.C = new TIntArrayList[loads.length];
 		this.P = new TIntArrayList[loads.length];
 		this.R = new TIntArrayList[loads.length];
 		this.pj = new int[loads.length];
 		this.sumPj = new int[loads.length];
-		for(int j = 0; j<n; j++) {
-			totalWeight += weights[j];
+		for(int j = 0; j<loads.length; j++) {
 			C[j] = new TIntArrayList();
 			P[j] = new TIntArrayList();
 			R[j] = new TIntArrayList();
@@ -394,7 +395,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 		}
 		
 		// Building Pj and Rj and Cj for each j
-		for(int j = 0; j<items.length; j++) {
+		for(int j = 0; j<loads.length; j++) {
 			P[j].clear();
 			R[j].clear();
 			C[j].clear();
@@ -408,7 +409,6 @@ public class PropBinPacking extends Propagator<IntVar> {
 			}
 			else {
 				for(int value = items[i].getLB(); value <= items[i].getUB(); value = items[i].nextValue(value)) {
-					System.out.println(P.length+":"+value+":"+offset+":"+(value-offset));
 					order(P[value-this.offset], weights, i);
 					order(C[value-this.offset], weights, i);
 				}
