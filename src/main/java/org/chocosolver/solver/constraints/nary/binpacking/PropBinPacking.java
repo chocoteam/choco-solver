@@ -13,6 +13,7 @@ import java.util.Arrays;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -45,6 +46,12 @@ public class PropBinPacking extends Propagator<IntVar> {
 	/** The total weight : it is the sum of all the weights. */
 	private int totalWeight;
 	
+	/** The sum of the lower bounds of loads variables. */
+	private int minLoad;
+	
+	/** The sum of the upper bounds of loads variables. */
+	private int maxLoad;
+	
 	/** First value computed by the noSum algorithm. */
 	private int a;
 	
@@ -65,7 +72,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 	
 	/** Array used to compute the weights corresponding to the P sets. */
 	private int[] sumPj;
-
+	
 	/**
 	 * Instantiates a new propagator of the bin packing constraint.
 	 *
@@ -83,6 +90,8 @@ public class PropBinPacking extends Propagator<IntVar> {
 		for(int w : weights) {
 			totalWeight += w;
 		}
+		this.minLoad = 0;
+		this.maxLoad = 0;
 		this.offset = offset;
 		this.C = new TIntArrayList[loads.length];
 		this.P = new TIntArrayList[loads.length];
@@ -98,6 +107,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 	
 	/**
 	 * Returns the first value computed by the last call to the noSum function.
+	 * Used only for tests purposes.
 	 *
 	 * @return the first value computed by the last call to the noSum function
 	 */
@@ -107,6 +117,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 	
 	/**
 	 * Returns the second value computed by the last call to the noSum function.
+	 * Used only for tests purposes.
 	 *
 	 * @return the second value computed by the last call to the noSum function
 	 */
@@ -228,25 +239,19 @@ public class PropBinPacking extends Propagator<IntVar> {
 	 */
 	private boolean loadAndSizeCoherence() throws ContradictionException { // 2.5 Load and Size Coherence
 		boolean modif = false;
-		int min = 0;
-		int max = 0;
-		for(int j = 0; j<loads.length; j++) {
-			min += loads[j].getLB();
-			max += loads[j].getUB();
-		}
 		for(int j = 0; j<loads.length; j++) {
 			boolean localModif = false;
-			int lb = this.totalWeight-(max-loads[j].getUB());
-			int ub = this.totalWeight-(min-loads[j].getLB());
+			int lb = this.totalWeight-(maxLoad-loads[j].getUB());
+			int ub = this.totalWeight-(minLoad-loads[j].getLB());
 			if(lb>loads[j].getLB()) {
 				localModif = true;
-				min = min - loads[j].getLB() + lb;
+				minLoad = minLoad - loads[j].getLB() + lb;
 				loads[j].updateLowerBound(lb, this);
 				modif = true;
 			}
 			if(ub<loads[j].getUB()) {
 				localModif = true;
-				max = max - loads[j].getUB() + ub;
+				maxLoad = maxLoad - loads[j].getUB() + ub;
 				loads[j].updateUpperBound(ub, this);
 				modif = true;
 			}
@@ -268,9 +273,12 @@ public class PropBinPacking extends Propagator<IntVar> {
 		for(int j = 0; j<loads.length; j++) {
 			if(loads[j].getLB()<pj[j] || loads[j].getUB()>sumPj[j]) {
 				modif = true;
+				int lb = loads[j].getLB();
+				int ub = loads[j].getUB();
+				loads[j].updateBounds(pj[j], sumPj[j], this);
+				minLoad += loads[j].getLB()-lb;
+				maxLoad += loads[j].getUB()-ub;
 			}
-			loads[j].updateLowerBound(pj[j], this);
-			loads[j].updateUpperBound(sumPj[j], this);
 		}
 		return modif;
 	}
@@ -333,12 +341,16 @@ public class PropBinPacking extends Propagator<IntVar> {
 	private boolean tighteningBoundsOnBinLoad() throws ContradictionException { // 3.3 Tightening Bounds on Bin Load
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
-			if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getLB()-pj[j])) {
+			int lb = loads[j].getLB();
+			int ub = loads[j].getUB();
+			if(noSum(C[j], weights, lb-pj[j], lb-pj[j])) {
 				loads[j].updateLowerBound(pj[j]+b, this);
+				minLoad += loads[j].getLB()-lb;
 				modif = true;
 			}
-			if(noSum(C[j], weights, loads[j].getUB()-pj[j], loads[j].getUB()-pj[j])) {
+			if(noSum(C[j], weights, ub-pj[j], ub-pj[j])) {
 				loads[j].updateUpperBound(pj[j]+a, this);
+				maxLoad += loads[j].getUB()-ub;
 				modif = true;
 			}
 		}
@@ -354,32 +366,70 @@ public class PropBinPacking extends Propagator<IntVar> {
 	private boolean eliminationAndCommitmentOfItems() throws ContradictionException { // 3.4 Elimination and Commitment of Items
 		boolean modif = false;
 		for(int j = 0; j<loads.length; j++) {
-			for(int k = 0; k<C[j].size(); k++) {
-				boolean localModif = false;
-				int i = C[j].removeAt(k);
-				if(noSum(C[j], weights, loads[j].getLB()-pj[j]-weights[i], loads[j].getUB()-pj[j]-weights[i])) {
-					localModif = true;
-					items[i].removeValue(j+offset, this);
-					P[j].remove(i);
-					sumPj[j] -= weights[i];
-					modif = true;
+			boolean localModif = false;
+			if(C[j].size()>=2) {
+				for(int k = 0; k<C[j].size(); k++) {
+					int i = C[j].removeAt(k);
+					if(noSum(C[j], weights, loads[j].getLB()-pj[j]-weights[i], loads[j].getUB()-pj[j]-weights[i])) {
+						localModif = true;
+						items[i].removeValue(j+offset, this);
+						P[j].remove(i);
+						sumPj[j] -= weights[i];
+						modif = true;
+						k--;
+					}
+					else if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j])) {
+						localModif = true;
+						items[i].instantiateTo(j+offset, this);
+						R[j].add(i);
+						pj[j] += weights[i];
+						modif = true;
+						k--;
+					}
+					else {
+						C[j].insert(k, new Integer(i));
+					}
 				}
-				else if(noSum(C[j], weights, loads[j].getLB()-pj[j], loads[j].getUB()-pj[j])) {
-					localModif = true;
-					items[i].instantiateTo(j+offset, this);
-					R[j].add(i);
-					pj[j] += weights[i];
-					modif = true;
-				}
-				if(localModif) {
-					k = -1;
-				}
-				else {
-					C[j].insert(k, new Integer(i));
-				}
+			}
+			if(localModif) {
+				j--;
 			}
 		}
 		return modif;
+	}
+	
+	/**
+	 * Initializes variables used by the filtering algorithm.
+	 */
+	private void init() {
+		this.minLoad = 0;
+		this.maxLoad = 0;
+		Arrays.fill(pj, 0);
+		Arrays.fill(sumPj, 0);
+		for(int j = 0; j<loads.length; j++) {
+			P[j].clear();
+			R[j].clear();
+			C[j].clear();
+			this.minLoad += loads[j].getLB();
+			this.maxLoad += loads[j].getUB();
+		}
+		
+		for(int i = 0; i<items.length; i++) {
+			if(items[i].isInstantiated()) {
+				int value = items[i].getValue();
+				R[value-this.offset].add(i);
+				pj[value-this.offset] += weights[i];
+				order(P[value-this.offset], weights, i);
+				sumPj[value-offset] += weights[i];
+			}
+			else {
+				for(int value = items[i].getLB(); value <= items[i].getUB(); value = items[i].nextValue(value)) {
+					order(P[value-this.offset], weights, i);
+					order(C[value-this.offset], weights, i);
+					sumPj[value-offset] += weights[i];
+				}
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -394,32 +444,7 @@ public class PropBinPacking extends Propagator<IntVar> {
 			}
 		}
 		
-		// Building Pj and Rj and Cj for each j
-		for(int j = 0; j<loads.length; j++) {
-			P[j].clear();
-			R[j].clear();
-			C[j].clear();
-		}
-		
-		for(int i = 0; i<items.length; i++) {
-			if(items[i].isInstantiated()) {
-				int value = items[i].getValue();
-				R[value-this.offset].add(i);
-				order(P[value-this.offset], weights, i);
-			}
-			else {
-				for(int value = items[i].getLB(); value <= items[i].getUB(); value = items[i].nextValue(value)) {
-					order(P[value-this.offset], weights, i);
-					order(C[value-this.offset], weights, i);
-				}
-			}
-		}
-		Arrays.fill(pj, 0);
-		Arrays.fill(sumPj, 0);
-		for(int j = 0; j<loads.length; j++) {
-			pj[j] = sum(R[j], weights);
-			sumPj[j] = sum(P[j], weights);
-		}
+		this.init();
 		
 		boolean modif = false;
 		do {
@@ -433,5 +458,13 @@ public class PropBinPacking extends Propagator<IntVar> {
 		} while(modif);
 		
 	}
-
+	
+	@Override
+	public int getPropagationConditions(int vIdx) {
+		if(vIdx>=items.length) {
+			return IntEventType.boundAndInst();
+		}
+		return IntEventType.all();
+	}
+	
 }
