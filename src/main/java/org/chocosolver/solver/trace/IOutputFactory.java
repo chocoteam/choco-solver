@@ -10,6 +10,8 @@ package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.loop.monitors.CPProfiler;
+import org.chocosolver.solver.search.loop.monitors.GraphvizGenerator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
@@ -20,6 +22,7 @@ import org.chocosolver.solver.trace.frames.StatisticsPanel;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
 
+import java.io.Closeable;
 import java.io.PrintStream;
 
 import javax.swing.*;
@@ -276,6 +279,35 @@ public interface IOutputFactory extends ISelf<Solver> {
         frame.pack();
 //        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    /**
+     * Populate a DOT file (<i>gvFilename</i> with search tree to be vizualized with
+     * <a href="https://graphviz.org">Graphviz</a>.
+     * @param gvFilename dot filename
+     * @return a {@link Closeable} object to be closed at the end of resolution
+     */
+    default Closeable outputSearchTreeToGraphviz(String gvFilename){
+        return new GraphvizGenerator(gvFilename,this.ref());
+    }
+
+    /**
+     * Populate a GEXF file (<i>gexfFilename</i> with search tree to be vizualized with
+     * <a href="https://gephi.org">Gephi</a>.
+     * @param gexfFilename dot filename
+     * @return a {@link Closeable} object to be closed at the end of resolution
+     */
+    default Closeable outputSearchTreeToGephi(String gexfFilename){
+        return new GraphvizGenerator(gexfFilename,this.ref());
+    }
+
+    /**
+     * Plug <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a> instance to this.
+     * @param domain set to <i>true</i> to send variables' domain on each node, <i>false</i> otherwise.
+     * @return a {@link Closeable} object to be closed at the end of resolution
+     */
+    default Closeable outputSearchTreeToCPProfiler(boolean domain){
+        return new CPProfiler(this.ref(), domain);
     }
 
 

@@ -13,6 +13,7 @@ NEXT MILESTONE
 - Add API for `cumulative` when only starts are variable
 - Add decomposition of cumulative: `model.cumulativeTimeDecomp(...)`
 - Logical expression XOR manages more than 2 variables
+- Add new API to IOutputFactory (to Gephi and to Graphviz)
 
 ### Deprecated API (to be removed in next release):
 
