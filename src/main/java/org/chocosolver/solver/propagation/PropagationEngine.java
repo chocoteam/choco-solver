@@ -18,12 +18,12 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.IntList;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * This engine is priority-driven constraint-oriented seven queues engine.
@@ -54,8 +54,7 @@ public class PropagationEngine {
     /**
      * To deal with propagators added dynamically
      */
-    private final List<Propagator> dynPropagators;
-    private final IntList dynWorlds;
+    private final DynPropagators dynPropagators;
     /**
      * The main structure of this engine: seven circular queues,
      * each of them is dedicated to store propagator to execute wrt their priority.
@@ -105,8 +104,7 @@ public class PropagationEngine {
         }
         this.var_queue = new CircularQueue<>(16);
         this.awake_queue = new CircularQueue<>(16);
-        this.dynPropagators = new ArrayList<>(16);
-        this.dynWorlds = new IntList();
+        this.dynPropagators = new DynPropagators();
         this.propagators = new ArrayList<>();
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
     }
@@ -191,15 +189,8 @@ public class PropagationEngine {
      * @throws ContradictionException if a propagation fails
      */
     private void activatePropagators() throws ContradictionException {
-        if (dynPropagators.size() > 0) {
-            int cw = model.getEnvironment().getWorldIndex(); // get current index
-            for(int p = 0; p < dynPropagators.size(); p++){
-                if (dynWorlds.getQuick(p) >= cw) {
-                    awake_queue.addLast(dynPropagators.get(p));
-                    dynWorlds.replaceQuick(p, cw);
-                }
-            }
-        }
+        int cw = model.getEnvironment().getWorldIndex(); // get current index
+        dynPropagators.descending(cw, awake_queue::addLast);
         while (!awake_queue.isEmpty()) {
             execute(awake_queue.pollFirst());
         }
@@ -305,7 +296,7 @@ public class PropagationEngine {
         variable.clearEvents();
     }
 
-    private void schedule(Propagator prop, int pindice, int mask) {
+    public void schedule(Propagator prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
         notEmpty = notEmpty | (1 << prop.doSchedule(pro_queue));
     }
@@ -354,7 +345,6 @@ public class PropagationEngine {
      */
     public void clear() {
         dynPropagators.clear();
-        dynWorlds.clear();
         awake_queue.clear();
         propagators.clear();
         notEmpty = 0;
@@ -382,7 +372,6 @@ public class PropagationEngine {
                 ps[i].setPosition(propagators.size());
                 propagators.add(ps[i]);
                 dynPropagators.add(ps[i]);
-                dynWorlds.add(Integer.MAX_VALUE);
             }
         }
     }
@@ -408,13 +397,7 @@ public class PropagationEngine {
         shift(idx);
         propagators.set(propagators.size() - 1, propagator);
         propagator.setPosition(propagators.size() - 1);
-        int pos = dynPropagators.indexOf(propagator);
-        if(pos>-1){
-            dynWorlds.replaceQuick(pos, Integer.MAX_VALUE);
-        }else {
-            dynPropagators.add(propagator);
-            dynWorlds.add(Integer.MAX_VALUE);
-        }
+        dynPropagators.addOrUpdate(propagator);
     }
 
     /**
@@ -427,12 +410,8 @@ public class PropagationEngine {
             if (lastProp == toDelete) {
                 lastProp = null;
             }
-            if(toDelete.getPosition()>-1) {
-                int idx = dynPropagators.indexOf(toDelete);
-                if (idx > -1) {
-                    dynPropagators.remove(idx);
-                    dynWorlds.removeAt(idx);
-                }
+            if (toDelete.getPosition() > -1) {
+                dynPropagators.remove(toDelete);
                 remove(toDelete);
             }
         }
@@ -453,6 +432,79 @@ public class PropagationEngine {
         for (int i = from; i < propagators.size() - 1; i++) {
             propagators.set(i, propagators.get(i + 1));
             propagators.get(i).setPosition(i);
+        }
+    }
+
+    private class DynPropagators {
+
+        private Propagator[] elements;
+        private int[] keys;
+        private int size;
+
+        public DynPropagators() {
+            elements = new Propagator[16];
+            keys = new int[16];
+            size = 0;
+        }
+
+        public void clear() {
+            size = 0;
+        }
+
+        public void add(Propagator e) {
+            ensureCapacity();
+            elements[size] = e;
+            keys[size++] = Integer.MAX_VALUE;
+        }
+
+        private void ensureCapacity() {
+            if (size >= elements.length - 1) {
+                Propagator[] tmp = elements;
+                elements = new Propagator[elements.length * 3 / 2];
+                System.arraycopy(tmp, 0, elements, 0, size);
+                int[] itmp = keys;
+                keys = new int[elements.length];
+                System.arraycopy(itmp, 0, keys, 0, size);
+            }
+        }
+
+        public void addOrUpdate(Propagator e) {
+            int p = indexOf(e);
+            if (p > -1) {
+                removeAt(p);
+            }
+            add(e);
+        }
+
+        public void remove(Propagator e) {
+            removeAt(indexOf(e));
+        }
+
+        private void removeAt(int p){
+            if(p < size - 1) {
+                System.arraycopy(elements, p + 1, elements, p, size - p);
+                System.arraycopy(keys, p + 1, keys, p, size - p);
+            }
+            elements[--size] = null;
+            keys[size] = 0;
+        }
+
+        private int indexOf(Propagator e) {
+            for (int i = 0; i < size; i++) {
+                if (e.equals(elements[i])) {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
+        public void descending(int w, Consumer<Propagator> cons) {
+            int i = size - 1;
+            while (i >= 0 && keys[i] >= w) {
+                cons.accept(elements[i]);
+                keys[i] = w;
+                i--;
+            }
         }
     }
 }
