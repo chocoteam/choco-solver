@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Solver;
 
@@ -16,6 +16,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import static org.chocosolver.solver.trace.GephiConstants.*;
+
 /**
  * <p> Project: choco-solver.
  *
@@ -23,40 +25,6 @@ import java.nio.file.StandardOpenOption;
  * @since 03/05/2018.
  */
 public class GephiGenerator extends SearchViz {
-
-    private static final String OXMLTAG = "<?xml version=\"1.0\" encoding=\"UTF−8\"?>\n" +
-            "<gexf \txmlns=\"http://www.gexf.net/1.2draft\"\n" +
-            "\txmlns:xsi=\"http://www.w3.org/2001/XMLSchema−instance\"\n" +
-            "\txsi:schemaLocation=\"http://www.gexf.net/1.2draft\n" +
-            "\t\thttp://www.gexf.net/1.2draft/gexf.xsd\"\n" +
-            "\txmlns:viz=\"http://www.gexf.net/1.2draft/viz\"\n"+
-            "\tversion=\"1.2\">\n";
-    private static final String OGRAPGTAG = "\t<graph mode=\"static\" defaultedgetype=\"directed\">\n";
-    private static final String ONODESTAG = "\t\t<nodes count=\"%d\">\n";
-    private static final String ROOTTAG =
-            "\t\t\t<node id=\"%d\" label=\"%s\">\n" +
-                    "\t\t\t\t%s\n" + // color
-                    "\t\t\t\t<viz:shape value=\"disc\"/>\n" +
-                    "\t\t\t</node>\n";
-    private static final String NODETAG =
-            "\t\t\t<node id=\"%d\" label=\"%s\" pid=\"%d\">\n" +
-                    "\t\t\t\t%s\n" + // color
-//                    "\t\t\t\t<viz:position x=\"15.783598\" y=\"40.109245\" z=\"0.0\"/>\n" +
-//                    "\t\t\t\t<viz:size value=\"2.0375757\"/>\n" +
-                    "\t\t\t\t<viz:shape value=\"disc\"/>\n" +
-                    "\t\t\t</node>\n";
-    private static final String ENODESTAG = "\t\t</nodes>\n";
-    private static final String OEDGESTAG = "\t\t<edges>\n";
-    private static final String EDGETAG = "\t\t\t<edge id=\"%d\" source=\"%d\" target=\"%d\" type=\"directed\"/>\n";
-    private static final String EEDGESTAG = "\t\t</edges>\n";
-    private static final String EGRAPGTAG = "\t</graph>\n";
-    private static final String EXMLTAG = "</gexf>\n";
-
-
-    private static final String GREEN = "<viz:color r=\"63\" g=\"191\" b=\"63\" a=\"1\"/>";
-    private static final String RED = "<viz:color r=\"191\" g=\"63\" b=\"63\" a=\"1\"/>";
-    private static final String BLUE = "<viz:color r=\"63\" g=\"127\" b=\"191\" a=\"0.1\"/>";
-    private static final String ORANGE = "<viz:color r=\"191\" g=\"127\" b=\"63\" a=\"1\"/>";
 
     private final String instance;
 
@@ -108,9 +76,9 @@ public class GephiGenerator extends SearchViz {
     protected void sendNode(int nc, int pid, int alt, int kid, int rid, String label, String info) {
         nodeCount++;
         if(pid == -1){
-            nodes.append(String.format(ROOTTAG, nc, label, ORANGE));
+            nodes.append(String.format(ROOTTAG, nc, label, ORANGE, DISC));
         }else {
-            nodes.append(String.format(NODETAG, nc, label, pid, BLUE));
+            nodes.append(String.format(NODETAG, nc, label, String.format(PID, pid), BLUE, DISC));
             edges.append(String.format(EDGETAG, edgeCount++, pid, nc));
         }
     }
@@ -118,14 +86,14 @@ public class GephiGenerator extends SearchViz {
     @Override
     protected void sendSolution(int nc, int pid, int alt, int kid, int rid, String label, String info) {
         nodeCount++;
-        nodes.append(String.format(NODETAG, nc, label, pid, GREEN));
+        nodes.append(String.format(NODETAG, nc, label, String.format(PID, pid), GREEN, DISC));
         edges.append(String.format(EDGETAG, edgeCount++, pid, nc));
     }
 
     @Override
     protected void sendFailure(int nc, int pid, int alt, int kid, int rid, String label, String info) {
         nodeCount++;
-        nodes.append(String.format(NODETAG, nc, label, pid, RED));
+        nodes.append(String.format(NODETAG, nc, label, String.format(PID, pid), RED, DISC));
         edges.append(String.format(EDGETAG, edgeCount++, pid, nc));
     }
 

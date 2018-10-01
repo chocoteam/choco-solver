@@ -14,6 +14,7 @@ NEXT MILESTONE
 - Add decomposition of cumulative: `model.cumulativeTimeDecomp(...)`
 - Logical expression XOR manages more than 2 variables
 - Add new API to IOutputFactory (to Gephi and to Graphviz)
+- Add constraint network output (to gexf format), see `solver.constraintNetworkToGephi(file)`
 
 ### Deprecated API (to be removed in next release):
 

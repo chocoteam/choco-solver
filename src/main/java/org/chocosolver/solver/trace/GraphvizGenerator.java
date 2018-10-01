@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.Solver;
 

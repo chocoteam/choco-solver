@@ -10,8 +10,6 @@ package org.chocosolver.solver.trace;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.loop.monitors.CPProfiler;
-import org.chocosolver.solver.search.loop.monitors.GraphvizGenerator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorClose;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
@@ -298,7 +296,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @return a {@link Closeable} object to be closed at the end of resolution
      */
     default Closeable outputSearchTreeToGephi(String gexfFilename){
-        return new GraphvizGenerator(gexfFilename,this.ref());
+        return new GephiGenerator(gexfFilename,this.ref());
     }
 
     /**
@@ -308,6 +306,15 @@ public interface IOutputFactory extends ISelf<Solver> {
      */
     default Closeable outputSearchTreeToCPProfiler(boolean domain){
         return new CPProfiler(this.ref(), domain);
+    }
+
+    /**
+     * Populate a GEXF file (<i>gexfFilename</i> with constraint netwok to be vizualized with
+     * <a href="https://gephi.org">Gephi</a>.
+     * @param gexfFilename dot filename
+     */
+    default void constraintNetworkToGephi(String gexfFilename){
+        GephiNetwork.write(gexfFilename, this.ref().getModel());
     }
 
 
