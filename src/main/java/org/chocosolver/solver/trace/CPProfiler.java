@@ -6,7 +6,7 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.search.loop.monitors;
+package org.chocosolver.solver.trace;
 
 import com.github.cpprofiler.Connector;
 
@@ -70,10 +70,12 @@ public class CPProfiler extends SearchViz {
 
     @Override
     protected void disconnect(){
-        try {
-            connector.disconnect();
-        } catch (IOException e) {
-            System.err.println("Unable to disconnect CPProfiler.");
+        if(connected) {
+            try {
+                connector.disconnect();
+            } catch (IOException e) {
+                System.err.println("Unable to disconnect CPProfiler.");
+            }
         }
     }
 
