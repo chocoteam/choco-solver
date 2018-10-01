@@ -131,8 +131,9 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
     public SearchViz(Solver aSolver, boolean sendDomain) {
         this.mSolver = aSolver;
         this.sendDomain = sendDomain;
-        connected = connect(mSolver.getModel().getName());
-        mSolver.plugMonitor(this);
+        if(connected = connect(mSolver.getModel().getName())) {
+            mSolver.plugMonitor(this);
+        }
         alt_stack.push(-1); // -1 is alt for the root node
         pid_stack.push(-1); // -1 is pid for the root node
         last_stack.push(-1);
@@ -155,49 +156,45 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
      */
     @Override
     public final void close() throws IOException {
-        if (connected) {
-            disconnect();
-            mSolver.unplugMonitor(this);
-        }
+        disconnect();
+        mSolver.unplugMonitor(this);
         connected = false;
     }
 
     @Override
     public final void beforeDownBranch(boolean left) {
-        if (connected) {
-            if (left) {
-                DecisionPath dp = mSolver.getDecisionPath();
-                int last = dp.size() - 1;
-                if (last > 0) { // may happen when LNS provide an empty meta-decision
-                    int first = dp.indexPreviousLevelLastLevel();
-                    String pdec;
-                    for (int i = first; i < last; i++) {
-                        pdec = pretty(dp.getDecision(i - 1));
-                        assert dp.getDecision(i).getArity() == 1;
-                        sendNode(nc, pid_stack.peek(), alt_stack.pop(), 1, rid, pdec,
-                                sendDomain? domainMessage.print():"");
-                        pid_stack.push(nc);
-                        nc++;
-                        alt_stack.push(0);
-                        last_stack.push(nc - 1);
-                    }
-                    pdec = pretty(dp.getDecision(last - 1));
-                    Decision dec = dp.getLastDecision();
-                    int ari = dec.getArity();
-                    sendNode(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, pdec,
+        if (left) {
+            DecisionPath dp = mSolver.getDecisionPath();
+            int last = dp.size() - 1;
+            if (last > 0) { // may happen when LNS provide an empty meta-decision
+                int first = dp.indexPreviousLevelLastLevel();
+                String pdec;
+                for (int i = first; i < last; i++) {
+                    pdec = pretty(dp.getDecision(i - 1));
+                    assert dp.getDecision(i).getArity() == 1;
+                    sendNode(nc, pid_stack.peek(), alt_stack.pop(), 1, rid, pdec,
                             sendDomain? domainMessage.print():"");
-                    for (int i = 0; i < ari; i++) {
-                        pid_stack.push(nc); // each child will have the same pid
-                    }
+                    pid_stack.push(nc);
                     nc++;
                     alt_stack.push(0);
                     last_stack.push(nc - 1);
                 }
-            } else {
+                pdec = pretty(dp.getDecision(last - 1));
+                Decision dec = dp.getLastDecision();
+                int ari = dec.getArity();
+                sendNode(nc, pid_stack.peek(), alt_stack.pop(), ari, rid, pdec,
+                        sendDomain? domainMessage.print():"");
+                for (int i = 0; i < ari; i++) {
+                    pid_stack.push(nc); // each child will have the same pid
+                }
                 nc++;
-                alt_stack.push(1);
-                last_stack.push(last);
+                alt_stack.push(0);
+                last_stack.push(nc - 1);
             }
+        } else {
+            nc++;
+            alt_stack.push(1);
+            last_stack.push(last);
         }
     }
 
@@ -224,15 +221,13 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
 
     @Override
     public final void afterRestart() {
-        if (connected) {
-            sendRestart(++rid);
-            pid_stack.clear();
-            alt_stack.clear();
-            alt_stack.push(-1); // -1 is alt for the root node
-            pid_stack.push(-1); // -1 is pid for the root node
-            last_stack.push(-1);
-            nc = 0;
-        }
+        sendRestart(++rid);
+        pid_stack.clear();
+        alt_stack.clear();
+        alt_stack.push(-1); // -1 is alt for the root node
+        pid_stack.push(-1); // -1 is pid for the root node
+        last_stack.push(-1);
+        nc = 0;
     }
 
     private static String pretty(Decision dec) {

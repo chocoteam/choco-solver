@@ -469,15 +469,15 @@ public class PropagationEngine {
         }
 
         public void addOrUpdate(Propagator e) {
-            int p = indexOf(e);
-            if (p > -1) {
-                removeAt(p);
-            }
+            remove(e);
             add(e);
         }
 
         public void remove(Propagator e) {
-            removeAt(indexOf(e));
+            int p = indexOf(e);
+            if (p > -1) {
+                removeAt(p);
+            }
         }
 
         private void removeAt(int p){
