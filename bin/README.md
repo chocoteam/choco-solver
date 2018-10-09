@@ -10,9 +10,9 @@ This document reports the release process.
 2. Check maven dependencies, update if necessary, and clean also (using archiva f-ex.)
 
 
-    $ mvn versions:display-dependency-updates
+    $ mvn -U versions:display-dependency-updates
 
-    $ mvn versions:display-plugin-updates
+    $ mvn -U versions:display-plugin-updates
 
 And update README.md with the correct versions of dependencies
 
