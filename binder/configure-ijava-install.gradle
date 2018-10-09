@@ -1,0 +1,7 @@
+allprojects {
+    afterEvaluate {
+        zipKernel {
+            archiveName = 'ijava-kernel.zip'
+        }
+    }
+}
