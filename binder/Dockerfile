@@ -6,7 +6,7 @@ USER root
 RUN curl -L https://github.com/SpencerPark/IJava/archive/v1.1.2.tar.gz > v1.1.2.tar.gz \
   && tar xf v1.1.2.tar.gz
 
-COPY configure-ijava-install.gradle /configure-ijava-install.gradle
+COPY ./binder/configure-ijava-install.gradle /configure-ijava-install.gradle
 
 RUN cd IJava-1.1.2/ \
   && gradle zipKernel -I /configure-ijava-install.gradle \
