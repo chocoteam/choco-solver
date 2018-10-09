@@ -511,7 +511,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         dpath.synchronize();
         objectivemanager.resetBestBounds();
         removeAllStopCriteria();
-        feasible = ESat.UNDEFINED;
+        feasible = UNDEFINED;
         jumpTo = 0;
         stop = false;
         canBeRepaired = true;
@@ -759,26 +759,26 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * <tt>ESat.UNDEFINED</tt> neither satisfiability nor  unsatisfiability could be proven so far.
      */
     public ESat isSatisfied() {
-        if (feasible != ESat.FALSE) {
+        if (feasible != FALSE) {
             int OK = 0;
             for (Constraint c : mModel.getCstrs()) {
                 ESat satC = c.isSatisfied();
-                if (ESat.FALSE == satC) {
+                if (FALSE == satC) {
                     if(getModel().getSettings().warnUser()) {
                         System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
                     }
-                    return ESat.FALSE;
-                } else if (ESat.TRUE == satC) {
+                    return FALSE;
+                } else if (TRUE == satC) {
                     OK++;
                 }
             }
             if (OK == mModel.getCstrs().length) {
-                return ESat.TRUE;
+                return TRUE;
             } else {
-                return ESat.UNDEFINED;
+                return UNDEFINED;
             }
         }
-        return ESat.FALSE;
+        return FALSE;
     }
 
     /**

@@ -12,7 +12,9 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
+
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.SatSolver.Clause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -26,7 +28,9 @@ import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
 
-import static org.chocosolver.sat.SatSolver.*;
+import static org.chocosolver.sat.SatSolver.negated;
+import static org.chocosolver.sat.SatSolver.sign;
+import static org.chocosolver.sat.SatSolver.var;
 
 /**
  * A propagator to deal with clauses and interface a {@link SatSolver}.
@@ -60,7 +64,7 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * Local-like parameter, for #why() method only, lazily initialized.
      */
-    private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
+    private TIntObjectHashMap<ArrayList<Clause>> inClauses;
 
     /**
      * Store new added variables when {@link #initialized} is <i>false</i>
@@ -147,10 +151,10 @@ public class PropSat extends Propagator<BoolVar> {
      * @param clauses list of clause
      * @return <tt>true</tt> if all clauses are satisfied, <tt>false</tt> otherwise
      */
-    private boolean clauseEntailed(ArrayList<SatSolver.Clause> clauses) {
+    private boolean clauseEntailed(ArrayList<Clause> clauses) {
         int lit, var, val;
         boolean sign;
-        for (SatSolver.Clause c : clauses) {
+        for (Clause c : clauses) {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
@@ -354,7 +358,7 @@ public class PropSat extends Propagator<BoolVar> {
         }
         // B. clauses:
         // We need to find the fully instantiated clauses where bvar appears
-        ArrayList<SatSolver.Clause> mClauses = inClauses.get(lit);
+        ArrayList<Clause> mClauses = inClauses.get(lit);
         if (mClauses != null) {
             for (int i = mClauses.size() - 1; i >= 0; i--) {
                 newrules |= _why(mClauses.get(i), ruleStore);
@@ -380,10 +384,10 @@ public class PropSat extends Propagator<BoolVar> {
     private void fillInClauses() {
         inClauses = new TIntObjectHashMap<>();
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
+            Clause cl = sat_.clauses.get(k);
             for (int d = cl.size() - 1; d >= 0; d--) {
                 int l = cl._g(d);
-                ArrayList<SatSolver.Clause> mcls = inClauses.get(l);
+                ArrayList<Clause> mcls = inClauses.get(l);
                 if (mcls == null) {
                     mcls = new ArrayList<>();
                     inClauses.put(l, mcls);
@@ -393,7 +397,7 @@ public class PropSat extends Propagator<BoolVar> {
         }
     }
 
-    private boolean _why(SatSolver.Clause cl, RuleStore ruleStore) {
+    private boolean _why(Clause cl, RuleStore ruleStore) {
         boolean newrules = false;
         // if the variable watches
         if (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated()) {
@@ -404,7 +408,7 @@ public class PropSat extends Propagator<BoolVar> {
         return newrules;
     }
 
-    private boolean _why(int neg, int lit, SatSolver.Clause cl, RuleStore ruleStore) {
+    private boolean _why(int neg, int lit, Clause cl, RuleStore ruleStore) {
         boolean newrules = false;
         // if the variable watches
         if (cl._g(0) == neg || cl._g(0) == lit || cl._g(1) == neg || cl._g(1) == lit) {

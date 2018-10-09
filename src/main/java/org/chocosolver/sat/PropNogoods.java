@@ -13,6 +13,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.SatSolver.Clause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -103,7 +104,7 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * Local-like parameter, for #why() method only, lazily initialized.
      */
-    private TIntObjectHashMap<ArrayList<SatSolver.Clause>> inClauses;
+    private TIntObjectHashMap<ArrayList<Clause>> inClauses;
 
     /**
      * Store new added variables when {@link #initialized} is <i>false</i>
@@ -240,12 +241,12 @@ public class PropNogoods extends Propagator<IntVar> {
         return true;
     }
 
-    private boolean clauseEntailed(ArrayList<SatSolver.Clause> clauses) {
+    private boolean clauseEntailed(ArrayList<Clause> clauses) {
         int lit, var;
         long value;
         boolean sign;
         IntVar ivar;
-        for (SatSolver.Clause c : clauses) {
+        for (Clause c : clauses) {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
@@ -283,7 +284,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param v a value
      * @return <code>v</code> with `&le;' information encoded into it
      */
-    protected static long leq(int v) {
+    static long leq(int v) {
         return v + BITOP;
     }
 
@@ -291,7 +292,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param v a value
      * @return the value without the '=' or '&le;' information.
      */
-    protected static int ivalue(long v) {
+    static int ivalue(long v) {
         return (int)(iseq(v)?v:v - BITOP);
     }
 
@@ -306,7 +307,7 @@ public class PropNogoods extends Propagator<IntVar> {
     public void initialize() {
         if (!initialized) {
             if (add_var.size() > 0) {
-                addVariable(add_var.toArray(new IntVar[add_var.size()]));
+                addVariable(add_var.toArray(new IntVar[0]));
             }
             add_var.clear();
             this.initialized = true;
@@ -388,7 +389,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param sign  the sign of the lit
      * @throws ContradictionException if inconsistency is detected
      */
-    protected void VariableBound(int index, boolean sign) throws ContradictionException {
+    void VariableBound(int index, boolean sign) throws ContradictionException {
         try {
             if (sat_trail_.get() < sat_.trailMarker()) {
                 sat_.cancelUntil(sat_trail_.get());
@@ -417,7 +418,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param lit literal to assign
      * @throws ContradictionException if reduction leads to failure
      */
-    protected void doReduce(int lit) throws ContradictionException {
+    void doReduce(int lit) throws ContradictionException {
         int var = var(lit);
         long value = lit2val[var];
         IntVar ivar = vars[lit2pos[var]];
@@ -453,7 +454,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @param var an integer variable
      * @return if clauses have been successfully added to the store.
      */
-    public boolean declareDomainNogood(IntVar var) {
+    boolean declareDomainNogood(IntVar var) {
         int size = var.getDomainSize();
         int[] lits = new int[size * 2];
         // 1. generate lits
@@ -538,14 +539,14 @@ public class PropNogoods extends Propagator<IntVar> {
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {
-            SatSolver.Clause last = sat_.learnts.get(sat_.learnts.size() - 1);
+            Clause last = sat_.learnts.get(sat_.learnts.size() - 1);
             test_eq.clear();
             for (int i = last.size() - 1; i >= 0; i--) {
                 test_eq.set(last._g(i));
             }
             for (int c = sat_.learnts.size() - 2; c >= 0; c--) {
                 int s = test_eq.cardinality();
-                SatSolver.Clause prev = sat_.learnts.get(c);
+                Clause prev = sat_.learnts.get(c);
                 if (last.size() > 1 && last.size() < prev.size()) {
                     for (int i = prev.size() - 1; i >= 0; i--) {
                         s -= test_eq.get(prev._g(i)) ? 1 : 0;
@@ -571,7 +572,7 @@ public class PropNogoods extends Propagator<IntVar> {
      *
      * @throws ContradictionException if it fails
      */
-    protected void applyEarlyDeductions() throws ContradictionException {
+    private void applyEarlyDeductions() throws ContradictionException {
         for (int i = 0; i < early_deductions_.size(); ++i) {
             int lit = early_deductions_.get(i);
             doReduce(lit);
@@ -619,7 +620,7 @@ public class PropNogoods extends Propagator<IntVar> {
         }
         // B. clauses:
         // We need to find the fully instantiated clauses where bvar appears
-        ArrayList<SatSolver.Clause> mClauses = inClauses.get(lit);
+        ArrayList<Clause> mClauses = inClauses.get(lit);
         if (mClauses != null) {
             for (int i = mClauses.size() - 1; i >= 0; i--) {
                 newrules |= _why(mClauses.get(i), ruleStore);
@@ -644,10 +645,10 @@ public class PropNogoods extends Propagator<IntVar> {
     private void fillInClauses() {
         inClauses = new TIntObjectHashMap<>();
         for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            SatSolver.Clause cl = sat_.clauses.get(k);
+            Clause cl = sat_.clauses.get(k);
             for (int d = cl.size() - 1; d >= 0; d--) {
                 int l = cl._g(d);
-                ArrayList<SatSolver.Clause> mcls = inClauses.get(l);
+                ArrayList<Clause> mcls = inClauses.get(l);
                 if (mcls == null) {
                     mcls = new ArrayList<>();
                     inClauses.put(l, mcls);
@@ -657,7 +658,7 @@ public class PropNogoods extends Propagator<IntVar> {
         }
     }
 
-    private boolean _why(SatSolver.Clause cl, RuleStore ruleStore) {
+    private boolean _why(Clause cl, RuleStore ruleStore) {
         boolean newrules = false;
         // if the watched literals are instantiated
         if (litIsKnown(cl._g(0)) && litIsKnown(cl._g(1))) {
@@ -668,7 +669,7 @@ public class PropNogoods extends Propagator<IntVar> {
         return newrules;
     }
 
-    private boolean _why(int neg, int lit, SatSolver.Clause cl, RuleStore ruleStore) {
+    private boolean _why(int neg, int lit, Clause cl, RuleStore ruleStore) {
         boolean newrules = false;
         // if the variable watches
         if (cl._g(0) == neg || cl._g(0) == lit || cl._g(1) == neg || cl._g(1) == lit) {

@@ -135,7 +135,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     @Override
     public Decision getDecision() {
         if (model.getSolver().getSolutionCount() == 0
-                || (nbSols == model.getSolver().getSolutionCount() && optPolicy == OptimizationPolicy.DICHOTOMIC)) {
+                || (nbSols == model.getSolver().getSolutionCount() && optPolicy == DICHOTOMIC)) {
             return null;
         }
         if (obj.isInstantiated()) {

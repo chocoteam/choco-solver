@@ -146,15 +146,15 @@ public class PropElementV_fast extends Propagator<IntVar> {
     public ESat isEntailed() {
         int lb = index.getLB();
         int ub = index.getUB();
-        int min = Integer.MAX_VALUE / 2;
-        int max = Integer.MIN_VALUE / 2;
+        int min = MAX_VALUE / 2;
+        int max = MIN_VALUE / 2;
         int val = var.getLB();
         boolean exists = false;
         for (int i = lb; i <= ub; i = index.nextValue(i)) {
             int j = 2 + i - offset;
             if (j >= 2 && j < vars.length) {
-                min = Math.min(min, vars[j].getLB());
-                max = Math.max(max, vars[j].getUB());
+                min = min(min, vars[j].getLB());
+                max = max(max, vars[j].getUB());
                 exists |= vars[j].contains(val);
             }
         }

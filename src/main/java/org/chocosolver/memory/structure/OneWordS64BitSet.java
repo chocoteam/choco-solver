@@ -12,9 +12,6 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateLong;
 
-import java.lang.reflect.Array;
-import java.util.BitSet;
-
 
 public class OneWordS64BitSet implements IStateBitSet {
 

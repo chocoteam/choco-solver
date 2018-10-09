@@ -14,7 +14,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateLong;
 
 import java.lang.reflect.Array;
-import java.util.BitSet;
 
 
 public class S64BitSet implements IStateBitSet {

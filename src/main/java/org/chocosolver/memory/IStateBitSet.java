@@ -9,8 +9,6 @@
 package org.chocosolver.memory;
 
 
-import java.util.BitSet;
-
 /**
  * Created by IntelliJ IDEA.
  * User: julien
