@@ -127,6 +127,6 @@ public class GraphvizGenerator extends SearchViz {
 
     @Override
     protected void sendRestart(int rid) {
-
+        // nothing is done in that case
     }
 }

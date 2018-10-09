@@ -86,12 +86,12 @@ public class CPProfiler extends SearchViz {
 
     @Override
     protected void sendSolution(int nc, int pid, int alt, int kid, int rid, String label, String info) {
-
+        send(nc, pid, alt, kid, rid, Connector.NodeStatus.SOLVED, label, info);
     }
 
     @Override
     protected void sendFailure(int nc, int pid, int alt, int kid, int rid, String label, String info) {
-
+        send(nc, pid, alt, kid, rid, Connector.NodeStatus.FAILED, label, info);
     }
 
     @Override
