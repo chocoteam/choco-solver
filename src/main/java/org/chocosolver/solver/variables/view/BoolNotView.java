@@ -18,7 +18,9 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
@@ -222,6 +224,11 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
                 return 1 - value;
             }
         };
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new BoolEvtScheduler();
     }
 
     public String toString() {

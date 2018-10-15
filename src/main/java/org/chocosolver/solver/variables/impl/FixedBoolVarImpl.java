@@ -13,7 +13,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  * A constant view specific to boolean variable
@@ -36,6 +38,11 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public int getTypeAndKind() {
         return Variable.BOOL | Variable.CSTE;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new BoolEvtScheduler();
     }
 
     @Override

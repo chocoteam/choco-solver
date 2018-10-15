@@ -17,9 +17,11 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
@@ -272,6 +274,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public int getTypeAndKind() {
         return Variable.INT | Variable.CSTE;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new IntEvtScheduler();
     }
 
     @Override

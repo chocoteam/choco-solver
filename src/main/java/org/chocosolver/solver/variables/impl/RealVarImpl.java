@@ -17,6 +17,8 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.RealEventType;
+import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  * An implementation of RealVar, variable for continuous constraints (solved using IBEX).
@@ -158,6 +160,11 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public int getTypeAndKind() {
         return VAR | REAL;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new RealEvtScheduler();
     }
 
     @Override
