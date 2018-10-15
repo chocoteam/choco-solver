@@ -149,6 +149,27 @@ public abstract class AbstractVariable implements Variable {
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
+     * Constructor to be used by choco extension. This (for the moment) a workaround for ensuring choco-graph
+     * compatibility (cf. comment in second constructor).
+     * @param name
+     * @param model
+     * @param scheduler
+     */
+    protected AbstractVariable(String name, Model model, EvtScheduler scheduler) {
+        this.name = name;
+        this.model = model;
+        this.views = new IView[2];
+        this.monitors = new IVariableMonitor[2];
+        this.propagators = new Propagator[8];
+        this.pindices = new int[8];
+        this.ID = this.model.nextId();
+        this.model.associates(this);
+        this.scheduler = scheduler;
+        this.dsize = this.scheduler.select(0) + 1;
+        this.dindices = new int[dsize + 1];
+    }
+
+    /**
      * Create the shared data of any type of variable.
      *
      * @param name  name of the variable
@@ -180,6 +201,13 @@ public abstract class AbstractVariable implements Variable {
             default:
                 // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
                 // event scheduler may be managed using java reflexion
+                //
+                // Comment by @Dimitri: This could be enhanced. The two following line will cause error in choco
+                //                      extensions (e.g. choco-graph). As a workaround I added the above constructor
+                //                      with an explicit scheduler argument, but this add code redundancy.
+                //                      I guess that a good solution would be to have the "typeAndkind()" information,
+                //                      (as well as which EvtScheduler to instantiate) to be defined at
+                //                      the class level.
                 break;
         }
         this.dsize = this.scheduler.select(0) + 1;
