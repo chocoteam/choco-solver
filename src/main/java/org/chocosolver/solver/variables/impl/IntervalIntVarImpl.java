@@ -21,6 +21,7 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
@@ -483,6 +484,11 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public int getTypeAndKind() {
         return VAR | INT;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new IntEvtScheduler();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

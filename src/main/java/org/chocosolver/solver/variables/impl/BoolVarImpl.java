@@ -20,12 +20,9 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -439,6 +436,11 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int getTypeAndKind() {
         return VAR | BOOL;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new BoolEvtScheduler();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

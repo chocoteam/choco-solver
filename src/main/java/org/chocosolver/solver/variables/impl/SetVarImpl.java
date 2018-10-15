@@ -21,6 +21,8 @@ import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -249,6 +251,11 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     @Override
     public int getTypeAndKind() {
         return VAR | SET;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new SetEvtScheduler();
     }
 
     @Override
