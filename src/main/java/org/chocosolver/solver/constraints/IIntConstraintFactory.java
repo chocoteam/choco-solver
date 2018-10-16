@@ -2027,7 +2027,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
-            return table(vars[0], vars[1], tuples);
+            switch (algo) {
+                case "FC":
+                    return table(vars[0], vars[1], tuples, algo);
+                case "GAC2001":
+                    return table(vars[0], vars[1], tuples, "AC2001");
+                case "GAC3rm":
+                    return table(vars[0], vars[1], tuples, "AC3rm");
+                default:
+                    return table(vars[0], vars[1], tuples);
+            }
         }
         if (algo.contains("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");

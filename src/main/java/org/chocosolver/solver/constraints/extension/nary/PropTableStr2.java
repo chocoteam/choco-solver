@@ -55,8 +55,12 @@ public class PropTableStr2 extends Propagator<IntVar> {
         super(vars_, PropagatorPriority.LINEAR, false);
         this.table = tuplesObject.toMatrix();
 		this.tuplesObject = tuplesObject;
-        str2vars = new str2_var[table[0].length];
-        for (int i = 0; i < table[0].length; i++) {
+        int size = 0;
+        if (table.length > 0) {
+            size = table[0].length;
+        }
+        str2vars = new str2_var[size];
+        for (int i = 0; i < size; i++) {
             str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
         }
         tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET,0,model);
