@@ -589,7 +589,7 @@ public class TableTest {
 	/**
 	 * A table based on STR2 algorithm does not survive an empty set of tuples.
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void str2CrashesWhenGivenAnEmptyTable() {
 		Model  choco = new Model();
 		Tuples empty = new Tuples();

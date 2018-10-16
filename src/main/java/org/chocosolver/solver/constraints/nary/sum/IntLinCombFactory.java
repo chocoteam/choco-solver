@@ -89,7 +89,7 @@ public class IntLinCombFactory {
         }
         IntVar[] NVARS;
         int[] NCOEFFS;
-        int RESULT = 0;
+        long RESULT = 0;
         if (VariableUtils.isConstant(SCALAR)) {
             RESULT = SCALAR.getValue();
             NVARS = VARS.clone();
@@ -152,9 +152,6 @@ public class IntLinCombFactory {
                 k++;
             }
         }
-        if(slb< Integer.MIN_VALUE || slb> Integer.MAX_VALUE || sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE){
-            throw new SolverException("Consider reducing variables' domain to prevent integer under/overflow");
-        }
         // b. resize arrays if needed
         if (k == 0) {
             switch (OPERATOR) {
@@ -171,9 +168,14 @@ public class IntLinCombFactory {
                 case GT:
                     return RESULT < 0 ? model.trueConstraint() : model.falseConstraint();
                 default:
-                    throw new SolverException("Unexpected Tuple operator " + OPERATOR
+                    throw new SolverException("Unexpected operator " + OPERATOR
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
+        }
+        if(slb < Integer.MIN_VALUE || slb> Integer.MAX_VALUE
+                || sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE
+                || RESULT< Integer.MIN_VALUE || RESULT> Integer.MAX_VALUE  ){
+            throw new SolverException("Consider reducing variables' domain to prevent integer under/overflow");
         }
         // 2. resize NVARS and NCOEFFS
         if (k < NVARS.length) {
@@ -190,9 +192,9 @@ public class IntLinCombFactory {
             NCOEFFS[lidx] = i;
         }
         if (nones + nmones == NVARS.length) {
-            return selectSum(NVARS, NCOEFFS, OPERATOR, RESULT, nbools);
+            return selectSum(NVARS, NCOEFFS, OPERATOR, (int)RESULT, nbools);
         } else {
-            return selectScalar(NVARS, NCOEFFS, OPERATOR, RESULT);
+            return selectScalar(NVARS, NCOEFFS, OPERATOR, (int)RESULT);
         }
     }
 
