@@ -20,6 +20,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -391,6 +392,125 @@ public class ElementTest {
 		}
 		while (s.getSolver().solve()) ;
 		assertEquals(s.getSolver().getSolutionCount(), 2L);
+	}
+
+	/**
+	 * In this case, the element factory maps the whole element constraint to
+	 * an arithmetic constraint (ElementFactory, line: 68) but forgets to care
+	 * about the value of `Index`.
+	 *
+	 * This could be fixed in constant time ensuring that
+	 * 0 <= index.getLB() - offset
+	 *
+	 * @throws ContradictionException never
+	 */
+	@Test
+	public void improveElement1() throws ContradictionException {
+		Model choco = new Model();
+
+		IntVar[] values = new IntVar[]{
+				choco.intVar(new int[]{3})
+		};
+
+		IntVar   index  = choco.intVar(new int[]{-4, 0});
+		IntVar   value  = choco.intVar(new int[]{-1, 0, 3});
+
+		choco.element(value, values, index, 0).post();
+		choco.getSolver().propagate();
+
+		System.out.println("values = " + Arrays.toString(values));
+		System.out.println("index  = " + index);
+		System.out.println("value  = " + value);
+
+		// FAILS !
+		Assert.assertTrue(index.isInstantiatedTo(0));
+	}
+
+	/**
+	 * This test is similar to `improveElement1` but shows that the upper
+	 * bound of the `index` variable is not taken into account either.
+	 *
+	 * This could be fixed in constant time ensuring that
+	 * values.length > index.getUB() - offset
+	 *
+	 * @throws ContradictionException never
+	 */
+	@Test
+	public void improveElement2() throws ContradictionException {
+		Model choco = new Model();
+
+		IntVar[] values = new IntVar[]{choco.intVar(3)};
+		IntVar   index  = choco.intVar(new int[]{0, 45});
+		IntVar   value  = choco.intVar(new int[]{-1, 0, 3});
+
+		choco.element(value, values, index, 0).post();
+		choco.getSolver().propagate();
+
+		System.out.println("values = " + Arrays.toString(values));
+		System.out.println("index  = " + index);
+		System.out.println("value  = " + value);
+
+		// FAILS !
+		Assert.assertTrue(index.isInstantiatedTo(0));
+	}
+
+	/**
+	 * This test is similar to the above but shows that problem also occurs
+	 * when the `values` array consists of one single primitive int.
+	 *
+	 * This could be fixed in constant time ensuring that
+	 * 0 <= index.getLB() - offset
+	 * and
+	 * values.length > index.getUB() - offset
+	 *
+	 * @throws ContradictionException never
+	 */
+	@Test
+	public void improveElement3() throws ContradictionException {
+		Model choco = new Model();
+
+		int[]   values = new int[]{3};
+		IntVar   index  = choco.intVar(new int[]{-7, 0, 45});
+		IntVar   value  = choco.intVar(new int[]{-1, 0, 3});
+
+		choco.element(value, values, index, 0).post();
+		choco.getSolver().propagate();
+
+		System.out.println("values = " + Arrays.toString(values));
+		System.out.println("index  = " + index);
+		System.out.println("value  = " + value);
+
+		// FAILS !
+		Assert.assertTrue(index.isInstantiatedTo(0));
+	}
+
+	/**
+	 * This test is similar to the above but shows that problem also occurs
+	 * when the `values` array consists of one single primitive int.
+	 *
+	 * This could be fixed in constant time ensuring that
+	 * 0 <= index.getLB() - offset
+	 * and
+	 * values.length > index.getUB() - offset
+	 *
+	 * @throws ContradictionException never
+	 */
+	@Test
+	public void itIsAlreadyDoneWhenThereIsMoreThanOnePrimitiveInt() throws ContradictionException {
+		Model choco = new Model();
+
+		int[]   values = new int[]{3, 56};
+		IntVar   index  = choco.intVar(new int[]{-7, 0, 45});
+		IntVar   value  = choco.intVar(new int[]{-1, 0, 3});
+
+		choco.element(value, values, index, 0).post();
+		choco.getSolver().propagate();
+
+		System.out.println("values = " + Arrays.toString(values));
+		System.out.println("index  = " + index);
+		System.out.println("value  = " + value);
+
+		Assert.assertTrue(index.isInstantiatedTo(0));
 	}
 
 }
