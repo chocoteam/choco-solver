@@ -10,6 +10,8 @@ package org.chocosolver.solver.constraints.binary.element;
 
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.unary.PropEqualXC;
+import org.chocosolver.solver.constraints.unary.PropMemberBound;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -65,8 +67,10 @@ public class ElementFactory {
         int st = sawtooth(TABLE);
         if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
             assert TABLE[0] == TABLE[TABLE.length - 1];
-            VALUE.getModel().member(INDEX, 0, TABLE.length - OFFSET).post();
-            return VALUE.getModel().arithm(VALUE, "=", TABLE[0]);
+            return new Constraint("FAKE_ELMT",
+                    new PropMemberBound(INDEX, 0, TABLE.length - OFFSET),
+                    new PropEqualXC(VALUE, TABLE[0])
+            );
         }
         return new Constraint(ConstraintsName.ELEMENT, new PropElement(VALUE, TABLE, INDEX, OFFSET));
     }
