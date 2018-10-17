@@ -198,5 +198,252 @@ public class SumTest {
         Assert.assertEquals(m.getSolver().getBestSolutionValue(), 6);
     }
 
+/////////// SUM GT /////////////////////////////////////////////////////////
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) > -581118 is considered to always be FALSE     !!
+     * !!                                   even though is is TRIVIALLY TRUE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void sumGtIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2_147_483_636);
+
+        choco.sum(new IntVar[]{x0}, ">", -581_118).post();
+        choco.getSolver().propagate();
+
+        // Never reached !
+        Assert.assertEquals(x0.getLB(), 2147483636);
+    }
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) > x1={-581118} is considered to always be      !!
+     * !!                             FALSE even though is is TRIVIALLY TRUE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void sumGtIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+        IntVar x1 = choco.intVar(-581118);
+
+        choco.sum(new IntVar[]{x0}, ">=", x1).post();
+        choco.getSolver().propagate();
+
+        // Never reached !
+        Assert.assertEquals(x0.getLB(), 2147483636);
+        Assert.assertEquals(x1.getLB(), -581118);
+    }
+
+
+    /////////// SUM GE /////////////////////////////////////////////////////////
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) >= -27121249 is considered to always be FALSE  !!
+     * !!                                   even though is is TRIVIALLY TRUE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void sumGeIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+
+        choco.sum(new IntVar[]{x0}, ">=", -27121249).post();
+        choco.getSolver().propagate();
+
+        // Never reached !
+        Assert.assertEquals(x0.getLB(), 2147483636);
+    }
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) >= x1={-27121249} is considered to always be   !!
+     * !!                             FALSE even though is is TRIVIALLY TRUE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void sumGeIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+        IntVar x1 = choco.intVar(-27121249);
+
+        choco.sum(new IntVar[]{x0}, ">=", x1).post();
+        choco.getSolver().propagate();
+
+        // Never reached !
+        Assert.assertEquals(x0.getLB(), 2147483636);
+        Assert.assertEquals(x1.getLB(), -27121249);
+    }
+
+    /////////// SUM LE /////////////////////////////////////////////////////////
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) <= -35468 is considered to always be TRUE      !!
+     * !!                                  even though is is TRIVIALLY FALSE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    public void sumLeIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+
+        choco.sum(new IntVar[]{x0}, "<=", -35468).post();
+        choco.getSolver().propagate();
+
+        // This point should never be reached !
+    }
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) <= x1={-35468} is considered to always be TRUE !!
+     * !!                                  even though is is TRIVIALLY FALSE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException never. But it really should throw one.
+     */
+    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    public void sumLeIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+        IntVar x1 = choco.intVar(-35468);
+
+        choco.sum(new IntVar[]{x0}, "<=", x1).post();
+        choco.getSolver().propagate();
+
+        // This point should never be reached !
+    }
+
+
+    /////////// SUM LT /////////////////////////////////////////////////////////
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) < -581118 is considered to always be TRUE      !!
+     * !!                                  even though is is TRIVIALLY FALSE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    public void sumLtIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2147483636);
+
+        choco.sum(new IntVar[]{x0}, "<", -581118).post();
+        choco.getSolver().propagate();
+
+        // This point should never be reached !
+    }
+
+    /**
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     * !! **BUG SPOTTED**                                                     !!
+     * !! SolverCheck automatically identified a problem in the choco         !!
+     * !! implementation of the constraint SUM(X) >= k                        !!
+     * !!                                                                     !!
+     * !! As shown by the following example:                                  !!
+     * !! SUM(x0={2147483636}) <= x1={-581118} is considered to always be TRUE!!
+     * !!                                  even though is is TRIVIALLY FALSE  !!
+     * !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+     *
+     * @throws ContradictionException never. But it really should throw one.
+     */
+    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    public void sumLtIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(2_147_483_636);
+        IntVar x1 = choco.intVar(-581118);
+
+        choco.sum(new IntVar[]{x0}, "<", x1).post();
+        choco.getSolver().propagate();
+
+        // This point should never be reached !
+    }
+
+    ///
+    /**
+     * This case illustrates that the same problem occurs even when there is
+     * more than one single variable involved in the constraint.
+     *
+     * @throws ContradictionException always. But it really should not.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void isAlsoHappensWhenThereIsMoreThanOneVariableInTheSum() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(715827876);
+        IntVar x1 = choco.intVar(715827877);
+        IntVar x2 = choco.intVar(715827878);
+
+        // All of the below cases reproduce the bug.
+        choco.sum(new IntVar[]{x0, x1, x2}, ">=", -581118).post();
+        //choco.sum(new IntVar[]{x0, x1, x2}, ">", -581118).post();
+        //choco.sum(new IntVar[]{x0, x1, x2}, "<", -581118).post();
+        //choco.sum(new IntVar[]{x0, x1, x2}, "<=", -581118).post();
+        choco.getSolver().propagate();
+
+        // Never reached !
+        Assert.assertEquals(x0.getLB(), 715827876);
+        Assert.assertEquals(x1.getLB(), 715827877);
+        Assert.assertEquals(x2.getLB(), 715827878);
+    }
 
 }
