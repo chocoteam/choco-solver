@@ -163,28 +163,12 @@ public abstract class AbstractVariable implements Variable {
         this.pindices = new int[8];
         this.ID = this.model.nextId();
         this.model.associates(this);
-        int kind = getTypeAndKind() & Variable.KIND;
-        switch (kind) {
-            case Variable.BOOL:
-                this.scheduler = new BoolEvtScheduler();
-                break;
-            case Variable.INT:
-                this.scheduler = new IntEvtScheduler();
-                break;
-            case Variable.REAL:
-                this.scheduler = new RealEvtScheduler();
-                break;
-            case Variable.SET:
-                this.scheduler = new SetEvtScheduler();
-                break;
-            default:
-                // do not throw exception to allow extending the solver with other variable kinds (e.g. graph)
-                // event scheduler may be managed using java reflexion
-                break;
-        }
+        this.scheduler = createScheduler();
         this.dsize = this.scheduler.select(0) + 1;
         this.dindices = new int[dsize + 1];
     }
+
+    protected abstract EvtScheduler createScheduler();
 
     @Override
     public final int getId() {

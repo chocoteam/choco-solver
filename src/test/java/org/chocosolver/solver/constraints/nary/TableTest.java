@@ -585,4 +585,20 @@ public class TableTest {
 			Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
 		}
 	}
+
+	/**
+	 * A table based on STR2 algorithm does not survive an empty set of tuples.
+	 */
+	@Test(groups="1s", timeOut=60000)
+	public void str2CrashesWhenGivenAnEmptyTable() {
+		Model  choco = new Model();
+		Tuples empty = new Tuples();
+
+		IntVar x0 = choco.intVar(-10, 10);
+		IntVar x1 = choco.intVar(-20, 20);
+		IntVar x2 = choco.intVar(-30, 30);
+
+		// This line triggers an ArrayIndexOutOfBoundsException.
+		choco.table(new IntVar[]{x0, x1, x2}, empty, "STR2+").post();
+	}
 }

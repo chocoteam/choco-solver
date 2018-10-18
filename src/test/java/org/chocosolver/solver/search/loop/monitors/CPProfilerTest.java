@@ -10,6 +10,7 @@ package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.trace.CPProfiler;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
@@ -30,7 +31,7 @@ public class CPProfilerTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test1() throws IOException {
         Model s1 = ProblemMaker.makeCostasArrays(7);
-        try (CPProfiler profiler = new CPProfiler(s1, true)) {
+        try (CPProfiler profiler = new CPProfiler(s1.getSolver(), true)) {
             while (s1.getSolver().solve()) ;
             out.println(s1.getSolver().getSolutionCount());
         }
@@ -39,7 +40,7 @@ public class CPProfilerTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test2() throws IOException {
         Model s1 = ProblemMaker.makeCostasArrays(7);
-        CPProfiler profiler = new CPProfiler(s1, true);
+        CPProfiler profiler = new CPProfiler(s1.getSolver(), true);
         while (s1.getSolver().solve()) ;
         out.println(s1.getSolver().getSolutionCount());
         profiler.close();
@@ -49,7 +50,7 @@ public class CPProfilerTest {
     public void test3() throws IOException {
         Model s1 = ProblemMaker.makeGolombRuler(11);
         s1.getSolver().setLNS(new RandomNeighborhood((IntVar[]) s1.getHook("ticks"), 10, 0));
-        CPProfiler profiler = new CPProfiler(s1, true);
+        CPProfiler profiler = new CPProfiler(s1.getSolver(), true);
         s1.getSolver().limitSolution(9);
         while (s1.getSolver().solve()) ;
         out.println(s1.getSolver().getSolutionCount());

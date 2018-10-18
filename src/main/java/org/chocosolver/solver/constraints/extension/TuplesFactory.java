@@ -12,7 +12,6 @@ import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import static org.chocosolver.util.tools.ArrayUtils.concat;
 
@@ -392,7 +391,7 @@ public class TuplesFactory {
                     throw new SolverException("Unexpected Tuple operator " + op
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
-        }, true, ArrayUtils.concat(VARS, SCALAR));
+        }, true, concat(VARS, SCALAR));
     }
 
     /**

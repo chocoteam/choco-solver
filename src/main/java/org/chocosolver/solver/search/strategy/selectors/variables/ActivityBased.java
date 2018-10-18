@@ -116,7 +116,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private int samplingIterationForced = 1; // CPRU: add this to force sampling phase
 
-    private java.util.Random random; //  a random object for the sampling phase
+    private Random random; //  a random object for the sampling phase
 
     private int currentVar = -1, currentVal = -1;
 

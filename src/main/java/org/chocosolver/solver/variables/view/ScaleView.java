@@ -14,8 +14,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.tools.MathUtils;
 
 /**
@@ -137,6 +139,11 @@ public final class ScaleView extends IntView<IntVar> {
     @Override
     public int previousValueOut(int v) {
         return var.previousValueOut(MathUtils.divCeil(v, cste)) * cste;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new IntEvtScheduler();
     }
 
     @Override

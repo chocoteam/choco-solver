@@ -49,7 +49,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private IntList bests = new IntList();
 
-    private java.util.Random random; //  a random object to break ties
+    private Random random; //  a random object to break ties
 
     private int nodeImpact;
 
@@ -409,7 +409,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             long tl = System.currentTimeMillis() + this.reevalTimeLimit;
             double before = searchSpaceSize.get();
             learnsAndFails = false;
-            for (int i = 0; idx < vars.length; idx++, i++) {
+            for (; idx < vars.length; idx++) {
                 IntVar v = vars[idx];
                 int dsz = v.getDomainSize();
                 if (System.currentTimeMillis() > tl) {

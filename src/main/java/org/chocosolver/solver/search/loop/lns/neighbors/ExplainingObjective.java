@@ -347,7 +347,7 @@ public class ExplainingObjective extends ExplainingCut{
             clusters.add(0);
             clusters.add(one);
             geo4cluster = new GeometricalCutoffStrategy(1, 1.2);
-            for (int j = 0, i = one + 1; i < tmpDeductions.size(); j++, i += geo4cluster.getNextCutoff()) {
+            for (int i = one + 1; i < tmpDeductions.size(); i += geo4cluster.getNextCutoff()) {
                 clusters.add(i);
             }
             if (clusters.get(clusters.size() - 1) != tmpDeductions.size() - 1) {

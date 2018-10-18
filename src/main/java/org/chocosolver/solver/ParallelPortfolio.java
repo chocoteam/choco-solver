@@ -295,10 +295,8 @@ public class ParallelPortfolio {
 
         // compute decision variables
         Variable[] varsX;
-        boolean customSearch = false;
         if (solver.getSearch() != null && solver.getSearch().getVariables().length > 0) {
             varsX = solver.getSearch().getVariables();
-            customSearch = true;
         }else{
             varsX = worker.getVars();
         }

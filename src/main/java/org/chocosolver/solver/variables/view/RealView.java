@@ -18,6 +18,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.RealEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
+import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  * <br/>
@@ -46,6 +48,11 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
         throw new UnsupportedOperationException("RealView does not support explanation.");
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new RealEvtScheduler();
     }
 
     @Override

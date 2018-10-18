@@ -16,6 +16,8 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  *
@@ -108,5 +110,10 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public int getTypeAndKind() {
         return Variable.REAL | Variable.CSTE;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new RealEvtScheduler();
     }
 }

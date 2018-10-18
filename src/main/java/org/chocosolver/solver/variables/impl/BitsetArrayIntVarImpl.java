@@ -24,8 +24,10 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -763,6 +765,11 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public int getTypeAndKind() {
         return VAR | INT;
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new IntEvtScheduler();
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -15,8 +15,10 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
 
 import static org.chocosolver.solver.variables.events.IntEventType.*;
 
@@ -165,6 +167,11 @@ public class MinusView extends IntView<IntVar> {
     @Override
     public int previousValueOut(int v) {
         return -var.nextValueOut(-v);
+    }
+
+    @Override
+    protected EvtScheduler createScheduler() {
+        return new IntEvtScheduler();
     }
 
     @Override

@@ -712,7 +712,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an allEqual constraint.
+     * Creates a notAllEqual constraint.
      * Ensures that all variables from vars take more than a single value.
      *
      * @param vars list of variables
@@ -1615,7 +1615,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an and constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
+     * Creates an or constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
      * @param bools an array of boolean variable
      * @return a constraint that is satisfied if at least one boolean variables in <i>bools</i> is true
      */
@@ -1627,7 +1627,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an and constraint that is satisfied if at least one constraint in <i>cstrs</i> are satisfied
+     * Creates an or constraint that is satisfied if at least one constraint in <i>cstrs</i> are satisfied
      * @param cstrs an array of constraints
      * @return a constraint and ensuring that at least one constraint in <i>cstrs</i> are satisfied
      */
@@ -2027,7 +2027,16 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
-            return table(vars[0], vars[1], tuples);
+            switch (algo) {
+                case "FC":
+                    return table(vars[0], vars[1], tuples, algo);
+                case "GAC2001":
+                    return table(vars[0], vars[1], tuples, "AC2001");
+                case "GAC3rm":
+                    return table(vars[0], vars[1], tuples, "AC3rm");
+                default:
+                    return table(vars[0], vars[1], tuples);
+            }
         }
         if (algo.contains("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
