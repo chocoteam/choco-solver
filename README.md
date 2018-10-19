@@ -5,3 +5,5 @@ These notebooks are dedicated to exemplify advanced usages of [Choco-solver](htt
 It comes in complement of the [documentation](https://choco-solver.readthedocs.io/en/latest/) and [tutorials](https://choco-tuto.readthedocs.io/en/latest/).
 
 Based on [IJava binder](https://github.com/SpencerPark/ijava-binder).
+
+1. [How to start solving based on a given solution ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/Loading_a_solution.ipynb#)
