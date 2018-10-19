@@ -553,6 +553,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Propagates constraints and related events through the constraint network until a fix point is find,
      * or a contradiction is detected.
+     * @implNote
+     * The propagation engine is ensured to be empty (no pending events) after this method.
+     * Indeed, if no contradiction occurs, a fix point is reached.
+     * Otherwise, a call to {@link PropagationEngine#flush()} is made.
      *
      * @throws ContradictionException inconsistency is detected, the problem has no solution with the current set of domains and constraints.
      */
@@ -560,7 +564,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
-        engine.propagate();
+        try {
+            engine.propagate();
+        } finally {
+            engine.flush();
+        }
     }
 
     /**
