@@ -24,7 +24,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 	// VARIABLES
 	//***********************************************************************************
 
-	private AbstractStrategy find, prove;
+	private AbstractStrategy<V> find, prove;
 	private Model model;
 
 	//***********************************************************************************
@@ -56,7 +56,7 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 	}
 
 	@Override
-	public Decision getDecision() {
+	public Decision<V> getDecision() {
 		if (model.getSolver().getSolutionCount() == 0) {
 			return find.getDecision();
 		}

@@ -92,7 +92,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 
     @SuppressWarnings({"unchecked"})
     @Override
-    public Decision getDecision() {
+    public Decision<IntVar> getDecision() {
         IntVar variable = variableSelector.getVariable(vars);
         return computeDecision(variable);
     }

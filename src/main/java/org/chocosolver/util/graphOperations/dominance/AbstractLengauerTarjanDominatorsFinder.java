@@ -56,6 +56,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		bucket = new int[n];
 		succs = new ISet[n];
 		preds = new ISet[n];
+		//noinspection unchecked
 		iterator = new Iterator[n];
 		T = new DirectedGraph(n, SetType.LINKED_LIST, false);
 		list = new TIntArrayList();

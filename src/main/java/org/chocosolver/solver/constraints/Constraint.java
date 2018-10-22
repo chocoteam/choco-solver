@@ -30,7 +30,7 @@ import java.util.Set;
  * @version major revision 13/01/2014
  * @see org.chocosolver.solver.variables.Variable
  * @see Propagator
- * @see org.chocosolver.solver.propagation.IPropagationEngine
+ * @see org.chocosolver.solver.propagation.PropagationEngine
  * @since 0.01
  */
 public class Constraint {
@@ -110,9 +110,10 @@ public class Constraint {
         }
         Model model = propagators[0].getModel();
         if(model.getSettings().checkDeclaredConstraints()) {
+            @SuppressWarnings("unchecked")
             Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
             if(instances == null){
-                instances = new HashSet();
+                instances = new HashSet<>();
                 model.addHook("cinstances", instances);
             }
             instances.add(this);
@@ -356,6 +357,6 @@ public class Constraint {
         for (Constraint c : toMerge) {
             Collections.addAll(props, c.getPropagators());
         }
-        return new Constraint(name, props.toArray(new Propagator[props.size()]));
+        return new Constraint(name, props.toArray(new Propagator[0]));
     }
 }

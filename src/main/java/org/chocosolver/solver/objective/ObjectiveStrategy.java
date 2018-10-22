@@ -133,7 +133,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         return true;
     }
     @Override
-    public Decision getDecision() {
+    public Decision<IntVar> getDecision() {
         if (model.getSolver().getSolutionCount() == 0
                 || (nbSols == model.getSolver().getSolutionCount() && optPolicy == DICHOTOMIC)) {
             return null;
@@ -157,13 +157,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().printf("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            model.getSolver().getErr().print("- objective in [" + globalLB + ", " + globalUB + "]\n");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         IntDecision dec = model.getSolver().getDecisionPath().makeIntDecision(obj, decOperator, target);
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().printf("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target+"\n");
+            model.getSolver().getErr().print("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target + "\n");
         }
         return dec;
     }
@@ -189,7 +189,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public DecisionOperator opposite() {
+        public DecisionOperator<IntVar> opposite() {
             return incLB;
         }
     };
@@ -214,7 +214,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         @Override
-        public DecisionOperator opposite() {
+        public DecisionOperator<IntVar> opposite() {
             return decUB;
         }
     };

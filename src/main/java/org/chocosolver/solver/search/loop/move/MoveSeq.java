@@ -111,6 +111,7 @@ public class MoveSeq implements Move {
 
     @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
+        //noinspection unchecked
         return seqStrat;
     }
 

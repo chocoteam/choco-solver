@@ -25,12 +25,13 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class FullyRandom extends IntStrategy {
 
-    private DecisionOperator[] dops = new DecisionOperator[]{DecisionOperatorFactory.makeIntEq(),
+    @SuppressWarnings("unchecked")
+    private DecisionOperator<IntVar>[] dops = new DecisionOperator[]{DecisionOperatorFactory.makeIntEq(),
             DecisionOperatorFactory.makeIntNeq(), DecisionOperatorFactory.makeIntSplit(), DecisionOperatorFactory.makeIntReverseSplit()};
     /**
      * Random
      */
-    java.util.Random rnd;
+    private java.util.Random rnd;
 
     public FullyRandom(IntVar[] scope, long seed) {
         super(scope, new Random<>(seed), new IntDomainRandom(seed));
@@ -43,7 +44,7 @@ public class FullyRandom extends IntStrategy {
             return null;
         }
         int value = this.valueSelector.selectValue(variable);
-        DecisionOperator dop;
+        DecisionOperator<IntVar> dop;
         dop = dops[rnd.nextInt(4)];
         if (!variable.hasEnumeratedDomain()) {
             if(value != variable.getLB() && value != variable.getUB()){

@@ -150,6 +150,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
         throw new SolverException("Unable to create delta for RealVar!");
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {

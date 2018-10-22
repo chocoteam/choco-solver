@@ -39,7 +39,7 @@ public class Search {
      * Should be set after specifying a search strategy.
      * @return last conflict strategy
      */
-    public static AbstractStrategy lastConflict(AbstractStrategy formerSearch) {
+    public static<V extends Variable> AbstractStrategy<V> lastConflict(AbstractStrategy<V> formerSearch) {
         return lastConflict(formerSearch, 1);
     }
 
@@ -52,7 +52,7 @@ public class Search {
      * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
      * @return best bound strategy
      */
-    public static AbstractStrategy<IntVar> bestBound(AbstractStrategy formerSearch) {
+    public static AbstractStrategy<IntVar> bestBound(AbstractStrategy<IntVar> formerSearch) {
         if (formerSearch == null) {
             throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
@@ -65,7 +65,7 @@ public class Search {
      * @param k the maximum number of conflicts to store
      * @return last conflict strategy
      */
-    public static AbstractStrategy lastConflict(AbstractStrategy formerSearch, int k) {
+    public static <V extends Variable>AbstractStrategy<V> lastConflict(AbstractStrategy<V> formerSearch, int k) {
         if (formerSearch == null) {
             throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
@@ -77,7 +77,7 @@ public class Search {
      * Should be set after specifying a search strategy.
      * @return last conflict strategy
      */
-    public static AbstractStrategy conflictOrderingSearch(AbstractStrategy formerSearch) {
+    public static <V extends Variable>AbstractStrategy<V> conflictOrderingSearch(AbstractStrategy<V> formerSearch) {
         return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(), formerSearch);
     }
 
@@ -251,7 +251,7 @@ public class Search {
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
         Model model = vars[0].getModel();
-        IntValueSelector valueSelector = null;
+        IntValueSelector valueSelector;
         if(model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
                 || !(model.getObjective() instanceof IntVar)){
                 valueSelector = new IntDomainMin();
@@ -394,9 +394,11 @@ public class Search {
         if (r.getObjectiveManager().isOptimization()) {
             objective = r.getObjectiveManager().getObjective();
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
+                //noinspection SuspiciousMethodCalls
                 lrvars.remove(objective);// real var objective
             } else {
                 assert (objective.getTypeAndKind() & Variable.INT) != 0;
+                //noinspection SuspiciousMethodCalls
                 livars.remove(objective);// bool/int var objective
             }
         }
@@ -404,13 +406,13 @@ public class Search {
         // 3. Creates a default search strategy for each variable kind
         ArrayList<AbstractStrategy> strats = new ArrayList<>();
         if (livars.size() > 0) {
-            strats.add(intVarSearch(livars.toArray(new IntVar[livars.size()])));
+            strats.add(intVarSearch(livars.toArray(new IntVar[0])));
         }
         if (lsvars.size() > 0) {
-            strats.add(setVarSearch(lsvars.toArray(new SetVar[lsvars.size()])));
+            strats.add(setVarSearch(lsvars.toArray(new SetVar[0])));
         }
         if (lrvars.size() > 0) {
-            strats.add(realVarSearch(lrvars.toArray(new RealVar[lrvars.size()])));
+            strats.add(realVarSearch(lrvars.toArray(new RealVar[0])));
         }
 
         // 4. lexico LB/UB branching for the objective variable
@@ -429,7 +431,7 @@ public class Search {
         }
 
         // 6. add last conflict
-        return lastConflict(sequencer(strats.toArray(new AbstractStrategy[strats.size()])));
+        return lastConflict(sequencer(strats.toArray(new AbstractStrategy[0])));
     }
 
     /**

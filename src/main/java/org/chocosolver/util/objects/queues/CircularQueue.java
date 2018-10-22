@@ -254,6 +254,7 @@ public class CircularQueue<E> {
     }
 
 
+    @SuppressWarnings("SameParameterValue")
     private E pollAndClean(boolean clean){
         if(size == 0){
             return null;
@@ -290,6 +291,7 @@ public class CircularQueue<E> {
         Object[] a = new Object[newCapacity];
         System.arraycopy(elementData, p, a, 0, r);
         System.arraycopy(elementData, 0, a, r, p);
+        //noinspection unchecked
         elementData = (E[]) a;
         head = 0;
         tail = n;

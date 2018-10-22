@@ -62,6 +62,7 @@ public class Task {
             update = new TaskMonitorBound(s, d, e);
         }
         Model model = s.getModel();
+        //noinspection unchecked
         ArrayList<Task> tset = (ArrayList<Task>) model.getHook(Model.TASK_SET_HOOK_NAME);
         if(tset == null){
             tset = new ArrayList<>();

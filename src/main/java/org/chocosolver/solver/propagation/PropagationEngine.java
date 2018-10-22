@@ -37,6 +37,7 @@ import java.util.function.Consumer;
  */
 public class PropagationEngine {
 
+    @SuppressWarnings("WeakerAccess")
     public static boolean CHECK_SCOPE = false;
 
     /**
@@ -305,9 +306,8 @@ public class PropagationEngine {
      * Exeucte a delayed propagator
      * @param propagator propagator to execute
      * @param type type of event to execute
-     * @throws ContradictionException if a failure is encountered
      */
-    public void delayedPropagation(Propagator propagator, PropagatorEventType type) throws ContradictionException {
+    public void delayedPropagation(Propagator propagator, PropagatorEventType type) {
         assert propagator == lastProp;
         assert delayedPropagationType == 0 || delayedPropagationType == type.getMask();
         delayedPropagationType = type.getMask();
@@ -441,7 +441,7 @@ public class PropagationEngine {
         private int[] keys;
         private int size;
 
-        public DynPropagators() {
+        DynPropagators() {
             elements = new Propagator[16];
             keys = new int[16];
             size = 0;
@@ -468,7 +468,7 @@ public class PropagationEngine {
             }
         }
 
-        public void addOrUpdate(Propagator e) {
+        void addOrUpdate(Propagator e) {
             remove(e);
             add(e);
         }
@@ -498,7 +498,7 @@ public class PropagationEngine {
             return -1;
         }
 
-        public void descending(int w, Consumer<Propagator> cons) {
+        void descending(int w, Consumer<Propagator> cons) {
             int i = size - 1;
             while (i >= 0 && keys[i] >= w) {
                 cons.accept(elements[i]);

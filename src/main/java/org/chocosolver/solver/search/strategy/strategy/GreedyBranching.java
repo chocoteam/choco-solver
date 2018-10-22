@@ -16,6 +16,7 @@ public class GreedyBranching extends AbstractStrategy {
     private AbstractStrategy mainSearch;
 
     public GreedyBranching(AbstractStrategy mainSearch){
+        //noinspection unchecked
         super(mainSearch.getVariables());
         this.mainSearch = mainSearch;
     }
@@ -36,6 +37,7 @@ public class GreedyBranching extends AbstractStrategy {
 
     @Override
     public Decision computeDecision(Variable variable) {
+        //noinspection unchecked
         Decision d = mainSearch.computeDecision(variable);
         if (d != null) {
             d.setRefutable(false);

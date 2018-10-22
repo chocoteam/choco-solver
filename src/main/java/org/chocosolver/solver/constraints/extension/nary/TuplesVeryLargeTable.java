@@ -44,6 +44,7 @@ public class TuplesVeryLargeTable extends LargeRelation {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public boolean checkTuple(int[] tuple) {
         TIntObjectHashMap<TIntObjectHashMap> current = supports;
         int i = 0;
@@ -82,6 +83,7 @@ public class TuplesVeryLargeTable extends LargeRelation {
         return tuples;
     }
 
+    @SuppressWarnings("unchecked")
     private void tuple(TIntObjectHashMap<TIntObjectHashMap> current, int[] tt, int p, Tuples tuples) {
         if (current.isEmpty()) {
             tuples.add(tt);

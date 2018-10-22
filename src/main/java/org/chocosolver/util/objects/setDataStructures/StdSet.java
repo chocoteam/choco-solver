@@ -41,6 +41,7 @@ public class StdSet implements ISet {
     public StdSet(Model model, ISet set) {
         super();
         this.environment = model.getEnvironment();
+        //noinspection unchecked
         this.operationPoolGC = (PoolManager<ListOP>) model.getHook(HK_LIST_OP_PM);
         if(this.operationPoolGC == null){
             this.operationPoolGC = new PoolManager<>();

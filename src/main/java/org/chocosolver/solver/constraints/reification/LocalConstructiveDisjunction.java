@@ -35,6 +35,7 @@ public class LocalConstructiveDisjunction extends Constraint {
         super(ConstraintsName.LOCALCONSTRUCTIVEDISJUNCTION, createProps(constraints));
     }
 
+    @SuppressWarnings("unchecked")
     private static Propagator[] createProps(Constraint... constraints) {
         Propagator<IntVar>[][] propagators = new Propagator[constraints.length][];
         TIntObjectHashMap<IntVar> map1 = new TIntObjectHashMap<>();

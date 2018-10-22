@@ -129,6 +129,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     public void createDelta() {
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {

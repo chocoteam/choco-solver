@@ -52,6 +52,7 @@ public class StrongConnectivityFinder  {
 		nextNode = new int[n];
 		nodeSCC = new int[n];
 		nbSCC = 0;
+		//noinspection unchecked
 		iterator = new Iterator[n];
 	}
 

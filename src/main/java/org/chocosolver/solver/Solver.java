@@ -134,24 +134,27 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected Model mModel;
 
     /** The objective manager declare */
+    @SuppressWarnings("WeakerAccess")
     protected IObjectiveManager objectivemanager;
 
     /** The next action to execute in the search <u>loop</u> */
     protected Action action;
 
     /** The measure recorder to keep up to date */
+    @SuppressWarnings("WeakerAccess")
     protected MeasuresRecorder mMeasures;
 
     /** The current decision */
+    @SuppressWarnings("WeakerAccess")
     protected DecisionPath dpath;
     /**
      * Index of the initial world, before initialization.
      * May be different from 0 if some external backups have been made.
      */
-    protected int rootWorldIndex = 0;
+    private int rootWorldIndex = 0;
 
     /** Index of the world where the search starts, after initialization. */
-    protected int searchWorldIndex = 0;
+    private int searchWorldIndex = 0;
     /**
      * List of stopping criteria.
      * When at least one is satisfied, the search loop ends.
@@ -159,15 +162,17 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected List<Criterion> criteria;
 
     /** Indicates if the default search loop is in use (set to <tt>true</tt> in that case). */
-    protected boolean defaultSearch = false;
+    private boolean defaultSearch = false;
 
     /** Indicates if a complementary search strategy should be added (set to <tt>true</tt> in that case). */
-    protected boolean completeSearch = false;
+    private boolean completeSearch = false;
 
     /** An explanation engine */
+    @SuppressWarnings("WeakerAccess")
     protected IExplanationEngine explainer;
 
     /** List of search monitors attached to this search loop */
+    @SuppressWarnings("WeakerAccess")
     protected SearchMonitorList searchMonitors;
 
     /** The propagation engine to use */
@@ -185,13 +190,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected ESat feasible = ESat.UNDEFINED;
 
     /** Counter that indicates how many world should be rolled back when backtracking */
-    protected int jumpTo;
+    private int jumpTo;
 
     /** Set to <tt>true</tt> to stop the search loop **/
     protected boolean stop;
 
     /** Set to <tt>true</tt> when no more reparation can be achieved, ie entire search tree explored. */
-    protected boolean canBeRepaired = true;
+    private boolean canBeRepaired = true;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -268,6 +273,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Executes the search loop
      * @return <tt>true</tt> if ends on a solution, <tt>false</tt> otherwise
      */
+    @SuppressWarnings("WeakerAccess")
     public boolean searchLoop() {
         boolean solution = false;
         boolean left = true;
@@ -320,6 +326,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected boolean initialize() {
         boolean ok = true;
         if (mModel.getSettings().checkDeclaredConstraints() && mModel.getSettings().warnUser()) {
+            //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
             instances
                     .stream()
@@ -339,6 +346,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
         try {
             if(mModel.getHook(Model.TASK_SET_HOOK_NAME) != null){
+                //noinspection unchecked
                 ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
                 for(int i = 0; i< tset.size(); i++){
                     tset.get(i).ensureBoundConsistency();
@@ -356,12 +364,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             L.record(this);
             L.forget(this);
             mModel.getEnvironment().worldPop();
-            stop = ok = true;
+            stop = true;
+            ok = false;
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
             if (mModel.getSettings().warnUser()) {
-                getErr().printf("No search strategies defined.\nSet to default ones.");
+                getErr().print("No search strategies defined.\nSet to default ones.");
             }
             defaultSearch = true;
             setSearch(mModel.getSettings().makeDefaultSearch(mModel));
@@ -438,7 +447,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Search loop validate phase
      * @return <code>true</code> if a solution is found
      */
-    protected boolean validate(){
+    private boolean validate(){
         if (!getModel().getSettings().checkModel(this)) {
             throw new SolverException("The current solution does not satisfy the checker." +
                     "Either (a) the search strategy is not complete or " +
@@ -461,7 +470,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * - set satisfaction
      * - update statistics
      */
-    protected void closeSearch() {
+    private void closeSearch() {
         if(mMeasures.getSearchState() == SearchState.RUNNING){
             mMeasures.setSearchState(SearchState.TERMINATED);
         }
@@ -595,7 +604,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Retrieves the state of the root node (after the initial propagation)
      * Has an immediate effect
      */
-    public void restoreRootNode() {
+    private void restoreRootNode() {
         IEnvironment environment = mModel.getEnvironment();
         while (environment.getWorldIndex() > searchWorldIndex) {
             getMeasures().incBackTrackCount();
@@ -858,6 +867,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
+            //noinspection unchecked
             M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
         }
     }
@@ -898,6 +908,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Completes (or not) the declared search strategy with one over all variables
      * @param isComplete set to true to complete the current search strategy
      */
+    @SuppressWarnings("WeakerAccess")
     public void makeCompleteStrategy(boolean isComplete) {
         this.completeSearch = isComplete;
     }
@@ -948,6 +959,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Empties the list of stop criteria declared.
      * This is not automatically called on {@link #reset()}.
      */
+    @SuppressWarnings("WeakerAccess")
     public void removeAllStopCriteria() {
         this.criteria.clear();
     }
@@ -983,6 +995,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Empties the list of search monitors.
      */
+    @SuppressWarnings("WeakerAccess")
     public void unplugAllSearchMonitors() {
         searchMonitors.reset();
     }

@@ -33,6 +33,7 @@ public class ArraySort<T> {
 
 	public ArraySort(int nbMaxItems, boolean sortOjects, boolean sortInts){
 		if(sortOjects){
+			//noinspection unchecked
 			iobj = (T[]) new Object[nbMaxItems];
 		}
 		if(sortInts){

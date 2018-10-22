@@ -170,8 +170,8 @@
                 <configuration>
                     <optimize>true</optimize>
                     <compilerVersion>1.8</compilerVersion>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.9</source>
+                    <target>1.9</target>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>

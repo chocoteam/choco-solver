@@ -44,15 +44,15 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     /**
      * The main strategy declared in the solver
      */
-    protected AbstractStrategy<V> mainStrategy;
+    private AbstractStrategy<V> mainStrategy;
     /**
      * Store the variables in conflict
      */
-    List<Variable> vars;
+    List<V> vars;
     /**
      * Get the position of a variable (thanks to its ID) in {@code #vars}
      */
-    TIntIntHashMap var2pos;
+    private TIntIntHashMap var2pos;
     /**
      * Get the position of the variable just before the variable 'i' wrt the stamp
      */
@@ -66,7 +66,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
      */
     int pcft;
 
-    protected Set<Variable> scope;
+    protected Set<V> scope;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -121,7 +121,8 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Decision dec = model.getSolver().getDecisionPath().getLastDecision();
+        //noinspection unchecked
+        Decision<V> dec = model.getSolver().getDecisionPath().getLastDecision();
         if(dec != RootDecision.ROOT) {
             if (scope.contains(dec.getDecisionVariable())) {
                 stampIt(dec.getDecisionVariable());
@@ -129,7 +130,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         }
     }
 
-    void stampIt(Variable cftVar) {
+    void stampIt(V cftVar) {
         int id = cftVar.getId();
         int pos = var2pos.get(id);
         if (pos == -1) {
@@ -168,11 +169,11 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
 
     V firstNotInst() {
         int p = pcft;
-        Variable v;
+        V v;
         while (p > -1) {
             v = vars.get(p);
             if (!v.isInstantiated()) {
-                return (V) vars.get(p);
+                return vars.get(p);
             }
             p = prev.get(p);
         }

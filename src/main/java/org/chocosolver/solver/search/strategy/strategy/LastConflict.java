@@ -28,7 +28,7 @@ import java.util.Set;
  * @author Jean-Guillaume Fages, Charles Prud'homme
  * @since 03/05/2013
  */
-public class LastConflict extends AbstractStrategy<Variable> implements IMonitorRestart, IMonitorSolution, IMonitorContradiction {
+public class LastConflict<V extends Variable> extends AbstractStrategy<V> implements IMonitorRestart, IMonitorSolution, IMonitorContradiction {
 
     //***********************************************************************************
     // VARIABLES
@@ -42,7 +42,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     /**
      * The main strategy declared in the solver
      */
-    protected AbstractStrategy<Variable> mainStrategy;
+    private AbstractStrategy<V> mainStrategy;
 
     /**
      * Set to <tt>true</tt> when this strategy is active
@@ -52,12 +52,12 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     /**
      * Number of conflicts stored
      */
-    protected int nbCV;
+    private int nbCV;
 
     /**
      * Variables related to decision in conflicts
      */
-    protected Variable[] conflictingVariables;
+    private V[] conflictingVariables;
 
     protected Set<Variable> scope;
 
@@ -71,14 +71,15 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
      * @param mainStrategy the main strategy declared
      * @param k the maximum number of conflicts to store
      */
-    public LastConflict(Model model, AbstractStrategy<Variable> mainStrategy, int k) {
+    public LastConflict(Model model, AbstractStrategy<V> mainStrategy, int k) {
         super(mainStrategy.vars);
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.model = model;
         this.mainStrategy = mainStrategy;
         this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         model.getSolver().plugMonitor(this);
-        conflictingVariables = new Variable[k];
+        //noinspection unchecked
+        conflictingVariables = (V[])new Variable[k];
         nbCV = 0;
         active = false;
     }
@@ -94,11 +95,11 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @SuppressWarnings("unchecked")
     @Override
-    public Decision<Variable> getDecision() {
+    public Decision<V> getDecision() {
         if (active) {
-            Variable decVar = firstNotInst();
+            V decVar = firstNotInst();
             if (decVar != null) {
-                Decision d = mainStrategy.computeDecision(decVar);
+                Decision<V> d = mainStrategy.computeDecision(decVar);
                 if (d != null) {
                     return d;
                 }
@@ -115,7 +116,8 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        Variable curDecVar = model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
+        //noinspection unchecked
+        V curDecVar = (V) model.getSolver().getDecisionPath().getLastDecision().getDecisionVariable();
         if (nbCV > 0 && conflictingVariables[nbCV - 1] == curDecVar) return;
         if (scope.contains(curDecVar)) {
             if (nbCV < conflictingVariables.length) {
@@ -145,7 +147,7 @@ public class LastConflict extends AbstractStrategy<Variable> implements IMonitor
     //***********************************************************************************
     //***********************************************************************************
 
-    private Variable firstNotInst() {
+    private V firstNotInst() {
         for (int i = nbCV - 1; i >= 0; i--) {
             if (!conflictingVariables[i].isInstantiated()) {
                 return conflictingVariables[i];

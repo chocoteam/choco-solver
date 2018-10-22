@@ -30,17 +30,19 @@ import java.util.Random;
  *
  * @author Jean-Guillaume FAGES
  */
-public class BoundSearch extends AbstractStrategy{
+public class BoundSearch extends AbstractStrategy<IntVar>{
 
 	private final Model model;
 	private final DecisionPath decisionPath;
-	private AbstractStrategy definedSearch; // int search into which this is plugged
+	private AbstractStrategy<IntVar> definedSearch; // int search into which this is plugged
 	private TIntIntHashMap vb = new TIntIntHashMap(); // value-bound map
 	private IntVar variable; // current variable, on which this branches
 	private Random rd = new Random(0); // only to alternate between LB and UB for bounded domain filtering
+	@SuppressWarnings("WeakerAccess")
 	public int MAX_DOM_SIZE = 100; // maximum size of an enumerated domain to apply strong consistency on it
 
-	public BoundSearch(AbstractStrategy mainSearch){
+	@SuppressWarnings("WeakerAccess")
+	public BoundSearch(AbstractStrategy<IntVar> mainSearch){
 		super(mainSearch.getVariables());
 		model = vars[0].getModel();
 		definedSearch = mainSearch;
@@ -53,12 +55,12 @@ public class BoundSearch extends AbstractStrategy{
 	}
 
 	@Override
-	public Decision getDecision() {
+	public Decision<IntVar> getDecision() {
 		if(variable == null || variable.isInstantiated()) {
-			Decision d = definedSearch.getDecision();
+			Decision<IntVar> d = definedSearch.getDecision();
 			vb.clear();
 			if(d == null) return null;
-			if((d.getDecisionVariable().getTypeAndKind() & IntVar.INT) != 0) variable = (IntVar) d.getDecisionVariable();
+			if((d.getDecisionVariable().getTypeAndKind() & IntVar.INT) != 0) variable = d.getDecisionVariable();
 			else {
 				return d;
 			}
@@ -121,7 +123,7 @@ public class BoundSearch extends AbstractStrategy{
 		return cost;
 	}
 
-	public int getBestVal(){
+	private int getBestVal(){
 		int coef = 1;
 		if(variable.hasEnumeratedDomain()){
 			int bestCost = Integer.MAX_VALUE;
