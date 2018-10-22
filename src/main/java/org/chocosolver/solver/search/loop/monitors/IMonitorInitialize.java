@@ -26,16 +26,6 @@ public interface IMonitorInitialize extends ISearchMonitor {
 
     /**
      * Actions to execute after initialisation of the solver
-     * @deprecated
-     * @see #afterInitialize(boolean)
-     */
-    @Deprecated
-    default void afterInitialize(){
-        afterInitialize(true);
-    }
-
-    /**
-     * Actions to execute after initialisation of the solver
      * @param correct equals <i>false</i> if initialization failed, <i>true</i> otherwise.
      */
     default void afterInitialize(boolean correct){

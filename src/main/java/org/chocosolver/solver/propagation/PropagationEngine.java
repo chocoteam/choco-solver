@@ -279,7 +279,7 @@ public class PropagationEngine {
             Propagator[] vpropagators = variable.getPropagators();
             int[] vindices = variable.getPIndices();
             Propagator prop;
-            EvtScheduler si = variable._schedIter();
+            EvtScheduler si = variable.getEvtScheduler();
             //noinspection unchecked
             si.init(mask);
             while (si.hasNext()) {
@@ -296,7 +296,7 @@ public class PropagationEngine {
         variable.clearEvents();
     }
 
-    public void schedule(Propagator prop, int pindice, int mask) {
+    private void schedule(Propagator prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
         notEmpty = notEmpty | (1 << prop.doSchedule(pro_queue));
     }

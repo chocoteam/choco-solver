@@ -305,7 +305,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * For scheduling purpose only
      * @return the scheduler
      */
-    <E extends IEventType> EvtScheduler<E> _schedIter();
+    EvtScheduler getEvtScheduler();
 
     /**
      * @return this cast into an IntVar.

@@ -21,10 +21,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
-import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
-import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
@@ -425,7 +421,7 @@ public abstract class AbstractVariable implements Variable {
      * @return the event scheduler
      */
     @SuppressWarnings("unchecked")
-    public final EvtScheduler _schedIter() {
+    public final EvtScheduler getEvtScheduler() {
         return scheduler;
     }
 

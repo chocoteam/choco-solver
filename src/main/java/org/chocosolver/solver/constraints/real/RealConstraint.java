@@ -63,31 +63,6 @@ public class RealConstraint extends Constraint {
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
-     * @param option    propagation option index (Ibex.COMPO is DEFAULT)
-     * @param rvars     a list of real variables
-     * @deprecated see {@link #RealConstraint(String, Variable...)} instead
-     */
-    @Deprecated
-    public RealConstraint(String functions, int option, Variable... rvars) {
-        this(functions, rvars);
-    }
-
-    /**
-     * Make a new RealConstraint to model one or more continuous functions, separated with
-     * semi-colon ";" <br/> A function is a string declared using the following format: <br/>- the
-     * '{i}' tag defines a variable, where 'i' is an explicit index the array of variables
-     * <code>vars</code>, <br/>- one or more operators :'+,-,*,/,=,<,>,<=,>=,exp( ),ln( ),max(
-     * ),min( ),abs( ),cos( ), sin( ),...' <br/> A complete list is available in the documentation
-     * of IBEX.
-     * <p/>
-     * <p/>
-     * <blockquote><pre>
-     *     model.realIbexGenericConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,
-     * y).post();
-     * </pre>
-     * </blockquote>
-     *
-     * @param functions list of functions, separated by a semi-colon
      * @param rvars     a list of real variables
      */
     public RealConstraint(String functions, Variable... rvars) {

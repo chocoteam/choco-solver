@@ -60,9 +60,6 @@ public class DefaultSettings implements Settings {
 
     private boolean warnUser = false;
 
-    @Deprecated
-    private boolean debugPropagation = false;
-
     private boolean enableDecompositionOfBooleanSum = false;
 
     private IntPredicate enableIncrementalityOnBoolSum = i -> i > 10;

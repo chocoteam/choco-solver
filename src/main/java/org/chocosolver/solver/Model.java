@@ -19,7 +19,6 @@ import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
-import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -676,15 +675,6 @@ public class Model implements IModel {
     }
 
     /**
-     * @deprecated will be removed in version > 4.0.7
-     * @see #Model(String, Settings)
-     * @see #Model(IEnvironment, String, Settings)
-     */
-    @Deprecated
-    public void set(Settings defaults) {
-    }
-
-    /**
      * Adds the <code>hookObject</code> to store in this model, associated with the name <code>hookName</code>.
      * A hook is a simple map "hookName" <-> hookObject.
      *
@@ -945,22 +935,6 @@ public class Model implements IModel {
             st.append(cstrs[c].toString()).append('\n');
         }
         return st.toString();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //////////////////////////////////////////// RELATED TO IBEX ///////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * Get the ibex reference
-     * Creates one if none
-     *
-     * @return the ibex reference
-     * @deprecated see {@link #getIbexHandler()} ()}`
-     */
-    @Deprecated
-    public Ibex getIbex() {
-        return null;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
