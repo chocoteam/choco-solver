@@ -91,6 +91,15 @@ public class Measures implements IMeasures, Cloneable {
      */
     protected long depth;
 
+    /**
+     * Stores the number of fixpoints
+     */
+    protected long fixpointCount;
+
+    /**
+     * Counts the number of non chronological backtracks done so far.
+     */
+    protected long backjumpCount;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -141,6 +150,16 @@ public class Measures implements IMeasures, Cloneable {
     @Override
     public final long getFailCount() {
         return failCount;
+    }
+
+    @Override
+    public final long getFixpointCount() {
+        return fixpointCount;
+    }
+
+    @Override
+    public long getBackjumpCount() {
+        return backjumpCount;
     }
 
     @Override

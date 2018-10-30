@@ -350,6 +350,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     tset.get(i).ensureBoundConsistency();
                 }
             }
+            mMeasures.incFixpointCount();
             P.execute(this);
             action = extend;
             mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
@@ -397,6 +398,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.beforeDownBranch(left);
         mMeasures.incDepth();
         try {
+            mMeasures.incFixpointCount();
             P.execute(this);
             action = extend;
         } catch (ContradictionException ce) {
@@ -595,6 +597,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
+            mMeasures.incFixpointCount();
             P.execute(this);
             action = extend;
         } catch (ContradictionException e) {
@@ -1067,8 +1070,18 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     @Override
+    public long getBackjumpCount() {
+        return getMeasures().getBackjumpCount();
+    }
+
+    @Override
     public long getFailCount() {
         return getMeasures().getFailCount();
+    }
+
+    @Override
+    public long getFixpointCount() {
+        return getMeasures().getFixpointCount();
     }
 
     @Override

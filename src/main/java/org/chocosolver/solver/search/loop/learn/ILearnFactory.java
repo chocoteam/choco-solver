@@ -9,7 +9,10 @@
 package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.learn.EventRecorder;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
 
 /**
  * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
@@ -22,6 +25,26 @@ public interface ILearnFactory extends ISelf<Solver> {
      */
     default void setNoLearning(){
         ref().setLearner(new LearnNothing());
+    }
+
+    /**
+     * Creates a learning object based on Conflict-Driven Clause-Learning (CD-CL) strategy.
+     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
+     * It also posts signed clauses learnt on failures.
+     * Some settings related to explanation can be define thanks to {@link org.chocosolver.solver.Settings}:
+     * <ul>
+     *     <il>{@link Settings#setNbMaxLearntClauses(int)}</il>
+     *     <il>{@link Settings#setRatioForClauseStoreReduction(float)}</il>
+     *     <il>{@link Settings#setMaxLearntClauseCardinality(int)}</il>
+     *     <il>{@link Settings#setLearntClausesDominancePerimeter(int)}</il>
+     * </ul>
+     */
+    default void setLearningSignedClauses() {
+        LearnSignedClauses<ExplanationForSignedClause> learner = new LearnSignedClauses<>(ref());
+        learner.setExplanation(
+                new ExplanationForSignedClause(((EventRecorder) ref().getEventObserver()).getGI())
+        );
+        ref().setLearner(learner);
     }
 
     /**

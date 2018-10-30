@@ -77,6 +77,16 @@ public interface IMeasures extends Serializable {
     long getFailCount();
 
     /**
+     * @return the fixpoint count
+     */
+    long getFixpointCount();
+
+    /**
+     * @return the non chronological backtracks count
+     */
+    long getBackjumpCount();
+
+    /**
      * @return the restart count
      */
     long getRestartCount();
@@ -136,11 +146,12 @@ public interface IMeasures extends Serializable {
         if (hasObjective()) {
             st.append(getBoundsManager()).append(", ");
         }
-        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Fails, %d Restarts",
+        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
+                getBackjumpCount(),
                 getFailCount(),
                 getRestartCount()));
         return st.toString();
@@ -197,13 +208,15 @@ public interface IMeasures extends Serializable {
             st.append("\t").append(getBoundsManager()).append(",\n");
         }
         st.append(String.format("\tBuilding time : %,.3fs" +
-                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n\tFails: %,d\n\t" +
+                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n" +
+                        "\tBackjumps: %,d\n\tFails: %,d\n\t" +
                         "Restarts: %,d",
                 getReadingTimeCount(),
                 getTimeCount(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
+                getBackjumpCount(),
                 getFailCount(),
                 getRestartCount()
         ));
@@ -215,9 +228,11 @@ public interface IMeasures extends Serializable {
      */
     default Number[] toArray() {
         return new Number[]{
+                getSearchState().ordinal(),
                 getSolutionCount(),
                 getReadingTimeCount(),
                 getTimeCount(),
+                getBoundsManager().getPolicy().ordinal(),
                 hasObjective() ? getBestSolutionValue() : 0,
                 getNodeCount(),
                 getBackTrackCount(),

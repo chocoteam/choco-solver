@@ -129,10 +129,24 @@ public final class MeasuresRecorder extends Measures {
     }
 
     /**
+     * increment backtrack counter
+     */
+    public final void incBackjumpCount() {
+        backjumpCount++;
+    }
+
+    /**
      * increment fail counter
      */
     public final void incFailCount() {
         failCount++;
+    }
+
+    /**
+     * increment fail counter
+     */
+    public final void incFixpointCount() {
+        fixpointCount++;
     }
 
     /**
