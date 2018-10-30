@@ -28,9 +28,13 @@ import org.chocosolver.util.criteria.Criterion;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -195,7 +199,7 @@ public class ParallelPortfolio {
                 models.parallelStream().forEach(m -> {
                     if (!getSolverTerminated().get()) {
                         boolean so = m.getSolver().solve();
-                        if (so && finder == m || !so) {
+                        if (!so || finder == m) {
                             getSolverTerminated().set(true);
                         }
                     }
@@ -244,6 +248,57 @@ public class ParallelPortfolio {
      */
     public List<Model> getModels(){
         return models;
+    }
+
+    /**
+     * Attempts to find all solutions of the declared problem.
+     * <ul>
+     * <li>If the method returns an empty list:</li>
+     * <ul>
+     * <li>either a stop criterion (e.g., a time limit) stops the search before any solution has been found,</li>
+     * <li>or no solution exists for the problem (i.e., over-constrained).</li>
+     * </ul>
+     * <li>if the method returns a list with at least one element in it:</li>
+     * <ul>
+     * <li>either the resolution stops eagerly du to a stop criterion before finding all solutions,</li>
+     * <li>or all solutions have been found.</li>
+     * </ul>
+     * </ul>
+     * <p>
+     *
+     * Note that all variables will be recorded
+     *
+     * @return a list that contained the found solutions.
+     */
+    public Stream<Solution> streamSolutions() {
+        Spliterator<Solution> it = new Spliterator<Solution>() {
+
+            @Override
+            public boolean tryAdvance(Consumer<? super Solution> action) {
+                if (solve()) {
+                    action.accept(new Solution(getBestModel()).record());
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public Spliterator<Solution> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return Long.MAX_VALUE;
+            }
+
+            @Override
+            public int characteristics() {
+                return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+            }
+
+        };
+        return StreamSupport.stream(it, false);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

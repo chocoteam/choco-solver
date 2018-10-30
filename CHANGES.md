@@ -7,6 +7,8 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+Minor release
+
 ### Major features:
 
 - Offer possibility to store and load `Settings` from a property file.
@@ -15,6 +17,7 @@ NEXT MILESTONE
 - Logical expression XOR manages more than 2 variables
 - Add new API to IOutputFactory (to Gephi and to Graphviz)
 - Add constraint network output (to gexf format), see `solver.constraintNetworkToGephi(file)`
+- add `ParallelPortfolio.streamSolutions` (#579)
 
 ### Deprecated API (to be removed in next release):
 

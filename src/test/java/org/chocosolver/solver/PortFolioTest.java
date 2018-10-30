@@ -9,8 +9,12 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.chocosolver.solver.ModelTest.knapsack;
 import static org.chocosolver.solver.search.strategy.Search.*;
@@ -92,6 +96,21 @@ public class PortFolioTest {
             while(pares.solve());
             Model finder = pares.getBestModel();
             Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestLB().intValue(), 51);
+            System.gc();
+        }
+    }
+
+    @Test(groups="10s", timeOut=300000)
+    public void testP21() {
+        for (int iter = 0; iter < 50; iter++) {
+            System.out.println("ITERATION "+iter);
+            ParallelPortfolio pares = new ParallelPortfolio();
+            for (int i = 0; i < 20; i++) {
+                pares.addModel(knapsack());
+            }
+            List<Solution> sols = pares.streamSolutions().collect(Collectors.toList());
+            Model finder = pares.getBestModel();
+            Assert.assertEquals(sols.get(sols.size()-1).getIntVal((IntVar) finder.getObjective()), 51);
             System.gc();
         }
     }
