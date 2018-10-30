@@ -78,6 +78,14 @@ public class DefaultSettings implements Settings {
 
     private byte hybridEngine = 0b00;
 
+    private int nbMaxLearnt = 100_000;
+
+    private int maxLearntCardinlity = Integer.MAX_VALUE / 100;
+
+    private float clauseReductionRatio = .5f;
+
+    private int dominancePerimeter = 4;
+
     private Function<Model, Solver> initSolver = Solver::new;
 
 
@@ -326,6 +334,50 @@ public class DefaultSettings implements Settings {
     @Override
     public Settings setHybridizationOfPropagationEngine(byte hybrid) {
         this.hybridEngine = hybrid;
+        return this;
+    }
+
+    @Override
+    public int getNbMaxLearntClauses() {
+        return nbMaxLearnt;
+    }
+
+    @Override
+    public Settings setNbMaxLearntClauses(int n) {
+        this.nbMaxLearnt = n;
+        return this;
+    }
+
+    @Override
+    public float getRatioForClauseStoreReduction() {
+        return this.clauseReductionRatio;
+    }
+
+    @Override
+    public Settings setRatioForClauseStoreReduction(float f) {
+        this.clauseReductionRatio = f;
+        return this;
+    }
+
+    @Override
+    public int getMaxLearntClauseCardinality() {
+        return maxLearntCardinlity;
+    }
+
+    @Override
+    public Settings setMaxLearntClauseCardinality(int n) {
+        maxLearntCardinlity = n;
+        return this;
+    }
+
+    @Override
+    public int getLearntClausesDominancePerimeter() {
+        return dominancePerimeter;
+    }
+
+    @Override
+    public Settings setLearntClausesDominancePerimeter(int n) {
+        this.dominancePerimeter = n;
         return this;
     }
 }

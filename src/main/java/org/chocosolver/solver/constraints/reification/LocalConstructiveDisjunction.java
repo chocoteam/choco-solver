@@ -43,7 +43,7 @@ public class LocalConstructiveDisjunction extends Constraint {
             propagators[i] = constraints[i].getPropagators().clone();
             for (int j = 0; j < propagators[i].length; j++) {
                 Propagator<IntVar> prop = propagators[i][j];
-                prop.setReifiedSilent();
+                prop.setReifiedSilent(null);
                 for (int k = 0; k < prop.getNbVars(); k++) {
                     map1.put(prop.getVar(k).getId(), prop.getVar(k));
                 }

@@ -15,6 +15,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
@@ -69,6 +70,8 @@ public class Model implements IModel {
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
+
+    public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
 
     public static final String IBEX_HOOK_NAME = "H_IBEX";
 
@@ -594,6 +597,21 @@ public class Model implements IModel {
             unpost(nogoods);
             removeHook(NOGOODS_HOOK_NAME);
         }
+    }
+
+    /**
+     * Return a constraint embedding a signed-clauses store.
+     * A call to this method will create and post the constraint if it does not exist already.
+     *
+     * @return the signed-clauses store constraint
+     */
+    public ClauseConstraint getClauseConstraint() {
+        if (getHook(CLAUSES_HOOK_NAME) == null) {
+            ClauseConstraint clauses = new ClauseConstraint(this);
+            clauses.post();
+            addHook(CLAUSES_HOOK_NAME, clauses);
+        }
+        return (ClauseConstraint) getHook(CLAUSES_HOOK_NAME);
     }
 
     /**

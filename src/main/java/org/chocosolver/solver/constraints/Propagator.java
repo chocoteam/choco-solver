@@ -87,7 +87,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Status of the propagator when activated (ie, after initial propagation).
      */
-    private static final short ACTIVE = 2;
+    protected static final short ACTIVE = 2;
 
     /**
      * Status of the propagator when entailed.
@@ -103,12 +103,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Current status of this propagator.
      * In: {@link #NEW}, {@link #REIFIED}, {@link #ACTIVE} and {@link #PASSIVE}.
      */
-    private short state;
+    protected short state;
 
     /**
      * Backtrackable operations to maintain the status on backtrack.
      */
-    private IOperation[] operations;
+    protected IOperation[] operations;
 
     /**
      * On propagator passivation, should this propagator be swapped from active to passive in its
@@ -465,6 +465,10 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             throw new SolverException("Try to activate a propagator already active, passive or reified.\n" +
                     this + " of " + this.getConstraint());
         }
+    }
+
+    protected void setActive0() {
+        state = ACTIVE;
     }
 
     /**

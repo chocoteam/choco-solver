@@ -62,6 +62,8 @@ public class ConstraintsName {
 
     public static final String CIRCUIT = "CIRCUIT";
 
+    public static final String CLAUSECONSTRAINT = "CLAUSECONSTRAINT";
+
     public static final String COUNT = "COUNT";
 
     public static final String COSTREGULAR = "COSTREGULAR";

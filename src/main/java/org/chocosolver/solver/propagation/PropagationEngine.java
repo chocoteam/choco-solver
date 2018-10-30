@@ -297,7 +297,7 @@ public class PropagationEngine {
         variable.clearEvents();
     }
 
-    private void schedule(Propagator prop, int pindice, int mask) {
+    public void schedule(Propagator prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
         notEmpty = notEmpty | (1 << prop.doSchedule(pro_queue));
     }

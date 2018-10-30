@@ -99,6 +99,7 @@ import org.chocosolver.solver.constraints.ternary.PropMinBC;
 import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
+import org.chocosolver.solver.constraints.unary.PropNotin;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -106,6 +107,7 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
@@ -185,6 +187,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint notMember(IntVar var, int[] table) {
         return new NotMember(var, table);
+    }
+
+    /**
+     * Creates a notMember constraint.
+     * Ensures var does not take its values in set
+     *
+     * @param var   an integer variable
+     * @param set an set of values
+     */
+    default Constraint notMember(IntVar var, IntIterableRangeSet set) {
+        return new Constraint(ConstraintsName.NOTMEMBER, new PropNotin(var, set));
     }
 
     /**

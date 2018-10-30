@@ -66,6 +66,10 @@ public interface Settings  {
         this.setSwapOnPassivate(Boolean.valueOf(properties.get("propagators.swap").toString()));
         this.setCheckDeclaredConstraints(Boolean.valueOf(properties.get("constraints.check").toString()));
         this.setHybridizationOfPropagationEngine(Byte.valueOf(properties.get("propagationEngine.hybridization").toString()));
+        this.setNbMaxLearntClauses(Integer.valueOf(properties.get("learnt.nbMax").toString()));
+        this.setRatioForClauseStoreReduction(Float.valueOf(properties.get("learnt.ratio").toString()));
+        this.setMaxLearntClauseCardinality(Integer.valueOf(properties.get("learnt.maxCard").toString()));
+        this.setLearntClausesDominancePerimeter(Integer.valueOf(properties.get("learnt.dominance").toString()));
         return this;
     }
 
@@ -126,6 +130,10 @@ public interface Settings  {
         properties.setProperty("propagators.swap", Boolean.toString(swapOnPassivate()));
         properties.setProperty("constraints.check", Boolean.toString(checkDeclaredConstraints()));
         properties.setProperty("propagationEngine.hybridization", Byte.toString(enableHybridizationOfPropagationEngine()));
+        properties.setProperty("learnt.nbMax", Integer.toString(this.getNbMaxLearntClauses()));
+        properties.setProperty("learnt.ratio", Float.toString(this.getRatioForClauseStoreReduction()));
+        properties.setProperty("learnt.maxCard", Integer.toString(this.getMaxLearntClauseCardinality()));
+        properties.setProperty("learnt.dominance", Integer.toString(this.getLearntClausesDominancePerimeter()));
         return properties;
     }
 
@@ -461,5 +469,90 @@ public interface Settings  {
      * @return the current instance
      */
     Settings setHybridizationOfPropagationEngine(byte hybrid);
+
+    /**
+     * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
+     * @see #setNbMaxLearntClauses(int)
+     * @see #setRatioForClauseStoreReduction(float)
+     * @see #getRatioForClauseStoreReduction()
+     * @see #setMaxLearntClauseCardinality(int)
+     * @see #getMaxLearntClauseCardinality()
+     */
+    int getNbMaxLearntClauses();
+
+    /**
+     * Set the maximum of number of learnt clauses to store before running a reduction of the store.
+     * @param n maximum number of learnt clauses before reducing the store.
+     * @see #getNbMaxLearntClauses()
+     * @see #setRatioForClauseStoreReduction(float)
+     * @see #getRatioForClauseStoreReduction()
+     * @see #setMaxLearntClauseCardinality(int)
+     * @see #getMaxLearntClauseCardinality()
+     * @return the current instance
+     */
+    Settings setNbMaxLearntClauses(int n);
+
+    /**
+     * when clauses store need to be reduced, 'ratio' of them are kept (between  0.1 and .99)
+     *
+     * @see #setRatioForClauseStoreReduction(float)
+     * @see #setNbMaxLearntClauses(int)
+     * @see #getNbMaxLearntClauses()
+     * @see #setMaxLearntClauseCardinality(int)
+     * @see #getMaxLearntClauseCardinality()
+     */
+    float getRatioForClauseStoreReduction();
+
+    /**
+     * when clauses store need to be reduced, 'ratio' of them are kept (between  0.1 and .99).
+     * A call to this defines 'ratio'.
+     * @param f ratio for clause store reduction
+     *
+     * @see #getRatioForClauseStoreReduction()
+     * @see #setNbMaxLearntClauses(int)
+     * @see #getNbMaxLearntClauses()
+     * @see #setMaxLearntClauseCardinality(int)
+     * @see #getMaxLearntClauseCardinality()
+     * @return the current instance
+     */
+    Settings setRatioForClauseStoreReduction(float f);
+
+    /**
+     * @return maximum learnt clause cardinality, clauses beyond this value are ignored.
+     * @see #setMaxLearntClauseCardinality(int)
+     * @see #setNbMaxLearntClauses(int)
+     * @see #setRatioForClauseStoreReduction(float)
+     * @see #getRatioForClauseStoreReduction()
+     * @see #setRatioForClauseStoreReduction(float)
+     */
+    int getMaxLearntClauseCardinality();
+
+    /**
+     * Set the maximum learnt clause cardinality, clauses beyond this value are ignored.
+     * @param n maximum learnt clause cardinality.
+     * @see #getMaxLearntClauseCardinality()
+     * @see #getNbMaxLearntClauses()
+     * @see #setRatioForClauseStoreReduction(float)
+     * @see #getRatioForClauseStoreReduction()
+     * @see #setRatioForClauseStoreReduction(float)
+     * @return the current instance
+     */
+    Settings setMaxLearntClauseCardinality(int n);
+
+    /**
+     * When a clause is learnt from a conflict, it may happen that it dominates previously learnt ones.
+     * The dominance will be evaluated with the <i>n</i> last learnt clauses.
+     * n = 0 means no dominance check, n = {@link Integer#MAX_VALUE} means checking all clauses with the last one.
+     * @return dominance perimeter
+     */
+    int getLearntClausesDominancePerimeter();
+
+    /**
+     * When a clause is learnt from a conflict, it may happen that it dominates previously learnt ones.
+     * The dominance will be evaluated with the <i>n</i> last learnt clauses.
+     * n = 0 means no dominance check, n = {@link Integer#MAX_VALUE} means checking all clauses with the last one.
+     * @return dominance perimeter
+     */
+    Settings setLearntClausesDominancePerimeter(int n);
 
 }
