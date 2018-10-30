@@ -49,9 +49,6 @@
         <developerConnection>scm:git:git@github.com:chocoteam/choco-solver.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <prerequisites>
-        <maven>3.5.4</maven>
-    </prerequisites>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

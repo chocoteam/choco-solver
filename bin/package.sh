@@ -106,7 +106,7 @@ NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))") || quit "Unable to get next r
 curl -i -sH "$AUTH" --data '{ "title": '\""${NEXT}"\"'}' \
         "${GH_API}milestones"
 
-rmdir -rf choco-${VERSION}
+rmdir choco-${VERSION}
 rm choco-${VERSION}.zip
 rm ${temp_file} || quit "Unable to remove tmp file"
 git checkout master

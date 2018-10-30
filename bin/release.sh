@@ -25,7 +25,7 @@ git ls-remote --exit-code --tags origin ${VERSION} && quit "tag ${VERSION} alrea
 # We assume the tests have been run before, and everything is OK for the release
 
 # add the tag
-git tag -a ${VERSION} -m "create tage ${VERSION}" || quit "Unable to tag with ${VERSION}"
+git tag -a ${VERSION} -m "create tag ${VERSION}" || quit "Unable to tag with ${VERSION}"
 git push --tags || quit "Unable to push the tag ${VERSION}"
 
 #Set the next development version
