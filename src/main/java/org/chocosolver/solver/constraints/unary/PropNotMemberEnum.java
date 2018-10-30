@@ -12,9 +12,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
@@ -90,11 +88,6 @@ public class PropNotMemberEnum extends Propagator<IntVar> {
     @Override
     public String toString() {
         return vars[0].getName() + " outside " + Arrays.toString(values.toArray());
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return ruleStore.addPropagatorActivationRule(this);
     }
 
 }

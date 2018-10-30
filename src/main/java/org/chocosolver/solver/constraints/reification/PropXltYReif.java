@@ -11,11 +11,8 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
 /**
@@ -65,36 +62,6 @@ public class PropXltYReif extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == vars[2]) {
-            if (vars[2].isInstantiatedTo(1)) {
-                nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                nrules |= ruleStore.addLowerBoundRule(vars[1]);
-            } else {
-                nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                nrules |= ruleStore.addUpperBoundRule(vars[1]);
-            }
-        } else {
-            if (var == vars[0]) {
-                if (evt == IntEventType.DECUPP) {
-                    nrules |= ruleStore.addUpperBoundRule(vars[1]);
-                } else {
-                    nrules |= ruleStore.addLowerBoundRule(vars[1]);
-                }
-            } else if (var == vars[1]) {
-                if (evt == IntEventType.DECUPP) {
-                    nrules |= ruleStore.addUpperBoundRule(vars[0]);
-                } else {
-                    nrules |= ruleStore.addLowerBoundRule(vars[0]);
-                }
-            }
-            nrules |= ruleStore.addFullDomainRule(vars[2]);
-        }
-        return nrules;
     }
 
     @Override

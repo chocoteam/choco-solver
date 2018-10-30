@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -134,7 +133,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         int sup = getUB();
         if (inf <= value && value <= sup) {
             IntEventType e = IntEventType.REMOVE;
-            model.getSolver().getExplainer().removeValue(this, value, cause);
             if (doRemoveValueFromVar(value)) {
                 if (value == inf) {
                     e = IntEventType.INCLOW;
@@ -146,8 +144,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
                 }
                 this.notifyPropagators(e, cause);
                 return true;
-            }else{
-                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -183,11 +179,8 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         int value = nlb, to = nub;
         boolean hasRemoved = false;
         while (value <= to) {
-            model.getSolver().getExplainer().removeValue(this, value, cause);
             if(doRemoveValueFromVar(value)){
                 hasRemoved |= true;
-            }else{
-                model.getSolver().getExplainer().undo();
             }
             value = values.nextValue(value);
         }
@@ -209,11 +202,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         } else if (getUB() <= to) {
             return updateUpperBound(from - 1, cause);
         } else if(var.hasEnumeratedDomain()){
-            for (int v = from; v <= to; v++) {
-                if (this.contains(v)) {
-                    model.getSolver().getExplainer().removeValue(this, v, cause);
-                }
-            }
             boolean done = doRemoveIntervalFromVar(from, to);
             if (done) {
                 notifyPropagators(IntEventType.REMOVE, cause);
@@ -238,11 +226,8 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         // iterate over the values in the domain, remove the ones that are not in values
         for (; value <= to; value = nextValue(value)) {
             if (!values.contains(value)) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if(doRemoveValueFromVar(value)){
                     hasRemoved |= true;
-                }else{
-                    model.getSolver().getExplainer().undo();
                 }
             }
         }
@@ -259,13 +244,10 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
         boolean done = doInstantiateVar(value);
         if (done) {
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
-        }else{
-            model.getSolver().getExplainer().undo();
         }
         return false;
     }
@@ -275,7 +257,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            model.getSolver().getExplainer().updateLowerBound(this, value, getLB(), cause);
             IntEventType e = IntEventType.INCLOW;
             boolean done = doUpdateLowerBoundOfVar(value);
             if (isInstantiated()) {
@@ -284,8 +265,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
             if (done) {
                 this.notifyPropagators(e, cause);
                 return true;
-            }else{
-                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -296,7 +275,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            model.getSolver().getExplainer().updateUpperBound(this, value, getUB(), cause);
             IntEventType e = IntEventType.DECUPP;
             boolean done = doUpdateUpperBoundOfVar(value);
             if (isInstantiated()) {
@@ -305,8 +283,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
             if (done) {
                 this.notifyPropagators(e, cause);
                 return true;
-            }else{
-                model.getSolver().getExplainer().undo();
             }
         }
         return false;
@@ -322,21 +298,15 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
             IntEventType e = null;
 
             if (olb < lb) {
-                model.getSolver().getExplainer().updateLowerBound(this, lb, getLB(), cause);
                 e = IntEventType.INCLOW;
                 if(doUpdateLowerBoundOfVar(lb)){
                     hasChanged = true;
-                }else{
-                    model.getSolver().getExplainer().undo();
                 }
             }
             if (oub > ub) {
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
-                model.getSolver().getExplainer().updateUpperBound(this, ub, getUB(), cause);
                 if(doUpdateUpperBoundOfVar(ub)){
                     hasChanged |= true;
-                }else{
-                    model.getSolver().getExplainer().undo();
                 }
             }
             if (isInstantiated()) {
@@ -444,32 +414,4 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return _javaIterator;
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {
-        boolean newrules = false;
-        boolean observed = modifiedVar == var;
-        IntEventType ievt;
-        if(observed){
-            value = this.transformValue(value);
-            ievt = (IntEventType)this.transformEvent(evt);
-        }else {
-            value = modifiedVar.reverseValue(value);
-            ievt = (IntEventType)modifiedVar.transformEvent(evt);
-        }
-        switch (ievt) {
-            case REMOVE:
-                newrules = ruleStore.addRemovalRule(this, value);
-                break;
-            case DECUPP:
-                newrules = ruleStore.addUpperBoundRule(this);
-                break;
-            case INCLOW:
-                newrules = ruleStore.addLowerBoundRule(this);
-                break;
-            case INSTANTIATE:
-                newrules = ruleStore.addFullDomainRule(this);
-                break;
-        }
-        return newrules;
-    }
 }

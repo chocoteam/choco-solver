@@ -8,8 +8,11 @@
  */
 package org.chocosolver.solver.search.loop.lns;
 
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.lns.neighbors.*;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -60,15 +63,11 @@ public class INeighborFactory {
     }
 
     /**
-     * Creates an Explanation based LNS Neighbor
-     * @param vars   the pool of variables to be freezed
+     * @deprecated does nothing, will be removed in next version
      */
+    @Deprecated
     public static INeighbor explanationBased(IntVar... vars) {
-        Model model = vars[0].getModel();
-//        INeighbor neighbor1 = new ExplainingObjective(model, 5, 0);
-        INeighbor neighbor2 = new ExplainingCut(model, 5, 0);
-        INeighbor neighbor3 = new RandomNeighborhood(vars, 5, 0);
-        return sequencer(/*neighbor1, */neighbor2, neighbor3);
+        throw new UnsupportedOperationException("Deprecated -- will be removed in the next release");
     }
 
 	/**

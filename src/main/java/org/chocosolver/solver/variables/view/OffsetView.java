@@ -13,7 +13,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -277,21 +276,4 @@ public final class OffsetView extends IntView<IntVar> {
         return value - cste;
     }
 
-    @Override
-    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
-        switch (mask) {
-            case DECUPP:
-                model.getSolver().getExplainer().updateUpperBound(this, one + cste, two + cste, var);
-                break;
-            case INCLOW:
-                model.getSolver().getExplainer().updateLowerBound(this, one + cste, two + cste, var);
-                break;
-            case REMOVE:
-                model.getSolver().getExplainer().removeValue(this, one + cste, var);
-                break;
-            case INSTANTIATE:
-                model.getSolver().getExplainer().instantiateTo(this, one + cste, var, two + cste, three + cste);
-                break;
-        }
-    }
 }

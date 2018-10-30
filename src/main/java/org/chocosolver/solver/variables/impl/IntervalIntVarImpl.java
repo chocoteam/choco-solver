@@ -184,12 +184,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (!this.contains(value)) {
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
             int lb = this.getLB();
             int ub = this.getUB();
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, lb, ub);
             IntEventType e = IntEventType.INSTANTIATE;
             if (reactOnRemoval) {
                 if (lb <= value - 1) delta.add(lb, value - 1, cause);
@@ -226,7 +224,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
-            model.getSolver().getExplainer().updateLowerBound(this, value, old, cause);
             int oub = this.getUB();
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
@@ -269,7 +266,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
-            model.getSolver().getExplainer().updateUpperBound(this, value, old, cause);
             int olb = this.getLB();
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
@@ -301,10 +297,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             IntEventType e = null;
             int d = 0;
             if (oub < lb) {
-                model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
-                model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 if (reactOnRemoval) {
                     if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
@@ -313,10 +307,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 LB.set(lb);
             }
             if (olb > ub) {
-                model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
-                model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 if (reactOnRemoval) {
                     if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);

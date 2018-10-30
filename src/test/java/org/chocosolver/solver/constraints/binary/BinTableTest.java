@@ -13,11 +13,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
@@ -29,16 +25,6 @@ import static org.testng.Assert.assertEquals;
  * @since 24/04/2014
  */
 public class BinTableTest {
-
-    @DataProvider(name = "params")
-    public Object[][] data1D(){
-        // indicates whether to use explanations or not
-        List<Object[]> elt = new ArrayList<>();
-        elt.add(new Object[]{true});
-        elt.add(new Object[]{false});
-        return elt.toArray(new Object[elt.size()][1]);
-    }
-
 
     private static String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
@@ -71,17 +57,14 @@ public class BinTableTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void testFeas1(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void testFeas1() {
         setUp();
         for (String a : ALGOS) {
             s = new Model();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
             s.table(v1, v2, feasible, a).post();
-            if(exp){
-                s.getSolver().setCBJLearning(false, false);
-            }
             while (s.getSolver().solve()) ;
             assertEquals(5, s.getSolver().getSolutionCount());
         }
@@ -89,17 +72,14 @@ public class BinTableTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void testInfeas1(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void testInfeas1() {
         setUp();
         for (String a : ALGOS) {
             s = new Model();
             v1 = s.intVar("v1", 1, 4, false);
             v2 = s.intVar("v2", 1, 4, false);
             s.table(v1, v2, infeasible, a).post();
-            if(exp){
-                s.getSolver().setCBJLearning(false, false);
-            }
             while (s.getSolver().solve()) ;
             assertEquals((16 - 5), s.getSolver().getSolutionCount());
         }
@@ -115,8 +95,8 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void testAbsolute(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void testAbsolute() {
         Model model = new Model();
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
@@ -133,9 +113,6 @@ public class BinTableTest {
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 absolute(tv1, tv2, a).post();
                 tsolver.getSolver().setSearch(randomSearch(new IntVar[]{tv1, tv2}, s));
-                if(exp){
-                    model.getSolver().setCBJLearning(false, false);
-                }
                 long nbSolutions = 0;
                 while (tsolver.getSolver().solve()) {
                     nbSolutions++;
@@ -154,8 +131,8 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void testArithmLT(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void testArithmLT() {
         Model model = new Model();
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
@@ -172,9 +149,6 @@ public class BinTableTest {
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmLT(tv1, tv2, a).post();
                 tsolver.getSolver().setSearch(randomSearch(new IntVar[]{tv1, tv2}, s));
-                if(exp){
-                    model.getSolver().setCBJLearning(false, false);
-                }
                 long nbSolutions = 0;
                 while (tsolver.getSolver().solve()) {
                     nbSolutions++;
@@ -193,8 +167,8 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void testArithmNQ(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void testArithmNQ() {
         Model model = new Model();
         IntVar v1 = model.intVar("v1", -10, 10, false);
         IntVar v2 = model.intVar("v2", -10, 10, false);
@@ -211,9 +185,6 @@ public class BinTableTest {
                 IntVar tv2 = tsolver.intVar("tv2", -10, 10, false);
                 arithmNQ(tv1, tv2, a).post();
                 tsolver.getSolver().setSearch(randomSearch(new IntVar[]{tv1, tv2}, s));
-                if(exp){
-                    model.getSolver().setCBJLearning(false, false);
-                }
                 long nbSolutions = 0;
                 while (tsolver.getSolver().solve()) {
                     nbSolutions++;
@@ -224,8 +195,8 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void test2(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void test2() {
         for (String a : ALGOS) {
             for (int i = 0; i < 10; i++) {
                 Tuples tuples = new Tuples(true);
@@ -239,9 +210,6 @@ public class BinTableTest {
                 model.table(vars[0], vars[1], tuples, a).post();
 
                 model.getSolver().setSearch(randomSearch(vars, i));
-                if(exp){
-                    model.getSolver().setCBJLearning(false, false);
-                }
                 long nbSolutions = 0;
                 while (model.getSolver().solve()) {
                     nbSolutions++;
@@ -251,8 +219,8 @@ public class BinTableTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
-    public void test3(boolean exp) {
+    @Test(groups="1s", timeOut=60000)
+    public void test3() {
         for (String a : ALGOS) {
             for (int i = 0; i < 10; i++) {
                 Tuples tuples = new Tuples(true);
@@ -266,9 +234,6 @@ public class BinTableTest {
                 model.table(vars[0], vars[1], tuples, a).post();
 
                 model.getSolver().setSearch(randomSearch(vars, i));
-                if(exp){
-                    model.getSolver().setCBJLearning(false, false);
-                }
                 long nbSolutions = 0;
                 while (model.getSolver().solve()) {
                     nbSolutions++;

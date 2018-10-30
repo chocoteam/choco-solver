@@ -10,15 +10,12 @@ package org.chocosolver.sat;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.ExplanationEngine;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
@@ -27,7 +24,8 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.sat.PropNogoods.*;
+import static org.chocosolver.sat.PropNogoods.iseq;
+import static org.chocosolver.sat.PropNogoods.ivalue;
 import static org.chocosolver.sat.PropNogoods.leq;
 
 /**
@@ -214,37 +212,6 @@ public class PropNogoodsTest {
     @Test(groups="1s", timeOut=60000)
     public void testApplyEarlyDeductions() throws Exception {
 
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testWhy() throws Exception {
-        ExplanationEngine ee = new ExplanationEngine(vars[0].getModel(), true, false);
-
-        PNG.propagate(2);
-        TIntList list = new TIntArrayList();
-        list.add(SatSolver.negated(lits[0]));
-        list.add(lits[2]);
-        PNG.addNogood(list);
-        list.clear();
-        list.add(SatSolver.negated(lits[2]));
-        list.add(lits[4]);
-        PNG.addNogood(list);
-        list.clear();
-        list.add(SatSolver.negated(lits[2]));
-        list.add(SatSolver.negated(lits[4]));
-        PNG.addNogood(list);
-        vars[0].instantiateTo(0, new ICause() {
-            @Override
-            public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-                return false;
-            }
-        });
-        try {
-            PNG.propagate(0, 15);
-            Assert.fail();
-        }catch (ContradictionException c){
-            ee.explain(c);
-        }
     }
 
     @Test(groups="1s", timeOut=60000)

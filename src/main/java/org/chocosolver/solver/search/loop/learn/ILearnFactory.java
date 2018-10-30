@@ -10,7 +10,6 @@ package org.chocosolver.solver.search.loop.learn;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.explanations.NoExplanationEngine;
 
 /**
  * Interface to define how to learn during the solving process (e.g. CBJ, DBT...)
@@ -23,28 +22,20 @@ public interface ILearnFactory extends ISelf<Solver> {
      */
     default void setNoLearning(){
         ref().setLearner(new LearnNothing());
-        ref().setExplainer(NoExplanationEngine.SINGLETON);
     }
 
     /**
-     * Creates a learning object based on Conflict-based Backjumping (CBJ) explanation strategy.
-     * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
+     * @deprecated does nothing, will be removed in next version
      */
+    @Deprecated
     default void setCBJLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-        ref().setLearner(new LearnCBJ(ref().getModel(),nogoodsOn, userFeedbackOn));
     }
 
     /**
-     * Creates a learning object based on Dynamic Backjumping (DBT) explanation strategy.
-     * It backtracks up to most recent decision involved in the explanation, keep unrelated ones.
-     * @param nogoodsOn set to true to extract nogoods from failures
-     * @param userFeedbackOn set to true to record the propagation in conflict
-     *                       (only relevant when one wants to interpret the explanation of a failure).
+     * @deprecated does nothing, will be removed in next version
      */
+    @Deprecated
     default void setDBTLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-        ref().setLearner(new LearnDBT(ref().getModel(), nogoodsOn, userFeedbackOn));
+
     }
 }

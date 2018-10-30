@@ -12,9 +12,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -177,59 +175,4 @@ public class PropMinBC extends Propagator<IntVar> {
         return BST.toString() + ".MIN(" + v1.toString() + "," + v2.toString() + ")";
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if(var == null){
-            super.why(ruleStore, null, evt, value);
-        }else if (var == vars[0]) {
-            if (IntEventType.isInstantiate(evt.getMask())) {
-                if (vars[1].isInstantiated()) {
-                    newrules |= ruleStore.addFullDomainRule(vars[1]);
-                    newrules |= ruleStore.addLowerBoundRule(vars[2]);
-                }
-                if (vars[2].isInstantiated()) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[1]);
-                    newrules |= ruleStore.addFullDomainRule(vars[2]);
-                }
-            } else {
-                if (IntEventType.isInclow(evt.getMask())) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[1]);
-                    newrules |= ruleStore.addLowerBoundRule(vars[2]);
-                }
-                if (IntEventType.isDecupp(evt.getMask())) {
-                    newrules |= ruleStore.addUpperBoundRule(vars[1]);
-                    newrules |= ruleStore.addUpperBoundRule(vars[2]);
-                }
-            }
-        } else {
-            int i = var == vars[1] ? 2 : 1;
-            if (IntEventType.isInstantiate(evt.getMask())) {
-                newrules |= ruleStore.addFullDomainRule(vars[0]);
-                if (vars[i].isInstantiated()) {
-                    newrules |= ruleStore.addFullDomainRule(vars[i]);
-                } else {
-                    newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                }
-            } else {
-                if (IntEventType.isInclow(evt.getMask())) {
-                    if (vars[0].isInstantiated()) {
-                        newrules |= ruleStore.addFullDomainRule(vars[0]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[0]);
-                    }
-                    if (vars[i].isInstantiated()) {
-                        newrules |= ruleStore.addFullDomainRule(vars[i]);
-                    } else {
-                        newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                    }
-                }
-                if (IntEventType.isDecupp(evt.getMask())) {
-                    newrules |= ruleStore.addLowerBoundRule(vars[0]);
-                    newrules |= ruleStore.addLowerBoundRule(vars[i]);
-                }
-            }
-        }
-        return newrules;
-    }
 }

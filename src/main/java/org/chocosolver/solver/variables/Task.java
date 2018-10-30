@@ -17,8 +17,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 
@@ -129,42 +127,6 @@ public class Task {
             }
         }
 
-        @Override
-        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-            boolean nrules = false;
-            if (var == S) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(E);
-                    nrules|=ruleStore.addUpperBoundRule(D);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addUpperBoundRule(E);
-                    nrules|=ruleStore.addLowerBoundRule(D);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            } else if (var == E) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(S);
-                    nrules|=ruleStore.addLowerBoundRule(D);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addUpperBoundRule(S);
-                    nrules|=ruleStore.addUpperBoundRule(D);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            } else if (var == D) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(E);
-                    nrules|=ruleStore.addUpperBoundRule(S);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addLowerBoundRule(S);
-                    nrules|=ruleStore.addUpperBoundRule(E);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            }
-            return nrules;
-        }
     }
 
     private class TaskMonitorBound implements IVariableMonitor<IntVar> {
@@ -191,42 +153,6 @@ public class Task {
             D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
         }
 
-        @Override
-        public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-            boolean nrules = false;
-            if (var == S) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(E);
-                    nrules|=ruleStore.addUpperBoundRule(D);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addUpperBoundRule(E);
-                    nrules|=ruleStore.addLowerBoundRule(D);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            } else if (var == E) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(S);
-                    nrules|=ruleStore.addLowerBoundRule(D);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addUpperBoundRule(S);
-                    nrules|=ruleStore.addUpperBoundRule(D);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            } else if (var == D) {
-                if (evt == IntEventType.INCLOW) {
-                    nrules = ruleStore.addLowerBoundRule(E);
-                    nrules|=ruleStore.addUpperBoundRule(S);
-                } else if (evt == IntEventType.DECUPP) {
-                    nrules = ruleStore.addLowerBoundRule(S);
-                    nrules|=ruleStore.addUpperBoundRule(E);
-                } else {
-                    throw new SolverException("TaskMonitor exception");
-                }
-            }
-            return nrules;
-        }
     }
 
     @Override

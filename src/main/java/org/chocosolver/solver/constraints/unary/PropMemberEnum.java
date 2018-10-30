@@ -12,9 +12,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
@@ -80,8 +78,4 @@ public class PropMemberEnum extends Propagator<IntVar> {
         return vars[0].getName() + " in " + Arrays.toString(values.toArray());
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return ruleStore.addPropagatorActivationRule(this);
-    }
 }

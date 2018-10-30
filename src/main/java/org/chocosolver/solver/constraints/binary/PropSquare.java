@@ -11,10 +11,8 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
@@ -231,22 +229,6 @@ public class PropSquare extends Propagator<IntVar> {
     protected void updateHoleinY(int remVal) throws ContradictionException {
         vars[1].removeValue(floor_sqrt(remVal), this);
         vars[1].removeValue(-ceil_sqrt(remVal), this);
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if (var.equals(vars[0])) {
-            int sqrt = (int) Math.sqrt(value);
-            newrules |= ruleStore.addRemovalRule(vars[1], sqrt);
-            newrules |= ruleStore.addRemovalRule(vars[1], -sqrt);
-        } else if (var.equals(vars[1])) {
-            int sqr = value ^ 2;
-            newrules |= ruleStore.addRemovalRule(vars[0], sqr);
-        } else {
-            newrules |= super.why(ruleStore, var, evt, value);
-        }
-        return newrules;
     }
 
     private static class RemProc implements UnaryIntProcedure<Integer> {

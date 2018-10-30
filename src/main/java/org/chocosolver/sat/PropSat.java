@@ -19,10 +19,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -319,118 +316,5 @@ public class PropSat extends Propagator<BoolVar> {
 //            demons_[var.value()].inhibit(solver());
             vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
         }
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar bvar, IEventType evt, int bvalue) {
-        if (inClauses == null) {
-            fillInClauses();
-        }
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        // When we got here, there are multiple cases:
-        // 1. the propagator fails, at least one clause or implication cannot be satisfied
-        // 2. the propagator is the cause of an instantiation
-        // but the clauses and implications may be lost (cf. propagate)
-
-        // get the index of the variable in the sat solver
-        int var = indices_.get(bvar);
-        boolean new_value = bvar.getValue() != 0;
-        int lit = SatSolver.makeLiteral(var, new_value);
-        int neg = negated(lit);
-        // A. implications:
-        // simply iterate over implies_ and add the instantiated variables
-        TIntList implies = sat_.implies_.get(lit);
-        if (implies != null) {
-            for (int i = implies.size() - 1; i >= 0; i--) {
-                newrules |= _why(implies.get(i), ruleStore);
-            }
-        }
-        implies = sat_.implies_.get(neg);
-        if (implies != null) {
-            for (int i = implies.size() - 1; i >= 0; i--) {
-                newrules |= _why(implies.get(i), ruleStore);
-            }
-        }
-        // B. clauses:
-        // We need to find the fully instantiated clauses where bvar appears
-        ArrayList<Clause> mClauses = inClauses.get(lit);
-        if (mClauses != null) {
-            for (int i = mClauses.size() - 1; i >= 0; i--) {
-                newrules |= _why(mClauses.get(i), ruleStore);
-            }
-        }
-        mClauses = inClauses.get(neg);
-        if (mClauses != null) {
-            for (int i = mClauses.size() - 1; i >= 0; i--) {
-                newrules |= _why(mClauses.get(i), ruleStore);
-            }
-        }
-
-        // C. learnt clauses:
-        // We need to find the fully instantiated clauses where bvar appears
-        // we cannot rely on watches_ because is not backtrackable
-        // So, we iterate over clauses where the two first literal are valued AND which contains bvar
-        for (int k = sat_.nLearnt() - 1; k >= 0; k--) {
-            newrules |= _why(neg, lit, sat_.learnts.get(k), ruleStore);
-        }
-        return newrules;
-    }
-
-    private void fillInClauses() {
-        inClauses = new TIntObjectHashMap<>();
-        for (int k = sat_.nClauses() - 1; k >= 0; k--) {
-            Clause cl = sat_.clauses.get(k);
-            for (int d = cl.size() - 1; d >= 0; d--) {
-                int l = cl._g(d);
-                ArrayList<Clause> mcls = inClauses.get(l);
-                if (mcls == null) {
-                    mcls = new ArrayList<>();
-                    inClauses.put(l, mcls);
-                }
-                mcls.add(cl);
-            }
-        }
-    }
-
-    private boolean _why(Clause cl, RuleStore ruleStore) {
-        boolean newrules = false;
-        // if the variable watches
-        if (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated()) {
-            for (int d = cl.size() - 1; d >= 0; d--) {
-                newrules |= _why(cl._g(d), ruleStore);
-            }
-        }
-        return newrules;
-    }
-
-    private boolean _why(int neg, int lit, Clause cl, RuleStore ruleStore) {
-        boolean newrules = false;
-        // if the variable watches
-        if (cl._g(0) == neg || cl._g(0) == lit || cl._g(1) == neg || cl._g(1) == lit) {
-            for (int d = cl.size() - 1; d >= 0; d--) {
-                newrules |= _why(cl._g(d), ruleStore);
-            }
-        } else
-            // if the watched literals are instantiated
-            if (vars[var(cl._g(0))].isInstantiated() && vars[var(cl._g(1))].isInstantiated()) {
-                // then, look for the lit
-                int p = cl.pos(neg);
-                int q = cl.pos(lit);
-                if (p > -1 || q > -1) { // we found a clause where neg is in
-                    for (int d = cl.size() - 1; d >= 0; d--) {
-                        newrules |= _why(cl._g(d), ruleStore);
-                    }
-                }
-            }
-        return newrules;
-    }
-
-    private boolean _why(int l, RuleStore ruleStore) {
-        return vars[var(l)].isInstantiated() && ruleStore.addFullDomainRule(vars[var(l)]);
     }
 }

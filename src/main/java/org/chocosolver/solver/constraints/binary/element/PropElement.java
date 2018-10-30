@@ -11,9 +11,7 @@ package org.chocosolver.solver.constraints.binary.element;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -150,12 +148,6 @@ public class PropElement extends Propagator<IntVar> {
         sb.append(this.values[values.length - 1]);
         sb.append("> [").append(this.index).append("])");
         return sb.toString();
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return ruleStore.addPropagatorActivationRule(this)
-                | ruleStore.addFullDomainRule((var == result) ? index : result);
     }
 
 }

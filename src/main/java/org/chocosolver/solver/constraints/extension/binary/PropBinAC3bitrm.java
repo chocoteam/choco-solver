@@ -10,9 +10,7 @@ package org.chocosolver.solver.constraints.extension.binary;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -199,22 +197,4 @@ public class PropBinAC3bitrm extends PropBinCSP {
         }
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == v0) {
-            for (int i = 0; i < initDomSize1; i++) {
-                if (relation.checkCouple(value, i + offset1)) {
-                    nrules |= ruleStore.addRemovalRule(v1, i + offset1);
-                }
-            }
-        } else {
-            for (int i = 0; i < initDomSize0; i++) {
-                if (relation.checkCouple(i + offset0, value)) {
-                    nrules |= ruleStore.addRemovalRule(v0, i + offset0);
-                }
-            }
-        }
-        return nrules;
-    }
 }

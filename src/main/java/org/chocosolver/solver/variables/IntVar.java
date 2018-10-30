@@ -10,11 +10,9 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
@@ -404,36 +402,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true iff the variable has a binary domain
      */
     boolean isBool();
-
-
-    @Override
-    default boolean why(RuleStore ruleStore, IntVar modifiedVar, IEventType evt, int value) {
-        boolean newrules = false;
-        boolean observed = modifiedVar == this;
-        IntEventType ievt;
-        if(observed){
-            value = this.transformValue(value);
-            ievt = (IntEventType)this.transformEvent(evt);
-        }else {
-            value = modifiedVar.reverseValue(value);
-            ievt = (IntEventType)modifiedVar.transformEvent(evt);
-        }
-        switch (ievt) {
-            case REMOVE:
-                newrules = ruleStore.addRemovalRule(this, value);
-                break;
-            case DECUPP:
-                newrules = ruleStore.addUpperBoundRule(this);
-                break;
-            case INCLOW:
-                newrules = ruleStore.addLowerBoundRule(this);
-                break;
-            case INSTANTIATE:
-                newrules = ruleStore.addFullDomainRule(this);
-                break;
-        }
-        return newrules;
-    }
 
 
     /**

@@ -10,10 +10,8 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 
 /**
  * An interface to define views.
@@ -34,19 +32,6 @@ public interface IView extends ICause, Variable {
      * @return variable observed
      */
     Variable getVariable();
-
-    /**
-     * This methods is related to explanations, it binds an event occurring on the observed
-     * variable to the view.
-     * @param var   modified variable
-     * @param cause cause of the modification
-     * @param mask  type of modification
-     * @param one   an int
-     * @param two   an int
-     * @param three an int
-     */
-    void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three);
-
 
     /**
      * To notify a view that the variable is observed has been modified.

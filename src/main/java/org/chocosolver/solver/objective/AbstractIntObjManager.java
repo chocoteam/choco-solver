@@ -11,9 +11,7 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
@@ -62,11 +60,6 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     public void resetBestBounds() {
         bestProvedLB = objective.getLB() - 1;
         bestProvedUB = objective.getUB() + 1;
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return isOptimization() && ruleStore.addBoundsRule(objective);
     }
 
     @Override

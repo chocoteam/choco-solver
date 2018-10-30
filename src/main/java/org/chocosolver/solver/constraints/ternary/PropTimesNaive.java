@@ -11,9 +11,7 @@ package org.chocosolver.solver.constraints.ternary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -102,14 +100,4 @@ public class PropTimesNaive extends Propagator<IntVar> {
     }
 
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        for (int i = 0; i < 3; i++) {
-            if (var != vars[i]) {
-                newrules |= ruleStore.addBoundsRule(vars[i]);
-            }
-        }
-        return newrules;
-    }
 }

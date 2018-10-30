@@ -15,8 +15,6 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -748,15 +746,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         st.append(')');
 
         return st.toString();
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i] != var) nrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
-        }
-        return nrules;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

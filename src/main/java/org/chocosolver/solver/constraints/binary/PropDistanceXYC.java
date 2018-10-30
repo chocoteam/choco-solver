@@ -13,10 +13,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -178,12 +176,6 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         }
         st.append(cste);
         return st.toString();
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        return ruleStore.addPropagatorActivationRule(this)
-                | ruleStore.addFullDomainRule((var == vars[0]) ? vars[1] : vars[0]);
     }
 
 

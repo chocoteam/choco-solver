@@ -152,7 +152,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int aValue = value - OFFSET;
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
-            model.getSolver().getExplainer().removeValue(this, value, cause);
             if (SIZE.get() == 1) {
                 this.contradiction(cause, MSG_REMOVE);
             }
@@ -214,7 +213,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         while (value <= to) {
             int aValue = value - OFFSET;
             if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -276,7 +274,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         for (int aValue = VALUES.nextSetBit(from); aValue > -1 && aValue <= to; aValue = VALUES.nextSetBit(aValue + 1)) {
             value = aValue + OFFSET;
             if (!values.contains(value)) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -315,7 +312,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(aValue, cause);
                 }
-                model.getSolver().getExplainer().removeValue(this, aValue, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -346,11 +342,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (!contains(value)) {
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
-
             int aValue = value - OFFSET;
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
@@ -397,7 +390,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
-            model.getSolver().getExplainer().updateLowerBound(this, value, old, cause);
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -447,7 +439,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int oub = this.getUB();
         if (oub > value) {
             int olb = this.getLB();
-            model.getSolver().getExplainer().updateUpperBound(this, value, oub, cause);
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -482,10 +473,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (olb < lb || oub > ub) {
             IntEventType e = null;
             if (oub < lb) {
-                model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
-                model.getSolver().getExplainer().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 int aLB = lb - OFFSET;
                 if (reactOnRemoval) {
@@ -501,10 +490,8 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 olb += OFFSET; // required because we will treat upper bound just after
             }
             if (olb > ub) {
-                model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
-                model.getSolver().getExplainer().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 int aUB = ub - OFFSET;
                 if (reactOnRemoval) {

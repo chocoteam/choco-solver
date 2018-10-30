@@ -13,11 +13,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.ReificationConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.ESat;
 
 /**
@@ -122,19 +119,6 @@ public class PropReif extends Propagator<Variable> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean newrules = ruleStore.addPropagatorActivationRule(this);
-        if (var.equals(bVar)) {
-            for (int i = 1; i < vars.length; i++) { // vars[0] is bVar
-                newrules |= ruleStore.addFullDomainRule((IntVar) vars[i]);
-            }
-        } else {
-            newrules |= super.why(ruleStore, var, evt, value);
-        }
-        return newrules;
     }
 
     @Override

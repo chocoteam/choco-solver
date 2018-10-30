@@ -153,7 +153,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(value);
         if (index > -1 && this.INDICES.get(index)) {
             if (SIZE.get() == 1) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 this.contradiction(cause, MSG_REMOVE);
             }
             IntEventType e = IntEventType.REMOVE;
@@ -173,7 +172,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             if (this.isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
             }
-            model.getSolver().getExplainer().removeValue(this, value, cause);
             this.notifyPropagators(e, cause);
             return true;
         } else {
@@ -216,7 +214,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         while (value <= to) {
             int index = V2I.get(value);
             if (index > -1 && this.INDICES.get(index)) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -267,7 +264,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         for (int index = INDICES.nextSetBit(LB.get() + 1); index > -1 && index <= to; index = INDICES.nextSetBit(index + 1)) {
             value = VALUES[index];
             if (!values.contains(value)) {
-                model.getSolver().getExplainer().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -316,7 +312,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 if (reactOnRemoval) {
                     delta.add(value, cause);
                 }
-                model.getSolver().getExplainer().removeValue(this, value, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -347,10 +342,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (!contains(value)) {
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if(!isInstantiated()){
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             int index = V2I.get(value);
             assert index > -1 && this.INDICES.get(index);
             if (reactOnRemoval) {
@@ -395,7 +388,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int lb = LB.get();
         int old = VALUES[lb];
         if (old < value) {
-            model.getSolver().getExplainer().updateLowerBound(this, value, old, cause);
             int ub = UB.get();
             int oub = VALUES[ub];
             if (oub < value) {
@@ -447,7 +439,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int ub = UB.get();
         int old = VALUES[ub];
         if (old > value) {
-            model.getSolver().getExplainer().updateUpperBound(this, value, old, cause);
             int lb = LB.get();
             int olb = VALUES[lb];
             if (olb > value) {
@@ -488,10 +479,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             IntEventType e = null;
             int index, b;
             if (oub < aLB) {
-                model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < aLB) {
-                model.getSolver().getExplainer().updateLowerBound(this, aLB, olb, cause);
                 e = IntEventType.INCLOW;
                 b = LB.get();
                 index = indexOfLowerBound(aLB, lb, ub);
@@ -508,10 +497,8 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 olb = VALUES[index];
             }
             if (olb > aUB) {
-                model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > aUB) {
-                model.getSolver().getExplainer().updateUpperBound(this, aUB, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 b = UB.get();
                 index = indexOfUpperBound(aUB, lb, ub);

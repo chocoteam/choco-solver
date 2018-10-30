@@ -150,9 +150,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             } else if (to == kFALSE) {
                 hasChanged = instantiateTo(kTRUE, cause);
             } else {
-                model.getSolver().getExplainer().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, MSG_UNKNOWN);
-
             }
         }
         return hasChanged;
@@ -179,7 +177,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)){
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (mValue == kUNDEF){
             IntEventType e = IntEventType.INSTANTIATE;
@@ -188,7 +185,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 delta.add(kTRUE - value, cause);
             }
             mValue = value;
-            model.getSolver().getExplainer().instantiateTo(this, value, cause, kFALSE, kTRUE);
             this.notifyPropagators(e, cause);
             return true;
         }
@@ -245,7 +241,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
-            model.getSolver().getExplainer().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
             if (lb == kTRUE) {

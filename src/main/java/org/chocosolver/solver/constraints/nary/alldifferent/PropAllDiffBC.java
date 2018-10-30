@@ -12,9 +12,7 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 
@@ -53,14 +51,4 @@ public class PropAllDiffBC extends Propagator<IntVar> {
         return ESat.TRUE; // redundant propagator (use PropAllDiffInst)
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        for (int i = 0; i < vars.length; i++) {
-            if(vars[i]!=var){
-                nrules |= ruleStore.addBoundsRule(vars[i]);
-            }
-        }
-        return nrules;
-    }
 }

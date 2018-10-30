@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.explanations.RuleStore;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.procedure.IntProcedure;
@@ -306,17 +304,4 @@ public class PropClauseChanneling extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    @Override
-    public boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value) {
-        boolean nrules = ruleStore.addPropagatorActivationRule(this);
-        if (var == iv) {
-            for (int i = 0; i < LENGTH; i++) {
-                nrules |= ruleStore.addFullDomainRule(eqs[i]);
-                nrules |= ruleStore.addFullDomainRule(lqs[i]);
-            }
-        } else {
-            nrules |= ruleStore.addFullDomainRule(iv);
-        }
-        return nrules;
-    }
 }

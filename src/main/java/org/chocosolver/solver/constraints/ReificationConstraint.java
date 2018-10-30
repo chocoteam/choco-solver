@@ -102,7 +102,6 @@ public class ReificationConstraint extends Constraint {
         for (int p = indices[idx]; p < indices[idx + 1]; p++) {
             assert (propagators[p].isReifiedAndSilent());
             propagators[p].setReifiedTrue();
-            model.getSolver().getExplainer().activePropagator(bool, propagators[p]);
             propagators[p].propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
             model.getSolver().getEngine().onPropagatorExecution(propagators[p]);
         }

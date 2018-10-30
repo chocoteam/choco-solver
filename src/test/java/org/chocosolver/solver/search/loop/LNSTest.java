@@ -15,7 +15,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
-import org.chocosolver.solver.search.loop.lns.neighbors.ExplainingCut;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
@@ -87,11 +86,6 @@ public class LNSTest {
                 ));
                 break;
             case 5:
-                r.setLNS(new SequenceNeighborhood(
-                        new ExplainingCut(model, 200, 123456L),
-                        new RandomNeighborhood(objects, 200, 123456L)));
-                break;
-            case 6:
                 r.setNoGoodRecordingFromRestarts();
                 r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
                 break;
@@ -108,7 +102,7 @@ public class LNSTest {
 
     @DataProvider(name = "lns")
     public Object[][] createData() {
-        return new Object[][]{{0}, {1}, {2}, {3}, {4}, {5}, {6}};
+        return new Object[][]{{0}, {1}, {2}, {3}, {4}, {5}};
     }
 
 
