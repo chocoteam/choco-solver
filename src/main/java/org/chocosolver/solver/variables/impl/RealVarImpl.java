@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.RealEventType;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -148,14 +147,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public void createDelta() {
         throw new SolverException("Unable to create delta for RealVar!");
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
     }
 
     @Override

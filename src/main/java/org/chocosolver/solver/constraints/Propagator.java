@@ -15,22 +15,29 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntCircularQueue;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -93,6 +100,18 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Status of the propagator when entailed.
      */
     private static final short PASSIVE = 3;
+
+    /**
+     * For debugging purpose only, set to true to use default explanation schema, false to fail
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static boolean DEFAULT_EXPL = true;
+    /**
+     * Set to true to output the name of the constraint that use the default explanation schema
+     */
+    @SuppressWarnings("WeakerAccess")
+    public static boolean OUTPUT_DEFAULT_EXPL = false;
+
 
     /**
      * Unique ID of this propagator.
@@ -774,6 +793,66 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         st.append(')');
 
         return st.toString();
+    }
+
+    /**
+     * @implSpec
+     * Based on the scope of this propagator, domains of variables are extracted as they
+     * were just before propagation that leads to node <i>p</i>.
+     * <p>
+     *     Consider that v_1 has been modified by propagation of this.
+     *     Before the propagation, the domains were like:
+     * <pre>
+     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n)
+     *     </pre>
+     * Then this propagates v1 &isin; D1', then:
+     * <pre>
+     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n) &rarr; v1 &isin; D1'
+     *     </pre>
+     * Converting to DNF:
+     * <pre>
+     *         (v1 &isin; (U \ D1) &cup; D'1  &or; v2 &isin; (U \ D2) &or; .... &or; vn &isin; (U \ Dn))
+     *     </pre>
+     * </p>
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        if (DEFAULT_EXPL) {
+            if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for "+this.getClass().getSimpleName()+"\n");
+            defaultExplain(this, explanation, front, ig, p);
+        } else {
+            ICause.super.explain(explanation, front, ig, p);
+        }
+    }
+
+    public static void defaultExplain(Propagator prop, ExplanationForSignedClause explanation,
+                                      @SuppressWarnings("unused") ValueSortedMap<IntVar> front,
+                                      Implications ig, int p) {
+        IntVar pivot = p > -1 ? ig.getIntVarAt(p) : null;
+        IntIterableRangeSet dom;
+        IntVar var;
+        // when a variable appear more than once AND is pivot : should be treated only once
+        boolean found = false;
+        for (int i = 0; i < prop.vars.length; i++) {
+            var = (IntVar) prop.vars[i];
+            dom = explanation.getComplementSet(var);
+            boolean ispivot;
+            if (ispivot = (var == pivot) && !found) {
+                unionOf(dom, ig.getDomainAt(p));
+                found = true;
+            }
+            explanation.addLiteral(var, dom, ispivot);
+        }
+        assert found || p == -1 : pivot + " not declared in scope of " + prop;
+    }
+
+    @Override
+    public void forEachIntVar(Consumer<IntVar> action) {
+        for (int i = 0; i < vars.length; i++) {
+            action.accept((IntVar) vars[i]);
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

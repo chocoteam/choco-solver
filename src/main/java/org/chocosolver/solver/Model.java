@@ -15,6 +15,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
@@ -72,6 +73,8 @@ public class Model implements IModel {
     public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
 
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
+
+    public static final String CLAUSESBUILDER_HOOK_NAME = "H_CLAUSESBUILDER";
 
     public static final String IBEX_HOOK_NAME = "H_IBEX";
 
@@ -612,6 +615,17 @@ public class Model implements IModel {
             addHook(CLAUSES_HOOK_NAME, clauses);
         }
         return (ClauseConstraint) getHook(CLAUSES_HOOK_NAME);
+    }
+
+    /**
+     * @return an instance of {@link ClauseBuilder} that helps creating clause <b>during</b> resolution.
+     */
+    public ClauseBuilder getClauseBuilder() {
+        if (getHook(CLAUSESBUILDER_HOOK_NAME) == null) {
+            ClauseBuilder builder = new ClauseBuilder(this);
+            addHook(CLAUSESBUILDER_HOOK_NAME, builder);
+        }
+        return (ClauseBuilder) getHook(CLAUSESBUILDER_HOOK_NAME);
     }
 
     /**

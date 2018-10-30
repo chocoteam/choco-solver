@@ -8,6 +8,13 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.ValueSortedMap;
+
+import java.util.function.Consumer;
+
 /**
  * <br/>
  *
@@ -16,5 +23,14 @@ package org.chocosolver.solver;
  */
 public enum Cause implements ICause {
     Null{
+        @Override
+        public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications implicationGraph, int pivot) {
+
+        }
+
+        @Override
+        public void forEachIntVar(Consumer<IntVar> action) {
+
+        }
     }
 }

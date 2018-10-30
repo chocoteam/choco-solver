@@ -398,14 +398,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return this.getId() - o.getId();
     }
 
-	@SuppressWarnings("unchecked")
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
-    }
-
     @Override
     public void notify(IEventType event) throws ContradictionException {
         super.notifyPropagators(transformEvent(event), this);

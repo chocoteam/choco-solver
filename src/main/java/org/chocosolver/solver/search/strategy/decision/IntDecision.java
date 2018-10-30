@@ -9,10 +9,17 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
+
+import java.util.function.Consumer;
 
 /**
  * A decision based on a {@link IntVar}
@@ -174,6 +181,41 @@ public class IntDecision extends Decision<IntVar> {
                     nonrefuted ? assignment.toString() : assignment.opposite().toString(),
                     value);
         }
+    }
+
+    /**
+     * @implSpec
+     * <p>Since a decision only relies on a unique variable, designed by 'p' and this decision,
+     * this can be treated as unary constraint, depending on this {@link #assignment}
+     * and {@link #branch}.
+     * </p>
+     * <p>
+     *  Let's consider an assignment decisions, (X = a) and that Dx is the domain of x just
+     *  before applying this decision.
+     *  Then, we can formalize the application of this like:
+     *
+     *     <pre>
+     *         (v1 &isin; D1) &rarr; v1 &isin; a
+     *     </pre>
+     *      Converting to DNF:
+     *     <pre>
+     *         (v1 &isin; (U \ D1) &cup; a)
+     *     </pre>
+     *
+     * </p>
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        IntIterableRangeSet dom = explanation.getComplementSet(var);
+        IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
+        explanation.addLiteral(var, dom, true);
+    }
+
+    @Override
+    public void forEachIntVar(Consumer<IntVar> action) {
+        // nothing to do
     }
 
 }

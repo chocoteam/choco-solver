@@ -9,6 +9,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -19,7 +20,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -279,12 +279,5 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     public SetDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new SetDeltaMonitor(delta, propagator);
-    }
-
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
     }
 }

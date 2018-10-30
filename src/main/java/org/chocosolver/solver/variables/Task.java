@@ -17,10 +17,17 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
+
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
  * Container representing a task:
@@ -98,6 +105,35 @@ public class Task {
         return end;
     }
 
+    private static void doExplain(IntVar S, IntVar D, IntVar E,
+                                  ExplanationForSignedClause clause,
+                                  ValueSortedMap<IntVar> front,
+                                  Implications ig, int p) {
+        IntVar pivot = ig.getIntVarAt(p);
+        IntIterableRangeSet dom;
+        dom = clause.getComplementSet(S);
+        if (S == pivot) {
+            unionOf(dom, ig.getDomainAt(p));
+            clause.addLiteral(S, dom, true);
+        } else {
+            clause.addLiteral(S, dom, false);
+        }
+        dom = clause.getComplementSet(D);
+        if (D == pivot) {
+            unionOf(dom, ig.getDomainAt(p));
+            clause.addLiteral(D, dom, true);
+        } else {
+            clause.addLiteral(D, dom, false);
+        }
+        dom = clause.getComplementSet(E);
+        if (E == pivot) {
+            unionOf(dom, ig.getDomainAt(p));
+            clause.addLiteral(E, dom, true);
+        } else {
+            clause.addLiteral(E, dom, false);
+        }
+    }
+
     private class TaskMonitorEnum implements IVariableMonitor<IntVar> {
 
         private IntVar S, D, E;
@@ -127,6 +163,24 @@ public class Task {
             }
         }
 
+        @Override
+        public void explain(ExplanationForSignedClause clause,
+                            ValueSortedMap<IntVar> front,
+                            Implications ig, int p) {
+            doExplain(S, D, E, clause, front, ig, p);
+        }
+
+        @Override
+        public void forEachIntVar(Consumer<IntVar> action) {
+            action.accept(S);
+            action.accept(D);
+            action.accept(E);
+        }
+
+        @Override
+        public String toString() {
+            return "Task["+S.getName()+"+"+D.getName()+"="+E.getName()+"]";
+        }
     }
 
     private class TaskMonitorBound implements IVariableMonitor<IntVar> {
@@ -153,6 +207,24 @@ public class Task {
             D.updateBounds(E.getLB() - S.getUB(), E.getUB() - S.getLB(), this);
         }
 
+        @Override
+        public void explain(ExplanationForSignedClause clause,
+                            ValueSortedMap<IntVar> front,
+                            Implications ig, int p) {
+            doExplain(S, D, E, clause, front, ig, p);
+        }
+
+        @Override
+        public void forEachIntVar(Consumer<IntVar> action) {
+            action.accept(S);
+            action.accept(D);
+            action.accept(E);
+        }
+
+        @Override
+        public String toString() {
+            return "Task["+S.getName()+"+"+D.getName()+"="+E.getName()+"]";
+        }
     }
 
     @Override

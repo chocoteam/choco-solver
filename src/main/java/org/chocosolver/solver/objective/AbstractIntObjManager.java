@@ -11,7 +11,13 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import java.util.function.Consumer;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
@@ -67,6 +73,10 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
         return String.format("%s %s = %d", policy, objective == null ? "?" : this.objective.getName(), getBestSolutionValue().intValue());
     }
 
+    @Override
+    public void forEachIntVar(Consumer<IntVar> action) {
+        action.accept(objective);
+    }
 }
 
 class MinIntObjManager extends AbstractIntObjManager {
@@ -97,6 +107,16 @@ class MinIntObjManager extends AbstractIntObjManager {
         return bestProvedUB;
     }
 
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig,
+                        int p) {
+        explanation.addLiteral(objective,
+                explanation.getFreeSet(IntIterableRangeSet.MIN, bestProvedUB.intValue() - 1),
+                true);
+    }
+
 }
 
 class MaxIntObjManager extends AbstractIntObjManager {
@@ -125,5 +145,15 @@ class MaxIntObjManager extends AbstractIntObjManager {
     @Override
     public Number getBestSolutionValue() {
         return bestProvedLB;
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig,
+                        int p) {
+        explanation.addLiteral(objective,
+                explanation.getFreeSet(bestProvedLB.intValue() + 1, IntIterableRangeSet.MAX),
+                true);
     }
 }
