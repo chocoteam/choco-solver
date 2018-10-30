@@ -16,7 +16,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.0.8 (23 Jul 2018).
+Current stable version is 4.0.9 (30 Oct 2018).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -56,7 +56,7 @@ solver.printStatistics();
 ## Documentation, Support and Issues
 
 The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
-[tarball](https://github.com/chocoteam/choco-solver/releases/download/4.0.8/choco-4.0.8.zip) which contains
+[tarball](https://github.com/chocoteam/choco-solver/releases/download/4.0.9/choco-4.0.9.zip) which contains
 the binary, the source code, the user guide (pdf) and the apidocs (zip).
 
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
@@ -125,7 +125,7 @@ In the following, we distinguish two usages of Choco:
 - as a standalone application: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-4.0.8.jar` or `choco-solver-4.0.8-no-dep.jar`.
+The name of the jar file terms the packaging: `choco-solver-4.0.9.jar` or `choco-solver-4.0.9-no-dep.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -138,7 +138,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.0.8</version>
+   <version>4.0.9</version>
 </dependency>
 ```
 
