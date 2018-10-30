@@ -367,7 +367,7 @@ public class StrategyTest {
 			Model modelBound = ProblemMaker.makeGolombRuler(8);
 			{
 				Solver s = modelBound.getSolver();
-				s.setSearch(Search.bestBound(Search.defaultSearch(modelBound)));
+				s.setSearch(Search.bestBound(Search.intVarSearch(modelBound.retrieveIntVars(true))));
 				while (s.solve()) ;
 			}
 			assertEquals(modelBound.getSolver().getBestSolutionValue().intValue(),model.getSolver().getBestSolutionValue().intValue());
