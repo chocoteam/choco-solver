@@ -288,7 +288,7 @@ public class LNSTest {
 
         //   Type of LNS neighbourhood -- propagation-guided LNS.
 //        INeighbor in=INeighborFactory.propagationGuided(decvars);
-        INeighbor in = INeighborFactory.explanationBased(decvars);
+        INeighbor in = INeighborFactory.blackBox(decvars);
 
         in.init(); // Should this be necessary?
 
