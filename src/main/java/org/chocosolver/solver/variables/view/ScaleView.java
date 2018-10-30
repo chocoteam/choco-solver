@@ -13,6 +13,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -62,6 +63,7 @@ public final class ScaleView extends IntView<IntVar> {
     @Override
     protected boolean doInstantiateVar(int value) throws ContradictionException {
         if (value % cste != 0) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, this, getLB(), getUB());
             this.contradiction(this, MSG_INST);
         }
         return var.instantiateTo(value / cste, this);
@@ -292,4 +294,21 @@ public final class ScaleView extends IntView<IntVar> {
         return value / cste;
     }
 
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        switch (mask) {
+            case DECUPP:
+                model.getSolver().getEventObserver().updateUpperBound(this, one * cste, two * cste, var);
+                break;
+            case INCLOW:
+                model.getSolver().getEventObserver().updateLowerBound(this, one * cste, two * cste, var);
+                break;
+            case REMOVE:
+                model.getSolver().getEventObserver().removeValue(this, one * cste, var);
+                break;
+            case INSTANTIATE:
+                model.getSolver().getEventObserver().instantiateTo(this, one * cste, var, two * cste, three * cste);
+                break;
+        }
+    }
 }

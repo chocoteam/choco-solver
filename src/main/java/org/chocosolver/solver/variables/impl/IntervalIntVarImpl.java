@@ -19,10 +19,14 @@ import org.chocosolver.solver.variables.delta.IIntervalDelta;
 import org.chocosolver.solver.variables.delta.IntervalDelta;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueBoundIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -184,10 +188,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (!this.contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
             int lb = this.getLB();
             int ub = this.getUB();
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, lb, ub);
             IntEventType e = IntEventType.INSTANTIATE;
             if (reactOnRemoval) {
                 if (lb <= value - 1) delta.add(lb, value - 1, cause);
@@ -224,6 +230,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
+            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             int oub = this.getUB();
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
@@ -266,6 +273,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         assert cause != null;
         int old = this.getUB();
         if (old > value) {
+            model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
             int olb = this.getLB();
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
@@ -297,8 +305,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             IntEventType e = null;
             int d = 0;
             if (oub < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 if (reactOnRemoval) {
                     if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
@@ -307,8 +317,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 LB.set(lb);
             }
             if (olb > ub) {
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 if (reactOnRemoval) {
                     if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);
@@ -462,14 +474,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new IntervalDeltaMonitor(delta, propagator);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

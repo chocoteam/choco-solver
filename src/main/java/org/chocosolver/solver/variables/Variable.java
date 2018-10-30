@@ -235,10 +235,17 @@ public interface Variable extends Identity, Comparable<Variable> {
     void notifyViews(IEventType event, ICause cause) throws ContradictionException;
 
     /**
-	 * Get the views observing this variables
-	 * @return views observing this variables
+     * @return the number of views attached to the variable
      */
-	IView[] getViews();
+    int getNbViews();
+
+	/**
+	 * Get the view at position <i>p</i> in this variable views.
+     * The array is filled from position 0 to position {@link #getNbViews()} excluded.
+     * @param p position of the view to return
+	 * @return view observing this variable, at position <i>p</i>
+	 */
+	IView getView(int p);
 
     /**
      * Notify monitors of observed variable modifications

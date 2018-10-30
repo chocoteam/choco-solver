@@ -17,6 +17,8 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
+import java.util.function.Consumer;
+
 
 /**
  * Interface for integer variables. Provides every required services.
@@ -403,6 +405,10 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      */
     boolean isBool();
 
+    @Override
+    default void forEachIntVar(Consumer<IntVar> action) {
+        action.accept(this);
+    }
 
     /**
      * @param evt   original event

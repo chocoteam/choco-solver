@@ -68,15 +68,21 @@ public class MinusView extends IntView<IntVar> {
             IntEventType e = null;
 
             if (olb < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, getLB(), cause);
                 e = INCLOW;
                 if (var.updateUpperBound(-lb, this)) {
                     hasChanged = true;
+                } else {
+                    model.getSolver().getEventObserver().undo();
                 }
             }
             if (oub > ub) {
                 e = e == null ? DECUPP : BOUND;
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, getUB(), cause);
                 if (var.updateLowerBound(-ub, this)) {
-                    hasChanged |= true;
+                    hasChanged = true;
+                } else {
+                    model.getSolver().getEventObserver().undo();
                 }
             }
             if (isInstantiated()) {
@@ -311,4 +317,21 @@ public class MinusView extends IntView<IntVar> {
         return evt;
     }
 
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        switch (mask) {
+            case DECUPP:
+                model.getSolver().getEventObserver().updateLowerBound(this, -one, -two, var);
+                break;
+            case INCLOW:
+                model.getSolver().getEventObserver().updateUpperBound(this, -one, -two, var);
+                break;
+            case REMOVE:
+                model.getSolver().getEventObserver().removeValue(this, -one, var);
+                break;
+            case INSTANTIATE:
+                model.getSolver().getEventObserver().instantiateTo(this, -one, var, -three, -two);
+                break;
+        }
+    }
 }

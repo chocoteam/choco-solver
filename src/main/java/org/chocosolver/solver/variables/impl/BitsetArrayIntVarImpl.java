@@ -22,7 +22,6 @@ import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -153,6 +152,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(value);
         if (index > -1 && this.INDICES.get(index)) {
             if (SIZE.get() == 1) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 this.contradiction(cause, MSG_REMOVE);
             }
             IntEventType e = IntEventType.REMOVE;
@@ -172,6 +172,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             if (this.isInstantiated()) {
                 e = IntEventType.INSTANTIATE;
             }
+            model.getSolver().getEventObserver().removeValue(this, value, cause);
             this.notifyPropagators(e, cause);
             return true;
         } else {
@@ -214,6 +215,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         while (value <= to) {
             int index = V2I.get(value);
             if (index > -1 && this.INDICES.get(index)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -264,6 +266,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         for (int index = INDICES.nextSetBit(LB.get() + 1); index > -1 && index <= to; index = INDICES.nextSetBit(index + 1)) {
             value = VALUES[index];
             if (!values.contains(value)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -312,6 +315,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 if (reactOnRemoval) {
                     delta.add(value, cause);
                 }
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -342,8 +346,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (!contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if(!isInstantiated()){
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             int index = V2I.get(value);
             assert index > -1 && this.INDICES.get(index);
             if (reactOnRemoval) {
@@ -388,6 +394,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int lb = LB.get();
         int old = VALUES[lb];
         if (old < value) {
+            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             int ub = UB.get();
             int oub = VALUES[ub];
             if (oub < value) {
@@ -439,6 +446,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int ub = UB.get();
         int old = VALUES[ub];
         if (old > value) {
+            model.getSolver().getEventObserver().updateUpperBound(this, value, old, cause);
             int lb = LB.get();
             int olb = VALUES[lb];
             if (olb > value) {
@@ -479,8 +487,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             IntEventType e = null;
             int index, b;
             if (oub < aLB) {
+                model.getSolver().getEventObserver().updateLowerBound(this, aLB, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < aLB) {
+                model.getSolver().getEventObserver().updateLowerBound(this, aLB, olb, cause);
                 e = IntEventType.INCLOW;
                 b = LB.get();
                 index = indexOfLowerBound(aLB, lb, ub);
@@ -497,8 +507,10 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
                 olb = VALUES[index];
             }
             if (olb > aUB) {
+                model.getSolver().getEventObserver().updateUpperBound(this, aUB, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > aUB) {
+                model.getSolver().getEventObserver().updateUpperBound(this, aUB, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 b = UB.get();
                 index = indexOfUpperBound(aUB, lb, ub);
@@ -737,14 +749,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

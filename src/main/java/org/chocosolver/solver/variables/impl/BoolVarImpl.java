@@ -18,11 +18,15 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.iterators.DisposableValueBoundIterator;
+import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -150,6 +154,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
             } else if (to == kFALSE) {
                 hasChanged = instantiateTo(kTRUE, cause);
             } else {
+                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, MSG_UNKNOWN);
             }
         }
@@ -177,6 +182,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)){
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (mValue == kUNDEF){
             IntEventType e = IntEventType.INSTANTIATE;
@@ -185,6 +191,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
                 delta.add(kTRUE - value, cause);
             }
             mValue = value;
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, kFALSE, kTRUE);
             this.notifyPropagators(e, cause);
             return true;
         }
@@ -241,6 +248,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
+            model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_UNKNOWN);
         } else {
             if (lb == kTRUE) {
@@ -418,14 +426,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new OneValueDeltaMonitor(delta, propagator);
-    }
-
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            //noinspection unchecked
-            monitors[i].onUpdate(this, event);
-        }
     }
 
     @Override

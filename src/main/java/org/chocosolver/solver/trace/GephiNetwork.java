@@ -22,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.chocosolver.solver.trace.GephiConstants.BLUE;
@@ -73,7 +72,9 @@ public class GephiNetwork{
         for(Variable var: model.getVars()){
             nodeCount++;
             nodes.append(String.format(NODETAG, var.getId(), var.getName(), "", RED, DISC));
-            views.addAll(Arrays.asList(var.getViews()));
+            for(int i = 0 ; i < var.getNbViews(); i++){
+                views.add(var.getView(i));
+            }
         }
         // 1.b, write views
         for(IView view: views){

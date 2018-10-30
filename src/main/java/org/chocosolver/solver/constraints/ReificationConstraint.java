@@ -63,8 +63,11 @@ public class ReificationConstraint extends Constraint {
         indices[0] = 1;
         indices[1] = indices[0] + trueCons.getPropagators().length;
         indices[2] = indices[1] + falseCons.getPropagators().length;
-        for (int i = 1; i < propagators.length; i++) {
-            propagators[i].setReifiedSilent();
+        for (int p = indices[0]; p < indices[1]; p++) {
+            propagators[p].setReifiedSilent(bool);
+        }
+        for (int p = indices[1]; p < indices[2]; p++) {
+            propagators[p].setReifiedSilent(bool.not());
         }
         trueCons.declareAs(Status.REIFIED, -1);
         falseCons.declareAs(Status.REIFIED, -1);

@@ -24,8 +24,6 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
-import java.util.Arrays;
-
 /**
  * Class used to factorise code The subclass must implement Variable interface <br/>
  *
@@ -332,6 +330,12 @@ public abstract class AbstractVariable implements Variable {
         notifyViews(event, cause);
     }
 
+    public void notifyMonitors(IEventType event) throws ContradictionException {
+        for (int i = mIdx - 1; i >= 0; i--) {
+            monitors[i].onUpdate(this, event);
+        }
+    }
+
     @Override
     public void notifyViews(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -365,7 +369,14 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void removeMonitor(IVariableMonitor monitor) {
-        throw new UnsupportedOperationException("not yet implemented");
+        int i = mIdx - 1;
+        for (; i >= 0 ; i--) {
+            if (monitors[i] == monitor) break;
+        }
+        if(i< mIdx-1) {
+            System.arraycopy(monitors, i + 1, monitors, i, mIdx - i);
+        }
+        monitors[--mIdx] = null;
     }
 
     @Override
@@ -389,8 +400,13 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public final IView[] getViews() {
-        return Arrays.copyOfRange(views, 0, vIdx);
+    public int getNbViews(){
+        return vIdx;
+    }
+
+    @Override
+    public IView getView(int idx) {
+        return views[idx];
     }
 
     @Override

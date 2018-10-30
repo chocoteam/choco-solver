@@ -15,6 +15,7 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -179,12 +180,18 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * A bi-int-consumer
      */
     private interface IntIntConsumer{
-        void accecpt(int a, int b);
+        void accept(int a, int b);
     }
+
     /**
      * Default action to do on fine event : nothing
      */
     private IntIntConsumer fineevt = (i, m) -> {};
+
+    /**
+     * Denotes the reifying variable when this propagator is reified, null otherwise.
+     */
+    private BoolVar reifVar;
 
     /**
      * Creates a new propagator to filter the domains of vars.
@@ -476,11 +483,13 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this reified propagator may not hold. Should not be called by the user.
+     * @param boolVar the reifying variable
      * @throws SolverException if the propagator cannot be reified due to its current state
      */
-    public void setReifiedSilent() throws SolverException {
+    public void setReifiedSilent(BoolVar boolVar) throws SolverException {
         if (isStateLess() || isReifiedAndSilent()) {
             state = REIFIED;
+            this.reifVar = boolVar;
         } else {
             throw new SolverException("Reification process try to reify a propagator already active or posted.\n" +
                     this + " of " + this.getConstraint());
@@ -595,6 +604,21 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     @Override
     public int compareTo(Propagator o) {
         return this.ID - o.ID;
+    }
+
+    /**
+     * @return the boolean variable that reifies this propagator, null otherwise.
+     */
+    public BoolVar reifiedWith() {
+        return reifVar;
+    }
+
+    /**
+     * @return <i>true</i> if this is reified.
+     * Call {@link #reifiedWith()} to get the reifying variable.
+     */
+    public boolean isReified(){
+        return reifVar != null;
     }
 
     //***********************************************************************************
@@ -779,6 +803,14 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * @return true if scheduled for propagation
+     */
+    public final boolean isScheduled() {
+        return scheduled;
+    }
+
+
+    /**
      * Apply scheduling instruction
      * @param queues array of queues in which this can be scheduled
      * @return 0 if already scheduled, its priority otherwise
@@ -794,7 +826,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     public void doScheduleEvent(int pindice, int mask){
-        fineevt.accecpt(pindice, mask);
+        fineevt.accept(pindice, mask);
     }
 
     /**

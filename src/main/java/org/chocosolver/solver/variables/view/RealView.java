@@ -51,6 +51,11 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        throw new UnsupportedOperationException("RealView does not support explanation.");
+    }
+
+    @Override
     public String toString() {
         return "(real)" + var.toString();
     }

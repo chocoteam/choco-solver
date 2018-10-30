@@ -12,6 +12,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
@@ -165,6 +166,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /** Indicates if a complementary search strategy should be added (set to <tt>true</tt> in that case). */
     private boolean completeSearch = false;
 
+    /** An events observer */
+    protected AbstractEventObserver eventObserver;
+
     /** List of search monitors attached to this search loop */
     @SuppressWarnings("WeakerAccess")
     protected SearchMonitorList searchMonitors;
@@ -205,6 +209,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         mModel = aModel;
         engine = new PropagationEngine(mModel);
         exception = new ContradictionException();
+        eventObserver = AbstractEventObserver.SILENT_OBSERVER;
         objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
@@ -566,6 +571,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
+        if(mModel.getHook(Model.TASK_SET_HOOK_NAME) != null){
+            ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
+            for(int i = 0; i< tset.size(); i++){
+                tset.get(i).ensureBoundConsistency();
+            }
+        }
         try {
             engine.propagate();
         } finally {
@@ -726,6 +737,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Return the events observer plugged into {@code this}.
+     * @return this events observer
+     */
+    public AbstractEventObserver getEventObserver() {
+        return eventObserver;
+    }
+
+    /**
      * @return the propagation engine used in {@code this}.
      */
     public PropagationEngine getEngine() {
@@ -855,6 +874,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             //noinspection unchecked
             M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
         }
+    }
+
+    /**
+     * Overrides the explanation engine.
+     * @param explainer the explanation to use
+     */
+    public void setEventObserver(AbstractEventObserver explainer) {
+        this.eventObserver = explainer;
     }
 
     /**

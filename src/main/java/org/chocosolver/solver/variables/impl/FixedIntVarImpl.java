@@ -74,6 +74,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         if (value == constante) {
             assert cause != null;
+            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -83,6 +84,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         if (values.contains(constante)) {
             assert cause != null;
+            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -92,6 +94,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         if (!values.contains(constante)) {
             assert cause != null;
+            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -101,6 +104,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         if (from <= constante && constante <= to) {
             assert cause != null;
+            model.getSolver().getEventObserver().removeValue(this, constante, cause);
             this.contradiction(cause, "unique value removal");
         }
         return false;
@@ -110,6 +114,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (value != constante) {
             assert cause != null;
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, constante, constante);
             this.contradiction(cause, "outside domain instantitation");
         }
         return false;
@@ -119,6 +124,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
         if (value > constante) {
             assert cause != null;
+            model.getSolver().getEventObserver().updateLowerBound(this, value, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;
@@ -128,6 +134,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
         if (value < constante) {
             assert cause != null;
+            model.getSolver().getEventObserver().updateUpperBound(this, value, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;
@@ -135,8 +142,12 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
-        if (lb > constante || ub < constante) {
+        if (lb > constante){
             assert cause != null;
+            model.getSolver().getEventObserver().updateLowerBound(this, lb, constante, cause);
+            this.contradiction(cause, "outside domain update bound");
+        }else if(ub < constante){
+            model.getSolver().getEventObserver().updateUpperBound(this, ub, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
         return false;

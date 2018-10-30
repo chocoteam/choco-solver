@@ -20,7 +20,6 @@ import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -152,6 +151,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int aValue = value - OFFSET;
         boolean change = aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue);
         if (change) {
+            model.getSolver().getEventObserver().removeValue(this, value, cause);
             if (SIZE.get() == 1) {
                 this.contradiction(cause, MSG_REMOVE);
             }
@@ -213,6 +213,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         while (value <= to) {
             int aValue = value - OFFSET;
             if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -274,6 +275,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         for (int aValue = VALUES.nextSetBit(from); aValue > -1 && aValue <= to; aValue = VALUES.nextSetBit(aValue + 1)) {
             value = aValue + OFFSET;
             if (!values.contains(value)) {
+                model.getSolver().getEventObserver().removeValue(this, value, cause);
                 if (count == 1) {
                     this.contradiction(cause, MSG_REMOVE);
                 }
@@ -312,6 +314,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 if (reactOnRemoval) {
                     delta.add(aValue, cause);
                 }
+                model.getSolver().getEventObserver().removeValue(this, aValue, cause);
             }
             if (anyChange) {
                 SIZE.set(count);
@@ -342,8 +345,10 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if (!contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             int aValue = value - OFFSET;
             if (reactOnRemoval) {
                 int i = VALUES.nextSetBit(this.LB.get());
@@ -390,6 +395,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int old = this.getLB();
         if (old < value) {
             int oub = this.getUB();
+            model.getSolver().getEventObserver().updateLowerBound(this, value, old, cause);
             if (oub < value) {
                 this.contradiction(cause, MSG_LOW);
             } else {
@@ -439,6 +445,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         int oub = this.getUB();
         if (oub > value) {
             int olb = this.getLB();
+            model.getSolver().getEventObserver().updateUpperBound(this, value, oub, cause);
             if (olb > value) {
                 this.contradiction(cause, MSG_UPP);
             } else {
@@ -473,8 +480,10 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         if (olb < lb || oub > ub) {
             IntEventType e = null;
             if (oub < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 this.contradiction(cause, MSG_LOW);
             } else if (olb < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 int aLB = lb - OFFSET;
                 if (reactOnRemoval) {
@@ -490,8 +499,10 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                 olb += OFFSET; // required because we will treat upper bound just after
             }
             if (olb > ub) {
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 this.contradiction(cause, MSG_UPP);
             } else if (oub > ub) {
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 int aUB = ub - OFFSET;
                 if (reactOnRemoval) {
@@ -526,7 +537,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public boolean contains(int aValue) {
         aValue -= OFFSET;
-        return aValue >= 0 && this.VALUES.get(aValue);
+        return LB.get() <= aValue && aValue <= UB.get() && this.VALUES.get(aValue);
     }
 
     /**
@@ -661,14 +672,6 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
         return new EnumDeltaMonitor(delta, propagator);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public void notifyMonitors(IEventType event) throws ContradictionException {
-        for (int i = mIdx - 1; i >= 0; i--) {
-            monitors[i].onUpdate(this, event);
-        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -99,8 +100,10 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (!this.contains(value)) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         }else if (!isInstantiated()){
+            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return var.instantiateTo(1 - value, this);
         }
@@ -271,4 +274,9 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
         return 1- value;
     }
 
+    @Override
+    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+        assert mask == IntEventType.INSTANTIATE;
+        model.getSolver().getEventObserver().instantiateTo(this, 1 - one, var, 0, 1);
+    }
 }
