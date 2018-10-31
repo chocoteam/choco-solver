@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver;
 
@@ -33,7 +33,7 @@ import java.util.function.Predicate;
  * Project: choco.
  * @author Charles Prud'homme
  */
-public interface Settings  {
+public interface Settings {
 
     /**
      * Load <b>some</b> settings from a property file.
@@ -49,27 +49,48 @@ public interface Settings  {
      * @return the current instance
      */
     default Settings load(Properties properties) {
-        this.setWelcomeMessage((String) properties.get("welcome.message"));
-        this.setEnableViews(Boolean.valueOf(properties.get("views.activate").toString()));
-        this.setMaxDomSizeForEnumerated(Integer.valueOf(properties.get("enumerated.threshold").toString()));
-        this.setMinCardinalityForSumDecomposition(Integer.valueOf(properties.get("sum.decomposition.threshold").toString()));
-        this.setEnableTableSubstitution(Boolean.valueOf(properties.get("table.substitution").toString()));
-        this.setMCRDecimalPrecision(Double.valueOf(properties.get("MCR.precision").toString()));
-        this.setMaxTupleSizeForSubstitution(Integer.valueOf(properties.get("tuple.threshold").toString()));
-        this.setSortPropagatorActivationWRTPriority(Boolean.valueOf(properties.get("propagators.sort").toString()));
-        this.setWarnUser(Boolean.valueOf(properties.get("user.warn").toString()));
-        this.setEnableDecompositionOfBooleanSum(Boolean.valueOf(properties.get("boolsum.decomposition").toString()));
-        this.setCloneVariableArrayInPropagator(Boolean.valueOf(properties.get("propagators.clonevars").toString()));
-        this.setEnableACOnTernarySum(Boolean.valueOf(properties.get("sum.AConTernary").toString()));
-        this.setDefaultPrefix((String) properties.get("variables.prefix"));
-        this.setEnableSAT(Boolean.valueOf(properties.get("satsolver.activate").toString()));
-        this.setSwapOnPassivate(Boolean.valueOf(properties.get("propagators.swap").toString()));
-        this.setCheckDeclaredConstraints(Boolean.valueOf(properties.get("constraints.check").toString()));
-        this.setHybridizationOfPropagationEngine(Byte.valueOf(properties.get("propagationEngine.hybridization").toString()));
-        this.setNbMaxLearntClauses(Integer.valueOf(properties.get("learnt.nbMax").toString()));
-        this.setRatioForClauseStoreReduction(Float.valueOf(properties.get("learnt.ratio").toString()));
-        this.setMaxLearntClauseCardinality(Integer.valueOf(properties.get("learnt.maxCard").toString()));
-        this.setLearntClausesDominancePerimeter(Integer.valueOf(properties.get("learnt.dominance").toString()));
+        this.setWelcomeMessage((String) properties.getOrDefault(
+                "welcome.message", this.getWelcomeMessage()));
+        this.setEnableViews(Boolean.valueOf(properties.getOrDefault(
+                "views.activate", this.enableViews()).toString()));
+        this.setMaxDomSizeForEnumerated(Integer.valueOf(properties.getOrDefault(
+                "enumerated.threshold", this.getMaxDomSizeForEnumerated()).toString()));
+        this.setMinCardinalityForSumDecomposition(Integer.valueOf(properties.getOrDefault(
+                "sum.decomposition.threshold", this.getMinCardForSumDecomposition()).toString()));
+        this.setEnableTableSubstitution(Boolean.valueOf(properties.getOrDefault(
+                "table.substitution", enableTableSubstitution()).toString()));
+        this.setMCRDecimalPrecision(Double.valueOf(properties.getOrDefault(
+                "MCR.precision", this.getMCRDecimalPrecision()).toString()));
+        this.setMaxTupleSizeForSubstitution(Integer.valueOf(properties.getOrDefault(
+                "tuple.threshold", this.getMaxTupleSizeForSubstitution()).toString()));
+        this.setSortPropagatorActivationWRTPriority(Boolean.valueOf(properties.getOrDefault(
+                "propagators.sort", this.sortPropagatorActivationWRTPriority()).toString()));
+        this.setWarnUser(Boolean.valueOf(properties.getOrDefault(
+                "user.warn", this.warnUser()).toString()));
+        this.setEnableDecompositionOfBooleanSum(Boolean.valueOf(properties.getOrDefault(
+                "boolsum.decomposition", this.enableDecompositionOfBooleanSum()).toString()));
+        this.setCloneVariableArrayInPropagator(Boolean.valueOf(properties.getOrDefault(
+                "propagators.clonevars", this.cloneVariableArrayInPropagator()).toString()));
+        this.setEnableACOnTernarySum(Boolean.valueOf(properties.getOrDefault(
+                "sum.AConTernary", this.enableACOnTernarySum()).toString()));
+        this.setDefaultPrefix((String) properties.getOrDefault(
+                "variables.prefix", this.defaultPrefix()));
+        this.setEnableSAT(Boolean.valueOf(properties.getOrDefault(
+                "satsolver.activate", this.enableSAT()).toString()));
+        this.setSwapOnPassivate(Boolean.valueOf(properties.getOrDefault(
+                "propagators.swap", this.swapOnPassivate()).toString()));
+        this.setCheckDeclaredConstraints(Boolean.valueOf(properties.getOrDefault(
+                "constraints.check", this.checkDeclaredConstraints()).toString()));
+        this.setHybridizationOfPropagationEngine(Byte.valueOf(properties.getOrDefault(
+                "propagationEngine.hybridization", this.enableHybridizationOfPropagationEngine()).toString()));
+        this.setNbMaxLearntClauses(Integer.valueOf(properties.getOrDefault(
+                "learnt.nbMax", this.getNbMaxLearntClauses()).toString()));
+        this.setRatioForClauseStoreReduction(Float.valueOf(properties.getOrDefault(
+                "learnt.ratio", this.getRatioForClauseStoreReduction()).toString()));
+        this.setMaxLearntClauseCardinality(Integer.valueOf(properties.getOrDefault(
+                "learnt.maxCard", this.getMaxLearntClauseCardinality()).toString()));
+        this.setLearntClausesDominancePerimeter(Integer.valueOf(properties.getOrDefault(
+                "learnt.dominance", this.getLearntClausesDominancePerimeter()).toString()));
         return this;
     }
 
@@ -84,9 +105,9 @@ public interface Settings  {
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
      * @param      inStream   the input stream.
-     * @exception  IOException  if an error occurred when reading from the
+     * @exception IOException  if an error occurred when reading from the
      *             input stream.
-     * @throws     IllegalArgumentException if the input stream contains a
+     * @throws IllegalArgumentException if the input stream contains a
      *             malformed Unicode escape sequence.
      * @return the current instance
      */
@@ -111,7 +132,7 @@ public interface Settings  {
      *             output stream throws an <tt>IOException</tt>.
      * @return the property file
      */
-    default Properties store(){
+    default Properties store() {
         Properties properties = new Properties();
         properties.setProperty("welcome.message", this.getWelcomeMessage());
         properties.setProperty("views.activate", Boolean.toString(this.enableViews()));
@@ -159,7 +180,7 @@ public interface Settings  {
     /**
      * @return the welcome message
      */
-    String getWelcomeMessage() ;
+    String getWelcomeMessage();
 
     /**
      * Define the welcome message, printed in the console
