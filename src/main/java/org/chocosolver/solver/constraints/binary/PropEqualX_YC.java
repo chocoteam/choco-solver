@@ -11,10 +11,14 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -135,6 +139,32 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             if (y.contains(lb - cste)) return true;
         }
         return false;
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        IntIterableRangeSet set0, set1, set2;
+        boolean isPivot;
+        if (isPivot = (ig.getIntVarAt(p) == vars[0])) { // case a. (see javadoc)
+            set1 = explanation.getComplementSet(vars[1]);
+            set0 = explanation.getRootSet(vars[0]);
+            set2 = explanation.getSet(vars[1]);
+            set2.plus(cste);
+            set0.retainAll(set2);
+            explanation.returnSet(set2);
+        } else { // case b. (see javadoc)
+            assert ig.getIntVarAt(p) == vars[1];
+            set0 = explanation.getComplementSet(vars[0]);
+            set1 = explanation.getRootSet(vars[1]);
+            set2 = explanation.getSet(vars[0]);
+            set2.minus(cste);
+            set1.retainAll(set2);
+            explanation.returnSet(set2);
+        }
+        explanation.addLiteral(vars[0], set0, isPivot);
+        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override

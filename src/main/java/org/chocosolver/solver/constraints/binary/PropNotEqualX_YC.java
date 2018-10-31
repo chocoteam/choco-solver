@@ -11,9 +11,13 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -87,6 +91,32 @@ public class PropNotEqualX_YC extends Propagator<IntVar> {
             return ESat.FALSE;
         else
             return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        boolean isPivot;
+        int m;
+        IntIterableRangeSet set0, set1;
+        if (isPivot = (ig.getIntVarAt(p) == vars[0])) {
+            assert explanation.getSet(vars[1]).size() == 1;
+            m = explanation.getSet(vars[1]).min();
+            set0 = explanation.getRootSet(vars[0]);
+            set1 = explanation.getRootSet(vars[1]);
+            set0.remove(m + cste);
+            set1.remove(m);
+        } else {
+            assert explanation.getSet(vars[0]).size() == 1;
+            m = explanation.getSet(vars[0]).min();
+            set1 = explanation.getRootSet(vars[1]);
+            set0 = explanation.getRootSet(vars[0]);
+            set0.remove(m);
+            set1.remove(m - cste);
+        }
+        explanation.addLiteral(vars[0], set0, isPivot);
+        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override
