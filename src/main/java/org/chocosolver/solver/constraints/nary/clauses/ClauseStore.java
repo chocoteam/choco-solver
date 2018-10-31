@@ -15,10 +15,13 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.ShrinkableList;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.tree.Interval;
 import org.chocosolver.util.objects.tree.IntervalTree;
@@ -772,6 +775,25 @@ public class ClauseStore extends Propagator<IntVar> {
                 i++;
             }
             return u ? UNDEFINED : FALSE;
+        }
+
+        public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+            IntVar pivot = ig.getIntVarAt(p);
+            IntIterableRangeSet set;
+            activity++;
+            int i = 0;
+            while (i < mvars.length) {
+                IntVar v = mvars[i];
+                if (front.getValueOrDefault(v, -1) == -1) { // see javadoc for motivation of these two lines
+                    ig.findPredecessor(front, v, p);
+                }
+                set = explanation.getFreeSet();
+                do {
+                    set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
+                    i++;
+                } while (i < mvars.length && mvars[i - 1] == mvars[i]);
+                explanation.addLiteral(v, set, (v == pivot));
+            }
         }
 
         @Override
