@@ -294,9 +294,9 @@ public class IntIterableRangeSetTest {
 		Assert.assertEquals(is1.nextValue(4), 6);
 		Assert.assertEquals(is1.nextValue(6), 11);
 
-		is1 = IntIterableSetUtils.complement(is, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		Assert.assertEquals(is1.min(), Integer.MIN_VALUE);
-		Assert.assertEquals(is1.max(), Integer.MAX_VALUE);
+		is1 = IntIterableSetUtils.complement(is, IntIterableRangeSet.MIN, IntIterableRangeSet.MAX);
+		Assert.assertEquals(is1.min(), IntIterableRangeSet.MIN);
+		Assert.assertEquals(is1.max(), IntIterableRangeSet.MAX);
 		Assert.assertEquals(is1.nextValue(0), 4);
 		Assert.assertEquals(is1.nextValue(4), 6);
 		Assert.assertEquals(is1.nextValue(6), 11);

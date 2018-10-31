@@ -9,6 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 
+- Fix `Settings.load` on missing property
+
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
