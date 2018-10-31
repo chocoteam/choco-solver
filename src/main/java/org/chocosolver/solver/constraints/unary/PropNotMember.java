@@ -18,45 +18,60 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 /**
- * X <= C
- * <br/>
+ * This propagator manages a singleton nogood.
+ * <p>
+ * <p>
+ * Project: choco-solver.
  *
  * @author Charles Prud'homme
- * @since 16/06/11
+ * @since 12/10/2016.
  */
-public class PropLessOrEqualXC extends Propagator<IntVar> {
+public class PropNotMember extends Propagator<IntVar> {
 
-    private final int constant;
+    /**
+     * List of forbidden values.
+     */
+    private IntIterableRangeSet range;
 
-    public PropLessOrEqualXC(IntVar var, int cste) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, true);
-        this.constant = cste;
+    /**
+     * Maintain : <i>var</i>&notin;<i>range</i>
+     *
+     * @param var a variable
+     * @param range  list of possible values
+     */
+    public PropNotMember(IntVar var, IntIterableRangeSet range) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+        this.range = range.duplicate();
     }
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.boundAndInst();
+        return IntEventType.all();
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        // with views such as abs(...), the prop can be not entailed after initial propagation
-        if (vars[0].updateUpperBound(constant, this) || vars[0].getUB() <= constant) {
-            this.setPassive();
+        if(enforce(vars[0], range, this)){
+            setPassive();
         }
+    }
+
+    private static boolean enforce(IntVar var, IntIterableRangeSet fset, Propagator<IntVar> prop) throws ContradictionException {
+        return var.removeValues(fset, prop)
+                && (var.hasEnumeratedDomain() || IntIterableSetUtils.notIncludedIn(var, fset));
     }
 
     @Override
     public ESat isEntailed() {
-        if (vars[0].getUB() <= constant) {
-            return ESat.TRUE;
-        }
-        if (vars[0].getLB() > constant) {
+        if(IntIterableSetUtils.includedIn(vars[0], range)){
             return ESat.FALSE;
+        }else if(IntIterableSetUtils.intersect(vars[0], range)){
+            return ESat.UNDEFINED;
         }
-        return ESat.UNDEFINED;
+        return ESat.TRUE;
     }
 
     /**
@@ -67,13 +82,13 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
      * <pre>
      *         (v1 &isin; D1)
      *     </pre>
-     * Then this propagates v1 &le; c, then:
+     * Then this propagates v1 &notin; S, then:
      * <pre>
-     *         (v1 &isin; D1) &rarr; v1 &le; c
+     *         (v1 &isin; D1) &rarr; v1 &notin; S
      *     </pre>
      * Converting to DNF:
      * <pre>
-     *         (v1 &isin; (U \ D1) &cup; (-&infin;, c])
+     *         (v1 &isin; (U \ D1) &cup; (U \ S))
      *     </pre>
      * </p>
      */
@@ -82,13 +97,12 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
         IntIterableRangeSet set = explanation.getRootSet(vars[0]);
-        set.retainBetween(IntIterableRangeSet.MIN, constant);
+        set.removeAll(range);
         explanation.addLiteral(vars[0], set, true);
     }
 
     @Override
     public String toString() {
-        return vars[0].getName() + " <= " + constant;
+        return String.valueOf(vars[0].getName()) + " \u2208 " + range;
     }
-
 }

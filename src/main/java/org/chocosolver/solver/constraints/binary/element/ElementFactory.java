@@ -11,8 +11,9 @@ package org.chocosolver.solver.constraints.binary.element;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.unary.PropEqualXC;
-import org.chocosolver.solver.constraints.unary.PropMemberBound;
+import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A factory that selects the most adapted element propagator.
@@ -68,7 +69,7 @@ public class ElementFactory {
         if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
             assert TABLE[0] == TABLE[TABLE.length - 1];
             return new Constraint("FAKE_ELMT",
-                    new PropMemberBound(INDEX, 0, TABLE.length - OFFSET),
+                    new PropMember(INDEX, new IntIterableRangeSet(0, TABLE.length - OFFSET)),
                     new PropEqualXC(VALUE, TABLE[0])
             );
         }

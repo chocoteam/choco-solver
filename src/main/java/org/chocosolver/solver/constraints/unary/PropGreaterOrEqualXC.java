@@ -11,9 +11,13 @@ package org.chocosolver.solver.constraints.unary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * X >= C
@@ -51,6 +55,33 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    /**
+     * @implSpec
+     * <p>
+     *     Consider that v1 has been modified by propagation of this.
+     *     Before the propagation, the domains were like:
+     * <pre>
+     *         (v1 &isin; D1)
+     *     </pre>
+     * Then this propagates v1 &ge; c, then:
+     * <pre>
+     *         (v1 &isin; D1) &rarr; v1 &ge; c
+     *     </pre>
+     * Converting to DNF:
+     * <pre>
+     *         (v1 &isin; (U \ D1) &cup; [c, +&infin;))
+     *     </pre>
+     * </p>
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        IntIterableRangeSet set = explanation.getRootSet(vars[0]);
+        set.retainBetween(constant, IntIterableRangeSet.MAX);
+        explanation.addLiteral(vars[0], set, true);
     }
 
     @Override

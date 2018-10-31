@@ -12,7 +12,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.unary.PropNotin;
+import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
@@ -122,7 +122,7 @@ public class ClauseBuilder {
                         break;
                     case 1:
                         new Constraint(String.format("%s &notin; %s", _vars[0].getName(), sets.get(_vars[0].getId())),
-                                new PropNotin(_vars[0], sets.get(_vars[0].getId()))).post();
+                                new PropMember(_vars[0], sets.get(_vars[0].getId()))).post();
                         break;
                     default:
                         IntIterableRangeSet[] ranges = new IntIterableRangeSet[_vars.length];

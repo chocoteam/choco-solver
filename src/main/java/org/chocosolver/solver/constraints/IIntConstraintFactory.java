@@ -99,7 +99,7 @@ import org.chocosolver.solver.constraints.ternary.PropMinBC;
 import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.constraints.unary.PropNotin;
+import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -190,14 +190,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a notMember constraint.
-     * Ensures var does not take its values in set
+     * Creates a member constraint.
+     * Ensures var takes its values in set
      *
      * @param var   an integer variable
-     * @param set an set of values
+     * @param set a set of values
      */
-    default Constraint notMember(IntVar var, IntIterableRangeSet set) {
-        return new Constraint(ConstraintsName.NOTMEMBER, new PropNotin(var, set));
+    default Constraint member(IntVar var, IntIterableRangeSet set) {
+        return new Constraint(ConstraintsName.MEMBER, new PropMember(var, set));
     }
 
     /**

@@ -11,9 +11,12 @@ package org.chocosolver.solver.constraints.unary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -26,20 +29,20 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUti
  * @author Charles Prud'homme
  * @since 12/10/2016.
  */
-public class PropNotin extends Propagator<IntVar> {
+public class PropMember extends Propagator<IntVar> {
 
     /**
-     * List of forbidden values.
+     * List of possible values.
      */
     private IntIterableRangeSet range;
 
     /**
-     * Maintain : <i>var</i>&notin;<i>range</i>
+     * Maintain : <i>var</i>&isin;<i>range</i>
      *
      * @param var a variable
-     * @param range  list of forbidden values
+     * @param range  list of possible values
      */
-    public PropNotin(IntVar var, IntIterableRangeSet range) {
+    public PropMember(IntVar var, IntIterableRangeSet range) {
         super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
         this.range = range.duplicate();
     }
@@ -69,6 +72,31 @@ public class PropNotin extends Propagator<IntVar> {
             return ESat.UNDEFINED;
         }
         return ESat.FALSE;
+    }
+
+    /**
+     * @implSpec
+     * <p>
+     *     Consider that v1 has been modified by propagation of this.
+     *     Before the propagation, the domains were like:
+     * <pre>
+     *         (v1 &isin; D1)
+     *     </pre>
+     * Then this propagates v1 &isin; S, then:
+     * <pre>
+     *         (v1 &isin; D1) &rarr; v1 &isin; S
+     *     </pre>
+     * Converting to DNF:
+     * <pre>
+     *         (v1 &isin; (U \ D1) &cup; S)
+     *     </pre>
+     * </p>
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(range), true);
     }
 
     @Override
