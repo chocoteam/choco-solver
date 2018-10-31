@@ -11,8 +11,6 @@ package org.chocosolver.solver.search.loop.learn;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.AbstractEventObserver;
-import org.chocosolver.solver.learn.EventRecorder;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
@@ -62,9 +60,6 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
      */
     public LearnSignedClauses(Solver solver) {
         this.mSolver = solver;
-        if (solver.getEventObserver() == AbstractEventObserver.SILENT_OBSERVER) {
-            solver.setEventObserver(new EventRecorder(solver));
-        }
         solver.getModel().getClauseBuilder(); // mandatory to store initial domains
         this.ngstore = mSolver.getModel().getClauseConstraint().getClauseStore();
         this.max_card = mSolver.getModel().getSettings().getMaxLearntClauseCardinality();

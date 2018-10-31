@@ -11,6 +11,8 @@ package org.chocosolver.solver.learn;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.Optional;
+
 /**
  * An abstract class for event recording utility.
  * <p>
@@ -85,5 +87,9 @@ public abstract class AbstractEventObserver {
      * Undo the last operation done
      */
     public void undo() {
+    }
+
+    public Optional<Implications> getGI(){
+        return Optional.empty();
     }
 }

@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.loop.learn;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.learn.EventRecorder;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 
@@ -40,10 +41,13 @@ public interface ILearnFactory extends ISelf<Solver> {
      * </ul>
      */
     default void setLearningSignedClauses() {
+        AbstractEventObserver evtObs = ref().getEventObserver();
+        if (evtObs == AbstractEventObserver.SILENT_OBSERVER) {
+            evtObs = new EventRecorder(ref());
+        }
         LearnSignedClauses<ExplanationForSignedClause> learner = new LearnSignedClauses<>(ref());
-        learner.setExplanation(
-                new ExplanationForSignedClause(((EventRecorder) ref().getEventObserver()).getGI())
-        );
+        assert evtObs.getGI().isPresent();
+        learner.setExplanation(new ExplanationForSignedClause(evtObs.getGI().get()));
         ref().setLearner(learner);
     }
 

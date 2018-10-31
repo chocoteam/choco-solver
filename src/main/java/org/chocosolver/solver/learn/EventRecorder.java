@@ -14,6 +14,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.IView;
 
+import java.util.Optional;
+
 /**
  * An explanation engine that learns general constraint from failures.
  * <p>
@@ -121,8 +123,8 @@ public class EventRecorder extends AbstractEventObserver {
         }
     }
 
-    public Implications getGI() {
-        return mIG;
+    public Optional<Implications> getGI() {
+        return Optional.of(mIG);
     }
 
     @Override
