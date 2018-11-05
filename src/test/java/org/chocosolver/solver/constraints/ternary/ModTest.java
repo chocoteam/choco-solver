@@ -13,6 +13,8 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.VariableUtils;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -60,5 +62,18 @@ public class ModTest extends AbstractTernaryTest {
 		Solver r = s.getSolver();
 		r.setSearch(inputOrderLBSearch(dividend, divisor, remainder));
 		s.getSolver().solve();
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testJT1(){
+		Model model = new Model("model");
+		IntVar a = model.intVar("a", 2,6);
+		IntVar b = model.intVar("b", 2);
+		int[] newVarBounds;
+		newVarBounds = VariableUtils.boundsForModulo(a, b);
+		System.out.println("newVarBounds[0] = " + newVarBounds[0] + ", newVarBounds[1]="+ newVarBounds[1]);
+		IntVar c = model.intVar("c", newVarBounds[0],newVarBounds[1]);
+		model.mod(a, b, c).post();
+		Assert.assertEquals(model.getSolver().findAllSolutions().size(), 5);
 	}
 }

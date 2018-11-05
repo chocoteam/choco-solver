@@ -184,18 +184,26 @@ public class VariableUtils {
         long[] vals = new long[4];
         if (y.isInstantiatedTo(0)) {
             vals[0] = Integer.MIN_VALUE;
-            vals[1] = Integer.MIN_VALUE;
-            vals[2] = Integer.MAX_VALUE;
-            vals[3] = Integer.MAX_VALUE;
+            vals[1] = Integer.MAX_VALUE;
+            vals[2] = 0;
+            vals[3] = 0;
         } else {
             int yl = y.getLB();
             int yu = y.getUB();
-            if (yl == 0) yl = 1;
-            if (yu == 0) yu = 1;
             vals[0] = 0;
             vals[1] = 0;
-            vals[2] = Math.abs(yl);
-            vals[3] = Math.abs(yu);
+            vals[2] = 0;
+            if(yl >= 0){
+                vals[3] = yu-1;
+            }else if(yu <= 0){
+                vals[3] = yl+1;
+            }else{
+                vals[0] = Math.abs(yl)-1;
+                vals[1] = Math.abs(yu)-1;
+                vals[2] = -vals[0];
+                vals[3] = -vals[1];
+            }
+
         }
         return bound(vals);
     }

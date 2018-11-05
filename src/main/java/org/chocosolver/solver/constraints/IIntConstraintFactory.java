@@ -597,15 +597,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a modulo constraint.
-     * Ensures X % Y = Z,
+     * <p>
+     * Ensures X % Y = Z.
+     * </p>
+     * <p>
+     * More precisely, Z = X - Y * trunc(X,Y).
      * <br/>i.e.:<br/>
-     * - X / Y = T1 and,<br/>
-     * - T1 * Y = T2 and,<br/>
-     * - Z + T2 = X<br/>
+     * - T1 = X / Y and,<br/>
+     * - T2 = T1 * Y and,<br/>
+     * - Z = X - T2<br/>
      * <br/>
-     * where T1 = T2 = [-|X|, |X|]
-     *
+     * where T1, T2 &isin; [-|X|, |X|]
+     * </p>
+     * <p>
+     * Creates a modulo constraint, that uses truncated division:
+     * the quotient is defined by truncation q = trunc(a/n)
+     * and the remainder would have same sign as the dividend.
+     * The quotient is rounded towards zero: equal to the first integer
+     * in the direction of zero from the exact rational quotient.
+     * </p>
      * @param X first variable
      * @param Y second variable
      * @param Z result
