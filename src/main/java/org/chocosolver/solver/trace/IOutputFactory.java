@@ -77,7 +77,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         ref().getOut().printf("\tVariables : %d\n", ref().getModel().getNbVars());
         ref().getOut().printf("\tConstraints : %d\n", ref().getModel().getNbCstrs());
         ref().getOut().printf("\tBuilding time : %.3fs\n", ref().getMeasures().getReadingTimeCount());
-        ref().getOut().printf("\tUser-defined search strategy : %s\n", ref().getModel().getSolver().isDefaultSearchUsed() ? "yes" : "no");
+        ref().getOut().printf("\tUser-defined search strategy : %s\n", ref().getModel().getSolver().isDefaultSearchUsed() ? "no" : "yes");
         ref().getOut().printf("\tComplementary search strategy : %s\n", ref().isSearchCompleted() ? "yes" : "no");
     }
 
