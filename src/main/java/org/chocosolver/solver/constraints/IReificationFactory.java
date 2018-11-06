@@ -187,8 +187,7 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXneC(IntVar X, int C, BoolVar B){
 		// no check to allow addition during resolution
-//		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXneCReif(X, C, B)));
-		ref().reifyXeqC(X, C, B.not());
+		reifyXeqC(X, C, B.not());
 	}
 
 	/**
@@ -205,27 +204,65 @@ public interface IReificationFactory extends ISelf<Model> {
 			reifyXeqC(X, Y.getValue(), B);
 		}else {
 			// no check to allow addition during resolution
-			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYReif(X, Y, B)));
+			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYCReif(X, Y, 0, B)));
 		}
 	}
 
-	/**
-	 * Posts one constraint that expresses : (x &ne; y) &hArr; b.
-	 * Bypasses the reification system.
-	 * @param X an integer variable
-	 * @param Y an integer variable
-	 * @param B a boolean variable
-	 */
-	default void reifyXneY(IntVar X, IntVar Y, BoolVar B){
-		if(X.isAConstant()){
-			reifyXneC(Y, X.getValue(), B);
-		}else if(Y.isAConstant()){
-			reifyXneC(X, Y.getValue(), B);
-		}else {
-			// no check to allow addition during resolution
-			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXneYReif(X, Y, B)));
-		}
-	}
+    /**
+     * Posts one constraint that expresses : (x &ne; y) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param B a boolean variable
+     */
+    default void reifyXneY(IntVar X, IntVar Y, BoolVar B){
+        if(X.isAConstant()){
+            reifyXneC(Y, X.getValue(), B);
+        }else if(Y.isAConstant()){
+            reifyXneC(X, Y.getValue(), B);
+        }else {
+            // no check to allow addition during resolution
+            reifyXeqY(X, Y, B.not());
+        }
+    }
+
+    /**
+     * Posts one constraint that expresses : (x = y + c) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param C an int
+     * @param B a boolean variable
+     */
+    default void reifyXeqYC(IntVar X, IntVar Y, int C, BoolVar B){
+        if(X.isAConstant()){
+            reifyXeqC(Y, X.getValue() - C, B);
+        }else if(Y.isAConstant()){
+            reifyXeqC(X, Y.getValue() + C, B);
+        }else {
+            // no check to allow addition during resolution
+            ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXeqYCReif(X, Y, C, B)));
+        }
+    }
+
+    /**
+     * Posts one constraint that expresses : (x &ne; y + c) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param C an int
+     * @param B a boolean variable
+     */
+    default void reifyXneYC(IntVar X, IntVar Y, int C, BoolVar B){
+        if(X.isAConstant()){
+            reifyXneC(Y, X.getValue() - C, B);
+        }else if(Y.isAConstant()){
+            reifyXneC(X, Y.getValue() + C, B);
+        }else {
+            // no check to allow addition during resolution
+            reifyXeqYC(X, Y, C, B.not());
+        }
+    }
 
 	/**
 	 * Posts one constraint that expresses : (x < c) &hArr; b.
@@ -248,6 +285,18 @@ public interface IReificationFactory extends ISelf<Model> {
         ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltCReif(X, C, B)));
     }
 
+    /**
+     * Posts one constraint that expresses : (x > c) &hArr; b.
+     * Bypasses the reification system.
+     * @param X a integer variable
+     * @param C an int
+     * @param B a boolean variable
+     */
+    default void reifyXgtC(IntVar X, int C, BoolVar B){
+        // no check to allow addition during resolution
+        reifyXltC(X, C + 1, B.not());
+    }
+
 	/**
 	 * Posts one constraint that expresses : (x < y) &hArr; b.
 	 * Bypasses the reification system.
@@ -257,14 +306,25 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXltY(IntVar X, IntVar Y, BoolVar B){
 		if(X.isAConstant()){
-			reifyXgtC(Y, X.getValue(), B);
+			reifyXltC(Y, X.getValue(), B);
 		}else if(Y.isAConstant()){
 			reifyXltC(X, Y.getValue(), B);
 		}else {
 			// no check to allow addition during resolution
-			ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYReif(X, Y, B)));
+			reifyXltYC(X, Y, 0, B);
 		}
 	}
+
+    /**
+     * Posts one constraint that expresses : (x > y) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param B a boolean variable
+     */
+    default void reifyXgtY(IntVar X, IntVar Y, BoolVar B){
+        reifyXltYC(X, Y, 1, B.not());
+    }
 
 	/**
 	 * Posts one constraint that expresses : (x &le; y) &hArr; b.
@@ -275,8 +335,20 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXleY(IntVar X, IntVar Y, BoolVar B){
 		// no check to allow addition during resolution
-		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, 1, B)));
+		reifyXltYC(X, Y, 1, B);
 	}
+
+    /**
+     * Posts one constraint that expresses : (x &ge; y) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param B a boolean variable
+     */
+    default void reifyXgeY(IntVar X, IntVar Y, BoolVar B){
+        // no check to allow addition during resolution
+        reifyXltYC(X, Y, 0, B.not());
+    }
 
 	/**
 	 * Posts one constraint that expresses : (x < y + c) &hArr; b.
@@ -288,21 +360,27 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B){
 		// no check to allow addition during resolution
-		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
+        if(X.isAConstant()){
+            reifyXltC(Y, X.getValue() - C, B);
+        }else if(Y.isAConstant()){
+            reifyXltC(X, Y.getValue() + C, B);
+        }else {
+            ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXltYCReif(X, Y, C, B)));
+        }
 	}
 
-	/**
-	 * Posts one constraint that expresses : (x > c) &hArr; b.
-	 * Bypasses the reification system.
-	 * @param X a integer variable
-	 * @param C an int
-	 * @param B a boolean variable
-	 */
-	default void reifyXgtC(IntVar X, int C, BoolVar B){
-		// no check to allow addition during resolution
-        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXgtCReif(X, C, B)));
-//        reifyXltC(X, C + 1, B.not());
-	}
+    /**
+     * Posts one constraint that expresses : (x > y + c) &hArr; b.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param Y an integer variable
+     * @param C an int
+     * @param B a boolean variable
+     */
+    default void reifyXgtYC(IntVar X, IntVar Y, int C, BoolVar B){
+        // no check to allow addition during resolution
+        reifyXltYC(X, Y, C+1, B.not());
+    }
 
 	/**
 	 * Posts one constraint that expresses : (X ∈ S) &hArr; B.
@@ -316,6 +394,17 @@ public interface IReificationFactory extends ISelf<Model> {
 		ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B)));
 	}
 
+    /**
+     * Posts one constraint that expresses : (X &notin; S) &hArr; B.
+     * Bypasses the reification system.
+     * @param X an integer variable
+     * @param S a set of values
+     * @param B a boolean variable
+     */
+    default void reifyXnotinS(IntVar X, IntIterableRangeSet S, BoolVar B){
+        // no check to allow addition during resolution
+        ref().post(new Constraint(ConstraintsName.BASIC_REI, new PropXinSReif(X, S, B.not())));
+    }
 
 
 }

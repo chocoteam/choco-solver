@@ -11,9 +11,13 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A propagator dedicated to express in a compact way: (x < y + c) &hArr; b
@@ -65,6 +69,151 @@ public class PropXltYCReif extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
+    }
+
+    /**
+     * @implSpec
+     *
+     * Premise: (x < y + c) &hArr; b
+     * <p>
+     * 6 cases here (only cases that triggered filtering are reported):
+     * <ol type="a">
+     *  <li>
+     *  <pre>
+     *      (b = [0,1] &and; x &isin; (-&infin;, m] &and; y &isin; [n, +&infin;) &and; m < n + c) &rarr; b = 1
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 1 &or; x &isin; [n + c, +&infin;) &or; y &isin; (-&infin;, n - 1])
+     *  </pre>
+     *  <pre>
+     *      (alt.) (b = 1 &or; x &isin; [m + 1, +&infin;) &or; y &isin; (-&infin;, m - c])
+     *  </pre>
+     *  </li>
+     *  <li>
+     *  <pre>
+     *      (b = [0,1] &and; x &isin; [m, +&infin;) &and; y &isin; (-&infin;,n] &and; m &ge; n + c) &rarr; b = 0
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 0 &or; x &isin; (-&infin;, m - 1] &or; y &isin; [m - t + 1,+&infin;))
+     *  </pre>
+     *  <pre>
+     *      (alt.) (b = 0 &or; x &isin; (-&infin;,n + c - 1] &or; y &isin; [n + 1, +&infin;))
+     *  </pre>
+     *  </li>
+     *  <li>
+     *  <pre>
+     *      (b = 1 &and; x &isin; [m, +&infin;) &and; y &isin; (-&infin;, +&infin;)) &rarr; y &isin; [m - c + 1, +&infin;)
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 0 &or; x &isin; (-&infin;, m-1] &or; y &isin; [m - c + 1, +&infin;))
+     *  </pre>
+     *  </li>
+     *  <li>
+     *  <pre>
+     *      (b = 1 &and; x &isin; (-&infin;, +&infin;) &and; y &isin; (-&infin;, n]) &rarr; x &isin; (-&infin;, n + c - 1]
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 0 &or; x &isin; (-&infin;, n + c - 1] &or; y &isin; [n + 1, +&infin;))
+     *  </pre>
+     *  </li>
+     *  <li>
+     *  <pre>
+     *      (b = 0 &and; x &isin; (-&infin;,m] &and; y &isin; (-&infin;, +&infin;)) &rarr; y &isin; (-&infin;,m - c]
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 1 &or; x &isin; [m + 1, +&infin;) &or; y &isin; (-&infin;,m - c])
+     *  </pre>
+     *  </li>
+     *  <li>
+     *  <pre>
+     *      (b = 0 &and; x &isin; (-&infin;, +&infin;) &and; y &isin; [n, +&infin;)) &rarr; x &isin; [n + c, +&infin;)
+     *  </pre>
+     *  <pre>
+     *      &hArr; (b = 1 &or; x &isin; [n + c, +&infin;) &or; y &isin; (-&infin;,n - 1])
+     *  </pre>
+     *  </li>
+     * </ol>
+     * </p>
+     *
+     *
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation,
+                        ValueSortedMap<IntVar> front,
+                        Implications ig, int p) {
+        IntVar pivot = ig.getIntVarAt(p);
+        IntIterableRangeSet set0, set1;
+        set0 = explanation.getRootSet(vars[0]);
+        set1 = explanation.getRootSet(vars[1]);
+        if (vars[2].isInstantiatedTo(1)) { // b is true and X < Y + c holds
+            if (pivot == vars[2]) { // b is the pivot, case a. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(1), true);
+                // deal with alternatives
+                if(front.getValue(vars[0]) > front.getValue(vars[1])){
+                    int n = ig.getDomainAt(front.getValue(vars[1])).min();
+                    set0.retainBetween(n+cste, IntIterableRangeSet.MAX);
+                    explanation.addLiteral(vars[0], set0, false);
+                    set1.retainBetween(IntIterableRangeSet.MIN, n - 1);
+                    explanation.addLiteral(vars[1], set1, false);
+                }else{
+                    int m = ig.getDomainAt(front.getValue(vars[0])).max();
+                    set0.retainBetween(m+1, IntIterableRangeSet.MAX);
+                    explanation.addLiteral(vars[0], set0, false);
+                    set1.retainBetween(IntIterableRangeSet.MIN, m - cste);
+                    explanation.addLiteral(vars[1], set1, false);
+                }
+            } else if (pivot == vars[0]) { // x is the pivot, case d. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(0), false);
+                int n = ig.getDomainAt(front.getValue(vars[1])).max();
+                set0.retainBetween(IntIterableRangeSet.MIN, n + cste - 1);
+                explanation.addLiteral(vars[0], set0, true);
+                set1.retainBetween(n + 1, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[1], set1, false);
+            } else if (pivot == vars[1]) { // y is the pivot, case c. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(0), false);
+                int m = ig.getDomainAt(front.getValue(vars[0])).min();
+                set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
+                explanation.addLiteral(vars[0], set0, false);
+                set1.retainBetween(m - cste + 1, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[1], set1, true);
+            }
+        } else if (vars[2].isInstantiatedTo(0)) {
+            if (pivot == vars[2]) { // b is the pivot, case b. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(0), true);
+                set0 = explanation.getRootSet(vars[0]);
+                set1 = explanation.getRootSet(vars[1]);
+                // deal with alternatives
+                if(front.getValue(vars[0]) > front.getValue(vars[1])){
+                    int n = ig.getDomainAt(front.getValue(vars[1])).max();
+                    set0.retainBetween(IntIterableRangeSet.MIN, n + cste - 1);
+                    explanation.addLiteral(vars[0], set0, false);
+                    set1.retainBetween(n + 1, IntIterableRangeSet.MAX);
+                    explanation.addLiteral(vars[1], set1, false);
+                }else{
+                    int m = ig.getDomainAt(front.getValue(vars[0])).min();
+                    set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
+                    explanation.addLiteral(vars[0], set0, false);
+                    set1.retainBetween(m - cste + 1, IntIterableRangeSet.MAX);
+                    explanation.addLiteral(vars[1], set1, false);
+                }
+            } else if (pivot == vars[0]) { // x is the pivot, case f. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(1), false);
+                int n = ig.getDomainAt(front.getValue(vars[1])).min();
+                set0.retainBetween(n + cste, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[0], set0, true);
+                set1.retainBetween(IntIterableRangeSet.MIN, n - 1);
+                explanation.addLiteral(vars[1], set1, false);
+            } else if (pivot == vars[1]) { // y is the pivot, case e. in javadoc
+                explanation.addLiteral(vars[2], explanation.getFreeSet(1), false);
+                int m = ig.getDomainAt(front.getValue(vars[0])).max();
+                set0.retainBetween(m + 1, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[0], set0, false);
+                set1.retainBetween(IntIterableRangeSet.MIN, m - cste);
+                explanation.addLiteral(vars[1], set1, true);
+            }
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override

@@ -320,7 +320,6 @@ public class ExplanationForSignedClause extends IExplanation {
     }
 
     private void addLiteralInternal(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        assert !var.isBool();
         IntIterableRangeSet rset = literals.get(var);
         if (rset == null) {
             if (dom.size() > 0) {
@@ -344,6 +343,7 @@ public class ExplanationForSignedClause extends IExplanation {
                 if (FINE_PROOF) System.out.printf(" = %s", rset);
             }
             if (rset.size() == 0) {
+                assert !var.isBool() || rset.contains(0) || !rset.contains(1);
                 if (FINE_PROOF) System.out.print(" -- remove");
                 literals.remove(var);
                 front.remove(var);
