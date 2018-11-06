@@ -195,12 +195,10 @@ public final class MeasuresRecorder extends Measures {
         this.boundsManager = boundsManager;
     }
 
-    public final void setTimeCount(long timeCount) {
-        this.timeCount = timeCount;
-    }
-
     public final void setReadingTimeCount(long readingTimeCount) {
-        this.readingTimeCount = readingTimeCount;
+        if(this.readingTimeCount <= 0) {
+            this.readingTimeCount = readingTimeCount;
+        }
     }
 
 }

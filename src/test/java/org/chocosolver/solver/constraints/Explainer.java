@@ -6,10 +6,9 @@
  * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
  * information.
  */
-package org.chocosolver.solver.constraints.reification;
+package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.loop.learn.LearnSignedClauses;
@@ -26,9 +25,9 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 05/11/2018.
  */
-class Explainer {
+public class Explainer {
 
-    static HashMap<IntVar, IntIterableRangeSet> execute(Solver solver, IntProcedure proc, Propagator prop, IntVar v) throws ContradictionException {
+    public static HashMap<IntVar, IntIterableRangeSet> execute(Solver solver, IntProcedure proc, Propagator prop, IntVar v) throws ContradictionException {
         solver.setLearningSignedClauses();
         solver.propagate();
         proc.execute(0);
@@ -39,6 +38,21 @@ class Explainer {
         ContradictionException cex = new ContradictionException();
         cex.set(prop, v, "");
         expl.learnSignedClause(cex);
+        return expl.getLiterals();
+    }
+
+    public static HashMap<IntVar, IntIterableRangeSet> fail(Solver solver, IntProcedure proc) throws ContradictionException {
+        solver.setLearningSignedClauses();
+        solver.propagate();
+        try {
+            proc.execute(0);
+            solver.propagate();
+        }catch (ContradictionException cex0){
+        }
+        LearnSignedClauses<ExplanationForSignedClause> learner
+                = (LearnSignedClauses<ExplanationForSignedClause>) solver.getLearner();
+        ExplanationForSignedClause expl = learner.getExplanation();
+        expl.learnSignedClause(solver.getContradictionException());
         return expl.getLiterals();
     }
 

@@ -12,8 +12,7 @@ import org.testng.annotations.Test;
 
 import java.util.HashMap;
 
-import static org.chocosolver.solver.constraints.reification.Explainer.execute;
-import static org.testng.Assert.*;
+import static org.chocosolver.solver.constraints.Explainer.execute;
 
 /**
  * <p>
