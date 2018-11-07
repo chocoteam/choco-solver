@@ -589,4 +589,60 @@ public class SumTest {
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, "<", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
     }
+
+    /**
+     * A bound consistent propagator should leave the domains intact. But
+     * here it is not the case (even though all possible solutions are
+     * feasible).
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void firstSumGeShouldBeBoundZConsistent3() throws ContradictionException {
+        int   rhs = -2147483647;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-5, 5});
+        IntVar x1 = cp.intVar(new int[]{-5, 5});
+        IntVar x2 = cp.intVar(new int[]{-5, 5});
+        IntVar x3 = cp.intVar(new int[]{-5, 5});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">=", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void secndSumGeShouldBeBoundZConsistent4() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0=cp.intVar(new int[]{972708062,972708065,972708068,972708069});
+        IntVar x1=cp.intVar(new int[]{972708066});
+        IntVar x2=cp.intVar(new int[]{972708061,972708063,972708069});
+        IntVar x3=cp.intVar(new int[]{972708065});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">=", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+
+    /**
+     * Voila comment sont rapportés mes contrexemples.
+     *
+     * ###########################
+     * RHS : 0
+     * ###########################
+     * SEED      : 166edb65238
+     * CAUSE     : Property violated
+     * WITNESS   : x0={-530774850,-530774849,-530774844,-530774842,-530774840}, x1={-530774850,-530774845}, x2={-530774847}, x3={-530774847,-530774846,-530774844,-530774841}, x4={-530774840}
+     * ###########################
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void thirdSumGeShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0=cp.intVar(new int[]{-530774850,-530774849,-530774844,-530774842,-530774840});
+        IntVar x1=cp.intVar(new int[]{-530774850,-530774845});
+        IntVar x2=cp.intVar(new int[]{-530774847});
+        IntVar x3=cp.intVar(new int[]{-530774847,-530774846,-530774844,-530774841});
+        IntVar x4=cp.intVar(new int[]{-530774840});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, ">=", rhs));
+        cp.getSolver().propagate(); // devrait lancer une exception
+    }
 }
