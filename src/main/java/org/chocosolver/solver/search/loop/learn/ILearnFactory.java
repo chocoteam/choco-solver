@@ -25,6 +25,7 @@ public interface ILearnFactory extends ISelf<Solver> {
      * Indicate that no learning should be achieved during search (default configuration)
      */
     default void setNoLearning(){
+        ref().setEventObserver(AbstractEventObserver.SILENT_OBSERVER);
         ref().setLearner(new LearnNothing());
     }
 
