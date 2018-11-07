@@ -11,10 +11,19 @@ package org.chocosolver.solver.constraints.nary.sum;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import static org.chocosolver.solver.constraints.Operator.EQ;
+import static org.chocosolver.solver.constraints.Operator.GE;
+import static org.chocosolver.solver.constraints.Operator.LE;
 
 /**
  * A propagator for SUM(x_i) o b
@@ -191,7 +200,8 @@ public class PropSum extends Propagator<IntVar> {
         int E = sumUB - b;
         do {
             anychange = false;
-            if (F < 0 || E < 0) {
+            // When explanations are on, no global failure allowed
+            if (model.getSolver().isLearnOff() && (F < 0 || E < 0)) {
                 fails();
             }
             if (maxI > F || maxI > E) {
@@ -263,7 +273,8 @@ public class PropSum extends Propagator<IntVar> {
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (F < 0) {
+        // When explanations are on, no global failure allowed
+        if (model.getSolver().isLearnOff() && F < 0) {
             fails();
         }
         if (maxI > F) {
@@ -310,7 +321,8 @@ public class PropSum extends Propagator<IntVar> {
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (E < 0) {
+        // When explanations are on, no global failure allowed
+        if (model.getSolver().isLearnOff() && E < 0) {
             fails();
         }
         if(maxI > E) {
@@ -433,6 +445,227 @@ public class PropSum extends Propagator<IntVar> {
                     return ESat.FALSE;
                 }
                 return ESat.UNDEFINED;
+        }
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        switch (o) {
+            case NQ:
+                Propagator.defaultExplain(this, explanation, front, ig, p);
+                break;
+            default:
+                doExplain(explanation, front, ig, p);
+                break;
+        }
+    }
+
+    void doExplain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p){
+        IntIterableRangeSet dom_before;
+        IntVar pivot = ig.getIntVarAt(p);
+        // first, compute F and E
+        int sumLB = 0;
+        int sumUB = 0;
+        int i = 0, lb, ub, la = 0, ua = 0, a = 0, ca = 0;
+        for (; i < pos; i++) { // first the positive coefficients
+            int f = front.getValue(vars[i]);
+            dom_before = ig.getDomainAt(f);
+            lb = dom_before.min();
+            ub = dom_before.max();
+            if (vars[i] == pivot) {
+                la = dom_before.min();
+                ua = dom_before.max();
+                a = i;
+                ca = 1;
+            }
+            sumLB += lb;
+            sumUB += ub;
+        }
+        for (; i < l; i++) { // then the negative ones
+            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            lb = -dom_before.max();
+            ub = -dom_before.min();
+            if (vars[i] == pivot) {
+                la = dom_before.min();
+                ua = dom_before.max();
+                a = i;
+                ca = -1;
+            }
+            sumLB += lb;
+            sumUB += ub;
+        }
+        int F = b - sumLB;
+        int E = sumUB - b;
+
+        if(ig.getDomainAt(p).isEmpty()){
+            doExplainGlobalFailure(explanation, front, ig, F, E);
+            return;
+        }
+
+
+        IntIterableRangeSet domain;
+        int la2 = IntIterableRangeSet.MIN, ua2 = IntIterableRangeSet.MAX;
+        if (a < pos) {
+            if (!o.equals(GE)) { // ie, LE or EQ
+                ua2 = F + la;
+            }
+            if (!o.equals(LE)) { // ie, GE or EQ
+                la2 = ua - E;
+            }
+        } else {
+            if (!o.equals(GE)) { // ie, LE or EQ
+                la2 = -F + ua;
+            }
+            if (!o.equals(LE)) { // ie, GE or EQ
+                ua2 = la + E;
+            }
+        }
+        domain = explanation.getRootSet(vars[a]);
+        if(la2 > ua2){
+            domain.clear();
+        }else {
+            domain.retainBetween(la2, ua2);
+        }
+        explanation.addLiteral(vars[a], domain, true);
+
+        i = 0;
+        for (; i < pos; i++) {
+            int min = IntIterableRangeSet.MIN;
+            int max = IntIterableRangeSet.MAX;
+            if (vars[i] != pivot) {
+                dom_before = ig.getDomainAt(front.getValue(vars[i]));
+                if (!o.equals(GE)) { // ie, LE or EQ
+                    max = F + dom_before.min() - ca * (ca > 0 ? (ua2 + 1 - la) : (la2 - 1 - ua));
+                }
+                if (!o.equals(LE)) { // ie, GE or EQ
+                    min = -E + dom_before.max() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la);
+                }
+                domain = explanation.getComplementSet(vars[i]);
+                if(o.equals(EQ)) {
+                    assert max+1 <= min-1 : "empty range";
+                    domain.removeBetween(max + 1, min - 1);
+                }else {
+                    domain.retainBetween(min, max);
+                }
+                explanation.addLiteral(vars[i], domain, false);
+            }
+        }
+        for (; i < l; i++) {
+            int min = IntIterableRangeSet.MIN;
+            int max = IntIterableRangeSet.MAX;
+            if (vars[i] != pivot) {
+                dom_before = ig.getDomainAt(front.getValue(vars[i]));
+                if (!o.equals(GE)) { // ie, LE or EQ
+                    min = -(F - dom_before.max() - ca * (ca > 0 ? ua2 + 1 - la : la2 - 1 - ua));
+                }
+                if (!o.equals(LE)) { // ie, GE or EQ
+                    max = -(-E - dom_before.min() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la));
+                }
+                domain = explanation.getComplementSet(vars[i]);
+                if(o.equals(EQ)) {
+                    assert max+1 <= min-1 : "empty range";
+                    domain.removeBetween(max + 1, min - 1);
+                }else {
+                    domain.retainBetween(min, max);
+                }
+                explanation.addLiteral(vars[i], domain, false);
+            }
+        }
+    }
+
+    void doExplainGlobalFailure(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig,
+                                int F, int E) {
+        assert (F < 0) ^ (E < 0);
+        IntIterableRangeSet dom_before, domain;
+        int i = 0;
+        for (; i < pos; i++) {
+            int min = IntIterableRangeSet.MIN;
+            int max = IntIterableRangeSet.MAX;
+            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            if (F < 0) {
+                max = dom_before.min() - 1;
+            }else /*E < 0*/{
+                min = dom_before.max() + 1;
+            }
+            domain = explanation.getComplementSet(vars[i]);
+            domain.retainBetween(min, max);
+            explanation.addLiteral(vars[i], domain, false);
+        }
+        for (; i < l; i++) {
+            int min = IntIterableRangeSet.MIN;
+            int max = IntIterableRangeSet.MAX;
+            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            if (F < 0) { // ie, LE or EQ
+                min = dom_before.max() + 1;
+            }else /*E < 0*/{ // ie, GE or EQ
+                max = dom_before.min() - 1;
+            }
+            domain = explanation.getComplementSet(vars[i]);
+            domain.retainBetween(min, max);
+            explanation.addLiteral(vars[i], domain, false);
+        }
+        if(model.getSettings().explainGlobalFailureInSum() && !this.isReified()){
+            explainGlobal(explanation, front, ig, F, E);
+        }
+    }
+
+    protected void explainGlobal(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig,
+                                 int F, int E) {
+        assert (F < 0)^(E < 0);
+        IntIterableRangeSet dom_before;
+        IntIterableRangeSet domain;
+        int i = 0;
+        ClauseBuilder ngb = model.getClauseBuilder();
+        for (; i < l; i++) {
+            int min = IntIterableRangeSet.MIN;
+            int max = IntIterableRangeSet.MAX;
+            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            if (F < 0) {
+                // BEWARE // second part of the equation differs from non-global-fail case
+                if(i < pos) {
+                    max = F + dom_before.min();
+                }else{
+                    min = -(F - dom_before.max());
+                }
+            }else /*if (E <  0)*/ {
+                // BEWARE // second part of the equation differs from non-global-fail case
+                if(i < pos) {
+                    min = -E + dom_before.max();
+                }else{
+                    max = -(-E - dom_before.min());
+                }
+            }
+            domain = explanation.getRootSet(vars[i]);
+            domain = domain.duplicate();
+            domain.retainBetween(min, max);
+            ngb.put(vars[i], domain);
+            int k = 0;
+            for (; k < l; k++) {
+                if (k != i) {
+                    min = IntIterableRangeSet.MIN;
+                    max = IntIterableRangeSet.MAX;
+                    dom_before = ig.getDomainAt(front.getValue(vars[k]));
+                    if (F < 0) {
+                        if(k < pos) {
+                            min = dom_before.min();
+                        }else{
+                            max = dom_before.max();
+                        }
+                    }else /*if (E <  0)*/ {
+                        if(k < pos) {
+                            max = dom_before.max();
+                        }else{
+                            min = dom_before.min();
+                        }
+                    }
+                    domain = explanation.getRootSet(vars[k]);
+                    domain = domain.duplicate();
+                    domain.removeBetween(min, max);
+                    ngb.put(vars[k], domain.duplicate());
+                }
+            }
+            ngb.buildNogood(model);
+            if(E == -1 || F == -1)return; // the same nogood will be learned all the time
         }
     }
 

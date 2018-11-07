@@ -86,6 +86,8 @@ public class DefaultSettings implements Settings {
 
     private int dominancePerimeter = 4;
 
+    private boolean explainGlobalFailureInSum = true;
+
     private Function<Model, Solver> initSolver = Solver::new;
 
 
@@ -378,6 +380,17 @@ public class DefaultSettings implements Settings {
     @Override
     public Settings setLearntClausesDominancePerimeter(int n) {
         this.dominancePerimeter = n;
+        return this;
+    }
+
+    @Override
+    public boolean explainGlobalFailureInSum() {
+        return explainGlobalFailureInSum;
+    }
+
+    @Override
+    public Settings explainGlobalFailureInSum(boolean b) {
+        this.explainGlobalFailureInSum = b;
         return this;
     }
 }

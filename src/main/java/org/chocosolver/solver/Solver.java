@@ -21,6 +21,7 @@ import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
+import org.chocosolver.solver.search.loop.learn.LearnNothing;
 import org.chocosolver.solver.search.loop.monitors.ISearchMonitor;
 import org.chocosolver.solver.search.loop.monitors.SearchMonitorList;
 import org.chocosolver.solver.search.loop.move.Move;
@@ -810,6 +811,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public int getJumpTo() {
         return jumpTo;
+    }
+
+    /**
+     * @return <i>true</i> when learning algorithm is not plugged in
+     */
+    public boolean isLearnOff(){
+        return L instanceof LearnNothing;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

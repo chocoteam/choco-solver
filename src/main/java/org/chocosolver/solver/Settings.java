@@ -91,6 +91,8 @@ public interface Settings {
                 "learnt.maxCard", this.getMaxLearntClauseCardinality()).toString()));
         this.setLearntClausesDominancePerimeter(Integer.valueOf(properties.getOrDefault(
                 "learnt.dominance", this.getLearntClausesDominancePerimeter()).toString()));
+        this.explainGlobalFailureInSum(Boolean.valueOf(properties.getOrDefault(
+                "learnt.sum.global", this.explainGlobalFailureInSum()).toString()));
         return this;
     }
 
@@ -155,6 +157,7 @@ public interface Settings {
         properties.setProperty("learnt.ratio", Float.toString(this.getRatioForClauseStoreReduction()));
         properties.setProperty("learnt.maxCard", Integer.toString(this.getMaxLearntClauseCardinality()));
         properties.setProperty("learnt.dominance", Integer.toString(this.getLearntClausesDominancePerimeter()));
+        properties.setProperty("learnt.sum.global", Boolean.toString(this.explainGlobalFailureInSum()));
         return properties;
     }
 
@@ -576,4 +579,13 @@ public interface Settings {
      */
     Settings setLearntClausesDominancePerimeter(int n);
 
+    /**
+     * @return <i>true</i> if additional clauses can be learned from sum's global failure
+     */
+    boolean explainGlobalFailureInSum();
+
+    /**
+     * Set to <i>true</i> to allow additional clauses to be learned from sum's global failure
+     */
+    Settings explainGlobalFailureInSum(boolean b);
 }
