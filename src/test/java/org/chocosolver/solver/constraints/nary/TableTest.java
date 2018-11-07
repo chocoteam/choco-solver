@@ -601,4 +601,27 @@ public class TableTest {
 		// This line triggers an ArrayIndexOutOfBoundsException.
 		choco.table(new IntVar[]{x0, x1, x2}, empty, "STR2+").post();
 	}
+
+	/**
+	 * STR2+ is not equivalent to an AC filtering.
+	 *
+	 * ###########################
+	 * arity : 1
+	 * ###########################
+	 * Table : []
+	 * ###########################
+	 * SEED      : 166e8679608
+	 * CAUSE     : Property violated
+	 * WITNESS   : x0={0}
+	 * ###########################
+	 */
+	@Test(expectedExceptions = ContradictionException.class)
+	public void str2PlusTableShouldBeAc() throws ContradictionException {
+		Model  cp = new Model();
+
+		IntVar x0 = cp.intVar(0, 0);
+		Tuples t  = new Tuples();
+		cp.post(cp.table(new IntVar[]{x0}, t, "STR2+"));
+		cp.getSolver().propagate(); // should trigger an inconsistency
+	}
 }

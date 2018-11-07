@@ -137,6 +137,9 @@ public class PropTableStr2 extends Propagator<IntVar> {
         for (int t = 0; t < table.length; t++) {
             tuples.add(t);
         }
+        if(tuples.isEmpty()){
+            this.fails();
+        }
     }
 
     private void Filter() throws ContradictionException {
