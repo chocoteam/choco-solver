@@ -172,10 +172,18 @@ public class IntLinCombFactory {
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
         }
-        if(slb < Integer.MIN_VALUE || slb> Integer.MAX_VALUE
-                || sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE
-                || RESULT< Integer.MIN_VALUE || RESULT> Integer.MAX_VALUE  ){
-            throw new SolverException("Consider reducing variables' domain to prevent integer under/overflow");
+        if(slb < Integer.MIN_VALUE || slb> Integer.MAX_VALUE){
+            throw new SolverException("Sum of lower bounds under/overflows. Consider reducing variables' domain to prevent this.");
+        }
+        if(sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE){
+            throw new SolverException("Sum of upper bounds under/overflows. Consider reducing variables' domain to prevent this.");
+        }
+        if(RESULT< Integer.MIN_VALUE || RESULT> Integer.MAX_VALUE){
+            throw new SolverException("RHS under/overflows. Consider reducing it to prevent this.");
+        }
+        if(RESULT - slb < Integer.MIN_VALUE || RESULT - slb > Integer.MAX_VALUE
+          || sub - RESULT < Integer.MIN_VALUE || sub - RESULT> Integer.MAX_VALUE){
+            throw new SolverException("Integer under/overflow detected. Consider reducing variables' domain and/or RHS to prevent this.");
         }
         // 2. resize NVARS and NCOEFFS
         if (k < NVARS.length) {

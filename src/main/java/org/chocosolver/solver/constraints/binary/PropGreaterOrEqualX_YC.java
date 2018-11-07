@@ -18,6 +18,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * X >= Y + C
@@ -53,8 +54,8 @@ public final class PropGreaterOrEqualX_YC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB() + this.cste, this);
-        y.updateUpperBound(x.getUB() - this.cste, this);
+        x.updateLowerBound(MathUtils.safeAdd(y.getLB(), this.cste), this);
+        y.updateUpperBound(MathUtils.safeSubstract(x.getUB(), this.cste), this);
         if (x.getLB() >= y.getUB() + this.cste) {
             this.setPassive();
         }

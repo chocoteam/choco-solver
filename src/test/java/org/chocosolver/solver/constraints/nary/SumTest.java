@@ -10,6 +10,7 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
@@ -20,7 +21,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.stream;
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Alexandre LEBRUN
@@ -446,4 +449,144 @@ public class SumTest {
         Assert.assertEquals(x2.getLB(), 715827878);
     }
 
+
+    /**
+     * A bound consistent propagator should leave the domains intact. But
+     * here it is not the case (even though all possible solutions are
+     * feasible).
+     */
+    @Test(groups="1s", timeOut=60000,expectedExceptions = SolverException.class)
+    public void firstSumGeShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = -2147483647;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-5, 5});
+        IntVar x1 = cp.intVar(new int[]{-5, 5});
+        IntVar x2 = cp.intVar(new int[]{-5, 5});
+        IntVar x3 = cp.intVar(new int[]{-5, 5});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">=", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void secndSumGeShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-731435840});
+        IntVar x1 = cp.intVar(new int[]{-731435844,-731435843,-731435841,-731435837});
+        IntVar x2 = cp.intVar(new int[]{-731435847,-731435842,-731435840,-731435839,-731435837});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2}, ">=", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+
+    /**
+     * Same remark as above, exept it is for the > operator rather than >=
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void firstSumGtShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = -2147483647;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-5, 5});
+        IntVar x1 = cp.intVar(new int[]{-5, 5});
+        IntVar x2 = cp.intVar(new int[]{-5, 5});
+        IntVar x3 = cp.intVar(new int[]{-5, 5});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+    /**
+     * Same remark as above, exept it is for the > operator rather than >=
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void secndSumGtShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-777264600});
+        IntVar x1 = cp.intVar(new int[]{-777264591});
+        IntVar x2 = cp.intVar(new int[]{-777264597,-777264591});
+        IntVar x3 = cp.intVar(new int[]{-777264597,-777264591});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
+        cp.getSolver().propagate(); // does not detect inconsistency
+    }
+
+    /**
+     * Same remark as above, exept it is for the > operator rather than >=
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void secndSumGtShouldBeBoundZConsistent2() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-100});
+        IntVar x1 = cp.intVar(new int[]{-91});
+        IntVar x2 = cp.intVar(new int[]{-97,-91});
+        IntVar x3 = cp.intVar(new int[]{-97,-91});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
+        cp.getSolver().propagate(); // does not detect inconsistency
+    }
+
+    /**
+     * Here we consider the <= operator. Here, it is problematic as it fails to
+     * detect an inconsistency (even one which is obvious to an human brain)
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void firstSumLeShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = -2147483647;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{186191402,186191412});
+        IntVar x1 = cp.intVar(new int[]{186191402,186191412});
+        IntVar x2 = cp.intVar(new int[]{186191402,186191412});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2}, "<=", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
+    /**
+     * Here we consider the <= operator. Here, it is problematic as it fails to
+     * detect an inconsistency (even one which is obvious to an human brain)
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void secndSumLeShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{1551476532,551476534,551476537});
+        IntVar x1 = cp.intVar(new int[]{551476531});
+        IntVar x2 = cp.intVar(new int[]{551476531,551476533,551476535});
+        IntVar x3 = cp.intVar(new int[]{551476531});
+        IntVar x4 = cp.intVar(new int[]{551476537});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, "<=", rhs));
+        cp.getSolver().propagate(); // does not detect inconsistency
+    }
+    /**
+     * Same as above, for the '<' operator
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void firstSumLtShouldBeBoundZConsistent() throws ContradictionException {
+        int   rhs = -2147483647;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{186191402,186191412});
+        IntVar x1 = cp.intVar(new int[]{186191402,186191412});
+        IntVar x2 = cp.intVar(new int[]{186191402,186191412});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2}, "<", rhs));
+        cp.getSolver().propagate(); // does not detect inconsistency
+    }
+    /**
+     * Same as above, for the '<' operator
+     */
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void secndSumLtShouldBeBoundZ() throws ContradictionException {
+        int   rhs = 0;
+        Model  cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-461559231});
+        IntVar x1 = cp.intVar(new int[]{-461559228,-461559227});
+        IntVar x2 = cp.intVar(new int[]{-461559226,-461559224});
+        IntVar x3 = cp.intVar(new int[]{-461559234,-461559230});
+        IntVar x4 = cp.intVar(new int[]{-461559234,-461559232,-461559231,-461559224});
+
+        cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, "<", rhs));
+        cp.getSolver().propagate(); // throws a spurious inconsistency
+    }
 }
