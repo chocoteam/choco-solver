@@ -9,12 +9,17 @@
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
 import gnu.trove.stack.array.TIntArrayStack;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * Propagator for AllDifferent that only reacts on instantiation
@@ -24,7 +29,7 @@ import org.chocosolver.util.ESat;
 public class PropAllDiffInst extends Propagator<IntVar> {
 
     protected static class FastResetArrayStack extends TIntArrayStack{
-        public void resetQuick(){
+        void resetQuick(){
             this._list.resetQuick();
         }
     }
@@ -54,7 +59,12 @@ public class PropAllDiffInst extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.instantiation();
+        //Principle : if v0 is instantiated and v1 is enumerated, then awakeOnInst(0) performs all needed pruning
+        //Otherwise, we must check if we can remove the value from v1 when the bounds has changed.
+        if (vars[vIdx].hasEnumeratedDomain()) {
+            return IntEventType.instantiation();
+        }
+        return IntEventType.boundAndInst();
     }
 
     //***********************************************************************************
@@ -113,6 +123,41 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             return ESat.TRUE;
         }
         return ESat.UNDEFINED;
+    }
+
+    /**
+     * @implSpec
+     * This version of alldiff algo only reacts on instantiation.
+     * So, the explaining algorithm should also be basic, and only infer on instantiation.
+     * <p>
+     *     First, from Dx and Dx', resp. the domain of x before and after propagation, deduce the values removed.
+     *     Then, scan other variables and store those that intersect the set of values.
+     *     Fill the clause with stored variables only.
+     * </p>
+     * <p>
+     *     Optionally, since this propagator can filter multiple variables in one loop, a good approach is to
+     *     go back in the implication graph as much as possible.
+     * </p>
+     *
+     */
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        IntVar pivot = ig.getIntVarAt(p);
+        IntIterableRangeSet dbef = explanation.getSet(pivot);
+        dbef.removeAll(ig.getDomainAt(p));
+        assert dbef.size() == 1;
+        for(int i = 0; i < vars.length; i++){
+            if(vars[i].isInstantiatedTo(dbef.min()) && vars[i]!= pivot){
+                IntIterableRangeSet set = explanation.getRootSet(vars[i]);
+                set.remove(dbef.min());
+                explanation.addLiteral(vars[i], set, false);
+                break;
+            }
+        }
+        IntIterableRangeSet set = explanation.getRootSet(pivot);
+        set.removeAll(dbef);
+        explanation.addLiteral(pivot, set, true);
+        explanation.returnSet(dbef);
     }
 
 }
