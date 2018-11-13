@@ -131,7 +131,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
 
     public void forAllBelow(int lb, Consumer<T> ex){
         Node n = root.minimumNode();
-        while(!n.isNil() && n.interval.overlaps(Integer.MIN_VALUE, lb)){
+        while(!n.isNil() && n.interval.overlaps(Integer.MIN_VALUE, lb + 1)){
             ex.accept(n.interval);
             n = n.successor();
         }
@@ -139,7 +139,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
 
     public void forAllAbove(int ub, Consumer<T> ex){
         Node n = root.maximumNode();
-        while(!n.isNil() && n.interval.overlaps(ub, Integer.MAX_VALUE)){
+        while(!n.isNil() && n.interval.overlaps(ub - 1, Integer.MAX_VALUE)){
             ex.accept(n.interval);
             n = n.predecessor();
         }

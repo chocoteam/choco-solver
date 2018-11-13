@@ -82,12 +82,14 @@ public class ValueSortedMap<E> {
     public void replace(E k, int v) {
         int cValue = map.get(k);
         assert cValue != NO_ENTRY;
-        int amount = cValue - v;
+        int amount = v - cValue;
         if(amount != 0) {
             map.adjustValue(k, amount);
             rmap.remove(cValue);
             rmap.put(v, k);
         }
+        assert rmap.get(map.get(k)) == k;
+        assert map.get(rmap.get(v)) == v;
     }
 
     /**

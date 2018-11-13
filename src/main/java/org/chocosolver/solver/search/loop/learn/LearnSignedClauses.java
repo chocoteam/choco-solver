@@ -100,26 +100,34 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
         DecisionPath path = mSolver.getDecisionPath();
         // find first refutable decision in decision path
         int i = path.size() - 1;
-        IntDecision dec = (IntDecision) path.getDecision(i);
+        IntDecision dec = null;
         // skip refuted bottom decisions
-        while (i > 1 && !dec.hasNext() && dec.getArity() > 1) { /*i == 0 means ROOT */
-            dec = (IntDecision) path.getDecision(--i);
+        while (i > 1 && !(dec = (IntDecision)path.getDecision(i)).hasNext() && dec.getArity() > 1) { /*i == 0 means ROOT */
+            i--;
         }
-        if(dec.getPosition() - lastExplanation.getAssertingLevel()>0){
+        if(dec !=null && dec.getPosition() - lastExplanation.getAssertingLevel()>0){
             mSolver.getMeasures().incBackjumpCount();
         }
         assert upto >= 0 && upto <= mSolver.getDecisionPath().size();
         mSolver.setJumpTo(upto);
     }
 
-    /**
-     * @implNote Optimization is a specific case: a solution is found and the cut has to be
-     * propagated until it reaches a failure. Doing so, a better explanation will be provided. It
-     * acts like that: <ol> <li> Go up to the root node </li> <li> Apply each decision one by one
-     * until a failure is thrown </li> <li> Explain the failure. </li> </ol>
-     */
     protected void onSolution() {
-        if (!mSolver.getObjectiveManager().isOptimization()) {
+        /*if (!mSolver.getObjectiveManager().isOptimization()) {
+            // extract the decision path to build the nogood
+            lastExplanation.learnSolution(mSolver.getDecisionPath());
+            mSolver.setJumpTo(-1);
+        }*/
+        if(mSolver.getObjectiveManager().isOptimization()){
+            // specific case: we found a solution, now a cut is updated.
+            // posting the cut will fail
+            try {
+                mSolver.getObjectiveManager().postDynamicCut();
+                throw new UnsupportedOperationException("LearnSignedClauses: posting cut does not fail as expected.");
+            } catch (ContradictionException e) {
+                onFailure();
+            }
+        }else{
             // extract the decision path to build the nogood
             lastExplanation.learnSolution(mSolver.getDecisionPath());
             mSolver.setJumpTo(-1);

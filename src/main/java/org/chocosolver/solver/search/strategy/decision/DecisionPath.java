@@ -21,10 +21,13 @@ import java.util.List;
  * To handle set of decisions.
  * <p>
  * Decisions are added to this set of decisions with a call to {@link #pushDecision(Decision)},
- * Decisions are then applied in a call to {@link #apply()}, and removed in a call to {@link #synchronize()}.
+ * Decisions are then applied in a call to {@link #buildNext()} and {@link #apply()},
+ * and removed in a call to {@link #synchronize()}.
  * </br>
- * Note that, if more than one decision is added before calling {@link #apply()}, these decisions belong to the same level.
- * They will be applied at the same time in a call to {@link #apply()}, and remove at the same time in a call to {@link #synchronize()}.
+ * Note that, if more than one decision is added before calling {@link #buildNext()},
+ * these decisions belong to the same level.
+ * They will be applied at the same time in a call to {@link #apply()},
+ * and remove at the same time in a call to {@link #synchronize()}.
  * Otherwise, only one decision is applied/removed at a time.
  * </br>
  * First decision is <b>always</b> {@link RootDecision#ROOT}, so, {@link #size()} returns at least 1.
@@ -43,11 +46,11 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * Store the sizes of {@link #decisions} during search, to evaluate which decisions are part of the same level.
      */
-    protected IStateInt mLevel;
+    IStateInt mLevel;
     /**
      * Indices of level in {@link #decisions}
      */
-    protected int[] levels;
+    int[] levels;
 
 
     /**
@@ -63,13 +66,11 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     }
 
     /**
-     * Apply decisions pushed since the last call to this method.
+     * Prepare the decisions, pushed since the last call to this method, to be applied.
      * If more than one decision are applied in this call,
      * they are automatically force to not be refuted, and are considered to belong to the same level.
-     *
-     * @throws ContradictionException if one decision application fails
      */
-    public void apply() throws ContradictionException {
+    public void buildNext() {
         // 1. look for the first decision in decisions with that rank
         int l = mLevel.get();
         int f = levels[l];
@@ -82,7 +83,22 @@ public class DecisionPath extends DecisionMaker implements Serializable {
                 decision.setRefutable(false);
             }
             decision.buildNext();
-            decision.apply();
+        }
+    }
+
+    /**
+     * Apply decisions pushed since the last call to this method.
+     * This call should be preceded by a call to {@link #buildNext()}.
+     *
+     * @throws ContradictionException if one decision application fails
+     */
+    public void apply() throws ContradictionException {
+        // 1. look for the first decision in decisions with that rank
+        int l = mLevel.get();
+        int f = levels[l];
+        int t = decisions.size();
+        for (int i = f; i < t; i++) {
+            decisions.get(i).apply();
         }
         if (t - f > 0) {
             mLevel.add(1);
@@ -111,14 +127,25 @@ public class DecisionPath extends DecisionMaker implements Serializable {
 
     /**
      * Synchronizes the decision path after a backtrack.
-     * Removes all decisions with level greater or equal to the current level.
+     * Removes and frees all decisions with level greater or equal to the current level.
      * Recall that the very first decision, {@link RootDecision#ROOT}, can not be removed from this.
      */
     public void synchronize() {
+        synchronize(true);
+    }
+
+    /**
+     * Synchronizes the decision path after a backtrack.
+     * Removes all decisions with level greater or equal to the current level.
+     * Recall that the very first decision, {@link RootDecision#ROOT}, can not be removed from this.
+     * @param free set to <i>true</i> to synchronize <b>and</b> free out-dated decisions
+     */
+    public void synchronize(boolean free) {
         if (decisions.size() > 1) { // never remove ROOT decision.
             int t = levels[mLevel.get()];
             for (int f = decisions.size() - 1; f >= t; f--) {
-                decisions.remove(f).free();
+                Decision d = decisions.remove(f);
+                if(free)d.free();
             }
         }
     }

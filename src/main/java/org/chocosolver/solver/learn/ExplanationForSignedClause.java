@@ -122,14 +122,14 @@ public class ExplanationForSignedClause extends IExplanation {
                 IntVar var = dec.getDecisionVariable();
                 literals.get(var);
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
-                    if (dec.hasNext()) {
+                    if (dec.hasNext() || dec.getArity() == 1) {
                         dom = getRootSet(var);
                         dom.remove(dec.getDecisionValue());
                     } else {
                         dom = getFreeSet(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
-                    if (dec.hasNext()) {
+                    if (dec.hasNext()|| dec.getArity() == 1) {
                         dom = getFreeSet(dec.getDecisionValue());
                     } else {
                         dom = getRootSet(var);
@@ -137,14 +137,14 @@ public class ExplanationForSignedClause extends IExplanation {
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
                     dom = getRootSet(var);
-                    if (dec.hasNext()) {
+                    if (dec.hasNext()|| dec.getArity() == 1) {
                         dom.retainBetween(dec.getDecisionValue() + 1, IntIterableRangeSet.MAX);
                     } else {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntReverseSplit())) { // >=
                     dom = getRootSet(var);
-                    if (dec.hasNext()) {
+                    if (dec.hasNext()|| dec.getArity() == 1) {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue() - 1);
                     } else {
                         dom.retainBetween(dec.getDecisionValue(), IntIterableRangeSet.MAX);
@@ -261,7 +261,7 @@ public class ExplanationForSignedClause extends IExplanation {
             if (PROOF)
                 System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
             if(ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()){
-                throw new SolverException("Weak explanation found");
+                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max));
             }
             assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
         }
