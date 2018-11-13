@@ -61,6 +61,7 @@ public class DecisionPathTest {
     @Test(groups = "1s", timeOut=60000)
     public void testApply() throws Exception {
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
@@ -74,6 +75,7 @@ public class DecisionPathTest {
         Assert.assertEquals(dp.levels[1], 0);
         Assert.assertEquals(dp.levels[2], 0);
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         Assert.assertEquals(d1.hasNext(), true);
         Assert.assertEquals(dp.size(), 2);
@@ -104,6 +106,7 @@ public class DecisionPathTest {
         Assert.assertEquals(dp.levels[3], 0);
 
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         Assert.assertEquals(d3.hasNext(), false);
         Assert.assertEquals(d2.hasNext(), false);
@@ -119,16 +122,19 @@ public class DecisionPathTest {
     @Test(groups = "1s", timeOut=60000)
     public void testRemoveLast() throws Exception {
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
         m.getEnvironment().worldPush();
+        dp.buildNext();
         dp.apply();
         Assert.assertEquals(dp.size(), 4);
         Assert.assertEquals(dp.mLevel.get(), 2);
