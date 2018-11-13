@@ -3,16 +3,20 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -24,7 +28,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUti
  * @author Charles Prud'homme
  * @since 03/02/2016.
  */
-public class PropXplusYeqZ extends Propagator<IntVar>{
+public class PropXplusYeqZ extends Propagator<IntVar> {
 
     /**
      * Position of X in {@link #vars}
@@ -54,7 +58,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
      * @param Z an integer variable
      */
     public PropXplusYeqZ(IntVar X, IntVar Y, IntVar Z, boolean enableAC) {
-        super(new IntVar[]{X,Y,Z}, PropagatorPriority.TERNARY, false);
+        super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);
         allbounded = !enableAC || (!X.hasEnumeratedDomain() & !Y.hasEnumeratedDomain() & !Z.hasEnumeratedDomain());
         r1 = new IntIterableRangeSet();
         r2 = new IntIterableRangeSet();
@@ -70,7 +74,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
             loop |= filterMinus(x, z, y);
             loop |= filterMinus(y, z, x);
             loop &= allbounded; // loop only when BC is selected
-        }while (loop);
+        } while (loop);
     }
 
     /**
@@ -85,7 +89,7 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
-        if(!allbounded){
+        if (!allbounded) {
             IntIterableSetUtils.copyIn(vars[v1], r1);
             IntIterableSetUtils.copyIn(vars[v2], r2);
             IntIterableSetUtils.plus(r3, r1, r2);
@@ -106,20 +110,108 @@ public class PropXplusYeqZ extends Propagator<IntVar>{
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
-        if(!allbounded){
+        if (!allbounded) {
             IntIterableSetUtils.copyIn(vars[v1], r1);
             IntIterableSetUtils.copyIn(vars[v2], r2);
             IntIterableSetUtils.minus(r3, r1, r2);
-            change |=vars[vr].removeAllValuesBut(r3, this);
+            change |= vars[vr].removeAllValuesBut(r3, this);
         }
         return change;
     }
 
     @Override
     public ESat isEntailed() {
-        if(isCompletelyInstantiated()){
+        if (isCompletelyInstantiated()) {
             return ESat.eval(vars[x].getValue() + vars[y].getValue() == vars[z].getValue());
         }
         return ESat.UNDEFINED;
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+//        super.explain(explanation, front, ig, p);
+        int m = ig.getEventMaskAt(p);
+        IntVar pivot = ig.getIntVarAt(p);
+        IntIterableRangeSet dx, dy, dz;
+        if (IntEventType.isInclow(m)) {
+            if (pivot == vars[z]) {
+                int a = ig.getDomainAt(front.getValue(vars[x])).min();
+                int b = ig.getDomainAt(front.getValue(vars[y])).min();
+                dz = explanation.getRootSet(vars[z]);
+                dz.retainBetween(a + b, IntIterableRangeSet.MAX);
+                dx = explanation.getRootSet(vars[x]);
+                dx.removeBetween(a, IntIterableRangeSet.MAX);
+                dy = explanation.getRootSet(vars[y]);
+                dy.removeBetween(b, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[x], dx, false);
+                explanation.addLiteral(vars[y], dy, false);
+                explanation.addLiteral(vars[z], dz, true);
+            } else if (pivot == vars[x]) {
+                int a = ig.getDomainAt(front.getValue(vars[y])).max();
+                int b = ig.getDomainAt(front.getValue(vars[z])).min();
+                dx = explanation.getRootSet(vars[x]);
+                dx.retainBetween(b - a, IntIterableRangeSet.MAX);
+                dy = explanation.getRootSet(vars[y]);
+                dy.removeBetween(IntIterableRangeSet.MIN, a);
+                dz = explanation.getRootSet(vars[z]);
+                dz.removeBetween(b, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[x], dx, true);
+                explanation.addLiteral(vars[y], dy, false);
+                explanation.addLiteral(vars[z], dz, false);
+            } else {
+                int a = ig.getDomainAt(front.getValue(vars[x])).max();
+                int b = ig.getDomainAt(front.getValue(vars[z])).min();
+                dy = explanation.getRootSet(vars[y]);
+                dy.retainBetween(b - a, IntIterableRangeSet.MAX);
+                dx = explanation.getRootSet(vars[x]);
+                dx.removeBetween(IntIterableRangeSet.MIN, a);
+                dz = explanation.getRootSet(vars[z]);
+                dz.removeBetween(b, IntIterableRangeSet.MAX);
+                explanation.addLiteral(vars[x], dx, false);
+                explanation.addLiteral(vars[y], dy, true);
+                explanation.addLiteral(vars[z], dz, false);
+            }
+        } else if (IntEventType.isDecupp(m)) {
+            if (pivot == vars[z]) {
+                int a = ig.getDomainAt(front.getValue(vars[x])).max();
+                int b = ig.getDomainAt(front.getValue(vars[y])).max();
+                dz = explanation.getRootSet(vars[z]);
+                dz.retainBetween(IntIterableRangeSet.MIN, a + b);
+                dx = explanation.getRootSet(vars[x]);
+                dx.removeBetween(IntIterableRangeSet.MIN, a);
+                dy = explanation.getRootSet(vars[y]);
+                dy.removeBetween(IntIterableRangeSet.MIN, b);
+                explanation.addLiteral(vars[x], dx, false);
+                explanation.addLiteral(vars[y], dy, false);
+                explanation.addLiteral(vars[z], dz, true);
+            } else if (pivot == vars[x]) {
+                int a = ig.getDomainAt(front.getValue(vars[y])).min();
+                int b = ig.getDomainAt(front.getValue(vars[z])).max();
+                dx = explanation.getRootSet(vars[x]);
+                dx.retainBetween(IntIterableRangeSet.MIN, b - a);
+                dy = explanation.getRootSet(vars[y]);
+                dy.removeBetween(a, IntIterableRangeSet.MAX);
+                dz = explanation.getRootSet(vars[z]);
+                dz.removeBetween(IntIterableRangeSet.MIN, b);
+                explanation.addLiteral(vars[x], dx, true);
+                explanation.addLiteral(vars[y], dy, false);
+                explanation.addLiteral(vars[z], dz, false);
+            } else {
+                int a = ig.getDomainAt(front.getValue(vars[x])).min();
+                int b = ig.getDomainAt(front.getValue(vars[z])).max();
+                dy = explanation.getRootSet(vars[y]);
+                dy.retainBetween(IntIterableRangeSet.MIN, b - a);
+                dx = explanation.getRootSet(vars[x]);
+                dx.removeBetween(a, IntIterableRangeSet.MAX);
+                dz = explanation.getRootSet(vars[z]);
+                dz.removeBetween(IntIterableRangeSet.MIN, b);
+                explanation.addLiteral(vars[x], dx, false);
+                explanation.addLiteral(vars[y], dy, true);
+                explanation.addLiteral(vars[z], dz, false);
+            }
+        } else { // remove
+            assert IntEventType.isRemove(m);
+            Propagator.defaultExplain(this, explanation, front, ig, p);
+        }
     }
 }

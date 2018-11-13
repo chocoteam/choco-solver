@@ -243,12 +243,14 @@ public class ExplanationForSignedClause extends IExplanation {
             // achieved lazily by only evaluating the right-most one
             if (!literals.containsKey(mIG.getIntVarAt(l))) {
                 front.pollLastValue();
-            } else
+            } else {
+                int p = mIG.getPredecessorOf(l);
                 // go left as long as the right-most variable in 'front' contradicts 'literals'
-                if (!IntIterableSetUtils.intersect(
-                        literals.get(mIG.getIntVarAt(l)),
-                        mIG.getDomainAt(mIG.getPredecessorOf(l)))) {
-                    front.replace(mIG.getIntVarAt(l), mIG.getPredecessorOf(l));
+                if (p < l /* to avoid going "before" root */
+                        && !IntIterableSetUtils.intersect(
+                        literals.get(mIG.getIntVarAt(l)),mIG.getDomainAt(p))) {
+                    front.replace(mIG.getIntVarAt(l), p);
+                }
             }
             k = l;
         }
