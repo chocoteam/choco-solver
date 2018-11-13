@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.constraints.nary.clauses;
 
@@ -80,6 +80,10 @@ public class ClauseStore extends Propagator<IntVar> {
     private SignedClause last;
 
     private HashMap<IntVar, IntervalTree<Container>> watches;
+    /**
+     * Amount to bump clause with.
+     */
+    private double clauseInc = 1d;
 
     /**
      * Create a Nogood store connected to a model.
@@ -165,10 +169,10 @@ public class ClauseStore extends Propagator<IntVar> {
             IntVar uni = null;
             int usl = 0;
             int fsl = 0;
-            for(int i = 0; i < ng.pos.length; i++){
+            for (int i = 0; i < ng.pos.length; i++) {
                 switch (ng.check(i)) {
                     case TRUE:
-                        throw new SolverException("Learn a satisfied signed clause: "+ng);
+                        throw new SolverException("Learn a satisfied signed clause: " + ng);
                     case FALSE:
                         fsl++;
                         break;
@@ -176,14 +180,14 @@ public class ClauseStore extends Propagator<IntVar> {
                         if (usl == 0 && uni == null) {
                             uni = ng.mvars[i];
                             usl++;
-                        } else if(usl > 0 && uni != ng.mvars[i]){
+                        } else if (usl > 0 && uni != ng.mvars[i]) {
                             uni = null;
                         }
                         break;
                 }
             }
             if (fsl < ng.cardinality() - 1) {
-                if(uni == null) {
+                if (uni == null) {
                     throw new SolverException("Learn a weak clause (" + fsl + "/" + ng.cardinality() + ")");
                 }
             }
@@ -197,10 +201,13 @@ public class ClauseStore extends Propagator<IntVar> {
      * Try to delete sclauses from this nogood store.
      */
     public void forget() {
+        decayActivity();
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
-        }else{
+        } else {
             if (last != null) {
+                last.activity = clauseInc;
+                last.rawActivity = 1;
                 if (ASSERT_UNIT_PROP) {
                     check(last);
                 }
@@ -212,6 +219,20 @@ public class ClauseStore extends Propagator<IntVar> {
         }
         // 2. reduce database
         reduceDB();
+    }
+
+    private void decayActivity() {
+        // Increase the increment by 0.1%.  This introduces "activity
+        // inflation", making all previous activity counts have less value.
+        clauseInc *= 1.001;
+        // If inflation has become too much, normalise all the activity
+        // counts by scaling everything down by a factor of 1e20.
+        if (clauseInc > 1e20) {
+            clauseInc *= 1e-20;
+            for (int i = 0; i < learnts.size(); i++) {
+                learnts.get(i).activity *= 1e-20;
+            }
+        }
     }
 
 
@@ -238,7 +259,7 @@ public class ClauseStore extends Propagator<IntVar> {
     private void reduceDB() {
         int size = learnts.size();
         if (size >= nbMaxLearnts) {
-            learnts.sort(Comparator.comparingInt(c -> -c.activity));
+            learnts.sort(Comparator.comparingDouble(c -> -c.activity));
             long to = Math.round(ratio * size);
             for (int i = size - 1; i >= to; i--) {
                 SignedClause ng = learnts.get(i);
@@ -270,6 +291,14 @@ public class ClauseStore extends Propagator<IntVar> {
     }
 
 
+    public void printStatistics(){
+        learnts.sort(Comparator.comparingInt(c -> -c.rawActivity));
+        System.out.print("Top ten clauses:\n");
+        for (int i = 0 ; i < 10 && i < learnts.size() ; i++) {
+            System.out.printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
+        }
+    }
+
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         // nothing is done here
@@ -284,7 +313,7 @@ public class ClauseStore extends Propagator<IntVar> {
         int ub = var.getUB();
         if (IntEventType.isInstantiate(mask) || IntEventType.isRemove(mask)) {
             sweep(wm.iterator(), var, lb, ub);
-        }else {
+        } else {
             if (IntEventType.isInclow(mask)) {
                 wm.forAllBelow(lb, c -> checkCont(c, var, lb, ub));
             }
@@ -482,7 +511,9 @@ public class ClauseStore extends Propagator<IntVar> {
          */
         private final int[] pos;
 
-        private int activity;
+        private double activity = 0d;
+
+        private int rawActivity = 0;
 
         private long fails;
 
@@ -579,7 +610,8 @@ public class ClauseStore extends Propagator<IntVar> {
         private void detectHiddenUUA() throws ContradictionException {
             IntVar one = null;
             IntIterableRangeSet set = new IntIterableRangeSet();
-            fl : for (int i = 0; i < pos.length; i++) {
+            fl:
+            for (int i = 0; i < pos.length; i++) {
                 switch (check(i)) {
                     case UNDEFINED:
                         if (one == null || one == mvars[i]) {
@@ -596,9 +628,9 @@ public class ClauseStore extends Propagator<IntVar> {
                 }
             }
             if (one != null) {
-                if(one.removeAllValuesBut(set, this)) {
+                if (one.removeAllValuesBut(set, this)) {
                     setPassiveAndLock();
-                }else setPassive();
+                } else setPassive();
             }
         }
 
@@ -834,7 +866,8 @@ public class ClauseStore extends Propagator<IntVar> {
         public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
             IntVar pivot = ig.getIntVarAt(p);
             IntIterableRangeSet set;
-            activity++;
+            activity += clauseInc;
+            rawActivity +=1;
             int i = 0;
             while (i < mvars.length) {
                 IntVar v = mvars[i];
