@@ -51,7 +51,7 @@ public class ClauseStore extends Propagator<IntVar> {
 
     public static boolean PRINT_CLAUSE = false;
 
-    public static boolean INTERVAL_TREE = false;
+    public static boolean INTERVAL_TREE = true;
     /**
      * Solver that handles the clauses
      */
@@ -126,7 +126,9 @@ public class ClauseStore extends Propagator<IntVar> {
             }
             mSolver.getEngine().dynamicAddition(true, cl);
         } else {
-            new Constraint("SC", PropSignedClause.makeFromIn(vars, ranges)).post();
+            PropSignedClause cl = PropSignedClause.makeFromIn(vars, ranges);
+            if (PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+            new Constraint("SC", cl).post();
         }
     }
 
@@ -158,13 +160,32 @@ public class ClauseStore extends Propagator<IntVar> {
 
     private void check(SignedClause ng) {
         if (mSolver.getDecisionPath().size() > 1) { // if at root node)
-            int fsl = ng.getNbFalsified();
-            int tsl = ng.getNbSatisfied();
-            if (tsl > 0) {
-                throw new SolverException("Learn a satisfied signed clause (" + tsl + "/" + ng.cardinality() + ")");
+            // collect variables related to UNDEF lits.
+            // If only one variable is concerned, then we can force the clause to filter.
+            IntVar uni = null;
+            int usl = 0;
+            int fsl = 0;
+            for(int i = 0; i < ng.pos.length; i++){
+                switch (ng.check(i)) {
+                    case TRUE:
+                        throw new SolverException("Learn a satisfied signed clause: "+ng);
+                    case FALSE:
+                        fsl++;
+                        break;
+                    case UNDEFINED:
+                        if (usl == 0 && uni == null) {
+                            uni = ng.mvars[i];
+                            usl++;
+                        } else if(usl > 0 && uni != ng.mvars[i]){
+                            uni = null;
+                        }
+                        break;
+                }
             }
             if (fsl < ng.cardinality() - 1) {
-                throw new SolverException("Learn a weak clause (" + fsl + "/" + ng.cardinality() + ")");
+                if(uni == null) {
+                    throw new SolverException("Learn a weak clause (" + fsl + "/" + ng.cardinality() + ")");
+                }
             }
             if (fsl == ng.cardinality() && model.getSettings().warnUser()) {
                 System.err.println("wrong clause asserting level");
@@ -176,17 +197,18 @@ public class ClauseStore extends Propagator<IntVar> {
      * Try to delete sclauses from this nogood store.
      */
     public void forget() {
-        if (last != null) {
-            if (ASSERT_UNIT_PROP) {
-                check(last);
-            }
-            if (last != null) {
-                detectDominance();
-            }
-        }
-        last = null;
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
+        }else{
+            if (last != null) {
+                if (ASSERT_UNIT_PROP) {
+                    check(last);
+                }
+                if (last != null) {
+                    detectDominance();
+                }
+            }
+            last = null;
         }
         // 2. reduce database
         reduceDB();
@@ -257,21 +279,17 @@ public class ClauseStore extends Propagator<IntVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         // iterate over clauses that needs to be propagator
         IntVar var = vars[idxVarInProp];
-        if (mask != IntEventType.REMOVE.getMask()) {
-            IntervalTree<Container> wm = watches.get(var);
-            int lb = var.getLB();
-            int ub = var.getUB();
-            if (IntEventType.isInstantiate(mask)) {
-                sweep(wm.iterator(), var, lb, ub);
-            } else {
-                if (IntEventType.isInclow(mask)) {
-//                    sweep(wm, wm.overlappers(IntIterableRangeSet.MIN, lb), var, lb, ub);
-                    wm.forAllBelow(lb, c-> checkCont(c, var, lb, ub));
-                }
-                if (IntEventType.isDecupp(mask)) {
-//                    sweep(wm, wm.overlappers(ub, IntIterableRangeSet.MAX), var, lb, ub);
-                    wm.forAllAbove(ub, c-> checkCont(c, var, lb, ub));
-                }
+        IntervalTree<Container> wm = watches.get(var);
+        int lb = var.getLB();
+        int ub = var.getUB();
+        if (IntEventType.isInstantiate(mask) || IntEventType.isRemove(mask)) {
+            sweep(wm.iterator(), var, lb, ub);
+        }else {
+            if (IntEventType.isInclow(mask)) {
+                wm.forAllBelow(lb, c -> checkCont(c, var, lb, ub));
+            }
+            if (IntEventType.isDecupp(mask)) {
+                wm.forAllAbove(ub, c -> checkCont(c, var, lb, ub));
             }
         }
     }
@@ -355,12 +373,12 @@ public class ClauseStore extends Propagator<IntVar> {
             while (i < s) {
                 Watcher w = watchers.get(i++);
                 SignedClause c = w.c;
-                if (w.c.isScheduled()) { // clause already scheduled, skip it
-                    watchers.set(j++, w);
-                    continue;
-                }
                 if (w.p != c.pos[p = 0] && w.p != c.pos[++p]) {
                     // watched literal loss, forget it
+                    continue;
+                }
+                if (w.c.isScheduled()) { // clause already scheduled, skip it
+                    watchers.set(j++, w);
                     continue;
                 }
                 if (!w.c.isActive()) {
@@ -545,6 +563,42 @@ public class ClauseStore extends Propagator<IntVar> {
             }
             if (FL != F0) {
                 propagateClause();
+            }
+            if (evtmask == 2 && this.isActive()) {
+                detectHiddenUUA();
+            }
+        }
+
+        /**
+         * Detect hidden "unit under assignment" case.
+         * This is supposed to be called only at coarse propagation (so mainly on backtrack).
+         * It collects variables related to UNDEF lits.
+         * If only one variable is concerned, then we can force the clause to filter.
+         * @throws ContradictionException not supposed to happen
+         */
+        private void detectHiddenUUA() throws ContradictionException {
+            IntVar one = null;
+            IntIterableRangeSet set = new IntIterableRangeSet();
+            fl : for (int i = 0; i < pos.length; i++) {
+                switch (check(i)) {
+                    case UNDEFINED:
+                        if (one == null || one == mvars[i]) {
+                            one = mvars[i];
+                            set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
+                        } else {
+                            one = null;
+                            break fl;
+                        }
+                        break;
+                    case TRUE:
+                        one = null;
+                        break fl;
+                }
+            }
+            if (one != null) {
+                if(one.removeAllValuesBut(set, this)) {
+                    setPassiveAndLock();
+                }else setPassive();
             }
         }
 
