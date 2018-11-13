@@ -5,7 +5,7 @@ import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.nary.clauses.PropSignedClause;
+import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -351,11 +351,9 @@ public class ExplScalarTest {
         Assert.assertEquals(lits.get(x1), rng);
         Assert.assertEquals(lits.get(x2), rng);
         Assert.assertEquals(lits.get(x3), rng);
-        Assert.assertEquals(model.getNbCstrs(), 6);
-        Assert.assertEquals(model.getCstrs()[2].getPropagator(0).getClass(), PropSignedClause.class);
-        Assert.assertEquals(model.getCstrs()[3].getPropagator(0).getClass(), PropSignedClause.class);
-        Assert.assertEquals(model.getCstrs()[4].getPropagator(0).getClass(), PropSignedClause.class);
-        Assert.assertEquals(model.getCstrs()[5].getPropagator(0).getClass(), PropSignedClause.class);
+        Assert.assertEquals(model.getNbCstrs(), 2);
+        Assert.assertEquals(model.getCstrs()[1].getPropagator(0).getClass(), ClauseStore.class);
+        Assert.assertEquals(((ClauseStore)model.getCstrs()[1].getPropagator(0)).getNbLearntClauses(), 4);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -412,10 +410,9 @@ public class ExplScalarTest {
         rng.clear();
         rng.addBetween(-15, -4);
         Assert.assertEquals(lits.get(x2), rng);
-        Assert.assertEquals(model.getNbCstrs(), 5);
-        Assert.assertEquals(model.getCstrs()[2].getPropagator(0).getClass(), PropSignedClause.class);
-        Assert.assertEquals(model.getCstrs()[3].getPropagator(0).getClass(), PropSignedClause.class);
-        Assert.assertEquals(model.getCstrs()[4].getPropagator(0).getClass(), PropSignedClause.class);
+        Assert.assertEquals(model.getNbCstrs(), 2);
+        Assert.assertEquals(model.getCstrs()[1].getPropagator(0).getClass(), ClauseStore.class);
+        Assert.assertEquals(((ClauseStore)model.getCstrs()[1].getPropagator(0)).getNbLearntClauses(), 3);
     }
 
 
