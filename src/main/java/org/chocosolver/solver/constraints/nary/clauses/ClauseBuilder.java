@@ -119,7 +119,7 @@ public class ClauseBuilder {
                         model.falseConstraint().post();
                         break;
                     case 1:
-                        model.notMember(_vars[0], sets.get(_vars[0].getId())).post();
+                        model.member(_vars[0], sets.get(_vars[0].getId())).post();
                         break;
                     default:
                         IntIterableRangeSet[] ranges = new IntIterableRangeSet[_vars.length];
