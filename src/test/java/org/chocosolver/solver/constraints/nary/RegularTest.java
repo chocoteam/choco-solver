@@ -281,7 +281,7 @@ public class RegularTest {
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testregExp6() {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 6, 0, 3, false);

@@ -391,7 +391,7 @@ public class MinMaxTest {
         }
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testMax2(){
         Model model = new Model();
         BoolVar[] bvars = model.boolVarArray("b",2);

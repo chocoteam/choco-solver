@@ -214,7 +214,7 @@ public class RealTest {
         while (solver.solve()) ;
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testHM2() {
         Model model = new Model("Default model");
         double precision = 1.e-1;
@@ -704,7 +704,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testFN1() {
         Model model = new Model("Environment generation problem");
         //A

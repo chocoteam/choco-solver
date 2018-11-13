@@ -358,7 +358,7 @@ public class ExplScalarTest {
         Assert.assertEquals(model.getCstrs()[5].getPropagator(0).getClass(), PropSignedClause.class);
     }
 
-    @Test(groups = "1s", timeOut = 6000000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test14() throws ContradictionException {
         // 1.[0,1] + 2.[2,3] + 2.[3,4] <= 20
         Model model = new Model(new DefaultSettings().explainGlobalFailureInSum(true));
@@ -386,7 +386,7 @@ public class ExplScalarTest {
         Assert.assertEquals(lits.get(x2), rng);
     }
 
-    @Test(groups = "1s", timeOut = 6000000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test15() throws ContradictionException {
         // 5.[7,8] + 1.[12,14] + 1.[-3,-1] <= 40
         Model model = new Model(new DefaultSettings().explainGlobalFailureInSum(true));

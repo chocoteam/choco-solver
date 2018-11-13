@@ -30,7 +30,7 @@ import org.testng.annotations.Test;
  */
 public class LazyImplicationsTest {
 
-    @Test(groups = "1s", timeOut = 6000000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         Model model = ProblemMaker.makeNQueenWithBinaryConstraints(8);
         IntVar[] qs = (IntVar[]) model.getHook("vars");

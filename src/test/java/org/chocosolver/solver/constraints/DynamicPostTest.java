@@ -50,7 +50,7 @@ public class DynamicPostTest {
     }
 
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void test1() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -234,7 +234,7 @@ public class DynamicPostTest {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testJLpareto() {
         pareto(false);
         pareto(true);

@@ -77,7 +77,7 @@ public class PropXltYCReifTest {
         Assert.assertEquals(lits.get(y), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBpivot2a() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -104,7 +104,7 @@ public class PropXltYCReifTest {
         Assert.assertEquals(lits.get(y), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBpivot2b() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -158,7 +158,7 @@ public class PropXltYCReifTest {
         Assert.assertEquals(lits.get(y), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testXpivot2() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -212,7 +212,7 @@ public class PropXltYCReifTest {
         Assert.assertEquals(lits.get(y), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testYpivot2() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);

@@ -278,7 +278,7 @@ public class ExplanationForSignedClause extends IExplanation {
             if (PROOF)
                 System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
             if(ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()){
-                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max));
+                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max)+"\n" + literals);
             }
             assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
         }

@@ -22,7 +22,7 @@ import static org.chocosolver.solver.constraints.Explainer.execute;
  */
 public class ExplPropXplusYeqZTest {
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testXpivot1() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -50,7 +50,7 @@ public class ExplPropXplusYeqZTest {
         Assert.assertEquals(lits.get(z), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testXpivot2() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -78,7 +78,7 @@ public class ExplPropXplusYeqZTest {
         Assert.assertEquals(lits.get(z), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testYpivot1() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -106,7 +106,7 @@ public class ExplPropXplusYeqZTest {
         Assert.assertEquals(lits.get(z), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testYpivot2() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -134,7 +134,7 @@ public class ExplPropXplusYeqZTest {
         Assert.assertEquals(lits.get(z), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testZpivot1() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);
@@ -162,7 +162,7 @@ public class ExplPropXplusYeqZTest {
         Assert.assertEquals(lits.get(y), rng);
     }
 
-    @Test(groups = "1s", timeOut = 600000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testZpivot2() throws ContradictionException {
         Model mo = new Model();
         IntVar x = mo.intVar("x", -999, 999);

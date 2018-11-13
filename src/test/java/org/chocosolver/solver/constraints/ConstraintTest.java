@@ -279,7 +279,7 @@ public class ConstraintTest {
         assertEquals(m.getSolver().getSolutionCount(), m2.getSolver().getSolutionCount());
     }
 
-    @Test(groups = "1s", timeOut = 6000000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUnlink1() {
         Model model = new Model("unlink");
         IntVar[] vars = model.intVarArray("X", 3, 0, 4);
@@ -307,7 +307,7 @@ public class ConstraintTest {
 
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testJiTee1(){
         Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
         Model model = new Model("model");
@@ -333,7 +333,7 @@ public class ConstraintTest {
         }
 
     }
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void testJiTee2(){
         Constraint stickyCstr = null;
         Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'

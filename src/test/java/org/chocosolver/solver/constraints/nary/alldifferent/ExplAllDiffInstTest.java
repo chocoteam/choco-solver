@@ -49,7 +49,7 @@ public class ExplAllDiffInstTest {
         Assert.assertEquals(lits.get(c), rng);
     }
 
-    @Test(groups = "1s", timeOut = 6000000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() throws ContradictionException {
         Model mo = new Model();
         IntVar a = mo.intVar("a", 2, 4);

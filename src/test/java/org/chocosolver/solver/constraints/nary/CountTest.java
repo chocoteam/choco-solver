@@ -70,7 +70,7 @@ public class CountTest {
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
-    @Test(groups="10s", timeOut=600000)
+    @Test(groups="10s", timeOut=60000)
     public void testRandomProblems() {
         for (int bigseed = 1; bigseed < 11; bigseed++) {
             long nbsol, nbsol2;

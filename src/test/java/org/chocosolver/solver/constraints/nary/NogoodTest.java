@@ -14,7 +14,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -23,8 +22,6 @@ import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.testng.Assert.assertEquals;
@@ -62,7 +59,7 @@ public class NogoodTest {
         assertEquals(model.getSolver().getBackTrackCount(), 133);
     }
 
-    @Test(groups="1s", timeOut=6000000)
+    @Test(groups="1s", timeOut=60000)
     public void test3() {
         Model model = new Model("nogoods");
         PropNogoods ngstore = model.getNogoodStore().getPropNogoods();
