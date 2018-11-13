@@ -201,10 +201,7 @@ public class ExplanationForSignedClause extends IExplanation {
                 System.out.printf("Expl: %s\n-----", literals);
             }
             // filter irrelevant nodes
-//            front.removeIf(updateFront);
-            while (!front.isEmpty() && !literals.containsKey(mIG.getIntVarAt(front.getLastValue()))) {
-                front.pollLastValue();
-            }
+            relax();
         }
     }
 
@@ -236,6 +233,24 @@ public class ExplanationForSignedClause extends IExplanation {
                     throw new UnsupportedOperationException("Oh nooo!");
                 }
             }
+        }
+    }
+
+    private void relax() {
+        int l, k = -1;
+        while (!front.isEmpty() && (l = front.getLastValue()) != k) {
+            // remove variable in 'front' but not in literals
+            // achieved lazily by only evaluating the right-most one
+            if (!literals.containsKey(mIG.getIntVarAt(l))) {
+                front.pollLastValue();
+            } else
+                // go left as long as the right-most variable in 'front' contradicts 'literals'
+                if (!IntIterableSetUtils.intersect(
+                        literals.get(mIG.getIntVarAt(l)),
+                        mIG.getDomainAt(mIG.getPredecessorOf(l)))) {
+                    front.replace(mIG.getIntVarAt(l), mIG.getPredecessorOf(l));
+            }
+            k = l;
         }
     }
 

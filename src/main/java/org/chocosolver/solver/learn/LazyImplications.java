@@ -126,11 +126,11 @@ public class LazyImplications extends Implications {
     /**
      * Ordered list of entries.
      */
-    private Entry[] entries;
+    Entry[] entries;
     /**
      * Pointer, per variable, to the root entry {@link #entries}
      */
-    private final HashMap<IntVar, Entry> rootEntries;
+    final HashMap<IntVar, Entry> rootEntries;
     /**
      * Number of entries stored -- backtrackable
      */
@@ -487,6 +487,11 @@ public class LazyImplications extends Implications {
     @Override
     public IntIterableRangeSet getDomainAt(int idx) {
         return entries[idx].d;
+    }
+
+    @Override
+    public int getPredecessorOf(int idx) {
+        return entries[idx].p;
     }
 
     @Override

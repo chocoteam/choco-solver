@@ -113,6 +113,13 @@ public abstract class Implications {
     public abstract IntIterableRangeSet getDomainAt(int idx);
 
     /**
+     * Get the position of precedent entry of the one declared in node <i>idx</i>
+     * @param idx position of the node to query
+     * @return its ancestor
+     */
+    public abstract int getPredecessorOf(int idx);
+
+    /**
      * Get the {@link IntIterableRangeSet} that represents domain of this variables
      * as declared in the model
      * @param var variable to query
