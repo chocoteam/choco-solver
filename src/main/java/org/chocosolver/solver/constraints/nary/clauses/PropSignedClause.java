@@ -12,9 +12,12 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -149,13 +152,14 @@ public class PropSignedClause extends Propagator<IntVar> {
     }
 
     private ESat check(int p) {
-        int lv = mvars[p].getLB();
-        int uv = mvars[p].getUB();
+        IntVar v = mvars[p];
+        int lv = v.getLB();
+        int uv = v.getUB();
         int l = bounds[p << 1];
         int u = bounds[(p << 1) + 1];
         if (l <= lv && uv <= u) { // v in [l,u]
             return ESat.TRUE;
-        } else if (l > uv || lv > u /*|| (v.hasEnumeratedDomain() && v.nextValue(l - 1) > u)*/) {  // v does not intersect [l,u]
+        } else if (l > uv || lv > u || (v.hasEnumeratedDomain() && v.nextValue(l - 1) > u)) {  // v does not intersect [l,u]
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
@@ -163,25 +167,6 @@ public class PropSignedClause extends Propagator<IntVar> {
 
     private boolean restrict(int p) throws ContradictionException {
         return mvars[p].updateBounds(bounds[p << 1], bounds[(p << 1) + 1], this);
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        switch (check(pos[idxVarInProp])) {
-            case TRUE:
-                FL = F0;
-                label = -this.mSolver.getDecisionPath().size();
-                setPassive();
-                return;
-            case FALSE:
-                FL |= idxVarInProp + 1;
-                break;
-            case UNDEFINED:
-                break;
-        }
-        if (FL != F0) {
-            propagateClause();
-        }
     }
 
     @SuppressWarnings("Duplicates")
@@ -382,6 +367,24 @@ public class PropSignedClause extends Propagator<IntVar> {
             i++;
         }
         return u ? UNDEFINED : FALSE;
+    }
+
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        IntVar pivot = ig.getIntVarAt(p);
+        IntIterableRangeSet set;
+        int i = 0;
+        while (i < mvars.length) {
+            IntVar v = mvars[i];
+            if (front.getValueOrDefault(v, -1) == -1) { // see javadoc for motivation of these two lines
+                ig.findPredecessor(front, v, p);
+            }
+            set = explanation.getFreeSet();
+            do {
+                set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
+                i++;
+            } while (i < mvars.length && mvars[i - 1] == mvars[i]);
+            explanation.addLiteral(v, set, (v == pivot));
+        }
     }
 
     @Override
