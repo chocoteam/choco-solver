@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -12,6 +12,7 @@ import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -48,12 +49,17 @@ public class XCSP extends RegParser {
     public XCSP() {
         super("ChocoXCSP");
         this.defaultSettings = new XCSPSettings(); // todo: rename or create the right one
-        if(PRINT_LOG)System.out.printf("c Choco 493a269\n");
+        if(PRINT_LOG)System.out.printf("c Choco e747e1e\n");
     }
 
     @Override
     public char getCommentChar() {
         return 'c';
+    }
+
+    @Override
+    public Settings createDefaultSettings() {
+        return new XCSPSettings();
     }
 
     @Override
