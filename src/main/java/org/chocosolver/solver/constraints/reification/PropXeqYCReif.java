@@ -38,19 +38,19 @@ public class PropXeqYCReif extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (vars[2].getLB() == 1) {
             if (vars[0].isInstantiated()) {
-                vars[1].instantiateTo(vars[0].getValue() + cste, this);
+                vars[1].instantiateTo(vars[0].getValue() - cste, this);
                 setPassive();
             } else if (vars[1].isInstantiated()) {
-                vars[0].instantiateTo(vars[1].getValue() - cste, this);
+                vars[0].instantiateTo(vars[1].getValue() + cste, this);
                 setPassive();
             }
         } else if (vars[2].getUB() == 0) {
             if (vars[0].isInstantiated()) {
-                if (vars[1].removeValue(vars[0].getValue() + cste, this) || !vars[1].contains(vars[0].getValue() + cste)) {
+                if (vars[1].removeValue(vars[0].getValue() - cste, this) || !vars[1].contains(vars[0].getValue() - cste)) {
                     setPassive();
                 }
             } else if (vars[1].isInstantiated()) {
-                if (vars[0].removeValue(vars[1].getValue() - cste, this) || !vars[0].contains(vars[1].getValue() - cste)) {
+                if (vars[0].removeValue(vars[1].getValue() + cste, this) || !vars[0].contains(vars[1].getValue() + cste)) {
                     setPassive();
                 }
             }
@@ -229,6 +229,6 @@ public class PropXeqYCReif extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + vars[0].getName() + " = " + vars[1].getName() + ") <=> " + vars[2].getName();
+        return "(" + vars[0].getName() + " = " + vars[1].getName() + (cste !=0?" + "+cste:"")+") <=> " + vars[2].getName();
     }
 }

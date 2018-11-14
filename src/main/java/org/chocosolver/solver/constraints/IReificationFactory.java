@@ -306,7 +306,7 @@ public interface IReificationFactory extends ISelf<Model> {
 	 */
 	default void reifyXltY(IntVar X, IntVar Y, BoolVar B){
 		if(X.isAConstant()){
-			reifyXltC(Y, X.getValue(), B);
+			reifyXgtC(Y, X.getValue(), B);
 		}else if(Y.isAConstant()){
 			reifyXltC(X, Y.getValue(), B);
 		}else {
@@ -361,7 +361,7 @@ public interface IReificationFactory extends ISelf<Model> {
 	default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B){
 		// no check to allow addition during resolution
         if(X.isAConstant()){
-            reifyXltC(Y, X.getValue() - C, B);
+            reifyXgtC(Y, X.getValue() - C, B);
         }else if(Y.isAConstant()){
             reifyXltC(X, Y.getValue() + C, B);
         }else {
