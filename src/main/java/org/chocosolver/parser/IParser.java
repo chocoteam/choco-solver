@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -10,7 +10,6 @@ package org.chocosolver.parser;
 
 import org.chocosolver.pf4cs.IProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 
 /**
  * An interface for all parsers
@@ -37,13 +36,6 @@ public interface IParser extends IProblem{
      * @param listener
      */
     void removeListener(ParserListener listener);
-
-    /**
-     * Declare the settings to use
-     *
-     * @param defaultSettings settings to consider
-     */
-    void defineSettings(Settings defaultSettings);
 
     /**
      * Create the solver

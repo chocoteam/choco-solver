@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -10,6 +10,7 @@ package org.chocosolver.parser.json;
 
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
@@ -40,8 +41,8 @@ public class JSONParser extends RegParser{
     }
 
     @Override
-    public void defineSettings(Settings defaultSettings) {
-        throw new UnsupportedOperationException("Cannot override Settings for JSON");
+    public Settings createDefaultSettings() {
+        return new DefaultSettings();
     }
 
     @Override

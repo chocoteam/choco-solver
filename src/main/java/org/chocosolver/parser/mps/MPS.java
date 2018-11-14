@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -12,6 +12,7 @@ import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -49,7 +50,7 @@ public class MPS extends RegParser {
     private boolean noeq = false;
 
     @Option(name = "-split", usage = "Split any contraints of cardinality greater than this value (default: 100).")
-    private int split = 100;
+    int split = 100;
 
 
     /**
@@ -65,6 +66,11 @@ public class MPS extends RegParser {
     @Override
     public char getCommentChar() {
         return 'c';
+    }
+
+    @Override
+    public Settings createDefaultSettings() {
+        return new MPSSettings();
     }
 
     @Override
@@ -89,8 +95,6 @@ public class MPS extends RegParser {
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new MPSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
-            defaultSettings.setDebugPropagation(false);
-            defaultSettings.setMinCardinalityForSumDecomposition(split);
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             threadModel.setPrecision(precision);
             portfolio.addModel(threadModel);

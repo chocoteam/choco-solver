@@ -34,13 +34,7 @@ public class T_var_decl extends GrammarTest {
 
     @BeforeMethod
     public void before() {
-        mSolver = new Model();
-        mSolver.set(new FznSettings(){
-            @Override
-            public boolean enableViews() {
-                return true;
-            }
-        });
+        mSolver = new Model(new FznSettings().setEnableViews(true));
         datas = new Datas();
     }
 

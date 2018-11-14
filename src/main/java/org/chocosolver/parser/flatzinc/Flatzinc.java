@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -20,6 +20,7 @@ import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.kohsuke.args4j.Option;
 
@@ -71,6 +72,11 @@ public class Flatzinc extends RegParser {
     @Override
     public char getCommentChar() {
         return '%';
+    }
+
+    @Override
+    public Settings createDefaultSettings() {
+        return new FznSettings();
     }
 
     @Override

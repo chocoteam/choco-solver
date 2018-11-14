@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -22,12 +22,7 @@ public class ChocoFZN {
         Flatzinc fzn = new Flatzinc();
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.setUp(args);
-        fzn.defineSettings(new FznSettings(){
-            @Override
-            public int getMinCardForSumDecomposition() {
-                return fzn.sum;
-            }
-        });
+        fzn.getSettings().setMinCardinalityForSumDecomposition(fzn.sum);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();

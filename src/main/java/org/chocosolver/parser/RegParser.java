@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -15,6 +15,10 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.nary.clause.ClauseStore;
+import org.chocosolver.solver.constraints.nary.cumulative.PropCumulative;
+import org.chocosolver.solver.constraints.nary.sum.PropSum;
+import org.chocosolver.solver.explanations.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
@@ -28,6 +32,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -85,6 +92,9 @@ public abstract class RegParser implements IParser {
     @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;
 
+    @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
+    protected File settingsFile = null;
+
     /**
      * Default time limit, as long, in ms
      */
@@ -131,6 +141,12 @@ public abstract class RegParser implements IParser {
 
     public abstract char getCommentChar();
 
+    public abstract Settings createDefaultSettings();
+
+    public final Settings getSettings(){
+        return defaultSettings;
+    }
+
     @Override
     public final void addListener(ParserListener listener) {
         listeners.add(listener);
@@ -142,7 +158,7 @@ public abstract class RegParser implements IParser {
     }
 
     @Override
-    public void setUp(String... args) throws SetUpException {
+    public final void setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
         System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
@@ -158,13 +174,15 @@ public abstract class RegParser implements IParser {
         cmdparser.getArguments();
         tl_ = TimeUtils.convertInMilliseconds(tl);
         listeners.forEach(ParserListener::afterParsingParameters);
+        defaultSettings = createDefaultSettings();
+        if(settingsFile != null){
+            try {
+                defaultSettings.load(new FileInputStream(settingsFile));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
-
-    @Override
-    public void defineSettings(Settings defaultSettings) {
-        this.defaultSettings = defaultSettings;
-    }
-
     /**
      * Create a complementary search on non-decision variables
      *

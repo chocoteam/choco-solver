@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -61,7 +61,7 @@ public class BaseFlatzincListener implements ParserListener {
     @Override
     public void afterParsingFile() {
 
-        if (((FznSettings) fznparser.getModel().getSettings()).printConstraint()) {
+        if (((FznSettings) fznparser.getModel().getSettings()).printConstraints()) {
             ArrayList<String> l = new ArrayList<>();
             System.out.println("% INVOLVED CONSTRAINTS (CHOCO) ");
             for (Constraint c : fznparser.getModel().getCstrs()) {
