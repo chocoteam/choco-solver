@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -26,6 +26,7 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.chocosolver.parser.IParser.PRINT_LOG;
@@ -42,22 +43,21 @@ public class Datas {
     // VARIABLES
     //***********************************************************************************
 
-    final THashMap<String, Object> map;
-    final List<String> output_names;
-    final List<Declaration.DType> output_types;
-    final List<Variable> output_vars;
-    final List<String> output_arrays_names;
-    final List<Declaration.DType> output_arrays_types;
-    final List<Variable[]> output_arrays_vars;
+    private final THashMap<String, Object> map;
+    private final List<String> output_names;
+    private final List<Declaration.DType> output_types;
+    private final List<Variable> output_vars;
+    private final List<String> output_arrays_names;
+    private final List<Declaration.DType> output_arrays_types;
+    private final List<Variable[]> output_arrays_vars;
 
-    boolean printAll;
-    boolean printStat;
-    boolean wrongSolution;
-    int nbSolution;
-    StringBuilder stringBuilder = new StringBuilder();
+    private boolean printAll;
+    private boolean printStat;
+    private int nbSolution;
+    private StringBuilder stringBuilder = new StringBuilder();
 
-    Model model;
-    Solution solution;
+    private Model model;
+    private Solution solution;
 
     //***********************************************************************************
     // VARIABLES
@@ -92,7 +92,7 @@ public class Datas {
         return map.get(id);
     }
 
-    public void declareOutput(String name, Variable variable, Declaration type) {
+    void declareOutput(String name, Variable variable, Declaration type) {
         output_names.add(name);
         output_vars.add(variable);
         output_types.add(type.typeOf);
@@ -165,7 +165,7 @@ public class Datas {
         }
     }
 
-    public void printSolution(){
+    private void printSolution(){
         for (int i = 0; i < output_names.size(); i++) {
             if(PRINT_LOG)System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
 
@@ -182,18 +182,17 @@ public class Datas {
                 if(PRINT_LOG)System.out.printf(name, stringBuilder.toString());
                 stringBuilder.setLength(0);
             } else {
-                if(PRINT_LOG)System.out.printf(name);
+                if(PRINT_LOG)System.out.print(name);
             }
         }
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
             if(PRINT_LOG)System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
         }
-        if(PRINT_LOG)System.out.printf("----------\n");
+        if(PRINT_LOG)System.out.print("----------\n");
     }
 
     public void onSolution() {
-        wrongSolution = false;
         nbSolution++;
         if(solution == null){
             solution = new Solution(model, allOutPutVars());
@@ -203,12 +202,9 @@ public class Datas {
     }
 
     private Variable[] allOutPutVars() {
-        ArrayList<Variable> vars = new ArrayList<>();
-        vars.addAll(output_vars);
+        ArrayList<Variable> vars = new ArrayList<>(output_vars);
         for(Variable[] vs:output_arrays_vars){
-            for(Variable v:vs) {
-                vars.add(v);
-            }
+            Collections.addAll(vars, vs);
         }
         return vars.toArray(new Variable[0]);
     }
@@ -219,19 +215,19 @@ public class Datas {
 //        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
         if(nbSolution>0){
             if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
-                if(PRINT_LOG)System.out.printf("==========\n");
+                if(PRINT_LOG)System.out.print("==========\n");
             }
         }else{
             if(complete){
-                if(PRINT_LOG)System.out.printf("=====UNSATISFIABLE=====\n");
+                if(PRINT_LOG)System.out.print("=====UNSATISFIABLE=====\n");
             }else{
-                if(PRINT_LOG)System.out.printf("=====UNKNOWN=====\n");
+                if(PRINT_LOG)System.out.print("=====UNKNOWN=====\n");
             }
         }
         if (printStat) {
             // TODO used to use the toOneShortLineString that has been removed
             if(PRINT_LOG)System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
-            if(PRINT_LOG)System.out.printf("%% ");
+            if(PRINT_LOG)System.out.print("%% ");
             if(PRINT_LOG)solver.printShortFeatures();
         }
     }
