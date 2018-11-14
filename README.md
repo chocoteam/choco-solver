@@ -7,3 +7,4 @@ It comes in complement of the [documentation](https://choco-solver.readthedocs.i
 Based on [IJava binder](https://github.com/SpencerPark/ijava-binder).
 
 1. [How to start solving based on a given solution ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/Loading_a_solution.ipynb#)
+2. [How to run CDCL algorithm ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/A_CDCL_overview.ipynb#)
