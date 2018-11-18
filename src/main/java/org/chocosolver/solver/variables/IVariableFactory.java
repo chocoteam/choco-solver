@@ -44,7 +44,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant of type BoolVar
      */
     default BoolVar boolVar(boolean value) {
-        return boolVar(CSTE_NAME + (value?1:0),value);
+        return boolVar(CSTE_NAME + (value ? 1 : 0), value);
     }
 
     /**
@@ -54,7 +54,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant of type BoolVar
      */
     default BoolVar boolVar(String name, boolean value) {
-        int intVal = value?1:0;
+        int intVal = value ? 1 : 0;
         if (name.equals(CSTE_NAME + intVal) && ref().getCachedConstants().containsKey(intVal)) {
             return (BoolVar) ref().getCachedConstants().get(intVal);
         }
@@ -90,7 +90,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an array of <i>size</i> BoolVar of domain {0, 1}
      */
     default BoolVar[] boolVarArray(int size) {
-        return boolVarArray(generateName("BV_"),size);
+        return boolVarArray(generateName("BV_"), size);
     }
 
     /**
@@ -116,7 +116,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a matrix of <i>dim1*dim2</i> BoolVar of domain {0, 1}
      */
     default BoolVar[][] boolVarMatrix(int dim1, int dim2) {
-        return boolVarMatrix(generateName("BV_"),dim1,dim2);
+        return boolVarMatrix(generateName("BV_"), dim1, dim2);
     }
 
     /**
@@ -146,7 +146,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant IntVar of domain {<i>value</i>}
      */
     default IntVar intVar(int value) {
-        return intVar(CSTE_NAME + value,value);
+        return intVar(CSTE_NAME + value, value);
     }
 
     /**
@@ -156,25 +156,29 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain <i>values</i>
      */
     default IntVar intVar(int[] values) {
-        return intVar(generateName("IV_"),values);
+        return intVar(generateName("IV_"), values);
     }
 
     /**
      * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
      * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
      * @param lb initial domain lower bound
      * @param ub initial domain upper bound
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub) {
-        return intVar(generateName("IV_"),lb, ub);
+        return intVar(generateName("IV_"), lb, ub);
     }
 
     /**
      * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
      * @param lb initial domain lower bound
      * @param ub initial domain upper bound
-     * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
+     * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                      (any value removals in the middle of the domain will be ignored).
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub, boolean boundedDomain) {
@@ -190,7 +194,7 @@ public interface IVariableFactory extends ISelf<Model> {
     default IntVar intVar(String name, int value) {
         checkIntDomainRange(name, value, value);
         if (value == 0 || value == 1) {
-            return boolVar(name,value==1);
+            return boolVar(name, value == 1);
         }
         if (name.equals(CSTE_NAME + value) && ref().getCachedConstants().containsKey(value)) {
             return ref().getCachedConstants().get(value);
@@ -207,7 +211,9 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param name name of the variable
      * @param lb initial domain lower bound
      * @param ub initial domain upper bound
-     * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain
+     * @param boundedDomain specifies whether to use a bounded domain or an enumerated domain.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                      (any value removals in the middle of the domain will be ignored).
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(String name, int lb, int ub, boolean boundedDomain) {
@@ -216,7 +222,7 @@ public interface IVariableFactory extends ISelf<Model> {
             return intVar(name, lb);
         } else if (lb == 0 && ub == 1) {
             return boolVar(name);
-        } else  if(boundedDomain) {
+        } else if (boundedDomain) {
             return new IntervalIntVarImpl(name, lb, ub, ref());
         } else {
             return new BitsetIntVarImpl(name, lb, ub, ref());
@@ -226,6 +232,8 @@ public interface IVariableFactory extends ISelf<Model> {
     /**
      * Create an integer variable of initial domain [<i>lb</i>, <i>ub</i>]
      * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
      * @param name name of the variable
      * @param lb initial domain lower bound
      * @param ub initial domain upper bound
@@ -274,6 +282,9 @@ public interface IVariableFactory extends ISelf<Model> {
 
     /**
      * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
      * @param size number of variables
      * @param lb initial domain lower bound of each variable
      * @param ub initial domain upper bound of each variable
@@ -288,7 +299,9 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param size number of variables
      * @param lb initial domain lower bound of each variable
      * @param ub initial domain upper bound of each variable
-     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
+     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                     (any value removals in the middle of the domain will be ignored).
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[] intVarArray(int size, int lb, int ub, boolean boundedDomain) {
@@ -301,7 +314,9 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param size number of variables
      * @param lb initial domain lower bound of each variable
      * @param ub initial domain upper bound of each variable
-     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
+     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                      (any value removals in the middle of the domain will be ignored).
      * @return an array of <i>size</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[] intVarArray(String name, int size, int lb, int ub, boolean boundedDomain) {
@@ -314,6 +329,10 @@ public interface IVariableFactory extends ISelf<Model> {
 
     /**
      * Creates an array of <i>size</i> integer variables, taking their domain in [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
+     *
      * @param name prefix name of the variables to create. The ith variable will be named <i>name</i>[i]
      * @param size number of variables
      * @param lb initial domain lower bound of each variable
@@ -358,6 +377,10 @@ public interface IVariableFactory extends ISelf<Model> {
 
     /**
      * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
+     *
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
      * @param lb initial domain lower bound of each variable
@@ -374,7 +397,9 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param dim2 number of columns in the matrix
      * @param lb initial domain lower bound of each variable
      * @param ub initial domain upper bound of each variable
-     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
+     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                      (any value removals in the middle of the domain will be ignored).
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[][] intVarMatrix(int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
@@ -388,7 +413,9 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param dim2 number of columns in the matrix
      * @param lb initial domain lower bound of each variable
      * @param ub initial domain upper bound of each variable
-     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable
+     * @param boundedDomain specifies whether to use bounded domains or enumerated domains for each variable.
+     *                      When 'boundedDomain' only bounds modifications are handled
+     *                      (any value removals in the middle of the domain will be ignored).
      * @return a matrix of <i>dim1*dim2</i> IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar[][] intVarMatrix(String name, int dim1, int dim2, int lb, int ub, boolean boundedDomain) {
@@ -401,6 +428,9 @@ public interface IVariableFactory extends ISelf<Model> {
 
     /**
      * Creates a matrix of <i>dim1*dim2</i> integer variables taking their domain in [<i>lb</i>, <i>ub</i>]
+     * Uses an enumerated domain if <i>ub</i>-<i>lb</i> is small, and a bounded domain otherwise
+     * @implNote When boundedDomain is selected only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
      * @param name prefix name of the variables to create. The variable in row i and col j will be named <i>name</i>[i][j]
      * @param dim1 number of rows in the matrix
      * @param dim2 number of columns in the matrix
@@ -447,7 +477,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param p fixed processing time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, int p){
+    default Task taskVar(IntVar s, int p) {
         return new Task(s, ref().intVar(p), ref().intOffsetView(s, p));
     }
 
@@ -462,7 +492,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param p fixed processing time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p){
+    default Task taskVar(IntVar s, IntVar p) {
         int[] bounds = VariableUtils.boundsForAddition(s, p);
         IntVar end = ref().intVar(bounds[0], bounds[1]);
         return new Task(s, p, end);
@@ -480,7 +510,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param e integer variable, ending time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p, IntVar e){
+    default Task taskVar(IntVar s, IntVar p, IntVar e) {
         return new Task(s, p, e);
     }
 
@@ -497,12 +527,12 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param e integer variables, ending times
      * @return an array of task variables.
      */
-    default Task[] taskVarArray(IntVar[] s, IntVar[] p, IntVar[] e){
-        if(s.length != p.length || s.length != e.length){
+    default Task[] taskVarArray(IntVar[] s, IntVar[] p, IntVar[] e) {
+        if (s.length != p.length || s.length != e.length) {
             throw new SolverException("Wrong arrays size");
         }
         Task[] tasks = new Task[s.length];
-        for(int i = 0; i < s.length; i++){
+        for (int i = 0; i < s.length; i++) {
             tasks[i] = taskVar(s[i], p[i], e[i]);
         }
         return tasks;
@@ -522,12 +552,12 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param e integer variables, ending times
      * @return a matrix task variable.
      */
-    default Task[][] taskVarMatrix(IntVar[][] s, IntVar[][] p, IntVar[][] e){
-        if(s.length != p.length || s.length != e.length){
+    default Task[][] taskVarMatrix(IntVar[][] s, IntVar[][] p, IntVar[][] e) {
+        if (s.length != p.length || s.length != e.length) {
             throw new SolverException("Wrong arrays size");
         }
         Task[][] tasks = new Task[s.length][];
-        for(int i = 0; i < s.length; i++){
+        for (int i = 0; i < s.length; i++) {
             tasks[i] = taskVarArray(s[i], p[i], e[i]);
         }
         return tasks;
@@ -543,7 +573,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant RealVar of domain [<i>value</i>,<i>value</i>]
      */
     default RealVar realVar(double value) {
-        return realVar(CSTE_NAME + value,value);
+        return realVar(CSTE_NAME + value, value);
     }
 
     /**
@@ -563,7 +593,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant RealVar of domain {<i>value</i>}
      */
     default RealVar realVar(double value, double precision) {
-        return realVar(CSTE_NAME+value, value, value, precision);
+        return realVar(CSTE_NAME + value, value, value, precision);
     }
 
     /**
@@ -675,10 +705,11 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(int... value) {
-        String name = CSTE_NAME+"{";
-        for(int i=0;i<value.length;i++){
-            name+=value[i]+(i<value.length-1?", ":"");
-        }name += "}";
+        String name = CSTE_NAME + "{";
+        for (int i = 0; i < value.length; i++) {
+            name += value[i] + (i < value.length - 1 ? ", " : "");
+        }
+        name += "}";
         return setVar(name, value);
     }
 
@@ -701,8 +732,8 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(String name, int... value) {
-    	if(value==null) value = new int[]{};
-      return new SetVarImpl(name, value, ref());
+        if (value == null) value = new int[]{};
+        return new SetVarImpl(name, value, ref());
     }
 
     // ARRAY
@@ -764,9 +795,6 @@ public interface IVariableFactory extends ISelf<Model> {
         }
         return vars;
     }
-
-
-
 
 
     //*************************************************************************************
