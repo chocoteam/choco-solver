@@ -9,6 +9,7 @@ NEXT MILESTONE
 
 ### Major features:
 
+- Update statistic dashboard (see `solver.showDashboard()`)
 - Fix `Settings.load` on missing property
 
 ### Deprecated API (to be removed in next release):

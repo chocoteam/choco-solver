@@ -3,14 +3,22 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.trace.frames;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.SearchState;
+import org.knowm.xchart.QuickChart;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.XYChart;
 
 import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -21,10 +29,11 @@ import javax.swing.*;
  *
  * <p>
  * Project: choco-solver.
+ *
  * @author Charles Prud'homme
  * @since 21/11/2017.
  */
-public class StatisticsPanel extends JPanel{
+public class StatisticsPanel extends JPanel {
 
     private static String[] fieldnames = {
             "Variables",
@@ -34,26 +43,40 @@ public class StatisticsPanel extends JPanel{
             "Nodes",
             "Fails",
             "Backtracks",
+            "Backjumps",
             "Restarts",
+            "Fixpoints",
+            "Depth",
             "Time (sec.)", // time in second
             "Nodes/sec.", // node per second
+            "Fails/sec.", // node per second
+            "Fixpoints/sec.", // node per second
     };
     @SuppressWarnings("unchecked")
     private static Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbVars()),
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbCstrs()),
             (Function<Solver, String>) solver ->
-                (solver.hasObjective()?solver.getBestSolutionValue().toString():"--"),
+                    (solver.hasObjective() ? solver.getBestSolutionValue().toString() : "--"),
             (Function<Solver, String>) solver -> Long.toString(solver.getSolutionCount()),
             (Function<Solver, String>) solver -> Long.toString(solver.getNodeCount()),
             (Function<Solver, String>) solver -> Long.toString(solver.getFailCount()),
             (Function<Solver, String>) solver -> Long.toString(solver.getBackTrackCount()),
+            (Function<Solver, String>) solver -> Long.toString(solver.getBackjumpCount()),
             (Function<Solver, String>) solver -> Long.toString(solver.getRestartCount()),
+            (Function<Solver, String>) solver -> Long.toString(solver.getFixpointCount()),
+            (Function<Solver, String>) solver -> Long.toString(solver.getCurrentDepth()),
             (Function<Solver, String>) solver ->
-                    toHHmmss((long)(solver.getTimeCount() * 1000)),
+                    toHHmmss((long) (solver.getTimeCount() * 1000)),
             (Function<Solver, String>) solver ->
-                    String.format("%.2f",(solver.getNodeCount() / solver.getTimeCount())),
+                    String.format("%.2f", (solver.getNodeCount() / solver.getTimeCount())),
+            (Function<Solver, String>) solver ->
+                    String.format("%.2f", (solver.getFailCount() / solver.getTimeCount())),
+            (Function<Solver, String>) solver ->
+                    String.format("%.2f", (solver.getFixpointCount() / solver.getTimeCount())),
     };
+
+    private final int length = fieldnames.length;
 
     /**
      * A boolean to kill the printer when the resolution ends.
@@ -64,25 +87,53 @@ public class StatisticsPanel extends JPanel{
      * Solver to extract statistics from
      */
     private final Solver solver;
-
     /**
      * Fields to update
      */
     private final JTextField[] textFields;
+    /**
+     * Chart for objective function
+     */
+    private XYChart chart;
+    /**
+     * Panel that hosts {@link #chart}
+     */
+    private XChartPanel chartpanel;
+    /**
+     * List required by {@link #chart}, for X coordinate
+     */
+    private final List<Number> time;
+    /**
+     * List required by {@link #chart}, for Y coordinate
+     */
+    private final List<Number> obj;
+    /**
+     * Chart menu
+     */
+    private JMenu menuChart;
+    /**
+     * Chart option, modified thanks to {@link #menuChart}
+     */
+    private byte chartOptions;
+    /**
+     * Thread that updates data
+     */
+    private final Thread printer;
 
     /**
      * Create a simple dashboard that show statistics from 'solver' every 'duration' milliseconds
-     * @param solver to extract statistics from
+     *
+     * @param solver   to extract statistics from
      * @param duration frequency rate, in milliseconds
      */
-    public StatisticsPanel(Solver solver, long duration){
+    public StatisticsPanel(Solver solver, long duration, JFrame mainFrame) {
         this.solver = solver;
 
         setLayout(new BorderLayout());
 
-        textFields = new JTextField[10];
-        JLabel[] labels = new JLabel[10];
-        for(int i = 0; i < 10; i++){
+        textFields = new JTextField[length];
+        JLabel[] labels = new JLabel[length];
+        for (int i = 0; i < length; i++) {
             textFields[i] = new JTextField(6);
             textFields[i].setEnabled(false);
             textFields[i].setHorizontalAlignment(SwingConstants.RIGHT);
@@ -110,14 +161,46 @@ public class StatisticsPanel extends JPanel{
         leftPane.add(textControlsPane, BorderLayout.PAGE_START);
 
         add(leftPane, BorderLayout.LINE_START);
+
+        // Create Chart
+        time = new ArrayList<>();
+        obj = new ArrayList<>();
+
+        chartOptions = 0b11;
+        makeMenu(mainFrame);
+
+
         printStatistics();
-        Thread printer = new Thread(() -> {
+        printer = new Thread(() -> {
             alive = true;
             try {
-                Thread.sleep(duration);
+                Thread.sleep(5);
                 //noinspection InfiniteLoopStatement
                 do {
-                    printStatistics();
+                    if (solver.getSearchState().equals(SearchState.RUNNING)) {
+                        printStatistics();
+                        if (solver.hasObjective()) {
+                            if ((chartOptions & 0b10) != 0) {
+                                time.add(solver.getTimeCount());
+                                obj.add(solver.getBestSolutionValue());
+                            }
+                            if (chart == null) {
+                                // Create Chart
+                                chart = QuickChart.getChart("Objective", "Time (sec)", "Objective value", "obj", time, obj);
+                                chart.getStyler().setChartBackgroundColor(leftPane.getBackground());
+                                chartpanel = new XChartPanel<>(chart);
+                                add(chartpanel);
+                                mainFrame.pack();
+                            }
+                            if ((chartOptions & 0b01) != 0) {
+                                chart.updateXYSeries("obj", time, obj, null);
+                                chartpanel.revalidate();
+                                chartpanel.repaint();
+                            }
+                        } else {
+                            menuChart.setEnabled(false);
+                        }
+                    }
                     Thread.sleep(duration);
                 } while (alive);
             } catch (InterruptedException ignored) {
@@ -125,6 +208,57 @@ public class StatisticsPanel extends JPanel{
         });
         printer.setDaemon(true);
         printer.start();
+    }
+
+    private void makeMenu(JFrame mainFrame) {
+        //Create the menu bar.
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu mainMenu = new JMenu("Menu");
+        mainMenu.setMnemonic(KeyEvent.VK_M);
+        menuBar.add(mainMenu);
+        mainFrame.setJMenuBar(menuBar);
+
+        menuChart = new JMenu("Chart");
+        menuChart.setMnemonic(KeyEvent.VK_C);
+        menuChart.add(makeShowHideItem(mainFrame));
+        menuChart.add(makeDisconnectConnectItem(mainFrame));
+        mainMenu.add(menuChart);
+    }
+
+    private JMenuItem makeDisconnectConnectItem(JFrame mainFrame) {
+        JMenuItem item = new JMenuItem("Disconnect",
+                KeyEvent.VK_D);
+        item.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_D, InputEvent.ALT_MASK));
+        item.addActionListener(e -> {
+            if ((chartOptions & 0b10) != 0) {
+                this.remove(chartpanel);
+            }
+            chartOptions = 0b00;
+            time.clear();
+            obj.clear();
+            mainFrame.pack();
+        });
+        return item;
+    }
+
+    private JMenuItem makeShowHideItem(JFrame mainFrame) {
+        JMenuItem item = new JMenuItem("Hide/Show",
+                KeyEvent.VK_H);
+        item.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_H, InputEvent.ALT_MASK));
+        item.addActionListener(e -> {
+            if ((chartOptions & 0b10) != 0) {
+                this.remove(chartpanel);
+                chartOptions ^= 0b10;
+            } else {
+                this.add(chartpanel);
+                chartOptions = 0b11;
+            }
+            mainFrame.pack();
+        });
+        return item;
     }
 
     private void addLabelTextRows(JLabel[] labels, JTextField[] textFields, Container container) {
@@ -146,12 +280,12 @@ public class StatisticsPanel extends JPanel{
     }
 
     private void printStatistics() {
-        for(int i = 0 ; i < textFields.length; i++) {
+        for (int i = 0; i < textFields.length; i++) {
             textFields[i].setText(fieldvalues[i].apply(solver));
         }
     }
 
-    private static String toHHmmss(long etime){
+    private static String toHHmmss(long etime) {
         return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(etime),
                 TimeUnit.MILLISECONDS.toMinutes(etime) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(etime) % TimeUnit.MINUTES.toSeconds(1));

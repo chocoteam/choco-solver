@@ -269,7 +269,7 @@ public interface IOutputFactory extends ISelf<Solver> {
 
 
         //Create and set up the content pane.
-        JComponent newContentPane = new StatisticsPanel(ref(), refresh);
+        JComponent newContentPane = new StatisticsPanel(ref(), refresh, frame);
         newContentPane.setOpaque(true); //content panes must be opaque
         frame.setContentPane(newContentPane);
 
