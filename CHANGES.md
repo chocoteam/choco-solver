@@ -11,11 +11,12 @@ NEXT MILESTONE
 
 - Update statistic dashboard (see `solver.showDashboard()`)
 - Fix `Settings.load` on missing property
+- Fix issue in Cumulative simplified API
 
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
-\#604
+\#604, #605, #606
 
 4.0.9 - 30 Oct 2018
 -------------------

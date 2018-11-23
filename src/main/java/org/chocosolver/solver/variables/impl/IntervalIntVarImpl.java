@@ -80,6 +80,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param min lower bound
      * @param max upper bound
      * @param model declaring model
+     * @implNote Only bounds modifications are handled
+     * (any value removals in the middle of the domain will be ignored).
      */
     public IntervalIntVarImpl(String name, int min, int max, Model model) {
         super(name, model);
@@ -107,6 +109,8 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @param cause removal releaser
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
+     * @implNote Can only update bounds.
+     * Any other value removals will be ignored.
      */
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
@@ -120,6 +124,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return false;
     }
 
+    /**
+     * @implNote Can only update bounds.
+     * Any other value removals will be ignored.
+     */
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         int olb = getLB();
@@ -148,6 +156,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return updateBounds(olb, oub, cause);
     }
 
+    /**
+     * @implNote Can only update bounds.
+     * Any other value removals will be ignored.
+     */
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         int olb = getLB();
@@ -158,6 +170,10 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return updateBounds(nlb, nub, cause);
     }
 
+    /**
+     * @implNote Can only update bounds.
+     * Any other value removals will be ignored.
+     */
     @Override
     public boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;

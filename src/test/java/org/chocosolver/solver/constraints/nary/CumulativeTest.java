@@ -10,14 +10,10 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -187,5 +183,29 @@ public class CumulativeTest {
 			default:
 				throw new UnsupportedOperationException();
 		}
+	}
+
+    @Test(groups="10s", timeOut=60000)
+    public void testADelsol1(){
+		int[] height = new int[]{0, 1, 3, 5, 1, 4, 4, 3, 4, 3, 0};
+		int capaMax = 10;
+		int duration[] = new int[11];
+		Arrays.fill(duration, 1);
+		// dÃ©claration du modÃ¨le
+		Model model = new Model("test");
+		// Ajout des starting times
+		IntVar[] start = model.intVarArray("start",11,0,3);
+        model.cumulative(start, duration, height, capaMax);
+
+		Solver solver= model.getSolver();
+        while(solver.solve()){
+            for(int time = 0; time < 4; ++time) {
+                int max_height = 0;
+                for(int i = 0 ; i < 11; ++i) {
+                    if(start[i].getValue() == time) max_height += height[i];
+                }
+                Assert.assertTrue(max_height <= capaMax);
+            }
+        }
 	}
 }

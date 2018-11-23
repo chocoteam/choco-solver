@@ -1174,18 +1174,20 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default void cumulative(IntVar[] starts, int[] durations, int[] heights, int capacity) {
         int n = starts.length;
-        final IntVar[] d = Arrays.stream(durations).mapToObj(i -> ref().intVar(durations[i])).toArray(IntVar[]::new);
-        final IntVar[] h = Arrays.stream(heights).mapToObj(i -> ref().intVar(heights[i])).toArray(IntVar[]::new);
+        final IntVar[] d = new IntVar[n];
+        final IntVar[] h = new IntVar[n];
         final IntVar[] e = new IntVar[n];
         Task[] tasks = new Task[n];
         for (int i = 0; i < n; i++) {
+            d[i] = ref().intVar(durations[i]);
+            h[i] = ref().intVar(heights[i]);
             e[i] = ref().intVar(starts[i].getName()+"_e",
                     starts[i].getLB() + durations[i],
                     starts[i].getUB() + durations[i],
                     true);
             tasks[i] = new Task(starts[i], d[i], e[i]);
         }
-        ref().cumulative(tasks, h, ref().intVar(capacity), true, Cumulative.Filter.NAIVETIME).post();
+        ref().cumulative(tasks, h, ref().intVar(capacity), false, Cumulative.Filter.NAIVETIME).post();
     }
 
     /**
