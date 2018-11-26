@@ -3,8 +3,8 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
- * information.
+ * Licensed under the BSD 4-clause license.
+ * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.clauses;
 
@@ -32,6 +32,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
@@ -52,6 +53,11 @@ public class ClauseStore extends Propagator<IntVar> {
     public static boolean PRINT_CLAUSE = false;
 
     public static boolean INTERVAL_TREE = true;
+
+    /**
+     * Signed clause unique ID -- for toString() mainly
+     */
+    private static int SID = 1;
     /**
      * Solver that handles the clauses
      */
@@ -88,7 +94,7 @@ public class ClauseStore extends Propagator<IntVar> {
     /**
      * Create a Nogood store connected to a model.
      *
-     * @param mModel       model to be connected with
+     * @param mModel model to be connected with
      */
     ClauseStore(Model mModel) {
         super(new IntVar[]{mModel.intVar(0)}, PropagatorPriority.LINEAR, true, false);
@@ -118,11 +124,13 @@ public class ClauseStore extends Propagator<IntVar> {
     public void add(IntVar[] vars, IntIterableRangeSet[] ranges) {
         if (INTERVAL_TREE) {
             SignedClause cl = new SignedClause(vars, ranges);
-            attach(cl, cl.pos[0]);
-            attach(cl, cl.pos[1]);
+            attach(new Watcher(cl.pos[0], cl));
+            attach(new Watcher(cl.pos[1], cl));
             if (model.getSolver().getEngine().isInitialized()) {
                 this.learnts.add(cl);
                 last = cl;
+                last.activity = clauseInc;
+                last.rawActivity = 1;
                 if (PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
             } else {
                 if (PRINT_CLAUSE) System.out.printf("add: %s\n", cl);
@@ -136,20 +144,20 @@ public class ClauseStore extends Propagator<IntVar> {
         }
     }
 
-    private void attach(SignedClause cl, int i) {
-        IntVar var = cl.v(i);
+    private void attach(Watcher w) {
+        IntVar var = w.c.v(w.p);
         IntervalTree<Container> wm = watches.get(var);
         if (wm == null) {
             wm = new IntervalTree<>();
             watches.put(var, wm);
             this.addVariable(var);
         }
-        Container ct = wm.get(cl.l(i), cl.u(i));
+        Container ct = wm.get(w.c.l(w.p), w.c.u(w.p));
         if (ct == null) {
-            ct = new Container(cl.l(i), cl.u(i));
+            ct = new Container(w.c.l(w.p), w.c.u(w.p));
             wm.insert(ct);
         }
-        ct.add(new Watcher(i, cl));
+        ct.add(w);
     }
 
     /**
@@ -159,6 +167,7 @@ public class ClauseStore extends Propagator<IntVar> {
      */
     private void remove(int idx) {
         SignedClause ng = learnts.remove(idx);
+        mSolver.getEngine().dynamicDeletion(ng);
         ng.pos[0] = ng.pos[1] = -1; // to remove it from watchers
     }
 
@@ -204,21 +213,17 @@ public class ClauseStore extends Propagator<IntVar> {
         decayActivity();
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
-        } else {
-            if (last != null) {
-                last.activity = clauseInc;
-                last.rawActivity = 1;
-                if (ASSERT_UNIT_PROP) {
-                    check(last);
-                }
-                if (last != null) {
-                    detectDominance();
-                }
+        } else if (last != null) {
+            if (ASSERT_UNIT_PROP) {
+                check(last);
             }
-            last = null;
+            if (last != null) {
+                detectDominance();
+            }
         }
         // 2. reduce database
         reduceDB();
+        last = null;
     }
 
     private void decayActivity() {
@@ -256,24 +261,34 @@ public class ClauseStore extends Propagator<IntVar> {
      * Remove sclauses with a lifespan greater than <i>lifespan</i> and which did not filtered in
      * the current branch.
      */
-    private void reduceDB() {
+    public void reduceDB() {
         int size = learnts.size();
         if (size >= nbMaxLearnts) {
             learnts.sort(Comparator.comparingDouble(c -> -c.activity));
             long to = Math.round(ratio * size);
             for (int i = size - 1; i >= to; i--) {
                 SignedClause ng = learnts.get(i);
-                if (ng.isNotLocked()) {
+                if (ng.isNotLocked() && ng != last) {
                     remove(i);
                 }
             }
             if (size > learnts.size() && model.getSettings().warnUser()) {
                 System.out.printf("Reduce DB: %d -> %d\n", size, learnts.size());
             }
+            for (IntervalTree<Container> t : watches.values()) {
+                Stack<Container> del = new Stack<>();
+                for (Container c : t) {
+                    c.watchers.removeIf(w -> !w.c.isConnected());
+                    if(c.watchers.isEmpty()){
+                        del.push(c);
+                    }
+                }
+                while(!del.isEmpty()){
+                    t.delete(del.pop());
+                }
+            }
         }
     }
-
-    private boolean activate = false;
 
     private void detectDominance() {
         int size = learnts.size();
@@ -284,17 +299,16 @@ public class ClauseStore extends Propagator<IntVar> {
                 remove(i);
             }
         }
-        if (!activate && size > learnts.size() && model.getSettings().warnUser()) {
-            System.out.print("Dominance DB\n");
-            activate = true;
+        if (size > learnts.size() && model.getSettings().warnUser()) {
+            System.out.printf("Dominance DB: %d -> %d\n", size, learnts.size());
         }
     }
 
 
-    public void printStatistics(){
+    public void printStatistics() {
         learnts.sort(Comparator.comparingInt(c -> -c.rawActivity));
         System.out.print("Top ten clauses:\n");
-        for (int i = 0 ; i < 10 && i < learnts.size() ; i++) {
+        for (int i = 0; i < 10 && i < learnts.size(); i++) {
             System.out.printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
         }
     }
@@ -412,7 +426,11 @@ public class ClauseStore extends Propagator<IntVar> {
                 }
                 if (!w.c.isActive()) {
                     // clause passive, forget it
-                    model.getEnvironment().save(() -> attach(w.c, w.p));
+                    model.getEnvironment().save(() -> {
+                        if (w.c.isConnected()) {
+                            attach(w);
+                        }
+                    });
                     continue;
                 }/*else*/
                 {
@@ -480,8 +498,7 @@ public class ClauseStore extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-
-    private class SignedClause extends Propagator<IntVar> {
+    public class SignedClause extends Propagator<IntVar> {
 
         static final short LOCK = 4;
         /**
@@ -515,13 +532,13 @@ public class ClauseStore extends Propagator<IntVar> {
 
         private int rawActivity = 0;
 
-        private long fails;
+        private int id;
 
         SignedClause(IntVar[] vars, IntIterableRangeSet[] ranges) {
             super(new IntVar[]{vars[0], vars[0]}, computePriority(vars.length), false, false);
             this.vars = new IntVar[0];
             setActive0();
-            this.fails = mSolver.getFailCount();
+            this.id = SID++;
             // TODO: accurately select literals
             int size = 0;
             for (int i = 0; i < ranges.length; i++) {
@@ -562,10 +579,14 @@ public class ClauseStore extends Propagator<IntVar> {
             return mvars[p].updateBounds(bounds[p << 1], bounds[(p << 1) + 1], this);
         }
 
+        public final boolean isConnected() {
+            return pos[0] > -1 && pos[1] > -1;
+        }
+
         @SuppressWarnings("Duplicates")
         public final void propagate(int evtmask) throws ContradictionException {
             if (evtmask == 2) {
-                if (pos[0] == -1 && pos[1] == -1) {
+                if (!isConnected()) {
                     // this was removed from ClauseStore, to ignore
                     return;
                 }
@@ -670,7 +691,7 @@ public class ClauseStore extends Propagator<IntVar> {
                         pos[1] = l;
                         pos[k] = pos[--to];
                         pos[to] = l1;
-                        attach(this, l);
+                        attach(new Watcher(l, this));
                         if (b == TRUE) {
                             setPassive();
                             FL = F0;
@@ -867,7 +888,7 @@ public class ClauseStore extends Propagator<IntVar> {
             IntVar pivot = ig.getIntVarAt(p);
             IntIterableRangeSet set;
             activity += clauseInc;
-            rawActivity +=1;
+            rawActivity += 1;
             int i = 0;
             while (i < mvars.length) {
                 IntVar v = mvars[i];
@@ -886,7 +907,7 @@ public class ClauseStore extends Propagator<IntVar> {
         @Override
         public String toString() {
             StringBuilder st = new StringBuilder();
-            st.append("#").append(fails).append(" : ");
+            st.append("#").append(id).append(" : ");
             st.append("?").append(isEntailed()).append(" : ");
             st.append('(').append(mvars[pos[0]]).append(" \u2208 [")
                     .append(bounds[pos[0] << 1]).append(',').append(bounds[(pos[0] << 1) + 1]).append(']');
