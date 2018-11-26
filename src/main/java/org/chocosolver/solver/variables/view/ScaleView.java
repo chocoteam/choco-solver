@@ -285,16 +285,6 @@ public final class ScaleView extends IntView<IntVar> {
     }
 
     @Override
-    public int transformValue(int value) {
-        return value * cste;
-    }
-
-    @Override
-    public int reverseValue(int value) {
-        return value / cste;
-    }
-
-    @Override
     public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
         switch (mask) {
             case DECUPP:

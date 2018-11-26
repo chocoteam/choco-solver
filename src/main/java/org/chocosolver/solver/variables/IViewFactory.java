@@ -11,6 +11,8 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.view.BoolNotView;
+import org.chocosolver.solver.variables.view.EqView;
+import org.chocosolver.solver.variables.view.LeqView;
 import org.chocosolver.solver.variables.view.MinusView;
 import org.chocosolver.solver.variables.view.OffsetView;
 import org.chocosolver.solver.variables.view.RealView;
@@ -41,9 +43,9 @@ public interface IViewFactory extends ISelf<Model> {
             return bool.not();
         } else {
             BoolVar not;
-            if(bool.isInstantiated()) {
+            if (bool.isInstantiated()) {
                 not = bool.getValue() == 1 ? ref().boolVar(false) : ref().boolVar(true);
-            }else {
+            } else {
                 if (ref().getSettings().enableViews()) {
                     not = new BoolNotView(bool);
                 } else {
@@ -72,12 +74,17 @@ public interface IViewFactory extends ISelf<Model> {
         if (cste == 0) {
             return var;
         }
-        String name = "(" + var.getName() + (cste >= 0 ? "+":"-") + Math.abs(cste) + ")";
-        if(var.isInstantiated()) {
+        String name = "(" + var.getName() + (cste >= 0 ? "+" : "-") + Math.abs(cste) + ")";
+        if (var.isInstantiated()) {
             return ref().intVar(name, var.getValue() + cste);
         }
         if (ref().getSettings().enableViews()) {
-            return new OffsetView(var, cste);
+            int p = checkDeclaredView(var, cste, OffsetView.class);
+            if(p>-1){
+                return var.getView(p).asIntVar();
+            }else {
+                return new OffsetView(var, cste);
+            }
         } else {
             int lb = var.getLB() + cste;
             int ub = var.getUB() + cste;
@@ -100,14 +107,19 @@ public interface IViewFactory extends ISelf<Model> {
      * @return an IntVar equal to <i>-var</i>
      */
     default IntVar intMinusView(IntVar var) {
-        if(var.isInstantiated()) {
+        if (var.isInstantiated()) {
             return ref().intVar(-var.getValue());
         }
         if (ref().getSettings().enableViews()) {
-            if(var instanceof MinusView){
-                return ((MinusView)var).getVariable();
-            }else {
-                return new MinusView(var);
+            if (var instanceof MinusView) {
+                return ((MinusView) var).getVariable();
+            } else {
+                int p = checkDeclaredView(var, -1, MinusView.class);
+                if(p>-1){
+                    return var.getView(p).asIntVar();
+                }else {
+                    return new MinusView(var);
+                }
             }
         } else {
             int ub = -var.getLB();
@@ -148,21 +160,27 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (cste == 1) {
             v2 = var;
         } else {
-            if(var.isInstantiated()) {
+            if (var.isInstantiated()) {
                 return ref().intVar(var.getValue() * cste);
             }
             if (ref().getSettings().enableViews()) {
-                if(cste>0) {
+                boolean rev = cste < 0;
+                cste = Math.abs(cste);
+                int p = checkDeclaredView(var, cste, ScaleView.class);
+                if(p>-1){
+                    return var.getView(p).asIntVar();
+                }else {
                     v2 = new ScaleView(var, cste);
-                }else{
-                    v2 = new MinusView(new ScaleView(var, -cste));
                 }
-            } else {
+                if(rev){
+                    v2 = intMinusView(v2);
+                }
+        } else {
                 int lb, ub;
-                if(cste > 0) {
+                if (cste > 0) {
                     lb = var.getLB() * cste;
                     ub = var.getUB() * cste;
-                }else{
+                } else {
                     lb = var.getUB() * cste;
                     ub = var.getLB() * cste;
                 }
@@ -228,6 +246,82 @@ public interface IViewFactory extends ISelf<Model> {
             return intOffsetView(intScaleView(x, a), b);
         }
     }
+
+
+    /**
+     * Creates an view over <i>x</i> such that: <i>(x = a) &hArr; b</i>.
+     * <p>
+     * @param x an integer variable.
+     * @param c a constant
+     * @return a BoolVar that reifies <i>x = c</i>
+     */
+    default BoolVar intEqView(IntVar x, int c) {
+        if (x.isInstantiatedTo(c)) {
+            return ref().boolVar(true);
+        } else if (!x.contains(c)) {
+            return ref().boolVar(false);
+        } else {
+            int p = checkDeclaredView(x, c, EqView.class);
+            if(p >= 0){
+                return x.getView(p).asBoolVar();
+            }else {
+                return new EqView(x, c);
+            }
+        }
+    }
+
+    /**
+     * Creates an view over <i>x</i> such that: <i>(x &le; a) &hArr; b</i>.
+     * <p>
+     * @param x an integer variable.
+     * @param c a constant
+     * @return a BoolVar that reifies <i>x = c</i>
+     */
+    default BoolVar intLeqView(IntVar x, int c) {
+        if (x.getUB() <= c) {
+            return ref().boolVar(true);
+        } else if (x.getLB() > c) {
+            return ref().boolVar(false);
+        } else {
+            int p = checkDeclaredView(x, c, LeqView.class);
+            if(p >= 0){
+                return x.getView(p).asBoolVar();
+            }else {
+                return new LeqView(x, c);
+            }
+        }
+    }
+
+    static int checkDeclaredView(IntVar x, int c, Class clazz){
+        for(int i = 0; i < x.getNbViews(); i++)
+            if (clazz.isInstance(x.getView(i))) {
+                if(clazz  == EqView.class){
+                    EqView v = (EqView) x.getView(i);
+                    if(v.cste == c){
+                        return i;
+                    }
+                }else if(clazz  == LeqView.class){
+                    LeqView v = (LeqView) x.getView(i);
+                    if(v.cste == c){
+                        return i;
+                    }
+                }else if(clazz == MinusView.class){
+                    return i;
+                }else if(clazz == OffsetView.class){
+                    OffsetView v = (OffsetView) x.getView(i);
+                    if(v.cste == c){
+                        return i;
+                    }
+                }else if(clazz == ScaleView.class){
+                    ScaleView v = (ScaleView) x.getView(i);
+                    if(v.cste == c){
+                        return i;
+                    }
+                }
+            }
+        return -1;
+    }
+
 
     //*************************************************************************************
     // REAL VARIABLES

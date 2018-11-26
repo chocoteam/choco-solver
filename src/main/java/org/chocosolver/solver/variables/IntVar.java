@@ -442,23 +442,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
 
-    /**
-     * @param value original value
-     * @return transforms the original value wrt this IntVar
-     */
-    default int transformValue(int value){
-        return value;
-    }
-
-    /**
-     * @param value original value
-     * @return reverses the original value wrt this IntVar
-     */
-    default int reverseValue(int value){
-        return value;
-    }
-
-
     @Override
     default IntVar intVar(){
         return this;

@@ -184,8 +184,8 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
         if (lb - 1 <= v && v <= ub) {
             return ub + 1;
         }else{
-        return v + 1;
-    }
+            return v + 1;
+        }
     }
 
     @Override
@@ -199,14 +199,14 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public int previousValueOut(int v) {
         int lb = 0, ub = 1;
-        if(var.isInstantiated()){
+        if (var.isInstantiated()) {
             lb = ub = getValue();
         }
         if (lb <= v && v <= ub + 1) {
             return lb - 1;
-        }else{
-        return v - 1;
-    }
+        } else {
+            return v - 1;
+        }
     }
 
     @Override
@@ -215,7 +215,7 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
         }
-        return new ViewDeltaMonitor((IIntDeltaMonitor) var.monitorDelta(propagator)) {
+        return new ViewDeltaMonitor(var.monitorDelta(propagator)) {
 
             @Override
             protected int transform(int value) {
@@ -266,12 +266,6 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public int getTypeAndKind() {
         return Variable.VIEW | Variable.BOOL;
-    }
-
-    @Override
-    public int transformValue(int value) {
-        assert value == 0 || value == 1;
-        return 1- value;
     }
 
     @Override

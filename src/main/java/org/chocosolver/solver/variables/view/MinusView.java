@@ -298,16 +298,6 @@ public class MinusView extends IntView<IntVar> {
     }
 
     @Override
-    public int transformValue(int value) {
-        return -value;
-    }
-
-    @Override
-    public int reverseValue(int value) {
-        return -value;
-    }
-
-    @Override
     public IEventType transformEvent(IEventType evt) {
         if (evt == INCLOW) {
             return DECUPP;

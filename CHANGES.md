@@ -12,6 +12,9 @@ NEXT MILESTONE
 - Update statistic dashboard (see `solver.showDashboard()`)
 - Fix `Settings.load` on missing property
 - Fix issue in Cumulative simplified API
+- Add two additional views `model.intEqView(x,c)`  and `model.intLeqView(x,c)` 
+- Detect when the same views is created twice on the same pair <variable, value (if any)>
+
 
 ### Deprecated API (to be removed in next release):
 
