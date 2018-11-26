@@ -17,6 +17,10 @@ import org.knowm.xchart.XYChart;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryPoolMXBean;
+import java.lang.management.MemoryType;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -51,6 +55,7 @@ public class StatisticsPanel extends JPanel {
             "Nodes/sec.", // node per second
             "Fails/sec.", // node per second
             "Fixpoints/sec.", // node per second
+            "Mem. usage (MB)",
     };
     @SuppressWarnings("unchecked")
     private static Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
@@ -74,6 +79,7 @@ public class StatisticsPanel extends JPanel {
                     String.format("%.2f", (solver.getFailCount() / solver.getTimeCount())),
             (Function<Solver, String>) solver ->
                     String.format("%.2f", (solver.getFixpointCount() / solver.getTimeCount())),
+            (Function<Solver, String>) solver -> String.format("%d", getUsedMemInBytes()),
     };
 
     private final int length = fieldnames.length;
@@ -134,7 +140,7 @@ public class StatisticsPanel extends JPanel {
         textFields = new JTextField[length];
         JLabel[] labels = new JLabel[length];
         for (int i = 0; i < length; i++) {
-            textFields[i] = new JTextField(6);
+            textFields[i] = new JTextField(8);
             textFields[i].setEnabled(false);
             textFields[i].setHorizontalAlignment(SwingConstants.RIGHT);
             labels[i] = new JLabel(fieldnames[i] + ": ");
@@ -186,14 +192,15 @@ public class StatisticsPanel extends JPanel {
                             }
                             if (chart == null) {
                                 // Create Chart
-                                chart = QuickChart.getChart("Objective", "Time (sec)", "Objective value", "obj", time, obj);
+                                chart = QuickChart.getChart("Objective", "Time (sec)", "Objective value",
+                                        solver.getObjectiveManager().getObjective().getName(), time, obj);
                                 chart.getStyler().setChartBackgroundColor(leftPane.getBackground());
                                 chartpanel = new XChartPanel<>(chart);
                                 add(chartpanel);
                                 mainFrame.pack();
                             }
                             if ((chartOptions & 0b01) != 0) {
-                                chart.updateXYSeries("obj", time, obj, null);
+                                chart.updateXYSeries(solver.getObjectiveManager().getObjective().getName(), time, obj, null);
                                 chartpanel.revalidate();
                                 chartpanel.repaint();
                             }
@@ -289,5 +296,17 @@ public class StatisticsPanel extends JPanel {
         return String.format("%02d:%02d:%02d", TimeUnit.MILLISECONDS.toHours(etime),
                 TimeUnit.MILLISECONDS.toMinutes(etime) % TimeUnit.HOURS.toMinutes(1),
                 TimeUnit.MILLISECONDS.toSeconds(etime) % TimeUnit.MINUTES.toSeconds(1));
+    }
+
+    private static long getUsedMemInBytes(){
+        long usedHeapMemoryAfterLastGC = 0;
+        List<MemoryPoolMXBean> memoryPools = new ArrayList<>(ManagementFactory.getMemoryPoolMXBeans());
+        for (MemoryPoolMXBean memoryPool : memoryPools) {
+            if (memoryPool.getType().equals(MemoryType.HEAP)) {
+                MemoryUsage poolCollectionMemoryUsage = memoryPool.getUsage();
+                usedHeapMemoryAfterLastGC += poolCollectionMemoryUsage.getUsed();
+            }
+        }
+        return(long)(usedHeapMemoryAfterLastGC / 1e6);
     }
 }
