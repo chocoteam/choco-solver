@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
+import org.chocosolver.solver.constraints.nary.clauses.PropSignedClause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -34,6 +35,7 @@ import java.util.HashMap;
  *
  * <p>
  * Project: choco-solver.
+ *
  * @author Charles Prud'homme
  * @since 27/01/2017.
  */
@@ -101,7 +103,7 @@ public class ExplanationForSignedClause extends IExplanation {
     @Override
     public void recycle() {
         front.clear();
-        literals.forEach((v,r) -> returnSet(r));
+        literals.forEach((v, r) -> returnSet(r));
         literals.clear();
         assertLevel = Integer.MAX_VALUE;
     }
@@ -129,7 +131,7 @@ public class ExplanationForSignedClause extends IExplanation {
                         dom = getFreeSet(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
-                    if (dec.hasNext()|| dec.getArity() == 1) {
+                    if (dec.hasNext() || dec.getArity() == 1) {
                         dom = getFreeSet(dec.getDecisionValue());
                     } else {
                         dom = getRootSet(var);
@@ -137,14 +139,14 @@ public class ExplanationForSignedClause extends IExplanation {
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
                     dom = getRootSet(var);
-                    if (dec.hasNext()|| dec.getArity() == 1) {
+                    if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(dec.getDecisionValue() + 1, IntIterableRangeSet.MAX);
                     } else {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntReverseSplit())) { // >=
                     dom = getRootSet(var);
-                    if (dec.hasNext()|| dec.getArity() == 1) {
+                    if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue() - 1);
                     } else {
                         dom.retainBetween(dec.getDecisionValue(), IntIterableRangeSet.MAX);
@@ -160,7 +162,6 @@ public class ExplanationForSignedClause extends IExplanation {
      * this method will compute the signed clause inferred from the conflict.
      * A call to {@link #extractConstraint(Model, ClauseStore)} will return the computed result.
      * @param cex the conflict
-     *
      */
     public void learnSignedClause(ContradictionException cex) {
         recycle();
@@ -206,8 +207,12 @@ public class ExplanationForSignedClause extends IExplanation {
     }
 
     private void explain(ICause cause, int p) {
-        if (p == -1 || DEFAULT_X
-                && Propagator.class.isAssignableFrom(cause.getClass())) {
+        if (p == -1 ||
+                DEFAULT_X
+                        && Propagator.class.isAssignableFrom(cause.getClass())
+                        && !PropSignedClause.class.isAssignableFrom(cause.getClass())
+                        && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
+        ) {
             Propagator<IntVar> propagator = (Propagator<IntVar>) cause;
             Propagator.defaultExplain(propagator, this, front, mIG, p);
         } else {
@@ -245,10 +250,11 @@ public class ExplanationForSignedClause extends IExplanation {
                 front.pollLastValue();
             } else {
                 int p = mIG.getPredecessorOf(l);
+                // todo improve
                 // go left as long as the right-most variable in 'front' contradicts 'literals'
                 if (p < l /* to avoid going "before" root */
                         && !IntIterableSetUtils.intersect(
-                        literals.get(mIG.getIntVarAt(l)),mIG.getDomainAt(p))) {
+                        literals.get(mIG.getIntVarAt(l)), mIG.getDomainAt(p))) {
                     front.replace(mIG.getIntVarAt(l), p);
                 }
             }
@@ -277,8 +283,8 @@ public class ExplanationForSignedClause extends IExplanation {
         } else if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
             if (PROOF)
                 System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
-            if(ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()){
-                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max)+"\n" + literals);
+            if (ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
             }
             assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
         }
