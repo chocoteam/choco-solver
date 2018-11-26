@@ -80,10 +80,12 @@ public class PropXeqYCReifTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.add(8);
+        rng.addBetween(-999, 5);
+        rng.addBetween(7, 999);
         Assert.assertEquals(lits.get(x), rng);
         rng.clear();
-        rng.add(1);
+        rng.addBetween(-999, 2);
+        rng.addBetween(4, 999);
         Assert.assertEquals(lits.get(y), rng);
     }
 
@@ -134,7 +136,7 @@ public class PropXeqYCReifTest {
 
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
-        rng.addBetween(-994, 999);
+        rng.addBetween(-999, 999);
         rng.remove(8);
         Assert.assertEquals(lits.get(x), rng);
         rng.clear();
@@ -194,7 +196,7 @@ public class PropXeqYCReifTest {
         rng.remove(6);
         Assert.assertEquals(lits.get(x), rng);
         rng.clear();
-        rng.addBetween(-999, 994);
+        rng.addBetween(-999, 999);
         rng.remove(1);
         Assert.assertEquals(lits.get(y), rng);
     }
