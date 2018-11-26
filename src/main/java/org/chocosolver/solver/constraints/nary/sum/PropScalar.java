@@ -282,7 +282,7 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    void doExplain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
         IntIterableRangeSet dom_before;
         // first, compute F and E
