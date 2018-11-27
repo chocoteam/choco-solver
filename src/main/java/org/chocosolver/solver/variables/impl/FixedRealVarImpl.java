@@ -57,7 +57,7 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
-        if (value > value) {
+        if (value > this.value) {
             assert cause != null;
             this.contradiction(cause, "outside domain update bound");
         }
@@ -66,7 +66,7 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public boolean updateUpperBound(double value, ICause cause) throws ContradictionException {
-        if (value < value) {
+        if (value < this.value) {
             assert cause != null;
             this.contradiction(cause, "outside domain update bound");
         }

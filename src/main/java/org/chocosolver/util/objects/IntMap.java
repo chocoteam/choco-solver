@@ -171,7 +171,7 @@ public class IntMap {
      * @param key   key with which the specified value is to be cleared
      */
     public void clear(int key) {
-        if (key >= 0 && key <= elements.length) {
+        if (key >= 0 && key < elements.length) {
             elements[key] = FREE;
         }
     }
