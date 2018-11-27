@@ -3,6 +3,8 @@
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![Documentation Status](https://readthedocs.org/projects/choco-solver/badge/?version=latest)](http://choco-solver.readthedocs.io/en/latest/?badge=latest)
+[![Code Quality: Java](https://img.shields.io/lgtm/grade/java/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/context:java)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/alerts)
 
 [![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.org/chocoteam/choco-solver) 
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
