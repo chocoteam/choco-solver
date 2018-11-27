@@ -860,7 +860,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
 
             return false;
         }
-        int[] gcost = new int[z.length];
+        double[] gcost = new double[z.length];
         for (int l = 0; l < graph.layers.length - 2; l++) {
             DisposableIntIterator it = graph.layers[l].getIterator();
             while (it.hasNext()) {
@@ -878,10 +878,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                if(DEBUG) model.getSolver().getOut().printf("z[" + i + "] in MCR should be instantiated : " + z[i]);
+                if(DEBUG) model.getSolver().getOut().print("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
-            } else if (z[i].getValue() != gcost[i]) {
-                if(DEBUG) model.getSolver().getOut().printf("cost: " + gcost[i] + " != z:" + z[i].getValue());
+            } else if (z[i].getValue() != (int)gcost[i]) {
+                if(DEBUG) model.getSolver().getOut().print("cost: " + gcost[i] + " != z:" + z[i].getValue());
                 return false;
             }
 

@@ -540,12 +540,12 @@ public class StoredDirectedMultiGraph {
             int arcId = it.next();
             int origId = GArcs.origs[arcId];
             int destId = GArcs.dests[arcId];
-            int cost = 0;
+            double cost = 0d;
             for (int r : resources) {
                 cost += pf.spfs[origId][r] + GArcs.originalCost[arcId][r] + pf.spft[destId][r];
             }
             if (cost < result)
-                result = cost;
+                result = (int)cost;
 
 
         }
@@ -569,12 +569,12 @@ public class StoredDirectedMultiGraph {
             int arcId = list[i];//it.next();
             int origId = GArcs.origs[arcId];
             int destId = GArcs.dests[arcId];
-            int cost = 0;
+            double cost = 0;
             for (int r : resources) {
                 cost += pf.spfs[origId][r] + GArcs.originalCost[arcId][r] + pf.spft[destId][r];
             }
             if (cost < result)
-                result = cost;
+                result = (int)cost;
         }
         it.dispose();
         return result;
@@ -592,14 +592,14 @@ public class StoredDirectedMultiGraph {
             int arcId = it.next();
             int origId = GArcs.origs[arcId];
             int destId = GArcs.dests[arcId];
-            int cost = 0;
+            double cost = 0;
             for (int r : resources) {
                 cost += pf.spfs[origId][r] + GArcs.originalCost[arcId][r] + pf.spft[destId][r];
             }
             if (cost < minmax[0])
-                minmax[0] = cost;
+                minmax[0] = (int)cost;
             if (cost > minmax[1])
-                minmax[1] = cost;
+                minmax[1] = (int)cost;
         }
         it.dispose();
         return minmax;
@@ -617,10 +617,10 @@ public class StoredDirectedMultiGraph {
     }
 
     public int getMinPathCost(int... resources) {
-        int result = 0;
+        double result = 0;
         for (int r : resources) {
             result += pf.spft[sourceIndex][r];
         }
-        return result;
+        return (int)result;
     }
 }

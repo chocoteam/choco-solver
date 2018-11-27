@@ -236,7 +236,7 @@ public class PropLexInt extends Propagator<IntVar> {
             }
         }
         //Part D
-        if (a < i && i < b) {
+        if (a < i /*&& i < b*/) {
             if ((i == (b - 1) && x[i].getLB() == y[i]) || x[i].getLB() > y[i]) {
                 updateBeta(i - 1);
             }

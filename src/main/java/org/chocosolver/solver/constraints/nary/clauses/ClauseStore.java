@@ -217,9 +217,7 @@ public class ClauseStore extends Propagator<IntVar> {
             if (ASSERT_UNIT_PROP) {
                 check(last);
             }
-            if (last != null) {
-                detectDominance();
-            }
+            detectDominance();
         }
         // 2. reduce database
         reduceDB();
@@ -261,7 +259,7 @@ public class ClauseStore extends Propagator<IntVar> {
      * Remove sclauses with a lifespan greater than <i>lifespan</i> and which did not filtered in
      * the current branch.
      */
-    public void reduceDB() {
+    private void reduceDB() {
         int size = learnts.size();
         if (size >= nbMaxLearnts) {
             learnts.sort(Comparator.comparingDouble(c -> -c.activity));

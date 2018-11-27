@@ -378,7 +378,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         }
         boolean change = false;
         int s1 = SIZE >> 1;
-        int s2 = a <= b ? 1 : 0;
+        int s2 = 1; // since a <= b
         if (s1 > 0 && s2 > 0) {
             int i = 0, j = 0;
             int s = 0, c = 0;
@@ -499,10 +499,8 @@ public class IntIterableRangeSet implements IntIterableSet {
                 for (int k = i + 2; k <= j + 1; k += 2) {
                     dcard += ELEMENTS[k + 1] - ELEMENTS[k] + 1;
                 }
-                if (rf < rt) {
-                    // remove useless range
-                    System.arraycopy(ELEMENTS, j + 1, ELEMENTS, i + 1, SIZE - (j + 1));
-                }
+                // remove useless range
+                System.arraycopy(ELEMENTS, j + 1, ELEMENTS, i + 1, SIZE - (j + 1));
                 SIZE -= (rt - rf) << 1;
             }
             CARDINALITY -= dcard;

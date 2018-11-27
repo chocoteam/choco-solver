@@ -253,7 +253,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             } else {
                 IntEventType e = IntEventType.INCLOW;
                 if (reactOnRemoval) {
-                    if (old <= value - 1) delta.add(old, value - 1, cause);
+                    delta.add(old, value - 1, cause);
                 }
                 SIZE.add(old - value);
                 LB.set(value);
@@ -296,7 +296,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
             } else {
                 IntEventType e = IntEventType.DECUPP;
                 if (reactOnRemoval) {
-                    if (value + 1 <= old) delta.add(value + 1, old, cause);
+                    delta.add(value + 1, old, cause);
                 }
                 SIZE.add(value - old);
                 UB.set(value);
@@ -327,7 +327,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 model.getSolver().getEventObserver().updateLowerBound(this, lb, olb, cause);
                 e = IntEventType.INCLOW;
                 if (reactOnRemoval) {
-                    if (olb <= lb - 1) delta.add(olb, lb - 1, cause);
+                    delta.add(olb, lb - 1, cause);
                 }
                 d += olb - lb;
                 LB.set(lb);
@@ -339,7 +339,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);
                 e = e == null ? IntEventType.DECUPP : IntEventType.BOUND;
                 if (reactOnRemoval) {
-                    if (ub + 1 <= oub) delta.add(ub + 1, oub, cause);
+                    delta.add(ub + 1, oub, cause);
                 }
                 d += ub - oub;
                 UB.set(ub);

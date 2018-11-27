@@ -47,8 +47,8 @@ public class PropDivXYZ extends Propagator<IntVar> {
     /**
      * The main propagation method that filters according to the constraint defintion
      *
-     * @param evtmask: is it the initial propagation or not?
-     * @throws ContradictionException
+     * @param evtmask   is it the initial propagation or not?
+     * @throws ContradictionException if failure occurs
      */
     @Override
     public void propagate(int evtmask) throws ContradictionException {

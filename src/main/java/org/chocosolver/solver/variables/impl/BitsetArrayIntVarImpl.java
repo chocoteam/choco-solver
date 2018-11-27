@@ -192,14 +192,14 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         }
         int i;
         // look for the new lb
-        while (nlb == olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+        while (nlb == olb && olb < Integer.MAX_VALUE) {
             i = INDICES.nextSetBit(V2I.get(olb) + 1);
             olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
             nlb = values.nextValue(olb - 1);
         }
         if(nlb <= nub) {
             // look for the new ub
-            while (nub == oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
+            while (nub == oub && oub > Integer.MIN_VALUE) {
                 i = INDICES.prevSetBit(V2I.get(oub) - 1);
                 oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
                 nub = values.previousValue(oub + 1);

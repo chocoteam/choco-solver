@@ -48,7 +48,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
 			resetStamp();
 		}
         assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
-                        :"Delta and monitor desynchronized. deltamonitor.freeze() is called" +
+                        :"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
                         "but no value has been removed since the last call.";
         for (int i = 0; i < 2; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices

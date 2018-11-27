@@ -69,7 +69,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     private static double distribution(int n) {
         if (n <= 0) {
             throw new UnsupportedOperationException();
-        } else if (n > 0 && n < 41) {
+        } else if (n < 41) {
             return distribution[n - 1];
         } else if (n < 61) {
             return distribution[40];

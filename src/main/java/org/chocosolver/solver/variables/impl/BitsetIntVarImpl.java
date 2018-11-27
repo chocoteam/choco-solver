@@ -190,14 +190,14 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         }
         int i;
         // look for the new lb
-        while (nlb == olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+        while (nlb == olb && olb < Integer.MAX_VALUE) {
             i = VALUES.nextSetBit(nlb + 1 - OFFSET);
             olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
             nlb = values.nextValue(olb - 1);
         }
         if(nlb <= nub) {
             // look for the new ub
-            while (nub == oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
+            while (nub == oub && oub > Integer.MIN_VALUE) {
                 i = VALUES.prevSetBit(nub - 1 - OFFSET);
                 oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
                 nub = values.previousValue(oub + 1);

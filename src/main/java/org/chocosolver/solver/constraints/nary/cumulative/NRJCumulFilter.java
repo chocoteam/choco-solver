@@ -84,7 +84,7 @@ public class NRJCumulFilter extends CumulFilter{
 					h[i].updateUpperBound((int)Math.floor((availSurf/(double)dlb[i])+0.01),aCause);
 				if(hlb[i]>0)
 					d[i].updateUpperBound((int)Math.floor((availSurf/(double)hlb[i])+0.01),aCause);
-				surface += dlb[i] * hlb[i];
+				surface += dlb[i] * (long)hlb[i]; // potential overflow
 				if(xMax>xMin){
 					capa.updateLowerBound((int)Math.ceil(surface/(xMax-xMin)-0.01),aCause);
 				}if(surface>(xMax-xMin)*camax){

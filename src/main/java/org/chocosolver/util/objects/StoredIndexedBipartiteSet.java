@@ -11,7 +11,6 @@ package org.chocosolver.util.objects;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.structure.IndexedObject;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 
 /**
@@ -63,7 +62,7 @@ public class StoredIndexedBipartiteSet {
 
     /**
      * @param environment the environment
-     * @param values:     a set of DIFFERENT positive integer values !
+     * @param values     a set of DIFFERENT positive integer values !
      */
     public StoredIndexedBipartiteSet(final IEnvironment environment, final int[] values) {
         buildList(environment, values);

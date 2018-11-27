@@ -111,7 +111,7 @@ public class IntLinCombFactory {
         TIntIntHashMap map = new TIntIntHashMap(NVARS.length, 1.5f, -1, -1);
         for (int i = 0; i < NVARS.length; i++) {
             if (VariableUtils.isConstant(NVARS[i])) {
-                RESULT -= NVARS[i].getValue() * NCOEFFS[i];
+                RESULT -= (long)NVARS[i].getValue() * NCOEFFS[i]; // potential overflow
                 NCOEFFS[i] = 0;
             } else if (NCOEFFS[i] != 0) {
                 int id = NVARS[i].getId();
@@ -134,11 +134,11 @@ public class IntLinCombFactory {
         for (int i = 0; i < _k; i++) {
             if (NCOEFFS[i] != 0) {
                 if(NCOEFFS[i]>0){
-                    slb += NVARS[i].getLB() * NCOEFFS[i];
-                    sub += NVARS[i].getUB() * NCOEFFS[i];
+                    slb += (long)NVARS[i].getLB() * NCOEFFS[i]; // potential overflow
+                    sub += (long)NVARS[i].getUB() * NCOEFFS[i]; // potential overflow
                 }else{
-                    slb += NVARS[i].getUB() * NCOEFFS[i];
-                    sub += NVARS[i].getLB() * NCOEFFS[i];
+                    slb += (long)NVARS[i].getUB() * NCOEFFS[i]; // potential overflow
+                    sub += (long)NVARS[i].getLB() * NCOEFFS[i]; // potential overflow
                 }
                 if (NVARS[i].isBool()) nbools++; // count number of boolean variables
                 if (NCOEFFS[i] == 1) nones++; // count number of coeff set to 1
