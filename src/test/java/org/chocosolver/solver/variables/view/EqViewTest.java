@@ -35,7 +35,7 @@ public class EqViewTest {
     IntVar x;
     BoolVar b;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void before(){
         model = new Model();
         x = model.intVar("x", 0,5);

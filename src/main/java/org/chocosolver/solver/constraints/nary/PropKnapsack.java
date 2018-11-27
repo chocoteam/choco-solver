@@ -105,8 +105,8 @@ public class PropKnapsack extends Propagator<IntVar> {
         double camax = capacity.getUB();
         double pomin = 0;
         for (int i = 0; i < n; i++) {
-            camax -= weigth[i] * (long)vars[i].getLB();
-            pomin += energy[i] * (long)vars[i].getLB();
+            camax -= (long)weigth[i] * vars[i].getLB(); // potential overflow
+            pomin += (long)energy[i] * vars[i].getLB(); // potential overflow
         }
         if (camax < 0 || pomin > power.getUB()) {
             return ESat.FALSE;

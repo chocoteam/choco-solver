@@ -379,7 +379,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         boolean change = false;
         int s1 = SIZE >> 1;
         int s2 = 1; // since a <= b
-        if (s1 > 0 && s2 > 0) {
+        if (s1 > 0) {
             int i = 0, j = 0;
             int s = 0, c = 0;
             int[] e = new int[SIZE];
@@ -452,14 +452,12 @@ public class IntIterableRangeSet implements IntIterableSet {
             change |= (CARDINALITY != c);
             CARDINALITY = c;
         } else {
-            if (s2 > 0) {
-                grow(1);
-                ELEMENTS[0] = a;
-                ELEMENTS[1] = b;
-                SIZE = 2;
-                CARDINALITY = Math.addExact(b + 1, -a);
-                change = true;
-            }
+            grow(1);
+            ELEMENTS[0] = a;
+            ELEMENTS[1] = b;
+            SIZE = 2;
+            CARDINALITY = Math.addExact(b + 1, -a);
+            change = true;
         }
         return change;
     }
