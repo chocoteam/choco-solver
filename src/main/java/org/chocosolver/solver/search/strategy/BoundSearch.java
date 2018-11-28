@@ -55,6 +55,11 @@ public class BoundSearch extends AbstractStrategy<IntVar>{
 	}
 
 	@Override
+	public void remove() {
+		this.definedSearch.remove();
+	}
+
+	@Override
 	public Decision<IntVar> getDecision() {
 		if(variable == null || variable.isInstantiated()) {
 			Decision<IntVar> d = definedSearch.getDecision();

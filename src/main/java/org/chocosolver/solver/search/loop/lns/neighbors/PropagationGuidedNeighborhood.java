@@ -8,16 +8,12 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.decision.DecisionPath;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Comparator;
 import java.util.List;
@@ -34,7 +30,7 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class PropagationGuidedNeighborhood implements INeighbor {
+public class PropagationGuidedNeighborhood extends Neighbor {
 
 
     /**
@@ -42,15 +38,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
      */
     protected final int n;
     /**
-     * Array of variables to consider in a fragment
-     */
-    protected final IntVar[] vars;
-    /**
-     * Last solution found, wrt {@link #vars}
-     */
-    protected final int[] bestSolution;
-    /**
-     * Domain size of each variable in {@link #vars}
+     * Domain size of each variable in {@link #variables}
      */
     protected int[] dsize;
     /**
@@ -60,19 +48,19 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     /**
      * Intial size of the fragment
      */
-    protected int fgmtSize = 100;
+    int fgmtSize = 100;
     /**
      * Number of variables modified through propagation to consider while computing the neighbor
      */
-    protected int listSize;
+    int listSize;
     /**
      * Restriction parameter
      */
-    protected double epsilon = 1.;
+    private double epsilon = 1.;
     /**
      * Logarithmic cardinality of domains
      */
-    protected double logSum = 0.;
+    double logSum = 0.;
     /**
      * Store the modified variables
      */
@@ -80,7 +68,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     /**
      * Store the variable elligible for propagation
      */
-    protected List<Integer> candidates;
+    List<Integer> candidates;
 
     /**
      * Indicate which variables are selected in a fragment
@@ -100,11 +88,10 @@ public class PropagationGuidedNeighborhood implements INeighbor {
      * @param seed     for randomness
      */
     public PropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
+        super(vars);
         this.mModel = vars[0].getModel();
         this.n = vars.length;
-        this.vars = vars.clone();
         this.rd = new Random(seed);
-        this.bestSolution = new int[n];
         this.fgmtSize = fgmtSize;
         this.listSize = listSize;
         this.all = new int[n];
@@ -113,62 +100,39 @@ public class PropagationGuidedNeighborhood implements INeighbor {
     }
 
     @Override
-    public boolean isSearchComplete() {
-        return false;
-    }
-
-    @Override
-    public void recordSolution() {
-        for (int i = 0; i < vars.length; i++) {
-            bestSolution[i] = vars[i].getValue();
-        }
-    }
-
-    @Override
-    public void loadFromSolution(Solution solution) {
-        for (int i = 0; i < vars.length; i++) {
-            bestSolution[i] = solution.getIntVal(vars[i]);
-        }
-    }
-
-    @Override
-    public void fixSomeVariables(DecisionPath decisionPath) {
-        logSum = 0.;
+    public void fixSomeVariables() throws ContradictionException {
+        logSum = Arrays.stream(variables).mapToDouble(v -> Math.log(v.getDomainSize())).sum();
         for (int i = 0; i < n; i++) {
-            int ds = vars[i].getDomainSize();
+            int ds = variables[i].getDomainSize();
             logSum += Math.log(ds);
         }
         fgmtSize = (int) (30 * (1 + epsilon));
         fragment.set(0, n); // all variables are frozen
-        mModel.getEnvironment().worldPush();
         try {
-            update(decisionPath);
-        } catch (ContradictionException cex) {
-            mModel.getSolver().getEngine().flush();
+            update();
+        }finally {
+            epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
         }
-        mModel.getEnvironment().worldPop();
-        epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
     }
 
     /**
      * Create the fragment
      *
-     * @param decisionPath the decision path to feed
      * @throws ContradictionException if the fragment is trivially infeasible
      */
-    protected void update(DecisionPath decisionPath) throws ContradictionException {
+    protected void update() throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             // 1. pick a variable
             int id = selectVariable();
-            // 2. fix it to its solution value and propagate
-            if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
-                impose(id, decisionPath);
+            // 2. freeze it to its solution value and propagate
+            if (variables[id].contains(values[id])) {  // to deal with objective variable and related
+                freeze(id);
                 mModel.getSolver().propagate();
                 fragment.clear(id);
-                logSum = 0;
+                logSum = 0.;
                 // 3. compute domain reductions & update logSum
                 for (int i = 0; i < n; i++) {
-                    int ds = vars[i].getDomainSize();
+                    int ds = variables[i].getDomainSize();
                     logSum += Math.log(ds);
                     if (fragment.get(i)) { // if not frozen until now
                         if (ds == 1) {       // if fixed by side effect
@@ -187,30 +151,15 @@ public class PropagationGuidedNeighborhood implements INeighbor {
                         .collect(Collectors.toList());
             } else {
                 fragment.clear(id);
-                logSum -= Math.log(vars[id].getDomainSize());
+                logSum -= Math.log(variables[id].getDomainSize());
             }
         }
     }
 
     /**
-     * Impose a decision to be part of the fragment
-     *
-     * @param id           variable id in {@link #vars}
-     * @param decisionPath the current decision path
-     * @throws ContradictionException if the application of the decision fails
+     * @return a variable id in {@link #variables} to be part of the fragment
      */
-    protected void impose(int id, DecisionPath decisionPath) throws ContradictionException {
-        IntDecision decision = decisionPath.makeIntDecision(vars[id], DecisionOperatorFactory.makeIntEq(), bestSolution[id]);
-        decision.setRefutable(false);
-        decisionPath.pushDecision(decision);
-        vars[id].instantiateTo(bestSolution[id], Cause.Null);
-    }
-
-
-    /**
-     * @return a variable id in {@link #vars} to be part of the fragment
-     */
-    protected int selectVariable() {
+    int selectVariable() {
         int id;
         if (candidates.isEmpty()) {
             int cc = rd.nextInt(fragment.cardinality());
@@ -218,7 +167,7 @@ public class PropagationGuidedNeighborhood implements INeighbor {
                 cc--;
             }
         } else {
-            id = candidates.remove(0).intValue();
+            id = candidates.remove(0);
         }
         return id;
     }
@@ -230,10 +179,9 @@ public class PropagationGuidedNeighborhood implements INeighbor {
 
     @Override
     public void init() {
-        // todo plug search monitor
         this.dsize = new int[n];
         for (int i = 0; i < n; i++) {
-            dsize[i] = vars[i].getDomainSize();
+            dsize[i] = variables[i].getDomainSize();
         }
     }
 }

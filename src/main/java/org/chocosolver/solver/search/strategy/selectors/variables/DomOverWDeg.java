@@ -94,6 +94,11 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
     }
 
     @Override
+    public void remove() {
+        vars[0].getModel().getSolver().unplugMonitor(this);
+    }
+
+    @Override
     public void onContradiction(ContradictionException cex) {
         if (cex.c != null && cex.c instanceof Propagator) {
             Propagator p = (Propagator) cex.c;

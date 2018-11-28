@@ -47,7 +47,8 @@ public final class IntDomainLast implements IntValueSelector {
     public int selectValue(IntVar var) {
         if(lastSolution.exists()){
             int value = lastSolution.getIntVal(var);
-            if(var.contains(value)){
+            if((var.hasEnumeratedDomain() && var.contains(value))
+            || (!var.hasEnumeratedDomain() && var.getLB() == value || var.getUB() == value)){
                 return value;
             }
         }

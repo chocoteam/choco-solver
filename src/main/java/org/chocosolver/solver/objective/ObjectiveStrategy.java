@@ -132,6 +132,12 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         decOperator = getOperator(optPolicy, model.getSolver().getObjectiveManager().getPolicy());
         return true;
     }
+
+    @Override
+    public void remove() {
+
+    }
+
     @Override
     public Decision<IntVar> getDecision() {
         if (model.getSolver().getSolutionCount() == 0

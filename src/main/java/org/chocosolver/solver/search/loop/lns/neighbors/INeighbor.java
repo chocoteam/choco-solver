@@ -17,42 +17,44 @@ import org.chocosolver.solver.search.strategy.decision.DecisionPath;
  *
  * @author Charles Prud'homme
  * @since 18/06/13
+ * @deprecated see {@link Neighbor} instead, will be removed in next release
  */
+@Deprecated
 public interface INeighbor {
 
     /**
-     * Initialize this neighbor
+     * @deprecated
      */
+    @Deprecated
     void init();
 
     /**
-     * Record values of decision variables to freeze some ones during the next LNS run
+     * @deprecated
      */
+    @Deprecated
     void recordSolution();
 
     /**
-     * Freezes some variables in order to have a fast computation.
-     * The fixed variables are declared as decisions in the decision path.
-     *
-     * @param decisionPath the decision path in which declaring variable to freeze
+     * @deprecated
      */
+    @Deprecated
     void fixSomeVariables(DecisionPath decisionPath);
 
     /**
-     * Use less restriction at the beginning of a LNS run
-     * in order to get better solutions
-     * Called when no solution was found during a LNS run (trapped into a local optimum)
+     * @deprecated
      */
+    @Deprecated
     void restrictLess();
 
     /**
-     * @return true iff the search is in a complete mode (no fixed variable)
+     * @deprecated
      */
+    @Deprecated
     boolean isSearchComplete();
 
     /**
-     * Load a solution and record it
-     * @param solution a solution to record
+     * @deprecated
      */
+    @Deprecated
     void loadFromSolution(Solution solution);
 }

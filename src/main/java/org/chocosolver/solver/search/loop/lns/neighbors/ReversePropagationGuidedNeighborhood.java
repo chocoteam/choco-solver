@@ -10,7 +10,6 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Comparator;
@@ -40,21 +39,21 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
     }
 
     @Override
-    protected void update(DecisionPath decisionPath) throws ContradictionException {
+    protected void update() throws ContradictionException {
         while (logSum > fgmtSize && fragment.cardinality() > 0) {
             // 1. pick a variable
             int id = selectVariable();
 
-            // 2. fix it to its solution value
-            if (vars[id].contains(bestSolution[id])) {  // to deal with objective variable and related
+            // 2. freeze it to its solution value
+            if (variables[id].contains(values[id])) {  // to deal with objective variable and related
 
                 mModel.getEnvironment().worldPush();
-                vars[id].instantiateTo(bestSolution[id], Cause.Null);
+                variables[id].instantiateTo(values[id], Cause.Null);
                 mModel.getSolver().propagate();
                 fragment.clear(id);
 
                 for (int i = 0; i < n; i++) {
-                    int ds = vars[i].getDomainSize();
+                    int ds = variables[i].getDomainSize();
                     if (fragment.get(i)) { // if not frozen until now
                         if (ds == 1) { // if fixed by side effect
                             fragment.clear(i); // set it has fixed
@@ -76,7 +75,7 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                         .collect(Collectors.toList());
                 logSum = 0;
                 for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
-                    logSum += Math.log(vars[i].getDomainSize());
+                    logSum += Math.log(variables[i].getDomainSize());
                 }
             } else {
                 fragment.clear(id);
@@ -84,15 +83,11 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
 
         }
         for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
-            if (vars[i].contains(bestSolution[i])) {
-                impose(i, decisionPath);
+            if (variables[i].contains(values[i])) {
+                freeze(i);
             }
         }
-        mModel.getSolver().propagate();
-
-        logSum = 0;
-        for (int i = 0; i < n; i++) {
-            logSum += Math.log(vars[i].getDomainSize());
-        }
+//        mModel.getSolver().propagate();
+//        logSum = Arrays.stream(variables).mapToDouble(v -> Math.log(v.getDomainSize())).sum();
     }
 }

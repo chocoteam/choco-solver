@@ -10,11 +10,22 @@ package org.chocosolver.solver.search.loop.move;
 
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.search.limits.ICounter;
-import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +46,7 @@ public class MoveLNS implements Move {
     /**
      * Neighbor to used
      */
-    protected INeighbor neighbor;
+    protected Neighbor neighbor;
     /**
      * Number of solutions found so far
      */
@@ -43,7 +54,7 @@ public class MoveLNS implements Move {
     /**
      * Indicate a restart has been triggered
      */
-    protected boolean freshRestart;
+    private boolean freshRestart;
     /**
      * Restart counter
      */
@@ -51,7 +62,11 @@ public class MoveLNS implements Move {
     /**
      * For restart strategy
      */
-    protected long frequency;
+    private long frequency;
+
+    protected PropLNS prop;
+
+    private boolean canApplyNeighborhood;
 
     /**
      * Create a move which defines a Large Neighborhood Search.
@@ -59,7 +74,7 @@ public class MoveLNS implements Move {
      * @param neighbor how the fragment are computed
      * @param restartCounter when a restart should occur
      */
-    public MoveLNS(Move move, INeighbor neighbor, ICounter restartCounter) {
+    public MoveLNS(Move move, Neighbor neighbor, ICounter restartCounter) {
         this.move = move;
         this.neighbor = neighbor;
         this.counter = restartCounter;
@@ -113,8 +128,13 @@ public class MoveLNS implements Move {
             if (freshRestart) {
                 assert solver.getDecisionPath().size() == 1;
                 assert solver.getDecisionPath().getDecision(0) == RootDecision.ROOT;
-                neighbor.fixSomeVariables(solver.getDecisionPath());
                 solver.getEnvironment().worldPush();
+                if(prop == null){
+                    prop = new PropLNS(solver.getModel().intVar(2));
+                    new Constraint("LNS", prop).post();
+                }
+                solver.getEngine().propagateOnBacktrack(prop);
+                canApplyNeighborhood = true;
                 freshRestart = false;
                 extend = true;
             } else {
@@ -171,7 +191,7 @@ public class MoveLNS implements Move {
      */
     @Override
     public boolean repair(Solver solver) {
-        boolean repair;
+        boolean repair = true;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
                 || solver.getSolutionCount() > 0) {
@@ -181,7 +201,6 @@ public class MoveLNS implements Move {
                 solutions++;
                 neighbor.recordSolution();
                 doRestart(solver);
-                repair = true;
             }
             // when posting the cut directly at root node fails
             else if (freshRestart) {
@@ -200,7 +219,6 @@ public class MoveLNS implements Move {
             else if (counter.isMet()) {
                 // then is restart is triggered
                 doRestart(solver);
-                repair = true;
             }
         }else{
             repair = move.repair(solver);
@@ -244,7 +262,7 @@ public class MoveLNS implements Move {
      *
      * @param solver SearchLoop
      */
-    protected void doRestart(Solver solver) {
+    private void doRestart(Solver solver) {
         if (!freshRestart) {
             neighbor.restrictLess();
         }
@@ -264,6 +282,40 @@ public class MoveLNS implements Move {
             this.move = someMoves.get(0);
         }else{
             throw new UnsupportedOperationException("Only one child move can be attached to it.");
+        }
+    }
+
+    class PropLNS extends Propagator<IntVar>{
+
+        PropLNS(IntVar var) {
+            super(var);
+            this.vars = new IntVar[0];
+        }
+
+        @Override
+        public int getPropagationConditions(int vIdx) {
+            return IntEventType.VOID.getMask();
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            if(canApplyNeighborhood) {
+                canApplyNeighborhood = false;
+                neighbor.fixSomeVariables();
+            }
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.TRUE;
+        }
+
+        @Override
+        public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+            IntVar pivot = ig.getIntVarAt(p);
+            IntIterableRangeSet dom = explanation.getComplementSet(pivot);
+            IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
+            explanation.addLiteral(pivot, dom, true);
         }
     }
 }

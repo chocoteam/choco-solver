@@ -12,6 +12,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.objective.ObjectiveStrategy;
+import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -308,6 +310,18 @@ public class Search {
             }
         };
         return intVarSearch(new Random<>(seed), selector, vars);
+    }
+
+    /**
+     * Defines a branching strategy over the objective variable
+     * Note that it is only activated after a first solution.
+     * This should be completed with another strategy with a larger scope.
+     * @param objective objective variable
+     * @param optPolicy policy to adopt for the optimization process
+     * @return a assignment strategy
+     */
+    public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective, OptimizationPolicy optPolicy) {
+        return new ObjectiveStrategy(objective, optPolicy);
     }
 
     // ************************************************************************************

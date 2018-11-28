@@ -186,6 +186,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     @Override
+    public void remove() {
+        model.getSolver().unplugMonitor(this);
+        for (int i = 0; i < vars.length; i++) {
+            v2i.put(vars[i].getId(), i);
+            vars[i].removeMonitor(this);
+        }
+    }
+
+    @Override
     public Decision<IntVar> computeDecision(IntVar variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;

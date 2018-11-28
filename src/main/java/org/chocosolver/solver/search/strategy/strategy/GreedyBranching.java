@@ -27,6 +27,11 @@ public class GreedyBranching extends AbstractStrategy {
     }
 
     @Override
+    public void remove() {
+        this.mainSearch.remove();
+    }
+
+    @Override
     public Decision getDecision() {
         Decision d = mainSearch.getDecision();
         if (d != null) {

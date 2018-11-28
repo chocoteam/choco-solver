@@ -34,7 +34,17 @@ public abstract class AbstractStrategy<V extends Variable>  {
      * Prepare <code>this</code> to be used in a search loop
      * The initialization can detect inconsistency, in that case, it returns false
      */
-    public boolean init(){return true;}
+    public boolean init(){
+        return true;
+    };
+
+    /**
+     * Remove the current strategy.
+     * This implies unplugging variable or search monitors.
+     */
+    public void remove(){
+
+    }
 
     /**
      * Provides access to the current decision in the strategy.

@@ -8,7 +8,7 @@
  */
 package org.chocosolver.solver.search.loop.lns;
 
-import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
 import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
@@ -26,7 +26,7 @@ public class INeighborFactory {
      * @param vars the pool of variables to be freezed
      * @return a black-box LNS neighbor
      */
-    public static INeighbor blackBox(IntVar... vars) {
+    public static Neighbor blackBox(IntVar... vars) {
         return sequencer(
                 propagationGuided(vars),
                 reversedPropagationGuided(vars),
@@ -39,7 +39,7 @@ public class INeighborFactory {
      * @param vars   the pool of variables to be freezed
      * @return a random neighborhood fixing variables randomly
      */
-    public static INeighbor random(IntVar... vars) {
+    public static Neighbor random(IntVar... vars) {
         return new RandomNeighborhood(vars, 3, 0);
     }
 
@@ -49,7 +49,7 @@ public class INeighborFactory {
      * @param vars     the pool of variables to be freezed
      * @return a propagation-guided neighborhood
      */
-    public static INeighbor propagationGuided(IntVar... vars) {
+    public static Neighbor propagationGuided(IntVar... vars) {
         return new PropagationGuidedNeighborhood(vars, 30, 10, 0);
     }
 
@@ -58,7 +58,7 @@ public class INeighborFactory {
      * @param vars      the pool of variables to be freezed
      * @return a reverse propagation-guided neighborhood
      */
-    public static INeighbor reversedPropagationGuided(IntVar... vars) {
+    public static Neighbor reversedPropagationGuided(IntVar... vars) {
         return new ReversePropagationGuidedNeighborhood(vars, 0, 30, 10);
     }
 
@@ -66,7 +66,7 @@ public class INeighborFactory {
      * @deprecated does nothing, will be removed in next version
      */
     @Deprecated
-    public static INeighbor explanationBased(IntVar... vars) {
+    public static Neighbor explanationBased(IntVar... vars) {
         throw new UnsupportedOperationException("Deprecated -- will be removed in the next release");
     }
 
@@ -75,7 +75,7 @@ public class INeighborFactory {
      * @param neighbors a set of neighbors to be grouped
      * @return a composite Neighbor grouping a set of neighbors
      */
-    public static INeighbor sequencer(INeighbor... neighbors) {
+    public static Neighbor sequencer(Neighbor... neighbors) {
         return new SequenceNeighborhood(neighbors);
     }
 }

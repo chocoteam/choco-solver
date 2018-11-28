@@ -14,6 +14,9 @@ NEXT MILESTONE
 - Fix issue in Cumulative simplified API
 - Add two additional views `model.intEqView(x,c)`  and `model.intLeqView(x,c)` 
 - Detect when the same views is created twice on the same pair <variable, value (if any)>
+- Revamp the way LNS' neighrbor is declared (simplication)
+- Add `AbstractStrategy.remove()` method to remove a declared strategy and its dependencies.
+- Add new strategies to `Search`
 
 
 ### Deprecated API (to be removed in next release):

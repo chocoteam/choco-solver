@@ -63,6 +63,13 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
     }
 
     @Override
+    public void remove() {
+        for (int i = 0; i < strategies.length; i++) {
+            strategies[i].remove();
+        }
+    }
+
+    @Override
     public Decision<Variable> computeDecision(Variable variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;

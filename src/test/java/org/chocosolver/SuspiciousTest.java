@@ -12,7 +12,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
@@ -45,7 +45,7 @@ public class SuspiciousTest {
     public void testGregy4() {
         Model model = makeNQueenWithBinaryConstraints(12);
         NodeCounter nodeCounter = new NodeCounter(model, 100);
-        INeighbor rnd = new RandomNeighborhood(model.retrieveIntVars(true), 30, 0);
+        Neighbor rnd = new RandomNeighborhood(model.retrieveIntVars(true), 30, 0);
         Move currentMove = model.getSolver().getMove();
         model.getSolver().setMove(new MoveLNS(currentMove, rnd, new FailCounter(model, 100)) {
             @Override

@@ -9,7 +9,8 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.search.strategy.decision.DecisionPath;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
 
 /**
  * A neighbor which is based on mutliple neighbors.
@@ -19,12 +20,12 @@ import org.chocosolver.solver.search.strategy.decision.DecisionPath;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public class SequenceNeighborhood implements INeighbor {
+public class SequenceNeighborhood extends Neighbor {
 
     /**
      * neighbor currently selected
      */
-    protected int who;
+    int who;
     /**
      * number of neighbors declared
      */
@@ -32,13 +33,14 @@ public class SequenceNeighborhood implements INeighbor {
     /**
      * neighbors declared
      */
-    protected INeighbor[] neighbors;
+    protected Neighbor[] neighbors;
     /**
      * Number of time each neighbor succeed in finding a solution
      */
-    protected int[] counters;
+    int[] counters;
 
-    public SequenceNeighborhood(INeighbor... neighbors) {
+    public SequenceNeighborhood(Neighbor... neighbors) {
+        super(new IntVar[0]);
         this.neighbors = neighbors;
         who = 0;
         count = neighbors.length;
@@ -65,10 +67,10 @@ public class SequenceNeighborhood implements INeighbor {
     }
 
     @Override
-    public void fixSomeVariables(DecisionPath decisionPath){
+    public void fixSomeVariables() throws ContradictionException {
         nextNeighbor();
         if (who == count) who = 0;
-        neighbors[who].fixSomeVariables(decisionPath);
+        neighbors[who].fixSomeVariables();
     }
 
     @Override

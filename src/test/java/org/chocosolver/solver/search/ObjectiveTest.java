@@ -16,7 +16,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
-import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
@@ -35,6 +34,7 @@ import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.ESat.FALSE;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.ESat.UNDEFINED;
@@ -230,14 +230,32 @@ public class ObjectiveTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJL2() {
-        Model model = new Model();
-        IntVar a = model.intVar("a", -2, 2, false);
-        Solver r = model.getSolver();
-        model.setObjective(Model.MAXIMIZE, a);
-        r.setSearch(new ObjectiveStrategy(a, OptimizationPolicy.TOP_DOWN), minDomLBSearch(a));
-        r.setNoGoodRecordingFromSolutions(a);
-        while (model.getSolver().solve()) ;
-        assertEquals(model.getSolver().isStopCriterionMet(), false);
+        for(OptimizationPolicy p : OptimizationPolicy.values()) {
+            Model model = new Model();
+            IntVar a = model.intVar("a", -2, 2, false);
+            Solver r = model.getSolver();
+            model.setObjective(Model.MAXIMIZE, a);
+            r.setSearch(Search.objectiveStrategy(a, p), minDomLBSearch(a));
+            r.setNoGoodRecordingFromSolutions(a);
+            while (model.getSolver().solve()) ;
+            assertEquals(model.getSolver().isStopCriterionMet(), false);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJL3() {
+        for(OptimizationPolicy p : OptimizationPolicy.values()) {
+            Model model = makeGolombRuler(8);
+            IntVar objective = (IntVar) model.getHook("objective");
+            IntVar[] ticks = (IntVar[]) model.getHook("ticks");
+            Solver r = model.getSolver();
+            model.setObjective(Model.MINIMIZE, objective);
+            r.setSearch(Search.objectiveStrategy(objective, p), randomSearch(ticks, 0L));
+            r.setNoGoodRecordingFromSolutions(ticks);
+            while (model.getSolver().solve()) ;
+            assertEquals(model.getSolver().isStopCriterionMet(), false);
+            assertEquals(r.getBestSolutionValue(), 34);
+        }
     }
 
     @Test(groups = "1s", timeOut = 60000)

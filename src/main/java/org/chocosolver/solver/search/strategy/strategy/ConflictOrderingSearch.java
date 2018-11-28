@@ -101,6 +101,12 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         return mainStrategy.init();
     }
 
+    @Override
+    public void remove() {
+        this.mainStrategy.remove();
+        model.getSolver().unplugMonitor(this);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Decision<V> getDecision() {

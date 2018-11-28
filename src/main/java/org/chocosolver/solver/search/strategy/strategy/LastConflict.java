@@ -93,6 +93,12 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
         return mainStrategy.init();
     }
 
+    @Override
+    public void remove() {
+        this.mainStrategy.remove();
+        model.getSolver().unplugMonitor(this);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Decision<V> getDecision() {
