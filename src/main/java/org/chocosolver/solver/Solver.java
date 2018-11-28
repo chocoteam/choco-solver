@@ -550,6 +550,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void hardReset() {
         reset();
+        this.M.getStrategy().remove();
         setMove(new MoveBinaryDFS());
         setPropagate(new PropagateBasic());
         setNoLearning();

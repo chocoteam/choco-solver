@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.strategy.decision;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -24,11 +25,9 @@ import java.util.List;
  * Decisions are then applied in a call to {@link #buildNext()} and {@link #apply()},
  * and removed in a call to {@link #synchronize()}.
  * </br>
- * Note that, if more than one decision is added before calling {@link #buildNext()},
- * these decisions belong to the same level.
- * They will be applied at the same time in a call to {@link #apply()},
- * and remove at the same time in a call to {@link #synchronize()}.
- * Otherwise, only one decision is applied/removed at a time.
+ * Only one decision can be added at the same level.
+ * The last declared will erased the previous ones.
+ * Only one decision is applied/removed at a time.
  * </br>
  * First decision is <b>always</b> {@link RootDecision#ROOT}, so, {@link #size()} returns at least 1.
  * <p>
@@ -43,15 +42,8 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      * Current decision path.
      */
     private List<Decision> decisions;
-    /**
-     * Store the sizes of {@link #decisions} during search, to evaluate which decisions are part of the same level.
-     */
-    IStateInt mLevel;
-    /**
-     * Indices of level in {@link #decisions}
-     */
-    int[] levels;
 
+    IStateInt last;
 
     /**
      * Create a decision path
@@ -59,59 +51,31 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public DecisionPath(IEnvironment environment) {
         this.decisions = new ArrayList<>();
-        this.mLevel = environment.makeInt(0);
         this.decisions.add(RootDecision.ROOT);
-        this.levels = new int[10];
-        this.levels[0] = 1;
+        this.last = environment.makeInt(1);
     }
 
     /**
-     * Prepare the decisions, pushed since the last call to this method, to be applied.
-     * If more than one decision are applied in this call,
-     * they are automatically force to not be refuted, and are considered to belong to the same level.
+     * Prepare the last decision pushed since the last call to this method to be applied.
      */
     public void buildNext() {
-        // 1. look for the first decision in decisions with that rank
-        int l = mLevel.get();
-        int f = levels[l];
-        int t = decisions.size();
-        boolean samelevel = (f < t - 1);
-        Decision decision;
-        for (int i = f; i < t; i++) {
-            decision = decisions.get(i);
-            if (samelevel) {
-                decision.setRefutable(false);
-            }
-            decision.buildNext();
+        int p = last.get();
+        if(p == decisions.size()-1) {
+            decisions.get(p).buildNext();
         }
     }
 
     /**
-     * Apply decisions pushed since the last call to this method.
-     * This call should be preceded by a call to {@link #buildNext()}.
+     * Apply decision pushed since the last call to this method.
+     * This call should always be preceded by a call to {@link #buildNext()}.
      *
      * @throws ContradictionException if one decision application fails
      */
     public void apply() throws ContradictionException {
-        // 1. look for the first decision in decisions with that rank
-        int l = mLevel.get();
-        int f = levels[l];
-        int t = decisions.size();
-        for (int i = f; i < t; i++) {
-            decisions.get(i).apply();
-        }
-        if (t - f > 0) {
-            mLevel.add(1);
-            ensureCapacity(l + 1);
-            levels[l + 1] = decisions.size();
-        }
-    }
-
-    private void ensureCapacity(int ncapa) {
-        if (levels.length <= ncapa) {
-            int[] tmp = levels;
-            levels = new int[ncapa * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, levels, 0, tmp.length);
+        int p = last.get();
+        if(p == decisions.size()-1) {
+            decisions.get(p).apply();
+            last.add(1);
         }
     }
 
@@ -121,8 +85,13 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      * @param decision the decision to add
      */
     public void pushDecision(Decision decision) {
-        decision.setPosition(decisions.size());
-        decisions.add(decision);
+        int p = last.get();
+        decision.setPosition(p);
+        if(decisions.size() == p){
+            decisions.add(decision);
+        }else if(decisions.size() == p + 1) {
+            decisions.set(p, decision);
+        }else throw new SolverException("Cannot add decision to decision path");
     }
 
     /**
@@ -142,7 +111,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public void synchronize(boolean free) {
         if (decisions.size() > 1) { // never remove ROOT decision.
-            int t = levels[mLevel.get()];
+            int t = last.get();
             for (int f = decisions.size() - 1; f >= t; f--) {
                 Decision d = decisions.remove(f);
                 if(free)d.free();
@@ -160,15 +129,6 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         int size = decisions.size();
         return decisions.get(size - 1);
 
-    }
-
-    /**
-     * Return the position of the first decision of the last level.
-     * Except for LNS first meta-decision, this should return the position of the last decision
-     * @return the position of the first decision of the last level.
-     */
-    public int indexPreviousLevelLastLevel() {
-        return levels[mLevel.get()];
     }
 
     /**
@@ -213,24 +173,10 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public String lastDecisionToString() {
         StringBuilder st = new StringBuilder();
-        int l = mLevel.get();
-        int f = levels[l];
-        int t = decisions.size();
-        Decision decision;
-        if (f < t - 1) {
-            st.append("[1/1] ");
-            decision = decisions.get(f);
-            st.append(decision.toString());
-            for (int i = f + 1; i < t; i++) {
-                decision = decisions.get(i);
-                st.append(" /\\ ").append(decision.toString());
-            }
-        } else if (f < t) {
-            decision = decisions.get(f);
-            st.append(String.format("[%d/%d] %s",
-                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
-            );
-        }
+        Decision decision = decisions.get(last.get());
+        st.append(String.format("[%d/%d] %s",
+                decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
+        );
         return st.toString();
     }
 

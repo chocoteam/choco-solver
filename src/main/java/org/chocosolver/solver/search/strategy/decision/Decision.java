@@ -55,7 +55,7 @@ public abstract class Decision<E extends Variable> implements ICause, Serializab
 
     /**
      * Set the position of this decision in the decision path.
-     * Note that the position a decision is unique, but some decisions taken together have the same rank.
+     * Note that the position a decision is unique.
      * @param p position of this decision in the decision path
      */
     public final void setPosition(int p) {
@@ -64,7 +64,7 @@ public abstract class Decision<E extends Variable> implements ICause, Serializab
 
     /**
      * Get the position of this decision in the decision path
-     * Note that the position a decision is unique, but some decisions taken together have the same rank.
+     * Note that the position a decision is unique.
      * @return position of this decision in the decision path
      */
     public final int getPosition() {

@@ -170,19 +170,8 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
         if (left) {
             DecisionPath dp = mSolver.getDecisionPath();
             int last = dp.size() - 1;
-            if (last > 0) { // may happen when LNS provide an empty meta-decision
-                int first = dp.indexPreviousLevelLastLevel();
+            if (last > 0) {
                 String pdec;
-                for (int i = first; i < last; i++) {
-                    pdec = pretty(dp.getDecision(i - 1));
-                    assert dp.getDecision(i).getArity() == 1;
-                    sendNode(nc, pid_stack.peek(), alt_stack.pop(), 1, rid, pdec,
-                            sendDomain? domainMessage.print():"");
-                    pid_stack.push(nc);
-                    nc++;
-                    alt_stack.push(0);
-                    last_stack.push(nc - 1);
-                }
                 pdec = pretty(dp.getDecision(last - 1));
                 Decision dec = dp.getLastDecision();
                 int ari = dec.getArity();

@@ -374,7 +374,7 @@ public abstract class AbstractVariable implements Variable {
             if (monitors[i] == monitor) break;
         }
         if(i< mIdx-1) {
-            System.arraycopy(monitors, i + 1, monitors, i, mIdx - i);
+            System.arraycopy(monitors, i + 1, monitors, i, mIdx - (i+1));
         }
         monitors[--mIdx] = null;
     }

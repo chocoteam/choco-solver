@@ -43,19 +43,19 @@ public class DecisionPathTest {
     @Test(groups = "1s", timeOut=60000)
     public void testPushDecision() throws Exception {
         Assert.assertEquals(dp.size(), 1);
-        Assert.assertEquals(dp.mLevel.get(), 0);
+        Assert.assertEquals(dp.last.get(), 1);
         IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         dp.pushDecision(d1);
         Assert.assertEquals(d1.getPosition(), 1);
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 0);
+        Assert.assertEquals(dp.last.get(), 1);
 
         IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         Assert.assertEquals(d2.getArity(), 2);
         dp.pushDecision(d2);
-        Assert.assertEquals(d2.getPosition(), 2);
-        Assert.assertEquals(dp.size(), 3);
-        Assert.assertEquals(dp.mLevel.get(), 0);
+        Assert.assertEquals(d2.getPosition(), 1);
+        Assert.assertEquals(dp.size(), 2);
+        Assert.assertEquals(dp.last.get(), 1);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -66,57 +66,38 @@ public class DecisionPathTest {
         IntDecision d1 = dp.makeIntDecision(vars[0], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
 
-        Assert.assertEquals(d1.hasNext(), true);
+        Assert.assertTrue(d1.hasNext());
         Assert.assertEquals(d1.getPosition(), 0);
         dp.pushDecision(d1);
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 0);
-        Assert.assertEquals(dp.levels[2], 0);
+        Assert.assertEquals(dp.last.get(), 1);
         m.getEnvironment().worldPush();
         dp.buildNext();
         dp.apply();
-        Assert.assertEquals(d1.hasNext(), true);
+        Assert.assertTrue(d1.hasNext());
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 0);
+        Assert.assertEquals(dp.last.get(), 2);
 
         IntDecision d2 = dp.makeIntDecision(vars[1], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
         IntDecision d3 = dp.makeIntDecision(vars[2], DecisionOperatorFactory.makeIntEq(), 4);
         d1.setRefutable(true);
         dp.pushDecision(d2);
-        Assert.assertEquals(d2.hasNext(), true);
+        Assert.assertTrue(d2.hasNext());
         Assert.assertEquals(dp.size(), 3);
-        Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 0);
-        Assert.assertEquals(dp.levels[3], 0);
+        Assert.assertEquals(dp.last.get(), 2);
         dp.pushDecision(d3);
-        Assert.assertEquals(d3.hasNext(), true);
-        Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 0);
-        Assert.assertEquals(dp.levels[3], 0);
+        Assert.assertTrue(d3.hasNext());
+        Assert.assertEquals(dp.size(), 3);
+        Assert.assertEquals(dp.last.get(), 2);
 
         m.getEnvironment().worldPush();
         dp.buildNext();
         dp.apply();
-        Assert.assertEquals(d3.hasNext(), false);
-        Assert.assertEquals(d2.hasNext(), false);
-        Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 4);
-        Assert.assertEquals(dp.levels[3], 0);
-        Assert.assertEquals(dp.levels[4], 0);
+        Assert.assertTrue(d3.hasNext());
+        Assert.assertTrue(d2.hasNext());
+        Assert.assertEquals(dp.size(), 3);
+        Assert.assertEquals(dp.last.get(), 3);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -136,43 +117,23 @@ public class DecisionPathTest {
         m.getEnvironment().worldPush();
         dp.buildNext();
         dp.apply();
-        Assert.assertEquals(dp.size(), 4);
-        Assert.assertEquals(dp.mLevel.get(), 2);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 4);
-        Assert.assertEquals(dp.levels[3], 0);
-        Assert.assertEquals(dp.levels[4], 0);
+        Assert.assertEquals(dp.size(), 3);
+        Assert.assertEquals(dp.last.get(), 3);
 
         m.getEnvironment().worldPop();
         dp.synchronize();
         Assert.assertEquals(dp.size(), 2);
-        Assert.assertEquals(dp.mLevel.get(), 1);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 4);
-        Assert.assertEquals(dp.levels[3], 0);
-        Assert.assertEquals(dp.levels[4], 0);
+        Assert.assertEquals(dp.last.get(), 2);
 
         m.getEnvironment().worldPop();
         dp.synchronize();
         Assert.assertEquals(dp.size(), 1);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 4);
-        Assert.assertEquals(dp.levels[3], 0);
-        Assert.assertEquals(dp.levels[4], 0);
+        Assert.assertEquals(dp.last.get(), 1);
 
         m.getEnvironment().worldPop();
         dp.synchronize();
         Assert.assertEquals(dp.size(), 1);
-        Assert.assertEquals(dp.mLevel.get(), 0);
-        Assert.assertEquals(dp.levels[0], 1);
-        Assert.assertEquals(dp.levels[1], 2);
-        Assert.assertEquals(dp.levels[2], 4);
-        Assert.assertEquals(dp.levels[3], 0);
-        Assert.assertEquals(dp.levels[4], 0);
+        Assert.assertEquals(dp.last.get(), 1);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -201,7 +162,7 @@ public class DecisionPathTest {
         dp.pushDecision(d1);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
-        Assert.assertEquals(dp.size(), 4);
+        Assert.assertEquals(dp.size(), 2);
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -212,9 +173,8 @@ public class DecisionPathTest {
         dp.pushDecision(d1);
         dp.pushDecision(d2);
         dp.pushDecision(d3);
-        Assert.assertEquals(dp.getDecision(1), d1);
-        Assert.assertEquals(dp.getDecision(2), d2);
-        Assert.assertEquals(dp.getDecision(3), d3);
+        Assert.assertEquals(dp.getDecision(1), d3);
+        Assert.assertEquals(dp.last.get(), 1);
     }
 
     @Test(groups = "1s", timeOut=60000, expectedExceptions = IndexOutOfBoundsException.class)
@@ -238,8 +198,7 @@ public class DecisionPathTest {
         dp.pushDecision(d3);
         List<Decision> decisions = new ArrayList<>();
         dp.transferInto(decisions, false);
-        Assert.assertEquals(decisions.size(), 3);
-        Assert.assertEquals(decisions.get(0), d1);
-        Assert.assertEquals(decisions.get(2), d3);
+        Assert.assertEquals(decisions.size(), 1);
+        Assert.assertEquals(decisions.get(0), d3);
     }
 }
