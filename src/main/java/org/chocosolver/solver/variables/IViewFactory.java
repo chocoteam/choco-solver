@@ -249,7 +249,7 @@ public interface IViewFactory extends ISelf<Model> {
 
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x = a) &hArr; b</i>.
+     * Creates an view over <i>x</i> such that: <i>(x = c) &hArr; b</i>.
      * <p>
      * @param x an integer variable.
      * @param c a constant
@@ -271,13 +271,35 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x &le; a) &hArr; b</i>.
+     * Creates an view over <i>x</i> such that: <i>(x != c) &hArr; b</i>.
      * <p>
      * @param x an integer variable.
      * @param c a constant
-     * @return a BoolVar that reifies <i>x = c</i>
+     * @return a BoolVar that reifies <i>x != c</i>
      */
-    default BoolVar intLeqView(IntVar x, int c) {
+    default BoolVar intNeView(IntVar x, int c) {
+        if (x.isInstantiatedTo(c)) {
+            return ref().boolVar(false);
+        } else if (!x.contains(c)) {
+            return ref().boolVar(true);
+        } else {
+            int p = checkDeclaredView(x, c, EqView.class);
+            if(p >= 0){
+                return x.getView(p).asBoolVar().not();
+            }else {
+                return new EqView(x, c).not();
+            }
+        }
+    }
+
+    /**
+     * Creates an view over <i>x</i> such that: <i>(x &le; c) &hArr; b</i>.
+     * <p>
+     * @param x an integer variable.
+     * @param c a constant
+     * @return a BoolVar that reifies <i>x &le; c</i>
+     */
+    default BoolVar intLeView(IntVar x, int c) {
         if (x.getUB() <= c) {
             return ref().boolVar(true);
         } else if (x.getLB() > c) {
@@ -288,6 +310,28 @@ public interface IViewFactory extends ISelf<Model> {
                 return x.getView(p).asBoolVar();
             }else {
                 return new LeqView(x, c);
+            }
+        }
+    }
+
+    /**
+     * Creates an view over <i>x</i> such that: <i>(x &ge; c) &hArr; b</i>.
+     * <p>
+     * @param x an integer variable.
+     * @param c a constant
+     * @return a BoolVar that reifies <i>x &ge; c</i>
+     */
+    default BoolVar intGeView(IntVar x, int c) {
+        if (x.getLB() >= c) {
+            return ref().boolVar(true);
+        } else if (x.getUB() < c) {
+            return ref().boolVar(false);
+        } else {
+            int p = checkDeclaredView(x, c - 1, LeqView.class);
+            if(p >= 0){
+                return x.getView(p).asBoolVar().not();
+            }else {
+                return new LeqView(x, c - 1).not();
             }
         }
     }

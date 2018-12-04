@@ -39,10 +39,6 @@ import java.util.Iterator;
  */
 public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
-    private static final int kFALSE = 0;
-    private static final int kTRUE = 1;
-    private static final int kUNDEF = 2;
-
     /**
      * indicate the value of the domain : false = 0, true = 1, undef =  2
      */

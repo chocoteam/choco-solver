@@ -11,6 +11,8 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -20,6 +22,7 @@ import org.chocosolver.solver.variables.events.RealEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.ValueSortedMap;
 
 /**
  * <br/>
@@ -51,8 +54,13 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+    public void justifyEvent(IntEventType mask, int one, int two, int three) {
         throw new UnsupportedOperationException("RealView does not support explanation.");
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause clause, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

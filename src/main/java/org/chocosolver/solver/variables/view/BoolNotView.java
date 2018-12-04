@@ -3,13 +3,15 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license.
- * See LICENSE file in the project root for full license information.
+ * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
+ * information.
  */
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -19,11 +21,11 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
- * A view for boolean variable, that enforce not(b).
- * <br/>
+ * A view for boolean variable, that enforce not(b). <br/>
  *
  * @author Charles Prud'homme
  * @since 31/07/12
@@ -31,7 +33,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
 
     /**
-     * Create a not view based on <i>var<i/> 
+     * Create a not view based on <i>var<i/>
      * @param var a boolean variable
      */
     public BoolNotView(BoolVar var) {
@@ -102,7 +104,7 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
         if (!this.contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        }else if (!isInstantiated()){
+        } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return var.instantiateTo(1 - value, this);
@@ -178,12 +180,12 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public int nextValueOut(int v) {
         int lb = 0, ub = 1;
-        if(var.isInstantiated()){
+        if (var.isInstantiated()) {
             lb = ub = getValue();
         }
         if (lb - 1 <= v && v <= ub) {
             return ub + 1;
-        }else{
+        } else {
             return v + 1;
         }
     }
@@ -269,8 +271,17 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+    public void justifyEvent(IntEventType mask, int one, int two, int three) {
         assert mask == IntEventType.INSTANTIATE;
-        model.getSolver().getEventObserver().instantiateTo(this, 1 - one, var, 0, 1);
+        model.getSolver().getEventObserver().instantiateTo(this, 1 - one, this, 0, 1);
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        IntVar pivot = ig.getIntVarAt(p);
+        boolean thisPivot = (this == pivot);
+        int value = thisPivot ? getValue() : 1 - getValue();
+        explanation.addLiteral(this, explanation.getFreeSet(value), thisPivot);
+        explanation.addLiteral(var, explanation.getFreeSet(value), !thisPivot);
     }
 }

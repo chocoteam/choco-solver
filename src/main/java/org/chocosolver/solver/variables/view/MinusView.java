@@ -20,7 +20,10 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 
-import static org.chocosolver.solver.variables.events.IntEventType.*;
+import static org.chocosolver.solver.variables.events.IntEventType.BOUND;
+import static org.chocosolver.solver.variables.events.IntEventType.DECUPP;
+import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
+import static org.chocosolver.solver.variables.events.IntEventType.INSTANTIATE;
 
 /**
  * View for -V, where V is a IntVar or view
@@ -308,19 +311,19 @@ public class MinusView extends IntView<IntVar> {
     }
 
     @Override
-    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+    public void justifyEvent(IntEventType mask, int one, int two, int three) {
         switch (mask) {
             case DECUPP:
-                model.getSolver().getEventObserver().updateLowerBound(this, -one, -two, var);
+                model.getSolver().getEventObserver().updateLowerBound(this, -one, -two, this);
                 break;
             case INCLOW:
-                model.getSolver().getEventObserver().updateUpperBound(this, -one, -two, var);
+                model.getSolver().getEventObserver().updateUpperBound(this, -one, -two, this);
                 break;
             case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, -one, var);
+                model.getSolver().getEventObserver().removeValue(this, -one, this);
                 break;
             case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, -one, var, -three, -two);
+                model.getSolver().getEventObserver().instantiateTo(this, -one, this, -three, -two);
                 break;
         }
     }

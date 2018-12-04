@@ -8,6 +8,7 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
@@ -27,7 +28,7 @@ import java.util.HashMap;
  */
 public class Explainer {
 
-    public static HashMap<IntVar, IntIterableRangeSet> execute(Solver solver, IntProcedure proc, Propagator prop, IntVar v) throws ContradictionException {
+    public static HashMap<IntVar, IntIterableRangeSet> execute(Solver solver, IntProcedure proc, ICause cause, IntVar v) throws ContradictionException {
         solver.setLearningSignedClauses();
         solver.propagate();
         proc.execute(0);
@@ -36,7 +37,7 @@ public class Explainer {
                 = (LearnSignedClauses<ExplanationForSignedClause>) solver.getLearner();
         ExplanationForSignedClause expl = learner.getExplanation();
         ContradictionException cex = new ContradictionException();
-        cex.set(prop, v, "");
+        cex.set(cause, v, "");
         expl.learnSignedClause(cex);
         return expl.getLiterals();
     }

@@ -11,19 +11,13 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.ValueSortedMap;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.function.Consumer;
-
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -410,23 +404,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true iff the variable has a binary domain
      */
     boolean isBool();
-
-    @Override
-    default void explain(ExplanationForSignedClause clause,
-                         ValueSortedMap<IntVar> front,
-                         Implications ig,
-                         int p) {
-        IntIterableRangeSet dom;
-        IntVar var = this;
-
-        dom = clause.getComplementSet(var);
-        clause.addLiteral(var, dom, false);
-
-        IntVar pivot = ig.getIntVarAt(p);
-        dom = clause.getComplementSet(pivot);
-        unionOf(dom, ig.getDomainAt(p));
-        clause.addLiteral(pivot, dom, true);
-    }
 
     @Override
     default void forEachIntVar(Consumer<IntVar> action) {

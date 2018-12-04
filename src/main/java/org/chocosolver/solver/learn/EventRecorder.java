@@ -53,7 +53,7 @@ public class EventRecorder extends AbstractEventObserver {
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {
-                view.justifyEvent(var, cause, IntEventType.REMOVE, val, -1, -1);
+                view.justifyEvent(IntEventType.REMOVE, val, -1, -1);
             }
         }
     }
@@ -75,7 +75,7 @@ public class EventRecorder extends AbstractEventObserver {
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {
-                view.justifyEvent(var, cause, IntEventType.INCLOW, value, old, -1);
+                view.justifyEvent(IntEventType.INCLOW, value, old, -1);
             }
         }
     }
@@ -97,7 +97,7 @@ public class EventRecorder extends AbstractEventObserver {
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {
-                view.justifyEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+                view.justifyEvent(IntEventType.DECUPP, value, old, -1);
             }
         }
     }
@@ -118,7 +118,7 @@ public class EventRecorder extends AbstractEventObserver {
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {
-                view.justifyEvent(var, cause, IntEventType.INSTANTIATE, val, oldLB, oldUB);
+                view.justifyEvent(IntEventType.INSTANTIATE, val, oldLB, oldUB);
             }
         }
     }

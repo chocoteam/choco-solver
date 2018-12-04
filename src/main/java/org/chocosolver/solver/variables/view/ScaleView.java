@@ -285,19 +285,19 @@ public final class ScaleView extends IntView<IntVar> {
     }
 
     @Override
-    public void justifyEvent(IntVar var, ICause cause, IntEventType mask, int one, int two, int three) {
+    public void justifyEvent(IntEventType mask, int one, int two, int three) {
         switch (mask) {
             case DECUPP:
-                model.getSolver().getEventObserver().updateUpperBound(this, one * cste, two * cste, var);
+                model.getSolver().getEventObserver().updateUpperBound(this, one * cste, two * cste, this);
                 break;
             case INCLOW:
-                model.getSolver().getEventObserver().updateLowerBound(this, one * cste, two * cste, var);
+                model.getSolver().getEventObserver().updateLowerBound(this, one * cste, two * cste, this);
                 break;
             case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, one * cste, var);
+                model.getSolver().getEventObserver().removeValue(this, one * cste, this);
                 break;
             case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, one * cste, var, two * cste, three * cste);
+                model.getSolver().getEventObserver().instantiateTo(this, one * cste, this, two * cste, three * cste);
                 break;
         }
     }
