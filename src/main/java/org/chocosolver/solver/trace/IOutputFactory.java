@@ -15,7 +15,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.trace.frames.StatisticsPanel;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.StringUtils;
@@ -91,7 +90,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
                 ref().getModel().getNbVars(),
                 ref().getModel().getNbCstrs(),
-                (System.nanoTime() - ref().getModel().getCreationTime())  / IMeasures.IN_SEC,
+                ref().getMeasures().getReadingTimeCount(),
                 ref().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
                 ref().isSearchCompleted() ? "w/" : "w/o"));
         getOut().println(st.toString());
