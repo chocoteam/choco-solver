@@ -457,6 +457,139 @@ public class EqViewTest {
     }
 
     @Test(groups = "1s", timeOut = 6000000)
+    public void testAA13() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.instantiateTo(2, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(0);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.add(3);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA14() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateLowerBound(3, Cause.Null);
+                    x.updateUpperBound(4, Cause.Null);
+                    x.removeValue(4, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(1);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.addBetween(0,2);
+        rng.addBetween(4,5);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA15() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateUpperBound(2, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(0);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.add(3);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA16() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateLowerBound(3, Cause.Null);
+                    x.updateUpperBound(3, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(1);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.addBetween(0,2);
+        rng.addBetween(4,5);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA17() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateLowerBound(3, Cause.Null);
+                    x.removeValue(4, Cause.Null);
+                    x.updateUpperBound(4, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(1);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.addBetween(0,2);
+        rng.addBetween(4,5);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA18() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateLowerBound(4, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(0);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.add(3);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA19() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateUpperBound(3, Cause.Null);
+                    x.updateLowerBound(3, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(1);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.addBetween(0,2);
+        rng.addBetween(4,5);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA20() throws ContradictionException {
+        HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
+                (i) -> {
+                    x.updateUpperBound(3, Cause.Null);
+                    x.removeValue(2, Cause.Null);
+                    x.updateLowerBound(2, Cause.Null);
+                }, b, b);
+        Assert.assertTrue(lits.containsKey(b));
+        Assert.assertTrue(lits.containsKey(x));
+        IntIterableRangeSet rng = new IntIterableRangeSet(1);
+        Assert.assertEquals(lits.get(b), rng);
+        rng.clear();
+        rng.addBetween(0,2);
+        rng.addBetween(4,5);
+        Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
     public void testAA21() throws ContradictionException {
         HashMap<IntVar, IntIterableRangeSet> lits = Explainer.execute(model.getSolver(),
                 (i) -> {

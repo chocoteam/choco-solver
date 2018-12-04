@@ -175,8 +175,10 @@ public final class LeqView extends IntBoolView {
                 }
                 break;
             case REMOVE:
-                if(var.getUB() == one || var.getLB() == one){
-                    throw new UnsupportedOperationException();
+                if(var.getUB() == one && var.previousValue(one) <= cste){
+                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
+                }else if(var.getLB() == one && var.nextValue(one) > cste){
+                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
                 }
                 break;
             case INSTANTIATE:
@@ -217,8 +219,6 @@ public final class LeqView extends IntBoolView {
                 dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
                 explanation.addLiteral(var, dom0, true);
             }
-        } else {
-            throw new UnsupportedOperationException();
         }
     }
 

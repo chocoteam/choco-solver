@@ -219,8 +219,6 @@ public final class EqView extends IntBoolView {
                 dom0.remove(cste);
                 explanation.addLiteral(var, dom0, true);
             }
-        } else {
-            throw new UnsupportedOperationException();
         }
     }
 }
