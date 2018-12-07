@@ -569,7 +569,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public boolean isInstantiatedTo(int value) {
-        return isInstantiated() && contains(value);
+        return isInstantiated() && getLB() == value;
     }
 
     @Override

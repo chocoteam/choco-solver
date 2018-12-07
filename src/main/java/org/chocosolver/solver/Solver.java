@@ -370,7 +370,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
             if (mModel.getSettings().warnUser()) {
-                getErr().print("No search strategies defined.\nSet to default ones.");
+                getErr().print("No search strategies defined.\nSet to default ones.\n");
             }
             defaultSearch = true;
             setSearch(mModel.getSettings().makeDefaultSearch(mModel));
