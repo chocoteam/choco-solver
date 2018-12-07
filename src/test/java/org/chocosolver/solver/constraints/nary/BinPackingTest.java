@@ -71,7 +71,7 @@ public class BinPackingTest {
 			assertTrue(binLoad[1].getValue()>=0);
 			assertTrue(binLoad[2].getValue()>=0);
 		}
-		assertEquals(24, model.getSolver().getSolutionCount());
+		assertEquals(6, model.getSolver().getSolutionCount());
 	}
 
 	@Test(groups="1s", timeOut=60000, dataProvider = "params")

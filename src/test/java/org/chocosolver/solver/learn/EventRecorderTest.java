@@ -15,7 +15,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
-import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnSignedClauses;
 import org.chocosolver.solver.search.strategy.Search;
@@ -823,8 +822,8 @@ public class EventRecorderTest {
     public Object[][] rcpspP(){
         return new Object[][]{
                 {0, 1_380_772},
-                {1, 24191}, // 254s
-                {2, 24191},
+                {1, 148}, // 254s
+                {2, 148},
         };
     }
 
@@ -918,8 +917,11 @@ public class EventRecorderTest {
                     rs.add(model.intVar(rr[i][j]));
                 }
             }
-            model.cumulative(ts.toArray(new Task[ts.size()]), rs.toArray(new IntVar[rs.size()]), model.intVar(rc[i]),
-                    true, Cumulative.Filter.NAIVETIME).post();
+            model.cumulativeTimeDec(
+                    ts.stream().map(Task::getStart).toArray(IntVar[]::new),
+                    ts.stream().mapToInt(t -> t.getDuration().getLB()).toArray(),
+                    rs.stream().mapToInt(IntVar::getLB).toArray(),
+                    rc[i]);
         }
         Solver solver = model.getSolver();
         solver.setSearch(Search.intVarSearch(
@@ -933,7 +935,6 @@ public class EventRecorderTest {
         Assert.assertEquals(solver.getBoundsManager().getBestSolutionValue(), 53);
         Assert.assertEquals(solver.getSolutionCount(), 5);
         Assert.assertEquals(solver.getNodeCount(), nbnodes);
-        model.getClauseConstraint().getClauseStore().printStatistics();
     }
 
 }
