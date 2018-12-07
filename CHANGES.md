@@ -12,7 +12,7 @@ NEXT MILESTONE
 - Update statistic dashboard (see `solver.showDashboard()`)
 - Fix `Settings.load` on missing property
 - Fix issue in `Cumulative` simplified API
-- Add two additional views `model.intEqView(x,c)`  and `model.intLeqView(x,c)` 
+- Add additional views `model.intEqView(x,c)`, `model.intNeView(x,c)`, `model.intLeView(x,c)` and `model.intGeView(x,c)` 
 - Detect when the same views is created twice on the same pair <variable, value?>
 - Revamp the way LNS' neighbor is declared (simplication)
 - Add `AbstractStrategy.remove()` method to remove a declared strategy and its dependencies
