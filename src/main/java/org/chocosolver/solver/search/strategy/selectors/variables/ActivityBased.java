@@ -139,11 +139,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         affected = new BitSet(vars.length);
 
         this.v2i = new IntMap(vars.length);
-        for (int i = 0; i < vars.length; i++) {
-            v2i.put(vars[i].getId(), i);
-            vars[i].addMonitor(this);
-        }
-
         assert g >= 0.0f && g <= 1.0f;
         this.g = g;
         assert d >= 0.0f && d <= 1.0f;
@@ -172,7 +167,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                     MAX_VALUE);
             model.getSolver().setMove(rfMove);
         }
-        model.getSolver().plugMonitor(this);
+        Solver solver = model.getSolver();
+        if(!solver.getSearchMonitors().contains(this)) {
+            model.getSolver().plugMonitor(this);
+            for (int i = 0; i < vars.length; i++) {
+                v2i.put(vars[i].getId(), i);
+                vars[i].addMonitor(this);
+            }
+        }
         for (int i = 0; i < vars.length; i++) {
             //TODO handle large domain size
             int ampl = vars[i].getUB() - vars[i].getLB() + 1;
@@ -187,10 +189,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public void remove() {
-        model.getSolver().unplugMonitor(this);
-        for (int i = 0; i < vars.length; i++) {
-            v2i.put(vars[i].getId(), i);
-            vars[i].removeMonitor(this);
+        Solver solver = model.getSolver();
+        if(solver.getSearchMonitors().contains(this)) {
+            solver.unplugMonitor(this);
+            for (int i = 0; i < vars.length; i++) {
+                v2i.put(vars[i].getId(), i);
+                vars[i].removeMonitor(this);
+            }
         }
     }
 

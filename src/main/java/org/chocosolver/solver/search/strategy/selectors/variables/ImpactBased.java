@@ -89,7 +89,6 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         random = new Random(seed);
         this.nodeImpact = nodeImpact;
         this.initOnly = initOnly;
-        if (!initOnly) model.getSolver().plugMonitor(this);
     }
 
     public ImpactBased(IntVar[] vars, boolean initOnly){
@@ -190,6 +189,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     @Override
     public boolean init(){
         long tl = System.currentTimeMillis() + this.initTimeLimit;
+        if (!initOnly && !model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().plugMonitor(this);
+        }
         // 0. Data structure construction
         Ilabel = new double[vars.length][];
         offsets = new int[vars.length];
@@ -277,7 +279,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     @Override
     public void remove() {
-        model.getSolver().unplugMonitor(this);
+        if (!initOnly && model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().unplugMonitor(this);
+        }
     }
 
     @Override

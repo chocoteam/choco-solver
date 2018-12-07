@@ -77,7 +77,6 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
         this.model = model;
         this.mainStrategy = mainStrategy;
         this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
-        model.getSolver().plugMonitor(this);
         //noinspection unchecked
         conflictingVariables = (V[])new Variable[k];
         nbCV = 0;
@@ -90,13 +89,19 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
 
     @Override
     public boolean init(){
+        if(!model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().plugMonitor(this);
+        }
+
         return mainStrategy.init();
     }
 
     @Override
     public void remove() {
         this.mainStrategy.remove();
-        model.getSolver().unplugMonitor(this);
+        if(model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().unplugMonitor(this);
+        }
     }
 
     @SuppressWarnings("unchecked")

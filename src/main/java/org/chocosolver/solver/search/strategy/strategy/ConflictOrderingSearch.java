@@ -82,7 +82,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         super(mainStrategy.vars);
         this.model = model;
         this.mainStrategy = mainStrategy;
-        model.getSolver().plugMonitor(this);
         // internal datastructures
         vars = new ArrayList<>();
         var2pos = new TIntIntHashMap(16, .5f, -1, -1);
@@ -98,13 +97,18 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
 
     @Override
     public boolean init() {
+        if(model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().plugMonitor(this);
+        }
         return mainStrategy.init();
     }
 
     @Override
     public void remove() {
         this.mainStrategy.remove();
-        model.getSolver().unplugMonitor(this);
+        if(model.getSolver().getSearchMonitors().contains(this)) {
+            model.getSolver().unplugMonitor(this);
+        }
     }
 
     @SuppressWarnings("unchecked")

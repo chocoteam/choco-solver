@@ -12,6 +12,7 @@ import gnu.trove.list.array.TIntArrayList;
 
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
@@ -83,9 +84,7 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
         init(Stream.of(model.getCstrs())
                 .flatMap(c -> Stream.of(c.getPropagators()))
                 .toArray(Propagator[]::new));
-        model.getSolver().plugMonitor(this);
     }
-
 
     private void init(Propagator[] propagators) {
         for (Propagator propagator : propagators) {
@@ -94,13 +93,25 @@ public class DomOverWDeg extends AbstractStrategy<IntVar> implements IMonitorCon
     }
 
     @Override
+    public boolean init() {
+        Solver solver = vars[0].getModel().getSolver();
+        if(!solver.getSearchMonitors().contains(this)) {
+            vars[0].getModel().getSolver().plugMonitor(this);
+        }
+        return true;
+    }
+
+    @Override
     public void remove() {
-        vars[0].getModel().getSolver().unplugMonitor(this);
+        Solver solver = vars[0].getModel().getSolver();
+        if(solver.getSearchMonitors().contains(this)) {
+            vars[0].getModel().getSolver().unplugMonitor(this);
+        }
     }
 
     @Override
     public void onContradiction(ContradictionException cex) {
-        if (cex.c != null && cex.c instanceof Propagator) {
+        if (cex.c instanceof Propagator) {
             Propagator p = (Propagator) cex.c;
             p2w.putOrAdjust(p.getId(), 1, 1);
         }
