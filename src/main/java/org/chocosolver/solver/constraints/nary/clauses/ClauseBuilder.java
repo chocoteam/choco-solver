@@ -11,13 +11,20 @@ package org.chocosolver.solver.constraints.nary.clauses;
 import gnu.trove.map.hash.TIntObjectHashMap;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.view.BoolNotView;
+import org.chocosolver.solver.variables.view.EqView;
+import org.chocosolver.solver.variables.view.LeqView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.Stack;
+import java.util.Vector;
 
 /**
  * A signed clause builder
@@ -29,6 +36,8 @@ import java.util.Set;
  */
 public class ClauseBuilder {
 
+    @SuppressWarnings("WeakerAccess")
+    public static boolean ELIMINATE_VIEWS = true;
     /**
      * When the nogood is true (based on variables declared domain)
      */
@@ -111,6 +120,7 @@ public class ClauseBuilder {
     public void buildNogood(Model model) {
         if ((status & ALWAYSTRUE) == 0) {
             if ((status & UNKNOWN) != 0) { // at least one clause is unknown
+                if (ELIMINATE_VIEWS) eliminateViews();
                 vars.removeIf(var -> (sets.get(var.getId()).isEmpty()));
                 IntVar[] _vars = vars.toArray(new IntVar[vars.size()]);
                 Arrays.sort(_vars); // to avoid undeterministic behavior
@@ -139,5 +149,100 @@ public class ClauseBuilder {
         this.status = FALSE;
         this.vars.clear();
         this.sets.clear();
+    }
+
+    private void eliminateViews() {
+        Stack<IntVar> keys = vars
+                .stream()
+                .filter(VariableUtils::isView)
+                .collect(
+                        Stack<IntVar>::new,
+                        Stack::push,
+                        Vector::addAll
+                );
+        while (!keys.isEmpty()) {
+            IntVar v = keys.pop();
+            if (v instanceof EqView) {
+                eliminateEqView((EqView) v, keys);
+            } else if (v instanceof LeqView) {
+                eliminateLeqView((LeqView) v, keys);
+            } else if (v instanceof BoolNotView) {
+                eliminateNotView((BoolNotView) v, keys);
+            }
+        }
+    }
+
+    private void eliminateEqView(EqView ev, Stack<IntVar> keys) {
+        IntIterableRangeSet set = sets.get(ev.getId());
+        IntVar vv = ev.getVariable();
+        assert set.size() == 1;
+        if (set.min() == 1) {
+            if (vars.contains(vv)) {
+                sets.get(vv.getId()).add(ev.cste);
+            } else {
+                put(vv, new IntIterableRangeSet(ev.cste));
+                if (VariableUtils.isView(vv)) {
+                    keys.push(vv);
+                }
+            }
+        } else if (set.min() == 0) {
+            if (vars.contains(vv)) {
+                sets.get(vv.getId()).remove(ev.cste);
+            } else {
+                IntIterableRangeSet es = initialDomains.get(vv.getId()).duplicate();
+                es.remove(ev.cste);
+                put(vv, es);
+                if (VariableUtils.isView(vv)) {
+                    keys.push(vv);
+                }
+            }
+        }
+        set.clear();
+    }
+
+    private void eliminateLeqView(LeqView lv, Stack<IntVar> keys) {
+        IntIterableRangeSet set = sets.get(lv.getId());
+        IntVar vv = lv.getVariable();
+        assert set.size() == 1;
+        if (set.min() == 1) {
+            IntIterableRangeSet root = initialDomains.get(vv.getId()).duplicate();
+            root.retainBetween(IntIterableRangeSet.MIN, lv.cste);
+            if (vars.contains(vv)) {
+                sets.get(vv.getId()).addAll(root);
+            } else {
+                put(vv, root);
+                if (VariableUtils.isView(vv)) {
+                    keys.push(vv);
+                }
+            }
+        } else if (set.min() == 0) {
+            if (vars.contains(vv)) {
+                sets.get(vv.getId()).removeBetween(IntIterableRangeSet.MIN, lv.cste);
+            } else {
+                IntIterableRangeSet es = initialDomains.get(vv.getId()).duplicate();
+                es.removeBetween(IntIterableRangeSet.MIN, lv.cste);
+                put(vv, es);
+                if (VariableUtils.isView(vv)) {
+                    keys.push(vv);
+                }
+            }
+        }
+        set.clear();
+    }
+
+    private void eliminateNotView(BoolNotView nv, Stack<IntVar> keys) {
+        IntIterableRangeSet set = sets.get(nv.getId());
+        BoolVar vv = nv.not();
+        assert set.size() == 1;
+        int value = set.min();
+        if (vars.contains(vv)) {
+            sets.get(vv.getId()).add(1 - value);
+        } else {
+            put(vv, new IntIterableRangeSet(1 - value));
+            if (VariableUtils.isView(vv)) {
+                keys.push(vv);
+            }
+        }
+        set.clear();
     }
 }
