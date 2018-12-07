@@ -63,7 +63,7 @@ public class TableTest {
 	}
 
 	@Test(groups="1s", timeOut=300000)
-	private void testTuples(){
+	public void testTuples(){
 		Model m = new Model();
 		IntVar x = m.intVar(0,4);
 		IntVar y = m.boolVar();
@@ -133,7 +133,7 @@ public class TableTest {
 	public void testAllDifferent() {
 		int[][] params = {{5, 2, 9}, {5, -2, 3}, {6, 0, 7}};
 
-		for (int p = 2; p < params.length; p++) {
+		for (int p = 0; p < params.length; p++) {
 			Model model = new Model();
 			IntVar[] vars = model.intVarArray("v1", params[p][0], params[p][1], params[p][2], false);
 			allDifferent(model, vars, -1);
