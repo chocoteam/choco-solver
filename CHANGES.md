@@ -18,7 +18,7 @@ NEXT MILESTONE
 - Add `AbstractStrategy.remove()` method to remove a declared strategy and its dependencies
 - Add new strategies to `Search`
 - Add new decomposition to `IDecompositionFactory`
-- Improve CT+ initialization
+- Improve initialization of CT+ and CT*
 - Improve `IntVar#isInstantiatedTo(int)`
 
 ### Deprecated API (to be removed in next release):

@@ -26,19 +26,19 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
 public class PropCompactTableStar extends PropCompactTable {
 
     //***********************************************************************************
-   	// VARIABLES
-   	//***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
     private long[][][] inc_supports;
 
     //***********************************************************************************
-   	// CONSTRUCTOR
-   	//***********************************************************************************
+    // CONSTRUCTOR
+    //***********************************************************************************
 
-	/**
+    /**
      * Create a propagator for table constraint
      * Only for feasible Tuples
-	 * @param vars scope
+     * @param vars   scope
      * @param tuples list of feasible tuples
      */
     public PropCompactTableStar(IntVar[] vars, Tuples tuples) {
@@ -47,18 +47,20 @@ public class PropCompactTableStar extends PropCompactTable {
     }
 
     //***********************************************************************************
-   	// INITIALIZATION
-   	//***********************************************************************************
+    // INITIALIZATION
+    //***********************************************************************************
 
-    protected UnaryIntProcedure<Integer> makeProcedure(){
+    protected UnaryIntProcedure<Integer> makeProcedure() {
         return new UnaryIntProcedure<Integer>() {
             int var, off;
+
             @Override
             public UnaryIntProcedure set(Integer o) {
                 var = o;
                 off = offset[var];
                 return this;
             }
+
             @Override
             public void execute(int i) throws ContradictionException {
                 // main reason we re-wrote the class
@@ -80,28 +82,34 @@ public class PropCompactTableStar extends PropCompactTable {
             supports[i] = new long[ub - lb + 1][currTable.words.length];
             inc_supports[i] = new long[ub - lb + 1][currTable.words.length];
             residues[i] = new int[ub - lb + 1];
-            for (int v=lb ; v<=ub; v=vars[i].nextValue(v)) {
-                long[] tmp = supports[i][v - lb];
-                long[] inc_tmp = inc_supports[i][v - lb];
-                int wI = 0;
-                int bI = 63;
-                for (int ti = 0; ti < tuples.nbTuples(); ti++) {
-                    int val = tuples.get(ti)[i];
-                    long index = 1L << bI;
-                    if (val == v) {
-                        // main reason we re-wrote the class
-                        inc_tmp[wI] |= index;
-                        tmp[wI] |= index;
-                    }else if(val == tuples.getStarValue()){
-                        // main reason we re-wrote the class
-                        tmp[wI] |= index;
-                    }
-                    bI--;
-                    if (bI < 0) {
-                        bI = 63;
-                        wI++;
+        }
+        int wI = 0;
+        byte bI = 63;
+        int star = tuples.getStarValue();
+        top:
+        for (int ti = 0; ti < tuples.nbTuples(); ti++) {
+            int[] tuple = tuples.get(ti);
+            for (int i = 0; i < tuple.length; i++) {
+                if (!vars[i].contains(tuple[i]) && tuple[i] != star) {
+                    continue top;
+                }
+            }
+            long index = 1L << bI;
+            for (int i = 0; i < tuple.length; i++) {
+                int val = tuple[i];
+                if (val != star) {
+                    supports[i][val - offset[i]][wI] |= index;
+                    inc_supports[i][val - offset[i]][wI] |= index;
+                } else {
+                    int u = supports[i].length + offset[i];
+                    for (val = offset[i]; val <= u; val = vars[i].nextValue(val)) {
+                        supports[i][val - offset[i]][wI] |= index;
                     }
                 }
+            }
+            if (--bI < 0) {
+                bI = 63;
+                wI++;
             }
         }
     }

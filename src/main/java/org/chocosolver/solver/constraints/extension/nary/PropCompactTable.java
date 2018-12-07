@@ -92,8 +92,6 @@ public class PropCompactTable extends Propagator<IntVar> {
         offset = new int[n];
         supports = new long[n][][];
         residues = new int[n][];
-        int[] wI = new int[n];
-        byte[] bI = new byte[n];
         long[] tmp;
         for (int i = 0; i < n; i++) {
             int lb = vars[i].getLB();
@@ -101,9 +99,9 @@ public class PropCompactTable extends Propagator<IntVar> {
             offset[i] = lb;
             supports[i] = new long[ub - lb + 1][currTable.words.length];
             residues[i] = new int[ub - lb + 1];
-            wI[i] = 0;
-            bI[i] = 63;
         }
+        int wI = 0;
+        byte bI = 63;
         top:
         for (int ti = 0; ti < tuples.nbTuples(); ti++) {
             int[] tuple = tuples.get(ti);
@@ -113,15 +111,16 @@ public class PropCompactTable extends Propagator<IntVar> {
                 }
             }
             for (int i = 0; i < tuple.length; i++) {
-                tmp = supports[i][tuple[i] - vars[i].getLB()];
-                tmp[wI[i]] |= 1L << (bI[i]);
-                if (--bI[i] < 0) {
-                    bI[i] = 63;
-                    wI[i]++;
-                }
+                tmp = supports[i][tuple[i] - offset[i]];
+                tmp[wI] |= 1L << (bI);
+            }
+            if (--bI < 0) {
+                bI = 63;
+                wI++;
             }
         }
     }
+
     //***********************************************************************************
     // FILTERING
     //***********************************************************************************
