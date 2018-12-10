@@ -275,9 +275,9 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
             // iterate over the values in the domain, remove the ones that are not in values
             int f = VALUES.nextSetBit(m0 - OFFSET);
             int t = VALUES.nextClearBit(f);
-            int k  = f;
-            while(k < m1){
-                if(k < t) {
+            int k = f;
+            while (k < m1) {
+                if (k < t) {
                     value = k + OFFSET;
                     assert !values.contains(value);
                     model.getSolver().getEventObserver().removeValue(this, value, cause);
@@ -290,13 +290,13 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
                         delta.add(value, cause);
                     }
                     k++;
-                }else{
+                } else {
                     VALUES.clear(f, t);
-                    f = VALUES.nextSetBit(t);
+                    k = f = VALUES.nextSetBit(t);
                     t = VALUES.nextClearBit(f);
                 }
             }
-            VALUES.clear(f, m1);
+            if(f < m1)VALUES.clear(f, m1);
             m0 = values.nextValueOut(m1 + OFFSET);
         }
 
