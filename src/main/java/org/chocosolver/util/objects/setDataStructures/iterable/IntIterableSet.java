@@ -67,15 +67,28 @@ public interface IntIterableSet extends ISet{
 
     /**
      * @param aValue (exclusive)
-     * @return the value after aValue
+     * @return the value after 'aValue' or {@link Integer#MAX_VALUE}
      */
     int nextValue(int aValue);
 
+
     /**
      * @param aValue (exclusive)
-     * @return the value before aValue
+     * @return the value outside thisn after 'aValue'
+     */
+    int nextValueOut(int aValue);
+
+    /**
+     * @param aValue (exclusive)
+     * @return the value before 'aValue' or or {@link Integer#MIN_VALUE}
      */
     int previousValue(int aValue);
+
+    /**
+     * @param aValue (exclusive)
+     * @return the value outside this, before'aValue'
+     */
+    int previousValueOut(int aValue);
 
     /**
      * Returns a carbon-copy of this set

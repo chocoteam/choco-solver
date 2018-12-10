@@ -212,6 +212,30 @@ public class IntIterableRangeSetTest {
 		Assert.assertEquals(is.nextValue(8), 9);
 	}
 
+    @Test(groups="1s", timeOut=60000)
+    public void testNextValueOut() {
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{1,3,5,5,7,10};
+        is.SIZE = 6;
+        is.CARDINALITY = 8;
+
+        Assert.assertEquals(is.nextValueOut(-10), -9);
+        Assert.assertEquals(is.nextValueOut(-1), 0);
+        Assert.assertEquals(is.nextValueOut(0), 4);
+        Assert.assertEquals(is.nextValueOut(1), 4);
+        Assert.assertEquals(is.nextValueOut(2), 4);
+        Assert.assertEquals(is.nextValueOut(3), 4);
+        Assert.assertEquals(is.nextValueOut(4), 6);
+        Assert.assertEquals(is.nextValueOut(5), 6);
+        Assert.assertEquals(is.nextValueOut(6), 11);
+        Assert.assertEquals(is.nextValueOut(7), 11);
+        Assert.assertEquals(is.nextValueOut(8), 11);
+        Assert.assertEquals(is.nextValueOut(9), 11);
+        Assert.assertEquals(is.nextValueOut(10), 11);
+        Assert.assertEquals(is.nextValueOut(15), 16);
+
+    }
+
 	@Test(groups="1s", timeOut=60000)
 	public void testPrevValue() {
 		IntIterableRangeSet is = new IntIterableRangeSet();
@@ -259,6 +283,29 @@ public class IntIterableRangeSetTest {
 		Assert.assertEquals(is.previousValue(4), 2);
 
 	}
+
+    @Test(groups="1s", timeOut=60000)
+    public void testPrevValueOut() {
+        IntIterableRangeSet is = new IntIterableRangeSet();
+        is.ELEMENTS = new int[]{1,3,5,5,7,10};
+        is.SIZE = 6;
+        is.CARDINALITY = 8;
+
+        Assert.assertEquals(is.previousValueOut(15), 14);
+        Assert.assertEquals(is.previousValueOut(11), 6);
+        Assert.assertEquals(is.previousValueOut(10), 6);
+        Assert.assertEquals(is.previousValueOut(9), 6);
+        Assert.assertEquals(is.previousValueOut(8), 6);
+        Assert.assertEquals(is.previousValueOut(7), 6);
+        Assert.assertEquals(is.previousValueOut(6), 4);
+        Assert.assertEquals(is.previousValueOut(5), 4);
+        Assert.assertEquals(is.previousValueOut(4), 0);
+        Assert.assertEquals(is.previousValueOut(3), 0);
+        Assert.assertEquals(is.previousValueOut(2), 0);
+        Assert.assertEquals(is.previousValueOut(1), 0);
+        Assert.assertEquals(is.previousValueOut(0), -1);
+        Assert.assertEquals(is.previousValueOut(-1), -2);
+    }
 
 	@Test(groups="1s", timeOut=60000)
 	public void testMin() {
@@ -655,4 +702,6 @@ public class IntIterableRangeSetTest {
 		Assert.assertEquals(is.SIZE, 6);
 		Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{7,7,11,12,15,15});
 	}
+
+
 }

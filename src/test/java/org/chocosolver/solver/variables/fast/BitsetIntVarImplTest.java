@@ -17,6 +17,8 @@ import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,7 +36,7 @@ public class BitsetIntVarImplTest {
         var = new BitsetIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Model());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemoveValue() throws Exception {
         setUp();
         Assert.assertFalse(var.removeValue(7, Cause.Null));
@@ -42,7 +44,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(var.contains(0));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemoveInterval() throws Exception {
         setUp();
         Assert.assertFalse(var.removeInterval(7, 8, Cause.Null));
@@ -51,7 +53,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(var.contains(3));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdateLowerBound() throws Exception {
         setUp();
         Assert.assertFalse(var.updateLowerBound(-6, Cause.Null));
@@ -61,7 +63,7 @@ public class BitsetIntVarImplTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdateUpperBound() throws Exception {
         setUp();
         Assert.assertFalse(var.updateUpperBound(6, Cause.Null));
@@ -71,25 +73,25 @@ public class BitsetIntVarImplTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetLB() throws Exception {
         setUp();
         Assert.assertEquals(-5, var.getLB());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetUB() throws Exception {
         setUp();
         Assert.assertEquals(5, var.getUB());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetDomainSize() throws Exception {
         setUp();
         Assert.assertEquals(5, var.getDomainSize());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testNextValue() throws Exception {
         setUp();
         Assert.assertEquals(-5, var.nextValue(-6));
@@ -97,7 +99,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(Integer.MAX_VALUE, var.nextValue(5));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPreviousValue() throws Exception {
         setUp();
         Assert.assertEquals(5, var.previousValue(6));
@@ -105,20 +107,20 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(Integer.MIN_VALUE, var.previousValue(-5));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testHasEnumeratedDomain() throws Exception {
         setUp();
         Assert.assertTrue(var.hasEnumeratedDomain());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetTypeAndKind() throws Exception {
         setUp();
         Assert.assertTrue((Variable.INT & var.getTypeAndKind()) != 0);
         Assert.assertTrue((Variable.VAR & var.getTypeAndKind()) != 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetValueIterator() throws Exception {
         setUp();
         DisposableValueIterator vit = var.getValueIterator(true);
@@ -150,7 +152,7 @@ public class BitsetIntVarImplTest {
         vit.dispose();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetRangeIterator() throws Exception {
         setUp();
         DisposableRangeIterator rit = var.getRangeIterator(true);
@@ -184,7 +186,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(rit.hasPrevious());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals0() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -193,7 +195,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -203,7 +205,7 @@ public class BitsetIntVarImplTest {
         x.removeValues(rems, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals11() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -214,7 +216,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(6));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals12() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -225,7 +227,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(9));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals13() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -236,7 +238,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.getDomainSize() == 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals14() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -247,7 +249,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(2));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemVals15() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -257,7 +259,7 @@ public class BitsetIntVarImplTest {
         x.removeValues(rems, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -268,7 +270,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getLB(), -1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -279,7 +281,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getLB(), -3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -290,7 +292,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals31() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -302,7 +304,7 @@ public class BitsetIntVarImplTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -312,7 +314,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.removeValues(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 3});
@@ -322,7 +324,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(x.removeValues(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemVals5() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1, false);
@@ -333,7 +335,7 @@ public class BitsetIntVarImplTest {
         Assert.fail();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{0, 2, 3});
@@ -344,7 +346,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getLB(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemVals7() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{0, 1, 3});
@@ -355,7 +357,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -364,7 +366,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds2() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -373,7 +375,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -382,7 +384,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds4() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -390,14 +392,14 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds5() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
         x.updateBounds(4, -2, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 0, 3});
@@ -406,7 +408,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds7() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 0, 3});
@@ -415,7 +417,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds8() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 0, 3});
@@ -424,7 +426,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testUpdBounds9() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 0, 3});
@@ -432,21 +434,21 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds10() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 0, 3});
         x.updateBounds(4, -2, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testUpdBounds11() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
         x.updateBounds(3, 4, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut0() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -455,7 +457,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -475,7 +477,7 @@ public class BitsetIntVarImplTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut11() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -486,7 +488,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(6));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut12() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -497,7 +499,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(9));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut13() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -508,7 +510,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getDomainSize(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut14() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -519,7 +521,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.isInstantiatedTo(2));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut15() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{2, 5, 6, 8, 9});
@@ -529,7 +531,7 @@ public class BitsetIntVarImplTest {
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut21() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -540,7 +542,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getLB(), -1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut22() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -552,7 +554,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut3() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -563,7 +565,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getLB(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut41() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -3, 3, false);
@@ -573,7 +575,7 @@ public class BitsetIntVarImplTest {
         Assert.assertTrue(x.removeAllValuesBut(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut42() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-3, 3});
@@ -583,7 +585,7 @@ public class BitsetIntVarImplTest {
         Assert.assertFalse(x.removeAllValuesBut(rems, Cause.Null));
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut5() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1, false);
@@ -593,7 +595,7 @@ public class BitsetIntVarImplTest {
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{0, 2, 3});
@@ -605,41 +607,41 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.getUB(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void testRemValsBut7() throws ContradictionException {
         Model model = new Model();
-        IntVar x = model.intVar("X", new int[]{-27,-25,-20});
+        IntVar x = model.intVar("X", new int[]{-27, -25, -20});
         IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-29);
-        rems.addAll(-29,-28,-26,-22,-21);
+        rems.addAll(-29, -28, -26, -22, -21);
         x.removeAllValuesBut(rems, Cause.Null);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut8() throws ContradictionException {
         Model model = new Model();
-        IntVar x = model.intVar("X", new int[]{-27,-25,-21});
+        IntVar x = model.intVar("X", new int[]{-27, -25, -21});
         IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-29);
-        rems.addAll(-29,-28,-26,-22,-21);
+        rems.addAll(-29, -28, -26, -22, -21);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), -21);
         Assert.assertEquals(x.getUB(), -21);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testRemValsBut9() throws ContradictionException {
         Model model = new Model();
-        IntVar x = model.intVar("X", new int[]{-29,-25,-21});
+        IntVar x = model.intVar("X", new int[]{-29, -25, -21});
         IntIterableBitSet rems = new IntIterableBitSet();
         rems.setOffset(-29);
-        rems.addAll(-29,-28,-26,-22,-20);
+        rems.addAll(-29, -28, -26, -22, -20);
         x.removeAllValuesBut(rems, Cause.Null);
         Assert.assertEquals(x.getLB(), -29);
         Assert.assertEquals(x.getUB(), -29);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL1() throws ContradictionException {
         Model s = new Model();
         IntVar i = s.intVar("i", new int[]{0, 1, 100, 200});
@@ -648,7 +650,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(i.getUB(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL2() throws ContradictionException {
         Model s = new Model();
         IntVar i = s.intVar("i", new int[]{0, 1, 100, 200});
@@ -657,7 +659,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(i.getLB(), 100);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJL3() throws ContradictionException {
         Model s = new Model();
         IntVar i = s.intVar("i", new int[]{0, 1, 50, 100, 200});
@@ -668,8 +670,8 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(i.getUB(), 50);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testNextOut1(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNextOut1() {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1);
         Assert.assertEquals(x.nextValueOut(-4), -3);
@@ -678,7 +680,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.nextValueOut(2), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testNextOut2() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1);
@@ -689,10 +691,10 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.nextValueOut(0), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testNextOut3() throws ContradictionException {
         Model model = new Model();
-        IntVar x = model.intVar("X", new int[]{-2,-1,1,2,5,6,7});
+        IntVar x = model.intVar("X", new int[]{-2, -1, 1, 2, 5, 6, 7});
         Assert.assertEquals(x.nextValueOut(-4), -3);
         Assert.assertEquals(x.nextValueOut(-3), 0);
         Assert.assertEquals(x.nextValueOut(0), 3);
@@ -701,8 +703,8 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.nextValueOut(8), 9);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testPreviousOut1(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPreviousOut1() {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1);
         Assert.assertEquals(x.previousValueOut(4), 3);
@@ -711,7 +713,7 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.previousValueOut(-2), -3);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPreviousOut2() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", -1, 1);
@@ -722,15 +724,49 @@ public class BitsetIntVarImplTest {
         Assert.assertEquals(x.previousValueOut(0), -1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testPreviousOut3() throws ContradictionException {
         Model model = new Model();
-        IntVar x = model.intVar("X", new int[]{-2,-1,1,2,5,6,7});
+        IntVar x = model.intVar("X", new int[]{-2, -1, 1, 2, 5, 6, 7});
         Assert.assertEquals(x.previousValueOut(9), 8);
         Assert.assertEquals(x.previousValueOut(8), 4);
         Assert.assertEquals(x.previousValueOut(4), 3);
         Assert.assertEquals(x.previousValueOut(3), 0);
         Assert.assertEquals(x.previousValueOut(0), -3);
         Assert.assertEquals(x.previousValueOut(-3), -4);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testremoveAllValuesBut1() throws ContradictionException {
+        Model model = new Model();
+        IntVar x = model.intVar("X", new int[]{-2, -1, 1, 2, 5, 6, 7});
+        IntIterableRangeSet check = IntIterableSetUtils.extract(x);
+        IntIterableRangeSet values = new IntIterableRangeSet(new int[]{-2,-1,0,2,3,7});
+        check.retainAll(values);
+        x.removeAllValuesBut(values, Cause.Null);
+        Assert.assertEquals(IntIterableSetUtils.extract(x), check);
+    }
+
+    @Test(groups = "10s", timeOut = 120000)
+    public void testRAL1() throws ContradictionException {
+        int ub = 115200;
+        int nIter = 1000;
+        IntIterableRangeSet values = new IntIterableRangeSet(new int[]{
+                3, 1354545, 103, 1003, 953, 267453, 69483, 351658,
+                9999, 11500000, 8569421, 9984999, 158085});
+        for (int size = 1152; size <= ub; size *= 10) {
+            long time = System.currentTimeMillis();
+            IntIterableRangeSet check = values.duplicate();
+            check.retainBetween(0, ub);
+            for (int k = 0; k < nIter; k++) {
+                Model m = new Model();
+                IntVar[] X = m.intVarArray(5, 0, ub, false);
+                for (int i = 0; i < X.length; i++) {
+                    X[i].removeAllValuesBut(values, Cause.Null);
+                    Assert.assertEquals(IntIterableSetUtils.extract(X[i]), check);
+                }
+            }
+            System.out.println(size + " : " + (System.currentTimeMillis() - time) + "ms");
+        }
     }
 }

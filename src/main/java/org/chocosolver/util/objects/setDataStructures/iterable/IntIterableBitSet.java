@@ -117,6 +117,17 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
     }
 
     @Override
+    public int nextValueOut(int aValue) {
+	    int val = aValue - offset;
+	    if(val < -1 || val >= values.length()){
+	        return aValue + 1;
+        }else{
+            val = values.nextClearBit(val + 1);
+            return val + offset;
+        }
+    }
+
+    @Override
     public int previousValue(int aValue) {
         int ub = values.previousSetBit(values.length());
         if (ub >= 0) {
@@ -132,6 +143,17 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
             }
         }
         return Integer.MIN_VALUE;
+    }
+
+    @Override
+    public int previousValueOut(int aValue) {
+        int val = aValue - offset;
+        if(val <= -1 || val > values.length()){
+            return aValue - 1;
+        }else{
+            val = values.previousClearBit(val - 1);
+            return val + offset;
+        }
     }
 
     public String toString() {

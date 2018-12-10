@@ -158,11 +158,11 @@ public class IntIterableRangeSet implements IntIterableSet {
     /**
      * @return number of ranges in this
      */
-    public int getNbRanges(){
+    public int getNbRanges() {
         return SIZE >> 1;
     }
 
-    public int cardinality(){
+    public int cardinality() {
         return CARDINALITY;
     }
 
@@ -171,7 +171,7 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     public int maxOfRange(int r) {
-        return ELEMENTS[(r<<1)+1];
+        return ELEMENTS[(r << 1) + 1];
     }
 
 
@@ -575,26 +575,13 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     @Override
     public int nextValue(int e) {
+        e++;
         int p = rangeOf(e);
         int next = Integer.MAX_VALUE;
         if (p == -1 && SIZE > 0) {
             next = ELEMENTS[0];
         } else if (p >= 0) {
-            int i = (p - 1) << 1;
-            int c = ELEMENTS[i] == e ? 1 : 0;
-            c += ELEMENTS[i + 1] == e ? 2 : 0;
-            switch (c) {
-                case 0:
-                case 1:
-                    // not last element of the range
-                    next = e + 1;
-                    break;
-                case 2:
-                case 3:
-                    if (i + 2 < SIZE) {
-                        next = ELEMENTS[i + 2];
-                    }
-            }
+            next = e;
         } else if (p > -((SIZE >> 1) + 1)) {
             return ELEMENTS[(-p - 1) << 1];
         }
@@ -602,29 +589,42 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     @Override
+    public int nextValueOut(int e) {
+        e++;
+        int p = rangeOf(e);
+        int next;
+        if (p >= 0) {
+            next = ELEMENTS[((p - 1) << 1) + 1] + 1;
+        } else {
+            next = e;
+        }
+        return next;
+    }
+
+    @Override
     public int previousValue(int e) {
+        e--;
         int p = rangeOf(e);
         int prev = Integer.MIN_VALUE;
         if (p == -((SIZE >> 1) + 1) && SIZE > 0) {
             prev = ELEMENTS[SIZE - 1];
         } else if (p >= 0) {
-            int i = (p - 1) << 1;
-            int c = ELEMENTS[i] == e ? 1 : 0;
-            c += ELEMENTS[i + 1] == e ? 2 : 0;
-            switch (c) {
-                case 0:
-                case 2:
-                    // not last element of the range
-                    prev = e - 1;
-                    break;
-                case 1:
-                case 3:
-                    if (i > 1) {
-                        prev = ELEMENTS[i - 1];
-                    }
-            }
+            prev = e;
         } else if (p < -1) {
-            return ELEMENTS[((-p - 1) << 1) - 1];
+            prev = ELEMENTS[((-p - 1) << 1) - 1];
+        }
+        return prev;
+    }
+
+    @Override
+    public int previousValueOut(int e) {
+        e--;
+        int p = rangeOf(e);
+        int prev;
+        if (p >= 0) {
+            prev = ELEMENTS[((p - 1) << 1)] - 1;
+        } else {
+            prev = e;
         }
         return prev;
     }
