@@ -1,22 +1,3 @@
-alabaster == 0.7.7
-Cython == 0.24
-pyOpenSSL == 18.0.0
-backports.functools_lru_cache == 1.2.1
-certifi == 2016.2.28
-charade == 1.0.3
-ed25519ll == 0.6
-Genshi == 0.7
-protobuf == 3.0.0b2.post2
-ipaddr == 2.1.11
-jsonschema == 2.5.1
-keyring == 9.0
-lxml == 3.6.0
-ndg_httpsclient == 0.4.0
-pyasn1 == 0.1.9
-pytest == 2.9.1
-redis == 2.10.5
-setuptools_svn == 1.1
-simplejson == 3.8.2
-wincertstore == 0.2
-pyxdg == 0.25
-sphinxcontrib-bibtex==0.3.3
+alabaster == 0.7.12
+sphinxcontrib-bibtex==0.4.1
+Sphinx>=1.8.2

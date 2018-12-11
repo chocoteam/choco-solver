@@ -80,7 +80,8 @@ To specify you want to use bounded domains, set the ``boundedDomain`` argument t
  IntVar v = model.intVar("v", 1, 12, true);
 
 .. note::
-When using bounded domains, branching decisions must either be domain splits or bound assignments/removals.
+
+   When using bounded domains, branching decisions must either be domain splits or bound assignments/removals.
    Indeed, assigning a bounded variable to a value strictly comprised between its bounds may results in infinite loop
    because such branching decisions will not be refutable.
 
@@ -89,8 +90,8 @@ Enumerated domains
 
 When the domain of an integer variable is said to be *enumerated*, it is represented through
 the set of possible values, in the form:
- - :math:`[\![a,b]\!]` where :math:`a` and :math:`b` are integers such that :math:`a <= b`
- - {:math:`a,b,c,..,z`}, where :math:`a < b < c ... < z`.
+- :math:`[\![a,b]\!]` where :math:`a` and :math:`b` are integers such that :math:`a <= b`
+- {:math:`a,b,c,..,z`}, where :math:`a < b < c ... < z`.
 Enumerated domains provide more information than bounded domains but are heavier in memory (the domain usually requires a bitset).
 
 To specify you want to use enumerated domains, either set the ``boundedDomain`` argument to ``false`` when creating variables by specifying two bounds
@@ -113,8 +114,8 @@ Boolean variable
 
 Boolean variables, ``BoolVar``, are specific ``IntVar`` that take their value in :math:`[\![0,1]\!]`.
 The avantage of ``BoolVar`` is twofold:
- - They can be used to say whether or not constraint should be satisfied (reification)
- - Their domain, and some filtering algorithms, are optimized
+- They can be used to say whether or not constraint should be satisfied (reification)
+- Their domain, and some filtering algorithms, are optimized
 
 To create a new boolean variable: ::
 
@@ -212,12 +213,14 @@ Constraint can be declared in *extension*, by defining the valid/invalid tuples,
 For a given requirement, there can be several constraints/propagators available.
 A widely used example is the `AllDifferent` constraint which ensures that all its variables take a distinct value in a solution.
 Such a rule can be formulated using :
- - a clique of basic inequality constraints,
- - a generic table constraint (an extension constraint that lists the valid tuples),
- - a dedicated global constraint analysing :
-        - instantiated variables (*Forward checking propagator*),
-        - variable domain bounds (*Bound consistency propagator*),
-        - variable domains (*Arc consistency propagator*).
+
+- a clique of basic inequality constraints,
+- a generic table constraint (an extension constraint that lists the valid tuples),
+- a dedicated global constraint analysing :
+
+  - instantiated variables (*Forward checking propagator*),
+  - variable domain bounds (*Bound consistency propagator*),
+  - variable domains (*Arc consistency propagator*).
 
 Depending on the problem to solve, the efficiency of each option may be dramatically different.
 In general, we tend to use global constraints, that capture a good part of the problem structure.
@@ -335,8 +338,8 @@ Automaton-based Constraints
 
 ``regular``, ``costRegular`` and ``multiCostRegular`` rely on an automaton, declared either implicitly or explicitly.
 There are two kinds of ``IAutomaton`` :
- - ``FiniteAutomaton``, needed for ``regular``,
- - ``CostAutomaton``, required for ``costRegular`` and ``multiCostRegular``.
+- ``FiniteAutomaton``, needed for ``regular``,
+- ``CostAutomaton``, required for ``costRegular`` and ``multiCostRegular``.
 
 
 ``FiniteAutomaton`` embeds an ``Automaton`` object provided by the ``dk.brics.automaton`` library.
@@ -394,9 +397,9 @@ Then you must implement the two following methods:
     This method checks the current state of the propagator. It is used for constraint reification.
     It checks whether the propagator will be always satisfied (``ESat.TRUE``), never satisfied (``ESat.FALSE``)
     or undefined (``ESat.UNDEFINED``) according to the current state of its domain variables. For instance,
-     - :math:`A \neq B` will always be satisfied when $A=\{0,1,2\}$ and :math:`B=\{4,5\}`.
-     - :math:`A = B` will never be satisfied when :math:`A=\{0,1,2\}` and :math:`B=\{4,5\}`.
-     - The entailment of :math:`A \neq B` cannot be defined when :math:`A=\{0,1,2\}` and :math:`B=\{1,2,3\}`.
+    - :math:`A \neq B` will always be satisfied when $A=\{0,1,2\}$ and :math:`B=\{4,5\}`.
+    - :math:`A = B` will never be satisfied when :math:`A=\{0,1,2\}` and :math:`B=\{4,5\}`.
+    - The entailment of :math:`A \neq B` cannot be defined when :math:`A=\{0,1,2\}` and :math:`B=\{1,2,3\}`.
 
 ``ESat isEntailed()`` implementation may be approximate
 but should at least cover the case where all variables are instantiated, in order to check solutions.
@@ -542,7 +545,7 @@ A redundant propagator does not have to be idempotent but **a necessary propagat
 
 
 .. [#fidem] **idempotent**: calling a propagator twice has no effect, i.e. calling it
-with its output domains returns its output domains. In that case, it has reached a fix point.
+    with its output domains returns its output domains. In that case, it has reached a fix point.
 
 .. [#fmono] **monotonic**: calling a propagator with two input domains :math:`A` and :math:`B`
     for which :math:`A \subseteq B` returns two output domains :math:`A'` and :math:`B'` for which :math:`A' \subseteq B'`.
