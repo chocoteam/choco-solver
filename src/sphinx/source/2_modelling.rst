@@ -319,7 +319,7 @@ The SAT solver is internally managed as a constraint (and a propagator), that's 
 
 .. important::
 
-    The SAT solver is directly inspired by `MiniSat <http://minisat.se/>`_:cite:`EenS03`.
+    The SAT solver is directly inspired by `MiniSat <http://minisat.se/>`_.
     However, it only propagates clauses. Neither learning nor search is implemented.
 
 Clauses can be added with the ``SatFactory`` (refer to javadoc for details).

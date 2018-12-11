@@ -87,7 +87,7 @@ The *cut computer* function defines how the cut should bound the objective varia
 The input *number* is the best solution value found so far, the output *number* define the new bound.
 When maximizing (resp. minimizing) a problem, the cut limits the lower bound (resp. upper bound) of the objective variable.
 For instance, one may want to indicate that the value of the objective variable is the next solution should be
- greater than or equal to the best value + 10 ::
+greater than or equal to the best value + 10 ::
 
     ObjectiveManager<IntVar, Integer> oman = solver.getObjectiveManager();
     oman.setCutComputer(n -> n - 10);
@@ -347,6 +347,9 @@ In Java 8, this can be shortened using lambda expressions: ::
         s.limitSearch(() -> { /*todo return true if you want to stop search*/ });
 
 
+.. [#f1] Resolution events are: backtracks, fails, nodes, solutions, time or user-defined ones.
+
+
 Using resolution statistics
 ===========================
 
@@ -421,7 +424,7 @@ If the resolution process reached a limit before ending *naturally*, the title o
 
     - Incomplete search - Limit reached.
 
-The body of the message remains the same. The message is formatted thanks to the ``IMeasureRecorder`` interface which is a :ref:`search monitor <44_monitors_label>`.
+The body of the message remains the same. The message is formatted thanks to the ``IMeasureRecorder``.
 
 On a call to ``solver.showSolutions()``, on each solution the following message will be printed:
 
@@ -573,9 +576,9 @@ List of available search strategy
 Most available search strategies are listed in ``Search``.
 This factory enables you to create search strategies using static methods.
 Most search strategies rely on :
- - variable selectors (see package ``org.chocosolver.solver.search.strategy.selectors.values``)
- - value selectors (see package ``org.chocosolver.solver.search.strategy.selectors.variables``)
- - operators (see ``DecisionOperator``)
+- variable selectors (see package ``org.chocosolver.solver.search.strategy.selectors.values``)
+- value selectors (see package ``org.chocosolver.solver.search.strategy.selectors.variables``)
+- operators (see ``DecisionOperator``)
 
 ``Search`` is not exhaustive, look at the selectors package to see learn more search possibilities.
 
@@ -863,8 +866,8 @@ The implemented explanation framework is an adapation of the well-konw SAT `CDCL
 By exploiting the implication graph (that records events, i.e. variables' modifications), this algorithm is able to derive a new constraint from the events that led to a contradiction.
 Once added to the constraint network, this constraint makes possible to "backjump" (non-chronological backtrack) to the appropriate decision in the decision path.
 
-In CP, learned constraints are denoted "signed-clauses" which is a disjunction of signed-literals, i.e. membership unary constraints : :math:`\bigvee-{i=0}^{n}X_i\inD_i`
-where :math:`X_i` are variables and :math:`D_i`a set of values.
+In CP, learned constraints are denoted "signed-clauses" which is a disjunction of signed-literals, i.e. membership unary constraints : :math:`\bigvee_{i=0}^{n}X_i \in D_i`
+where :math:`X_i` are variables and :math:`D_i` a set of values.
 A signed-clause is satisfied when at least one signed-literal is satisfied.
 
 
@@ -952,25 +955,8 @@ Indeed, the search loop is composed of three parts, each of them with a specific
 .. [#PLM] Narendra Jussien and Olivier Lhomme. Unifying search algorithms for CSP. Technical report 02-3-INFO, EMN.
 
 Any component can be freely implemented and attached to the search loop in order to customize its behavior.
-There exists some pre-defined `Move` and `Learn` implementations, avaiable in :ref:`550_slf`.
-
-**Move**:
-
-:ref:`550_slfdfs`,
-:ref:`550_slflds`,
-:ref:`550_slfdds`,
-:ref:`550_slfhbfs`,
-:ref:`550_slfseq`,
-:ref:`550_slfrestart`,
-:ref:`550_slfrestartonsol`,
-:ref:`550_slflns`.
-
-**Learn**:
-
-:ref:`550_slfcbj`,
-:ref:`550_slfdbt`,
-
-One can also define its own `Move` or `Learn` implementation, more details are given in :ref:`48_plm`.
+There exists some pre-defined `Move` and `Learn` implementations.
+One can also define its own `Move` or `Learn` implementation.
 
 
 .. _45_define_search_label:

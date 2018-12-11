@@ -11,9 +11,9 @@ Choco Solver User Guide documentation
 =====================================
 
 .. toctree::
-   :maxdepth: 5
+    :maxdepth: 5
 
- 1_overview
- 2_modelling
- 3_solving
- 4_advanced
+    1_overview
+    2_modelling
+    3_solving
+    4_advanced

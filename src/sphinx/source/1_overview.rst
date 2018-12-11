@@ -165,7 +165,7 @@ With SBT
 
 To declare Choco as a dependency of your project, simply update the ``build.sbt`` of your project by adding the following instruction:
 
-.. code-block:: sbt
+.. code-block:: java
 
    libraryDependencies ++= Seq(
      "org.choco-solver" % "choco-solver" % "X.Y.Z",

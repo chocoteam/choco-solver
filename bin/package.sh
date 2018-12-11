@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source bin/commons.sh
+source commons.sh
 set -ex
 #
 # Make archive for the release
