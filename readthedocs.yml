@@ -9,4 +9,4 @@ python:
   use_system_site_packages: true
   pip_install: true
 
-requirements_file: source/requirements.txt
+requirements_file: src/sphinx/source/requirements.txt
