@@ -50,6 +50,7 @@ public class PropGreaterOrEqualX_YCTest {
         pR.remove(17);
         pE.remove(17);
         checkWhenXisPivot(prop, y, oR, oD, oE, x, pR, pE);
+        mo.getSolver().setLearningSignedClauses();
     }
 
     private void checkWhenXisPivot(PropGreaterOrEqualX_YC prop,

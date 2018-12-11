@@ -737,26 +737,16 @@ Even though there are various ways to repair the partial solution, we focus on t
 to assign a value to variables not yet instantiated.
 These two phases are repeated until the search stops (optimality proven or limit reached).
 
-The ``LNSFactory`` provides pre-defined configurations.
+The ``INeighborFactory`` provides pre-defined configurations.
 Here is the way to declare LNS to solve a problem: ::
 
-    LNSFactory.rlns(solver, ivars, 30, 20140909L, new FailCounter(solver, 100));
+    solver.setLNS(INeighborFactory.random(ivars, new FailCounter(solver, 100));
     solver.findOptimalSolution(Model.MINIMIZE, objective);
 
 It declares a *random* LNS which, on a solution, computes a partial solution based on ``ivars``.
 If no solution are found within 100 fails (``FailCounter(solver, 100)``), a restart is forced.
-Then, every ``30`` calls to this neighborhood, the number of fixed variables is randomly picked.
-``20140909L`` is the seed for the ``java.util.Random``.
 
-
-The instruction ``LNSFactory.rlns(solver, vars, level, seed, frcounter)`` runs:
-
-.. literalinclude:: /../../choco-solver/src/main/java/org/chocosolver/solver/search/loop/lns/LNSFactory.java
-   :language: java
-   :lines: 112-114
-   :linenos:
-
-The factory provides other LNS configurations together with built-in neighbors.
+The factory provides other built-in neighbors.
 
 Neighbors
 ---------
@@ -814,7 +804,7 @@ It forces to implements the following methods:
 | ``void recordSolution()``                                              | Action to perform on a solution (typicallu, storing the current variables' value).                                     |
 +------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 +------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
-| ``Decision fixSomeVariables()``                                        | Fix some variables to their value in the last solution, computing a partial solution and returns it as a decision.     |
+| ``void fixSomeVariables()``                                            | Fix some variables to their value in the last solution.                                                                |
 +------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 +------------------------------------------------------------------------+------------------------------------------------------------------------------------------------------------------------+
 | ``void restrictLess()``                                                | Relax the number of variables fixed. Called when no solution was found during a LNS run (trapped into a local optimum).|
@@ -857,7 +847,7 @@ Explanations
 Choco |version| natively support explanations [#1]_. However, no explanation engine is plugged-in by default.
 
 
-.. [#1] Narendra Jussien. The versatility of using explanations within constraint programming. Technical Report 03-04-INFO, 2003.
+.. [#1] "A Proof-Producing CSP Solver", M.Vesler and O.Strichman, AAI'10.
 
 
 Principle
@@ -869,10 +859,14 @@ It is made of a subset of the original propagators of the problem and a subset o
 Explanations represent the logical chain of inferences made by the solver during propagation in an efficient and usable manner.
 In a way, they provide some kind of a trace of the behavior of the solver as any operation needs to be explained.
 
-Explanations have been successfully used for improving constraint programming search process.
-Both complete (as the mac-dbt algorithm) and incomplete (as the decision-repair algorithm) techniques have been proposed.
-Those techniques follow a similar pattern: learning from failures by recording each domain modification with its associated explanation (provided by the solver) and taking advantage of the information gathered to be able to react upon failure by directly pointing to relevant decisions to be undone.
-Complete techniques follow a most-recent based pattern while incomplete technique design heuristics to be used to focus on decisions more prone to allow a fast recovery upon failure.
+The implemented explanation framework is an adapation of the well-konw SAT `CDCL algorithm <https://en.wikipedia.org/wiki/Conflict-driven_clause_learning>`_ to discrete constraint solver.
+By exploiting the implication graph (that records events, i.e. variables' modifications), this algorithm is able to derive a new constraint from the events that led to a contradiction.
+Once added to the constraint network, this constraint makes possible to "backjump" (non-chronological backtrack) to the appropriate decision in the decision path.
+
+In CP, learned constraints are denoted "signed-clauses" which is a disjunction of signed-literals, i.e. membership unary constraints : :math:`\bigvee-{i=0}^{n}X_i\inD_i`
+where :math:`X_i` are variables and :math:`D_i`a set of values.
+A signed-clause is satisfied when at least one signed-literal is satisfied.
+
 
 The current explanation engine is coded to be *Asynchronous, Reverse, Low-intrusive and Lazy*:
 
@@ -891,43 +885,11 @@ Lazy:
 
 To do so, all events are stored during the descent to a conflict/solution, and are then evaluated and kept if relevant, to get the explanation.
 
-In practice
------------
-
-Consider the following example:
-
-.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/ExplanationExamples.java
-   :language: java
-   :lines: 52-56,59
-   :linenos:
-
-The problem has no solution since the two constraints cannot be satisfied together.
-A naive strategy such as ``inputOrderLB(bvars)`` (which selects the variables in lexicographical order) will detect lately and many times the failure.
-By plugging-in an explanation engine, on each failure, the reasons of the conflict will be explained.
-
-.. literalinclude:: /../../choco-samples/src/test/java/org/chocosolver/docs/ExplanationExamples.java
-   :language: java
-   :lines: 57
-   :linenos:
-
-The explanation engine records *deductions* and *causes* in order to compute explanations.
-In that small example, when an explanation engine is plugged-in, the two first failures will enable to conclude that the problem has no solution.
-Only three nodes are created to close the search, seven are required without explanations.
-
 .. note::
 
-    Only unary, binary, ternary and limited number of nary propagators over integer variables have a dedicated explanation algorithm.
-    Although global constraints over integer variables are compatible with explanations, they should be either accurately explained or reformulated to fully benefit from explanations.
+    In CP, CDCL algorithm requires that each constraint of a problem can be explained. Even though a default explanation function for any constraint, dedicated functions offers better performances.
+    In Choco |version| a few set of constraints is equipped with dedicated explanation function (unary constraints, binary and ternary, sum and scalar).
 
-
-Cause
-^^^^^
-
-A cause implements ``ICause`` and must defined the ``boolean why(RuleStore ruleStore, IntVar var, IEventType evt, int value)`` method.
-Such a method add new *event filtering* rules to the ruleStore in parameter in order to *filter* relevant events among all generated during the search.
-Every time a variable is modified, the cause is specified in order to compute explanations afterwards.
-For instance, when a propagator updates the bound of an integer variable, the cause is the propagator itself.
-So do decisions, objective manager, etc.
 
 Computing explanations
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -939,41 +901,9 @@ When a contradiction occurs during propagation, it can only be thrown by:
 
 Consequently, in addition to causes, variables can also explain the current state of their domain.
 Computing the explanation of a failure consists in going up in the stack of all events generated in the current branch of the search tree and filtering the one relative to the conflict.
-The entry point is either a the unsatisfiabable propagator or the empty variable.
-
-.. note::
-
-    Explanations can be computed without failure. The entry point is a variable, and only removed values can be explained.
-
+The entry point is either the not satisfiable propagator or the empty variable.
 
 Each propagator embeds its own explanation algorithm which relies on the relation it defines over variables.
-
-
-.. warning::
-
-    Even if a naive (and weak) explanation algorithm could be provided by all constraints, we made the choice to throw an `SolverException` whenever a propagator does not defined its own explanation algorithm.
-    This is restrictive, but almost all non-global constraints support explanation, which enables reformulation.
-    The missing explanation schemas will be integrated all needs long.
-
-
-
-For instance, here is the algorithm of ``PropGreaterOrEqualX_YC`` (:math:`x \geq y + c`, ``x`` and ``y`` are integer variables, ``c`` is a constant):
-
-.. literalinclude:: /../../choco-solver/src/main/java/org/chocosolver/solver/constraints/binary/PropGreaterOrEqualX_YC.java
-   :language: java
-   :lines: 112-122
-   :linenos:
-
-The first lines indicates that the deduction is due to the application of the propagator (l.2), maybe through reification.
-Then, depending on the variable touched by the deduction, either the lower bound of ``y`` (l.4) or the upper bound of ``x`` (l.6) explains the deduction.
-Indeed, such a propagator only updates lower bound of ``y`` based on the upper bound of ``x`` and *vice versa*.
-
-Let consider that the deduction involves ``x`` and is explained by the lower bound of ``y``.
-The lower bound ``y`` needs to be explained.
-A new rule is added to the ruleStore to specify that events on the lower bound of ``y`` needs to be kept during the event stack analyse (only events generated before the current are relevant).
-When such events are found, the ruleStore can be updated, until the first event is analyzed.
-
-The results is a set of branching decisions, and a set a propagators, which applied altogether leads the conflict and thus, explained it.
 
 
 Explanations for the system
@@ -987,67 +917,23 @@ Both rely on the capacity of the explanation engine to motivate a failure, durin
     Most of the time, explanations are raw and need to be processed to be easily interpreted by users.
 
 
-Conflict-based backjumping
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Learning signed-clauses
+^^^^^^^^^^^^^^^^^^^^^^^
 
-When Conflict-based Backjumping (CBJ) is plugged-in, the search is hacked in the following way.
-On a failure, explanations are retrieved.
-From all left branch decisions explaining the failure, the last taken, *return decision*, is stored to jump back to it.
+When learning is plugged-in, the search is hacked in the following way.
+On a failure, the implication graph is analyzed in order to build a signed-clause and to define the decision to jump back to it.
 Decisions from the current one to the return decision (excluded) are erased.
-Then, the return decision is refuted and the search goes on.
-If the explanation is made of no left branch decision, the problem is proven to have no solution and search stops.
+Then, the signed-clause is added to the constraint network and automatically dominates decision refutation; then the search goes on.
+If the explanation jumps back to the root node, the problem is proven to have no solution and search stops.
 
-
-**Factory**: ``solver.explanations.ExplanationFactory``
 
 **API**: ::
 
-    CBJ.plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn)
-
-
-+ *solver*: the solver to explain.
-+ *nogoodsOn*: set to `true` to extract nogood from each conflict,. Extracting nogoods slows down the overall resolution but can reduce the search space.
-+ *userFeedbackOn*: set to `true` to store the very last explanation of the search (recommended value: `false`).
-
-Dynamic backtracking
-^^^^^^^^^^^^^^^^^^^^
-
-This strategy, Dynamic backtracking (DBT) corrects a lack of deduction of Conflict-based backjumping.
-On a failure, explanations are retrieved.
-From all left branch decisions explaining the failure, the last taken, *return decision*, is stored to jump back to it.
-Decisions from the current one to the return decision (excluded) are maintained, only the return decision is refuted and the search goes on.
-If the explanation is made of no left branch decision, the problem is proven to have no solution and search stops.
-
-
-**Factory**: ``solver.explanations.ExplanationFactory``
-
-**API**: ::
-
-    DBT.plugin(Solver solver, boolean nogoodsOn, boolean userFeedbackOn)
+    solver.setLearningSignedClauses();
 
 + *solver*: the solver to explain.
-+ *nogoodsOn*: set to `true` to extract nogood from each conflict,. Extracting nogoods slows down the overall resolution but can reduce the search space.
-+ *userFeedbackOn*: set to `true` to store the very last explanation of the search (recommended value: `false`).
 
-Explanations for the end-user
------------------------------
-
-Explaining the last failure of a complete search without solution provides information about the reasons why a problem has no solution.
-For the moment, there is no simplified way to get such explanations.
-CBJ and DBT enable retrieving an explanation of the last conflict. ::
-
-    // .. problem definition ..
-    // First manually plug CBJ, or DBT
-    ExplanationEngine ee = new ExplanationEngine(solver, userFeedbackOn);
-    ConflictBackJumping cbj = new ConflictBackJumping(ee, solver, nogoodsOn);
-    solver.plugMonitor(cbj);
-    if(!solver.solve()){
-        // If the problem has no solution, the end-user explanation can be retrieved
-        System.out.println(cbj.getLastExplanation());
-    }
-
-Incomplete search leads to incomplete explanations: as far as at least one decision is part of the explanation, there is no guarantee the failure does not come from that decision.
-On the other hand, when there is no decision, the explanation is complete.
+See `Settings` to configure learning algorithm.
 
 
 .. _440_loops_label:
