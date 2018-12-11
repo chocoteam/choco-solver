@@ -7,6 +7,12 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
+This release comes with several major modifications.
+The most important one is related to explanations.
+The previous framework is replaced by a new one based on "A Proof-Producing CSP Solver", M.Vesler and O.Strichman, AAI'10.
+
+See [notebooks](https://github.com/chocoteam/notebooks) for an example of use.
+
 ### Major features:
 
 - Update statistic dashboard (see `solver.showDashboard()`)
@@ -22,6 +28,10 @@ NEXT MILESTONE
 - Improve `IntVar#isInstantiatedTo(int)`
 
 ### Deprecated API (to be removed in next release):
+
+- `INeighbor` interface is deprecated and replaced by `Neighbor` abstract class
+- `INeighborFactory#explanationBased(IntVar...)` is deprecated, no replacement.
+- `ILearnFactory#setCBJLearning(boolean,boolean)` and `ILearnFactory#setDBTLearning(boolean,boolean)` are deprecated, see `ILearnFactory#setLearningSignedClauses()` instead
 
 ### Closed issues and pull requests:
 \#604, #605, #606
