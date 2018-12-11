@@ -14,6 +14,11 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.HashSet;
+import java.util.List;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -21,9 +26,9 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.Bounds;
 import org.chocosolver.solver.constraints.nary.automata.FA.utils.ICounter;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
-import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.Arc;
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.FastPathFinder;
 import org.chocosolver.solver.constraints.nary.automata.structure.multicostregular.StoredDirectedMultiGraph;
+import org.chocosolver.solver.constraints.nary.automata.structure.regular.Arc;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -36,8 +41,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.jgrapht.graph.DirectedMultigraph;
-
-import java.util.*;
 
 
 /**
@@ -282,7 +285,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         DirectedMultigraph<Node, Arc> graph;
 
         int n = offset;
-        graph = new DirectedMultigraph<>(new Arc.ArcFactory());
+        graph = new DirectedMultigraph<>(null, null, false);
         ArrayList<HashSet<Arc>> tmp = new ArrayList<>(totalSizes);
         for (int i = 0; i < totalSizes; i++) {
             tmp.add(new HashSet<>());

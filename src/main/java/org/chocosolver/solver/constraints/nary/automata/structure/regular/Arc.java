@@ -11,7 +11,6 @@ package org.chocosolver.solver.constraints.nary.automata.structure.regular;
 
 import org.chocosolver.memory.structure.IndexedObject;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
-import org.jgrapht.EdgeFactory;
 
 /**
  * Created by IntelliJ IDEA.
@@ -42,14 +41,6 @@ public class Arc implements IndexedObject {
     @Override
     public int getObjectIdx() {
         return orig.state;
-    }
-
-
-    public static class ArcFactory implements EdgeFactory<Node, Arc> {
-
-        public Arc createEdge(Node node, Node node1) {
-            return new Arc(node, node1, 0, 0);
-        }
     }
 
     @Override

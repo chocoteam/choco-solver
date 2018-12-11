@@ -11,19 +11,19 @@ package org.chocosolver.solver.constraints.nary.automata.structure.multicostregu
 
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Set;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.structure.Node;
+import org.chocosolver.solver.constraints.nary.automata.structure.regular.Arc;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSetWithOffset;
 import org.jgrapht.graph.DirectedMultigraph;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Set;
 
 /**
  * Created by IntelliJ IDEA.
