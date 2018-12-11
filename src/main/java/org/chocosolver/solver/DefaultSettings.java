@@ -33,7 +33,7 @@ public class DefaultSettings implements Settings {
      * Default welcome message
      */
     private static final String DEFAULT_WELCOME_MESSAGE =
-        "** Choco 4.0.9 (2018-10) : Constraint Programming Solver, Copyright (c) 2010-2018";
+        "** Choco 4.10.0 (2018-12) : Constraint Programming Solver, Copyright (c) 2010-2018";
 
     private static final String DEFAULT_PREFIX = "TMP_";
 

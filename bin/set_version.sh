@@ -1,5 +1,5 @@
 #!/bin/bash
-source commons.sh
+source bin/commons.sh
 #Script to notify the website about a release
 
 set -ex
