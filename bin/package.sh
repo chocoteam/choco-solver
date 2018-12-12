@@ -6,6 +6,9 @@ set -ex
 # Make archive for the release
 function makeArchive(){
     VERSION=$1
+    if [ -d choco-${VERSION} ]; then
+      rm -Rf choco-${VERSION};
+    fi
     mkdir choco-${VERSION} || quit "unable to make choco-${VERSION}"
     git checkout ${VERSION} || quit "unable to checkout ${VERSION}"
     mvn -q clean install -DskipTests || quit "unable to install"
@@ -106,7 +109,10 @@ NEXT=$(echo "${VERSION%.*}.$((${VERSION##*.}+1))") || quit "Unable to get next r
 curl -i -sH "$AUTH" --data '{ "title": '\""${NEXT}"\"'}' \
         "${GH_API}milestones"
 
-rmdir choco-${VERSION}
-rm choco-${VERSION}.zip
+if [ -d choco-${VERSION} ]; then
+  rm -Rf choco-${VERSION} || quit "Unable to remove choco-${VERSION} dir"
+fi
+#rm choco-${VERSION}.zip
 rm ${temp_file} || quit "Unable to remove tmp file"
+
 git checkout master

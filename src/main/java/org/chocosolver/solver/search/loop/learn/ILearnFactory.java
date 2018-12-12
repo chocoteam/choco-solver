@@ -52,19 +52,4 @@ public interface ILearnFactory extends ISelf<Solver> {
         learner.setExplanation(new ExplanationForSignedClause(evtObs.getGI().get()));
         ref().setLearner(learner);
     }
-
-    /**
-     * @deprecated does nothing, will be removed in next version
-     */
-    @Deprecated
-    default void setCBJLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-    }
-
-    /**
-     * @deprecated does nothing, will be removed in next version
-     */
-    @Deprecated
-    default void setDBTLearning(boolean nogoodsOn, boolean userFeedbackOn) {
-
-    }
 }

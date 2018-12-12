@@ -17,16 +17,6 @@ NEXT MILESTONE
 4.10.0 - 12 Dec 2018
 -------------------
 
-### Major features:
-
-### Deprecated API (to be removed in next release):
-
-### Closed issues and pull requests:
-
-
-4.10.0 - 11 Dec 2018
--------------------
-
 This release comes with several major modifications.
 The most important one is related to explanations.
 The previous framework is replaced by a new one based on "A Proof-Producing CSP Solver", M.Vesler and O.Strichman, AAI'10.

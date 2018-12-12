@@ -63,14 +63,6 @@ public class INeighborFactory {
         return new ReversePropagationGuidedNeighborhood(vars, 0, 30, 10);
     }
 
-    /**
-     * @deprecated does nothing, will be removed in next version
-     */
-    @Deprecated
-    public static Neighbor explanationBased(IntVar... vars) {
-        throw new UnsupportedOperationException("Deprecated -- will be removed in the next release");
-    }
-
 	/**
      * Creates a composite Neighbor grouping a set of neighbors
      * @param neighbors a set of neighbors to be grouped
