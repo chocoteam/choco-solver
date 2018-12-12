@@ -9,6 +9,12 @@
  */
 package org.chocosolver.solver.constraints;
 
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
+
+import java.util.Arrays;
+import java.util.Random;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -20,12 +26,6 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
 
 /**
  * <br/>
@@ -296,10 +296,10 @@ public class ConstraintTest {
         Assert.assertEquals(vars[0].getPropagators(), propagators);
 
         Assert.assertEquals(vars[1].getPIndices(), new int[]{1,0,0,0,0,0,0,0});
-        Assert.assertEquals(vars[1].getPropagators(), new Propagator[]{propagators[0], propagators[1], null, null, null, null, null, null});
+        Assert.assertEquals(Arrays.copyOfRange(vars[1].getPropagators(), 0,2), new Propagator[]{propagators[0], propagators[1]});
 
         Assert.assertEquals(vars[2].getPIndices(), new int[]{2,0,0,0,0,0,0,0});
-        Assert.assertEquals(vars[2].getPropagators(), new Propagator[]{propagators[0], null, null, null, null, null, null, null});
+        Assert.assertEquals(Arrays.copyOfRange(vars[2].getPropagators(), 0,1), new Propagator[]{propagators[0]});
 
         Assert.assertEquals(propagators[0].getVIndices(), new int[]{0,0,0});
         Assert.assertEquals(propagators[1].getVIndices(), new int[]{1,1});
