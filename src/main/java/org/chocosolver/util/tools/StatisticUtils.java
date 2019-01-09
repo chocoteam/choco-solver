@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -57,11 +57,11 @@ public class StatisticUtils {
     }
 
     public static double mean(int... values) {
-        return sum(values) / values.length;
+        return sum(values)*1f / values.length;
     }
 
     public static float mean(long... values) {
-        return sum(values) / values.length;
+        return sum(values)*1f / values.length;
     }
 
     public static double mean(float... values) {

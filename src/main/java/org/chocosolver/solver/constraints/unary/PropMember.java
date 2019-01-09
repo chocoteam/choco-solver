@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -102,6 +102,6 @@ public class PropMember extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return String.valueOf(vars[0].getName()) + " \u2208 " + range;
+        return vars[0].getName() + " \u2208 " + range;
     }
 }

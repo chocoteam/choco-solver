@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,15 +9,14 @@
  */
 package org.chocosolver.util.tools;
 
+import static java.util.Arrays.stream;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
-
-import static java.util.Arrays.stream;
 
 /**
  * <p>
@@ -360,7 +359,7 @@ public class VariableUtils {
      * @return
      */
     public static IntVar[] toIntVar(Model model, int... values) {
-        return Arrays.stream(values).mapToObj(i -> model.intVar(i)).toArray(IntVar[]::new);
+        return Arrays.stream(values).mapToObj(model::intVar).toArray(IntVar[]::new);
     }
 
     /**

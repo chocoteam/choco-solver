@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -706,12 +706,12 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a constant SetVar of domain {<i>value</i>}
      */
     default SetVar setVar(int... value) {
-        String name = CSTE_NAME + "{";
+        StringBuilder name = new StringBuilder(CSTE_NAME + "{");
         for (int i = 0; i < value.length; i++) {
-            name += value[i] + (i < value.length - 1 ? ", " : "");
+            name.append(value[i]).append(i < value.length - 1 ? ", " : "");
         }
-        name += "}";
-        return setVar(name, value);
+        name.append("}");
+        return setVar(name.toString(), value);
     }
 
     /**

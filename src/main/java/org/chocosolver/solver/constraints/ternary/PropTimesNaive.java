@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,14 +9,14 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import static org.chocosolver.util.tools.MathUtils.safeMultiply;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-
-import static org.chocosolver.util.tools.MathUtils.safeMultiply;
 
 /**
  * V0 * V1 = V2

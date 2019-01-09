@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -176,7 +176,7 @@ public class AlgoAllDiffBC {
             if (h[x] > x) {
                 int w = pathmax(h, h[x]);
                 if (maxsorted[i].var.updateLowerBound(bounds[w], aCause)) {
-                    filter |= true;
+                    filter = true;
                     maxsorted[i].lb = maxsorted[i].var.getLB();//bounds[w];
                 }
                 pathset(h, x, w, w);
@@ -212,7 +212,7 @@ public class AlgoAllDiffBC {
             if (h[x] < x) {
                 int w = pathmin(h, h[x]);
                 if (minsorted[i].var.updateUpperBound(bounds[w] - 1, aCause)) {
-                    filter |= true;
+                    filter = true;
                     minsorted[i].ub = minsorted[i].var.getUB();//bounds[w] - 1;
                 }
                 pathset(h, x, w, w);

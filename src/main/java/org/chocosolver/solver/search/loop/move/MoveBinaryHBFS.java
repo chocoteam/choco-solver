@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -316,7 +316,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
          * @return an array of decisions
          */
         public Decision[] toArray() {
-            return path.toArray(new Decision[path.size()]);
+            return path.toArray(new Decision[0]);
         }
 
         /**

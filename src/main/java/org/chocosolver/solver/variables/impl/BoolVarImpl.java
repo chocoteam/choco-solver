@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -400,7 +400,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public String toString() {
         if (isInstantiated()) {
-            return this.name + " = " + Integer.toString(mValue);
+            return this.name + " = " + mValue;
         } else {
             return this.name + " = " + "[0,1]";
         }

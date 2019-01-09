@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -86,15 +86,15 @@ public interface IOutputFactory extends ISelf<Solver> {
      */
     default void printShortFeatures() {
         ref().getMeasures().setReadingTimeCount(System.nanoTime() - ref().getModel().getCreationTime());
-        StringBuilder st = new StringBuilder(256);
-        st.append("Model[").append(ref().getModelName()).append("], ");
-        st.append(String.format("%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
-                ref().getModel().getNbVars(),
-                ref().getModel().getNbCstrs(),
-                ref().getMeasures().getReadingTimeCount(),
-                ref().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
-                ref().isSearchCompleted() ? "w/" : "w/o"));
-        getOut().println(st.toString());
+        String st = "Model[" + ref().getModelName() + "], "
+            + String.format(
+            "%d variables, %d constraints, building time: %.3fs, %s user-defined search strategy, %s complementary search strategy",
+            ref().getModel().getNbVars(),
+            ref().getModel().getNbCstrs(),
+            ref().getMeasures().getReadingTimeCount(),
+            ref().getModel().getSolver().isDefaultSearchUsed() ? "w/" : "w/o",
+            ref().isSearchCompleted() ? "w/" : "w/o");
+        getOut().println(st);
     }
 
     /**

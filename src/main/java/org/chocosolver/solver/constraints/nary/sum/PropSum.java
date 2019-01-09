@@ -1,13 +1,17 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.constraints.nary.sum;
+
+import static org.chocosolver.solver.constraints.Operator.EQ;
+import static org.chocosolver.solver.constraints.Operator.GE;
+import static org.chocosolver.solver.constraints.Operator.LE;
 
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
@@ -21,10 +25,6 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
-import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.constraints.Operator.GE;
-import static org.chocosolver.solver.constraints.Operator.LE;
 
 /**
  * A propagator for SUM(x_i) o b
@@ -451,13 +451,10 @@ public class PropSum extends Propagator<IntVar> {
 
     @Override
     public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        switch (o) {
-            case NQ:
-                Propagator.defaultExplain(this, explanation, front, ig, p);
-                break;
-            default:
-                doExplain(explanation, front, ig, p);
-                break;
+        if (o == Operator.NQ) {
+            Propagator.defaultExplain(this, explanation, front, ig, p);
+        } else {
+            doExplain(explanation, front, ig, p);
         }
     }
 

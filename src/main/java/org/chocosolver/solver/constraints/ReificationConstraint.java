@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -78,7 +78,8 @@ public class ReificationConstraint extends Constraint {
         Set<Variable> setOfVars = new HashSet<>();
         prepareConstraint(bVar, trueCons, setOfVars);
         prepareConstraint(bVar, falseCons, setOfVars);
-        Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(new Variable[setOfVars.size()]));
+        Variable[] allVars = ArrayUtils.append(new Variable[]{bVar}, setOfVars.toArray(
+            new Variable[0]));
         PropReif reifProp = new PropReif(allVars, trueCons, falseCons);
         return ArrayUtils.append(new Propagator[]{reifProp},
                 trueCons.getPropagators().clone(),

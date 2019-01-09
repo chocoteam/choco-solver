@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,11 +9,15 @@
  */
 package org.chocosolver.sat;
 
+import static org.chocosolver.sat.SatSolver.negated;
+import static org.chocosolver.sat.SatSolver.sign;
+import static org.chocosolver.sat.SatSolver.var;
+
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
+import java.util.ArrayList;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.sat.SatSolver.Clause;
 import org.chocosolver.solver.Model;
@@ -23,12 +27,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-
-import java.util.ArrayList;
-
-import static org.chocosolver.sat.SatSolver.negated;
-import static org.chocosolver.sat.SatSolver.sign;
-import static org.chocosolver.sat.SatSolver.var;
 
 /**
  * A propagator to deal with clauses and interface a {@link SatSolver}.
@@ -184,7 +182,7 @@ public class PropSat extends Propagator<BoolVar> {
     public void initialize() {
         if (!initialized) {
             if (add_var.size() > 0) {
-                addVariable(add_var.toArray(new BoolVar[add_var.size()]));
+                addVariable(add_var.toArray(new BoolVar[0]));
             }
             add_var.clear();
             this.initialized = true;

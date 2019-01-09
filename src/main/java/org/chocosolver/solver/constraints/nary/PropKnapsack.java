@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -54,7 +54,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         }
         this.order = ArrayUtils.array(0,n-1);
         ArraySort sorter = new ArraySort(n,false,true);
-        sorter.sort(order, n, (i1, i2) -> {return Double.compare(ratio[i2],ratio[i1]);});
+        sorter.sort(order, n, (i1, i2) -> Double.compare(ratio[i2],ratio[i1]));
     }
 
     //***********************************************************************************

@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,10 +9,15 @@
  */
 package org.chocosolver.solver.constraints;
 
+import static java.lang.Math.abs;
+
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.PropAbsolute;
@@ -112,13 +117,6 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
-
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import static java.lang.Math.abs;
 
 /**
  * Interface to make constraints over BoolVar and IntVar

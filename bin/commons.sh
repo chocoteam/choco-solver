@@ -4,7 +4,7 @@ set -ex
 
 function guess() {
     v=$1
-    if [[ $v == *-SNAPSHOT ]]; then
+    if [[ ${v} == *-SNAPSHOT ]]; then
         echo "${v%%-SNAPSHOT}"
     else
         echo "${v%.*}.$((${v##*.}+1))-SNAPSHOT"

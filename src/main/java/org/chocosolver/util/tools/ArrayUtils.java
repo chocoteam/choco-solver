@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,13 +9,17 @@
  */
 package org.chocosolver.util.tools;
 
+import static java.lang.reflect.Array.newInstance;
+
 import gnu.trove.list.array.TIntArrayList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.*;
-
-import static java.lang.reflect.Array.newInstance;
 
 /**
  * This class contains various methods for manipulating arrays.
@@ -713,7 +717,7 @@ public enum ArrayUtils {
     }
 
     /**
-     * Adapted from {@link java.util.Arrays#binarySearch0(int[], int, int, int)} ,
+     * Adapted from java.util.Arrays#binarySearch0(int[], int, int, int) ,
      * it returns the value greater or equal to key in an increasing order value array
      * If the key exists in a, it returns the index of key in a,
      * otherwise it returns the index of the closest value greater than key when gq is set to true,

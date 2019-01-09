@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,9 +10,13 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 
+import static java.lang.Integer.MAX_VALUE;
+
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.Random;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
@@ -32,12 +36,6 @@ import org.chocosolver.util.objects.ArrayVal;
 import org.chocosolver.util.objects.IVal;
 import org.chocosolver.util.objects.IntMap;
 import org.chocosolver.util.objects.MapVal;
-
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.Random;
-
-import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Implementation of the search described in:
@@ -117,7 +115,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private int nb_probes; // probing size
 
-    private int samplingIterationForced = 1; // CPRU: add this to force sampling phase
+    private int samplingIterationForced; // CPRU: add this to force sampling phase
 
     private Random random; //  a random object for the sampling phase
 
@@ -376,7 +374,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                         while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
                             m = m.getChildMoves().get(0);
                         }
-                        if(m.getChildMoves()!= rfMove){
+                        if(m.getChildMoves() != rfMove){
                             m.setChildMoves(rfMove.getChildMoves());
                         }
                     }

@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,7 +34,7 @@ public abstract class Decision<E extends Variable> implements ICause, Serializab
      * Number of time a decision can be applied.
      * For unary decision set to 1 , for binary decision, set to 2, ...
      */
-    protected int max_branching = 2;
+    protected int max_branching;
     /**
      * Indication of the decision state.
      * 0: not yet applied

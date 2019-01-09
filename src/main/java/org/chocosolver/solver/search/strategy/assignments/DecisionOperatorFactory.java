@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -57,7 +57,7 @@ public final class DecisionOperatorFactory {
 
         private final static IntEqDecision INSTANCE = new IntEqDecision();
 
-        public final static IntEqDecision getInstance() {
+        public static IntEqDecision getInstance() {
             return INSTANCE;
         }
 
@@ -96,7 +96,7 @@ public final class DecisionOperatorFactory {
         private static final long serialVersionUID = 3056222234436601667L;
         private final static IntNeqDecision INSTANCE = new IntNeqDecision();
 
-        public final static IntNeqDecision getInstance() {
+        public static IntNeqDecision getInstance() {
             return INSTANCE;
         }
 
@@ -135,7 +135,7 @@ public final class DecisionOperatorFactory {
         private static final long serialVersionUID = 2796498653106384502L;
         private final static IntSplitDecision INSTANCE = new IntSplitDecision();
 
-        public final static IntSplitDecision getInstance() {
+        public static IntSplitDecision getInstance() {
             return INSTANCE;
         }
 
@@ -171,7 +171,7 @@ public final class DecisionOperatorFactory {
 
         private final static IntReverseSplitDecision INSTANCE = new IntReverseSplitDecision();
 
-        public final static IntReverseSplitDecision getInstance() {
+        public static IntReverseSplitDecision getInstance() {
             return INSTANCE;
         }
 
@@ -215,7 +215,7 @@ public final class DecisionOperatorFactory {
 
         private final static SetForceDecision INSTANCE = new DecisionOperatorFactory.SetForceDecision();
 
-        public final static SetForceDecision getInstance() {
+        public static SetForceDecision getInstance() {
             return INSTANCE;
         }
 
@@ -257,7 +257,7 @@ public final class DecisionOperatorFactory {
 
         private final static SetRemoveDecision INSTANCE = new SetRemoveDecision();
 
-        public final static SetRemoveDecision getInstance() {
+        public static SetRemoveDecision getInstance() {
             return INSTANCE;
         }
 

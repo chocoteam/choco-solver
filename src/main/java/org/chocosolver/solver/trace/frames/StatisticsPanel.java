@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -83,8 +83,6 @@ public class StatisticsPanel extends JPanel {
             (Function<Solver, String>) solver -> String.format("%d", getUsedMemInBytes()),
     };
 
-    private final int length = fieldnames.length;
-
     /**
      * A boolean to kill the printer when the resolution ends.
      */
@@ -122,10 +120,6 @@ public class StatisticsPanel extends JPanel {
      * Chart option, modified thanks to {@link #menuChart}
      */
     private byte chartOptions;
-    /**
-     * Thread that updates data
-     */
-    private final Thread printer;
 
     /**
      * Create a simple dashboard that show statistics from 'solver' every 'duration' milliseconds
@@ -138,6 +132,7 @@ public class StatisticsPanel extends JPanel {
 
         setLayout(new BorderLayout());
 
+        int length = fieldnames.length;
         textFields = new JTextField[length];
         JLabel[] labels = new JLabel[length];
         for (int i = 0; i < length; i++) {
@@ -178,7 +173,12 @@ public class StatisticsPanel extends JPanel {
 
 
         printStatistics();
-        printer = new Thread(() -> {
+        //noinspection InfiniteLoopStatement
+        // Create Chart
+        /**
+         * Thread that updates data
+         */
+        Thread printer = new Thread(() -> {
             alive = true;
             try {
                 Thread.sleep(5);
@@ -193,15 +193,19 @@ public class StatisticsPanel extends JPanel {
                             }
                             if (chart == null) {
                                 // Create Chart
-                                chart = QuickChart.getChart("Objective", "Time (sec)", "Objective value",
-                                        solver.getObjectiveManager().getObjective().getName(), time, obj);
+                                chart = QuickChart
+                                    .getChart("Objective", "Time (sec)", "Objective value",
+                                        solver.getObjectiveManager().getObjective().getName(), time,
+                                        obj);
                                 chart.getStyler().setChartBackgroundColor(leftPane.getBackground());
                                 chartpanel = new XChartPanel<>(chart);
                                 add(chartpanel);
                                 mainFrame.pack();
                             }
                             if ((chartOptions & 0b01) != 0) {
-                                chart.updateXYSeries(solver.getObjectiveManager().getObjective().getName(), time, obj, null);
+                                chart.updateXYSeries(
+                                    solver.getObjectiveManager().getObjective().getName(), time,
+                                    obj, null);
                                 chartpanel.revalidate();
                                 chartpanel.repaint();
                             }

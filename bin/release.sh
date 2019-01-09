@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source bin/commons.sh
+source ./commons.sh
 
 function getVersionToRelease() {
     CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]"`

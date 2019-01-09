@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,8 +22,6 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
-
-import java.util.Iterator;
 
 /**
  * Propagator for Global Cardinality Constraint (GCC) for integer variables
@@ -130,15 +128,14 @@ public class PropFastGCC extends Propagator<IntVar> {
 
     private boolean filter() throws ContradictionException {
         boolean again = false;
-        Iterator<Integer> iter = valueToCompute.iterator();
-        while (iter.hasNext()) {
-            int i = iter.next();
+        for (int i : valueToCompute) {
             again |= vars[n + i].updateLowerBound(mandatories[i].size(), this);
-            again |= vars[n + i].updateUpperBound(mandatories[i].size() + possibles[i].size(), this);
+            again |= vars[n + i]
+                .updateUpperBound(mandatories[i].size() + possibles[i].size(), this);
             if (vars[n + i].isInstantiated()) {
                 if (possibles[i].size() + mandatories[i].size() == vars[n + i].getLB()) {
                     ISetIterator possIt = possibles[i].iterator();
-                    while (possIt.hasNext()){
+                    while (possIt.hasNext()) {
                         int j = possIt.nextInt();
                         mandatories[i].add(j);
                         again |= vars[j].instantiateTo(values[i], this);
@@ -147,7 +144,7 @@ public class PropFastGCC extends Propagator<IntVar> {
                     valueToCompute.remove(i);//value[i] restriction entailed
                 } else if (mandatories[i].size() == vars[n + i].getUB()) {
                     ISetIterator possIt = possibles[i].iterator();
-                    while (possIt.hasNext()){
+                    while (possIt.hasNext()) {
                         again |= vars[possIt.nextInt()].removeValue(values[i], this);
                     }
                     possibles[i].clear();

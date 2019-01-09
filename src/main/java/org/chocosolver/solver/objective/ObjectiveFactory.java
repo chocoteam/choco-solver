@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -116,7 +116,7 @@ final class SATManager implements IObjectiveManager<Variable> {
     private static final long serialVersionUID = 2115489336441115889L;
     private final static SATManager INSTANCE = new SATManager();
 
-    public final static SATManager getInstance() {
+    public static SATManager getInstance() {
         return INSTANCE;
     }
 

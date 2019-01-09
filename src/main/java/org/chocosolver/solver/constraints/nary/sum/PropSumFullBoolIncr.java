@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -112,7 +112,7 @@ public class PropSumFullBoolIncr extends PropSumFullBool {
                 doFilter |= o != Operator.LE;
             }
         } else {
-            doFilter |= true;
+            doFilter = true;
         }
         if (doFilter) {
             forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
@@ -128,6 +128,7 @@ public class PropSumFullBoolIncr extends PropSumFullBool {
     @Override
     protected PropSum opposite(){
         BoolVar[] bvars = new BoolVar[vars.length];
+        //noinspection SuspiciousSystemArraycopy
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
         return new PropSumFullBoolIncr(bvars, pos, nop(o), b + nb(o));
     }

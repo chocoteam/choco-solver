@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -587,7 +587,7 @@ public class IntIterableSetUtils {
             c += ub - lb + 1;
             set1.ELEMENTS = e;
             set1.SIZE = s;
-            change |= (set1.CARDINALITY != c);
+            change = (set1.CARDINALITY != c);
             set1.CARDINALITY = c;
         } else {
             if(s2 > 0){

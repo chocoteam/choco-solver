@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -56,7 +56,7 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
         cutComputer = (Number n) -> n.doubleValue() + precision.doubleValue();
     }
 
-    private final int getNbDecimals() {
+    private int getNbDecimals() {
         int dec = 0;
         double p = precision.doubleValue();
         while ((int) p <= 0 && dec <= 12) {

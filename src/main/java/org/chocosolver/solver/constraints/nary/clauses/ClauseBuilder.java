@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -123,7 +123,7 @@ public class ClauseBuilder {
             if ((status & UNKNOWN) != 0) { // at least one clause is unknown
                 if (ELIMINATE_VIEWS) eliminateViews();
                 vars.removeIf(var -> (sets.get(var.getId()).isEmpty()));
-                IntVar[] _vars = vars.toArray(new IntVar[vars.size()]);
+                IntVar[] _vars = vars.toArray(new IntVar[0]);
                 Arrays.sort(_vars); // to avoid undeterministic behavior
                 switch (vars.size()) {
                     case 0:

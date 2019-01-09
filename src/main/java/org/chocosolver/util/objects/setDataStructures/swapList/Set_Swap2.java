@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -119,13 +119,13 @@ public class Set_Swap2 implements ISet {
 
 	@Override
 	public String toString() {
-		String st = "{";
+		StringBuilder st = new StringBuilder("{");
 		ISetIterator iter = newIterator();
 		while (iter.hasNext()) {
-			st+=iter.nextInt()+", ";
+			st.append(iter.nextInt()).append(", ");
 		}
-		st+="}";
-		return st.replace(", }","}");
+		st.append("}");
+		return st.toString().replace(", }","}");
 	}
 
     @Override

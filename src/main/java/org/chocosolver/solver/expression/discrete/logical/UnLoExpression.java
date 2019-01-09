@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -53,12 +53,11 @@ public class UnLoExpression extends LoExpression {
     public BoolVar boolVar() {
         if (me == null) {
             BoolVar b = e.boolVar();
-            switch (op) {
-                case NOT:
-                    me = model.boolNotView(b);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unary logical expressions does not support " + op.name());
+            if (op == Operator.NOT) {
+                me = model.boolNotView(b);
+            } else {
+                throw new UnsupportedOperationException(
+                    "Unary logical expressions does not support " + op.name());
             }
         }
         return me;
@@ -73,9 +72,8 @@ public class UnLoExpression extends LoExpression {
     public Constraint decompose() {
         BoolVar v1 = e.boolVar();
         Model model = v1.getModel();
-        switch (op) {
-            case NOT:
-                return model.arithm(v1, "<", 1);
+        if (op == Operator.NOT) {
+            return model.arithm(v1, "<", 1);
         }
         throw new SolverException("Unexpected case");
     }

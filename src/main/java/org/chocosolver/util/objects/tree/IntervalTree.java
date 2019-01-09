@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -172,7 +172,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
             if (cmp == 0) {
                 return false;                        // Value already in tree. Do nothing.
             }
-            x = cmp == -1 ? x.left : x.right;
+            x = cmp < 0 ? x.left : x.right;
         }
 
         z.parent = y;
@@ -182,10 +182,10 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
             root.blacken();
         } else {                      // Set the parent of n.
             int cmp = z.compareTo(y);
-            if (cmp == -1) {
+            if (cmp < 0) {
                 y.left = z;
             } else {
-                assert (cmp == 1);
+                assert (cmp > 0);
                 y.right = z;
             }
 

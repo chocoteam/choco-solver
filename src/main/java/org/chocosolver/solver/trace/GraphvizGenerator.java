@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -90,7 +90,7 @@ public class GraphvizGenerator extends SearchViz {
             } catch (IOException e) {
                 System.err.println("Unable to write to GEXF file. No information will be sent.");
                 connected = false;
-            };
+            }
         }else{
             try {
                 Files.write(instance, String.format(NODE, nc, label).getBytes(), APPEND);
@@ -98,7 +98,7 @@ public class GraphvizGenerator extends SearchViz {
             } catch (IOException e) {
                 System.err.println("Unable to write to GEXF file. No information will be sent.");
                 connected = false;
-            };
+            }
         }
     }
 
@@ -112,7 +112,7 @@ public class GraphvizGenerator extends SearchViz {
         } catch (IOException e) {
             System.err.println("Unable to write to GEXF file. No information will be sent.");
             connected = false;
-        };
+        }
     }
 
     @Override
@@ -123,7 +123,7 @@ public class GraphvizGenerator extends SearchViz {
         } catch (IOException e) {
             System.err.println("Unable to write to GEXF file. No information will be sent.");
             connected = false;
-        };
+        }
     }
 
     @Override

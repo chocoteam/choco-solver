@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,6 +10,15 @@
 package org.chocosolver.solver.constraints;
 
 
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOf;
+import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
+import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
+import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
+
+import java.util.Arrays;
+import java.util.function.Consumer;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -29,16 +38,6 @@ import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
-import java.util.Arrays;
-import java.util.function.Consumer;
-
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOf;
-import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
-import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
-import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -123,7 +122,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Current status of this propagator.
      * In: {@link #NEW}, {@link #REIFIED}, {@link #ACTIVE} and {@link #PASSIVE}.
      */
-    protected short state;
+    protected short state = NEW;
 
     /**
      * Backtrackable operations to maintain the status on backtrack.
@@ -233,7 +232,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
-        this.state = NEW;
         this.priority = priority;
         // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
         // This is the responsibility of the propagator's developer to take care of that point.
@@ -821,7 +819,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
         if (DEFAULT_EXPL) {
-            if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for "+this.getClass().getSimpleName()+"\n");
+            if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for %s \n",this.getClass().getSimpleName());
             defaultExplain(this, explanation, front, ig, p);
         } else {
             ICause.super.explain(explanation, front, ig, p);

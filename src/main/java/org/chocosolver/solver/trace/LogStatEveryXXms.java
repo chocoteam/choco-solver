@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -39,22 +39,18 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
      */
     public LogStatEveryXXms(final Solver solver, final long duration) {
 
-        printer = new Thread() {
-
-            @Override
-            public void run() {
-                alive = true;
-                try {
-                    sleep(duration);
-                    //noinspection InfiniteLoopStatement
-                    do {
-                        solver.getOut().println(String.format(">> %s", solver.toOneLineString()));
-                        sleep(duration);
-                    } while (alive);
-                } catch (InterruptedException ignored) {
-                }
+        printer = new Thread(() -> {
+            alive = true;
+            try {
+                Thread.sleep(duration);
+                //noinspection InfiniteLoopStatement
+                do {
+                    solver.getOut().println(String.format(">> %s", solver.toOneLineString()));
+                    Thread.sleep(duration);
+                } while (alive);
+            } catch (InterruptedException ignored) {
             }
-        };
+        });
         printer.setDaemon(true);
     }
 

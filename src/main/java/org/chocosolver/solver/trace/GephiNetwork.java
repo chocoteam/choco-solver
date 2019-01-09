@@ -1,29 +1,13 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.trace;
-
-import gnu.trove.set.hash.TIntHashSet;
-
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.view.IView;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.chocosolver.solver.trace.GephiConstants.BLUE;
 import static org.chocosolver.solver.trace.GephiConstants.DIAM;
@@ -42,6 +26,20 @@ import static org.chocosolver.solver.trace.GephiConstants.OXMLTAG;
 import static org.chocosolver.solver.trace.GephiConstants.RED;
 import static org.chocosolver.solver.trace.GephiConstants.SQUARE;
 
+import gnu.trove.set.hash.TIntHashSet;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.view.IView;
+
 /**
  * <p> Project: choco-solver.
  *
@@ -55,7 +53,7 @@ public class GephiNetwork{
     }
 
 
-    public static final void write(String gexfFile, Model model) {
+    public static void write(String gexfFile, Model model) {
         int nodeCount = 1;
         int edgeCount = 1;
 

@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -44,7 +44,7 @@ public class NaReExpression implements ReExpression {
     /**
      * Operator of the arithmetic expression
      */
-    Operator op = null;
+    Operator op;
 
     /**
      * The expressions this expression relies on
@@ -84,18 +84,17 @@ public class NaReExpression implements ReExpression {
         if (me == null) {
             IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
             me = model.boolVar(model.generateName(op+"_exp_"));
-            switch (op) {
-                case EQ:
-                    if(vs.length == 2){
-                        model.reifyXeqY(vs[0], vs[1], me);
-                    }else {
-                        IntVar count = model.intVar(op + "_count_", 1, vs.length);
-                        model.atMostNValues(vs, count, false).post();
-                        model.reifyXltC(count, 2, me);
-                    }
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
+            if (op == Operator.EQ) {
+                if (vs.length == 2) {
+                    model.reifyXeqY(vs[0], vs[1], me);
+                } else {
+                    IntVar count = model.intVar(op + "_count_", 1, vs.length);
+                    model.atMostNValues(vs, count, false).post();
+                    model.reifyXltC(count, 2, me);
+                }
+            } else {
+                throw new UnsupportedOperationException(
+                    "Binary arithmetic expressions does not support " + op.name());
             }
         }
         return me;

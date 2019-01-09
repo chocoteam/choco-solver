@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,14 +9,14 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-
-import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
-import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * A propagator for SUM(x_i) = y + b, where x_i are boolean variables
@@ -254,6 +254,7 @@ public class PropSumBool extends PropSum {
     @Override
     protected PropSum opposite(){
         BoolVar[] bvars = new BoolVar[vars.length-1];
+        //noinspection SuspiciousSystemArraycopy
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
         return new PropSumBool(bvars, pos, nop(o), vars[vars.length-1], b + nb(o), reactToFineEvt);
     }

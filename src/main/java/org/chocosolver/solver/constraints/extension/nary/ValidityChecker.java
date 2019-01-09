@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -55,9 +55,7 @@ public class ValidityChecker implements IntComparator {
         for(int i = 0; i < vars.length-1; i++){
             correct &= vars[sortedidx[i]].getDomainSize() <= vars[sortedidx[i + 1]].getDomainSize();
         }
-        if(!correct){
-            assert false: "wrong sort";
-        }
+        assert correct : "wrong sort";
     }
 
     // Is tuple valide ?

@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -103,7 +103,7 @@ public class PropSubcircuit extends Propagator<IntVar> {
      *
      * @param var origin
      * @param val dest
-     * @throws ContradictionException
+     * @throws ContradictionException if failure occurs
      */
     private void varInstantiated(int var, int val) throws ContradictionException {
         if (isPassive()) {

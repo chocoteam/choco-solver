@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -136,7 +137,8 @@ public class Solution implements ICause {
             }
         }
         if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
-            model.getSolver().getOut().printf("Some non decision variables are not instantiated in the current solution.");
+            model.getSolver().getOut()
+                .print("Some non decision variables are not instantiated in the current solution.");
         }
         return this;
     }
@@ -310,7 +312,7 @@ public class Solution implements ICause {
      * a propagation loop will be achieved to ensure that the correctness and completeness of the model.
      * If the propagation detects a failure, a {@link ContradictionException} will be thrown.
      * If so, the propagation engine is not flushed automatically,
-     * and a call to {@link IPropagationEngine#flush()} may be needed.
+     * and a call to {@link PropagationEngine#flush()} may be needed.
      *
      * However, the satisfaction of the solution status is not check
      * (see {@link Settings#checkModel(Solver)} to check satisfaction).

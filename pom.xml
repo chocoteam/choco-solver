@@ -3,7 +3,7 @@
 
     This file is part of choco-solver, http://choco-solver.org/
 
-    Copyright (c) 2018, IMT Atlantique. All rights reserved.
+    Copyright (c) 2019, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -230,6 +230,7 @@
                     </properties>
                     <mapping>
                         <template>JAVADOC_STYLE</template>
+                        <java>SLASHSTAR_STYLE</java>
                     </mapping>
                     <includes>
                         <include>**/*.java</include>
@@ -251,6 +252,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M2</version>
                 <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
                     <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>
                     <properties>
                         <property>

@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -89,9 +89,7 @@ public class PropDivXYZ extends Propagator<IntVar> {
                     hasChanged |= updateAbsX();
                     hasChanged |= updateAbsY();
                     vz = vx / vy;//(int) Math.floor((double) (vx + ((vx * vy < 0 ? 1 : 0) * (vy - 1))) / (double) vy);
-                    if (vy != 0) {
-                        if (inInterval(Z, vz, vz)) return; // entail
-                    }
+                    if (inInterval(Z, vz, vz)) return; // entail
                     break;
                 case 4: // Z is instanciated
                     hasChanged |= updateAbsX();

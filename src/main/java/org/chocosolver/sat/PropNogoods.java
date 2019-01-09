@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,10 +9,20 @@
  */
 package org.chocosolver.sat;
 
+import static org.chocosolver.sat.SatSolver.makeLiteral;
+import static org.chocosolver.sat.SatSolver.negated;
+import static org.chocosolver.sat.SatSolver.sign;
+import static org.chocosolver.sat.SatSolver.var;
+
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Deque;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.sat.SatSolver.Clause;
 import org.chocosolver.solver.Model;
@@ -23,10 +33,6 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
-
-import java.util.*;
-
-import static org.chocosolver.sat.SatSolver.*;
 
 
 /**

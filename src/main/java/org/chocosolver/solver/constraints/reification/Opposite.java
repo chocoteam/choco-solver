@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -43,7 +43,7 @@ public class Opposite extends Constraint {
             for (Propagator p : cons.getPropagators()) {
                 Collections.addAll(allvars, p.getVars());
             }
-            vars = allvars.toArray(new Variable[allvars.size()]);
+            vars = allvars.toArray(new Variable[0]);
         }
         return new PropOpposite(cons, vars);
     }

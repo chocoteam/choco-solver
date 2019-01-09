@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,21 @@
  */
 package org.chocosolver.solver;
 
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.chocosolver.solver.search.strategy.Search.realVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Spliterator;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.exception.SolverException;
@@ -25,22 +40,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.criteria.Criterion;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Spliterator;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.chocosolver.solver.search.strategy.Search.realVarSearch;
-import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
 
 /**
  *
@@ -196,16 +195,14 @@ public class ParallelPortfolio {
         }
         ForkJoinPool forkJoinPool = new ForkJoinPool(models.size());
         try {
-            forkJoinPool.submit(() -> {
-                models.parallelStream().forEach(m -> {
-                    if (!getSolverTerminated().get()) {
-                        boolean so = m.getSolver().solve();
-                        if (!so || finder == m) {
-                            getSolverTerminated().set(true);
-                        }
+            forkJoinPool.submit(() -> models.parallelStream().forEach(m -> {
+                if (!getSolverTerminated().get()) {
+                    boolean so = m.getSolver().solve();
+                    if (!so || finder == m) {
+                        getSolverTerminated().set(true);
                     }
-                });
-            }).get();
+                }
+            })).get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -217,9 +214,8 @@ public class ParallelPortfolio {
                 int mVal = m.getSolver().getBestSolutionValue().intValue();
                 if (m.getResolutionPolicy() == ResolutionPolicy.MAXIMIZE) {
                     assert mVal <= bestAll : mVal + " > " + bestAll;
-                } else if (m.getResolutionPolicy() == ResolutionPolicy.MINIMIZE) {
-                    assert mVal >= bestAll : mVal + " < " + bestAll;
-                }
+                } else
+                    assert m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || mVal >= bestAll : mVal + " < " + bestAll;
             }
         }
         return getSolutionFound().get();
@@ -313,7 +309,7 @@ public class ParallelPortfolio {
         for(int i=0;i<models.size();i++){
             Solver s = models.get(i).getSolver();
             s.addStopCriterion((Criterion) () -> getSolverTerminated().get());
-            s.plugMonitor((IMonitorSolution) () -> {updateFromSolution(s.getModel());});
+            s.plugMonitor((IMonitorSolution) () -> updateFromSolution(s.getModel()));
             if(searchAutoConf){
                 configureModel(i);
             }
@@ -329,9 +325,9 @@ public class ParallelPortfolio {
             int bestVal = m.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
             if(m.getResolutionPolicy()==ResolutionPolicy.MAXIMIZE){
                 assert solverVal<=bestVal:solverVal+">"+bestVal;
-            }else if(m.getResolutionPolicy()==ResolutionPolicy.MINIMIZE){
-                assert solverVal>=bestVal:solverVal+"<"+bestVal;
-            }
+            }else
+                assert
+                    m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || solverVal >= bestVal :solverVal+"<"+bestVal;
             if(solverVal == bestVal){
                 getSolutionFound().set(true);
                 finder = m;

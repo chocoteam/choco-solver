@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,7 +40,7 @@ public class NaArExpression implements ArExpression {
     /**
      * Operator of the arithmetic expression
      */
-    Operator op = null;
+    Operator op;
 
     /**
      * The expressions this expression relies on
@@ -81,7 +81,7 @@ public class NaArExpression implements ArExpression {
     @Override
     public IntVar intVar() {
         if (me == null) {
-            IntVar[] vs = Arrays.stream(es).map(e -> e.intVar()).toArray(IntVar[]::new);
+            IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
             int[] bounds;
             switch (op) {
                 case ADD:

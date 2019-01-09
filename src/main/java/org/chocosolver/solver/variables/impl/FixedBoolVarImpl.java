@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -97,7 +97,7 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
 
     @Override
     public String toString() {
-        return name + " = " + String.valueOf(constante);
+        return name + " = " + constante;
     }
 
 }

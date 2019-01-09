@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,7 +40,7 @@ public class BiArExpression implements ArExpression {
     /**
      * Operator of the arithmetic expression
      */
-    Operator op = null;
+    Operator op;
 
     /**
      * The first expression this expression relies on

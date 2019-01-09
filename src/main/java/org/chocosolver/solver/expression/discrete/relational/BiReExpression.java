@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,13 @@
  */
 package org.chocosolver.solver.expression.discrete.relational;
 
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.ADD;
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.NOP;
+import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.SUB;
+
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Map;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
@@ -17,14 +24,6 @@ import org.chocosolver.solver.expression.discrete.arithmetic.BiArExpression;
 import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Map;
-
-import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.ADD;
-import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.NOP;
-import static org.chocosolver.solver.expression.discrete.arithmetic.ArExpression.Operator.SUB;
 
 /**
  * Binary relational expression
@@ -51,7 +50,7 @@ public class BiReExpression implements ReExpression {
     /**
      * Operator of the arithmetic expression
      */
-    ReExpression.Operator op = null;
+    ReExpression.Operator op;
 
     /**
      * The first expression this expression relies on

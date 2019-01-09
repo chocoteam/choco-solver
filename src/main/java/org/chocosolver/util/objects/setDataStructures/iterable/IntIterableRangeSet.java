@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -377,7 +377,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         if (a > b) {
             throw new IndexOutOfBoundsException("Incorrect bounds [" + a + "," + b + "]");
         }
-        boolean change = false;
+        boolean change;
         int s1 = SIZE >> 1;
         int s2 = 1; // since a <= b
         if (s1 > 0) {
@@ -450,7 +450,7 @@ public class IntIterableRangeSet implements IntIterableSet {
             c += ub - lb + 1;
             ELEMENTS = e;
             SIZE = s;
-            change |= (CARDINALITY != c);
+            change = (CARDINALITY != c);
             CARDINALITY = c;
         } else {
             grow(1);
@@ -900,7 +900,7 @@ public class IntIterableRangeSet implements IntIterableSet {
                     try {
                         CARDINALITY += ELEMENTS[i + 2] - ELEMENTS[i + 1] + 1;
                     } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.printf("tt");
+                        System.out.print("tt");
                     }
                     ELEMENTS[i] = ELEMENTS[--i] - 1;
                 }

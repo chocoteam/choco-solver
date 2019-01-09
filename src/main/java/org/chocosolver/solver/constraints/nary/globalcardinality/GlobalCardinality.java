@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -57,6 +57,6 @@ public class GlobalCardinality extends Constraint {
             }
             cstrs.add(model.sum(bs, "=", card[i]));
         }
-        return Constraint.merge("reformulatedGCC", cstrs.toArray(new Constraint[cstrs.size()]));
+        return Constraint.merge("reformulatedGCC", cstrs.toArray(new Constraint[0]));
     }
 }

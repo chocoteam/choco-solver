@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -118,7 +118,7 @@ public class RealConstraint extends Constraint {
                         "{_" + sidx.get(k) + "}");
             }
             fct = p1.matcher(fct).replaceAll("{");
-            props[i] = new RealPropagator(fct, vars.toArray(new Variable[vars.size()]));
+            props[i] = new RealPropagator(fct, vars.toArray(new Variable[0]));
             sidx.clear();
             vars.clear();
         }

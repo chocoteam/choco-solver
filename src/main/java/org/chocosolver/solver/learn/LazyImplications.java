@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -203,9 +203,7 @@ public class LazyImplications extends Implications {
             }
         }
         nbEntries = upto;
-        if (DEBUG && !checkIntegrity()) {
-            assert false;
-        }
+        assert !DEBUG || checkIntegrity();
     }
 
     @Override
@@ -247,6 +245,7 @@ public class LazyImplications extends Implications {
      * @param cause cause of the current event to merge into prev
      * @return <i>true</i> if two entries can be merged into a single one.
      */
+    @SuppressWarnings("ConstantConditions")
     private boolean mergeConditions(Entry prev, ICause cause) {
         switch (MERGE_CONDITIONS){
             default:
@@ -376,9 +375,7 @@ public class LazyImplications extends Implications {
         }else{
             addEntry(var, cause, evt, one, root, prev);
         }
-        if (DEBUG && !checkIntegrity()) {
-            assert false;
-        }
+        assert !DEBUG || checkIntegrity();
     }
 
 

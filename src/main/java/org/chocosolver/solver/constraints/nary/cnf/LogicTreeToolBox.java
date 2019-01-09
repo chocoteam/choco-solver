@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -206,7 +206,7 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
-            ILogical[] ts = lits.values().toArray(new ILogical[lits.size()]);
+            ILogical[] ts = lits.values().toArray(new ILogical[0]);
 //            Arrays.sort(ts);
             return LogOp.or(ts);
         } else if (!n.hasOrChild()) {
@@ -224,7 +224,7 @@ public class LogicTreeToolBox {
                     lits.put(var, children[i]);
                 }
             }
-            ILogical[] ts = lits.values().toArray(new ILogical[lits.size()]);
+            ILogical[] ts = lits.values().toArray(new ILogical[0]);
 //            Arrays.sort(ts);
             return LogOp.and(ts);
         } else {

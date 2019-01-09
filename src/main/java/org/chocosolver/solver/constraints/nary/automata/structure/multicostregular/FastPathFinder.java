@@ -1,7 +1,7 @@
-/**
+/*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,14 +11,11 @@ package org.chocosolver.solver.constraints.nary.automata.structure.multicostregu
 
 
 import gnu.trove.stack.TIntStack;
-import org.chocosolver.memory.IStateIntVector;
+import java.util.Arrays;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
-
-import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
