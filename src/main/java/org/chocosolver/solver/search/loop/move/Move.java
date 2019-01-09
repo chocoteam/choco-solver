@@ -66,6 +66,11 @@ public interface Move  {
     <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy);
 
     /**
+     * Erases the defined search strategy.
+     */
+    void removeStrategy();
+
+    /**
      * Returns the child moves or <tt>null</tt>
      * Some Move only accepts one single move as child.
      * @return the child moves

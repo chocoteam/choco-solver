@@ -114,6 +114,11 @@ public class MoveRestart implements Move {
         move.setStrategy(aStrategy);
     }
 
+    @Override
+    public void removeStrategy() {
+        move.removeStrategy();
+    }
+
     /**
      * Execute the restart and update measures
      * @param solver reference to the solver

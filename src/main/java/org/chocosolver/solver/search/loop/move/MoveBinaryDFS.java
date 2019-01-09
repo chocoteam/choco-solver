@@ -89,10 +89,15 @@ public class MoveBinaryDFS implements Move {
 
     @Override
     public <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy) {
+        removeStrategy();
+        this.strategy = aStrategy;
+    }
+
+    @Override
+    public void removeStrategy() {
         if(this.strategy!=null){
             this.strategy.remove();
         }
-        this.strategy = aStrategy;
     }
 
     /**

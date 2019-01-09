@@ -9,6 +9,21 @@
  */
 package org.chocosolver.solver;
 
+import static org.chocosolver.solver.Solver.Action.extend;
+import static org.chocosolver.solver.Solver.Action.initialize;
+import static org.chocosolver.solver.Solver.Action.propagate;
+import static org.chocosolver.solver.Solver.Action.repair;
+import static org.chocosolver.solver.Solver.Action.validate;
+import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
+
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -40,22 +55,6 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.chocosolver.solver.Solver.Action.extend;
-import static org.chocosolver.solver.Solver.Action.initialize;
-import static org.chocosolver.solver.Solver.Action.propagate;
-import static org.chocosolver.solver.Solver.Action.repair;
-import static org.chocosolver.solver.Solver.Action.validate;
-import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
 
 /**
  * This class is inspired from :
@@ -551,7 +550,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void hardReset() {
         reset();
-        this.M.getStrategy().remove();
+        this.M.removeStrategy();
         setMove(new MoveBinaryDFS());
         setPropagate(new PropagateBasic());
         setNoLearning();

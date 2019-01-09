@@ -110,6 +110,7 @@ public class MoveSeq implements Move {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <V extends Variable> AbstractStrategy<V> getStrategy() {
         //noinspection unchecked
@@ -119,6 +120,12 @@ public class MoveSeq implements Move {
     @Override
     public <V extends Variable> void setStrategy(AbstractStrategy<V> aStrategy) {
         throw new UnsupportedOperationException("A sequential Move does not support declaring search strategy in retrospect.\n" +
+                "It has to be done on each of it child nodes.");
+    }
+
+    @Override
+    public void removeStrategy() {
+        throw new UnsupportedOperationException("A sequential Move does not support removing search strategy in retrospect.\n" +
                 "It has to be done on each of it child nodes.");
     }
 

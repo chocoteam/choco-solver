@@ -258,6 +258,11 @@ public class MoveLNS implements Move {
         move.setStrategy(aStrategy);
     }
 
+    @Override
+    public void removeStrategy() {
+        move.removeStrategy();
+    }
+
     /**
      * Extend the neighbor when conditions are met and do the restart
      *
