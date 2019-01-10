@@ -6,7 +6,7 @@ jdk:
 - oraclejdk8
 cache:
   directories:
-    - $HOME/.m2
+  - "$HOME/.m2"
 env:
   global:
   # COVERITY_SCAN_TOKEN=...
@@ -15,23 +15,25 @@ env:
   - secure: hGeJ+dPc3AI/lOLIuVPuuo1LRrm432NXTsybYvlxIiRUpTDezHLWp/8okg+e+xF93jQSwzrTV0xBuH6upnixzzRzo/6fepT6OINe6a/W/VyQL7vUqOvypHWahU7a85sypEMZ7xSKohrixIIxx+NHjD61Q1s5kSc/r+yGkbU2pzI=
   # OSS SONATYPE, CI_DEPLOY_PASSWORD=...
   - secure: bcwHH/i43WCwnHb6C3G3hNgcS/OOVgCVxoXSUPtsYWcLZxb4cV05vUzs5VO/Iiw/YBRHEQM342yCKS46wunqv2wwEXpzWRTJG0Pwpn2tEj4fjp0OzPsiTx9AWYSkbiQjHoIGWC57LgxNzpuqHJsi4xnc9iiwQaV6mdlJP3Ofb7E=
+  # COVERITY_PROJECT_TOKEN=
+  - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
   matrix:
   - GROUP=1s
   - GROUP=10s
 before_install:
-- /bin/sh ./.travis/install-ibex.sh
+- "/bin/sh ./.travis/install-ibex.sh"
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 - sudo apt-get install jq
-- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets[0].browser_download_url')
-
+- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest
+  | jq -r '.assets[0].browser_download_url')
 install:
 - npm install travis-ping
 branches:
   only:
-  - /^develop.*$/
+  - "/^develop.*$/"
   - master
-  - /^feature.*$/
+  - "/^feature.*$/"
   - coverity_scan
 notifications:
   email:
@@ -47,8 +49,8 @@ notifications:
     on_start: never
 before_script:
 - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
-script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib && mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP; fi
-
+script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib
+  && mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP; fi
 addons:
   coverity_scan:
     project:
@@ -58,8 +60,7 @@ addons:
     build_command_prepend: mvn clean
     build_command: mvn -DskipTests=true compile
     branch_pattern: coverity_scan
-    condition: $GROUP = 1s
-
+    condition: "$GROUP = 1s"
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - travis-ping chocoteam/choco-parsers --branch master --token ${GH_TOKEN}
@@ -69,18 +70,18 @@ before_deploy:
 - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
 deploy:
 - provider: script
-  script: /bin/sh ./.travis/deploy.sh
+  script: "/bin/sh ./.travis/deploy.sh"
   skip_cleanup: true
   on:
     repo: chocoteam/choco-solver
     branch: master
     jdk: oraclejdk8
-    condition: $GROUP = 10s
+    condition: "$GROUP = 10s"
 - provider: script
-  script: /bin/sh ./.travis/deploy.sh
+  script: "/bin/sh ./.travis/deploy.sh"
   skip_cleanup: true
   on:
     repo: chocoteam/choco-solver
     tags: true
     jdk: oraclejdk8
-    condition: $GROUP = 10s
+    condition: "$GROUP = 10s"
