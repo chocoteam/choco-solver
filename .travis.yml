@@ -22,6 +22,9 @@ before_install:
 - /bin/sh ./.travis/install-ibex.sh
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+- sudo apt-get install jq
+- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest | jq -r '.assets[0].browser_download_url')
+
 install:
 - npm install travis-ping
 branches:
@@ -45,6 +48,7 @@ notifications:
 before_script:
 - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib && mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP; fi
+
 addons:
   coverity_scan:
     project:
@@ -55,9 +59,11 @@ addons:
     build_command: mvn -DskipTests=true compile
     branch_pattern: coverity_scan
     condition: $GROUP = 1s
+
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - travis-ping chocoteam/choco-parsers --branch master --token ${GH_TOKEN}
+- java -jar ~/codacy-coverage-reporter-assembly-latest.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
 before_deploy:
 - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
 - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
