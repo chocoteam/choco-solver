@@ -52,6 +52,16 @@ public class ElementTest {
 
 
 	@Test(groups="1s", timeOut=60000)
+	public void testAllSame() {
+		Model s = new Model();
+		int[] values = new int[]{1, 1, 1, 1};
+		IntVar value = s.intVar("v_0", 0,1, false);
+		IntVar index = s.intVar("v_1", 20, 22, false);
+		model(s, index, values, value, 20, 3);
+	}
+
+
+	@Test(groups="1s", timeOut=60000)
 	public void test1() {
 		Model s = new Model();
 		int[] values = new int[]{1, 2, 0, 4, 3};

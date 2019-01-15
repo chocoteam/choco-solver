@@ -70,7 +70,7 @@ public class ElementFactory {
         if (st == -1) { // all values from TABLE are the same OR TABLE only contains one value
             assert TABLE[0] == TABLE[TABLE.length - 1];
             return new Constraint("FAKE_ELMT",
-                    new PropMember(INDEX, new IntIterableRangeSet(0, TABLE.length - OFFSET)),
+                    new PropMember(INDEX, new IntIterableRangeSet(OFFSET, OFFSET + TABLE.length - 1)),
                     new PropEqualXC(VALUE, TABLE[0])
             );
         }
