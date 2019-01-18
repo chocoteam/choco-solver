@@ -10,9 +10,6 @@
 package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.variables.GeneralizedMinDomVarSelector;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -22,40 +19,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
-
 /**
  * @author Guillaume Le Lou�t [guillaume.lelouet@gmail.com] 2016, Jean-Guillaume Fages
  */
 public class SetVarImplTest {
-
-	@Test(groups="1s", timeOut=60000)
-	public void testKnapsack20Set() {
-		int[] capacities = {99, 1101};
-		int[] volumes = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
-		int[] energies = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 49, 43, 36, 68, 92, 33, 84, 90};
-
-		Model model = new Model();
-		int nos = 20;
-		// occurrence of each item
-		SetVar in = model.setVar(new int[0], ArrayUtils.array(0,nos));
-		final IntVar power = model.intVar("power", 0, 99999, true);
-		final IntVar weight = model.intVar("weight", capacities[0], capacities[1], true);
-		model.sumElements(in, volumes, 0, weight).post();
-		model.sumElements(in, energies, 0, power).post();
-
-		Solver r = model.getSolver();
-		r.setSearch(setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), false, in));
-		r.limitTime("10s");
-		r.showDecisions();
-		model.setObjective(Model.MAXIMIZE, power);
-		int bp = 0;
-		while (model.getSolver().solve()) {
-			bp = power.getValue();
-		}
-		r.printStatistics();
-		Assert.assertEquals(bp, 1211);
-	}
 
 	@Test(groups="1s", timeOut=60000)
 	public void testStructures(){

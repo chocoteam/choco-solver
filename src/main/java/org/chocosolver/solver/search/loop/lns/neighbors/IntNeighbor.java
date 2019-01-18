@@ -21,12 +21,12 @@ import java.util.function.Consumer;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public abstract class Neighbor implements INeighbor {
+public abstract class IntNeighbor implements INeighbor {
 
     protected final IntVar[] variables;
     protected final int[] values;
 
-    protected Neighbor(IntVar[] variables) {
+    protected IntNeighbor(IntVar[] variables) {
         this.variables = variables;
         this.values = new int[variables.length];
     }

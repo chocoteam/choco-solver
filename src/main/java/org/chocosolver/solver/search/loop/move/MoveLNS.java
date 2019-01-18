@@ -45,7 +45,7 @@ public class MoveLNS implements Move {
      */
     protected Move move;
     /**
-     * Neighbor to used
+     * IntNeighbor to used
      */
     protected INeighbor neighbor;
     /**
