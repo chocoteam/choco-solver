@@ -41,10 +41,10 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
     // VARIABLES
     //***********************************************************************************
 
-    protected final ISet lb, ub, lbReadOnly, ubReadOnly;
-    protected SetDelta delta;
-    protected boolean reactOnModification;
-    protected IntVar cardinality = null;
+    private final ISet lb, ub, lbReadOnly, ubReadOnly;
+    private SetDelta delta;
+    private boolean reactOnModification;
+    private IntVar cardinality = null;
 
     //***********************************************************************************
     // CONSTRUCTORS

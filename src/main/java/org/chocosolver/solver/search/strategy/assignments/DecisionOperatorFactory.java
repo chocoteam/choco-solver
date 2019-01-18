@@ -232,11 +232,15 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert !var.isInstantiated();
+            assert !var.getLB().contains(element);
             return var.force(element, cause);
         }
 
         @Override
         public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert !var.isInstantiated();
+            assert var.getUB().contains(element);
             return var.remove(element, cause);
         }
 
@@ -274,11 +278,15 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert var.getUB().contains(element);
+            assert !var.isInstantiated();
             return var.remove(element, cause);
         }
 
         @Override
         public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert !var.isInstantiated();
+            assert !var.getLB().contains(element) : var.getLB()+" // already contains "+element;
             return var.force(element, cause);
         }
 
