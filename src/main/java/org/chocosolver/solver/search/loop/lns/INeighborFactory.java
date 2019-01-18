@@ -9,11 +9,7 @@
  */
 package org.chocosolver.solver.search.loop.lns;
 
-import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
-import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -27,7 +23,7 @@ public class INeighborFactory {
      * @param vars the pool of variables to be freezed
      * @return a black-box LNS neighbor
      */
-    public static Neighbor blackBox(IntVar... vars) {
+    public static INeighbor blackBox(IntVar... vars) {
         return sequencer(
                 propagationGuided(vars),
                 reversedPropagationGuided(vars),
@@ -68,7 +64,7 @@ public class INeighborFactory {
      * @param neighbors a set of neighbors to be grouped
      * @return a composite Neighbor grouping a set of neighbors
      */
-    public static Neighbor sequencer(Neighbor... neighbors) {
+    public static INeighbor sequencer(INeighbor... neighbors) {
         return new SequenceNeighborhood(neighbors);
     }
 }

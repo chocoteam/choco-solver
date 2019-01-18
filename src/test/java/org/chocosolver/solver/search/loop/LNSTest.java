@@ -16,11 +16,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
-import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
-import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
@@ -289,7 +285,7 @@ public class LNSTest {
 
         //   Type of LNS neighbourhood -- propagation-guided LNS.
 //        INeighbor in=INeighborFactory.propagationGuided(decvars);
-        Neighbor in = INeighborFactory.blackBox(decvars);
+        INeighbor in = INeighborFactory.blackBox(decvars);
 
         in.init(); // Should this be necessary?
 
