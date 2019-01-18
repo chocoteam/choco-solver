@@ -72,6 +72,8 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            assert var.contains(value) : "branching on value not in domain";
+            assert var.hasEnumeratedDomain() || var.getLB() == value || var.getUB() == value: "branching in the middle of bounded domain";
             return var.instantiateTo(value, cause);
         }
 
@@ -111,6 +113,8 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            assert var.contains(value) : "branching on value not in domain";
+            assert var.hasEnumeratedDomain() || var.getLB() == value || var.getUB() == value: "branching in the middle of bounded domain";
             return var.removeValue(value, cause);
         }
 
@@ -145,6 +149,8 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            assert var.contains(value) : "branching on value not in domain";
+            assert var.getUB()>value;
             return var.updateUpperBound(value, cause);
         }
 
@@ -188,6 +194,8 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+            assert var.contains(value) : "branching on value not in domain";
+            assert var.getLB()<value;
             return var.updateLowerBound(value, cause);
         }
 
@@ -232,15 +240,13 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
-            assert !var.isInstantiated();
+            assert var.getUB().contains(element);
             assert !var.getLB().contains(element);
             return var.force(element, cause);
         }
 
         @Override
         public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            assert !var.isInstantiated();
-            assert var.getUB().contains(element);
             return var.remove(element, cause);
         }
 
@@ -279,14 +285,12 @@ public final class DecisionOperatorFactory {
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
             assert var.getUB().contains(element);
-            assert !var.isInstantiated();
+            assert !var.getLB().contains(element);
             return var.remove(element, cause);
         }
 
         @Override
         public boolean unapply(SetVar var, int element, ICause cause) throws ContradictionException {
-            assert !var.isInstantiated();
-            assert !var.getLB().contains(element) : var.getLB()+" // already contains "+element;
             return var.force(element, cause);
         }
 
