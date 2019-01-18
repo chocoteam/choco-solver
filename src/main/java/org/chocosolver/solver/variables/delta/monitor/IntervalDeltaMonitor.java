@@ -26,15 +26,14 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  */
 public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
-    protected final IIntervalDelta delta;
-    protected int first, last, frozenFirst, frozenLast;
-    protected ICause propagator;
+    private final IIntervalDelta delta;
+    private int first, frozenFirst, frozenLast;
+    private final ICause propagator;
 
     public IntervalDeltaMonitor(IIntervalDelta delta, ICause propagator) {
 		super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
-        this.last = 0;
         this.frozenFirst = 0;
         this.frozenLast = 0;
         this.propagator = propagator;
@@ -44,14 +43,14 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
     public void freeze() {
 		if (needReset()) {
             delta.lazyClear();
-			this.first = this.last = 0;
+			this.first = 0;
 			resetStamp();
 		}
         assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
                         :"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
                         "but no value has been removed since the last call.";
         this.frozenFirst = first; // freeze indices
-        this.frozenLast = last = delta.size();
+        this.frozenLast = delta.size();
     }
 
     @Override
@@ -59,7 +58,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
         resetStamp();
-        this.first = this.last = delta.size();
+        this.first = delta.size();
     }
 
     @Override
@@ -90,7 +89,7 @@ public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDelta
 
     @Override
     public String toString() {
-        return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
+        return String.format("(%d,last) => (%d,%d) :: %d", first, frozenFirst, frozenLast, delta.size());
     }
 
 	@Override

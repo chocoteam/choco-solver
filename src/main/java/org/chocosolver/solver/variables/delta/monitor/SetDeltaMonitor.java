@@ -23,17 +23,15 @@ import org.chocosolver.util.procedure.IntProcedure;
  */
 public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonitor {
 
-    protected final ISetDelta delta;
-
-    protected int[] first, last; // references, in variable delta value to propagate, to un propagated values
-    protected int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
-    protected ICause propagator;
+    private final ISetDelta delta;
+    private final int[] first; // references, in variable delta value to propagate, to un propagated values
+    private final int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+    private final ICause propagator;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
 		super(delta.getEnvironment());
         this.delta = delta;
         this.first = new int[2];
-        this.last = new int[2];
         this.frozenFirst = new int[2];
         this.frozenLast = new int[2];
         this.propagator = propagator;
@@ -44,7 +42,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
 		if (needReset()) {
             delta.lazyClear();
 			for (int i = 0; i < 2; i++) {
-				this.first[i] = last[i] = 0;
+				this.first[i] = 0;
 			}
 			resetStamp();
 		}
@@ -53,7 +51,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
                         "but no value has been removed since the last call.";
         for (int i = 0; i < 2; i++) {
             this.frozenFirst[i] = first[i]; // freeze indices
-            this.first[i] = this.frozenLast[i] = last[i] = delta.getSize(i);
+            this.first[i] = this.frozenLast[i] = delta.getSize(i);
         }
     }
 
@@ -62,7 +60,7 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
         delta.lazyClear();    // fix 27/07/12
         resetStamp();
         for (int i = 0; i < 2; i++) {
-            this.first[i] = last[i] = delta.getSize(i);
+            this.first[i] = delta.getSize(i);
         }
     }
 

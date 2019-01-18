@@ -26,15 +26,14 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  */
 public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
-    protected final IEnumDelta delta;
-    protected int first, last, frozenFirst, frozenLast;
-    protected ICause propagator;
+    private final IEnumDelta delta;
+    private int first, frozenFirst, frozenLast;
+    private final ICause propagator;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
 		super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
-        this.last = 0;
         this.frozenFirst = 0;
         this.frozenLast = 0;
         this.propagator = propagator;
@@ -44,11 +43,11 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     public void freeze() {
 		if (needReset()) {
             delta.lazyClear();
-			this.first = this.last = 0;
+			this.first = 0;
 			resetStamp();
 		}
         this.frozenFirst = first; // freeze indices
-        this.frozenLast = last = delta.size();
+        this.frozenLast = delta.size();
     }
 
     @Override
@@ -56,7 +55,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
         //propagator is idempotent
         delta.lazyClear();    // fix 27/07/12
         resetStamp();
-        this.first = this.last = delta.size();
+        this.first = delta.size();
     }
 
     @Override
@@ -79,7 +78,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
 
     @Override
     public String toString() {
-        return String.format("(%d,%d) => (%d,%d) :: %d", first, last, frozenFirst, frozenLast, delta.size());
+        return String.format("(%d,last) => (%d,%d) :: %d", first, frozenFirst, frozenLast, delta.size());
     }
 
 	@Override
