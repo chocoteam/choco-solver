@@ -20,6 +20,7 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
+  - GROUP=ibex
 before_install:
 - "/bin/sh ./.travis/install-ibex.sh"
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END

@@ -46,7 +46,7 @@ public class RealTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void test1() {
         for (int i = 0; i < 10; i++) {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
@@ -71,7 +71,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void test2() {
         for (int i = 0; i < 10; i++) {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
@@ -109,7 +109,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ibex")
     public void test4() {
         for (int i = 0; i < 10; i++) {
             Model model = new Model();
@@ -131,7 +131,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testFreemajb1() {
         Model model = new Model();
 
@@ -153,7 +153,7 @@ public class RealTest {
         }
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testFreemajb2() {
         Model model = new Model();
 
@@ -171,7 +171,7 @@ public class RealTest {
 
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testFreemajb3() {
         Model model = new Model();
 
@@ -197,7 +197,7 @@ public class RealTest {
         };
     }
 
-    @Test(groups = "1s", timeOut = 60000, dataProvider = "coeffs")
+    @Test(groups = "ibex", timeOut = 60000, dataProvider = "coeffs")
     public void testHM1(String coeffs) {
         Model model = new Model("Test model");
         double precision = 1.e-6;
@@ -215,7 +215,7 @@ public class RealTest {
         while (solver.solve()) ;
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testHM2() {
         Model model = new Model("Default model");
         double precision = 1.e-1;
@@ -230,7 +230,7 @@ public class RealTest {
         solver.solve();
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testHM21() {
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-1});
         ibex.add_ctr("932.6-(8.664*{0})+(0.02678*({0}^2))-(0.000028*({0}^3)) = {1}");
@@ -239,7 +239,7 @@ public class RealTest {
         System.out.printf("Expected: %d, found: %d\n", Ibex.NOTHING, result);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ibex")
     public void testPG1() throws Exception {
         Model model = new Model();
         RealVar rv = model.realVar(0, 5, 4.E-2);
@@ -256,7 +256,7 @@ public class RealTest {
         assertEquals(model.getSolver().getSolutionCount(), 63);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJJ35() {
         Ibex ibex = new Ibex(new double[]{1.0E-1});
         ibex.add_ctr("{0} = 4");
@@ -265,7 +265,7 @@ public class RealTest {
         Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ibex")
     public void testJiiTee1() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
@@ -310,7 +310,7 @@ public class RealTest {
         assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testPeter() {
         Random ds = new Random();
         Model model = new Model();
@@ -341,7 +341,7 @@ public class RealTest {
         while (model.getSolver().solve()) {}
     }
 
-    @Test(groups = "10s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJiTee1() throws ContradictionException {
         double[] posA = new double[]{150.0, 195.0, 270.0, 370.0, 470.0};
         Model model = new Model("model");
@@ -364,7 +364,7 @@ public class RealTest {
         model.getSolver().findSolution();
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testPostUnpost() {
         LinkedList<Variable> printVars = new LinkedList<Variable>();
         Constraint stickyCstr = null;
@@ -453,7 +453,7 @@ public class RealTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testDetec() {
         Model model = new Model();
 
@@ -471,7 +471,7 @@ public class RealTest {
 
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJJ1() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}<=200.0");
@@ -510,7 +510,7 @@ public class RealTest {
         Assert.assertEquals(domains[1], 470.);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJJ2() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}=150.0");
@@ -521,7 +521,7 @@ public class RealTest {
         Assert.assertEquals(domains[1], 150.);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJJ3() {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0} < 150.0");
@@ -531,7 +531,7 @@ public class RealTest {
         while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) { }
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testMove1() {
         Model model = new Model();
         RealVar[] x = model.realVarArray(3, 0., 5., 1.E-2);
@@ -546,7 +546,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testMove2() {
         Model model = new Model();
         IntVar[] x = model.intVarArray(3, 0, 5);
@@ -567,7 +567,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 108);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testJJ34() {
         Ibex ibex = new Ibex(new double[]{-1.0, -1.0, -1.0, 1.0E-2, 1.0E-2});
         ibex.add_ctr("({0} + {1} + {2}) / 3 = {3}");
@@ -578,7 +578,7 @@ public class RealTest {
     }
 
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testMove3() {
         Model model = new Model();
         RealVar[] x = model.realVarArray(3, -10., 10., 1.E-2);
@@ -593,7 +593,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s"/*, timeOut = 60000*/)
+    @Test(groups = "ibex"/*, timeOut = 60000*/)
     public void testMove4() {
         Model model = new Model();
         RealVar[] y = model.realVarArray(3, -10., 10., 1.E-5);
@@ -608,7 +608,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void testMove5() {
         Model model = new Model();
         RealVar y = model.realVar(-10., 10., 1.E-1);
@@ -624,7 +624,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 100);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testJuha1() {
         Model model = new Model("model");
         IntVar foo = model.intVar("foo", 0, 20);
@@ -639,7 +639,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 60);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testJuha2() {
         Model model = new Model("model");
         IntVar foo = model.intVar("foo", new int[]{0,15, 20});
@@ -654,7 +654,7 @@ public class RealTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
     public void testJuha3(){
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -678,7 +678,7 @@ public class RealTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
     public void testJuha4(){
         double eps=1e-7;
         Ibex ibex = new Ibex(new double[]{eps,eps,eps,eps,eps,eps,eps,eps});
@@ -704,7 +704,7 @@ public class RealTest {
         ibex.release();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testFN1() {
         Model model = new Model("Environment generation problem");
         //A
@@ -722,7 +722,7 @@ public class RealTest {
         Assert.assertNotNull(model.getSolver().findSolution());
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups="ibex", timeOut=60000, expectedExceptions = SolverException.class)
     public void testFN2(){
         Model model = new Model("Environment generation problem");
         RealVar x_a = model.realVar("X_a", 0, 2, 1.0d);
@@ -732,7 +732,7 @@ public class RealTest {
         model.getSolver().findSolution();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRoberto1(){
         Model model = new Model();
         double precision = 1.e-4;
@@ -749,7 +749,7 @@ public class RealTest {
         Assert.assertTrue(solver.solve());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRoberto3(){
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
         ibex.add_ctr("{0}+{1}={2}");
