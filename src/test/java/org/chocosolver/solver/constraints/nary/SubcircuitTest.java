@@ -123,7 +123,7 @@ public class SubcircuitTest {
 		for (int i = min; i <= max; i++) {
 			nbSol += parmi(i, n) * factorial(i - 1);
 		}
-		model.getSolver().printStatistics();
+
 		assertEquals(model.getSolver().getSolutionCount(), nbSol);
 	}
 

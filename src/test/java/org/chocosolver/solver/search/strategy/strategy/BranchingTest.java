@@ -36,6 +36,7 @@ public class BranchingTest {
 		Assert.assertEquals(s.getSolutionCount(), 9);
 	}
 
+	/* Assertion removed because of portfolio (bound update at any time)
 	@Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
 	public void testBoundedEqOut(){
 		Model m = new Model();
@@ -48,7 +49,7 @@ public class BranchingTest {
 				x, y));
 		while (s.solve());
 		Assert.assertEquals(s.getSolutionCount(), 9);
-	}
+	}*/
 
 	@Test(groups="1s", timeOut=60000)
 	public void testBoundedEqLB(){

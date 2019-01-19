@@ -168,7 +168,7 @@ public class RealTest {
             e.printStackTrace();
         }
         out.printf("%s\n", model.toString());
-        model.getSolver().printStatistics();
+
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -186,7 +186,7 @@ public class RealTest {
             e.printStackTrace();
         }
         out.printf("%s\n", model.toString());
-        model.getSolver().printStatistics();
+
     }
 
     @DataProvider(name = "coeffs")
