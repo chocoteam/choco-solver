@@ -159,7 +159,7 @@ public class SolverTest {
         r.setDFS();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         while (model.getSolver().solve()) ;
-        model.getSolver().printShortStatistics();
+
         assertEquals(model.getSolver().getSolutionCount(), 3);
         assertEquals(model.getSolver().getNodeCount(), 17);
     }
@@ -172,7 +172,7 @@ public class SolverTest {
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyCutoffStrategy(2), 2);
         while (model.getSolver().solve()) ;
-        model.getSolver().printShortStatistics();
+
         assertEquals(model.getSolver().getRestartCount(), 2);
     }
 
@@ -185,7 +185,7 @@ public class SolverTest {
         r.setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.limitSearch(() -> r.getMeasures().getNodeCount() >= 1000);
         while (model.getSolver().solve()) ;
-        model.getSolver().printShortStatistics();
+
         assertEquals(model.getSolver().getRestartCount(), 314);
     }
 
@@ -198,7 +198,7 @@ public class SolverTest {
         model.getSolver().setLNS(new RandomNeighborhood(model.retrieveIntVars(false), 15, 0), new NodeCounter(model, 10));
         r.addStopCriterion(() -> r.getMeasures().getNodeCount() >= 1000);
         while (model.getSolver().solve()) ;
-        model.getSolver().printShortStatistics();
+
         assertEquals(r.getMeasures().getRestartCount(), 972);
     }
 

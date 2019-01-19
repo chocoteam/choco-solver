@@ -44,7 +44,7 @@ public class ExpressionTest {
                 break;
         }
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
-        model.getSolver().printShortStatistics();
+
     }
 
 

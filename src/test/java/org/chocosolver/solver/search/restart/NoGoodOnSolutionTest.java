@@ -17,7 +17,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -65,7 +64,7 @@ public class NoGoodOnSolutionTest {
         // no restarts (ok)
         Model s = makeProblem();
         while (s.getSolver().solve()) ;
-        out.println(s.getSolver().getMeasures());
+
         assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
     }
 
@@ -75,7 +74,7 @@ public class NoGoodOnSolutionTest {
         Model s = makeProblem();
         s.getSolver().setRestartOnSolutions();
         while (s.getSolver().solve()) ;
-        out.println(s.getSolver().getMeasures());
+
         assertTrue(s.getSolver().getSolutionCount() == MAX_NB_SOLS);
     }
 
@@ -86,7 +85,7 @@ public class NoGoodOnSolutionTest {
         s.getSolver().setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         s.getSolver().setRestartOnSolutions();
         while (s.getSolver().solve()) ;
-        out.println(s.getSolver().getMeasures());
+
         assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
     }
 
@@ -95,10 +94,9 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Model s = makeProblem();
         Solver r = s.getSolver();
-        System.out.println(s);
         r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.getSolver().solve()) ;
-        out.println(r.getMeasures());
+
         assertTrue(r.getMeasures().getSolutionCount() == MAX_NB_SOLS);
     }
 
@@ -110,7 +108,6 @@ public class NoGoodOnSolutionTest {
         r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.getSolver().solve()) ;
-        out.println(r.getMeasures());
         assertEquals(r.getMeasures().getSolutionCount(), NB_SOLS);
     }
 
@@ -134,7 +131,7 @@ public class NoGoodOnSolutionTest {
 
         model.getSolver().setRestartOnSolutions();
         while (model.getSolver().solve()) ;
-        out.println(model.getSolver().getMeasures());
+
         assertTrue(model.getSolver().getSolutionCount() == 92);
     }
 
@@ -158,7 +155,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().setSearch(randomSearch(vars, 0));
         model.getSolver().setRestartOnSolutions();
         while (model.getSolver().solve()) ;
-        out.println(model.getSolver().getMeasures());
+
         assertEquals(model.getSolver().getSolutionCount(), 92);
     }
 
@@ -181,7 +178,7 @@ public class NoGoodOnSolutionTest {
 
         model.getSolver().setSearch(inputOrderLBSearch(vars));
         while (model.getSolver().solve()) ;
-        out.println(model.getSolver().getMeasures());
+
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
@@ -205,7 +202,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         while (model.getSolver().solve()) ;
-        out.println(model.getSolver().getMeasures());
+
         assertEquals(model.getSolver().getSolutionCount(), 36);
     }
 }

@@ -208,7 +208,6 @@ public class LNSTest {
                 if (linkCosts[i][j] > maxLinkCost) maxLinkCost = linkCosts[i][j];
             }
         }
-        System.out.println("Max link cost: " + maxLinkCost);
 
         assert initialNode >= 0 && initialNode < nodes;
         assert linkCosts.length == nodes;
@@ -273,20 +272,13 @@ public class LNSTest {
         }
         //decvars[4*nodes]=optVar;
 
-        System.out.println("Starting search.");
 
         // Set up basic search for first sol.
         Move basicsearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 992634, new IntDomainMin()));
         Solver solver = model.getSolver();
         solver.setMove(basicsearch);
 
-        boolean foundFirstSol = solver.solve();
-        if (foundFirstSol) {
-            System.out.println("First solution:");
-            System.out.println(optVar.getValue());
-        } else {
-            System.out.println("No first solution found.");
-        }
+        solver.solve();
 
         //   Type of LNS neighbourhood -- propagation-guided LNS.
 //        INeighbor in=INeighborFactory.propagationGuided(decvars);
@@ -301,9 +293,7 @@ public class LNSTest {
 
         solver.setMove(lns);
         solver.limitNode(20000);
-        while (solver.solve()) {
-            System.out.printf("%.3fs -> %d\n", solver.getTimeCount(), optVar.getValue());
-        }
+        while (solver.solve()) ;
         Assert.assertEquals(solver.getObjectiveManager().getBestUB(), 318);
     }
 
@@ -314,7 +304,6 @@ public class LNSTest {
     public void testKnapsackSet20() {
         int obj1 = testKnapsackSet(20, false);
         int obj2 = testKnapsackSet(20, true);
-        System.out.println(obj1+" -- "+obj2);
         Assert.assertTrue(obj1 == obj2);
     }
 
@@ -322,7 +311,6 @@ public class LNSTest {
     public void testKnapsackSet30() {
         int obj1 = testKnapsackSet(30, false);
         int obj2 = testKnapsackSet(30, true);
-        System.out.println(obj1+" -- "+obj2);
         Assert.assertTrue(obj1==obj2); // on this data set LNS improves results
     }
 
@@ -330,7 +318,6 @@ public class LNSTest {
     public void testKnapsackSet50() {
         int obj1 = testKnapsackSet(50, false);
         int obj2 = testKnapsackSet(50, true);
-        System.out.println(obj1+" -- "+obj2);
         Assert.assertTrue(obj1<obj2); // on this data set LNS improves results
     }
 
@@ -364,7 +351,7 @@ public class LNSTest {
         while (m.getSolver().solve()) {
             bp = power.getValue();
         }
-        s.printStatistics();
+
         return bp;
     }
 }

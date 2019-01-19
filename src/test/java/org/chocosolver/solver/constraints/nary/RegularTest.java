@@ -32,7 +32,6 @@ import java.util.List;
 import dk.brics.automaton.Automaton;
 import dk.brics.automaton.RegExp;
 
-import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.testng.Assert.assertEquals;
 
@@ -224,8 +223,6 @@ public class RegularTest {
             solutions.add(new Solution(model).record());
         }
 
-        out.println(solutions);
-
         assertEquals(1, solutions.size());
         assertEquals(-9, (int) solutions.get(0).getIntVal(CS[0]));
         assertEquals(1, (int) solutions.get(0).getIntVal(CS[1]));
@@ -277,7 +274,6 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 2, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("1{2}")).post();
 
-
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
@@ -288,7 +284,6 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 6, 0, 3, false);
         model.regular(CS, new FiniteAutomaton("0{2,3}1*")).post();
 
-
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -298,13 +293,6 @@ public class RegularTest {
         Model model = new Model();
         IntVar[] CS = model.intVarArray("CS", 10, 0, 2, false);
         model.regular(CS, new FiniteAutomaton("0*(1{2,4}0{0,2}0)*0*")).post();
-        model.getSolver().showSolutions(() -> {
-            for (int i = 0; i < 10; i++) {
-                out.printf("%d", CS[i].getValue());
-            }
-//            System.out.printf("\n");
-            return "";
-        });
         model.getSolver().setSearch(inputOrderLBSearch(CS));
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 84);
@@ -354,12 +342,7 @@ public class RegularTest {
         IntVar[] CS = model.intVarArray("CS", 9, 3,6);
         model.regular(CS, new FiniteAutomaton("([^56]*(44[56]{3}44){1,})*", 3,6)).post();
         model.getSolver().propagate();
-        Arrays.stream(CS).forEach(i-> System.out.printf("%s, ", i));
-        System.out.printf("%n");
-        while (model.getSolver().solve()){
-            Arrays.stream(CS).forEach(i-> System.out.printf("%d", i.getValue()));
-            System.out.printf("%n");
-        }
+        while (model.getSolver().solve());
         assertEquals(model.getSolver().getSolutionCount(), 32);
     }
 

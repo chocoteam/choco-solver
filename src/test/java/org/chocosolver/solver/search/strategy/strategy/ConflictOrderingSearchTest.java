@@ -205,6 +205,5 @@ public class ConflictOrderingSearchTest {
                 greedySearch(inputOrderLBSearch(Y))
         );
         while(s.solve());
-        s.printStatistics();
     }
 }

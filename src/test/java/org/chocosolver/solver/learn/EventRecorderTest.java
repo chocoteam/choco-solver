@@ -39,7 +39,6 @@ import org.testng.annotations.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.lang.System.out;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Arrays.fill;
 import static org.chocosolver.solver.search.strategy.Search.greedySearch;
@@ -779,7 +778,6 @@ public class EventRecorderTest {
         model.scalar(new IntVar[]{x, y, z}, new int[]{1, 1, 1}, "<=", 2).post();
 
         model.getSolver().propagate();
-        out.printf("%s\n", model);
     }
 
     @Test(groups="1s", timeOut=60000)

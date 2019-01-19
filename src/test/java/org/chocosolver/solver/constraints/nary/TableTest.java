@@ -102,7 +102,6 @@ public class TableTest {
 				nbs++;
 			}
 			long nbn = model.getSolver().getNodeCount();
-//            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
 			for (int a = 0; a < ALGOS.length; a++) {
 				for (int s = 0; s < 10; s++) {
 					Model tsolver = new Model(ALGOS[a]);
@@ -116,7 +115,6 @@ public class TableTest {
 					}
 					assertEquals(nbSolutions, nbs);
 					if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
 				}
 			}
 		}
@@ -143,7 +141,6 @@ public class TableTest {
 				nbs++;
 			}
 			long nbn = model.getSolver().getNodeCount();
-//            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
 			for (int a = 0; a < ALGOS.length; a++) {
 				for (int s = 0; s < 1; s++) {
 					Model tsolver = new Model(ALGOS[a]);
@@ -157,10 +154,8 @@ public class TableTest {
 					}
 					assertEquals(nbSolutions, nbs);
 					if (a > 1) assertEquals(r.getMeasures().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
 				}
 			}
-//            System.out.printf("===\n%s\n", solver.getMeasures().toOneLineString());
 		}
 	}
 
