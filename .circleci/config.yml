@@ -12,8 +12,8 @@ jobs: # a collection of steps
 
       - run: |
           mvn dependency:go-offline # gets the project dependencies
-          bash ./.travis/install-ibex.sh
-          mvn validate -Dibex.path=./.travis/ibex/plugins/java
+        # bash ./.travis/install-ibex.sh
+        # mvn validate -Dibex.path=./.travis/ibex/plugins/java
 
       - run: mvn clean install -DtestFailureIgnore=true -Dgroups="1s,10s"
 
