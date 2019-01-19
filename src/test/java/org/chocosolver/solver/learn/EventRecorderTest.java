@@ -782,7 +782,7 @@ public class EventRecorderTest {
         out.printf("%s\n", model);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testCumul1(){
         Model model = new Model();
         IntVar start1 = model.intVar("S1", 0, 3, true);

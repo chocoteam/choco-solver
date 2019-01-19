@@ -114,7 +114,7 @@ public class LNSTest {
         knapsack20(lns);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testTOTO() {
         // First, the model: here a simple knapsack pb ...
         int[] capacities = {99, 1101};

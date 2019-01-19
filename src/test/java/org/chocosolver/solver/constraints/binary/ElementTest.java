@@ -363,7 +363,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement1() throws ContradictionException {
 		Model choco = new Model();
 
@@ -394,7 +394,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement2() throws ContradictionException {
 		Model choco = new Model();
 
@@ -424,7 +424,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement3() throws ContradictionException {
 		Model choco = new Model();
 
@@ -454,7 +454,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void itIsAlreadyDoneWhenThereIsMoreThanOnePrimitiveInt() throws ContradictionException {
 		Model choco = new Model();
 
