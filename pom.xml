@@ -58,6 +58,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.codacy</groupId>
+            <artifactId>codacy-coverage-reporter</artifactId>
+            <version>4.0.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-sat</artifactId>
             <version>1.0.2</version>
