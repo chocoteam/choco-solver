@@ -76,8 +76,7 @@ public class SetCstrsTest {
 		BoolVar b2 = s.notEmpty(Yright).reify();
 		// ---
 		s.addClausesBoolOrArrayEqualTrue(new BoolVar[]{b1, b2});
-		s.getSolver().showStatistics();
-		s.getSolver().showSolutions();
+
 		s.getMinisat().getPropSat().initialize();
 		try {
 			s.getSolver().propagate();

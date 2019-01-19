@@ -76,7 +76,6 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
@@ -100,8 +99,8 @@ public class DynamicPostTest {
                 }
             }
         });
-        model.getSolver().showDecisions();
-        model.getSolver().showSolutions();
+
+
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }

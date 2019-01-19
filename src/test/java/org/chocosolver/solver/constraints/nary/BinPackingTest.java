@@ -45,7 +45,6 @@ public class BinPackingTest {
 		IntVar[] itemBin = model.intVarArray("binOfItem",3,-1,1);
 		IntVar[] binLoad = model.intVarArray("binLoad",2,3,3);
 		model.binPacking(itemBin,itemSize,binLoad,0).post();
-		model.getSolver().showSolutions();
 		model.getSolver().setSearch(Search.inputOrderLBSearch(itemBin));
 		boolean sol = model.getSolver().solve();
 		assertTrue(sol);

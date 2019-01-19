@@ -121,7 +121,6 @@ public class InverseChannelingTest {
         IntVar[] X = model.intVarArray("X", 4, 0, 3);
         model.inverseChanneling(X, X).post();
         Solver solver = model.getSolver();
-        solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(10, solver.getSolutionCount());
     }

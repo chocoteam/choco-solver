@@ -69,7 +69,7 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(true)));
         r.setDFS();
-        model.getSolver().showSolutions();
+
         model.getSolver().solve();
         assertEquals(r.getMeasures().getSolutionCount(), 1);
         assertEquals(r.getMeasures().getNodeCount(), 24);
@@ -158,7 +158,6 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
-        r.showSolutions();
         while (model.getSolver().solve()) ;
         model.getSolver().printShortStatistics();
         assertEquals(model.getSolver().getSolutionCount(), 3);
@@ -212,8 +211,8 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setSearch(inputOrderUBSearch(B));
         r.setLDS(1);
-        model.getSolver().showSolutions();
-        model.getSolver().showDecisions();
+
+
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
 
@@ -231,8 +230,6 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setSearch(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
         r.setLDS(1);
-        r.showDecisions();
-        r.showSolutions();
         r.limitSolution(10);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 4);
@@ -252,8 +249,8 @@ public class SolverTest {
         r.setMove(new MoveBinaryLDS(inputOrderUBSearch(B), 1, model.getEnvironment()),
                 new MoveBinaryDFS(greedySearch(inputOrderLBSearch(X)))
         );
-        model.getSolver().showSolutions();
-        model.getSolver().showDecisions();
+
+
         r.limitSolution(10);
         while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 4);

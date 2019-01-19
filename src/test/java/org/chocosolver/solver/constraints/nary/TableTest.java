@@ -75,7 +75,7 @@ public class TableTest {
 		t.add(5,-1,1);
 		t.add(1,0,1);
 		m.table(new IntVar[]{x,y,z},t,"CT+").post();
-		m.getSolver().showSolutions();
+
 		while (m.getSolver().solve());
 		m.getSolver().printStatistics();
 	}
@@ -506,8 +506,8 @@ public class TableTest {
 			BoolVar r = s2.boolVar("r");
 			s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
 		}
-		s1.getSolver().showDecisions();
-		s2.getSolver().showDecisions();
+
+
 		s1.getSolver().findAllSolutions();
 		s2.getSolver().findAllSolutions();
 		Assert.assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
@@ -529,7 +529,7 @@ public class TableTest {
 		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
 
 		Solver solver = model.getSolver();
-		solver.showDecisions();
+
 		solver.findAllSolutions();
 		Assert.assertEquals(solver.getSolutionCount(), 5);
 	}
@@ -547,7 +547,7 @@ public class TableTest {
 		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
 
 		Solver solver = model.getSolver();
-		solver.showDecisions();
+
 		solver.findAllSolutions();
 		Assert.assertEquals(solver.getSolutionCount(), 27);
 	}

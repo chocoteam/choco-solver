@@ -159,7 +159,6 @@ public class IReificationFactoryTest {
         IntVar Y = m.intVar(yy[0],yy[1]);
         BoolVar B = m.boolVar();
         m.reifyXleY(X, Y, B);
-        m.getSolver().showSolutions();
         while(m.getSolver().solve()){
             Assert.assertTrue(B.isInstantiatedTo(0) | X.getValue() <= Y.getValue());
         }

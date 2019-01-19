@@ -49,7 +49,6 @@ public class SubcircuitTest {
 		m.subPath(nodes, start,end, 0, m.intVar(1,14)).post();
 
 		int sol=0;
-		m.getSolver().showContradiction();
 		while(m.getSolver().solve()){
 			sol++;
 		}

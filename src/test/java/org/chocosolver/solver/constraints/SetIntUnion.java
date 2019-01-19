@@ -31,8 +31,8 @@ public class SetIntUnion {
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.union(x, values).post();
-        s.getSolver().showStatistics();
-        s.getSolver().showSolutions();
+
+
         s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
     }
@@ -49,8 +49,8 @@ public class SetIntUnion {
         };
         SetVar values = s.setVar("values", new int[]{0, 1, 4});
         s.union(x, values).post();
-        s.getSolver().showStatistics();
-        s.getSolver().showSolutions();
+
+
         s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
         assertEquals(s.getSolver().getSolutionCount(), 0);
@@ -68,8 +68,8 @@ public class SetIntUnion {
         };
         SetVar values = s.setVar("values", new int[]{}, new int[]{-1, 0, 1, 2, 3, 4, 5, 6});
         s.union(x, values).post();
-        s.getSolver().showStatistics();
-        s.getSolver().showSolutions();
+
+
         s.getSolver().setSearch(inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
         out.println(values);

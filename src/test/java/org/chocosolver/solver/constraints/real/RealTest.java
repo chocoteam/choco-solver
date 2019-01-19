@@ -227,7 +227,6 @@ public class RealTest {
         model.realIbexGenericConstraint("min(20,{0}) = {1}", MTBF_MT, MTBF).post();//MTBF;
         model.setPrecision(precision);
         model.setObjective(false, MTBF);
-        solver.showDecisions();
         solver.solve();
     }
 
@@ -247,8 +246,8 @@ public class RealTest {
         BoolVar bv = model.realIbexGenericConstraint("{0}=4", rv).reify();
         model.arithm(bv, "=", 0).post();
         Solver solver = model.getSolver();
-        solver.showSolutions();
-        solver.showDecisions();
+
+
         solver.setSearch(
                 Search.inputOrderLBSearch(bv),
                 Search.realVarSearch(4.E-2, rv));
@@ -298,7 +297,7 @@ public class RealTest {
         printVars.add(dim_A);
         printVars.add(ll);
         Solver solver = model.getSolver();
-        solver.showDecisions();
+
     /*try {
         model.getSolver().propagate();
     } catch (ContradictionException e) {
@@ -338,7 +337,7 @@ public class RealTest {
         //CRASH
         model.realIbexGenericConstraint("{0}=max({1},{2})", opt, srv1, srv2).post();
         model.setObjective(false, opt);
-        model.getSolver().showStatistics();
+
         while (model.getSolver().solve()) {}
     }
 
@@ -563,7 +562,7 @@ public class RealTest {
         ).post();
         Solver solver = model.getSolver();
         solver.setSearch(Search.randomSearch(x, 0), Search.ibexSolving(model));
-        solver.showSolutions();
+
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 108);
     }
@@ -604,7 +603,7 @@ public class RealTest {
                         "abs({0})=abs({2});",
                 y).post();
         Solver solver = model.getSolver();
-        solver.showSolutions();
+
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
@@ -669,7 +668,7 @@ public class RealTest {
         model.sum(dim_A_guards, "=", 1).post();
         RealVar dim_H_asReal = model.realIntView(dim_H, 1.0E-5);
         model.realIbexGenericConstraint("{0}+{1} > 2500", dim_A, dim_H_asReal).post();
-        model.getSolver().showSolutions();
+
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
@@ -745,8 +744,8 @@ public class RealTest {
         model.realIbexGenericConstraint("{0}+{1}={2}", new RealVar[] {var1,var2,var3}).post();
 
         Solver solver = model.getSolver();
-        solver.showSolutions();
-        solver.showDecisions();
+
+
         Assert.assertTrue(solver.solve());
     }
 

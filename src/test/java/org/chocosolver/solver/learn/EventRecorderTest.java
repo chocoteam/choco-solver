@@ -152,7 +152,6 @@ public class EventRecorderTest {
             model.arithm(p[m - 1], "+", p[m - 2], ">", 4).post();
             model.getSolver().setSearch(Search.inputOrderLBSearch(p));
             model.getSolver().setLearningSignedClauses();
-            model.getSolver().showShortStatistics();
             assertFalse(model.getSolver().solve());
             assertEquals(model.getSolver().getNodeCount(),  m - 1);
             assertEquals(model.getSolver().getFailCount(), 3);
@@ -177,9 +176,6 @@ public class EventRecorderTest {
 
         r.setLearningSignedClauses();
 
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
-        model.getSolver().showDecisions();
         assertFalse(model.getSolver().solve());
         assertEquals(model.getSolver().getNodeCount(),  4);
         assertEquals(model.getSolver().getFailCount(), 3);
@@ -204,9 +200,9 @@ public class EventRecorderTest {
 
         r.setLearningSignedClauses();
 
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
-        model.getSolver().showDecisions();
+
+
+
         assertFalse(model.getSolver().solve());
         assertEquals(model.getSolver().getNodeCount(),  5);
         assertEquals(model.getSolver().getFailCount(), 4);
@@ -214,7 +210,6 @@ public class EventRecorderTest {
 
 
     private void configure(Model model, int conf) {
-//        model.getSolver().showDecisions(()->""+model.getSolver().getFailCount());
 //        model.getSolver().limitFail(10);
 //        ClauseStore.PRINT_CLAUSE= true;
 //        ExplanationForSignedClause.PROOF= ExplanationForSignedClause.FINE_PROOF = true;
@@ -255,7 +250,7 @@ public class EventRecorderTest {
         }
         model.getSolver().setSearch(inputOrderLBSearch(vars));
         configure(model, a);
-        model.getSolver().showShortStatistics();
+
         model.getSolver().limitTime("5m");
         assertTrue(model.getSolver().solve() || model.getSolver().isStopCriterionMet());
     }
@@ -301,7 +296,7 @@ public class EventRecorderTest {
         model.getSolver().setSearch(inputOrderLBSearch(vars));
 
         configure(model, a);
-        model.getSolver().showShortStatistics();
+
         model.getSolver().limitTime("5m");
         assertTrue(model.getSolver().solve());
     }
@@ -354,7 +349,7 @@ public class EventRecorderTest {
         model.getSolver().setSearch(inputOrderLBSearch(ticks));
 
         configure(model, a);
-        model.getSolver().showShortStatistics();
+
         model.getSolver().limitTime("50s");
         model.setObjective(Model.MINIMIZE, ticks[m - 1]);
         while (model.getSolver().solve()) ;
@@ -390,7 +385,7 @@ public class EventRecorderTest {
         r.setSearch(minDomUBSearch(position));
 
         configure(model, a);
-        model.getSolver().showShortStatistics();
+
         model.getSolver().limitTime("5m");
         assertTrue(model.getSolver().solve());
     }
@@ -458,7 +453,6 @@ public class EventRecorderTest {
         r.setSearch(intVarSearch(new FirstFail(r.getModel()), new IntDomainMiddle(true), vars));
 
         configure(model, a);
-        r.showShortStatistics();
         r.limitTime("5m");
         assertTrue(r.solve() || r.isStopCriterionMet());
     }
@@ -543,7 +537,7 @@ public class EventRecorderTest {
         model.getSolver().setSearch(minDomLBSearch(Ovars));
 
         configure(model, a);
-        model.getSolver().showShortStatistics();
+
         model.getSolver().limitTime("5m");
         assertTrue(model.getSolver().solve() || model.getSolver().isStopCriterionMet());
     }
@@ -709,7 +703,6 @@ public class EventRecorderTest {
             s.getSolver().setLearningSignedClauses();
         }
         // logging and solution
-        s.getSolver().showShortStatistics();
         s.getSolver().setSearch(Search.inputOrderLBSearch(x));
         while (s.getSolver().solve()) ;
         return s;
@@ -729,9 +722,9 @@ public class EventRecorderTest {
         r.setLearningSignedClauses();
 //        s.getSolver().setCBJLearning(true);
         r.setSearch(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
-//        model.getSolver().showDecisions();
+//
         ClauseStore.ASSERT_UNIT_PROP = false;
-        model.getSolver().showSolutions();
+
         while (model.getSolver().solve()) ;
     }
 
@@ -814,7 +807,7 @@ public class EventRecorderTest {
                 new IntDomainMiddle(true),
                 DecisionOperatorFactory.makeIntSplit(),
                 start1, start2));
-//        solver.showDecisions();
+//
         solver.findSolution();
         ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = false;
     }
@@ -930,7 +923,6 @@ public class EventRecorderTest {
                 new IntDomainMin(),
                 ArrayUtils.append(S, new IntVar[]{objective})));
         configure(model, learn);
-        solver.showShortStatistics();
         Runtime.getRuntime().addShutdownHook(new Thread(solver::printShortStatistics));
         solver.findOptimalSolution(objective, false);
         Assert.assertEquals(solver.getBoundsManager().getBestSolutionValue(), 53);

@@ -30,8 +30,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = model.intVar("N", 2, 3, false);
         model.atLeastNValues(XS, N, false).post();
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
+
+
         final BitSet values = new BitSet(3);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();
@@ -57,8 +57,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 4, 0, 2, false);
         final IntVar N = model.intVar("N", 2, 3, false);
         model.atMostNValues(XS, N, false).post();
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
+
+
         final BitSet values = new BitSet(3);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
             values.clear();
@@ -85,8 +85,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
         final IntVar N = model.intVar("N", 6);
         model.atLeastNValues(XS, N, false).post();
-        model.getSolver().showStatistics();
-        model.getSolver().showDecisions();
+
+
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
     }
@@ -99,8 +99,8 @@ public class NValueTest {
             final IntVar N = model.intVar("N", 2, 3);
             model.atLeastNValues(XS, N, true).post();
         }
-        model.getSolver().showStatistics();
-//        model.getSolver().showDecisions();
+
+//
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
     }
@@ -111,8 +111,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
         final IntVar N = model.intVar("N", 6);
         model.atMostNValues(XS, N, false).post();
-        model.getSolver().showStatistics();
-        model.getSolver().showDecisions();
+
+
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
     }
@@ -123,8 +123,8 @@ public class NValueTest {
         final IntVar[] XS = model.intVarArray("XS", 6, 0, 5, false);
         final IntVar N = model.intVar("N", 6);
         model.nValues(XS, N).post();
-        model.getSolver().showStatistics();
-        model.getSolver().showDecisions();
+
+
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
     }

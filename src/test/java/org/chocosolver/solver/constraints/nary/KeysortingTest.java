@@ -326,7 +326,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 2).post();
         Solver r = model.getSolver();
         r.setSearch(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
-        model.getSolver().showSolutions();
+
         while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 16);
     }
@@ -352,7 +352,7 @@ public class KeysortingTest {
         model.keySort(X, null, Y, 1).post();
         Solver r = model.getSolver();
         r.setSearch(inputOrderLBSearch(flatten(X)), inputOrderLBSearch(flatten(Y)));
-        model.getSolver().showSolutions();
+
         while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 16);
     }

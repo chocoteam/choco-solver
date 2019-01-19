@@ -95,6 +95,7 @@ public class NoGoodOnSolutionTest {
         // restarts on solutions and on fails (at activity presolve only) (loop infinitely)
         Model s = makeProblem();
         Solver r = s.getSolver();
+        System.out.println(s);
         r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.getSolver().solve()) ;
         out.println(r.getMeasures());
@@ -108,7 +109,6 @@ public class NoGoodOnSolutionTest {
         Solver r = s.getSolver();
         r.setNoGoodRecordingFromSolutions(s.retrieveIntVars(true));
         r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
-        s.getSolver().showSolutions();
         while (s.getSolver().solve()) ;
         out.println(r.getMeasures());
         assertEquals(r.getMeasures().getSolutionCount(), NB_SOLS);
@@ -178,7 +178,7 @@ public class NoGoodOnSolutionTest {
             }
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0]);
-        model.getSolver().showSolutions();
+
         model.getSolver().setSearch(inputOrderLBSearch(vars));
         while (model.getSolver().solve()) ;
         out.println(model.getSolver().getMeasures());
@@ -201,9 +201,9 @@ public class NoGoodOnSolutionTest {
             }
         }
         model.getSolver().setNoGoodRecordingFromSolutions(vars[0], vars[1]);
-        model.getSolver().showSolutions();
+
         model.getSolver().setSearch(inputOrderLBSearch(vars));
-//        IOutputFactory.showDecisions(solver);
+
         while (model.getSolver().solve()) ;
         out.println(model.getSolver().getMeasures());
         assertEquals(model.getSolver().getSolutionCount(), 36);

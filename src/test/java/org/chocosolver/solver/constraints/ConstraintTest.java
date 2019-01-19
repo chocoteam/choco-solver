@@ -395,7 +395,6 @@ public class ConstraintTest {
         model.ifThen(eq, model.arithm(varD, "=", 0));
 
         Solver solver = model.getSolver();
-        solver.showSolutions();
         solver.findAllSolutions();
     }
 
@@ -405,17 +404,12 @@ public class ConstraintTest {
         IntVar a= model.intVar("a", 0, 1000, false);
         IntVar b= model.intVar("b", 0, 100, false);
 
-
-        System.out.println(model);
-
         IntVar ten = model.intVar(10);
         Constraint modC = model.mod(a, ten, b);
         modC.post();
 
         int i=0;
 
-        long timeMs = System.currentTimeMillis();
-        long newTimeMs = System.currentTimeMillis();
         for (int aNow =a.getLB(); aNow<a.getUB(); aNow++) {
             Constraint ra = model.arithm(a, "=", aNow);
             model.post(ra);
@@ -424,10 +418,6 @@ public class ConstraintTest {
                 model.post(rb);
                 while (model.getSolver().solve()) {
                     i++;
-                    newTimeMs = System.currentTimeMillis();
-//                    System.out.print("Solution " + i + " found :" + (newTimeMs-timeMs) + " ms. ");
-                    timeMs = newTimeMs;
-                    System.out.println("");
                 }
                 model.unpost(rb);
                 model.getSolver().reset();

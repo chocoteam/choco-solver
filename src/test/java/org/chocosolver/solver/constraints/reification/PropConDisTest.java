@@ -156,7 +156,6 @@ public class PropConDisTest {
             model.setObjective(Model.MINIMIZE, horizon);
         }
         model.addHook("decvars", append(OS, LS));
-//        showShortStatistics(model);
         return model;
     }
 }
