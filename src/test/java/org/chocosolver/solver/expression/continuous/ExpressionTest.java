@@ -11,6 +11,7 @@ package org.chocosolver.solver.expression.continuous;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.expression.continuous.relational.CReExpression;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -88,7 +89,7 @@ public class ExpressionTest {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 1.d);
         RealVar y = model.realVar("y", 0, 5, 1.d);
-        eval(model, x.sub(1).eq(y), p, 8);
+        eval(model, x.sub(1).eq(y), p, 5);
     }
 
     @Test(groups = "ibex", timeOut = 60000, dataProvider = "post")
@@ -104,9 +105,8 @@ public class ExpressionTest {
         Model model = new Model();
         RealVar x = model.realVar("x", 1, 5, 1.d);
         RealVar y = model.realVar("y", 0, 5, 1.d);
-        eval(model, x.div(2).eq(y), p, 8);
+        eval(model, x.div(2).eq(y), p, 5);
     }
-
 
     @Test(groups = "ibex", timeOut = 60000, dataProvider = "post")
     public void test12(int p) {
@@ -129,7 +129,7 @@ public class ExpressionTest {
         Model model = new Model();
         RealVar x = model.realVar("x", -2, 2, 1.d);
         RealVar y = model.realVar("y", 0, 5, 1.d);
-        eval(model, x.abs().eq(y), p, 8);
+        eval(model, x.abs().eq(y), p, 5);
     }
 
     @Test(groups = "ibex", timeOut = 60000, dataProvider = "post")

@@ -4,6 +4,7 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![Documentation Status](https://readthedocs.org/projects/choco-solver/badge/?version=latest)](http://choco-solver.readthedocs.io/en/latest/?badge=latest)
 
+[![CircleCI](https://circleci.com/gh/chocoteam/choco-solver.svg?style=svg)](https://circleci.com/gh/chocoteam/choco-solver)
 [![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.org/chocoteam/choco-solver) 
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
 [![Coverity](https://scan.coverity.com/projects/8383/badge.svg)](https://scan.coverity.com/projects/choco-solver) 
