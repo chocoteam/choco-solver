@@ -36,8 +36,6 @@ public class ExpressionTest {
                 ex.ibex(1.d).post();
                 break;
         }
-        System.out.printf("%s\n", model);
-        model.getSolver().showSolutions();
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
     }
 

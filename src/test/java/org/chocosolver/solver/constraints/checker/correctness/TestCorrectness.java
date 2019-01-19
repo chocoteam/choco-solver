@@ -93,7 +93,6 @@ public class TestCorrectness {
     @Test(groups="10s", timeOut=60000)
     public void testGCC() {
         for (int i = 0; i < 5; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
@@ -118,7 +117,6 @@ public class TestCorrectness {
     @Test(groups="10s", timeOut=60000)
     public void testCOUNT() {
         for (int i = 0; i < 3; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
@@ -170,7 +168,6 @@ public class TestCorrectness {
     @Test(groups="10s", timeOut=60000)
     public void testAMONG() {
         for (int i = 0; i < 5; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});

@@ -21,7 +21,6 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
@@ -81,7 +80,6 @@ public class PropConDisTest {
     public void test3() {
         Random rnd = new Random();
         for (int n = 1; n < 18; n += 2) {
-            out.printf("Size: %d\n", n);
             Model or = modelPb(n, n, rnd, false, true);
             Model cd = modelPb(n, n, rnd, true, true);
             or.getSolver().setSearch(inputOrderLBSearch(ArrayUtils.append((IntVar[]) or.getHook("decvars"),new IntVar[]{(IntVar) or.getObjective()})));
@@ -105,9 +103,7 @@ public class PropConDisTest {
     public void test4() {
         Random rnd = new Random();
         for (int n = 1; n < 3; n ++) {
-            System.out.printf("Size: %d\n", n);
             for (int seed = 0; seed < 5; seed += 1) {
-                out.printf("Size: %d (%d)\n", n, seed);
                 Model or = modelPb(n, seed, rnd, false, false);
                 or.getSolver().setSearch(randomSearch((IntVar[]) or.getHook("decvars"), 0));
                 while (or.getSolver().solve()) ;

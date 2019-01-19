@@ -51,7 +51,7 @@ public class ScaleViewTest {
         m.arithm(m.intScaleView(y, 3), "!=", z).post();
         Solver s = m.getSolver();
         while (s.solve()) {
-            System.out.println("3 * " + y.getValue() + " != " + z);
+            Assert.assertNotEquals(3*y.getValue(),z.getValue());
         }
         Assert.assertEquals(s.getSolutionCount(),5);
     }
