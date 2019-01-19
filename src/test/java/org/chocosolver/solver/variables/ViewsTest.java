@@ -231,7 +231,7 @@ public class ViewsTest {
     @DataProvider(name = "1d")
     public Object[][] data1D() {
         List<Object[]> elt = new ArrayList<>();
-        for (int seed = 2; seed < 9; seed += 1) {
+        for (int seed = 2; seed < 6; seed += 1) {
             elt.add(new Object[]{seed});
         }
         return elt.toArray(new Object[elt.size()][1]);

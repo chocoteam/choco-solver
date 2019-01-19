@@ -751,7 +751,7 @@ public class BitsetIntVarImplTest {
     @Test(groups = "10s", timeOut = 120000)
     public void testRAL1() throws ContradictionException {
         int ub = 115200;
-        int nIter = 1000;
+        int nIter = 100;
         IntIterableRangeSet values = new IntIterableRangeSet(new int[]{
                 3, 1354545, 103, 1003, 953, 267453, 69483, 351658,
                 9999, 11500000, 8569421, 9984999, 158085});
