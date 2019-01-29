@@ -49,8 +49,8 @@ public class SetRandomNeighbor implements INeighbor {
             if(rd.nextBoolean())var.force(value.get(k), this);
         }
         for (int i:var.getLB()) {
-            if(!var.getLB().contains(i)){
-                if(rd.nextBoolean())var.remove(i, this);
+            if(!var.getLB().contains(i) && rd.nextBoolean()){
+                var.remove(i, this);
             }
         }
     }
