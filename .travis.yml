@@ -18,8 +18,8 @@ env:
   # COVERITY_PROJECT_TOKEN=
   - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
   matrix:
-  # - GROUP=1s
-  #- GROUP=10s
+  - GROUP=1s
+  - GROUP=10s
   - GROUP=ibex
 before_install:
 - "/bin/sh ./.travis/install-ibex.sh"

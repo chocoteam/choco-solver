@@ -25,7 +25,9 @@ public interface INeighbor extends ICause {
     /**
      * Initialize this neighbor
      */
-    default void init(){}
+    default void init(){
+        // Intentionally left empty.
+    }
 
     /**
      * Record values of decision variables to freeze some ones during the next LNS run
@@ -42,7 +44,9 @@ public interface INeighbor extends ICause {
      * Use less restriction at the beginning of a LNS run in order to get better solutions Called
      * when no solution was found during a LNS run (trapped into a local optimum)
      */
-    default void restrictLess(){}
+    default void restrictLess(){
+        // Intentionally left empty.
+    }
 
     /**
      * @return true iff the search is in a complete mode (no fixed variable)
