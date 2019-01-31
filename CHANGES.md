@@ -8,6 +8,8 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- LNS on other variables (e.g. SetVarLNS)
+- Continuous integration fixed
 
 ### Deprecated API (to be removed in next release):
 
