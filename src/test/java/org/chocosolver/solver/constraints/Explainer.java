@@ -40,7 +40,7 @@ public class Explainer {
         ContradictionException cex = new ContradictionException();
         cex.set(cause, v, "");
         expl.learnSignedClause(cex);
-        return expl.getLiterals();
+        return expl.getLiterals(); 
     }
 
     public static HashMap<IntVar, IntIterableRangeSet> fail(Solver solver, IntProcedure proc) throws ContradictionException {
