@@ -17,7 +17,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.search.limits.ICounter;
-import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
+import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -45,9 +45,9 @@ public class MoveLNS implements Move {
      */
     protected Move move;
     /**
-     * Neighbor to used
+     * IntNeighbor to used
      */
-    protected Neighbor neighbor;
+    protected INeighbor neighbor;
     /**
      * Number of solutions found so far
      */
@@ -75,7 +75,7 @@ public class MoveLNS implements Move {
      * @param neighbor how the fragment are computed
      * @param restartCounter when a restart should occur
      */
-    public MoveLNS(Move move, Neighbor neighbor, ICounter restartCounter) {
+    public MoveLNS(Move move, INeighbor neighbor, ICounter restartCounter) {
         this.move = move;
         this.neighbor = neighbor;
         this.counter = restartCounter;

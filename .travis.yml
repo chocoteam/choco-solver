@@ -3,7 +3,7 @@ sudo: true
 os:
 - linux
 jdk:
-- oraclejdk8
+- openjdk8
 cache:
   directories:
   - "$HOME/.m2"
@@ -20,13 +20,14 @@ env:
   matrix:
   - GROUP=1s
   - GROUP=10s
+  - GROUP=ibex
+  - GROUP=checker
 before_install:
 - "/bin/sh ./.travis/install-ibex.sh"
 - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
   CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 - sudo apt-get install jq
-- wget -O ~/codacy-coverage-reporter-assembly-latest.jar $(curl https://api.github.com/repos/codacy/codacy-coverage-reporter/releases/latest
-  | jq -r '.assets[0].browser_download_url')
+# - wget -O ~/.codacy/reporter/codacy-reporter-latest.jar https://oss.sonatype.org/service/local/repositories/releases/content/com/codacy/codacy-coverage-reporter/2.0.2/codacy-coverage-reporter-2.0.2-assembly.jar
 install:
 - npm install travis-ping
 branches:

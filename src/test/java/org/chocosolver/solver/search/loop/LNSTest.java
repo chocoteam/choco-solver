@@ -16,17 +16,18 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
-import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
-import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -113,7 +114,7 @@ public class LNSTest {
         knapsack20(lns);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testTOTO() {
         // First, the model: here a simple knapsack pb ...
         int[] capacities = {99, 1101};
@@ -207,7 +208,6 @@ public class LNSTest {
                 if (linkCosts[i][j] > maxLinkCost) maxLinkCost = linkCosts[i][j];
             }
         }
-        System.out.println("Max link cost: " + maxLinkCost);
 
         assert initialNode >= 0 && initialNode < nodes;
         assert linkCosts.length == nodes;
@@ -272,24 +272,17 @@ public class LNSTest {
         }
         //decvars[4*nodes]=optVar;
 
-        System.out.println("Starting search.");
 
         // Set up basic search for first sol.
         Move basicsearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 992634, new IntDomainMin()));
         Solver solver = model.getSolver();
         solver.setMove(basicsearch);
 
-        boolean foundFirstSol = solver.solve();
-        if (foundFirstSol) {
-            System.out.println("First solution:");
-            System.out.println(optVar.getValue());
-        } else {
-            System.out.println("No first solution found.");
-        }
+        solver.solve();
 
         //   Type of LNS neighbourhood -- propagation-guided LNS.
 //        INeighbor in=INeighborFactory.propagationGuided(decvars);
-        Neighbor in = INeighborFactory.blackBox(decvars);
+        INeighbor in = INeighborFactory.blackBox(decvars);
 
         in.init(); // Should this be necessary?
 
@@ -300,10 +293,65 @@ public class LNSTest {
 
         solver.setMove(lns);
         solver.limitNode(20000);
-        while (solver.solve()) {
-            System.out.printf("%.3fs -> %d\n", solver.getTimeCount(), optVar.getValue());
-        }
+        while (solver.solve()) ;
         Assert.assertEquals(solver.getObjectiveManager().getBestUB(), 318);
     }
 
+
+    // --- LNS on a set var
+
+    @Test(groups="10s", timeOut=60000)
+    public void testKnapsackSet20() {
+        int obj1 = testKnapsackSet(20, false);
+        int obj2 = testKnapsackSet(20, true);
+        Assert.assertTrue(obj1 == obj2);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testKnapsackSet30() {
+        int obj1 = testKnapsackSet(30, false);
+        int obj2 = testKnapsackSet(30, true);
+        Assert.assertTrue(obj1==obj2); // on this data set LNS improves results
+    }
+
+    @Test(groups="60s", timeOut=60000)
+    public void testKnapsackSet50() {
+        int obj1 = testKnapsackSet(50, false);
+        int obj2 = testKnapsackSet(50, true);
+        Assert.assertTrue(obj1<obj2); // on this data set LNS improves results
+    }
+
+    private static int testKnapsackSet(int nos, boolean lns) {
+        int[] capacities = {99, 1101};
+        int[] volumesDef = {54, 12, 47, 33, 30, 65, 56, 57, 91, 88, 77, 99, 29, 23, 39, 86, 12, 85, 22, 64};
+        int[] energiesDef = {38, 57, 69, 90, 79, 89, 28, 70, 38, 71, 46, 41, 36, 68, 92, 33, 84, 90};
+        int[] volumes = new int[nos];
+        int[] energies = new int[nos];
+        for(int i=0;i<nos;i++){
+            volumes[i] = volumesDef[i%volumesDef.length];
+            energies[i] = energiesDef[i%energiesDef.length];
+        }
+
+        Model m = new Model();
+        // occurrence of each item
+        SetVar in = m.setVar(new int[0], ArrayUtils.array(0,nos));
+        final IntVar power = m.intVar("power", 0, 99999, true);
+        final IntVar weight = m.intVar("weight", capacities[0], capacities[1], true);
+        m.sumElements(in, volumes, 0, weight).post();
+        m.sumElements(in, energies, 0, power).post();
+
+        Solver s = m.getSolver();
+        s.setSearch(Search.setVarSearch(new InputOrder<>(m), new SetDomainMin(), false, in));
+        if(lns) s.setLNS(INeighborFactory.setVarRandom(in));
+        s.limitTime("5s");
+
+        //r.limitTime("10s");
+        m.setObjective(Model.MAXIMIZE, power);
+        int bp = 0;
+        while (m.getSolver().solve()) {
+            bp = power.getValue();
+        }
+
+        return bp;
+    }
 }

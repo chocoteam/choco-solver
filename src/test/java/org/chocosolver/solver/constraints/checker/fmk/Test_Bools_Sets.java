@@ -38,44 +38,44 @@ public class Test_Bools_Sets {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void testBOOL_SUM(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.boolSum, n, -n / 2, 2 * n, seed, null);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setUnion(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setUnion, n, -n / 2, 2 * n, seed, null);
     }
 
-    @Test(groups="10s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setInter(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setInter, n, -n / 2, 2 * n, seed, null);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setDisj(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setDisj, n, -n / 2, 2 * n, seed, null);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setDiff(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setDiff, n, -n / 2, 2 * n, seed, null);
 
     }
 
-    @Test(groups="10s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setSubSet(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setSubSet, n, -n / 2, 2 * n, seed, null);
     }
 
-    @Test(groups="10s", timeOut=60000, dataProvider = "params")
+    @Test(groups="checker", timeOut=60000, dataProvider = "params")
     public void setAllEq(int i, int n) {
         long seed = System.currentTimeMillis();
         Correctness.checkCorrectness(SetTestModel.setAllEq, n, -n / 2, 2 * n, seed, null);

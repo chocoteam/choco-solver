@@ -143,7 +143,7 @@ public class MeasuresTest {
         }
         model.getSolver().limitNode(0);
         model.getSolver().solve();
-        model.getSolver().printStatistics();
+
         Assert.assertTrue(model.getSolver().getReadingTimeCountInNanoSeconds() > 0);
         Assert.assertTrue(model.getSolver().getReadingTimeCount() > 0.0);
     }

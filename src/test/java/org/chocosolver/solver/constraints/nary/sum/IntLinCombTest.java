@@ -295,7 +295,7 @@ public class IntLinCombTest {
         Model model = new Model();
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.scalar(bs, new int[]{1, 2, 3}, "=", 2).post();
-        model.getSolver().showSolutions();
+
         while (model.getSolver().solve()) ;
     }
 
@@ -557,8 +557,7 @@ public class IntLinCombTest {
             BoolVar r = s2.boolVar("r");
             s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        s1.getSolver().showDecisions();
-        s2.getSolver().showDecisions();
+
         while (s1.getSolver().solve()) ;
         while (s2.getSolver().solve()) ;
         assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
@@ -577,7 +576,6 @@ public class IntLinCombTest {
         IntVar sum = model.intVar("S", -n / 2, n / 2, true);
         model.scalar(bs, cs, "=", sum).post();
         model.getSolver().setSearch(inputOrderLBSearch(bs));
-//        IOutputFactory.showDecisions(solver);
         while (model.getSolver().solve()) ;
     }
 
@@ -726,8 +724,8 @@ public class IntLinCombTest {
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, ">=", 60).post();
         model.getSolver().setSearch(inputOrderLBSearch(var));
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
+
+
         model.getSolver().solve();
     }
 
@@ -737,8 +735,8 @@ public class IntLinCombTest {
         IntVar[] var = model.intVarArray("var", 3, new int[]{30, 60});
         model.sum(new IntVar[]{var[0], var[1], var[2]}, "<=", 120).post();
         model.getSolver().setSearch(inputOrderLBSearch(var));
-        model.getSolver().showStatistics();
-        model.getSolver().showSolutions();
+
+
         model.getSolver().solve();
     }
 

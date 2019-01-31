@@ -118,13 +118,11 @@ public class ElementTest {
 		IntVar indexVar = model.intVar("index", 0, 2000, false);
 		IntVar valueVar = model.intVar("value", 1, 2000, false); // enumerated
 		model.element(valueVar, table, indexVar).post();
-		System.out.println("before filtering : "+valueVar);
 		try {
 			model.getSolver().propagate();
 		} catch(ContradictionException e) {
 			e.printStackTrace();
 		}
-		System.out.println("after filtering : "+valueVar);
 		Assert.assertEquals(valueVar.getDomainSize(),3);
 	}
 
@@ -363,7 +361,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement1() throws ContradictionException {
 		Model choco = new Model();
 
@@ -376,10 +374,6 @@ public class ElementTest {
 
 		choco.element(value, values, index, 0).post();
 		choco.getSolver().propagate();
-
-		System.out.println("values = " + Arrays.toString(values));
-		System.out.println("index  = " + index);
-		System.out.println("value  = " + value);
 
 		// FAILS !
 		Assert.assertTrue(index.isInstantiatedTo(0));
@@ -394,7 +388,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement2() throws ContradictionException {
 		Model choco = new Model();
 
@@ -405,10 +399,6 @@ public class ElementTest {
 		choco.element(value, values, index, 0).post();
 		choco.getSolver().propagate();
 
-		System.out.println("values = " + Arrays.toString(values));
-		System.out.println("index  = " + index);
-		System.out.println("value  = " + value);
-
 		// FAILS !
 		Assert.assertTrue(index.isInstantiatedTo(0));
 	}
@@ -424,7 +414,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void improveElement3() throws ContradictionException {
 		Model choco = new Model();
 
@@ -435,10 +425,6 @@ public class ElementTest {
 		choco.element(value, values, index, 0).post();
 		choco.getSolver().propagate();
 
-		System.out.println("values = " + Arrays.toString(values));
-		System.out.println("index  = " + index);
-		System.out.println("value  = " + value);
-
 		// FAILS !
 		Assert.assertTrue(index.isInstantiatedTo(0));
 	}
@@ -454,7 +440,7 @@ public class ElementTest {
 	 *
 	 * @throws ContradictionException never
 	 */
-	@Test
+	@Test(groups="1s", timeOut=60000)
 	public void itIsAlreadyDoneWhenThereIsMoreThanOnePrimitiveInt() throws ContradictionException {
 		Model choco = new Model();
 
@@ -464,10 +450,6 @@ public class ElementTest {
 
 		choco.element(value, values, index, 0).post();
 		choco.getSolver().propagate();
-
-		System.out.println("values = " + Arrays.toString(values));
-		System.out.println("index  = " + index);
-		System.out.println("value  = " + value);
 
 		Assert.assertTrue(index.isInstantiatedTo(0));
 	}

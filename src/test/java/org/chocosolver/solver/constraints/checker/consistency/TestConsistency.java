@@ -36,7 +36,7 @@ public class TestConsistency {
 
     // EQ *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testEQ() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++) {
@@ -47,7 +47,7 @@ public class TestConsistency {
 
     // NEQ *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testNEQ() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++) {
@@ -58,7 +58,7 @@ public class TestConsistency {
 
     // AllDifferent *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testALLDIFFERENT() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 10; i++) {
@@ -67,7 +67,7 @@ public class TestConsistency {
             checkConsistency(Modeler.modelAllDiffAC, 5, 2, 30, null, seed + i, "ac");
         }
     }
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testALLDIFFERENTBC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++) {
@@ -80,7 +80,7 @@ public class TestConsistency {
 
     // Absolute *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testABSOLUTE() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++) {
@@ -95,7 +95,7 @@ public class TestConsistency {
 
     // Count *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testCOUNT() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 60; i++) {
@@ -108,7 +108,7 @@ public class TestConsistency {
 
     // LEX *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testLEX() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 50; i++) {
@@ -119,7 +119,7 @@ public class TestConsistency {
 
     // LEX CHAIN *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testLEXCHAIN() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 25; i++) {
@@ -130,7 +130,7 @@ public class TestConsistency {
 
     // ELEMENT *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testELEMENT() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
@@ -140,7 +140,7 @@ public class TestConsistency {
 
     // AMONG *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testAMONG() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 20; i++) {
@@ -153,7 +153,7 @@ public class TestConsistency {
 
     // SORT *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testSORT() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 30; i++) {
@@ -164,7 +164,7 @@ public class TestConsistency {
 
     // MIN *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testMIN() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
@@ -177,7 +177,7 @@ public class TestConsistency {
 
     // MAX *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testMAX() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
@@ -190,7 +190,7 @@ public class TestConsistency {
 
     // INT VALUE PRECEDE CHAIN *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testIVPC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 50; i++) {
@@ -201,7 +201,7 @@ public class TestConsistency {
 
     // MDD *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testMDD() {
         long seed = System.currentTimeMillis();
         Random rnd = new Random();
@@ -230,7 +230,7 @@ public class TestConsistency {
 
     // PLUS *******************************************************
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testPLUSBC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
@@ -239,7 +239,7 @@ public class TestConsistency {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testPLUSAC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {

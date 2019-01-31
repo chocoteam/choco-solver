@@ -9,12 +9,9 @@
  */
 package org.chocosolver.solver.search.loop.lns;
 
-import org.chocosolver.solver.search.loop.lns.neighbors.Neighbor;
-import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 
 /**
  * Factory to creates INeighbor objects that configures LNS
@@ -27,7 +24,7 @@ public class INeighborFactory {
      * @param vars the pool of variables to be freezed
      * @return a black-box LNS neighbor
      */
-    public static Neighbor blackBox(IntVar... vars) {
+    public static INeighbor blackBox(IntVar... vars) {
         return sequencer(
                 propagationGuided(vars),
                 reversedPropagationGuided(vars),
@@ -40,7 +37,7 @@ public class INeighborFactory {
      * @param vars   the pool of variables to be freezed
      * @return a random neighborhood fixing variables randomly
      */
-    public static Neighbor random(IntVar... vars) {
+    public static IntNeighbor random(IntVar... vars) {
         return new RandomNeighborhood(vars, 3, 0);
     }
 
@@ -50,7 +47,7 @@ public class INeighborFactory {
      * @param vars     the pool of variables to be freezed
      * @return a propagation-guided neighborhood
      */
-    public static Neighbor propagationGuided(IntVar... vars) {
+    public static IntNeighbor propagationGuided(IntVar... vars) {
         return new PropagationGuidedNeighborhood(vars, 30, 10, 0);
     }
 
@@ -59,16 +56,25 @@ public class INeighborFactory {
      * @param vars      the pool of variables to be freezed
      * @return a reverse propagation-guided neighborhood
      */
-    public static Neighbor reversedPropagationGuided(IntVar... vars) {
+    public static IntNeighbor reversedPropagationGuided(IntVar... vars) {
         return new ReversePropagationGuidedNeighborhood(vars, 0, 30, 10);
     }
 
 	/**
-     * Creates a composite Neighbor grouping a set of neighbors
+     * Creates a composite INeighbor grouping a set of neighbors
      * @param neighbors a set of neighbors to be grouped
-     * @return a composite Neighbor grouping a set of neighbors
+     * @return a composite IntNeighbor grouping a set of neighbors
      */
-    public static Neighbor sequencer(Neighbor... neighbors) {
+    public static INeighbor sequencer(INeighbor... neighbors) {
         return new SequenceNeighborhood(neighbors);
+    }
+
+	/**
+	 * Creates a random neighborhood fixing a set variable randomly
+	 * @param setVar the set var to be freezed
+	 * @return a random neighborhood fixing a set var randomly
+	 */
+	public static INeighbor setVarRandom(SetVar setVar){
+        return new SetRandomNeighbor(setVar);
     }
 }

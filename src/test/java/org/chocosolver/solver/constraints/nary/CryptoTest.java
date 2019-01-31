@@ -185,7 +185,6 @@ public class CryptoTest {
         solver.setSearch(Search.domOverWDegSearch(vars));
         solver.setSearch(Search.lastConflict(solver.getSearch()));
         solver.findAllOptimalSolutions(OBJ, false);
-        solver.printStatistics();
         Assert.assertEquals(solver.getSolutionCount(), 60);
     }
     

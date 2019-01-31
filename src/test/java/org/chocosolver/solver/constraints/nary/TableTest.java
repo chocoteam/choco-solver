@@ -75,7 +75,7 @@ public class TableTest {
 		t.add(5,-1,1);
 		t.add(1,0,1);
 		m.table(new IntVar[]{x,y,z},t,"CT+").post();
-		m.getSolver().showSolutions();
+
 		while (m.getSolver().solve());
 		m.getSolver().printStatistics();
 	}
@@ -102,7 +102,6 @@ public class TableTest {
 				nbs++;
 			}
 			long nbn = model.getSolver().getNodeCount();
-//            System.out.printf("%s\n", solver.getMeasures().toOneLineString());
 			for (int a = 0; a < ALGOS.length; a++) {
 				for (int s = 0; s < 10; s++) {
 					Model tsolver = new Model(ALGOS[a]);
@@ -116,7 +115,6 @@ public class TableTest {
 					}
 					assertEquals(nbSolutions, nbs);
 					if (a > 1) assertEquals(tsolver.getSolver().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
 				}
 			}
 		}
@@ -143,7 +141,6 @@ public class TableTest {
 				nbs++;
 			}
 			long nbn = model.getSolver().getNodeCount();
-//            System.out.printf("%s\n===\n", solver.getMeasures().toOneLineString());
 			for (int a = 0; a < ALGOS.length; a++) {
 				for (int s = 0; s < 1; s++) {
 					Model tsolver = new Model(ALGOS[a]);
@@ -157,10 +154,8 @@ public class TableTest {
 					}
 					assertEquals(nbSolutions, nbs);
 					if (a > 1) assertEquals(r.getMeasures().getNodeCount(), nbn);
-//                    System.out.printf("%s\n", tsolver.getResolver().getMeasures().toOneLineString());
 				}
 			}
-//            System.out.printf("===\n%s\n", solver.getMeasures().toOneLineString());
 		}
 	}
 
@@ -506,8 +501,8 @@ public class TableTest {
 			BoolVar r = s2.boolVar("r");
 			s2.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
 		}
-		s1.getSolver().showDecisions();
-		s2.getSolver().showDecisions();
+
+
 		s1.getSolver().findAllSolutions();
 		s2.getSolver().findAllSolutions();
 		Assert.assertEquals(s2.getSolver().getSolutionCount(), s1.getSolver().getSolutionCount());
@@ -529,7 +524,7 @@ public class TableTest {
 		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
 
 		Solver solver = model.getSolver();
-		solver.showDecisions();
+
 		solver.findAllSolutions();
 		Assert.assertEquals(solver.getSolutionCount(), 5);
 	}
@@ -547,7 +542,7 @@ public class TableTest {
 		model.table(new IntVar[]{x,y,z}, ts, "CT+").post();
 
 		Solver solver = model.getSolver();
-		solver.showDecisions();
+
 		solver.findAllSolutions();
 		Assert.assertEquals(solver.getSolutionCount(), 27);
 	}

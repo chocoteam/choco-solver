@@ -30,7 +30,6 @@ public class SetVarImplTest {
 			if(!type.name().contains("FIXED")) {
 				for (boolean b : new boolean[]{true, false}) {
 					SetFactory.HARD_CODED = b;
-					System.out.println(type.name());
 					Model m = new Model();
 					SetVar s1 = new SetVarImpl("s1", new int[0], type, ArrayUtils.array(0, 2), type, m);
 					SetVar s2 = new SetVarImpl("s2", new int[0], type, ArrayUtils.array(0, 2), type, m);

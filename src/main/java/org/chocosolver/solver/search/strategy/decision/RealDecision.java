@@ -58,21 +58,21 @@ public class RealDecision extends Decision<RealVar> {
 
     @Override
     public void apply() throws ContradictionException {
-        boolean modif = true;
         if (branch == 1) {
+            boolean modif;
             if(leftFirst){
                 modif = var.updateUpperBound(value, this);
             }else{
                 modif = var.updateLowerBound(value, this);
             }
+            assert modif : "applying decision " + this + " does not modify the variable's domain.";
         } else if (branch == 2) {
             if(leftFirst) {
-                modif = var.updateLowerBound(value + epsilon, this);
+                var.updateLowerBound(value + epsilon, this);
             }else{
-                modif = var.updateUpperBound(value - epsilon, this);
+                var.updateUpperBound(value - epsilon, this);
             }
         }
-        assert modif : "(un-)applying decision " + this + " does not modify the variable's domain.";
     }
 
     /**

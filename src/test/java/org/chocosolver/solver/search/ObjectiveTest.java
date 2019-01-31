@@ -326,7 +326,7 @@ public class ObjectiveTest {
         IntVar objective = (IntVar) model.getHook("objective");
         model.setObjective(Model.MINIMIZE, objective);
         int best = objective.getUB();
-        model.getSolver().showShortStatistics();
+
         while (model.getSolver().solve()) {
             best = objective.getValue();
         }

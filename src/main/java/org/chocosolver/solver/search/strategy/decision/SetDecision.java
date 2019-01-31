@@ -51,13 +51,11 @@ public class SetDecision extends Decision<SetVar> {
 
     @Override
     public void apply() throws ContradictionException {
-        boolean modif = true;
         if (branch == 1) {
-            modif = operator.apply(var, value, this);
+            operator.apply(var, value, this);
         } else if (branch == 2) {
-            modif = operator.unapply(var, value, this);
+            operator.unapply(var, value, this);
         }
-        assert modif: "(un-)applying decision "+ this + " does not modify the variable's domain.";
     }
 
     /**

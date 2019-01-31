@@ -23,7 +23,7 @@ import java.util.Random;
  * @author Charles Prud'homme
  * @since 18/04/13
  */
-public class RandomNeighborhood extends Neighbor {
+public class RandomNeighborhood extends IntNeighbor {
 
     /**
      * Number of variables to consider in this neighbor

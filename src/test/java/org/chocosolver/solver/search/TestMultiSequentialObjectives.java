@@ -95,7 +95,7 @@ public class TestMultiSequentialObjectives {
         m.getSolver().setSearch(Search.setVarSearch(sv),inputOrderLBSearch(card,load));
 		Solution s = m.getSolver().findLexOptimalSolution(new IntVar[]{load,m.intMinusView(card)}, true);
 		Assert.assertNotNull(s);
-		System.out.println(s);
+
 		Assert.assertEquals(s.getIntVal(load), 9);
 		Assert.assertEquals(s.getIntVal(card), 2);
 	}

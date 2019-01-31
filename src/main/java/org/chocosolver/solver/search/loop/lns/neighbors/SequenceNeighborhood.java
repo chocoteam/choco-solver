@@ -11,7 +11,6 @@ package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
 
 /**
  * A neighbor which is based on mutliple neighbors.
@@ -21,7 +20,7 @@ import org.chocosolver.solver.variables.IntVar;
  * @author Charles Prud'homme
  * @since 18/06/13
  */
-public class SequenceNeighborhood extends Neighbor {
+public class SequenceNeighborhood implements INeighbor {
 
     /**
      * neighbor currently selected
@@ -34,14 +33,13 @@ public class SequenceNeighborhood extends Neighbor {
     /**
      * neighbors declared
      */
-    protected Neighbor[] neighbors;
+    protected INeighbor[] neighbors;
     /**
      * Number of time each neighbor succeed in finding a solution
      */
     int[] counters;
 
-    public SequenceNeighborhood(Neighbor... neighbors) {
-        super(new IntVar[0]);
+    public SequenceNeighborhood(INeighbor... neighbors) {
         this.neighbors = neighbors;
         who = 0;
         count = neighbors.length;

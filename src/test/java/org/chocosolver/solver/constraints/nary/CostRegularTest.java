@@ -418,7 +418,6 @@ public class CostRegularTest {
         model.costRegular(vars,cost,auto).post();
         model.post(model.arithm(vars[0],"=",1));
         model.post(model.arithm(vars[1],"=",1));
-        model.getSolver().showDecisions();
         model.getSolver().setSearch(Search.inputOrderLBSearch(vars));
         model.getSolver().solve();
         Assert.assertTrue(cost.isInstantiated());

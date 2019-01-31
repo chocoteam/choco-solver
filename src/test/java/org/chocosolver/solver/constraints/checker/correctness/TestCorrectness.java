@@ -32,7 +32,7 @@ public class TestCorrectness {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     // TIMES
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testTIMES() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -43,7 +43,7 @@ public class TestCorrectness {
     }
 
     // ABSOLUTE
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testABSOLUTE() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -54,7 +54,7 @@ public class TestCorrectness {
     }
 
     // EQ
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -65,7 +65,7 @@ public class TestCorrectness {
     }
 
     // NEQ
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testNEQ() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class TestCorrectness {
     }
 
     // ALLDIFFERENT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testALLDIFFERENT() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -90,10 +90,9 @@ public class TestCorrectness {
     }
 
     // GCC
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testGCC() {
         for (int i = 0; i < 5; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelGCC, n, 0, n, seed, true);
@@ -103,7 +102,7 @@ public class TestCorrectness {
     }
 
     // INVERSE
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testINVERSECHANNELING() {
         for (int i = 0; i < 3; i++) {
             long seed = System.currentTimeMillis();
@@ -115,10 +114,9 @@ public class TestCorrectness {
     }
 
     // COUNT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testCOUNT() {
         for (int i = 0; i < 3; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelCountBC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
@@ -132,7 +130,7 @@ public class TestCorrectness {
     }
 
     // LEX
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testLEX() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -144,7 +142,7 @@ public class TestCorrectness {
     }
 
     // LEX CHAIN
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testLEXCH() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -156,7 +154,7 @@ public class TestCorrectness {
     }
 
     // ELEMENT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testELEMENT() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -167,10 +165,9 @@ public class TestCorrectness {
     }
 
     // AMONG
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testAMONG() {
         for (int i = 0; i < 5; i++) {
-            System.out.println(i);
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelAmongAC, n, -n / 2, 2 * n, seed, new int[]{0, 1});
@@ -180,7 +177,7 @@ public class TestCorrectness {
     }
 
     // NVALUES
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testNVALUES() {
         String[][] filters = new String[][]{
                 {"at_most_BC"},
@@ -202,7 +199,7 @@ public class TestCorrectness {
     }
 
     // TREE
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testTree() {
         for (int n = 2; n < 25; n += 5) {
             long seed = System.currentTimeMillis();
@@ -212,7 +209,7 @@ public class TestCorrectness {
     }
 
     // CIRCUIT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testCircuit() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 10; i++) {
@@ -223,7 +220,7 @@ public class TestCorrectness {
     }
 
     // PATH
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testPath() {
         for (int n = 3; n < 25; n += 5) {
             for (int i = 0; i < 10; i++) {
@@ -234,7 +231,7 @@ public class TestCorrectness {
     }
 
     // SUBCIRCUIT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testSubcircuit() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 10; i++) {
@@ -245,7 +242,7 @@ public class TestCorrectness {
     }
 
     // DIFFN
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testDiffn() {
         for (int n = 2; n < 25; n += 5) {
             for (int i = 0; i < 10; i++) {
@@ -256,7 +253,7 @@ public class TestCorrectness {
     }
 
     // CUMULATIVE
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testCumulative() {
         int nBugSweep = 32;
         long seedBugSweep = 1368003588936l;
@@ -269,7 +266,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testIncrementalCumulative() {
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 32 + 1, 1, 32, 1368003588936l, true);
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 7 + 1, 1, 7, 29, true);
@@ -282,7 +279,7 @@ public class TestCorrectness {
     }
 
     // SORT
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testSORT() {
         for (int i = 0; i < 2; i++) {
             long seed = System.currentTimeMillis();
@@ -294,7 +291,7 @@ public class TestCorrectness {
     }
 
     // MDD
-    @Test(groups="10s", timeOut=300000)
+    @Test(groups="checker", timeOut=300000)
     public void testMDD() {
         Random rnd = new Random();
         long seed = System.currentTimeMillis();
@@ -320,7 +317,7 @@ public class TestCorrectness {
     }
 
     // INT VALUE PRECEDE CHAIN
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testIntValuePrecedeChain() {
         for (int i = 0; i < 10; i++) {
             long seed = System.currentTimeMillis();
@@ -331,7 +328,7 @@ public class TestCorrectness {
     }
 
     // MIN
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testMIN() {
         for (int i = 0; i < 3; i++) {
             long seed = System.currentTimeMillis();
@@ -343,7 +340,7 @@ public class TestCorrectness {
     }
 
     // MAX
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testMAX() {
         for (int i = 0; i < 3; i++) {
             long seed = System.currentTimeMillis();
@@ -354,7 +351,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testPLUSBC() {
         for (int i = 0; i < 3; i++) {
             long seed = System.currentTimeMillis();
@@ -365,7 +362,7 @@ public class TestCorrectness {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups="checker", timeOut=60000)
     public void testPLUSAC() {
         for (int i = 0; i < 4; i++) {
             long seed = System.currentTimeMillis();

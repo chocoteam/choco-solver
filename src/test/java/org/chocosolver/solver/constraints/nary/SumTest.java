@@ -186,7 +186,7 @@ public class SumTest {
         IntVar j = m.intVar("j", 0, 1);
         IntVar k = m.intVar("k", 0, 1);
         m.sum(new IntVar[]{i, j, k}, "=", m.intVar(1)).post();
-        m.getSolver().showSolutions();
+
         m.getSolver().findAllSolutions();
         Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }

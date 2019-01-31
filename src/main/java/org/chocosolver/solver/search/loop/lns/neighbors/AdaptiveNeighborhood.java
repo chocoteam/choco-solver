@@ -24,7 +24,7 @@ public class AdaptiveNeighborhood extends SequenceNeighborhood {
     private Random random;
     private int sum;
 
-    public AdaptiveNeighborhood(long seed, Neighbor... neighbors) {
+    public AdaptiveNeighborhood(long seed, INeighbor... neighbors) {
         super(neighbors);
         this.random = new Random(seed);
         sum = count - 1;

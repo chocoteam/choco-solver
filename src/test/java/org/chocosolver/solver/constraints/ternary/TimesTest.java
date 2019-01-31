@@ -20,7 +20,6 @@ import org.testng.annotations.Test;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
-import static java.lang.System.out;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -68,7 +67,6 @@ public class TimesTest extends AbstractTernaryTest {
 	@Test(groups="10s", timeOut=60000)
 	public void testJL2(){
 		for(int i = 1 ; i < 100001; i*=10) {
-			out.printf("%d\n", 465 * i);
 			Model s = new Model();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, false);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, false);
@@ -81,7 +79,6 @@ public class TimesTest extends AbstractTernaryTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testJL3(){
 		for(int i = 1 ; i < 1000001; i*=10) {
-			out.printf("%d\n", 465 * i);
 			Model s = new Model();
 			IntVar i1 = s.intVar("i1", 0, 465 * i, true);
 			IntVar i2 = s.intVar("i2", 0, 465 * i, true);

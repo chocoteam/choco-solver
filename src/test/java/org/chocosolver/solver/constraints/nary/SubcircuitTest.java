@@ -49,7 +49,6 @@ public class SubcircuitTest {
 		m.subPath(nodes, start,end, 0, m.intVar(1,14)).post();
 
 		int sol=0;
-		m.getSolver().showContradiction();
 		while(m.getSolver().solve()){
 			sol++;
 		}
@@ -124,7 +123,7 @@ public class SubcircuitTest {
 		for (int i = min; i <= max; i++) {
 			nbSol += parmi(i, n) * factorial(i - 1);
 		}
-		model.getSolver().printStatistics();
+
 		assertEquals(model.getSolver().getSolutionCount(), nbSol);
 	}
 

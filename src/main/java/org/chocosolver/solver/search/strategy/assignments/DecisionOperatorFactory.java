@@ -72,6 +72,10 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+        	// not true because of parallel portfolio (bound update)
+            // assert var.contains(value) : "branching on value not in domain ; var :"+var+" val : "+value;
+            // not true because of ABS
+            // assert var.hasEnumeratedDomain() || var.getLB() == value || var.getUB() == value: "branching in the middle of bounded domain ; var :"+var+" val : "+value;
             return var.instantiateTo(value, cause);
         }
 
@@ -111,6 +115,9 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+			// not true because of parallel portfolio (bound update)
+			// assert var.contains(value) : "branching on value not in domain ; var :"+var+" val : "+value;
+            assert var.hasEnumeratedDomain() || var.getLB() == value || var.getUB() == value: "branching in the middle of bounded domain ; var :"+var+" val : "+value;
             return var.removeValue(value, cause);
         }
 
@@ -145,6 +152,9 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+			// not true because of parallel portfolio (bound update)
+			// assert var.contains(value) : "branching on value not in domain ; var :"+var+" val : "+value;
+            assert var.getUB()>value : "Branching value should be < UB; var :"+var+" val : "+value;
             return var.updateUpperBound(value, cause);
         }
 
@@ -188,6 +198,9 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
+			// not true because of parallel portfolio (bound update)
+			// assert var.contains(value) : "branching on value not in domain ; var :"+var+" val : "+value;
+            assert var.getLB()<value : "Branching value should be > LB; var :"+var+" val : "+value;
             return var.updateLowerBound(value, cause);
         }
 
@@ -232,6 +245,7 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert var.getUB().contains(element) && !var.getLB().contains(element): "Invalid branching; var :"+var+" val : "+element;
             return var.force(element, cause);
         }
 
@@ -274,6 +288,7 @@ public final class DecisionOperatorFactory {
 
         @Override
         public boolean apply(SetVar var, int element, ICause cause) throws ContradictionException {
+            assert var.getUB().contains(element) && !var.getLB().contains(element): "Invalid branching; var :"+var+" val : "+element;
             return var.remove(element, cause);
         }
 

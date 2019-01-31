@@ -31,7 +31,7 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class PropagationGuidedNeighborhood extends Neighbor {
+public class PropagationGuidedNeighborhood extends IntNeighbor {
 
 
     /**

@@ -231,7 +231,7 @@ public class ViewsTest {
     @DataProvider(name = "1d")
     public Object[][] data1D() {
         List<Object[]> elt = new ArrayList<>();
-        for (int seed = 2; seed < 9; seed += 1) {
+        for (int seed = 2; seed < 6; seed += 1) {
             elt.add(new Object[]{seed});
         }
         return elt.toArray(new Object[elt.size()][1]);
@@ -325,7 +325,6 @@ public class ViewsTest {
         IntVar z = model.intVar("Z", -2, 2, false);
         IntVar absZ = model.intVar("|Z|", 0, 2, false);
         model.absolute(absZ, z).post();
-        System.out.println(model.arithm(x, "-", y, "=", z));
         model.arithm(x, "-", y, "=", z).post(); // test passes if added twice
         model.arithm(absZ, "=", 1).post();
         model.arithm(y, "=", 0).post();
@@ -334,10 +333,7 @@ public class ViewsTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        System.out.println("x - y = z");
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println(z);
+        Assert.assertEquals(x.getValue()-y.getValue(), z.getValue());
         Assert.assertTrue(x.isInstantiatedTo(1));
     }
 
@@ -350,7 +346,6 @@ public class ViewsTest {
         IntVar z = model.intVar("Z", -2, 2, false);
         IntVar absZ = model.intVar("|Z|", 0, 2, false);
         model.absolute(absZ, z).post();
-        System.out.println(model.arithm(x, "-", y, "=", z));
         model.arithm(x, "-", y, "=", z).post(); // test passes if added twice
         model.arithm(absZ, "=", 1).post();
         model.arithm(y, "=", 0).post();
@@ -359,10 +354,7 @@ public class ViewsTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        System.out.println("x - y = z");
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println(z);
+        Assert.assertEquals(x.getValue()-y.getValue(), z.getValue());
         Assert.assertTrue(x.isInstantiatedTo(1));
     }
 

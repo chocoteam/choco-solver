@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayDeque;
 
-import static java.lang.System.out;
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.util.ESat.FALSE;
@@ -77,7 +76,6 @@ public class DynamicPostTest {
 
                     }
                 }).post();
-        model.getSolver().showDecisions();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
@@ -101,8 +99,8 @@ public class DynamicPostTest {
                 }
             }
         });
-        model.getSolver().showDecisions();
-        model.getSolver().showSolutions();
+
+
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
@@ -261,11 +259,9 @@ public class DynamicPostTest {
         Model s2 = costasArray(7, true);
 
         while (s1.getSolver().solve()) ;
-        out.println(s1.getSolver().getSolutionCount());
 
         while (s2.getSolver().solve()) ;
 
-        out.println(s2.getSolver().getSolutionCount());
         assertEquals(s1.getSolver().getSolutionCount(), s2.getSolver().getSolutionCount());
     }
 
