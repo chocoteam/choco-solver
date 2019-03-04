@@ -8,18 +8,24 @@
  */
 package org.chocosolver.parser;
 
-import gnu.trove.set.hash.THashSet;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
+import gnu.trove.set.hash.THashSet;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.nary.clause.ClauseStore;
-import org.chocosolver.solver.constraints.nary.cumulative.PropCumulative;
-import org.chocosolver.solver.constraints.nary.sum.PropSum;
-import org.chocosolver.solver.explanations.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
@@ -31,15 +37,6 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * A regular parser with default and common services
@@ -73,6 +70,12 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
+
+    @Option(name = "-exp", usage ="Plug explanation in (default: false).")
+    public boolean exp = false;
+
+    @Option(name = "-dfx", usage ="Force default explanation algorithm.")
+    public boolean dftexp = false;
 
     @Option(name = "-oes", usage ="Override default explanations for sum constraints.")
     public boolean sumdft = false;
@@ -211,7 +214,32 @@ public abstract class RegParser implements IParser {
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
+        if(nb_cores == 1 && exp){
+            solver.setLearningSignedClauses();
+            // THEN PARAMETERS
+            ExplanationForSignedClause.DEFAULT_X = dftexp;
+            ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = false;
+            ClauseStore.PRINT_CLAUSE = false;
+            ClauseStore.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
+            ExplanationForSignedClause.ASSERT_NO_LEFT_BRANCH = false;
+//            LearnSignedClauses.LIMIT = 100;
+            ClauseStore.INTERVAL_TREE = true;
+            if(solver.hasObjective()) {
+                solver.setRestartOnSolutions();
+            }
+        }
+//        solver.limitSolution(6);
+//        solver.limitFail(71);
+//        solver.showDecisions(()->"");
+        /*try {
+            getModel().getObjective().asIntVar().instantiateTo(162, Null);
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }*/
+//        solver.showDashboard();
         if(bbox>0) {
+            solver.getMove().removeStrategy();
+            solver.setMove(new MoveBinaryDFS());
             switch (bbox) {
                 case 1:
                     solver.setSearch(Search.domOverWDegSearch(getModel().retrieveIntVars(true)));
@@ -227,18 +255,23 @@ public abstract class RegParser implements IParser {
                     solver.setSearch(ibs);
             }
             solver.setNoGoodRecordingFromRestarts();
-            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
+            solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
+            solver.setLubyRestart(500, new FailCounter(getModel(), 500), 500);
             solver.setSearch(lastConflict(solver.getSearch()));
 
         }else if(nb_cores == 1 && free){ // add last conflict
+            solver.getMove().removeStrategy();
+            solver.setMove(new MoveBinaryDFS());
             solver.setSearch(Search.defaultSearch(solver.getModel()));
             solver.setNoGoodRecordingFromRestarts();
+            solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
             solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
         }
         for (int i = 0; i < nb_cores; i++) {
             if (tl_ > -1)portfolio.getModels().get(i).getSolver().limitTime(tl);
             makeComplementarySearch(portfolio.getModels().get(i));
         }
+        solver.showDecisions();
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 

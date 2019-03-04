@@ -23,7 +23,6 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
-import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -234,13 +233,6 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
                 break;
             case "setunion":
                 c = makeSetUnion(jparams, model);
-                break;
-            // Real constraints
-            case "inteqreal":
-                c = new IntEqRealConstraint(
-                        extractIntVarArray(jparams.get(0).getAsJsonArray()),
-                        extractRealVarArray(jparams.get(1).getAsJsonArray()),
-                        jparams.get(2).getAsDouble());
                 break;
             case "realcstr":
                 c = makeRealConstraint(jparams, model);
