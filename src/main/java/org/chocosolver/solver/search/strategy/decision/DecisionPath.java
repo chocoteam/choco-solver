@@ -174,10 +174,15 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      */
     public String lastDecisionToString() {
         StringBuilder st = new StringBuilder();
-        Decision decision = decisions.get(last.get());
-        st.append(String.format("[%d/%d] %s",
-                decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
-        );
+        int lst = last.get();
+        if (lst < decisions.size()) {
+            Decision decision = decisions.get(lst);
+            st.append(String.format("[%d/%d] %s",
+                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
+            );
+        } else {
+            st.append(String.format("[1/1] d_0: %s", decisions.get(0).toString()));
+        }
         return st.toString();
     }
 

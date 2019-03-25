@@ -148,19 +148,19 @@ public class IntDecision extends Decision<IntVar> {
     public String toString() {
         boolean nonrefuted = ((branch < max_branching) || (max_branching == 1 && branch == max_branching));
         if (assignment.getClass().equals(DecisionOperatorFactory.makeIntEq().getClass())) {
-            return String.format("d_%d:%s%s%d",
+            return String.format("d_%d: %s%s%d",
                     getPosition(),
                     var.getName(),
                     nonrefuted ? "=": '\\',
                     value);
         } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntNeq().getClass())) {
-            return String.format("d_%d:%s%s%d",
+            return String.format("d_%d: %s%s%d",
                     getPosition(),
                     var.getName(),
                     nonrefuted ? "\u2260" : '=',
                     value);
         } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntSplit().getClass())) {
-            return String.format("d_%d:%s%s%s%d,%d]",
+            return String.format("d_%d: %s%s%s%d,%d]",
                     getPosition(),
                     var.getName(),
                     "\u2208",
@@ -168,7 +168,7 @@ public class IntDecision extends Decision<IntVar> {
                     nonrefuted ? var.getLB() : value,
                     nonrefuted ? value : var.getUB());
         } else if (assignment.getClass().equals(DecisionOperatorFactory.makeIntReverseSplit().getClass())) {
-            return String.format("d_%d:%s%s[%d,%d%s",
+            return String.format("d_%d: %s%s[%d,%d%s",
                     getPosition(),
                     var.getName(),
                     "\u2208",
@@ -176,7 +176,7 @@ public class IntDecision extends Decision<IntVar> {
                     nonrefuted ? var.getUB() : value,
                     nonrefuted ? ']' : '[');
         } else {
-            return String.format("d_%d:%s%s{%s}",
+            return String.format("d_%d: %s%s{%s}",
                     getPosition(),
                     var.getName(),
                     nonrefuted ? assignment.toString() : assignment.opposite().toString(),
