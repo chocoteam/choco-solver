@@ -94,15 +94,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
-import org.chocosolver.solver.constraints.ternary.PropEQDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropMaxBC;
-import org.chocosolver.solver.constraints.ternary.PropMinBC;
-import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
+import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.constraints.unary.PropMember;
@@ -632,15 +624,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param Z result
      */
     default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-        int xl = abs(X.getLB());
-        int xu = abs(X.getUB());
-        int b = Math.max(xl, xu);
-        Model model = X.getModel();
-        IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
-        IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
-        div(X, Y, t1).post();
-        times(t1, Y, t2).post();
-        return sum(new IntVar[]{Z, t2}, "=", X);
+        return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModulo(X, Y, Z));
+    }
+
+    default Constraint mod(IntVar X, int a, IntVar Z) {
+        return new Constraint((X.getName()+" MOD "+a+" = "+Z.getName()), new PropModulo(X, a, Z));
+    }
+
+    default Constraint mod(IntVar X, int a, int b) {
+        return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModulo(X, a, b));
     }
 
     /**
