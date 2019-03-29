@@ -7,10 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/*
-@author Arthur Godet <arth.godet@gmail.com>
-@since 28/03/2019
-*/
 package org.chocosolver.solver.constraints.ternary;
 
 import gnu.trove.list.array.TIntArrayList;
@@ -25,6 +21,9 @@ import org.chocosolver.util.ESat;
  * X % Y = Z
  * A propagator for the constraint Z = X % Y where X, Y and Z are integer, possibly negative, variables
  * The filtering algorithm both supports bounded and enumerated integer variables
+ *
+ * @author Arthur Godet
+ * @since 29/03/2019
  */
 public class PropModXYZ extends Propagator<IntVar> {
     private IntVar x;

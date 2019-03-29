@@ -1,7 +1,12 @@
 /*
-@author Arthur Godet <arth.godet@gmail.com>
-@since 29/03/2019
-*/
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
@@ -14,6 +19,12 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 
+/**
+ * <br/>
+ *
+ * @author Arthur Godet
+ * @since 29/03/2019
+ */
 public class ModXYTest extends AbstractBinaryTest {
     private static int TEST_VALUE = 3; // TODO How to change this dependency to use AbstractBinaryTest
 

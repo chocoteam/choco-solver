@@ -16,8 +16,8 @@ import org.chocosolver.solver.variables.IntVar;
 /**
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 16/07/12
+ * @author Arthur Godet
+ * @since 29/03/2019
  */
 public class ModXYZTest extends AbstractTernaryTest {
 

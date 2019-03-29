@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import static java.lang.Math.abs;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -626,23 +624,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     default Constraint mod(IntVar X, int a, IntVar Y) {
-//        if(a != 0) {
-            if(Y.isInstantiated()) {
-                return mod(X, a, Y.getValue());
-            } else {
-                return new Constraint((X.getName()+" MOD "+a+" = "+Y.getName()), new PropModXY(X, a, Y));
-            }
-//        } else {
-//            return null;
-//        }
+        if(Y.isInstantiated()) {
+            return mod(X, a, Y.getValue());
+        } else {
+            return new Constraint((X.getName()+" MOD "+a+" = "+Y.getName()), new PropModXY(X, a, Y));
+        }
     }
 
     default Constraint mod(IntVar X, int a, int b) {
-//        if(a != 0) {
-            return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
-//        } else {
-//            return null;
-//        }
+        return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
     }
 
     /**
