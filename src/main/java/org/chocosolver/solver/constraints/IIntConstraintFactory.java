@@ -20,10 +20,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.binary.PropAbsolute;
-import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
-import org.chocosolver.solver.constraints.binary.PropScale;
-import org.chocosolver.solver.constraints.binary.PropSquare;
+import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -95,10 +92,7 @@ import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.*;
-import org.chocosolver.solver.constraints.unary.Member;
-import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.constraints.unary.PropMember;
-import org.chocosolver.solver.constraints.unary.PropNotMember;
+import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -624,15 +618,31 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param Z result
      */
     default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-        return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModulo(X, Y, Z));
+        if(Y.isInstantiated()) {
+          return mod(X, Y.getValue(), Z);
+        } else {
+            return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModXYZ(X, Y, Z));
+        }
     }
 
-    default Constraint mod(IntVar X, int a, IntVar Z) {
-        return new Constraint((X.getName()+" MOD "+a+" = "+Z.getName()), new PropModulo(X, a, Z));
+    default Constraint mod(IntVar X, int a, IntVar Y) {
+//        if(a != 0) {
+            if(Y.isInstantiated()) {
+                return mod(X, a, Y.getValue());
+            } else {
+                return new Constraint((X.getName()+" MOD "+a+" = "+Y.getName()), new PropModXY(X, a, Y));
+            }
+//        } else {
+//            return null;
+//        }
     }
 
     default Constraint mod(IntVar X, int a, int b) {
-        return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModulo(X, a, b));
+//        if(a != 0) {
+            return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
+//        } else {
+//            return null;
+//        }
     }
 
     /**
