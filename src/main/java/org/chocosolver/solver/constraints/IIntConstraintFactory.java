@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import static java.lang.Math.abs;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
@@ -20,10 +18,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.binary.PropAbsolute;
-import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
-import org.chocosolver.solver.constraints.binary.PropScale;
-import org.chocosolver.solver.constraints.binary.PropSquare;
+import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -94,19 +89,8 @@ import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
-import org.chocosolver.solver.constraints.ternary.PropEQDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropMaxBC;
-import org.chocosolver.solver.constraints.ternary.PropMinBC;
-import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
-import org.chocosolver.solver.constraints.unary.Member;
-import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.constraints.unary.PropMember;
-import org.chocosolver.solver.constraints.unary.PropNotMember;
+import org.chocosolver.solver.constraints.ternary.*;
+import org.chocosolver.solver.constraints.unary.*;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -632,15 +616,35 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param Z result
      */
     default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-        int xl = abs(X.getLB());
-        int xu = abs(X.getUB());
-        int b = Math.max(xl, xu);
-        Model model = X.getModel();
-        IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
-        IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
-        div(X, Y, t1).post();
-        times(t1, Y, t2).post();
-        return sum(new IntVar[]{Z, t2}, "=", X);
+        if(Y.isInstantiated() && Y.getValue()==0) {
+            throw new SolverException("Y variable should not be instantiated to 0 for constraint "
+                    +X.getName()+" MOD "+Y.getName()+" = "+Z.getName());
+        }
+
+        if(Y.isInstantiated()) {
+          return mod(X, Y.getValue(), Z);
+        } else {
+            return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModXYZ(X, Y, Z));
+        }
+    }
+
+    default Constraint mod(IntVar X, int a, IntVar Y) {
+        if(a == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = "+Y.getName());
+        }
+
+        if(Y.isInstantiated()) {
+            return mod(X, a, Y.getValue());
+        } else {
+            return new Constraint((X.getName()+" MOD "+a+" = "+Y.getName()), new PropModXY(X, a, Y));
+        }
+    }
+
+    default Constraint mod(IntVar X, int a, int b) {
+        if(a == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = b");
+        }
+        return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
     }
 
     /**
