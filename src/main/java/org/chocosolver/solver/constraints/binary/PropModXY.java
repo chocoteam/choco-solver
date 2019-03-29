@@ -46,19 +46,17 @@ public class PropModXY extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(a != 0) {
-            usedValues.clear();
-            for(int v = x.getLB(); v<=x.getUB(); v=x.nextValue(v)) {
-                if(y.contains(v%a)) {
-                    usedValues.add(v%a);
-                } else {
-                    x.removeValue(v, this);
-                }
+        usedValues.clear();
+        for(int v = x.getLB(); v<=x.getUB(); v=x.nextValue(v)) {
+            if(y.contains(v%a)) {
+                usedValues.add(v%a);
+            } else {
+                x.removeValue(v, this);
             }
-            for(int v = y.getLB(); v<= y.getUB(); v= y.nextValue(v)) {
-                if(!usedValues.contains(v)) {
-                    y.removeValue(v, this);
-                }
+        }
+        for(int v = y.getLB(); v<= y.getUB(); v= y.nextValue(v)) {
+            if(!usedValues.contains(v)) {
+                y.removeValue(v, this);
             }
         }
     }
@@ -66,7 +64,7 @@ public class PropModXY extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if(x.isInstantiated() && y.isInstantiated()) {
-            return a==0 || x.getValue()%a == y.getValue() ? ESat.TRUE : ESat.FALSE;
+            return x.getValue()%a == y.getValue() ? ESat.TRUE : ESat.FALSE;
         }
         return ESat.UNDEFINED;
     }

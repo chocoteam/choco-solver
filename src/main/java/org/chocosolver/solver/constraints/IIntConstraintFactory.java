@@ -616,6 +616,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param Z result
      */
     default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
+        if(Y.isInstantiated() && Y.getValue()==0) {
+            throw new SolverException("Y variable should not be instantiated to 0 for constraint "
+                    +X.getName()+" MOD "+Y.getName()+" = "+Z.getName());
+        }
+
         if(Y.isInstantiated()) {
           return mod(X, Y.getValue(), Z);
         } else {
@@ -624,6 +629,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     default Constraint mod(IntVar X, int a, IntVar Y) {
+        if(a == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = "+Y.getName());
+        }
+
         if(Y.isInstantiated()) {
             return mod(X, a, Y.getValue());
         } else {
@@ -632,6 +641,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     default Constraint mod(IntVar X, int a, int b) {
+        if(a == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = b");
+        }
         return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
     }
 
