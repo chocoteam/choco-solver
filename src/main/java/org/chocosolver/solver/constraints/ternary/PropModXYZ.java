@@ -70,7 +70,7 @@ public class PropModXYZ extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         if(x.isInstantiated() && y.isInstantiated() && z.isInstantiated()) {
-            return y.getValue()==0 || x.getValue()%y.getValue()==z.getValue() ? ESat.TRUE : ESat.FALSE;
+            return y.getValue()!=0 && x.getValue()%y.getValue()==z.getValue() ? ESat.TRUE : ESat.FALSE;
         }
         return ESat.UNDEFINED;
     }
