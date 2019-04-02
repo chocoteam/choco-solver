@@ -73,6 +73,11 @@ public final class LeqView extends IntBoolView {
     }
 
     @Override
+    public int getDomainSize() {
+        return isInstantiated()?1:2;
+    }
+
+    @Override
     public boolean isInstantiated() {
         if (var.getUB() <= cste) {
             return true;
