@@ -210,16 +210,20 @@ public class VariableUtils {
 
     /**
      * @param x a variable
-     * @param y a variable
+     * @param y a variable (we consider that lb(y) >= 0
      * @return computes the bounds for "x ^ y"
      */
     public static int[] boundsForPow(IntVar x, IntVar y) {
-        return bound(
-                MathUtils.pow(x.getLB(), y.getLB()),
-                MathUtils.pow(x.getLB(), y.getUB()),
-                MathUtils.pow(x.getUB(), y.getLB()),
-                MathUtils.pow(x.getUB(), y.getUB())
-        );
+      return bound(0, 1,
+          MathUtils.pow(x.getLB(), y.getUB()),
+          MathUtils.pow(x.getUB(), y.getUB()),
+          MathUtils.pow(x.getLB() + 1, y.getUB()),
+          MathUtils.pow(x.getUB() - 1, y.getUB()),
+          MathUtils.pow(x.getLB(), Math.max(0, y.getUB() - 1)),
+          MathUtils.pow(x.getUB(), Math.max(0, y.getUB() - 1)),
+          MathUtils.pow(x.getLB() + 1, Math.max(0, y.getUB() - 1)),
+          MathUtils.pow(x.getUB() - 1, Math.max(0, y.getUB() - 1))
+      );
     }
 
     /**
