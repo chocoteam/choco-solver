@@ -12,31 +12,14 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC2001;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3bitrm;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
-import org.chocosolver.solver.constraints.extension.binary.PropBinFC;
-import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
-import org.chocosolver.solver.constraints.extension.nary.PropCompactTableStar;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeFC;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001Positive;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rm;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rmPositive;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGACSTRPos;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeMDDC;
-import org.chocosolver.solver.constraints.extension.nary.PropTableStr2;
+import org.chocosolver.solver.constraints.extension.binary.*;
+import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
@@ -53,18 +36,8 @@ import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
-import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
-import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuitSCC;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_AntiArboFiltering;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_ArboFiltering;
-import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
-import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuit;
-import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuitDominatorFilter;
+import org.chocosolver.solver.constraints.nary.channeling.*;
+import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
@@ -90,7 +63,10 @@ import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.*;
-import org.chocosolver.solver.constraints.unary.*;
+import org.chocosolver.solver.constraints.unary.Member;
+import org.chocosolver.solver.constraints.unary.NotMember;
+import org.chocosolver.solver.constraints.unary.PropMember;
+import org.chocosolver.solver.constraints.unary.PropNotMember;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -101,6 +77,11 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
+
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Interface to make constraints over BoolVar and IntVar
@@ -150,6 +131,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint member(IntVar var, int lb, int ub) {
         return new Member(var, lb, ub);
+    }
+
+    /**
+     * Creates a modulo constraint.
+     * Ensures X % a = b
+     *
+     * @param X an integer variable
+     * @param mod  the value of the modulo operand
+     * @param res  the result of the modulo operation
+     */
+    default Constraint mod(IntVar X, int mod, int res) {
+        if(mod == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = b");
+        }
+        TIntArrayList list = new TIntArrayList();
+        for(int v = X.getLB(); v<=X.getUB(); v=X.nextValue(v)) {
+            if(v % mod == res) {
+                list.add(v);
+            }
+        }
+        return member(X, list.toArray());
     }
 
     /**
@@ -358,6 +360,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint element(IntVar value, int[] table, IntVar index) {
         return element(value, table, index, 0);
+    }
+
+    /**
+     * Creates a modulo constraint: X % a = Y
+     *
+     * @param X first integer variable
+     * @param mod the value of the modulo operand
+     * @param Y second integer variable (result of the modulo operation)
+     */
+    default Constraint mod(IntVar X, int mod, IntVar Y) {
+        if(mod == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = "+Y.getName());
+        }
+
+        if(Y.isInstantiated()) {
+            return mod(X, mod, Y.getValue());
+        } else if(TuplesFactory.canBeTupled(X, Y)) {
+            return table(X, Y, TuplesFactory.modulo(X, mod, Y));
+        } else {
+            return new Constraint((X.getName()+" MOD "+mod+" = "+Y.getName()), new PropModXY(X, mod, Y));
+        }
     }
 
     /**
@@ -596,15 +619,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures X % Y = Z.
      * </p>
      * <p>
-     * More precisely, Z = X - Y * trunc(X,Y).
-     * <br/>i.e.:<br/>
-     * - T1 = X / Y and,<br/>
-     * - T2 = T1 * Y and,<br/>
-     * - Z = X - T2<br/>
-     * <br/>
-     * where T1, T2 &isin; [-|X|, |X|]
-     * </p>
-     * <p>
      * Creates a modulo constraint, that uses truncated division:
      * the quotient is defined by truncation q = trunc(a/n)
      * and the remainder would have same sign as the dividend.
@@ -623,28 +637,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
         if(Y.isInstantiated()) {
           return mod(X, Y.getValue(), Z);
+        } else if(TuplesFactory.canBeTupled(X, Y, Z)) {
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
         } else {
             return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModXYZ(X, Y, Z));
         }
-    }
-
-    default Constraint mod(IntVar X, int a, IntVar Y) {
-        if(a == 0) {
-            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = "+Y.getName());
-        }
-
-        if(Y.isInstantiated()) {
-            return mod(X, a, Y.getValue());
-        } else {
-            return new Constraint((X.getName()+" MOD "+a+" = "+Y.getName()), new PropModXY(X, a, Y));
-        }
-    }
-
-    default Constraint mod(IntVar X, int a, int b) {
-        if(a == 0) {
-            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = b");
-        }
-        return new Constraint(X.getName()+" MOD "+a+" = "+b, new PropModX(X, a, b));
     }
 
     /**

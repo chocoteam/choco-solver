@@ -92,4 +92,55 @@ public class ModXYTest extends AbstractBinaryTest {
         Assert.assertEquals(x.getUB(), 5);
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValues() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 5);
+        IntVar z = model.intVar("z", -5,5);
+        model.mod(x, 3, z).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 5);
+        Assert.assertEquals(x.getDomainSize(), 11);
+        for(int i = -5; i<=5; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        for(int j = -2; j<=2; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValues2() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 0);
+        IntVar z = model.intVar("z", -5,5);
+        model.mod(x, 3, z).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 3);
+        Assert.assertEquals(x.getDomainSize(), 6);
+        for(int i = -5; i<=0; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        for(int j = -2; j<=0; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarNegValues3() throws ContradictionException {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", -5, 5);
+        IntVar z = model.intVar("z", -5,0);
+        model.mod(x, 3, z).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 3);
+        Assert.assertEquals(x.getDomainSize(), 7);
+        for(int i = -5; i<=0; i++) {
+            Assert.assertTrue(x.contains(i));
+        }
+        Assert.assertTrue(x.contains(3));
+        for(int j = -2; j<=0; j++) {
+            Assert.assertTrue(z.contains(j));
+        }
+    }
 }

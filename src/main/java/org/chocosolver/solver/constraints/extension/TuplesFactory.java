@@ -163,6 +163,15 @@ public class TuplesFactory {
     }
 
     /**
+     * Generate valid tuples for minimum constraint: VAR1 % m = VAR2
+     *
+     * @return a Tuples object, reserved for a table constraint
+     */
+    public static Tuples modulo(IntVar VAR1, int m, IntVar VAR2) {
+        return generateTuples(values -> values[1] == values[0] % m, true, VAR1, VAR2);
+    }
+
+    /**
      * Generate valid tuples for absolute constraint: VAR1  = VAR2^POWER
      *
      * @return a Tuples object, reserved for a table constraint
@@ -212,14 +221,13 @@ public class TuplesFactory {
     }
 
     /**
-     * Generate valid tuples for minimum constraint: VAR1 % VAR2 = MOD
+     * Generate valid tuples for minimum constraint: VAR1 % VAR2 = RES
      *
      * @return a Tuples object, reserved for a table constraint
      */
-    public static Tuples modulo(IntVar VAR1, IntVar VAR2, IntVar MOD) {
-        return generateTuples(values -> values[0] == values[1] % values[2], true, MOD, VAR1, VAR2);
+    public static Tuples modulo(IntVar VAR1, IntVar VAR2, IntVar RES) {
+        return generateTuples(values -> values[1]!=0 && values[2] == values[0] % values[1], true, VAR1, VAR2, RES);
     }
-
 
     /**
      * Generate valid tuples for minus constraint: VAR1 - VAR2 = RESULT
