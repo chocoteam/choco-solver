@@ -446,4 +446,17 @@ public class ExpressionTest {
         eval(model, y.eq(b.ift(t.add(1),t.sub(1))), p, 6);
     }
 
+    @Test(groups="1s", timeOut=60000, dataProvider = "post")
+    public void test49(int p){
+        Model model = new Model();
+        //variables
+        IntVar d = model.intVar("D",0,100);
+        IntVar x1 = model.intVar("X1", 0, 2);
+        IntVar y1= model.intVar("Y1", 0, 2);
+        IntVar x2= model.intVar("X2", 0, 2);
+        IntVar y2= model.intVar("Y2", 0, 2);
+        model.getSolver().showSolutions(()->String.format("%d = V[(%d - %d)^2 + (%d - %d)^2]",
+            d.getValue(), x1.getValue(), x2.getValue(), y1.getValue(), y2.getValue()));
+        eval(model, d.eq(((x1.sub(x2)).pow(2).add((y1.sub(y2)).pow(2))).sqr()), p, 81);
+    }
 }

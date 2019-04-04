@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.variables.view;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Stream;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
@@ -22,9 +25,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
 
 /**
  * <p>
@@ -531,6 +531,19 @@ public class LeqViewTest {
         rng.clear();
         rng.addBetween(4,5);
         Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups="1s", timeOut=6000000)
+    public void testAA23(){
+        Model model = new Model();
+        final IntVar[] xs = model.intVarArray("x", 5, 0, 5);
+        final BoolVar[] bs = Stream.of(xs).map(x ->
+            model.intGeView(x, 1)
+        ).toArray(BoolVar[]::new);
+
+        final IntVar count = model.intVar(0, 5);
+        model.sum(bs, "=", count).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 7776);
     }
 
 }
