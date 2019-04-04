@@ -12,12 +12,16 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * <br/>
@@ -142,5 +146,47 @@ public class ModXYTest extends AbstractBinaryTest {
         for(int j = -2; j<=0; j++) {
             Assert.assertTrue(z.contains(j));
         }
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void testMod2VarsZeroDiv() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar y = model.intVar("y", 0, 9);
+        model.mod(x, 0, y).post();
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod3VarsIntoMod2VarsMod() {
+        Model model = spy(new Model("model"));
+        IntVar x = model.intVar("x", 0,9);
+        IntVar y = model.intVar("y", 5);
+        IntVar z = model.intVar("z", 3);
+        model.post(model.mod(x, y, z));
+        verify(model).mod(x, 5, 3);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod3VarsTable() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,9);
+        IntVar y = model.intVar("y", 0, 9);
+        model.mod(x, 5, y).post();
+        Assert.assertEquals(model.getNbCstrs(), 1);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getPropagators().length, 1);
+        Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropBinAC3rm.class);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testMod2VarsPropMod() {
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0,10_000);
+        IntVar y = model.intVar("y", 0, 10_000);
+        model.mod(x, 5_000, y).post();
+        Assert.assertEquals(model.getNbCstrs(), 1);
+        Constraint constraint = model.getCstrs()[0];
+        Assert.assertEquals(constraint.getPropagators().length, 1);
+        Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropModXY.class);
     }
 }
