@@ -12,7 +12,7 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
+import org.chocosolver.solver.constraints.extension.binary.PropBinAC3bitrm;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -167,7 +167,7 @@ public class ModXYTest extends AbstractBinaryTest {
     }
 
     @Test(groups="1s", timeOut=60000)
-    public void testMod3VarsTable() {
+    public void testMod2VarsTable() {
         Model model = new Model("model");
         IntVar x = model.intVar("x", 0,9);
         IntVar y = model.intVar("y", 0, 9);
@@ -175,7 +175,7 @@ public class ModXYTest extends AbstractBinaryTest {
         Assert.assertEquals(model.getNbCstrs(), 1);
         Constraint constraint = model.getCstrs()[0];
         Assert.assertEquals(constraint.getPropagators().length, 1);
-        Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropBinAC3rm.class);
+        Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropBinAC3bitrm.class);
     }
 
     @Test(groups="1s", timeOut=60000)
