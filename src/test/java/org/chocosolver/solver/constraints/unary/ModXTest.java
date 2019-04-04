@@ -11,10 +11,13 @@ package org.chocosolver.solver.constraints.unary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -57,5 +60,20 @@ public class ModXTest {
 		Assert.assertEquals(x.getLB(), 1);
 		assertTrue(x.contains(5));
 		Assert.assertEquals(x.getUB(), 9);
+	}
+
+	@Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+	public void testMod1VarZeroDiv() {
+		Model model = new Model("model");
+		IntVar x = model.intVar("x", 0,9);
+		model.mod(x, 0, 1).post();
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarsIntoMember() {
+		Model model = spy(new Model("model"));
+		IntVar x = model.intVar("x", 0,9);
+		model.post(model.mod(x, 3, 0));
+		verify(model).member(x, new int[]{0, 3, 6, 9});
 	}
 }

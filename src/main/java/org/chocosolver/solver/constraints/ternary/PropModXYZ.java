@@ -49,22 +49,20 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(model.getSolver().getDecisionPath().size() == 0) { // root node
-            if(z.getLB()<0) {
-                z.updateLowerBound(-(Math.max(Math.abs(y.getLB()), y.getUB())-1), this);
-            }
-            if(z.getUB()>0) {
-                z.updateUpperBound(Math.max(Math.abs(y.getLB()), y.getUB())-1, this);
-            }
-            if(x.getUB() <= 0) {
-                z.updateUpperBound(0, this);
-            }
-            if(x.getLB() >= 0) {
-                z.updateLowerBound(0, this);
-            }
-            if(y.hasEnumeratedDomain()) {
-                y.removeValue(0, this);
-            }
+        if(z.getLB()<0) {
+            z.updateLowerBound(-(Math.max(Math.abs(y.getLB()), y.getUB())-1), this);
+        }
+        if(z.getUB()>0) {
+            z.updateUpperBound(Math.max(Math.abs(y.getLB()), y.getUB())-1, this);
+        }
+        if(x.getUB() <= 0) {
+            z.updateUpperBound(0, this);
+        }
+        if(x.getLB() >= 0) {
+            z.updateLowerBound(0, this);
+        }
+        if(y.hasEnumeratedDomain()) {
+            y.removeValue(0, this);
         }
 
         if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && z.hasEnumeratedDomain()) {

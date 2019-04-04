@@ -11,12 +11,16 @@ package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.extension.nary.PropLargeGACSTRPos;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * <br/>
@@ -81,5 +85,51 @@ public class ModXYZTest extends AbstractTernaryTest {
 				Assert.assertFalse(y.contains(k));
 			}
 		}
+	}
+
+	@Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+	public void testMod3VarsZeroDiv() {
+		Model model = new Model("model");
+		IntVar x = model.intVar("x", 0,9);
+		IntVar y = model.intVar("y", 0, 0);
+		IntVar z = model.intVar("z", 0, 0);
+		model.mod(x, y, z).post();
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarsIntoMod2VarsMod() {
+		Model model = spy(new Model("model"));
+		IntVar x = model.intVar("x", 0,9);
+		IntVar y = model.intVar("y", 5);
+		IntVar z = model.intVar("z", 0, 9);
+		model.post(model.mod(x, y, z));
+		verify(model).mod(x, 5, z);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarsTable() {
+		Model model = new Model("model");
+		IntVar x = model.intVar("x", 0,9);
+		IntVar y = model.intVar("y", 0, 9);
+		IntVar z = model.intVar("z", 0, 9);
+		model.mod(x, y, z).post();
+		Assert.assertEquals(model.getNbCstrs(), 1);
+		Constraint constraint = model.getCstrs()[0];
+		Assert.assertEquals(constraint.getPropagators().length, 1);
+		System.out.println(constraint.getPropagators()[0].getClass());
+		Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropLargeGACSTRPos.class);
+	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testMod3VarsPropMod() {
+		Model model = new Model("model");
+		IntVar x = model.intVar("x", 0,10_000);
+		IntVar y = model.intVar("y", 0, 10_000);
+		IntVar z = model.intVar("z", 0, 10_000);
+		model.mod(x, y, z).post();
+		Assert.assertEquals(model.getNbCstrs(), 1);
+		Constraint constraint = model.getCstrs()[0];
+		Assert.assertEquals(constraint.getPropagators().length, 1);
+		Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropModXYZ.class);
 	}
 }
