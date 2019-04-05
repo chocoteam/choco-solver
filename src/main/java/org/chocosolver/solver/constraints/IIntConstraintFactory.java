@@ -9,15 +9,9 @@
  */
 package org.chocosolver.solver.constraints;
 
-import static java.lang.Math.abs;
-
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.PropAbsolute;
@@ -27,21 +21,8 @@ import org.chocosolver.solver.constraints.binary.PropSquare;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC2001;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3bitrm;
-import org.chocosolver.solver.constraints.extension.binary.PropBinAC3rm;
-import org.chocosolver.solver.constraints.extension.binary.PropBinFC;
-import org.chocosolver.solver.constraints.extension.nary.PropCompactTable;
-import org.chocosolver.solver.constraints.extension.nary.PropCompactTableStar;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeFC;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC2001Positive;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rm;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGAC3rmPositive;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeGACSTRPos;
-import org.chocosolver.solver.constraints.extension.nary.PropLargeMDDC;
-import org.chocosolver.solver.constraints.extension.nary.PropTableStr2;
+import org.chocosolver.solver.constraints.extension.binary.*;
+import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
@@ -58,18 +39,8 @@ import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
 import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
-import org.chocosolver.solver.constraints.nary.channeling.PropBitChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
-import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
-import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuitSCC;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_AntiArboFiltering;
-import org.chocosolver.solver.constraints.nary.circuit.PropCircuit_ArboFiltering;
-import org.chocosolver.solver.constraints.nary.circuit.PropNoSubtour;
-import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuit;
-import org.chocosolver.solver.constraints.nary.circuit.PropSubcircuitDominatorFilter;
+import org.chocosolver.solver.constraints.nary.channeling.*;
+import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
 import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
@@ -94,15 +65,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R3;
 import org.chocosolver.solver.constraints.nary.sort.PropKeysorting;
 import org.chocosolver.solver.constraints.nary.sum.IntLinCombFactory;
 import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
-import org.chocosolver.solver.constraints.ternary.PropDivXYZ;
-import org.chocosolver.solver.constraints.ternary.PropEQDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropGTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLEDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropLTDistanceXYZ;
-import org.chocosolver.solver.constraints.ternary.PropMaxBC;
-import org.chocosolver.solver.constraints.ternary.PropMinBC;
-import org.chocosolver.solver.constraints.ternary.PropTimesNaive;
+import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.constraints.unary.PropMember;
@@ -117,6 +80,13 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
+
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static java.lang.Math.abs;
 
 /**
  * Interface to make constraints over BoolVar and IntVar
@@ -1496,6 +1466,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
+        if(vars1.length != vars2.length) {
+            throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
+        }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, true));
     }
 
@@ -1507,6 +1480,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
+        if(vars1.length != vars2.length) {
+            throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
+        }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, false));
     }
 
