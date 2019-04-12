@@ -97,4 +97,30 @@ public interface IGraph  {
      * @return true if and only if <code>this</code> is a directed graph
      */
     boolean isDirected();
+
+    //***********************************************************************************
+    // GraphViz
+    //***********************************************************************************
+
+    /**
+     * Export graph to graphviz format, see http://www.webgraphviz.com/
+     *
+     * @return a String encoding the graph to be displayed by graphViz
+     */
+    default String graphVizExport() {
+        boolean directed = isDirected();
+        String arc = directed ? " -> " : " -- ";
+        StringBuilder sb = new StringBuilder();
+        sb.append(directed ? "digraph " : "graph ").append("G" + "{\n");
+        sb.append("node ; ");
+        for (int i : getNodes()) sb.append(i + " ");
+        sb.append(";\n");
+        for (int i : getNodes()) {
+            for (int j : getSuccOrNeighOf(i)) {
+                if (directed || i < j) sb.append(i + arc + j + " ;\n");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }

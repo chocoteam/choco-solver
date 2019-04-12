@@ -14,10 +14,7 @@ import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.binary.PropAbsolute;
-import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
-import org.chocosolver.solver.constraints.binary.PropScale;
-import org.chocosolver.solver.constraints.binary.PropSquare;
+import org.chocosolver.solver.constraints.binary.*;
 import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
@@ -136,6 +133,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint member(IntVar var, int lb, int ub) {
         return new Member(var, lb, ub);
+    }
+
+    /**
+     * Creates a modulo constraint.
+     * Ensures X % a = b
+     *
+     * @param X an integer variable
+     * @param mod  the value of the modulo operand
+     * @param res  the result of the modulo operation
+     */
+    default Constraint mod(IntVar X, int mod, int res) {
+        if(mod == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = b");
+        }
+        TIntArrayList list = new TIntArrayList();
+        for(int v = X.getLB(); v<=X.getUB(); v=X.nextValue(v)) {
+            if(v % mod == res) {
+                list.add(v);
+            }
+        }
+        return member(X, list.toArray());
     }
 
     /**
@@ -344,6 +362,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint element(IntVar value, int[] table, IntVar index) {
         return element(value, table, index, 0);
+    }
+
+    /**
+     * Creates a modulo constraint: X % a = Y
+     *
+     * @param X first integer variable
+     * @param mod the value of the modulo operand
+     * @param Y second integer variable (result of the modulo operation)
+     */
+    default Constraint mod(IntVar X, int mod, IntVar Y) {
+        if(mod == 0) {
+            throw new SolverException("a should not be 0 for "+X.getName()+" MOD a = "+Y.getName());
+        }
+
+        if(Y.isInstantiated()) {
+            return mod(X, mod, Y.getValue());
+        } else if(TuplesFactory.canBeTupled(X, Y)) {
+            return table(X, Y, TuplesFactory.modulo(X, mod, Y));
+        } else {
+            return new Constraint((X.getName()+" MOD "+mod+" = "+Y.getName()), new PropModXY(X, mod, Y));
+        }
     }
 
     /**
@@ -582,15 +621,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures X % Y = Z.
      * </p>
      * <p>
-     * More precisely, Z = X - Y * trunc(X,Y).
-     * <br/>i.e.:<br/>
-     * - T1 = X / Y and,<br/>
-     * - T2 = T1 * Y and,<br/>
-     * - Z = X - T2<br/>
-     * <br/>
-     * where T1, T2 &isin; [-|X|, |X|]
-     * </p>
-     * <p>
      * Creates a modulo constraint, that uses truncated division:
      * the quotient is defined by truncation q = trunc(a/n)
      * and the remainder would have same sign as the dividend.
@@ -602,15 +632,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param Z result
      */
     default Constraint mod(IntVar X, IntVar Y, IntVar Z) {
-        int xl = abs(X.getLB());
-        int xu = abs(X.getUB());
-        int b = Math.max(xl, xu);
-        Model model = X.getModel();
-        IntVar t1 = model.intVar(model.generateName("T1_"), -b, b, true);
-        IntVar t2 = model.intVar(model.generateName("T2_"), -b, b, true);
-        div(X, Y, t1).post();
-        times(t1, Y, t2).post();
-        return sum(new IntVar[]{Z, t2}, "=", X);
+        if(Y.isInstantiated() && Y.getValue()==0) {
+            throw new SolverException("Y variable should not be instantiated to 0 for constraint "
+                    +X.getName()+" MOD "+Y.getName()+" = "+Z.getName());
+        }
+
+        if(Y.isInstantiated()) {
+          return mod(X, Y.getValue(), Z);
+        } else if(TuplesFactory.canBeTupled(X, Y, Z)) {
+            return table(new IntVar[]{X, Y, Z}, TuplesFactory.modulo(X, Y, Z));
+        } else {
+            return new Constraint(X.getName()+" MOD "+Y.getName()+" = "+Z.getName(), new PropModXYZ(X, Y, Z));
+        }
     }
 
     /**
