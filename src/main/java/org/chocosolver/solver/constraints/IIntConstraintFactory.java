@@ -83,8 +83,6 @@ import java.util.BitSet;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.lang.Math.abs;
-
 /**
  * Interface to make constraints over BoolVar and IntVar
  *
