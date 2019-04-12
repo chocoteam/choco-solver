@@ -1497,6 +1497,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
+        if(vars1.length != vars2.length) {
+            throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
+        }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, true));
     }
 
@@ -1508,6 +1511,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
+        if(vars1.length != vars2.length) {
+            throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
+        }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, false));
     }
 

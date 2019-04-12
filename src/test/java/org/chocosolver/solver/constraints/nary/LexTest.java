@@ -13,6 +13,7 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
@@ -244,5 +245,45 @@ public class LexTest {
 //        SearchMonitorFactory.log(solver, true, false);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 30);
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void outOfBoundsInLexLE() throws Exception{
+        Model choco = new Model();
+
+        IntVar[] x = new IntVar[]{
+                choco.intVar(new int[]{2147483646}),
+                choco.intVar(new int[]{-800571629,-800571628,-800571626,-800571624,-800571622}),
+                choco.intVar(new int[]{-805251943,-805251939,-805251936,-805251935}),
+                choco.intVar(new int[]{-937887857}),
+        };
+
+        IntVar[] y = new IntVar[]{
+                choco.intVar(new int[]{2147483641,2147483643,2147483644,2147483646}),
+                choco.intVar(new int[]{-3,0,2,3,4})
+        };
+
+        choco.post(choco.lexLessEq(x, y));
+        choco.getSolver().propagate();
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    public void outOfBoundsInLexLT() throws Exception{
+        Model choco = new Model();
+
+        IntVar[] x = new IntVar[]{
+                choco.intVar(new int[]{2147483646}),
+                choco.intVar(new int[]{-800571629,-800571628,-800571626,-800571624,-800571622}),
+                choco.intVar(new int[]{-805251943,-805251939,-805251936,-805251935}),
+                choco.intVar(new int[]{-937887857}),
+        };
+
+        IntVar[] y = new IntVar[]{
+                choco.intVar(new int[]{2147483641,2147483643,2147483644,2147483646}),
+                choco.intVar(new int[]{-3,0,2,3,4})
+        };
+
+        choco.post(choco.lexLess(x, y));
+        choco.getSolver().propagate();
     }
 }
