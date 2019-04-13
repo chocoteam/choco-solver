@@ -170,6 +170,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub) {
+        if (lb == ub) return intVar(lb);
         return intVar(generateName("IV_"), lb, ub);
     }
 
@@ -183,6 +184,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return an IntVar of domain [<i>lb</i>, <i>ub</i>]
      */
     default IntVar intVar(int lb, int ub, boolean boundedDomain) {
+		if (lb == ub) return intVar(lb);
         return intVar(generateName("IV_"), lb, ub, boundedDomain);
     }
 
