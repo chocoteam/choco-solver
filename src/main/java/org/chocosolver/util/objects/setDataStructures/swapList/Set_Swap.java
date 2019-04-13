@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -52,6 +53,16 @@ public class Set_Swap implements ISet {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	/**
+	 * Get the nth element in the set
+	 * @param nth must respect : 0 <= nth <size
+	 * @return the nth element in this
+	 */
+	public int getNth(int nth){
+		if(nth<0 || nth>=size()) throw new SolverException(" invalid getNth parameter, must  be 0 <= nth ("+nth+") < size ("+size()+")");
+		return values[nth];
+	}
 
 	@Override
 	public boolean add(int element) {
