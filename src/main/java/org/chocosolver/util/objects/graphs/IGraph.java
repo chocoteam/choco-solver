@@ -112,7 +112,6 @@ public interface IGraph  {
         String arc = directed ? " -> " : " -- ";
         StringBuilder sb = new StringBuilder();
         sb.append(directed ? "digraph " : "graph ").append("G" + "{\n");
-        sb.append("node ; ");
         for (int i : getNodes()) sb.append(i + " ");
         sb.append(";\n");
         for (int i : getNodes()) {
