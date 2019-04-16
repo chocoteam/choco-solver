@@ -445,7 +445,7 @@ A decision is prefixed with ``[R]`` and a refutation is prefixed by ``[L]``.
 
 .. warning::
 
-    ``solver.printDecisions()`` prints the tree search during the resolution.
+    ``solver.showDecisions()`` prints the tree search during the resolution.
     Printing the decisions slows down the search process.
 
 *****************
