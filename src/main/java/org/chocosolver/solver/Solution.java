@@ -180,9 +180,15 @@ public class Solution implements ICause {
     public Solution copySolution() {
         Solution ret = new Solution(model, varsToStore);
         ret.empty = empty;
-        ret.intmap = new TIntIntHashMap(intmap);
-        ret.realmap = new TIntObjectHashMap<>(realmap);
-        ret.setmap = new TIntObjectHashMap<>(setmap);
+        if (intmap != null) {
+            ret.intmap = new TIntIntHashMap(intmap);
+        }
+        if (realmap != null) {
+            ret.realmap = new TIntObjectHashMap<>(realmap);
+        }
+        if (setmap != null) {
+            ret.setmap = new TIntObjectHashMap<>(setmap);
+        }
         return ret;
     }
 
