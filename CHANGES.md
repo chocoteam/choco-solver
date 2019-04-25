@@ -10,6 +10,7 @@ NEXT MILESTONE
 ### Major features:
 - LNS on other variables (e.g. SetVarLNS)
 - Continuous integration fixed
+- `IntDomainMiddle` now allows an external definition of what middle is, thanks to `ToDoubleFunction<IntVar>`
 
 ### Deprecated API (to be removed in next release):
 
