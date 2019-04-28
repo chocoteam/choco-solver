@@ -10,7 +10,6 @@ package org.chocosolver.flatzinc;
 
 import org.chocosolver.parser.flatzinc.BaseFlatzincListener;
 import org.chocosolver.parser.flatzinc.Flatzinc;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -65,12 +64,11 @@ public class FastTest {
         Flatzinc fzn = new Flatzinc();
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.setUp(args);
-        fzn.defineSettings(new FznSettings());
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
         if(exp) {
-            fzn.getModel().getSolver().setCBJLearning(false, false);
+            fzn.getModel().getSolver().setLearningSignedClauses();
         }
         fzn.solve();
 

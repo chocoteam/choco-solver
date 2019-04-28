@@ -9,9 +9,7 @@
 package org.chocosolver.parser.json;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.real.IntEqRealConstraint;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.annotations.Test;
 
@@ -23,15 +21,6 @@ import org.testng.annotations.Test;
  * @since 27/09/2017.
  */
 public class JSONRealConstraintTest extends JSONConstraintTest{
-
-    @Test(groups="1s", timeOut=60000)
-    public void testInteqreal(){
-        Model model = new Model();
-        IntVar[] ivrs = model.intVarArray(3, 0, 3);
-        RealVar[] rvrs = model.realVarArray(3, 0.0, 3.0, 0.01);
-        new IntEqRealConstraint(ivrs, rvrs, 0.01).post();
-        eval(model, false);
-    }
 
     @Test(groups="1s", timeOut=60000)
     public void testRealCstr(){

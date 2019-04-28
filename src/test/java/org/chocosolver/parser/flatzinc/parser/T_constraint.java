@@ -12,7 +12,6 @@ import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
 import org.testng.Assert;
@@ -34,8 +33,7 @@ public class T_constraint extends GrammarTest {
 
     @BeforeMethod
     public void before() {
-        mSolver = new Model();
-        mSolver.set(new FznSettings());
+        mSolver = new Model(new FznSettings());
         map = new Datas();
     }
 
