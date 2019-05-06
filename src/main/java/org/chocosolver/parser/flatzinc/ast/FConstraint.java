@@ -3,14 +3,16 @@
  *
  * Copyright (c) 2018, IMT Atlantique. All rights reserved.
  *
- * Licensed under the BSD 4-clause license. See LICENSE file in the project root for full license
- * information.
+ * Licensed under the BSD 4-clause license.
+ * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
-
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
@@ -36,17 +38,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.MIN_VALUE;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.String.format;
-import static java.util.stream.IntStream.range;
 
 /*
  * User : CPRUDHOM

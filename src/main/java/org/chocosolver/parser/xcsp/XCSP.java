@@ -121,10 +121,6 @@ public class XCSP extends RegParser {
             solver.setNoGoodRecordingFromRestarts();
             solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
         }
-//        Files.move(Paths.get(instance),
-//                Paths.get("/Users/cprudhom/Sources/XCSP/ok/"+ Paths.get(instance).getFileName().toString()),
-//                StandardCopyOption.REPLACE_EXISTING);
-//        System.exit(-1);
     }
 
 

@@ -20,7 +20,9 @@ import java.util.List;
 import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
@@ -28,6 +30,9 @@ import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.variables.IntVar;
@@ -55,44 +60,47 @@ public abstract class RegParser implements IParser {
 
     @SuppressWarnings("unused")
     @Option(name = "-pa", aliases = {"--parser"}, usage = "Parser to use (" +
-            "0: automatic -- based on file name extension (compression is allowed), " +
-            "1: FlatZinc (.fzn)," +
-            "2: XCSP3 (.xml)," +
-            "3: MPS (.mps)," +
-            "4: JSON (.json).")
+        "0: automatic -- based on file name extension (compression is allowed), " +
+        "1: FlatZinc (.fzn)," +
+        "2: XCSP3 (.xml)," +
+        "3: MPS (.mps)," +
+        "4: JSON (.json).")
     private int pa = 0;
 
     @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.")
     protected String tl = "-1";
 
-    @Option(name = "-stat", aliases = {"--print-statistics"}, usage = "Print statistics on each solution (default: false).")
+    @Option(name = "-stat", aliases = {
+        "--print-statistics"}, usage = "Print statistics on each solution (default: false).")
     protected boolean stat = false;
 
-    @Option(name = "-f", aliases = {"--free-search"}, usage = "Ignore search strategy (default: false). ")
+    @Option(name = "-f", aliases = {
+        "--free-search"}, usage = "Ignore search strategy (default: false). ")
     protected boolean free = false;
 
-    @Option(name = "-exp", usage ="Plug explanation in (default: false).")
+    @Option(name = "-exp", usage = "Plug explanation in (default: false).")
     public boolean exp = false;
 
-    @Option(name = "-dfx", usage ="Force default explanation algorithm.")
+    @Option(name = "-dfx", usage = "Force default explanation algorithm.")
     public boolean dftexp = false;
 
-    @Option(name = "-oes", usage ="Override default explanations for sum constraints.")
+    @Option(name = "-oes", usage = "Override default explanations for sum constraints.")
     public boolean sumdft = false;
 
-    @Option(name = "-sumglb", usage ="Learn permanent nogood when sum fails.")
+    @Option(name = "-sumglb", usage = "Learn permanent nogood when sum fails.")
     public boolean sumglb = false;
 
-    @Option(name = "-bb", usage ="Set the search strategy to a black-box one.")
-    public int bbox = 0;
+    @Option(name = "-bb", usage = "Set the search strategy to a black-box one (-1 is the default one).")
+    public int bbox = -1;
 
-    @Option(name = "-splitsum", usage ="Split sum composed of more than N elements (N = 1000 by default).")
+    @Option(name = "-splitsum", usage = "Split sum composed of more than N elements (N = 1000 by default).")
     public int sum = 1000;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     public boolean all = false;
 
-    @Option(name = "-p", aliases = {"--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
+    @Option(name = "-p", aliases = {
+        "--nb-cores"}, usage = "Number of cores available for parallel search (default: 1).")
     protected int nb_cores = 1;
 
     @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
@@ -146,7 +154,7 @@ public abstract class RegParser implements IParser {
 
     public abstract Settings createDefaultSettings();
 
-    public final Settings getSettings(){
+    public final Settings getSettings() {
         return defaultSettings;
     }
 
@@ -178,7 +186,7 @@ public abstract class RegParser implements IParser {
         tl_ = TimeUtils.convertInMilliseconds(tl);
         listeners.forEach(ParserListener::afterParsingParameters);
         defaultSettings = createDefaultSettings();
-        if(settingsFile != null){
+        if (settingsFile != null) {
             try {
                 defaultSettings.load(new FileInputStream(settingsFile));
             } catch (IOException e) {
@@ -186,6 +194,7 @@ public abstract class RegParser implements IParser {
             }
         }
     }
+
     /**
      * Create a complementary search on non-decision variables
      *
@@ -193,19 +202,20 @@ public abstract class RegParser implements IParser {
      */
     private static void makeComplementarySearch(Model m) {
         Solver solver = m.getSolver();
-        if(solver.getSearch() != null) {
+        if (solver.getSearch() != null) {
             IntVar[] ovars = new IntVar[m.getNbVars()];
             THashSet<Variable> dvars = new THashSet<>();
             dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
             int k = 0;
-            for (IntVar iv:m.retrieveIntVars(true)) {
+            for (IntVar iv : m.retrieveIntVars(true)) {
                 if (!dvars.contains(iv)) {
                     ovars[k++] = iv;
                 }
             }
             // do not enumerate on the complementary search (greedy assignment)
-            if(k>0) {
-                solver.setSearch(solver.getSearch(), Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+            if (k > 0) {
+                solver.setSearch(solver.getSearch(),
+                    Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
             }
         }
     }
@@ -214,7 +224,7 @@ public abstract class RegParser implements IParser {
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
-        if(nb_cores == 1 && exp){
+        if (nb_cores == 1 && exp) {
             solver.setLearningSignedClauses();
             // THEN PARAMETERS
             ExplanationForSignedClause.DEFAULT_X = dftexp;
@@ -222,56 +232,65 @@ public abstract class RegParser implements IParser {
             ClauseStore.PRINT_CLAUSE = false;
             ClauseStore.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
             ExplanationForSignedClause.ASSERT_NO_LEFT_BRANCH = false;
-//            LearnSignedClauses.LIMIT = 100;
             ClauseStore.INTERVAL_TREE = true;
-            if(solver.hasObjective()) {
+            if (solver.hasObjective()) {
                 solver.setRestartOnSolutions();
             }
         }
-//        solver.limitSolution(6);
-//        solver.limitFail(71);
-//        solver.showDecisions(()->"");
-        /*try {
-            getModel().getObjective().asIntVar().instantiateTo(162, Null);
-        } catch (ContradictionException e) {
-            e.printStackTrace();
-        }*/
-//        solver.showDashboard();
-        if(bbox>0) {
+        if (bbox > -1) {
             solver.getMove().removeStrategy();
             solver.setMove(new MoveBinaryDFS());
+            IntVar[] dvars = getModel().retrieveIntVars(true);
             switch (bbox) {
+                case 0:
+                    solver.setSearch(Search.defaultSearch(getModel()));
                 case 1:
-                    solver.setSearch(Search.domOverWDegSearch(getModel().retrieveIntVars(true)));
+                    solver.setSearch(Search.domOverWDegSearch(dvars));
                     break;
                 case 2:
-                    solver.setSearch(new DomOverWDeg(getModel().retrieveIntVars(true), 0, new IntDomainBest()));
+                    solver.setSearch(new DomOverWDeg(dvars, 0, new IntDomainBest()));
                     break;
                 case 3:
-                    solver.setSearch(Search.activityBasedSearch(getModel().retrieveIntVars(true)));
+                    solver.setSearch(Search.activityBasedSearch(dvars));
                     break;
                 case 4:
-                    ImpactBased ibs = new ImpactBased(getModel().retrieveIntVars(true), 2, 1024, 2048, 0, false);
+                    ImpactBased ibs = new ImpactBased(dvars, 2, 1024, 2048, 0, false);
                     solver.setSearch(ibs);
+                    break;
+                case 5: {
+                    IntValueSelector valueSelector;
+                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(getModel().getObjective() instanceof IntVar)) {
+                        valueSelector = new IntDomainMin();
+                    } else {
+                        valueSelector = new IntDomainBest();
+                        Solution lastSolution = new Solution(getModel(), dvars);
+                        solver.attach(lastSolution);
+                        valueSelector = new IntDomainLast(lastSolution, valueSelector, c -> solver.getRestartCount() > c);
+                    }
+                    solver.setSearch(new DomOverWDeg(dvars, 0, valueSelector));
+                }
+                break;
             }
             solver.setNoGoodRecordingFromRestarts();
-            solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
-            solver.setLubyRestart(500, new FailCounter(getModel(), 500), 500);
+            solver.setNoGoodRecordingFromSolutions(dvars);
+            solver.setLubyRestart(500, new FailCounter(getModel(), 500), 5000);
             solver.setSearch(lastConflict(solver.getSearch()));
 
-        }else if(nb_cores == 1 && free){ // add last conflict
+        } else if (nb_cores == 1 && free) { // add last conflict
             solver.getMove().removeStrategy();
             solver.setMove(new MoveBinaryDFS());
             solver.setSearch(Search.defaultSearch(solver.getModel()));
             solver.setNoGoodRecordingFromRestarts();
             solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
-            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 500);
+            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 5000);
         }
         for (int i = 0; i < nb_cores; i++) {
-            if (tl_ > -1)portfolio.getModels().get(i).getSolver().limitTime(tl);
+            if (tl_ > -1) {
+                portfolio.getModels().get(i).getSolver().limitTime(tl);
+            }
             makeComplementarySearch(portfolio.getModels().get(i));
         }
-        solver.showDecisions();
         listeners.forEach(ParserListener::afterConfiguringSearch);
     }
 
@@ -294,8 +313,8 @@ public abstract class RegParser implements IParser {
         return -1;
     }
 
-    protected boolean runInTime(){
-        long rtime = (System.currentTimeMillis() - time) ;
+    protected boolean runInTime() {
+        long rtime = (System.currentTimeMillis() - time);
         return tl_ < 0 || rtime < tl_;
     }
 }
