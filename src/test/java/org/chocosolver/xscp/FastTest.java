@@ -8,7 +8,6 @@
  */
 package org.chocosolver.xscp;
 
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.xcsp.XCSP;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -48,12 +47,11 @@ public class FastTest {
 
         XCSP xscp = new XCSP();
         xscp.setUp(args);
-        xscp.defineSettings(new FznSettings());
         xscp.createSolver();
         xscp.buildModel();
         xscp.configureSearch();
         if(exp) {
-            xscp.getModel().getSolver().setCBJLearning(false, false);
+            xscp.getModel().getSolver().setLearningSignedClauses();
         }
         xscp.solve();
 

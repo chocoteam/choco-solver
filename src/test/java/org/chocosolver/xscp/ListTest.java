@@ -15,7 +15,6 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.chocosolver.parser.xcsp.BaseXCSPListener;
 import org.chocosolver.parser.xcsp.XCSP;
-import org.chocosolver.parser.xcsp.XCSPSettings;
 import org.chocosolver.pf4cs.SetUpException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -78,7 +77,6 @@ public class ListTest {
         xscp.setUp(ROOT+ File.separator+ file,
                 (nbSol < Integer.MAX_VALUE ?"-a":"-stat"),
                 "-stat"/*, "-cs"*/);
-        xscp.defineSettings(new XCSPSettings());
         xscp.createSolver();
         try {
             xscp.buildModel();
@@ -126,7 +124,6 @@ public class ListTest {
         XCSP xscp = new XCSP();
         xscp.addListener(new BaseXCSPListener(xscp));
         xscp.setUp(ROOT+ File.separator+ file, "-stat"/*, "-cs"*/);
-        xscp.defineSettings(new XCSPSettings());
         xscp.createSolver();
         try {
             xscp.buildModel();

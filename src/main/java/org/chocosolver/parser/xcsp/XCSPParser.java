@@ -178,6 +178,8 @@ public class XCSPParser implements XCallbacks2 {
             return var(node.var(0));
         } else if (type == Types.TypeExpr.LONG) {
             return model.intVar(node.val(0));
+        } else if (type == Types.TypeExpr.SET){
+            return model.intVar(node.arrayOfVals());
         }
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
         ArExpression[] aes = null;

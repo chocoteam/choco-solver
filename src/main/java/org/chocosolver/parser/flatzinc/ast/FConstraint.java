@@ -41,6 +41,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static java.util.stream.IntStream.range;
+
 /*
  * User : CPRUDHOM
  * Mail : cprudhom(a)emn.fr
