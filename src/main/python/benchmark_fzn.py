@@ -35,7 +35,7 @@ parser.add_argument(
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_la_x.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_pack_d.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_pack.txt',
-            # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_psplib_j30.txt',
+        # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_psplib_j30.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_psplib_j60.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_psplib_j90.txt',
         # '/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp_psplib_j120.txt',
@@ -72,6 +72,7 @@ parser.add_argument(
         # 'EX+D+MIC:-stat -x 3 -cum MIC',
         'EX+S+MZN:-stat -x 3 -cum MZN -oes',
         'EX+G+MZN:-stat -x 3 -cum MZN -oes -sumglb',
+        # "CHU:"
     ]
 )
 parser.add_argument(
@@ -92,6 +93,10 @@ parser.add_argument(
 )
 
 cmd = 'java %s -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -tl %s %s %s'
+chucmd = '/Users/cprudhom/Sources/Sandbox/2018/SOURCES/chuffed/build/fzn-chuffed --time-out %s -a --verbosity 1 %s'
+
+
+print("begin0")
 
 # start here
 args = parser.parse_args()
@@ -99,7 +104,7 @@ args = parser.parse_args()
 if args.print:
     print(
         "python3.4 ./benchmark_fzn.py -cp %s org.chocosolver.parser.flatzinc.ChocoFZN -n %s -fl %s -p %s -c %s -tl %s;" %
-        (args.classpath, args.name, args.filelist, args.process, args.configurations, args.timelimit)
+        (args.classpath, args.name, args.filelists, args.process, args.configurations, args.timelimit)
     )
     exit(0)
 
@@ -120,12 +125,22 @@ for filelist in args.filelists:
             fname = os.path.basename(abspath)
             for conf in args.configurations:
                 cc = conf.split(':')
-                commands.append(
-                    (cmd % (args.jargs, args.classpath, args.timelimit * 1000, cc[1], abspath),
-                     os.path.join(ldir, fname) + '+' + cc[0] + '.log',
-                     os.path.join(ldir, 'error', fname) + '+' + cc[0] + '.err.log',
-                     args.timelimit
-                     )
+                if cc[0]== "CHU":
+                    commands.append(
+                        (chucmd % (args.timelimit, abspath),
+                         os.path.join(ldir, fname) + '+' + cc[0] + '.log',
+                         os.path.join(ldir, 'error', fname) + '+' + cc[0] + 'err.log',
+                         # os.path.join(ldir, fname) + '+' + cc[0] + '.log',
+                         args.timelimit
+                         )
+                    )
+                else:
+                    commands.append(
+                        (cmd % (args.jargs, args.classpath, args.timelimit * 1000, cc[1], abspath),
+                         os.path.join(ldir, fname) + '+' + cc[0] + '.log',
+                         os.path.join(ldir, 'error', fname) + '+' + cc[0] + '.err.log',
+                         args.timelimit
+                         )
                 )
 # run commands
 for cm in commands:
@@ -133,7 +148,6 @@ for cm in commands:
 if args.process == 1:
     for cm in commands:
         worker.work1(cm)
-
 else:
     pool = multiprocessing.Pool(args.process)
     pool.map(

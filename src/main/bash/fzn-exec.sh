@@ -2,9 +2,11 @@
 
 STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
+EXP="no"
+STAT="no"
 NB_NODES=1
-TIME_LIMIT=900000
-DIR=./
+TIME_LIMIT=-1
+DIR=`dirname "$0"`
 JAR_NAME=choco-parsers.jar
 CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
@@ -28,6 +30,9 @@ OPTIONS:
 
     -f
         When invoked with this option the solver ignores any specified search strategy.
+
+    -s
+        When invoked with this option the solver outputs statistics for solving
 
     -p
         When invoked with this option the solver is free to use multiple threads and/or cores during search.
@@ -90,6 +95,10 @@ do
             shift
         ;;
 
+        -s)
+            STAT="yes"
+        ;;
+
         -jar)
             CHOCO_JAR="$2"
             shift
@@ -127,7 +136,12 @@ then
     ARGS=$ARGS" -f"
 fi
 
-CMD="java -server ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS} -stat"
+if test "${STAT}" = "yes"
+then
+    ARGS=$ARGS" -stat"
+fi
+
+CMD="java -server ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
 
 echo "% $CMD"
 eval ${CMD}

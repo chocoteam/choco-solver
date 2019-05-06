@@ -879,32 +879,16 @@ public enum FConstraint {
                                 starts[i].getLB() + durations[i].getLB(),
                                 starts[i].getUB() + durations[i].getUB(),
                                 true);
+                        assert durations[i].getUB() > 0 && resources[i].getUB() > 0;
                         tasks[i] = new Task(starts[i], durations[i], ends[i]);
                     }
                     model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
                     break;
                 case "MZN":
-                    // 1. find range of 't' parameters while creating variables
-                    int min_t = MAX_VALUE, max_t = MIN_VALUE;
-                    for (int i = 0; i < n; i++) {
-                        min_t = min(min_t, starts[i].getLB());
-                        max_t = max(max_t, starts[i].getUB() + durations[i].getValue());
-                    }
-                    for (int t = min_t; t <= max_t; t++) {
-                        BoolVar[] bit = model.boolVarArray(format("b_%s_", t), n);
-                        for (int i = 0; i < n; i++) {
-                            BoolVar[] bits = model.boolVarArray(format("b_%s_%s_", t, i), 2);
-                            model.reifyXltC(starts[i], t + 1, bits[0]);
-                            model.reifyXgtC(starts[i], t - durations[i].getValue(), bits[1]);
-                            model.addClausesBoolAndArrayEqVar(bits, bit[i]);
-                        }
-                        model.scalar(
-                                bit,
-                                range(0, n).map(i -> resources[i].getValue()).toArray(),
-                                "<=",
-                                limit.getValue()
-                        ).post();
-                    }
+                    model.cumulativeTimeDec(starts,
+                            Arrays.stream(durations).mapToInt(IntVar::getUB).toArray(),
+                            Arrays.stream(resources).mapToInt(IntVar::getUB).toArray(),
+                            limit.getLB());
                     break;
                 case "MIC":
                     int epsilon = 1;

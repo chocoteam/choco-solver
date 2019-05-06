@@ -5,7 +5,7 @@ import os
 from pylatex import Document, Section, Subsection, Tabular, TikZ, Axis, \
     Plot, Package, Subsubsection, MultiColumn, Command, NoEscape
 
-from utils import logExtractor, ChuLogExtractor
+from utils import logExtractor, ChuLogExtractor2
 
 parser = argparse.ArgumentParser(description='Pretty flatzinc log files.')
 parser.add_argument(
@@ -121,7 +121,7 @@ with open(args.filelist, 'r') as f:
         optPerSol[fname] = []
         for o in range(len(options)):
             if options[o] == 'CHU':
-                solution = ChuLogExtractor.read(args.directory, fname, maxtime)
+                solution = ChuLogExtractor2.read(args.directory, fname, maxtime)
             else:
                 solution = logExtractor.read(args.directory, fname, options[o], False, maxtime)
             optPerSol[fname].append(solution)
