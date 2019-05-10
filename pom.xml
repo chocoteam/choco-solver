@@ -15,7 +15,7 @@
     <groupId>org.choco-solver</groupId>
     <artifactId>cutoffseq</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.5</version>
+    <version>1.0.6-SNAPSHOT</version>
     <name>cutoffseq</name>
     <url>https://github.com/chocoteam/cutoffseq</url>
     <description>Cutoff sequence generator.</description>
