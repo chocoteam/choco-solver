@@ -40,6 +40,7 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
      * A Luby cutoff strategy.
      * @param s scale factor
      */
+    @SuppressWarnings("WeakerAccess")
     public LubyCutoffStrategy(long s) {
         super(s);
     }

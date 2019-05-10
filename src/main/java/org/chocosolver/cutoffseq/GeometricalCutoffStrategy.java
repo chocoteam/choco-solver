@@ -24,19 +24,22 @@ public final class GeometricalCutoffStrategy extends AbstractCutoffStrategy {
     /**
      * Declared geometrical factor
      */
-    public final double geometricalFactor;
+    private final double geometricalFactor;
     /**
      * Current geometrical factor, after n calls to {@link #getNextCutoff()}.
      */
-    public double geometricalFactorPower;
+    private double geometricalFactorPower;
 
     /**
      * A geometrical cutoff strategy.
      * At step <i>n</i>, the next cutoff is computed with the following function : <i>s*g^n</i>
      * @param s scale factor
      * @param g geometrical factor
+     * @exception IllegalArgumentException if <i>g</i> is not strictly greater than 1
+
      */
-    public GeometricalCutoffStrategy(long s, double g) {
+    @SuppressWarnings("WeakerAccess")
+    public GeometricalCutoffStrategy(long s, double g) throws IllegalArgumentException{
         super(s);
         if (g <= 1) {
             throw new IllegalArgumentException("The geometrical factor of the restart strategy must be strictly greater than 1.");

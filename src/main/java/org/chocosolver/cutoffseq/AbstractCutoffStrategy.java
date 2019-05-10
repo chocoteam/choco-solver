@@ -15,6 +15,7 @@ package org.chocosolver.cutoffseq;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
+@SuppressWarnings("WeakerAccess")
 public abstract class AbstractCutoffStrategy implements ICutoffStrategy {
 
     /**
@@ -25,9 +26,9 @@ public abstract class AbstractCutoffStrategy implements ICutoffStrategy {
     /**
      * Create a abstract class with the specific <i>scaleFactor</i>.
      * @param s scale factor (should be strictly positive)
-     * @exception IllegalAccessException if <i>scaleFactor</i> is not strictly positive
+     * @exception IllegalArgumentException if <i>scaleFactor</i> is not strictly positive
      */
-    public AbstractCutoffStrategy(long s) {
+    public AbstractCutoffStrategy(long s) throws IllegalArgumentException{
         super();
         if (s < 1) {
             throw new IllegalArgumentException("The scale factor of a restart strategy must be strictly positive.");
