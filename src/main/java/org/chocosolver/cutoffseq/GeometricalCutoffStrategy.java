@@ -1,7 +1,7 @@
 /**
  * This file is part of cutoffseq, https://github.com/chocoteam/cutoffseq
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -54,7 +54,7 @@ public final class GeometricalCutoffStrategy extends AbstractCutoffStrategy {
      */
     @Override
     public long getNextCutoff() {
-        final long cutoff = (int) Math.ceil(scaleFactor * geometricalFactorPower);
+        final long cutoff = (long) Math.ceil(scaleFactor * geometricalFactorPower);
         geometricalFactorPower *= geometricalFactor;
         return cutoff;
     }
