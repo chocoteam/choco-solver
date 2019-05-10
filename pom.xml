@@ -51,9 +51,6 @@
         <developerConnection>scm:git:git@github.com:chocoteam/cutoffseq.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <prerequisites>
-        <maven>3.2.3</maven>
-    </prerequisites>
 
     <dependencies>
         <dependency>
@@ -232,6 +229,29 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-versions</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.2.3</version>
+                                </requireMavenVersion>
+                                <requireJavaVersion>
+                                    <version>1.8</version>
+                                </requireJavaVersion>
+                            </rules>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
