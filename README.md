@@ -8,3 +8,4 @@ Based on [IJava binder](https://github.com/SpencerPark/ijava-binder).
 
 1. [How to start solving based on a given solution ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/Loading_a_solution.ipynb#)
 2. [How to run CDCL algorithm ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/A_CDCL_overview.ipynb#)
+3. [How to use conditional constraint ?](https://nbviewer.jupyter.org/github/chocoteam/notebooks/blob/master/Conditionnal_constraint.ipynb#)
