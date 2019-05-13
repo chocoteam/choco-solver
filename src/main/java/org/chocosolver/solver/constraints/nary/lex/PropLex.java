@@ -88,7 +88,7 @@ public class PropLex extends Propagator<IntVar> {
             if (strict) {
                 return ESat.FALSE;
             } else {
-                return ESat.eval(vars[n - 1].getValue() == vars[n - 1 + n].getValue());
+                return ESat.TRUE;
             }
         }
         return ESat.UNDEFINED;
