@@ -63,13 +63,13 @@ public class PropXeqYCReif extends Propagator<IntVar> {
                         vars[2].instantiateTo(0, this);
                     }
                     setPassive();
-                } else if (!vars[1].contains(vars[0].getValue() + cste)) {
+                } else if (!vars[1].contains(vars[0].getValue() - cste)) {
                     vars[2].instantiateTo(0, this);
                     setPassive();
                 }
             } else {
                 if (vars[1].isInstantiated()) {
-                    if (!vars[0].contains(vars[1].getValue() - cste)) {
+                    if (!vars[0].contains(vars[1].getValue() + cste)) {
                         vars[2].instantiateTo(0, this);
                         setPassive();
                     }
