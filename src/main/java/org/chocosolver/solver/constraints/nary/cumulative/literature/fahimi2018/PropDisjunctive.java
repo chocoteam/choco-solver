@@ -33,7 +33,8 @@ public class PropDisjunctive extends CumulativeFilter {
     private int[] u;
     private int[] r;        
 
-    private Timeline overloadTimeline, detectPrecTimeline;
+    private Timeline overloadTimeline;
+    private Timeline detectPrecTimeline;
 
     private TIntArrayList postponedTasks;
     private int[] lstIndexes;
