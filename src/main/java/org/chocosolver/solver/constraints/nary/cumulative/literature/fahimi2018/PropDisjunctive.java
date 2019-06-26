@@ -29,7 +29,9 @@ public class PropDisjunctive extends CumulativeFilter {
     private Integer[] Ip;
 
     // Useful variables for TimeTabling algorithm
-    private int[] l, u, r;
+    private int[] l;
+    private int[] u;
+    private int[] r;        
 
     private Timeline overloadTimeline, detectPrecTimeline;
 
