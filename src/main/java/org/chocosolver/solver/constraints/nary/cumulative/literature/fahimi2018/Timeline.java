@@ -35,7 +35,9 @@ public class Timeline {
     private int cSize;
     private int e;
     private UnionFindWithGreatest timelineUnion;
-    private final int sumP, maxiP, min;
+    private final int sumP;
+    private final int maxiP;
+    private final int min;
     private ArrayList<Integer> indexes;
 
     public Timeline(Task[] tasks, IntVar[] heights, IntVar capacity) {
