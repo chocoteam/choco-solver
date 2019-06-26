@@ -132,7 +132,7 @@ public class CumulativeConstraintFactory {
      * @param edgeFinding <i>true</i> if the Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] Vilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
+    public static CumulativeFilter[] vilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
         return checker(tasks,
                 (t) -> new CumulativeFilter[]{
                         new org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropDisjunctive(t, overloadCheck, notFirst, edgeFinding),
