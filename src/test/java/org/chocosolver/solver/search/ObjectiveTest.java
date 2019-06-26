@@ -450,7 +450,7 @@ public class ObjectiveTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testCP1() {
-        Model model = makeGolombRuler(11);
+        Model model = makeGolombRuler(9);
         IntVar objective = (IntVar) model.getHook("objective");
         IntVar[] ticks = (IntVar[]) model.getHook("ticks");
         Solver solver = model.getSolver();
@@ -485,6 +485,6 @@ public class ObjectiveTest {
             ;
         }
         assertEquals(model.getSolver().isStopCriterionMet(), false);
-        assertEquals(solver.getBestSolutionValue(), 34);
+        assertEquals(solver.getBestSolutionValue(), 44);
     }
 }
