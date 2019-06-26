@@ -15,6 +15,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -57,7 +58,7 @@ public class PropCumulativeGingras2016 extends CumulativeFilter {
     public void overloadCheck() throws ContradictionException {
         profile.initialize();
         theta.clear();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             theta.add(i);
             int[] ectOv = profile.scheduleTasks(theta, capacity.getUB()); // [ect, ov]

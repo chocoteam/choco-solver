@@ -16,6 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -94,7 +95,7 @@ public class PropCumulativeVilim2009 extends CumulativeFilter {
             prec[i] = tasks[i].getEnd().getLB();
         }
         thetaLambdaTree.initializeTree(true);
-        indexes.sort(Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
         for(int j : indexes) {
             if(thetaLambdaTree.root.env > capacity.getUB()*tasks[j].getEnd().getUB()) {
                 aCause.fails();
@@ -109,7 +110,7 @@ public class PropCumulativeVilim2009 extends CumulativeFilter {
     }
 
     private void computeAllUpdateJC() {
-        indexes.sort(Comparator.comparingInt(j -> tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getEnd().getUB()));
         for(int k = 0; k<Cs.size(); k++) {
             int c = Cs.getQuick(k);
             thetaLambdaTree.setC(c);

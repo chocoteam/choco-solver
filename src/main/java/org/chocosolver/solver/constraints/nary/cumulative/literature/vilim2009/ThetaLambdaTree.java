@@ -13,6 +13,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -166,7 +167,7 @@ public class ThetaLambdaTree {
     Node[] nodes;
     int[] correspondingNodes;
     Node root;
-    private ArrayList<Integer> indexes;
+    private Integer[] indexes;
 
     public ThetaLambdaTree(Task[] tasks, IntVar[] heights, IntVar capacity) {
         this.tasks = tasks;
@@ -174,10 +175,10 @@ public class ThetaLambdaTree {
         this.capacity = capacity;
 
         nodes = new Node[tasks.length];
-        indexes = new ArrayList<>(tasks.length);
+        indexes = new Integer[tasks.length];
         for(int i = 0; i<tasks.length; i++) {
             nodes[i] = new Node(i);
-            indexes.add(i);
+            indexes[i] = i;
         }
         correspondingNodes = new int[tasks.length];
 
@@ -218,9 +219,9 @@ public class ThetaLambdaTree {
     }
 
     public void initializeTree(boolean full) {
-        indexes.sort(this::compare);
+        Arrays.sort(indexes, this::compare);
         for(int i = 0; i<nodes.length; i++) {
-            nodes[i].taskIdx = indexes.get(i);
+            nodes[i].taskIdx = indexes[i];
             nodes[i].inTheta = full;
             nodes[i].inLambda = false;
             correspondingNodes[nodes[i].taskIdx] = i;

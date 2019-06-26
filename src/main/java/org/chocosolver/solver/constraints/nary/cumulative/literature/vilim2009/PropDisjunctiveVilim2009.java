@@ -16,6 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -46,7 +47,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
     @Override
     public void overloadCheck() throws ContradictionException {
         thetaLambdaTree.initializeTree(false);
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             thetaLambdaTree.addToTheta(i);
             if(thetaLambdaTree.root.env > tasks[i].getEnd().getUB()) {
@@ -57,7 +58,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
     private void fillQ() {
         Q.clear();
-        indexes.sort(Comparator.comparingInt(j -> tasks[j].getStart().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getStart().getUB()));
         for(int i : indexes) {
             Q.add(i);
         }
@@ -76,7 +77,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(false);
         fillQ();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         int j = Q.get(0);
         for(int i : indexes) {
             while(!Q.isEmpty() && tasks[i].getEnd().getUB()>tasks[Q.get(0)].getStart().getUB()) {
@@ -97,7 +98,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(true);
         Q.clear();
-        indexes.sort(Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
         for(int i : indexes) {
             Q.add(i);
         }

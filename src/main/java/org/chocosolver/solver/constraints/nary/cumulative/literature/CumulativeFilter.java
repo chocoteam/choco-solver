@@ -29,7 +29,7 @@ public abstract class CumulativeFilter {
     protected IntVar capacity;
     protected Propagator<IntVar> aCause;
 
-    protected ArrayList<Integer> indexes;
+    protected Integer[] indexes;
 
     protected boolean overloadCheck;
     protected boolean timeTable;
@@ -64,9 +64,9 @@ public abstract class CumulativeFilter {
         this.heights = heights;
         this.capacity = capacity;
 
-        this.indexes = new ArrayList<>(tasks.length);
+        this.indexes = new Integer[tasks.length];
         for(int i = 0; i<tasks.length; i++) {
-            indexes.add(i);
+            indexes[i] = i;
         }
     }
 

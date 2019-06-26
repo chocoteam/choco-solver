@@ -14,6 +14,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -40,7 +42,7 @@ public class PropCumulativeFahimi2018 extends CumulativeFilter {
     public void overloadCheck() throws ContradictionException {
         overloadTimeline.setCapacity(capacity.getUB());
         overloadTimeline.initializeTimeline();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             overloadTimeline.scheduleTask(i);
             if(overloadTimeline.earliestCompletionTime()>capacity.getUB()*tasks[i].getEnd().getUB()) {
@@ -52,7 +54,7 @@ public class PropCumulativeFahimi2018 extends CumulativeFilter {
     @Override
     public boolean notFirst() throws ContradictionException {
         boolean hasFiltered = false;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             if(!tasks[i].getStart().isInstantiated()) {
                 int minEct = Integer.MAX_VALUE;
