@@ -45,7 +45,9 @@ public class PropCumulative extends CumulativeFilter {
     private TIntArrayList eligibleHeights, r;
     private int[] c;
     private int cSize;
-    private ArrayList<DecomposedTask> T, F, extEdgeFind;
+    private ArrayList<DecomposedTask> T, ;
+    private ArrayList<DecomposedTask> F;
+    private ArrayList<DecomposedTask> extEdgeFind;
     private BitSet S; // TODO : check if complexities are the same as for an AVL Tree
     private int min;
 
