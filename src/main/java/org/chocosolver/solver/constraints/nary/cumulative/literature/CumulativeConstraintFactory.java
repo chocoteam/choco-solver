@@ -81,7 +81,7 @@ public class CumulativeConstraintFactory {
      * @param notFirst <i>true</i> if the not-first/not-last rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] Fahimi2018(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
+    public static CumulativeFilter[] fahimi2018(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
                         new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropCumulative(t, h, capacity, overloadCheck, notFirst),
