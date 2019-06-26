@@ -62,54 +62,66 @@ public class Search {
     // ************************************************************************************
 
     /**
-     * Use the last conflict heuristic as a pluggin to improve a former search heuristic
-     * Should be set after specifying a search strategy.
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic Should be
+     * set after specifying a search strategy.
+     *
      * @return last conflict strategy
      */
-    public static<V extends Variable> AbstractStrategy<V> lastConflict(AbstractStrategy<V> formerSearch) {
+    public static <V extends Variable> AbstractStrategy<V> lastConflict(
+        AbstractStrategy<V> formerSearch) {
         return lastConflict(formerSearch, 1);
     }
 
     /**
-     * Search heuristic combined with a constraint performing strong consistency on the next decision variable
-     * and branching on the value with the best objective bound (for optimization) and branches on the lower bound for SAT problems.
+     * Search heuristic combined with a constraint performing strong consistency on the next
+     * decision variable and branching on the value with the best objective bound (for optimization)
+     * and branches on the lower bound for SAT problems.
      *
      * BEWARE: ONLY FOR INTEGERS (lets the former search work for other variable types)
      *
-     * @param formerSearch default search to branch on variables (defines the variable selector and the value selector when this does not hold)
+     * @param formerSearch default search to branch on variables (defines the variable selector and
+     * the value selector when this does not hold)
      * @return best bound strategy
      */
     public static AbstractStrategy<IntVar> bestBound(AbstractStrategy<IntVar> formerSearch) {
         if (formerSearch == null) {
-            throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+            throw new UnsupportedOperationException(
+                "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new BoundSearch(formerSearch);
     }
 
     /**
-     * Use the last conflict heuristic as a pluggin to improve a former search heuristic
-     * Should be set after specifying a search strategy.
+     * Use the last conflict heuristic as a pluggin to improve a former search heuristic Should be
+     * set after specifying a search strategy.
+     *
      * @param k the maximum number of conflicts to store
      * @return last conflict strategy
      */
-    public static <V extends Variable>AbstractStrategy<V> lastConflict(AbstractStrategy<V> formerSearch, int k) {
+    public static <V extends Variable> AbstractStrategy<V> lastConflict(
+        AbstractStrategy<V> formerSearch, int k) {
         if (formerSearch == null) {
-            throw new UnsupportedOperationException("the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+            throw new UnsupportedOperationException(
+                "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
     }
 
     /**
-     * Use the conflict ordering search as a pluggin to improve a former search heuristic
-     * Should be set after specifying a search strategy.
+     * Use the conflict ordering search as a pluggin to improve a former search heuristic Should be
+     * set after specifying a search strategy.
+     *
      * @return last conflict strategy
      */
-    public static <V extends Variable>AbstractStrategy<V> conflictOrderingSearch(AbstractStrategy<V> formerSearch) {
-        return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(), formerSearch);
+    public static <V extends Variable> AbstractStrategy<V> conflictOrderingSearch(
+        AbstractStrategy<V> formerSearch) {
+        return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(),
+            formerSearch);
     }
 
     /**
      * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
+     *
      * @param search a search heuristic building branching decisions
      * @return a greedy form of search
      */
@@ -117,6 +129,13 @@ public class Search {
         return new GreedyBranching(search);
     }
 
+    /**
+     * Apply sequentialy enumeration strategies. Strategies are considered in input order. When
+     * strategy <i>i</i> returns null (all variables are instantiated) the <i>i+1</i> ones is
+     * activated.
+     *
+     * @param searches ordered set of enumeration strategies
+     */
     public static AbstractStrategy sequencer(AbstractStrategy... searches) {
         return new StrategiesSequencer(searches);
     }
@@ -128,18 +147,20 @@ public class Search {
     /**
      * Generic strategy to branch on set variables
      *
-     * @param varS         variable selection strategy
-     * @param valS         integer  selection strategy
+     * @param varS variable selection strategy
+     * @param valS integer  selection strategy
      * @param enforceFirst branching order true = enforce first; false = remove first
-     * @param sets         SetVar array to branch on
+     * @param sets SetVar array to branch on
      * @return a strategy to instantiate sets
      */
-    public static SetStrategy setVarSearch(VariableSelector<SetVar> varS, SetValueSelector valS, boolean enforceFirst, SetVar... sets) {
+    public static SetStrategy setVarSearch(VariableSelector<SetVar> varS, SetValueSelector valS,
+        boolean enforceFirst, SetVar... sets) {
         return new SetStrategy(sets, varS, valS, enforceFirst);
     }
 
     /**
-     * strategy to branch on sets by choosing the first unfixed variable and forcing its first unfixed value
+     * strategy to branch on sets by choosing the first unfixed variable and forcing its first
+     * unfixed value
      *
      * @param sets variables to branch on
      * @return a strategy to instantiate sets
@@ -153,34 +174,33 @@ public class Search {
     // ************************************************************************************
 
     /**
-     * Generic strategy to branch on real variables, based on domain splitting.
-     * A real decision is like:
+     * Generic strategy to branch on real variables, based on domain splitting. A real decision is
+     * like:
      * <ul>
-     *     <li>left branch: X &le; v</li>
-     *     <li>right branch: X &ge; v + e</li>
+     * <li>left branch: X &le; v</li>
+     * <li>right branch: X &ge; v + e</li>
      * </ul>
      * where 'e' is given by epsilon.
      * </p>
      *
-     * @param varS  variable selection strategy
-     * @param valS  strategy to select where to split domains
+     * @param varS variable selection strategy
+     * @param valS strategy to select where to split domains
      * @param epsilon gap for refutation
      * @param rvars RealVar array to branch on
      * @param leftFirst select left range first
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
-                                             double epsilon, boolean leftFirst, RealVar... rvars) {
+        double epsilon, boolean leftFirst, RealVar... rvars) {
         return new RealStrategy(rvars, varS, valS, epsilon, leftFirst);
     }
 
     /**
-     * strategy to branch on real variables by choosing sequentially the next variable domain
-     * to split in two, wrt the middle value.
-     * A real decision is like:
+     * strategy to branch on real variables by choosing sequentially the next variable domain to
+     * split in two, wrt the middle value. A real decision is like:
      * <ul>
-     *     <li>left branch: X &le; v</li>
-     *     <li>right branch: X &ge; v + e</li>
+     * <li>left branch: X &le; v</li>
+     * <li>right branch: X &ge; v + e</li>
      * </ul>
      * where 'e' is given by epsilon.
      * </p>
@@ -198,31 +218,31 @@ public class Search {
      *
      * A real decision is like:
      * <ul>
-     *     <li>left branch: X &le; v</li>
-     *     <li>right branch: X &ge; v + epsilon</li>
+     * <li>left branch: X &le; v</li>
+     * <li>right branch: X &ge; v + epsilon</li>
      * </ul>
      * where epsilon is given or equal to the smallest precision among rvars divide by 10.
      * </p>
      *
-     * @param varS  variable selection strategy
-     * @param valS  strategy to select where to split domains
+     * @param varS variable selection strategy
+     * @param valS strategy to select where to split domains
      * @param leftFirst select left range first
      * @param rvars RealVar array to branch on
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
-                                             boolean leftFirst, RealVar... rvars) {
+        boolean leftFirst, RealVar... rvars) {
         return realVarSearch(varS, valS, Double.NaN, leftFirst, rvars);
     }
 
     /**
-     * strategy to branch on real variables by choosing sequentially the next variable domain
-     * to split in two, wrt the middle value.
+     * strategy to branch on real variables by choosing sequentially the next variable domain to
+     * split in two, wrt the middle value.
      *
      * A real decision is like:
      * <ul>
-     *     <li>left branch: X &le; v</li>
-     *     <li>right branch: X &ge; v + {@link Double#MIN_VALUE}</li>
+     * <li>left branch: X &le; v</li>
+     * <li>right branch: X &ge; v + {@link Double#MIN_VALUE}</li>
      * </ul>
      * </p>
      *
@@ -242,57 +262,61 @@ public class Search {
      *
      * @param varSelector defines how to select a variable to branch on.
      * @param valSelector defines how to select a value in the domain of the selected variable
-     * @param decisionOperator defines how to modify the domain of the selected variable with the selected value
-     * @param vars         variables to branch on
+     * @param decisionOperator defines how to modify the domain of the selected variable with the
+     * selected value
+     * @param vars variables to branch on
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-                                           IntValueSelector valSelector,
-                                           DecisionOperator<IntVar> decisionOperator,
-                                           IntVar... vars) {
+        IntValueSelector valSelector,
+        DecisionOperator<IntVar> decisionOperator,
+        IntVar... vars) {
         return new IntStrategy(vars, varSelector, valSelector, decisionOperator);
     }
 
     /**
-     * Builds your own assignment strategy based on <b>binary</b> decisions.
-     * Selects a variable X and a value V to make the decision X = V.
-     * Note that value assignments are the public static decision operators.
-     * Therefore, they are not mentioned in the search heuristic name.
+     * Builds your own assignment strategy based on <b>binary</b> decisions. Selects a variable X
+     * and a value V to make the decision X = V. Note that value assignments are the public static
+     * decision operators. Therefore, they are not mentioned in the search heuristic name.
+     *
      * @param varSelector defines how to select a variable to branch on.
      * @param valSelector defines how to select a value in the domain of the selected variable
-     * @param vars         variables to branch on
+     * @param vars variables to branch on
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-                                           IntValueSelector valSelector,
-                                           IntVar... vars) {
+        IntValueSelector valSelector,
+        IntVar... vars) {
         return intVarSearch(varSelector, valSelector, DecisionOperatorFactory.makeIntEq(), vars);
     }
 
     /**
-     * Builds a default search heuristics of integer variables
-     * Variable selection relies on {@link #domOverWDegSearch(IntVar...)}
-     * Value selection relies on InDomainBest for optimization and InDomainMin for satisfaction
-     * @param vars         variables to branch on
+     * Builds a default search heuristics of integer variables Variable selection relies on {@link
+     * #domOverWDegSearch(IntVar...)} Value selection relies on InDomainBest for optimization and
+     * InDomainMin for satisfaction
+     *
+     * @param vars variables to branch on
      * @return a default search strategy
      */
     public static AbstractStrategy<IntVar> intVarSearch(IntVar... vars) {
         Model model = vars[0].getModel();
         IntValueSelector valueSelector;
-        if(model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
-                || !(model.getObjective() instanceof IntVar)){
-                valueSelector = new IntDomainMin();
-        }else{
+        if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+            || !(model.getObjective() instanceof IntVar)) {
+            valueSelector = new IntDomainMin();
+        } else {
             valueSelector = new IntDomainBest();
             Solution lastSolution = new Solution(model, vars);
             model.getSolver().attach(lastSolution);
             valueSelector = new IntDomainLast(lastSolution, valueSelector, null);
         }
-        return new DomOverWDeg(vars, 0,valueSelector);
+        return new DomOverWDeg(vars, 0, valueSelector);
     }
 
     /**
-     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign it to its lower bound
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
+     * it to its lower bound
+     *
      * @param vars list of variables
      * @return assignment strategy
      */
@@ -304,9 +328,8 @@ public class Search {
      * Create an Activity based search strategy.
      * <p>
      * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
-     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12.
-     * <br/>
-     * Uses public static parameters (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
+     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12. <br/> Uses public static parameters
+     * (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
      *
      * @param vars collection of variables
      * @return an Activity based search strategy.
@@ -316,9 +339,9 @@ public class Search {
     }
 
     /**
-     * Randomly selects a variable and assigns it to a value randomly taken in
-     * - the domain in case the variable has an enumerated domain
-     * - {LB,UB} (one of the two bounds) in case the domain is bounded
+     * Randomly selects a variable and assigns it to a value randomly taken in - the domain in case
+     * the variable has an enumerated domain - {LB,UB} (one of the two bounds) in case the domain is
+     * bounded
      *
      * @param vars list of variables
      * @param seed a seed for random
@@ -338,14 +361,15 @@ public class Search {
     }
 
     /**
-     * Defines a branching strategy over the objective variable
-     * Note that it is only activated after a first solution.
-     * This should be completed with another strategy with a larger scope.
+     * Defines a branching strategy over the objective variable Note that it is only activated after
+     * a first solution. This should be completed with another strategy with a larger scope.
+     *
      * @param objective objective variable
      * @param optPolicy policy to adopt for the optimization process
      * @return a assignment strategy
      */
-    public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective, OptimizationPolicy optPolicy) {
+    public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective,
+        OptimizationPolicy optPolicy) {
         return new ObjectiveStrategy(objective, optPolicy);
     }
 
@@ -355,6 +379,7 @@ public class Search {
 
     /**
      * Assigns the first non-instantiated variable to its lower bound.
+     *
      * @param vars list of variables
      * @return int strategy based on value assignments
      */
@@ -364,6 +389,7 @@ public class Search {
 
     /**
      * Assigns the first non-instantiated variable to its upper bound.
+     *
      * @param vars list of variables
      * @return assignment strategy
      */
@@ -373,6 +399,7 @@ public class Search {
 
     /**
      * Assigns the non-instantiated variable of smallest domain size to its lower bound.
+     *
      * @param vars list of variables
      * @return assignment strategy
      */
@@ -382,6 +409,7 @@ public class Search {
 
     /**
      * Assigns the non-instantiated variable of smallest domain size to its upper bound.
+     *
      * @param vars list of variables
      * @return assignment strategy
      */
@@ -394,8 +422,8 @@ public class Search {
     // ************************************************************************************
 
     /**
-     * Creates a default search strategy for the given model.
-     * This heuristic is complete (handles IntVar, BoolVar, SetVar and RealVar)
+     * Creates a default search strategy for the given model. This heuristic is complete (handles
+     * IntVar, BoolVar, SetVar and RealVar)
      *
      * @param model a model requiring a default search strategy
      */
@@ -458,9 +486,12 @@ public class Search {
         if (objective != null) {
             boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
-                strats.add(realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(), !max, (RealVar) objective));
+                strats.add(
+                    realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(),
+                        !max, (RealVar) objective));
             } else {
-                strats.add(max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
+                strats.add(
+                    max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
             }
         }
 
@@ -478,26 +509,23 @@ public class Search {
      * Create a strategy which lets Ibex terminates the solving process for the CSP,
      * <b>once all integer variables have been instantiated</b>.
      * </p><p>
-     * Note that if the system is not constrained enough,
-     * there can be an infinite number of solutions.
+     * Note that if the system is not constrained enough, there can be an infinite number of
+     * solutions.
      * </p><p>
-     * For example, solving the function
-     * <br/>
-     * x,y in [0.0,1.0] with
-     * <br/>
-     * x + y = 1.0
-     * <br/>
-     * will return x,y in [0.0,1.0] and not a single solution.
+     * For example, solving the function <br/> x,y in [0.0,1.0] with <br/> x + y = 1.0 <br/> will
+     * return x,y in [0.0,1.0] and not a single solution.
      * </p><p>
-     * If one wants a unique solution,
-     * calling {@link #realVarSearch(RealVar...)} should be considered.
+     * If one wants a unique solution, calling {@link #realVarSearch(RealVar...)} should be
+     * considered.
      * </p>
+     *
      * @param model declaring model
      * @return a strategy that lets Ibex terminates the solving process.
      */
     public static AbstractStrategy ibexSolving(Model model) {
         return new AbstractStrategy<Variable>(model.getVars()) {
             IbexDecision dec = new IbexDecision(model);
+
             @Override
             public Decision<Variable> getDecision() {
                 if (dec.inUse()) {
