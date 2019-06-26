@@ -16,7 +16,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.10.0 (12 Dec 2018).
+Current stable version is 4.10.1 (26 Jun 2019).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -26,7 +26,7 @@ Choco-solver comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2018, Ecole des Mines de Nantes).
+Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2019, IMT Atlantique).
 
 Contact: [choco@mines-nantes.fr](mailto:choco@mines-nantes.fr?subject=[choco]contact)
 
@@ -56,7 +56,7 @@ solver.printStatistics();
 ## Documentation, Support and Issues
 
 The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
-[tarball](https://github.com/chocoteam/choco-solver/releases/download/4.10.0/choco-4.10.0.zip) which contains
+[tarball](https://github.com/chocoteam/choco-solver/releases/download//choco-4.10.1.zip) which contains
 the binary, the source code, the user guide (pdf) and the apidocs (zip).
 
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
@@ -125,7 +125,7 @@ In the following, we distinguish two usages of Choco:
 - as a standalone application: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-4.10.0.jar` or `choco-solver-4.10.0-no-dep.jar`.
+The name of the jar file terms the packaging: `choco-solver-4.10.1.jar` or `choco-solver-4.10.1-no-dep.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -138,7 +138,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.10.0</version>
+   <version>4.10.1</version>
 </dependency>
 ```
 
