@@ -169,7 +169,7 @@ public class CumulativeConstraintFactory {
      * @param edgeFinding <i>true</i> if the Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] Gingras2016(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
+    public static CumulativeFilter[] gingras2016(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
                         new org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016.PropCumulative(t, h, capacity, overloadCheck, edgeFinding),
