@@ -151,7 +151,7 @@ public class CumulativeConstraintFactory {
      * @param timetableExtendedEdgeFinding <i>true</i> if the Timetable-Extended-Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] OuelletQuimper2013(Task[] tasks, IntVar[] heights, IntVar capacity, boolean timeTable, boolean edgeFinding, boolean timetableExtendedEdgeFinding) {
+    public static CumulativeFilter[] ouelletQuimper2013(Task[] tasks, IntVar[] heights, IntVar capacity, boolean timeTable, boolean edgeFinding, boolean timetableExtendedEdgeFinding) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
                         new org.chocosolver.solver.constraints.nary.cumulative.literature.ouelletQuimper2013.PropCumulative(t, h, capacity, timeTable, edgeFinding, timetableExtendedEdgeFinding),
