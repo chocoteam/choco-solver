@@ -150,6 +150,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
         model.getSolver().setRestartOnSolutions();
+        if (restartAfterEachFail) {
+            rfMove = new MoveRestart(model.getSolver().getMove(),
+                new MonotonicRestartStrategy(1),
+                new FailCounter(model.getSolver().getModel(), 1),
+                MAX_VALUE);
+            model.getSolver().setMove(rfMove);
+        }
 //        init(vars);
     }
 
@@ -159,13 +166,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     @Override
     public boolean init() {
-        if (restartAfterEachFail) {
-            rfMove = new MoveRestart(model.getSolver().getMove(),
-                    new MonotonicRestartStrategy(1),
-                    new FailCounter(model.getSolver().getModel(), 1),
-                    MAX_VALUE);
-            model.getSolver().setMove(rfMove);
-        }
         Solver solver = model.getSolver();
         if(!solver.getSearchMonitors().contains(this)) {
             model.getSolver().plugMonitor(this);

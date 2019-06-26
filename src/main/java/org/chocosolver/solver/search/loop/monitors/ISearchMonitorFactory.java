@@ -10,8 +10,13 @@
 package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.*;
+import org.chocosolver.solver.search.limits.BacktrackCounter;
+import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.limits.SolutionCounter;
+import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.TimeUtils;
@@ -120,5 +125,13 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      */
     default void limitTime(String duration) {
         limitTime(TimeUtils.convertInMilliseconds(duration));
+    }
+
+    /**
+     * Attach a solution recorder to this solver
+     * @param solution solution object to be filled on solutions.
+     */
+    default void attach(Solution solution){
+        ref().plugMonitor((IMonitorSolution) solution::record);
     }
 }
