@@ -15,6 +15,7 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -93,6 +94,14 @@ public class Search {
         return new GreedyBranching(search);
     }
 
+    /**
+     * Apply sequentialy enumeration strategies.
+     * Strategies are considered in input order.
+     * When strategy <i>i</i> returns null (all variables are instantiated)
+     * the <i>i+1</i> ones is activated.
+     * @param searches ordered set of enumeration strategies
+     * @return
+     */
     public static AbstractStrategy sequencer(AbstractStrategy... searches) {
         return new StrategiesSequencer(searches);
     }
