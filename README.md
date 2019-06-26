@@ -173,14 +173,14 @@ The next step is to add the jar file to your classpath of your application and a
 The required dependencies for compilation are:
 
     de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.13
-    org.jheaps:jheaps:0.9
-    org.jgrapht:jgrapht-core:1.3.0
-    org.choco-solver:cutoffseq:1.0.4
+    org.jheaps:jheaps:0.10
+    org.jgrapht:jgrapht-core:1.3.1
+    org.choco-solver:cutoffseq:1.0.5
     com.github.cp-profiler:cpprof-java:1.3.0
     dk.brics.automaton:automaton:1.11-8
     org.choco-solver:choco-sat:1.0.2
     net.sf.trove4j:trove4j:3.0.3
-    org.knowm.xchart:xchart:3.5.2
+    org.knowm.xchart:xchart:3.5.4
     com.google.protobuf:protobuf-java:2.6.1
 
 
