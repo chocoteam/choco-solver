@@ -31,7 +31,8 @@ public class Timeline {
     private int[] m;
     private int[] t;
     private int[] c;
-    private int tSize, cSize;
+    private int tSize;
+    private int cSize;
     private int e;
     private UnionFindWithGreatest timelineUnion;
     private final int sumP, maxiP, min;
