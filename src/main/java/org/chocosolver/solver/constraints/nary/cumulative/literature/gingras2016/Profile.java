@@ -26,7 +26,11 @@ import java.util.HashMap;
  */
 class Profile {
     class TimePoint {
-        int startTime, ov, capacity, deltaMax, deltaReq;
+        int startTime;
+        int ov;
+        int capacity;
+        int deltaMax;
+        int deltaReq;                     
         TimePoint previous;
         TimePoint next;
 
