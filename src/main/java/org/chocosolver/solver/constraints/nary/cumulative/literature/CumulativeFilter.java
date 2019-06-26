@@ -31,7 +31,13 @@ public abstract class CumulativeFilter {
 
     protected ArrayList<Integer> indexes;
 
-    protected boolean overloadCheck, timeTable, edgeFinding, extendedEdgeFinding, timeTableExtendedEdgeFinding, notFirst, energeticReasoning;
+    protected boolean overloadCheck;
+    protected boolean timeTable;
+    protected boolean edgeFinding;
+    protected boolean extendedEdgeFinding;
+    protected boolean timeTableExtendedEdgeFinding;
+    protected boolean notFirst;
+    protected boolean energeticReasoning;
 
     /**
      * Declares a class that contains filtering algorithms for the disjunctive constraint
