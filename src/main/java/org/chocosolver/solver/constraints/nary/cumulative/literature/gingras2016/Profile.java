@@ -46,7 +46,9 @@ class Profile {
     private Task[] tasks;
     private IntVar[] heights;
     private IntVar capacity;
-    TimePoint first, last, sentinel;
+    TimePoint first;
+    TimePoint last;
+    TimePoint sentinel;
     HashMap<Integer, TimePoint> T;
     ArrayList<TimePoint> list;
 
