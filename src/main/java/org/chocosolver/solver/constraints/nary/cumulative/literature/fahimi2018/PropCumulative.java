@@ -24,7 +24,8 @@ import java.util.Comparator;
  * @since 23/05/2019
  */
 public class PropCumulative extends CumulativeFilter {
-    private Timeline overloadTimeline, notFirstTimeline;
+    private Timeline overloadTimeline;
+    private Timeline notFirstTimeline;
 
     public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
         super(tasks, heights, capacity);
