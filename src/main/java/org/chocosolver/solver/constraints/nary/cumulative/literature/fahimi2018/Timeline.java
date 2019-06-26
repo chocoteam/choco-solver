@@ -28,7 +28,9 @@ public class Timeline {
     private int capacity;
 
     // Useful variables for Timeline data structure (and so, useful for Overload check and Detectable Precedences algorithms)
-    private int[] m, t, c;
+    private int[] m;
+    private int[] t;
+    private int[] c;
     private int tSize, cSize;
     private int e;
     private UnionFindWithGreatest timelineUnion;
