@@ -42,7 +42,8 @@ public class PropCumulative extends CumulativeFilter {
     }
 
     private OmegaLambdaPhiGammaTree tree;
-    private TIntArrayList eligibleHeights, r;
+    private TIntArrayList eligibleHeights;
+    private TIntArrayList r;
     private int[] c;
     private int cSize;
     private ArrayList<DecomposedTask> T, ;
