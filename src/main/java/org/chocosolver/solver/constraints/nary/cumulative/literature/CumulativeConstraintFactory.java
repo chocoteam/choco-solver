@@ -98,7 +98,7 @@ public class CumulativeConstraintFactory {
      * @param edgeFinding <i>true</i> if the Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] Fahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
+    public static CumulativeFilter[] fahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
         return checker(tasks,
                 (t) -> new CumulativeFilter[]{
                         new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropDisjunctive(t, overloadCheck, timeTable, edgeFinding),
