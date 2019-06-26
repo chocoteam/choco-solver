@@ -25,7 +25,7 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropDisjunctive extends CumulativeFilter {
+public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
     private Integer[] Ip;
 
     // Useful variables for TimeTabling algorithm
@@ -39,7 +39,7 @@ public class PropDisjunctive extends CumulativeFilter {
     private TIntArrayList postponedTasks;
     private int[] lstIndexes;
 
-    public PropDisjunctive(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
+    public PropDisjunctiveFahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
         super(tasks);
         this.overloadCheck = overloadCheck;
         this.timeTable = timeTable;
@@ -110,6 +110,7 @@ public class PropDisjunctive extends CumulativeFilter {
         }
 
         UnionFindWithGreatest timeTablingUnion = new UnionFindWithGreatest(m);
+        Arrays.sort(Ip, Comparator.comparingInt(i -> tasks[i].getDuration().getLB()));
         for(int i : Ip) {
             if(tasks[i].getEnd().getLB() <= tasks[i].getStart().getUB()) {
                 int c = r[i];

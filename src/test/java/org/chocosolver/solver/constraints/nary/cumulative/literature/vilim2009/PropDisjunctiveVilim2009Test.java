@@ -17,10 +17,10 @@ import org.chocosolver.solver.variables.Task;
  @author Arthur Godet <arth.godet@gmail.com>
  @since 23/05/2019
  */
-public class PropDisjunctiveTest extends AbstractDisjunctiveTest {
+public class PropDisjunctiveVilim2009Test extends AbstractDisjunctiveTest {
 
     @Override
     public CumulativeFilter propagator(Task[] tasks) {
-        return new PropDisjunctive(tasks, true, true, true);
+        return new PropDisjunctiveVilim2009(tasks, true, true, true);
     }
 }

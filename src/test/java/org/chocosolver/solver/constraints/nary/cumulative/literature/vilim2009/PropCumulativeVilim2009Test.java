@@ -18,10 +18,10 @@ import org.chocosolver.solver.variables.Task;
  @author Arthur Godet <arth.godet@gmail.com>
  @since 23/05/2019
  */
-public class PropCumulativeTest extends AbstractCumulativeTest {
+public class PropCumulativeVilim2009Test extends AbstractCumulativeTest {
 
     @Override
     public CumulativeFilter propagator(Task[] tasks, IntVar[] heights, IntVar capacity) {
-        return new PropCumulative(tasks, heights, capacity, true);
+        return new PropCumulativeVilim2009(tasks, heights, capacity, true);
     }
 }

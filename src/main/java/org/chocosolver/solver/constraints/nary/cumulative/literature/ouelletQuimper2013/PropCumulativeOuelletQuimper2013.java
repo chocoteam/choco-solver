@@ -24,7 +24,7 @@ import java.util.*;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeOuelletQuimper2013 extends CumulativeFilter {
     class DecomposedTask {
         final int idxTask, est, lct, h, p;
         DecomposedTask(int idxTask, int est, int lct, int h, int p) {
@@ -46,13 +46,13 @@ public class PropCumulative extends CumulativeFilter {
     private TIntArrayList r;
     private int[] c;
     private int cSize;
-    private ArrayList<DecomposedTask> T, ;
+    private ArrayList<DecomposedTask> T;
     private ArrayList<DecomposedTask> F;
     private ArrayList<DecomposedTask> extEdgeFind;
     private BitSet S; // TODO : check if complexities are the same as for an AVL Tree
     private int min;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean timeTable, boolean edgeFinding, boolean timetableExtendedEdgeFinding) {
+    public PropCumulativeOuelletQuimper2013(Task[] tasks, IntVar[] heights, IntVar capacity, boolean timeTable, boolean edgeFinding, boolean timetableExtendedEdgeFinding) {
         super(tasks, heights, capacity);
         this.timeTable = timeTable;
         this.edgeFinding = edgeFinding;

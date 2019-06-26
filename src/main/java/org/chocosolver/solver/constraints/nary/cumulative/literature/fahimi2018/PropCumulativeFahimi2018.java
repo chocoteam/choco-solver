@@ -23,11 +23,11 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeFahimi2018 extends CumulativeFilter {
     private Timeline overloadTimeline;
     private Timeline notFirstTimeline;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
+    public PropCumulativeFahimi2018(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
         super(tasks, heights, capacity);
         this.overloadCheck = overloadCheck;
         this.notFirst = notFirst;

@@ -25,7 +25,7 @@ import java.util.LinkedList;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeGingras2016 extends CumulativeFilter {
     private Profile profile;
     private TIntArrayList theta;
 
@@ -37,7 +37,7 @@ public class PropCumulative extends CumulativeFilter {
     private TIntArrayList lctj;
     LinkedList<Prec> prec;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
+    public PropCumulativeGingras2016(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
         super(tasks, heights, capacity);
         this.overloadCheck = overloadCheck;
         this.edgeFinding = edgeFinding;

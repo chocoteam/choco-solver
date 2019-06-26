@@ -24,10 +24,10 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeKameugne2014 extends CumulativeFilter {
     private ThetaLambdaTree tree;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean notFirst) {
+    public PropCumulativeKameugne2014(Task[] tasks, IntVar[] heights, IntVar capacity, boolean notFirst) {
         super(tasks, heights, capacity);
         this.notFirst = notFirst;
 

@@ -9,7 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018;
 
-import java.util.HashMap;
+import gnu.trove.map.hash.TObjectIntHashMap;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 public class UnionFind<T> {
     protected final Map<T, T> parentMap = new LinkedHashMap();
-    protected final Map<T, Integer> rankMap = new HashMap();
+    protected final TObjectIntHashMap rankMap = new TObjectIntHashMap();
     protected int count;
 
     protected UnionFind() {
@@ -53,7 +54,7 @@ public class UnionFind<T> {
         return this.parentMap;
     }
 
-    protected Map<T, Integer> getRankMap() {
+    protected TObjectIntHashMap getRankMap() {
         return this.rankMap;
     }
 
@@ -87,8 +88,8 @@ public class UnionFind<T> {
             T parent1 = this.find(element1);
             T parent2 = this.find(element2);
             if (!parent1.equals(parent2)) {
-                int rank1 = (Integer)this.rankMap.get(parent1);
-                int rank2 = (Integer)this.rankMap.get(parent2);
+                int rank1 = this.rankMap.get(parent1);
+                int rank2 = this.rankMap.get(parent2);
                 if (rank1 > rank2) {
                     this.parentMap.put(parent2, parent1);
                 } else if (rank1 < rank2) {
@@ -136,7 +137,7 @@ public class UnionFind<T> {
 
         T t;
         T representative;
-        for(Iterator<T> var2 = this.parentMap.keySet().iterator(); var2.hasNext(); ((Set)setRep.get(representative)).add(t)) {
+        for(Iterator<T> var2 = this.parentMap.keySet().iterator(); var2.hasNext(); setRep.get(representative).add(t)) {
             t = var2.next();
             representative = this.find(t);
             if (!setRep.containsKey(representative)) {
@@ -144,8 +145,8 @@ public class UnionFind<T> {
             }
         }
 
-        return (String)setRep.keySet().stream().map((key) -> {
-            return "{" + key + ":" + (String)((Set)setRep.get(key)).stream().map(Objects::toString).collect(Collectors.joining(",")) + "}";
+        return setRep.keySet().stream().map((key) -> {
+            return "{" + key + ":" + ((Set)setRep.get(key)).stream().map(Objects::toString).collect(Collectors.joining(",")) + "}";
         }).collect(Collectors.joining(", ", "{", "}"));
     }
 }

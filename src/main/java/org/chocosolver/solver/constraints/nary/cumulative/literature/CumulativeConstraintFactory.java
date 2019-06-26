@@ -9,6 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature;
 
+import org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropCumulativeFahimi2018;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropDisjunctiveFahimi2018;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016.PropCumulativeGingras2016;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.kameugne2014.PropCumulativeKameugne2014;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.ouelletQuimper2013.PropCumulativeOuelletQuimper2013;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropCumulativeVilim2009;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropDisjunctiveVilim2009;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
@@ -84,8 +91,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] fahimi2018(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean notFirst) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropCumulative(t, h, capacity, overloadCheck, notFirst),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropCumulative(oppTasks(t), h, capacity, overloadCheck, notFirst)});
+                        new PropCumulativeFahimi2018(t, h, capacity, overloadCheck, notFirst),
+                        new PropCumulativeFahimi2018(oppTasks(t), h, capacity, overloadCheck, notFirst)});
     }
 
     /**
@@ -101,8 +108,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] fahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
         return checker(tasks,
                 (t) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropDisjunctive(t, overloadCheck, timeTable, edgeFinding),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018.PropDisjunctive(oppTasks(t), overloadCheck, timeTable, edgeFinding)});
+                        new PropDisjunctiveFahimi2018(t, overloadCheck, timeTable, edgeFinding),
+                        new PropDisjunctiveFahimi2018(oppTasks(t), overloadCheck, timeTable, edgeFinding)});
     }
 
     /**
@@ -118,8 +125,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] vilim2009(Task[] tasks, IntVar[] heights, IntVar capacity, boolean edgeFinding) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropCumulative(t, h, capacity, edgeFinding),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropCumulative(oppTasks(t), h, capacity, edgeFinding)});
+                        new PropCumulativeVilim2009(t, h, capacity, edgeFinding),
+                        new PropCumulativeVilim2009(oppTasks(t), h, capacity, edgeFinding)});
     }
 
     /**
@@ -135,8 +142,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] vilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
         return checker(tasks,
                 (t) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropDisjunctive(t, overloadCheck, notFirst, edgeFinding),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009.PropDisjunctive(oppTasks(t), overloadCheck, notFirst, edgeFinding)});
+                        new PropDisjunctiveVilim2009(t, overloadCheck, notFirst, edgeFinding),
+                        new PropDisjunctiveVilim2009(oppTasks(t), overloadCheck, notFirst, edgeFinding)});
     }
 
     /**
@@ -154,8 +161,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] ouelletQuimper2013(Task[] tasks, IntVar[] heights, IntVar capacity, boolean timeTable, boolean edgeFinding, boolean timetableExtendedEdgeFinding) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.ouelletQuimper2013.PropCumulative(t, h, capacity, timeTable, edgeFinding, timetableExtendedEdgeFinding),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.ouelletQuimper2013.PropCumulative(oppTasks(t), h, capacity, timeTable, edgeFinding, timetableExtendedEdgeFinding)});
+                        new PropCumulativeOuelletQuimper2013(t, h, capacity, timeTable, edgeFinding, timetableExtendedEdgeFinding),
+                        new PropCumulativeOuelletQuimper2013(oppTasks(t), h, capacity, timeTable, edgeFinding, timetableExtendedEdgeFinding)});
     }
 
     /**
@@ -172,8 +179,8 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] gingras2016(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016.PropCumulative(t, h, capacity, overloadCheck, edgeFinding),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016.PropCumulative(oppTasks(t), h, capacity, overloadCheck, edgeFinding)});
+                        new PropCumulativeGingras2016(t, h, capacity, overloadCheck, edgeFinding),
+                        new PropCumulativeGingras2016(oppTasks(t), h, capacity, overloadCheck, edgeFinding)});
     }
 
     /**
@@ -189,7 +196,7 @@ public class CumulativeConstraintFactory {
     public static CumulativeFilter[] kameugne2014(Task[] tasks, IntVar[] heights, IntVar capacity, boolean notFirst) {
         return checker(tasks, heights,
                 (t,h) -> new CumulativeFilter[]{
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.kameugne2014.PropCumulative(t, h, capacity, notFirst),
-                        new org.chocosolver.solver.constraints.nary.cumulative.literature.kameugne2014.PropCumulative(oppTasks(t), h, capacity, notFirst)});
+                        new PropCumulativeKameugne2014(t, h, capacity, notFirst),
+                        new PropCumulativeKameugne2014(oppTasks(t), h, capacity, notFirst)});
     }
 }
