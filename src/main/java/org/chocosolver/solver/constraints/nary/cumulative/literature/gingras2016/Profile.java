@@ -27,7 +27,8 @@ import java.util.HashMap;
 class Profile {
     class TimePoint {
         int startTime, ov, capacity, deltaMax, deltaReq;
-        TimePoint previous, next;
+        TimePoint previous;
+        TimePoint next;
 
         TimePoint(int startTime, int capacity) {
             this.startTime = startTime;
