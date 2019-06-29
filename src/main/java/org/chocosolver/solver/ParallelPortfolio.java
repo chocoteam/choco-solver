@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.exception.SolverException;
@@ -32,6 +33,7 @@ import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
@@ -203,7 +205,7 @@ public class ParallelPortfolio {
                     }
                 }
             })).get();
-        } catch (InterruptedException | ExecutionException e) {
+        } catch (InterruptedException | ExecutionException | SolverException e) {
             e.printStackTrace();
         }
         forkJoinPool.shutdownNow();
@@ -375,17 +377,23 @@ public class ParallelPortfolio {
         switch (workerID) {
             case 0:
                 // DWD  + fast restart + LC (+ B2V)
-                solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), 0,
-                        policy == ResolutionPolicy.SATISFACTION ? new IntDomainMin(): new IntDomainBest()));
+                if(policy == ResolutionPolicy.SATISFACTION){
+                    solver.setSearch(new DomOverWDeg(ivars,0, new IntDomainMin()));
+                }else{
+                    Solution solution = new Solution(worker, ivars);
+                    solver.attach(solution);
+                    solver.setSearch(new DomOverWDeg(ivars,0,
+                        new IntDomainLast(solution, new IntDomainBest(), null)));
+                }
                 solver.setNoGoodRecordingFromRestarts();
-                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 1:
                 // ABS  + fast restart + LC
                 solver.setSearch(Search.activityBasedSearch(worker.retrieveIntVars(true)));
                 solver.setNoGoodRecordingFromRestarts();
-                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 2:
@@ -409,30 +417,46 @@ public class ParallelPortfolio {
                 // DWD  + fast restart + COS
                 solver.setSearch(Search.conflictOrderingSearch(Search.domOverWDegSearch(worker.retrieveIntVars(true))));
                 solver.setNoGoodRecordingFromRestarts();
-                solver.setLubyRestart(500, new FailCounter(worker, 0), 500);
-                solver.setSearch(lastConflict(solver.getSearch()));
-                break;
-            case 5:
-                // input order + LC
-                solver.setSearch(Search.minDomUBSearch(worker.retrieveIntVars(true)));
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 6:
-                // input order + LDS
-                solver.setSearch(Search.inputOrderLBSearch(worker.retrieveIntVars(true)));
-                solver.setLDS(Integer.MAX_VALUE);
+                // DWD  + fast restart + LC (+ B2V)
+                if(policy == ResolutionPolicy.SATISFACTION){
+                    solver.setSearch(new DomOverWDeg(ivars,0, new IntDomainMin()));
+                }else{
+                    Solution solution = new Solution(worker, ivars);
+                    solver.attach(solution);
+                    IntVar[] finalIvars = ivars;
+                    final int[] t = new int[2];
+                    solver.setSearch(new DomOverWDeg(ivars,0,
+                        new IntDomainLast(solution, new IntDomainBest(), (x, v) -> {
+                            int c = 0;
+                            for (int idx = 0; idx < finalIvars.length; idx++) {
+                                if (finalIvars[idx].isInstantiatedTo(solution.getIntVal(finalIvars[idx]))) {
+                                    c++;
+                                }
+                            }
+                            double d =  (c * 1. / finalIvars.length);
+                            double r = Math.exp(-t[0]++ / 25);
+                            if (solver.getRestartCount() > t[1]) {
+                                t[1] += 150;
+                                t[0] = 0;
+                            }
+                            return d > r;
+                        })));
+                }
+                solver.setNoGoodRecordingFromRestarts();
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
+                solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 7:
-                if(policy == ResolutionPolicy.SATISFACTION) {
-                    // DWD  + very fast restart
-                    solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), 0, new IntDomainMin()));
-                    solver.setNoGoodRecordingFromRestarts();
-                    solver.setLubyRestart(100, new FailCounter(worker, 0), 1000);
-                }else{
-                    // occurrence + LC
-                    solver.setSearch(Search.intVarSearch(new Occurrence<>(), new IntDomainMin(), worker.retrieveIntVars(true)));
-                    solver.setSearch(lastConflict(solver.getSearch()));
-                }
+                // DWD + LC + CDCL
+                solver.setSearch(new DomOverWDeg(ivars, 0, new IntDomainMin()));
+                solver.setSearch(lastConflict(solver.getSearch()));
+                solver.setLearningSignedClauses();
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
+                break;
             default:
                 // random search (various seeds) + LNS if optim
                 solver.setSearch(lastConflict(randomSearch(ivars,workerID)));

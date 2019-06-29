@@ -124,6 +124,17 @@ public class ValueSortedMap<E> {
     }
 
     /**
+     * return the lowest value stored in this
+     * @return the lowest value stored in this
+     */
+    public int getLowerValue(int value){
+        Integer low = rmap.lowerKey(value);
+        if(low == null){
+            low = -1;
+        }
+        return low;
+    }
+    /**
      * return and remove the largest value stored in this
      * @return  the largest value stored in this
      */

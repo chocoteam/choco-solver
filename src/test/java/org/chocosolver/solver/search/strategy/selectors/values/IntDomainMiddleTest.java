@@ -28,7 +28,7 @@ public class IntDomainMiddleTest {
     public void testSelectValue1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", new int[]{0, 3, 5, 6, 7, 8, 11});
-        int[] order = {5, 6, 3, 7, 8, 0, 11};
+        int[] order = {5, 6, 7, 3, 8, 0, 11};
         IntDomainMiddle sel = new IntDomainMiddle(true);
         int i = 0;
         while (x.getDomainSize() > 0) {
