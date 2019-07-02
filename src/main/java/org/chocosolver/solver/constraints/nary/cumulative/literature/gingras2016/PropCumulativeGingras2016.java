@@ -15,6 +15,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -25,7 +26,7 @@ import java.util.LinkedList;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeGingras2016 extends CumulativeFilter {
     private Profile profile;
     private TIntArrayList theta;
 
@@ -37,7 +38,7 @@ public class PropCumulative extends CumulativeFilter {
     private TIntArrayList lctj;
     LinkedList<Prec> prec;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
+    public PropCumulativeGingras2016(Task[] tasks, IntVar[] heights, IntVar capacity, boolean overloadCheck, boolean edgeFinding) {
         super(tasks, heights, capacity);
         this.overloadCheck = overloadCheck;
         this.edgeFinding = edgeFinding;
@@ -57,7 +58,7 @@ public class PropCumulative extends CumulativeFilter {
     public void overloadCheck() throws ContradictionException {
         profile.initialize();
         theta.clear();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             theta.add(i);
             int[] ectOv = profile.scheduleTasks(theta, capacity.getUB()); // [ect, ov]

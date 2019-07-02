@@ -13,6 +13,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -28,12 +29,17 @@ public class Timeline {
     private int capacity;
 
     // Useful variables for Timeline data structure (and so, useful for Overload check and Detectable Precedences algorithms)
-    private int[] m, t, c;
-    private int tSize, cSize;
+    private int[] m;
+    private int[] t;
+    private int[] c;
+    private int tSize;
+    private int cSize;
     private int e;
     private UnionFindWithGreatest timelineUnion;
-    private final int sumP, maxiP, min;
-    private ArrayList<Integer> indexes;
+    private final int sumP;
+    private final int maxiP;
+    private final int min;
+    private Integer[] indexes;
 
     public Timeline(Task[] tasks, IntVar[] heights, IntVar capacity) {
         this.tasks = tasks;
@@ -42,12 +48,12 @@ public class Timeline {
         t = new int[tasks.length+1];
         c = new int[tasks.length];
         m = new int[tasks.length];
-        this.indexes = new ArrayList<>();
+        this.indexes = new Integer[tasks.length];
         int tmp = tasks[0].getStart().getLB();
         int tmpSum = 0;
         int tmpMax = tasks[0].getEnd().getUB()*this.capacity;
         for(int i = 0; i<tasks.length; i++) {
-            indexes.add(i);
+            indexes[i] = i;
             tmp = Math.min(tmp, this.capacity*tasks[i].getStart().getLB());
             tmpSum += tasks[i].getDuration().getLB()*heights[i].getLB();
             tmpMax = Math.max(tmpMax, tasks[i].getEnd().getUB()*this.capacity);
@@ -61,7 +67,7 @@ public class Timeline {
     public void initializeTimeline() {
         tSize = 0;
         cSize = 0;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getStart().getLB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getLB()));
         for(int i : indexes) {
             if(tSize==0 || t[tSize-1]!=capacity*tasks[i].getStart().getLB()) {
                 t[tSize++] = capacity*tasks[i].getStart().getLB();

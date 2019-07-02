@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
  @author Arthur Godet <arth.godet@gmail.com>
  @since 23/05/2019
  */
-public class PropDisjunctiveTest extends AbstractDisjunctiveTest {
+public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
 
     @Test
     public void DetectablePrecedencesTest() {
@@ -37,7 +37,7 @@ public class PropDisjunctiveTest extends AbstractDisjunctiveTest {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
-        PropDisjunctive prop = new PropDisjunctive(tasks, false, false, true);
+        PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, false, false, true);
         PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
 
         try {
@@ -60,7 +60,7 @@ public class PropDisjunctiveTest extends AbstractDisjunctiveTest {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
-        PropDisjunctive prop = new PropDisjunctive(tasks, false, true, false);
+        PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, false, true, false);
         PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
 
         try {
@@ -83,13 +83,13 @@ public class PropDisjunctiveTest extends AbstractDisjunctiveTest {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
-        PropDisjunctive prop = new PropDisjunctive(tasks, true, false, false);
+        PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, true, false, false);
         PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
 
         prop.overloadCheck();
     }
 
     public CumulativeFilter propagator(Task[] tasks) {
-        return new PropDisjunctive(tasks, true, true, true);
+        return new PropDisjunctiveFahimi2018(tasks, true, true, true);
     }
 }

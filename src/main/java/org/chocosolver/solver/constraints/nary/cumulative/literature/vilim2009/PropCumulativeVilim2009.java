@@ -9,14 +9,15 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 
 /**
  * Cumulative constraint filtering algorithms described in the following paper :
@@ -25,16 +26,16 @@ import java.util.HashMap;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeVilim2009 extends CumulativeFilter {
     private ThetaLambdaTree thetaLambdaTree;
 
     private int[] prec;
     private int[][] updateJC;
 
     private TIntArrayList Cs;
-    private HashMap<Integer, Integer> mapHeightsToCsIdx;
+    private TIntIntHashMap mapHeightsToCsIdx;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean edgeFinding) {
+    public PropCumulativeVilim2009(Task[] tasks, IntVar[] heights, IntVar capacity, boolean edgeFinding) {
         super(tasks, heights, capacity);
         this.edgeFinding = edgeFinding;
 
@@ -75,7 +76,7 @@ public class PropCumulative extends CumulativeFilter {
                 Cs.add(c);
             }
         }
-        mapHeightsToCsIdx = new HashMap<>(heights.length);
+        mapHeightsToCsIdx = new TIntIntHashMap(heights.length);
         for(int i = 0; i<heights.length; i++) {
             for(int j = 0; j< Cs.size(); j++) {
                 if(heights[i].getLB() == Cs.getQuick(j)) {
@@ -94,7 +95,7 @@ public class PropCumulative extends CumulativeFilter {
             prec[i] = tasks[i].getEnd().getLB();
         }
         thetaLambdaTree.initializeTree(true);
-        indexes.sort(Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
         for(int j : indexes) {
             if(thetaLambdaTree.root.env > capacity.getUB()*tasks[j].getEnd().getUB()) {
                 aCause.fails();
@@ -109,7 +110,7 @@ public class PropCumulative extends CumulativeFilter {
     }
 
     private void computeAllUpdateJC() {
-        indexes.sort(Comparator.comparingInt(j -> tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getEnd().getUB()));
         for(int k = 0; k<Cs.size(); k++) {
             int c = Cs.getQuick(k);
             thetaLambdaTree.setC(c);

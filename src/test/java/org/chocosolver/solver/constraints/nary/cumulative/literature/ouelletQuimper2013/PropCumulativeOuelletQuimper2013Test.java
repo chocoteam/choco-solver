@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016;
+package org.chocosolver.solver.constraints.nary.cumulative.literature.ouelletQuimper2013;
 
 import org.chocosolver.solver.constraints.nary.cumulative.literature.AbstractCumulativeTest;
 import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
@@ -23,23 +23,23 @@ import org.testng.annotations.Test;
  @author Arthur Godet <arth.godet@gmail.com>
  @since 23/05/2019
  */
-public class PropCumulativeTest extends AbstractCumulativeTest {
+public class PropCumulativeOuelletQuimper2013Test extends AbstractCumulativeTest {
 
     @Override
     public CumulativeFilter propagator(Task[] tasks, IntVar[] heights, IntVar capacity) {
-        return new PropCumulative(tasks, heights, capacity, true, false);
+        return new PropCumulativeOuelletQuimper2013(tasks, heights, capacity, true, true, false);
     }
 
     @Test
-    public void testOverloadCheck() {
+    public void testFilterTimeTabling() throws ContradictionException {
         int[][] values = new int[][]{
-                new int[]{0, 2, 2, 2, 4},
-                new int[]{1, 3, 1, 2, 4},
-                new int[]{1, 3, 1, 2, 4},
-                new int[]{1, 3, 1, 2, 4}
+                new int[]{0, 6, 6, 6, 12}, // A
+                new int[]{1, 4, 3, 4, 7}, // B
+                new int[]{2, 4, 2, 4, 6}, // C
+                new int[]{3, 6, 4, 7, 10} // D
         };
-        int[] heights = new int[]{1, 2, 2, 2};
-        int capacity = 2;
+        int[] heights = new int[]{2, 2, 1, 1};
+        int capacity = 3;
 
         Model model = new Model();
         Task[] tasks = buildTasks(values, model);
@@ -48,15 +48,15 @@ public class PropCumulativeTest extends AbstractCumulativeTest {
             heightsVar[i] = model.intVar(heights[i]);
         }
         IntVar cap = model.intVar(capacity);
-        PropCumulative prop = (PropCumulative) propagator(tasks, heightsVar, cap);
-        PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, heightsVar, cap, prop);
+        PropCumulativeOuelletQuimper2013 prop = new PropCumulativeOuelletQuimper2013(tasks, heightsVar, cap, true, true, true);
+        PropCumulativeOuelletQuimper2013 propOpp = new PropCumulativeOuelletQuimper2013(buildOpposite(tasks), heightsVar, cap, true, true, true);
 
-        try {
-            prop.overloadCheck();
-            Assert.fail();
-        } catch(ContradictionException ex) {
+        PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, heightsVar, cap, prop, propOpp);
 
-        }
+        prop.timeTableExtendedEdgeFinding();
+        Assert.assertEquals(tasks[0].getStart().getLB(), 3);
+
+        propOpp.timeTable();
+        Assert.assertEquals(tasks[1].getEnd().getUB(), 6);
     }
-
 }

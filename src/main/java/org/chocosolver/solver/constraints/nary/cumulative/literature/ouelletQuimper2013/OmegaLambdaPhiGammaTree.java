@@ -250,7 +250,7 @@ public class OmegaLambdaPhiGammaTree {
         }
     }
 
-    private PropCumulative.DecomposedTask[] decomposedTasks;
+    private PropCumulativeOuelletQuimper2013.DecomposedTask[] decomposedTasks;
     private int capacity;
     private int h, hor;
 
@@ -260,7 +260,7 @@ public class OmegaLambdaPhiGammaTree {
     private LinkedList<Node> current, next;
     TIntArrayList lambda, phi, delta, changes;
 
-    public OmegaLambdaPhiGammaTree(PropCumulative.DecomposedTask[] decomposedTasks, int capacity) {
+    public OmegaLambdaPhiGammaTree(PropCumulativeOuelletQuimper2013.DecomposedTask[] decomposedTasks, int capacity) {
         this.decomposedTasks = decomposedTasks;
         this.capacity = capacity;
 

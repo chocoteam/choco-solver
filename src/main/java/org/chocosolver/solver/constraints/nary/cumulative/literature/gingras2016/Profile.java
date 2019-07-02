@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016;
 
 import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
@@ -26,8 +27,13 @@ import java.util.HashMap;
  */
 class Profile {
     class TimePoint {
-        int startTime, ov, capacity, deltaMax, deltaReq;
-        TimePoint previous, next;
+        int startTime;
+        int ov;
+        int capacity;
+        int deltaMax;
+        int deltaReq;                     
+        TimePoint previous;
+        TimePoint next;
 
         TimePoint(int startTime, int capacity) {
             this.startTime = startTime;
@@ -41,8 +47,10 @@ class Profile {
     private Task[] tasks;
     private IntVar[] heights;
     private IntVar capacity;
-    TimePoint first, last, sentinel;
-    HashMap<Integer, TimePoint> T;
+    TimePoint first;
+    TimePoint last;
+    TimePoint sentinel;
+    TIntObjectHashMap T;
     ArrayList<TimePoint> list;
 
     // used for scheduleTasks() method
@@ -53,7 +61,7 @@ class Profile {
         this.heights = heights;
         this.capacity = capacity;
 
-        this.T = new HashMap<>(4*tasks.length+1);
+        this.T = new TIntObjectHashMap(4*tasks.length+1);
         list = new ArrayList<>(4*tasks.length+1);
 
         int tmp = 0;
@@ -116,7 +124,8 @@ class Profile {
             throw new UnsupportedOperationException("theta should not be null or empty to scheduleTasks");
         }
 
-        for(TimePoint tp : T.values()) {
+        for(Object o : T.values()) {
+            TimePoint tp = (TimePoint) o;
             tp.deltaMax = 0;
             tp.deltaReq = 0;
             tp.capacity = capacity.getUB();
@@ -128,12 +137,12 @@ class Profile {
             Task task = tasks[theta.getQuick(i)];
             int h = heights[theta.getQuick(i)].getLB();
 
-            TimePoint t = T.get(task.getStart().getLB());
+            TimePoint t = (TimePoint) T.get(task.getStart().getLB());
             t.deltaMax += h;
             t.deltaReq += h;
 
-            T.get(task.getEnd().getUB()).deltaMax -= h;
-            T.get(task.getEnd().getLB()).deltaReq -= h;
+            ((TimePoint) T.get(task.getEnd().getUB())).deltaMax -= h;
+            ((TimePoint) T.get(task.getEnd().getLB())).deltaReq -= h;
 
             lctTheta = Math.max(lctTheta, task.getEnd().getUB());
         }
@@ -176,19 +185,20 @@ class Profile {
     }
 
     public TIntArrayList detectPrecedences(TIntArrayList omega, TIntArrayList theta, TIntArrayList lambdaH, int h, int lct) {
-        for(TimePoint tp : T.values()) {
+        for(Object o : T.values()) {
+            TimePoint tp = (TimePoint) o;
             tp.deltaMax = 0;
         }
         for(int i = 0; i<theta.size(); i++) {
             int taskIdx = theta.getQuick(i);
-            T.get(tasks[taskIdx].getStart().getLB()).deltaMax -= heights[taskIdx].getLB();
-            T.get(tasks[taskIdx].getEnd().getUB()).deltaMax += heights[taskIdx].getLB();
+            ((TimePoint) T.get(tasks[taskIdx].getStart().getLB())).deltaMax -= heights[taskIdx].getLB();
+            ((TimePoint) T.get(tasks[taskIdx].getEnd().getUB())).deltaMax += heights[taskIdx].getLB();
         }
         int minest = Integer.MAX_VALUE;
         for(int i = 0; i<lambdaH.size(); i++) {
             minest = Math.min(minest, tasks[lambdaH.getQuick(i)].getStart().getLB());
         }
-        TimePoint t = T.get(lct).previous;
+        TimePoint t = ((TimePoint) T.get(lct)).previous;
         omega.clear();
         int e = 0, ov = 0, hMax = h;
         while(t!=null && t.startTime >= minest) {
@@ -212,19 +222,20 @@ class Profile {
     }
 
     public int computeBound(int i, TIntArrayList theta, int ovMax) {
-        for(TimePoint tp : T.values()) {
+        for(Object o : T.values()) {
+            TimePoint tp = (TimePoint) o;
             tp.deltaMax = 0;
             tp.deltaReq = 0;
         }
         for(int j = 0; j<theta.size(); j++) {
             int taskIdx = theta.getQuick(j);
             Task task = tasks[taskIdx];
-            TimePoint tp = T.get(task.getStart().getLB());
+            TimePoint tp = (TimePoint) T.get(task.getStart().getLB());
             tp.deltaMax += heights[taskIdx].getLB();
             tp.deltaReq += heights[taskIdx].getLB();
 
-            T.get(task.getEnd().getUB()).deltaMax -= heights[taskIdx].getLB();
-            T.get(task.getEnd().getLB()).deltaReq -= heights[taskIdx].getLB();
+            ((TimePoint) T.get(task.getEnd().getUB())).deltaMax -= heights[taskIdx].getLB();
+            ((TimePoint) T.get(task.getEnd().getLB())).deltaReq -= heights[taskIdx].getLB();
         }
         TimePoint t = first;
         while(t.next != null && t.ov <= 0) {

@@ -25,18 +25,21 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropDisjunctive extends CumulativeFilter {
+public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
     private Integer[] Ip;
 
     // Useful variables for TimeTabling algorithm
-    private int[] l, u, r;
+    private int[] l;
+    private int[] u;
+    private int[] r;        
 
-    private Timeline overloadTimeline, detectPrecTimeline;
+    private Timeline overloadTimeline;
+    private Timeline detectPrecTimeline;
 
     private TIntArrayList postponedTasks;
     private int[] lstIndexes;
 
-    public PropDisjunctive(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
+    public PropDisjunctiveFahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
         super(tasks);
         this.overloadCheck = overloadCheck;
         this.timeTable = timeTable;
@@ -64,7 +67,7 @@ public class PropDisjunctive extends CumulativeFilter {
     @Override
     public void overloadCheck() throws ContradictionException {
         overloadTimeline.initializeTimeline();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             overloadTimeline.scheduleTask(i);
             if(overloadTimeline.earliestCompletionTime()>tasks[i].getEnd().getUB()) {
@@ -77,7 +80,7 @@ public class PropDisjunctive extends CumulativeFilter {
     public boolean timeTable() throws ContradictionException {
         boolean hasFiltered = false;
         int m = 0;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
         for(int i : indexes) {
             if(tasks[i].getStart().getUB() < tasks[i].getEnd().getLB()) {
                 if(m > 0 ) {
@@ -98,7 +101,7 @@ public class PropDisjunctive extends CumulativeFilter {
         }
 
         int k = 0;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getStart().getLB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getLB()));
         for(int i : indexes) {
             while(k<m && tasks[i].getStart().getLB()>=u[k]) {
                 k++;
@@ -107,6 +110,7 @@ public class PropDisjunctive extends CumulativeFilter {
         }
 
         UnionFindWithGreatest timeTablingUnion = new UnionFindWithGreatest(m);
+        Arrays.sort(Ip, Comparator.comparingInt(i -> tasks[i].getDuration().getLB()));
         for(int i : Ip) {
             if(tasks[i].getEnd().getLB() <= tasks[i].getStart().getUB()) {
                 int c = r[i];
@@ -133,15 +137,15 @@ public class PropDisjunctive extends CumulativeFilter {
         boolean hasFiltered = false;
         detectPrecTimeline.initializeTimeline();
         int j = 0;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
         for(int a = 0; a< lstIndexes.length; a++) {
-            lstIndexes[a] = indexes.get(a);
+            lstIndexes[a] = indexes[a];
         }
         int k = lstIndexes[j];
         postponedTasks.clear();
         int blockingTask = -1;
 
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getLB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getLB()));
         for(int i : indexes) {
             while(j<tasks.length && tasks[k].getStart().getUB()<tasks[i].getEnd().getLB()) {
                 if(tasks[k].getStart().getUB() >= tasks[k].getEnd().getLB()) {

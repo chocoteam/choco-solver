@@ -15,6 +15,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 
 /**
@@ -24,10 +25,10 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropCumulative extends CumulativeFilter {
+public class PropCumulativeKameugne2014 extends CumulativeFilter {
     private ThetaLambdaTree tree;
 
-    public PropCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, boolean notFirst) {
+    public PropCumulativeKameugne2014(Task[] tasks, IntVar[] heights, IntVar capacity, boolean notFirst) {
         super(tasks, heights, capacity);
         this.notFirst = notFirst;
 
@@ -37,7 +38,7 @@ public class PropCumulative extends CumulativeFilter {
     @Override
     public boolean notFirst() throws ContradictionException {
         boolean hasFiltered = false;
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             if(!tasks[i].getStart().isInstantiated()) {
                 int minEct = Integer.MAX_VALUE;

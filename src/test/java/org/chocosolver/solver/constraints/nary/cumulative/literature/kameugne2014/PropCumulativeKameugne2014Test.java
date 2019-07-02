@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
  @author Arthur Godet <arth.godet@gmail.com>
  @since 23/05/2019
  */
-public class PropCumulativeTest extends AbstractCumulativeTest {
+public class PropCumulativeKameugne2014Test extends AbstractCumulativeTest {
 
     @Test
     public void CumulativeNotFirstTest() {
@@ -40,7 +40,7 @@ public class PropCumulativeTest extends AbstractCumulativeTest {
         IntVar[] heights = model.intVarArray(4, 1, 1);
         IntVar capacity = model.intVar(2);
 
-        PropCumulative prop = new PropCumulative(tasks, heights, capacity, true);
+        PropCumulativeKameugne2014 prop = new PropCumulativeKameugne2014(tasks, heights, capacity, true);
         PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, heights, capacity, prop);
 
         try {
@@ -54,7 +54,7 @@ public class PropCumulativeTest extends AbstractCumulativeTest {
     }
 
     public CumulativeFilter propagator(Task[] tasks, IntVar[] heights, IntVar capacity) {
-        return new PropCumulative(tasks, heights, capacity, true);
+        return new PropCumulativeKameugne2014(tasks, heights, capacity, true);
     }
 
 }

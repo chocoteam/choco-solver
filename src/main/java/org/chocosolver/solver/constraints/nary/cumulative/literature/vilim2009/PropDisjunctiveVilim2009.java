@@ -9,11 +9,14 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 
@@ -25,11 +28,11 @@ import java.util.LinkedList;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropDisjunctive extends CumulativeFilter {
+public class PropDisjunctiveVilim2009 extends CumulativeFilter {
     private ThetaLambdaTree thetaLambdaTree;
-    private LinkedList<Integer> Q;
+    private TIntLinkedList Q;
 
-    public PropDisjunctive(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
+    public PropDisjunctiveVilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
         super(tasks);
         this.overloadCheck = overloadCheck;
         this.notFirst = notFirst;
@@ -38,13 +41,13 @@ public class PropDisjunctive extends CumulativeFilter {
         IntVar[] heights = tasks[0].getStart().getModel().intVarArray(tasks.length, 1, 1);
         IntVar capacity = tasks[0].getStart().getModel().intVar(1);
         thetaLambdaTree = new ThetaLambdaTree(tasks, heights, capacity);
-        Q = new LinkedList<Integer>();
+        Q = new TIntLinkedList();
     }
 
     @Override
     public void overloadCheck() throws ContradictionException {
         thetaLambdaTree.initializeTree(false);
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
         for(int i : indexes) {
             thetaLambdaTree.addToTheta(i);
             if(thetaLambdaTree.root.env > tasks[i].getEnd().getUB()) {
@@ -55,9 +58,9 @@ public class PropDisjunctive extends CumulativeFilter {
 
     private void fillQ() {
         Q.clear();
-        indexes.sort(Comparator.comparingInt(j -> tasks[j].getStart().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getStart().getUB()));
         for(int i : indexes) {
-            Q.addLast(i);
+            Q.add(i);
         }
     }
 
@@ -74,11 +77,11 @@ public class PropDisjunctive extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(false);
         fillQ();
-        indexes.sort(Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
-        int j = Q.getFirst();
+        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        int j = Q.get(0);
         for(int i : indexes) {
-            while(!Q.isEmpty() && tasks[i].getEnd().getUB()>tasks[Q.getFirst()].getStart().getUB()) {
-                j = Q.removeFirst();
+            while(!Q.isEmpty() && tasks[i].getEnd().getUB()>tasks[Q.get(0)].getStart().getUB()) {
+                j = Q.removeAt(0);
                 thetaLambdaTree.addToTheta(j);
             }
             if(getEnvWithouti(i)>tasks[i].getStart().getUB()) {
@@ -95,18 +98,18 @@ public class PropDisjunctive extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(true);
         Q.clear();
-        indexes.sort(Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
         for(int i : indexes) {
-            Q.addLast(i);
+            Q.add(i);
         }
-        int j = Q.getFirst();
+        int j = Q.get(0);
         while(Q.size() > 1) {
             if(thetaLambdaTree.root.env > tasks[j].getEnd().getUB()) { // Overload Check
                 aCause.fails();
             }
             thetaLambdaTree.addToLambdaAndRemoveFromTheta(j);
-            Q.removeFirst();
-            j = Q.getFirst();
+            Q.removeAt(0);
+            j = Q.get(0);
             while(thetaLambdaTree.root.envLambda > tasks[j].getEnd().getUB()) {
                 int i = thetaLambdaTree.root.responsibleEnvLambda.taskIdx;
                 hasFiltered |= tasks[i].getStart().updateLowerBound(thetaLambdaTree.root.env, aCause);
