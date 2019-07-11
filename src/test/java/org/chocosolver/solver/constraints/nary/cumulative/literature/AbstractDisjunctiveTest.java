@@ -81,4 +81,27 @@ public abstract class AbstractDisjunctiveTest {
 
         Assert.assertEquals(nbSolution, 6336);
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test2() {
+        int[][] values = new int[][]{
+                new int[]{56, 72, 11, 67, 83},
+                new int[]{61, 64, 1, 62, 65},
+                new int[]{71, 77, 15, 86, 92}
+        };
+
+        Model[] models = buildModels(values);
+        int[] nbSolutions = new int[2];
+        for(int j = 0; j<nbSolutions.length; j++) {
+            nbSolutions[j] = models[j].getSolver().findAllSolutions(null).size();
+//                System.out.println(j+":"+nbSolutions[j]);
+        }
+
+        for(int j = 1; j<nbSolutions.length; j++) {
+            if(nbSolutions[0] != nbSolutions[j]) {
+                System.out.println(Arrays.deepToString(values));
+            }
+            Assert.assertEquals(nbSolutions[0], nbSolutions[j]);
+        }
+    }
 }

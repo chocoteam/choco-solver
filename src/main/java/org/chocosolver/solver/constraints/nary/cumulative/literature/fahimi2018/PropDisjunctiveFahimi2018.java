@@ -132,6 +132,18 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
         return hasFiltered;
     }
 
+    // test if k is before i in array
+    private static Boolean before(int[] array, int k, int i) {
+        for(int a : array) {
+            if(a == i) {
+                return false;
+            } else if(a == k) {
+                return true;
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean edgeFinding() throws ContradictionException {
         boolean hasFiltered = false;
@@ -147,10 +159,10 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
 
         arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getLB(), tasks[i2].getEnd().getLB()));
         for(int i : indexes) {
-            while(j<tasks.length && tasks[k].getStart().getUB()<tasks[i].getEnd().getLB()) {
+            while(j<tasks.length && k!=i && tasks[k].getStart().getUB()<tasks[i].getEnd().getLB()) {
                 if(tasks[k].getStart().getUB() >= tasks[k].getEnd().getLB()) {
                     detectPrecTimeline.scheduleTask(k);
-                } else {
+                } else if(!before(indexes, k, i)) {
                     if(blockingTask != -1) {
                         aCause.fails();
                     }
