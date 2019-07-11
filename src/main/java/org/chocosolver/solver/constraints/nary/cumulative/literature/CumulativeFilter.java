@@ -14,8 +14,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-
-import java.util.ArrayList;
+import org.chocosolver.util.sort.ArraySort;
 
 /**
  * Abstract class for cumulative constraint filtering algorithms.
@@ -29,7 +28,8 @@ public abstract class CumulativeFilter {
     protected IntVar capacity;
     protected Propagator<IntVar> aCause;
 
-    protected Integer[] indexes;
+    protected int[] indexes;
+    protected ArraySort arraySort;
 
     protected boolean overloadCheck;
     protected boolean timeTable;
@@ -64,10 +64,11 @@ public abstract class CumulativeFilter {
         this.heights = heights;
         this.capacity = capacity;
 
-        this.indexes = new Integer[tasks.length];
+        this.indexes = new int[tasks.length];
         for(int i = 0; i<tasks.length; i++) {
             indexes[i] = i;
         }
+        arraySort = new ArraySort(indexes.length, false, true);
     }
 
     public void setPropagator(Propagator<IntVar> aCause) {

@@ -9,16 +9,11 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.linked.TIntLinkedList;
 import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedList;
 
 
 /**
@@ -47,7 +42,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
     @Override
     public void overloadCheck() throws ContradictionException {
         thetaLambdaTree.initializeTree(false);
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             thetaLambdaTree.addToTheta(i);
             if(thetaLambdaTree.root.env > tasks[i].getEnd().getUB()) {
@@ -58,7 +53,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
     private void fillQ() {
         Q.clear();
-        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getStart().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getStart().getUB(), tasks[i2].getStart().getUB()));
         for(int i : indexes) {
             Q.add(i);
         }
@@ -77,7 +72,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(false);
         fillQ();
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         int j = Q.get(0);
         for(int i : indexes) {
             while(!Q.isEmpty() && tasks[i].getEnd().getUB()>tasks[Q.get(0)].getStart().getUB()) {
@@ -98,7 +93,7 @@ public class PropDisjunctiveVilim2009 extends CumulativeFilter {
 
         thetaLambdaTree.initializeTree(true);
         Q.clear();
-        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(-tasks[i1].getEnd().getUB(), -tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             Q.add(i);
         }

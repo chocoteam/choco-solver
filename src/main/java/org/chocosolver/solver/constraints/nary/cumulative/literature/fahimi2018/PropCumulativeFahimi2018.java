@@ -14,10 +14,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
  * Cumulative constraint filtering algorithms described in the following paper :
  * Fahimi, H., Ouellet, Y., Quimper, C.-G.: Linear-Time Filtering Algorithms for the Disjunctive Constraint and a Quadratic Filtering Algorithm for the Cumulative Not-First Not-Last. Constraints 23(3), pages 272–293 (2018). https://doi.org/10.1007/s10601-018-9282-9
@@ -42,7 +38,7 @@ public class PropCumulativeFahimi2018 extends CumulativeFilter {
     public void overloadCheck() throws ContradictionException {
         overloadTimeline.setCapacity(capacity.getUB());
         overloadTimeline.initializeTimeline();
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             overloadTimeline.scheduleTask(i);
             if(overloadTimeline.earliestCompletionTime()>capacity.getUB()*tasks[i].getEnd().getUB()) {
@@ -54,7 +50,7 @@ public class PropCumulativeFahimi2018 extends CumulativeFilter {
     @Override
     public boolean notFirst() throws ContradictionException {
         boolean hasFiltered = false;
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             if(!tasks[i].getStart().isInstantiated()) {
                 int minEct = Integer.MAX_VALUE;

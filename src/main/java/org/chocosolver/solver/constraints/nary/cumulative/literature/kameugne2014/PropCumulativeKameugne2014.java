@@ -15,9 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
 /**
  * Cumulative constraint filtering algorithms described in the following paper :
  * Kameugne, R., Fotso, L.P.: A cumulative not-first/not-last filtering algorithm in O(n2 log(n)). Indian Journal of Pure and Applied Mathematics 44(1), pages 95-115 (2013). https://doi.org/10.1007/s13226-013-0005-z
@@ -38,7 +35,7 @@ public class PropCumulativeKameugne2014 extends CumulativeFilter {
     @Override
     public boolean notFirst() throws ContradictionException {
         boolean hasFiltered = false;
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             if(!tasks[i].getStart().isInstantiated()) {
                 int minEct = Integer.MAX_VALUE;

@@ -67,7 +67,7 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
     @Override
     public void overloadCheck() throws ContradictionException {
         overloadTimeline.initializeTimeline();
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             overloadTimeline.scheduleTask(i);
             if(overloadTimeline.earliestCompletionTime()>tasks[i].getEnd().getUB()) {
@@ -80,7 +80,7 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
     public boolean timeTable() throws ContradictionException {
         boolean hasFiltered = false;
         int m = 0;
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getStart().getUB(), tasks[i2].getStart().getUB()));
         for(int i : indexes) {
             if(tasks[i].getStart().getUB() < tasks[i].getEnd().getLB()) {
                 if(m > 0 ) {
@@ -101,7 +101,7 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
         }
 
         int k = 0;
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getLB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getStart().getLB(), tasks[i2].getStart().getLB()));
         for(int i : indexes) {
             while(k<m && tasks[i].getStart().getLB()>=u[k]) {
                 k++;
@@ -137,7 +137,7 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
         boolean hasFiltered = false;
         detectPrecTimeline.initializeTimeline();
         int j = 0;
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getStart().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getStart().getUB(), tasks[i2].getStart().getUB()));
         for(int a = 0; a< lstIndexes.length; a++) {
             lstIndexes[a] = indexes[a];
         }
@@ -145,7 +145,7 @@ public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
         postponedTasks.clear();
         int blockingTask = -1;
 
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getLB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getLB(), tasks[i2].getEnd().getLB()));
         for(int i : indexes) {
             while(j<tasks.length && tasks[k].getStart().getUB()<tasks[i].getEnd().getLB()) {
                 if(tasks[k].getStart().getUB() >= tasks[k].getEnd().getLB()) {

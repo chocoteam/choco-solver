@@ -9,14 +9,12 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.gingras2016;
 
-import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.LinkedList;
 
 /**
@@ -58,7 +56,7 @@ public class PropCumulativeGingras2016 extends CumulativeFilter {
     public void overloadCheck() throws ContradictionException {
         profile.initialize();
         theta.clear();
-        Arrays.sort(indexes, Comparator.comparingInt(i -> tasks[i].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int i : indexes) {
             theta.add(i);
             int[] ectOv = profile.scheduleTasks(theta, capacity.getUB()); // [ect, ov]

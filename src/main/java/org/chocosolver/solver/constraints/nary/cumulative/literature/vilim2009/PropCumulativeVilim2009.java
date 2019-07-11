@@ -9,15 +9,12 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
+import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
-
-import java.util.Arrays;
-import java.util.Comparator;
 
 /**
  * Cumulative constraint filtering algorithms described in the following paper :
@@ -95,7 +92,8 @@ public class PropCumulativeVilim2009 extends CumulativeFilter {
             prec[i] = tasks[i].getEnd().getLB();
         }
         thetaLambdaTree.initializeTree(true);
-        Arrays.sort(indexes, Comparator.comparingInt(j -> -tasks[j].getEnd().getUB()));
+
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(-tasks[i1].getEnd().getUB(), -tasks[i2].getEnd().getUB()));
         for(int j : indexes) {
             if(thetaLambdaTree.root.env > capacity.getUB()*tasks[j].getEnd().getUB()) {
                 aCause.fails();
@@ -110,7 +108,7 @@ public class PropCumulativeVilim2009 extends CumulativeFilter {
     }
 
     private void computeAllUpdateJC() {
-        Arrays.sort(indexes, Comparator.comparingInt(j -> tasks[j].getEnd().getUB()));
+        arraySort.sort(indexes, indexes.length, (i1, i2) -> Integer.compare(tasks[i1].getEnd().getUB(), tasks[i2].getEnd().getUB()));
         for(int k = 0; k<Cs.size(); k++) {
             int c = Cs.getQuick(k);
             thetaLambdaTree.setC(c);
