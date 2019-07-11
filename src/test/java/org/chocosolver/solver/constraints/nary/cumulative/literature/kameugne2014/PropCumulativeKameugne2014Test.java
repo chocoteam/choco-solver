@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
  */
 public class PropCumulativeKameugne2014Test extends AbstractCumulativeTest {
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void CumulativeNotFirstTest() {
         int[][] values = new int[][]{
                 new int[]{0, 1, 2, 2, 3},

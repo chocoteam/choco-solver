@@ -25,7 +25,7 @@ import java.util.Arrays;
 public abstract class AbstractDisjunctiveTest {
     public abstract CumulativeFilter propagator(Task[] tasks);
 
-    public Model[] buildModels(int[][] values) {
+    private Model[] buildModels(int[][] values) {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
@@ -44,7 +44,7 @@ public abstract class AbstractDisjunctiveTest {
         return new Model[]{modelComparison, model};
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testDisjunctivePropagator() {
         for(int i = 0; i<10; i++) {
             int[][] values = AbstractCumulativeTest.generateData(3);
@@ -64,7 +64,7 @@ public abstract class AbstractDisjunctiveTest {
         }
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void test() {
         int[][] values = new int[][]{
                 new int[]{48, 59, 1, 49, 60},

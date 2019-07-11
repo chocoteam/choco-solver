@@ -25,7 +25,7 @@ import org.testng.annotations.Test;
  */
 public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void DetectablePrecedencesTest() {
         int[][] values = new int[][]{
                 new int[]{0, 15, 4, 4, 19},
@@ -50,7 +50,7 @@ public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
         Assert.assertTrue(AbstractCumulativeTest.checkProp(tasks, afterProp));
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void TimeTableTest() {
         int[][] values = new int[][]{
                 new int[]{0, 1, 4, 4, 5},
@@ -73,7 +73,7 @@ public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
         Assert.assertTrue(AbstractCumulativeTest.checkProp(tasks, afterProp));
     }
 
-    @Test(expectedExceptions = ContradictionException.class)
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void OverloadCheckTest() throws ContradictionException {
         int[][] values = new int[][]{
                 new int[]{0, 1, 3, 3, 4},

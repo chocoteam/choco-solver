@@ -30,7 +30,7 @@ public class PropCumulativeOuelletQuimper2013Test extends AbstractCumulativeTest
         return new PropCumulativeOuelletQuimper2013(tasks, heights, capacity, true, true, false);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testFilterTimeTabling() throws ContradictionException {
         int[][] values = new int[][]{
                 new int[]{0, 6, 6, 6, 12}, // A

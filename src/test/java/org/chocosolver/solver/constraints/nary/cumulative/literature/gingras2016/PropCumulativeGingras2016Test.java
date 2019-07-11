@@ -30,7 +30,7 @@ public class PropCumulativeGingras2016Test extends AbstractCumulativeTest {
         return new PropCumulativeGingras2016(tasks, heights, capacity, true, false);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testOverloadCheck() {
         int[][] values = new int[][]{
                 new int[]{0, 2, 2, 2, 4},

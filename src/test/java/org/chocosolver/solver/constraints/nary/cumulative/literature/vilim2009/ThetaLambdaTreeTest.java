@@ -22,7 +22,7 @@ import org.testng.annotations.Test;
  */
 public class ThetaLambdaTreeTest {
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void buildThetaLambdaTreeTest() {
         int[][] values = new int[][]{
                 new int[]{30, Integer.MAX_VALUE/10, 3, 33, Integer.MAX_VALUE/10},
@@ -47,7 +47,7 @@ public class ThetaLambdaTreeTest {
         Assert.assertEquals(tree.root.right.right.right.taskIdx, 2);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void computeValuesThetaLambdaTreeTest() {
         int[][] values = new int[][]{
                 new int[]{0, 4, 1, 1, 5}, // A
@@ -100,7 +100,7 @@ public class ThetaLambdaTreeTest {
         }
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void maxestTest() {
         Model model = new Model();
         int[][] values = new int[][]{
@@ -110,7 +110,6 @@ public class ThetaLambdaTreeTest {
                 new int[]{0, 5, 2, 2, 7} // W
         };
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
-        int[] heights = new int[]{1, 1, 1, 1};
         IntVar[] heightsVar = model.intVarArray(4, 1, 1);
         IntVar capacity = model.intVar(2);
 

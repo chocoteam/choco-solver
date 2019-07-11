@@ -24,9 +24,9 @@ import java.util.Random;
  @since 23/05/2019
  */
 public abstract class AbstractCumulativeTest {
-    public static Random RND = new Random(System.currentTimeMillis());
-    public static final int MAX_DURATION = 100;
-    public static final int MAX_HEIGHT = 5;
+    private static Random RND = new Random(System.currentTimeMillis());
+    private static final int MAX_DURATION = 100;
+    private static final int MAX_HEIGHT = 5;
 
     public static Task[] buildTasks(int[][] values, Model model) {
         IntVar[] starts = new IntVar[values.length];
@@ -40,7 +40,7 @@ public abstract class AbstractCumulativeTest {
         return tasks;
     }
 
-    public static Task[] buildOpposite(Task[] tasks) {
+    protected static Task[] buildOpposite(Task[] tasks) {
         Task[] opposite = new Task[tasks.length];
         for(int k = 0; k<opposite.length; k++) {
             opposite[k] = new Task(tasks[k].getEnd().neg().intVar(), tasks[k].getDuration(), tasks[k].getStart().neg().intVar());
@@ -52,12 +52,12 @@ public abstract class AbstractCumulativeTest {
     public static boolean checkProp(Task[] tasks, int[] afterProp) {
         boolean propOk = true;
         for(int i = 0; i<tasks.length && propOk; i++) {
-            propOk &= (tasks[i].getStart().getLB() == afterProp[i]);
+            propOk = (tasks[i].getStart().getLB() == afterProp[i]);
         }
         return propOk;
     }
 
-    public static int[][] generateData(int nTasks) {
+    static int[][] generateData(int nTasks) {
         int[][] res = new int[nTasks][5];
         for(int i = 0; i<res.length; i++) {
             int[] v = new int[3];
@@ -88,7 +88,7 @@ public abstract class AbstractCumulativeTest {
 
     public abstract CumulativeFilter propagator(Task[] tasks, IntVar[] heights, IntVar capacity);
 
-    public Model[] buildModels(int[][] values, int[] heights, int capacity) {
+    private Model[] buildModels(int[][] values, int[] heights, int capacity) {
         Model model = new Model();
         Task[] tasks = buildTasks(values, model);
         IntVar[] heightsVarMod = new IntVar[heights.length];
@@ -111,7 +111,7 @@ public abstract class AbstractCumulativeTest {
         return new Model[]{modelComparison, model};
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void testCumulativePropagator() {
         for(int i = 0; i<10; i++) {
             int[][] values = generateData(3);
@@ -142,7 +142,7 @@ public abstract class AbstractCumulativeTest {
         }
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void test() {
         int[][] values = new int[][]{
                 new int[]{52, 56, 4, 56, 60},
@@ -166,7 +166,7 @@ public abstract class AbstractCumulativeTest {
         Assert.assertEquals(nbSolution, 2760);
     }
 
-    @Test
+    @Test(groups="1s", timeOut=60000)
     public void test2() {
         int[][] values = new int[][]{
                 new int[]{35, 55, 5, 40, 60},
