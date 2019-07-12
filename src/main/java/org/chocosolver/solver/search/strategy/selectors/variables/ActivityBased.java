@@ -150,13 +150,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
         model.getSolver().setRestartOnSolutions();
-        if (restartAfterEachFail) {
-            rfMove = new MoveRestart(model.getSolver().getMove(),
-                new MonotonicRestartStrategy(1),
-                new FailCounter(model.getSolver().getModel(), 1),
-                MAX_VALUE);
-            model.getSolver().setMove(rfMove);
-        }
 //        init(vars);
     }
 
@@ -183,6 +176,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
+    	if (restartAfterEachFail) {
+            rfMove = new MoveRestart(model.getSolver().getMove(),
+                new MonotonicRestartStrategy(1),
+                new FailCounter(model.getSolver().getModel(), 1),
+                MAX_VALUE);
+            model.getSolver().setMove(rfMove);
+        }
         return true;
     }
 
@@ -196,6 +196,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vars[i].removeMonitor(this);
             }
         }
+    	if (restartAfterEachFail) {
+		removeRFMove();
+    	}
     }
 
     @Override
@@ -366,18 +369,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
                 if(restartAfterEachFail){
-                    Solver sl = model.getSolver();
-                    Move m = sl.getMove();
-                    if(m == rfMove){
-                        sl.setMove(rfMove.getChildMoves().get(0));
-                    }else{
-                        while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
-                            m = m.getChildMoves().get(0);
-                        }
-                        if(m.getChildMoves() != rfMove){
-                            m.setChildMoves(rfMove.getChildMoves());
-                        }
-                    }
+                    removeRFMove();
                 }
                 restartAfterEachFail = false;
 
@@ -390,6 +382,21 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         }
     }
 
+    private void removeRFMove(){
+    	Solver sl = model.getSolver();
+    	Move m = sl.getMove();
+   	if(m == rfMove){
+		sl.setMove(rfMove.getChildMoves().get(0));
+	}else if(rfMove != null){
+		while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
+		    m = m.getChildMoves().get(0);
+		}
+		if(m.getChildMoves() != rfMove){
+		    m.setChildMoves(rfMove.getChildMoves());
+		}
+    	}
+    }
+		
     /**
      * Return true if the interval is small enough
      *
