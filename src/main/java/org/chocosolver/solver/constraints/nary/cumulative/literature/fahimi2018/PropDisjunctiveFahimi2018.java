@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018;
 
-import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.DisjunctiveFilter;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -25,7 +25,7 @@ import java.util.Comparator;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropDisjunctiveFahimi2018 extends CumulativeFilter {
+public class PropDisjunctiveFahimi2018 extends DisjunctiveFilter {
     private Integer[] Ip;
 
     // Useful variables for TimeTabling algorithm

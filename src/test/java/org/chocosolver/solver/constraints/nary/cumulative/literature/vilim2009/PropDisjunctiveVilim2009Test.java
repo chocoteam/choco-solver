@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
 import org.chocosolver.solver.constraints.nary.cumulative.literature.AbstractDisjunctiveTest;
-import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.DisjunctiveFilter;
 import org.chocosolver.solver.variables.Task;
 
 /**
@@ -20,7 +20,7 @@ import org.chocosolver.solver.variables.Task;
 public class PropDisjunctiveVilim2009Test extends AbstractDisjunctiveTest {
 
     @Override
-    public CumulativeFilter propagator(Task[] tasks) {
+    public DisjunctiveFilter propagator(Task[] tasks) {
         return new PropDisjunctiveVilim2009(tasks, true, true, true);
     }
 }

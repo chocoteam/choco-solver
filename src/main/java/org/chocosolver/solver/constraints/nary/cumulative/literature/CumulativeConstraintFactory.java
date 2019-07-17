@@ -35,7 +35,7 @@ public class CumulativeConstraintFactory {
 
     @FunctionalInterface
     private interface DeclareDisjunctiveConstraint {
-        CumulativeFilter[] call(Task[] tasks);
+        DisjunctiveFilter[] call(Task[] tasks);
     }
 
     private static Task[] oppTasks(Task[] tasks) {
@@ -63,7 +63,7 @@ public class CumulativeConstraintFactory {
         return dc.call(T2, H2);
     }
 
-    private static CumulativeFilter[] checker(Task[] tasks, DeclareDisjunctiveConstraint dc) {
+    private static DisjunctiveFilter[] checker(Task[] tasks, DeclareDisjunctiveConstraint dc) {
         ArrayList<Task> taskList = new ArrayList<>(tasks.length);
 
         for(Task t : tasks) {
@@ -105,9 +105,9 @@ public class CumulativeConstraintFactory {
      * @param edgeFinding <i>true</i> if the Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] fahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
+    public static DisjunctiveFilter[] fahimi2018(Task[] tasks, boolean overloadCheck, boolean timeTable, boolean edgeFinding) {
         return checker(tasks,
-                (t) -> new CumulativeFilter[]{
+                (t) -> new DisjunctiveFilter[]{
                         new PropDisjunctiveFahimi2018(t, overloadCheck, timeTable, edgeFinding),
                         new PropDisjunctiveFahimi2018(oppTasks(t), overloadCheck, timeTable, edgeFinding)});
     }
@@ -139,9 +139,9 @@ public class CumulativeConstraintFactory {
      * @param edgeFinding <i>true</i> if the Edge-Finding rule should be applied
      * @return the filtering algorithms
      */
-    public static CumulativeFilter[] vilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
+    public static DisjunctiveFilter[] vilim2009(Task[] tasks, boolean overloadCheck, boolean notFirst, boolean edgeFinding) {
         return checker(tasks,
-                (t) -> new CumulativeFilter[]{
+                (t) -> new DisjunctiveFilter[]{
                         new PropDisjunctiveVilim2009(t, overloadCheck, notFirst, edgeFinding),
                         new PropDisjunctiveVilim2009(oppTasks(t), overloadCheck, notFirst, edgeFinding)});
     }

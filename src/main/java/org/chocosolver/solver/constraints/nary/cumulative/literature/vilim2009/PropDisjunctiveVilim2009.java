@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary.cumulative.literature.vilim2009;
 
 import gnu.trove.list.linked.TIntLinkedList;
-import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.DisjunctiveFilter;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -23,7 +23,7 @@ import org.chocosolver.solver.variables.Task;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropDisjunctiveVilim2009 extends CumulativeFilter {
+public class PropDisjunctiveVilim2009 extends DisjunctiveFilter {
     private ThetaLambdaTree thetaLambdaTree;
     private TIntLinkedList Q;
 

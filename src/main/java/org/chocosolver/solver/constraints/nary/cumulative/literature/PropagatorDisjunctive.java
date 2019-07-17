@@ -12,12 +12,10 @@ package org.chocosolver.solver.constraints.nary.cumulative.literature;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Cumulative propagator
@@ -26,30 +24,19 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 23/05/2019
  */
-public class PropagatorCumulative extends Propagator<IntVar> {
+public class PropagatorDisjunctive extends Propagator<IntVar> {
     private Task[] tasks;
-    private IntVar[] heights;
-    private IntVar capacity;
-    private CumulativeFilter[] filters;
+    private DisjunctiveFilter[] filters;
     private boolean atLeastOneTimeTabling;
 
-    public PropagatorCumulative(Task[] tasks, CumulativeFilter... filters) {
-        this(tasks, tasks[0].getStart().getModel().intVarArray(tasks.length, 1, 1), tasks[0].getStart().getModel().intVar(1), filters);
-    }
-
-    public PropagatorCumulative(Task[] tasks, IntVar[] heights, IntVar capacity, CumulativeFilter... filters) {
-        super(ArrayUtils.append(extractIntVars(tasks), heights, new IntVar[]{capacity}), PropagatorPriority.CUBIC, false);
-        if(tasks.length != heights.length) {
-            throw new SolverException("Arrays of task and heights should have the same size in cumulative constraint.");
-        }
+    public PropagatorDisjunctive(Task[] tasks, DisjunctiveFilter... filters) {
+        super(extractIntVars(tasks), PropagatorPriority.QUADRATIC, false);
 
         this.tasks = tasks;
-        this.heights = heights;
-        this.capacity = capacity;
         this.filters = filters;
         this.atLeastOneTimeTabling = false;
 
-        for(CumulativeFilter filter : filters) {
+        for(DisjunctiveFilter filter : filters) {
             filter.setPropagator(this);
             atLeastOneTimeTabling |= (filter.timeTable || filter.timeTableExtendedEdgeFinding);
         }
@@ -75,7 +62,7 @@ public class PropagatorCumulative extends Propagator<IntVar> {
         boolean hasFiltered;
         do {
             hasFiltered = false;
-            for(CumulativeFilter filter : filters) {
+            for(DisjunctiveFilter filter : filters) {
                 hasFiltered |= filter.propagate();
             }
         } while(hasFiltered);
@@ -100,18 +87,15 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 return ESat.FALSE;
             }
         }
-        // check capacity
-        int maxLoad = 0;
+        // check disjunctive
         if (min <= max) {
-            int capamax = capacity.getUB();
             int[] consoMin = new int[max - min];
             for (int i = 0; i < n; i++) {
                 for (int t = tasks[i].getStart().getUB(); t < tasks[i].getEnd().getLB(); t++) {
-                    consoMin[t - min] += heights[i].getLB();
-                    if (consoMin[t - min] > capamax) {
+                    consoMin[t - min] += 1;
+                    if (consoMin[t - min] > 1) {
                         return ESat.FALSE;
                     }
-                    maxLoad = Math.max(maxLoad, consoMin[t - min]);
                 }
             }
         }
@@ -121,12 +105,6 @@ public class PropagatorCumulative extends Propagator<IntVar> {
                 return ESat.UNDEFINED;
             }
         }
-        assert min <= max;
-        // capacity check entailed
-        if (maxLoad <= capacity.getLB()) {
-            return ESat.TRUE;
-        }
-        // capacity not instantiated
-        return ESat.UNDEFINED;
+        return ESat.TRUE;
     }
 }

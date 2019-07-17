@@ -23,14 +23,14 @@ import java.util.Arrays;
  @since 23/05/2019
  */
 public abstract class AbstractDisjunctiveTest {
-    public abstract CumulativeFilter propagator(Task[] tasks);
+    public abstract DisjunctiveFilter propagator(Task[] tasks);
 
     private Model[] buildModels(int[][] values) {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
         model.post(new Constraint("DISJUNCTIVE",
-                new PropagatorCumulative(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
+                new PropagatorDisjunctive(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
 
         Model modelComparison = new Model();
         Task[] tasksComparison = AbstractCumulativeTest.buildTasks(values, modelComparison);
@@ -75,7 +75,7 @@ public abstract class AbstractDisjunctiveTest {
         Model model = new Model();
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
         model.post(new Constraint("DISJUNCTIVE",
-                new PropagatorCumulative(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
+                new PropagatorDisjunctive(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
 
         int nbSolution = model.getSolver().findAllSolutions(null).size();
 

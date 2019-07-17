@@ -9,10 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.cumulative.literature.fahimi2018;
 
-import org.chocosolver.solver.constraints.nary.cumulative.literature.AbstractCumulativeTest;
-import org.chocosolver.solver.constraints.nary.cumulative.literature.AbstractDisjunctiveTest;
-import org.chocosolver.solver.constraints.nary.cumulative.literature.CumulativeFilter;
-import org.chocosolver.solver.constraints.nary.cumulative.literature.PropagatorCumulative;
+import org.chocosolver.solver.constraints.nary.cumulative.literature.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Task;
@@ -38,7 +35,7 @@ public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
         PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, false, false, true);
-        PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
+        PropagatorDisjunctive propagatorCumulative = new PropagatorDisjunctive(tasks, prop);
 
         try {
             Assert.assertTrue(prop.edgeFinding());
@@ -61,7 +58,7 @@ public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
         PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, false, true, false);
-        PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
+        PropagatorDisjunctive propagatorCumulative = new PropagatorDisjunctive(tasks, prop);
 
         try {
             Assert.assertTrue(prop.timeTable());
@@ -84,12 +81,12 @@ public class PropDisjunctiveFahimi2018Test extends AbstractDisjunctiveTest {
         Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
 
         PropDisjunctiveFahimi2018 prop = new PropDisjunctiveFahimi2018(tasks, true, false, false);
-        PropagatorCumulative propagatorCumulative = new PropagatorCumulative(tasks, prop);
+        PropagatorDisjunctive propagatorCumulative = new PropagatorDisjunctive(tasks, prop);
 
         prop.overloadCheck();
     }
 
-    public CumulativeFilter propagator(Task[] tasks) {
+    public DisjunctiveFilter propagator(Task[] tasks) {
         return new PropDisjunctiveFahimi2018(tasks, true, true, true);
     }
 }
