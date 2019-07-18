@@ -162,26 +162,27 @@ public class PropagationEngine {
         activatePropagators();
         do {
             manageModifications();
-            for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-                while (!pro_queue[i].isEmpty()) {
-                    lastProp = pro_queue[i].pollFirst();
-                    // revision of the variable
-                    lastProp.unschedule();
-                    delayedPropagationType = 0;
-                    if (lastProp.reactToFineEvent()) {
-                        lastProp.doFinePropagation();
-                        // now we can check whether a delayed propagation has been scheduled
-                        if (delayedPropagationType > 0) {
-                            lastProp.propagate(delayedPropagationType);
-                        }
-                    } else if (lastProp.isActive()) { // need to be checked due to views
-                        lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
+                assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
+                lastProp = pro_queue[i].pollFirst();
+                // revision of the variable
+                lastProp.unschedule();
+                delayedPropagationType = 0;
+                if (lastProp.reactToFineEvent()) {
+                    lastProp.doFinePropagation();
+                    // now we can check whether a delayed propagation has been scheduled
+                    if (delayedPropagationType > 0) {
+                        lastProp.propagate(delayedPropagationType);
                     }
-                    if (hybrid < 0b01) {
-                        manageModifications();
-                    }
+                } else if (lastProp.isActive()) { // need to be checked due to views
+                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
-                notEmpty = notEmpty & ~(1 << i);
+                if (hybrid < 0b01) {
+                    manageModifications();
+                }
+                if (pro_queue[i].isEmpty()) {
+                    notEmpty &= ~(1 << i);
+                }
             }
         } while (!var_queue.isEmpty());
     }
@@ -224,13 +225,9 @@ public class PropagationEngine {
         }
     }
 
-    private int nextNotEmpty(int fromIndex) {
-        int word = notEmpty & (WORD_MASK << fromIndex);
-        if (word != 0) {
-            return Integer.numberOfTrailingZeros(word);
-        } else {
-            return -1;
-        }
+    private int nextNotEmpty() {
+        if(notEmpty == 0)return -1;
+        return Integer.numberOfTrailingZeros(notEmpty);
     }
 
     /**
@@ -243,7 +240,7 @@ public class PropagationEngine {
         while (!var_queue.isEmpty()) {
             var_queue.pollLast().clearEvents();
         }
-        for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
+        for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
             while (!pro_queue[i].isEmpty()) {
                 // revision of the variable
                 pro_queue[i].pollLast().doFlush();
@@ -300,7 +297,7 @@ public class PropagationEngine {
 
     public void schedule(Propagator prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
-        notEmpty = notEmpty | (1 << prop.doSchedule(pro_queue));
+        notEmpty |= (1 << prop.doSchedule(pro_queue));
     }
 
     /**
