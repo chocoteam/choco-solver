@@ -18,7 +18,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -37,7 +36,7 @@ public class MagicSquareTest {
         return pb.getModel();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testImpact() throws SetUpException {
         Model sol;
         int j = 3;
@@ -46,35 +45,29 @@ public class MagicSquareTest {
         while (sol.getSolver().solve()) ;
         long nbsol = sol.getSolver().getSolutionCount();
         long node = sol.getSolver().getNodeCount();
-        for (int t = 0; t < values().length; t++) {
-            sol = modeler(j);
-            sol.getSolver().setSearch(new ImpactBased((IntVar[]) sol.getSolver().getSearch().getVariables(), 2, 3, 10, 29091981L, false));
-            values()[t].make(sol);
-            while (sol.getSolver().solve()) ;
-            assertEquals(sol.getSolver().getSolutionCount(), nbsol);
-            assertEquals(sol.getSolver().getNodeCount(), node);
-        }
+        sol = modeler(j);
+        sol.getSolver().setSearch(new ImpactBased((IntVar[]) sol.getSolver().getSearch().getVariables(), 2, 3, 10, 29091981L, false));
+        while (sol.getSolver().solve()) ;
+        assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+        assertEquals(sol.getSolver().getNodeCount(), node);
     }
 
-    @Test(groups="5m", timeOut=300000)
-    public void testAll()throws SetUpException {
+    @Test(groups = "5m", timeOut = 300000)
+    public void testAll() throws SetUpException {
         Model sol;
         for (int j = 3; j < 5; j++) {
             sol = modeler(j);
             while (sol.getSolver().solve()) ;
             long nbsol = sol.getSolver().getSolutionCount();
             long node = sol.getSolver().getNodeCount();
-            for (int t = 0; t < values().length; t++) {
-                sol = modeler(j);
-                values()[t].make(sol);
-                while (sol.getSolver().solve()) ;
-                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getNodeCount(), node);
-            }
+            sol = modeler(j);
+            while (sol.getSolver().solve()) ;
+            assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getNodeCount(), node);
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug1() throws ContradictionException, SetUpException {
         // square0,0=3 square0,1=6 square0,2={12,13} square0,3={12,13}
         // square1,0={1,2,5,7,8,9...,15} square1,1=16 square1,2={1,2} square1,3={2,5,7,8,9,10...,15}
@@ -84,23 +77,24 @@ public class MagicSquareTest {
         Model model = modeler(4);
         Variable[] vars = model.getVars();
         model.getSolver().propagate();
-		int offset = 0;
+        int offset = 0;
         ((IntVar) vars[offset]).instantiateTo(3, Cause.Null);
-        ((IntVar) vars[15+offset]).instantiateTo(4, Cause.Null);
-        ((IntVar) vars[5+offset]).removeInterval(11, 15, Cause.Null);
-        ((IntVar) vars[1+offset]).removeValue(2, Cause.Null);
-        ((IntVar) vars[9+offset]).removeInterval(1, 2, Cause.Null);
-        ((IntVar) vars[13+offset]).removeInterval(1, 2, Cause.Null);
-        ((IntVar) vars[1+offset]).instantiateTo(6, Cause.Null);
+        ((IntVar) vars[15 + offset]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[5 + offset]).removeInterval(11, 15, Cause.Null);
+        ((IntVar) vars[1 + offset]).removeValue(2, Cause.Null);
+        ((IntVar) vars[9 + offset]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[13 + offset]).removeInterval(1, 2, Cause.Null);
+        ((IntVar) vars[1 + offset]).instantiateTo(6, Cause.Null);
         model.getSolver().propagate();
-        ((IntVar) vars[2+offset]).instantiateTo(12, Cause.Null);
+        ((IntVar) vars[2 + offset]).instantiateTo(12, Cause.Null);
         try {
             model.getSolver().propagate();
             Assert.fail("should fail");
-        } catch (ContradictionException ignored) {}
+        } catch (ContradictionException ignored) {
+        }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug2() throws ContradictionException, SetUpException {
         //square0,0=2 square0,1=13 square0,2=16 square0,3=3
         // square1,0={4,5,6,7,8,9...,14} square1,1={7,8,9,10,11,12...,14} square1,2={4,5,6,7,8,9...,10} square1,3={1,4,5,6,7,8...,15}
@@ -109,21 +103,21 @@ public class MagicSquareTest {
         //[R]!square3,0  ==  14 (1)
         Model model = modeler(4);
         model.getSolver().propagate();
-		int offset = 0;
+        int offset = 0;
         Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(2, Cause.Null);
         model.getSolver().propagate();
-        ((IntVar) vars[3+offset]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[3 + offset]).instantiateTo(3, Cause.Null);
         model.getSolver().propagate();
-        ((IntVar) vars[1+offset]).instantiateTo(13, Cause.Null);
+        ((IntVar) vars[1 + offset]).instantiateTo(13, Cause.Null);
         model.getSolver().propagate();
 
-        ((IntVar) vars[6+offset]).removeValue(1, Cause.Null);
+        ((IntVar) vars[6 + offset]).removeValue(1, Cause.Null);
         model.getSolver().propagate();
-        ((IntVar) vars[14+offset]).removeValue(1, Cause.Null);
+        ((IntVar) vars[14 + offset]).removeValue(1, Cause.Null);
         model.getSolver().propagate();
-        ((IntVar) vars[12+offset]).removeInterval(9, 14, Cause.Null);
+        ((IntVar) vars[12 + offset]).removeInterval(9, 14, Cause.Null);
         model.getSolver().propagate();
-        Assert.assertTrue(((IntVar) vars[13+offset]).isInstantiatedTo(1));
+        Assert.assertTrue(((IntVar) vars[13 + offset]).isInstantiatedTo(1));
     }
 }

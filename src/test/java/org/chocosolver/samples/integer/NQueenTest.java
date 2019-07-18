@@ -18,7 +18,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.propagation.PropagationEngineFactory.values;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -70,14 +69,14 @@ public class NQueenTest {
     }
 
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testBinary() throws SetUpException {
         Model s = modeler(new NQueenBinary(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testLinBinary() throws SetUpException {
         Model s = modeler(new NQueenLinearBinary(), size);
         while (s.getSolver().solve()) ;
@@ -85,21 +84,21 @@ public class NQueenTest {
         //s.solve();
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testGlobalBinary() throws SetUpException {
         Model s = modeler(new NQueenBinaryGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testGlobal() throws ContradictionException, SetUpException {
         Model s = modeler(new NQueenGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testDualBinary() throws SetUpException {
         Model s = modeler(new NQueenDualBinary(), size);
         while (s.getSolver().solve()) ;
@@ -107,14 +106,14 @@ public class NQueenTest {
     }
 
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testDualGlobal() throws SetUpException {
         Model s = modeler(new NQueenDualGlobal(), size);
         while (s.getSolver().solve()) ;
         assertIt(s);
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testAll1() throws SetUpException {
         Model sol;
         for (int j = 4; j < 14; j++) {
@@ -122,17 +121,14 @@ public class NQueenTest {
             while (sol.getSolver().solve()) ;
             long nbsol = sol.getSolver().getSolutionCount();
             long node = sol.getSolver().getNodeCount();
-            for (int t = 0; t < values().length; t++) {
-                sol = modeler(new NQueenBinary(), j);
-                values()[t].make(sol);
-                while (sol.getSolver().solve()) ;
-                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getNodeCount(), node);
-            }
+            sol = modeler(new NQueenBinary(), j);
+            while (sol.getSolver().solve()) ;
+            assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getNodeCount(), node);
         }
     }
 
-    @Test(groups="5m", timeOut=300000)
+    @Test(groups = "5m", timeOut = 300000)
     public void testAll2() throws SetUpException {
         Model sol;
         for (int j = 4; j < 14; j++) {
@@ -140,36 +136,32 @@ public class NQueenTest {
             while (sol.getSolver().solve()) ;
             long nbsol = sol.getSolver().getSolutionCount();
             long node = sol.getSolver().getNodeCount();
-            for (int t = 0; t < values().length; t++) {
-                sol = modeler(new NQueenBinary(), j);
-                // default group
-                values()[t].make(sol);
-                while (sol.getSolver().solve()) ;
-                assertEquals(sol.getSolver().getSolutionCount(), nbsol);
-                assertEquals(sol.getSolver().getNodeCount(), node);
-            }
-
+            sol = modeler(new NQueenBinary(), j);
+            // default group
+            while (sol.getSolver().solve()) ;
+            assertEquals(sol.getSolver().getSolutionCount(), nbsol);
+            assertEquals(sol.getSolver().getNodeCount(), node);
         }
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug1() throws ContradictionException, SetUpException {
 //        "a corriger!!!, ca doit etre du a prop cond des propagators";
         Model model = modeler(new NQueenBinaryGlobal(), 16);
         model.getSolver().propagate();
-		int offset = 2;
+        int offset = 2;
         Variable[] vars = model.getVars();
         ((IntVar) vars[offset]).instantiateTo(1, Cause.Null);
-        ((IntVar) vars[1+offset]).instantiateTo(3, Cause.Null);
-        ((IntVar) vars[2+offset]).instantiateTo(5, Cause.Null);
-        ((IntVar) vars[3+offset]).instantiateTo(2, Cause.Null);
-        ((IntVar) vars[4+offset]).instantiateTo(12, Cause.Null);
-        ((IntVar) vars[5+offset]).instantiateTo(16, Cause.Null);
-        ((IntVar) vars[6+offset]).instantiateTo(4, Cause.Null);
+        ((IntVar) vars[1 + offset]).instantiateTo(3, Cause.Null);
+        ((IntVar) vars[2 + offset]).instantiateTo(5, Cause.Null);
+        ((IntVar) vars[3 + offset]).instantiateTo(2, Cause.Null);
+        ((IntVar) vars[4 + offset]).instantiateTo(12, Cause.Null);
+        ((IntVar) vars[5 + offset]).instantiateTo(16, Cause.Null);
+        ((IntVar) vars[6 + offset]).instantiateTo(4, Cause.Null);
         model.getSolver().propagate();
 //        System.out.printf("%s\n", solver.toString());
-        ((IntVar) vars[7+offset]).instantiateTo(7, Cause.Null);
+        ((IntVar) vars[7 + offset]).instantiateTo(7, Cause.Null);
         try {
             model.getSolver().propagate();
             Assert.fail();

@@ -14,7 +14,7 @@
 
     <groupId>org.choco-solver</groupId>
     <artifactId>samples</artifactId>
-    <version>4.0.7-SNAPSHOT</version>
+    <version>4.10.1</version>
     <packaging>jar</packaging>
 
     <name>Samples</name>
@@ -44,7 +44,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-        <choco.version>4.0.6-SNAPSHOT</choco.version>
+        <choco.version>LATEST</choco.version>
     </properties>
 
     <scm>
@@ -62,7 +62,7 @@
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>pf4cs</artifactId>
-            <version>1.0.5</version>
+            <version>LATEST</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

@@ -93,7 +93,7 @@ public class SMPTSP extends AbstractProblem {
 		// displays the root lower bound
 		r.plugMonitor(new IMonitorInitialize() {
 			@Override
-			public void afterInitialize() {
+			public void afterInitialize(boolean correct) {
 				out.println("bound after initial propagation : " + nbValues);
 			}
 		});
