@@ -27,6 +27,7 @@
 package org.chocosolver.samples.integer;
 
 import org.chocosolver.samples.AbstractProblem;
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
@@ -62,7 +63,7 @@ public class Takuzu extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        model = new Model();
+        model = new Model(new DefaultSettings().setEnableTableSubstitution(false));
         int n = data.grid.length;
         int m = data.grid[0].length;
         cells = new BoolVar[n][m];
@@ -185,10 +186,9 @@ public class Takuzu extends AbstractProblem {
      */
     private void rule32(BoolVar[][] vars) {
         int size = vars.length;
-        IntVar[] res = new IntVar[size];
+        IntVar[] res = model.intVarArray("r", size, 0, (int) Math.pow(2, size) - 1);
+        int[] coeffs = IntStream.range(0, size).map(k -> (int) Math.pow(2, k)).toArray();
         for (int i = 0; i < size; i++) {
-            res[i] = model.intVar("r_" + i, 0, (int) Math.pow(10, size) - 1);
-            int[] coeffs = IntStream.range(0, size).map(k -> (int) Math.pow(10, k)).toArray();
             model.scalar(vars[i], coeffs, "=", res[i]).post();
         }
         model.allDifferent(res).post();
