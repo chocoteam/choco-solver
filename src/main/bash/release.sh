@@ -38,6 +38,7 @@ mvn clean install -DskipTests  || quit "unable to install "
 echo "New version is ${VERSION}"
 YEAR=`LANG=en_US.utf8 date +"%Y"`
 sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
+sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  README.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  MINIZINC.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  XCSP3.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  JSON.md
