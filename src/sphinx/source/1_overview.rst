@@ -157,7 +157,7 @@ To declare Choco as a dependency of your project, simply update the ``pom.xml`` 
    </dependency>
 
 where ``X.Y.Z`` is replaced by |release|.
-Note that the artifact does not include any dependencies.
+Note that the artifact includes all dependencies.
 Please, refer to `README.md` for the list of required dependencies.
 
 With SBT
