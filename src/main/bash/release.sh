@@ -8,7 +8,7 @@ function quit() {
 }
 
 function getVersionToRelease() {
-    CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]"`
+    CURRENT_VERSION=`mvn ${MVN_ARGS} org.apache.maven.plugins:maven-help-plugin:2.1.1:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]"`
     echo ${CURRENT_VERSION%%-SNAPSHOT}
 }
 
@@ -41,9 +41,9 @@ sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  MINIZINC.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  XCSP3.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  JSON.md
-sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/chocofzn/fzn-exec
-sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/chocoxcsp/xcsp3-exec
-sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/chocojson/json-exec
+sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/fzn-exec.sh
+sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/xcsp3-exec
+sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/json-exec.sh
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false || quit "unable to set new version"
 mvn license:format || quit "unable to format the license"
