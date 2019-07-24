@@ -27,7 +27,7 @@ parser.add_argument(
     help='Files containing name of flatzinc files to solve.',
     nargs='+',
     default=[
-        '/Users/cprudhom/Sources/XCSP/Challenges/inst/2018/xcsp18.txt',
+        '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/inst/2018/xcsp3-opt.txt',
     ]
 )
 
@@ -35,7 +35,7 @@ parser.add_argument(
 parser.add_argument(
     "-o", "--outputdirectory",
     help="Output files directory.",
-    default='/Users/cprudhom/Sources/XCSP/Challenges/logs/'
+    default='/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/logs/'
 )
 parser.add_argument(
     "-p", "--process",
@@ -48,15 +48,18 @@ parser.add_argument(
     help='Configurations to evaluate, \'name:options\'',
     nargs='+',
     default=[
-        'DEF:-stat',
-        'NEW:-stat -bb 5'
+        # 'IDL+IBS:-stat',
+        # 'CPL+IBS:-stat -bb 5',
+        # 'IBS+:-stat -bb 6',
+        #'MIXED:-stat -bb 8',
+        'PROB:-stat'
     ]
 )
 parser.add_argument(
     "-tl", "--timelimit",
     help='Time limit in seconds for the resolutions.',
     type=int,
-    default=600
+    default=2400
 )
 parser.add_argument(
     "-jargs",
