@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.memory.ICondition;
 import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
@@ -26,7 +28,6 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
@@ -35,6 +36,9 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.ConditionalSequencer;
+import org.chocosolver.solver.search.strategy.strategy.InTurnSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
@@ -237,13 +241,13 @@ public abstract class RegParser implements IParser {
                 solver.setRestartOnSolutions();
             }
         }
-        if (bbox > -1) {
+        if (bbox > 0) {
+            IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
+                .map(Variable::asIntVar)
+                .toArray(IntVar[]::new);
             solver.getMove().removeStrategy();
             solver.setMove(new MoveBinaryDFS());
-            IntVar[] dvars = getModel().retrieveIntVars(true);
             switch (bbox) {
-                case 0:
-                    solver.setSearch(Search.defaultSearch(getModel()));
                 case 1:
                     solver.setSearch(Search.domOverWDegSearch(dvars));
                     break;
@@ -266,15 +270,103 @@ public abstract class RegParser implements IParser {
                         valueSelector = new IntDomainBest();
                         Solution lastSolution = new Solution(getModel(), dvars);
                         solver.attach(lastSolution);
-                        valueSelector = new IntDomainLast(lastSolution, valueSelector, c -> solver.getRestartCount() > c);
+                        int[] t = new int[2];
+                        valueSelector = new IntDomainLast(lastSolution, valueSelector,
+                            (x, v) -> {
+                                int c = 0;
+                                for (int idx = 0; idx < dvars.length; idx++) {
+                                    if (dvars[idx]
+                                        .isInstantiatedTo(lastSolution.getIntVal(dvars[idx]))) {
+                                        c++;
+                                    }
+                                }
+                                double d = (c * 1. / dvars.length);
+                                double r = Math.exp(-t[0]++ / 25);
+                                if (solver.getRestartCount() > t[1]) {
+                                    t[1] += 150;
+                                    t[0] = 0;
+                                }
+                                return d > r;
+                            });
                     }
                     solver.setSearch(new DomOverWDeg(dvars, 0, valueSelector));
+                }
+                break;
+                case 6: {
+                    IntValueSelector valueSelector;
+                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(getModel().getObjective() instanceof IntVar)) {
+                        valueSelector = new IntDomainMin();
+                    } else {
+                        valueSelector = new IntDomainBest();
+                    }
+                    solver.setSearch(new DomOverWDeg(dvars, 0, valueSelector));
+                }
+                break;
+                case 7: {
+                    IntValueSelector valueSelector;
+                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(getModel().getObjective() instanceof IntVar)) {
+                        valueSelector = new IntDomainMin();
+                    } else {
+                        valueSelector = new IntDomainBest();
+                        Solution lastSolution = new Solution(getModel(), dvars);
+                        solver.attach(lastSolution);
+                        valueSelector = new IntDomainLast(lastSolution, valueSelector, null);
+                    }
+                    solver.setSearch(new DomOverWDeg(dvars, 0, valueSelector));
+                }
+                break;
+                case 8: {
+                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(getModel().getObjective() instanceof IntVar)) {
+                        solver.setSearch(new DomOverWDeg(dvars, 0, new IntDomainMin()));
+                    } else {
+                        IntValueSelector valueSelector = new IntDomainBest();
+                        Solution lastSolution = new Solution(getModel(), dvars);
+                        solver.attach(lastSolution);
+
+                        solver.setSearch(
+                            new ConditionalSequencer(
+                                new AbstractStrategy[]{
+                                    new DomOverWDeg(dvars, 0, valueSelector),
+                                    new DomOverWDeg(dvars, 0,
+                                        new IntDomainLast(lastSolution, valueSelector, null))
+                                }, new ICondition[]{
+                                () -> solver.getTimeCount() > 250,
+                                () -> false
+                            }
+                            )
+                        );
+                    }
+                }
+                break;
+                case 9: {
+                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                        || !(getModel().getObjective() instanceof IntVar)) {
+                        solver.setSearch(new DomOverWDeg(dvars, 0, new IntDomainMin()));
+                    } else {
+                        IntValueSelector valueSelector = new IntDomainBest();
+                        Solution lastSolution = new Solution(getModel(), dvars);
+                        solver.attach(lastSolution);
+
+                        solver.setSearch(
+                            new InTurnSequencer(
+                                new AbstractStrategy[]{
+                                    new DomOverWDeg(dvars, 0,
+                                        new IntDomainLast(lastSolution, valueSelector, null)),
+                                    new DomOverWDeg(dvars, 0, valueSelector),
+                                }, value -> solver.getTimeCount() > value, 30
+                            )
+                        );
+                    }
                 }
                 break;
             }
             solver.setNoGoodRecordingFromRestarts();
             solver.setNoGoodRecordingFromSolutions(dvars);
-            solver.setLubyRestart(500, new FailCounter(getModel(), 500), 5000);
+            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500),
+                5000);
             solver.setSearch(lastConflict(solver.getSearch()));
 
         } else if (nb_cores == 1 && free) { // add last conflict
@@ -283,7 +375,8 @@ public abstract class RegParser implements IParser {
             solver.setSearch(Search.defaultSearch(solver.getModel()));
             solver.setNoGoodRecordingFromRestarts();
             solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
-            solver.setLubyRestart(500, new FailCounter(getModel(), 0), 5000);
+            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(1),
+                5000);
         }
         for (int i = 0; i < nb_cores; i++) {
             if (tl_ > -1) {

@@ -8,23 +8,22 @@
  */
 package org.chocosolver.parser.xcsp;
 
+import java.io.ByteArrayInputStream;
+import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
 import org.xcsp.checker.SolutionChecker;
-
-import java.io.ByteArrayInputStream;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
 
 /**
  * Created by cprudhom on 01/09/15.
@@ -119,7 +118,7 @@ public class XCSP extends RegParser {
             Solver solver = target.getSolver();
             solver.setSearch(Search.defaultSearch(target));
             solver.setNoGoodRecordingFromRestarts();
-            solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
         }
     }
 
