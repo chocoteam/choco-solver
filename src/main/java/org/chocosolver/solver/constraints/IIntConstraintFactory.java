@@ -118,7 +118,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param table an array of values
      */
     default Constraint member(IntVar var, int[] table) {
-        return new Member(var, table);
+        return new Member(var, new IntIterableRangeSet(table));
     }
 
     /**
@@ -172,7 +172,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param table an array of values
      */
     default Constraint notMember(IntVar var, int[] table) {
-        return new NotMember(var, table);
+        return new NotMember(var, new IntIterableRangeSet(table));
     }
 
     /**
