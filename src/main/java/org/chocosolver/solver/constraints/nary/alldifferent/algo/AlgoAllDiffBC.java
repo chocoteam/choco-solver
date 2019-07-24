@@ -15,6 +15,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
 
 import java.util.Comparator;
+import org.chocosolver.util.tools.MathUtils;
 
 public class AlgoAllDiffBC {
 
@@ -68,13 +69,13 @@ public class AlgoAllDiffBC {
         MAX {
             @Override
             public final int compare(Interval o1, Interval o2) {
-                return o1.ub - o2.ub;
+                return MathUtils.safeSubstract(o1.ub, o2.ub);
             }
         },
         MIN {
             @Override
             public final int compare(Interval o1, Interval o2) {
-                return o1.lb - o2.lb;
+                return MathUtils.safeSubstract(o1.lb,o2.lb);
             }
         },;
     }
