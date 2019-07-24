@@ -129,55 +129,27 @@ public class JSONConstraintWriter extends ConstraintWriter {
     }
 
     @Override
-    public void writeMember(int id, int a, int b) throws IOException {
+    public void writeMember(int id, IntIterableRangeSet values) throws IOException {
         writer.beginObject();
         writer.name("type");
         writer.value("member");
         writer.name("params");
         writer.beginArray();
         writeVar(id);
-        writer.value(a);
-        writer.value(b);
+        writer.value(values.toSmartString());
         writer.endArray();
         writer.endObject();
     }
 
     @Override
-    public void writeNotMember(int id, int a, int b) throws IOException {
+    public void writeNotMember(int id, IntIterableRangeSet values) throws IOException {
         writer.beginObject();
         writer.name("type");
         writer.value("notmember");
         writer.name("params");
         writer.beginArray();
         writeVar(id);
-        writer.value(a);
-        writer.value(b);
-        writer.endArray();
-        writer.endObject();
-    }
-
-    @Override
-    public void writeMember(int id, int[] values) throws IOException {
-        writer.beginObject();
-        writer.name("type");
-        writer.value("member");
-        writer.name("params");
-        writer.beginArray();
-        writeVar(id);
-        writeIntArray(values);
-        writer.endArray();
-        writer.endObject();
-    }
-
-    @Override
-    public void writeNotMember(int id, int[] values) throws IOException {
-        writer.beginObject();
-        writer.name("type");
-        writer.value("notmember");
-        writer.name("params");
-        writer.beginArray();
-        writeVar(id);
-        writeIntArray(values);
+        writer.value(values.toSmartString());
         writer.endArray();
         writer.endObject();
     }

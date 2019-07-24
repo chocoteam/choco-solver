@@ -310,32 +310,12 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
 
     private Constraint makeMember(JsonArray jparams, Model model) {
         IntVar v1 = ModelDeserializer.getIntVar(jparams.get(0).getAsString());
-        JsonElement elm = jparams.get(1);
-        if (elm.isJsonArray()) {
-            JsonArray array = elm.getAsJsonArray();
-            int[] values = new int[array.size()];
-            for (int i = 0; i < array.size(); i++) {
-                values[i] = array.get(i).getAsInt();
-            }
-            return model.member(v1, values);
-        } else {
-            return model.member(v1, elm.getAsInt(), jparams.get(2).getAsInt());
-        }
+        return model.member(v1, JSONHelper.convert(jparams.get(1).getAsString()));
     }
 
     private Constraint makeNotMember(JsonArray jparams, Model model) {
         IntVar v1 = ModelDeserializer.getIntVar(jparams.get(0).getAsString());
-        JsonElement elm = jparams.get(1);
-        if (elm.isJsonArray()) {
-            JsonArray array = elm.getAsJsonArray();
-            int[] values = new int[array.size()];
-            for (int i = 0; i < array.size(); i++) {
-                values[i] = array.get(i).getAsInt();
-            }
-            return model.notMember(v1, values);
-        } else {
-            return model.notMember(v1, elm.getAsInt(), jparams.get(2).getAsInt());
-        }
+        return model.notMember(v1, JSONHelper.convert(jparams.get(1).getAsString()));
     }
 
     private Constraint makeArithm(JsonArray jparams, Model model) {

@@ -412,30 +412,12 @@ public abstract class ConstraintWriter {
     public abstract void writeArithm2(int id1, Operator op, int id2) throws IOException;
 
     /**
-     * Encodes a member constraint like "X in [a,b]"
-     *
-     * @param id variable's ID (X)
-     * @param a  minimum value of the range
-     * @param b  maximum value of the range
-     */
-    public abstract void writeMember(int id, int a, int b) throws IOException;
-
-    /**
-     * Encodes a not member constraint like "X not in [a,b]"
-     *
-     * @param id variable's ID (X)
-     * @param a  minimum value of the range
-     * @param b  maximum value of the range
-     */
-    public abstract void writeNotMember(int id, int a, int b) throws IOException;
-
-    /**
      * Encodes a member constraint like "X in {values,...}"
      *
      * @param id     variable's ID (X)
      * @param values a set of int
      */
-    public abstract void writeMember(int id, int[] values) throws IOException;
+    public abstract void writeMember(int id, IntIterableRangeSet values) throws IOException;
 
     /**
      * Encodes a not member constraint like "X not in {values,...}"
@@ -443,7 +425,7 @@ public abstract class ConstraintWriter {
      * @param id     variable's ID (X)
      * @param values a set of int
      */
-    public abstract void writeNotMember(int id, int[] values) throws IOException;
+    public abstract void writeNotMember(int id, IntIterableRangeSet  values) throws IOException;
 
     /**
      * Encodes an arithmetic constraint like "X op Y + c"

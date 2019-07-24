@@ -8,14 +8,11 @@
  */
 package org.chocosolver.writer.constraints.unary;
 
-import gnu.trove.set.hash.TIntHashSet;
-
-import org.chocosolver.util.Reflection;
-import org.chocosolver.writer.constraints.ConstraintWriter;
+import java.io.IOException;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
-
-import java.io.IOException;
+import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.constraints.ConstraintWriter;
 
 /**
  * <p> Project: choco-json.
@@ -62,30 +59,16 @@ public class UnaryWriterHelper {
     public static void writeMember(ConstraintWriter writer, Propagator prop) throws IOException {
         String name = prop.getClass().getSimpleName();
         switch (name) {
-            case "PropMemberBound":
+            case "PropMember":
                 writer.writeMember(
                         prop.getVar(0).getId(),
-                        Reflection.getInt(prop, "lb"),
-                        Reflection.getInt(prop, "ub"));
+                        Reflection.getObj(prop, "range"));
                 break;
-            case "PropNotMemberBound":
+            case "PropNotMember":
                 writer.writeNotMember(
                         prop.getVar(0).getId(),
-                        Reflection.getInt(prop, "lb"),
-                        Reflection.getInt(prop, "ub"));
+                    Reflection.getObj(prop, "range"));
                 break;
-            case "PropMemberEnum": {
-                writer.writeMember(
-                        prop.getVar(0).getId(),
-                        Reflection.<TIntHashSet>getObj(prop, "values").toArray());
-            }
-            break;
-            case "PropNotMemberEnum": {
-                writer.writeNotMember(
-                        prop.getVar(0).getId(),
-                        Reflection.<TIntHashSet>getObj(prop, "values").toArray());
-            }
-            break;
         }
     }
 }
