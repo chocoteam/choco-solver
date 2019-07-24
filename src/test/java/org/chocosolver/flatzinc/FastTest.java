@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -99,22 +99,22 @@ public class FastTest {
     @DataProvider(name = "close<1m")
     public Object[][] provider1() {
         return new Object[][]{
-                {pre2012 + "amaze+amaze+2012-03-15.fzn", 1, 1429, 139370, true},
-                {pre2012 + "amaze+amaze+2012-03-19.fzn", 1, 447, 58121, true},
-                {pre2012 + "amaze+amaze+2012-06-22.fzn", 1, 928, 5007, true},
-                {pre2012 + "amaze+amaze+2012-07-04.fzn", 1, 481, 243, true},
+                {pre2012 + "amaze+amaze+2012-03-15.fzn", 1, 1429, 465563, true},
+                {pre2012 + "amaze+amaze+2012-03-19.fzn", 1, 447, 137735, true},
+                {pre2012 + "amaze+amaze+2012-06-22.fzn", 1, 928, 11221, true},
+                {pre2012 + "amaze+amaze+2012-07-04.fzn", 1, 481, 490, true},
                 {pre2012 + "fast-food+fastfood+ff3.fzn", 195, 1330, 71699, true},
                 {pre2012 + "fast-food+fastfood+ff59.fzn", 109, 242, 275063, true},
                 {pre2012 + "fast-food+fastfood+ff61.fzn", 99, 152, 318924, true},
                 {pre2012 + "fast-food+fastfood+ff63.fzn", 87, 103, 155177, true},
-                {pre2012 + "filters+filter+ar_1_2.fzn", 4, 18, 67400, true},
+                {pre2012 + "filters+filter+ar_1_2.fzn", 4, 18, 67180, true},
                 {pre2012 + "filters+filter+dct_1_1.fzn", 1, 34, 49, true},
                 {pre2012 + "filters+filter+ewf_1_1.fzn", 1, 28, 37, true},
                 {pre2012 + "filters+filter+fir_1_1.fzn", 1, 18, 24, true},
                 {pre2012 + "filters+filter+fir16_1_1.fzn", 1, 35, 34, true},
-                {pre2012 + "mspsp+mspsp+easy_01.fzn", 5, 26, 1251640, true},
+                {pre2012 + "mspsp+mspsp+easy_01.fzn", 5, 26, 1251639, true},
                 {pre2012 + "mspsp+mspsp+medium_02.fzn", 2, 15, 2048096, true},
-                {pre2012 + "mspsp+mspsp+medium_03.fzn", 5, 26, 1251640, true},
+                {pre2012 + "mspsp+mspsp+medium_03.fzn", 5, 26, 1251639, true},
                 {pre2012 + "mspsp+mspsp+medium_05.fzn", 3, 18, 2623938, true},
                 {pre2012 + "nonogram+non+non_fast_4.fzn", 1, 0, 43069, true},
                 {pre2012 + "nonogram+non+non_fast_8.fzn", 1, 0, 1932, true},
@@ -124,16 +124,16 @@ public class FastTest {
                 {pre2012 + "pattern-set-mining-k2+pattern_set_mining_k2+audiology.fzn", 38, 54, 212187, true},
                 {pre2012 + "radiation+radiation+m06_15_15.fzn", 1, 711, 307742, true},
                 {pre2012 + "ship-schedule+ship-schedule.cp+5Ships.fzn", 359, 483650, 3139, true},
-                {pre2012 + "ship-schedule+ship-schedule.cp+6ShipsMixed.fzn", 237, 301650, 16089, true},
+                {pre2012 + "ship-schedule+ship-schedule.cp+6ShipsMixed.fzn", 237, 301650, 16101, true},
                 {pre2012 + "solbat+sb+sb_12_12_5_1.fzn", 1, 0, 1315, true},
-                {pre2012 + "solbat+sb+sb_13_13_5_4.fzn", 1, 0, 75419, true},
+                {pre2012 + "solbat+sb+sb_13_13_5_4.fzn", 1, 0, 75414, true},
                 {pre2012 + "solbat+sb+sb_14_14_6_0.fzn", 1, 0, 383, true},
-                {pre2012 + "still-life-wastage+still-life+09.fzn", 8, 43, 109471, true},
-                {pre2012 + "still-life-wastage+still-life+10.fzn", 9, 54, 164574, true},
-                {pre2012 + "tpp+tpp+tpp_3_5_20_1.fzn", 74, 127, 3751495, true},
-                {pre2012 + "tpp+tpp+tpp_5_3_20_1.fzn", 68, 141, 3526578, true},
-                {pre2012 + "tpp+tpp+tpp_5_5_20_1.fzn", 54, 115, 3215964, true},
-                {pre2012 + "tpp+tpp+tpp_7_5_20_1.fzn", 76, 105, 5869333, true},
+                {pre2012 + "still-life-wastage+still-life+09.fzn", 25, 43, 109471, true},
+                {pre2012 + "still-life-wastage+still-life+10.fzn", 27, 54, 164574, true},
+                {pre2012 + "tpp+tpp+tpp_3_5_20_1.fzn", 74, 127, 3751494, true},
+                {pre2012 + "tpp+tpp+tpp_5_3_20_1.fzn", 68, 141, 3526579, true},
+                {pre2012 + "tpp+tpp+tpp_5_5_20_1.fzn", 54, 115, 1265506, true},
+                {pre2012 + "tpp+tpp+tpp_7_5_20_1.fzn", 76, 105, 5868697, true},
         };
     }
 

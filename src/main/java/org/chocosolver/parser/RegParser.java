@@ -1,7 +1,7 @@
 /**
  * This file is part of choco-parsers, https://github.com/chocoteam/choco-parsers
  *
- * Copyright (c) 2018, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
@@ -18,7 +18,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
-import org.chocosolver.memory.ICondition;
 import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
@@ -36,9 +35,6 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.search.strategy.strategy.ConditionalSequencer;
-import org.chocosolver.solver.search.strategy.strategy.InTurnSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
@@ -315,51 +311,6 @@ public abstract class RegParser implements IParser {
                         valueSelector = new IntDomainLast(lastSolution, valueSelector, null);
                     }
                     solver.setSearch(new DomOverWDeg(dvars, 0, valueSelector));
-                }
-                break;
-                case 8: {
-                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
-                        || !(getModel().getObjective() instanceof IntVar)) {
-                        solver.setSearch(new DomOverWDeg(dvars, 0, new IntDomainMin()));
-                    } else {
-                        IntValueSelector valueSelector = new IntDomainBest();
-                        Solution lastSolution = new Solution(getModel(), dvars);
-                        solver.attach(lastSolution);
-
-                        solver.setSearch(
-                            new ConditionalSequencer(
-                                new AbstractStrategy[]{
-                                    new DomOverWDeg(dvars, 0, valueSelector),
-                                    new DomOverWDeg(dvars, 0,
-                                        new IntDomainLast(lastSolution, valueSelector, null))
-                                }, new ICondition[]{
-                                () -> solver.getTimeCount() > 250,
-                                () -> false
-                            }
-                            )
-                        );
-                    }
-                }
-                break;
-                case 9: {
-                    if (getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION
-                        || !(getModel().getObjective() instanceof IntVar)) {
-                        solver.setSearch(new DomOverWDeg(dvars, 0, new IntDomainMin()));
-                    } else {
-                        IntValueSelector valueSelector = new IntDomainBest();
-                        Solution lastSolution = new Solution(getModel(), dvars);
-                        solver.attach(lastSolution);
-
-                        solver.setSearch(
-                            new InTurnSequencer(
-                                new AbstractStrategy[]{
-                                    new DomOverWDeg(dvars, 0,
-                                        new IntDomainLast(lastSolution, valueSelector, null)),
-                                    new DomOverWDeg(dvars, 0, valueSelector),
-                                }, value -> solver.getTimeCount() > value, 30
-                            )
-                        );
-                    }
                 }
                 break;
             }
