@@ -38,7 +38,17 @@ public class INeighborFactory {
      * @return a random neighborhood fixing variables randomly
      */
     public static IntNeighbor random(IntVar... vars) {
-        return new RandomNeighborhood(vars, 3, 0);
+        return random(0, vars);
+    }
+
+    /**
+     * Create a random neighborhood fixing variables randomly
+     * @param seed   the seed for randomness
+     * @param vars   the pool of variables to be freezed
+     * @return a random neighborhood fixing variables randomly
+     */
+    public static IntNeighbor random(int seed, IntVar... vars) {
+        return new RandomNeighborhood(vars, 3, seed);
     }
 
     /**
@@ -48,7 +58,18 @@ public class INeighborFactory {
      * @return a propagation-guided neighborhood
      */
     public static IntNeighbor propagationGuided(IntVar... vars) {
-        return new PropagationGuidedNeighborhood(vars, 30, 10, 0);
+        return propagationGuided(0, vars);
+    }
+
+    /**
+     * Create a propagation guided neighborhood fixing variables based on constraint propagation
+     * Based on "Propagation-Guided LNS", Perronn Shaw and Furnon, CP2004
+     * @param seed     the seed for randomness
+     * @param vars     the pool of variables to be freezed
+     * @return a propagation-guided neighborhood
+     */
+    public static IntNeighbor propagationGuided(int seed, IntVar... vars) {
+        return new PropagationGuidedNeighborhood(vars, 30, 10, seed);
     }
 
     /**
@@ -57,7 +78,17 @@ public class INeighborFactory {
      * @return a reverse propagation-guided neighborhood
      */
     public static IntNeighbor reversedPropagationGuided(IntVar... vars) {
-        return new ReversePropagationGuidedNeighborhood(vars, 0, 30, 10);
+        return reversedPropagationGuided(10, vars);
+    }
+
+    /**
+     * Create a reverse propagation guided neighborhood fixing variables based on constraint propagation
+     * @param seed      the seed for randomness
+     * @param vars      the pool of variables to be freezed
+     * @return a reverse propagation-guided neighborhood
+     */
+    public static IntNeighbor reversedPropagationGuided(int seed, IntVar... vars) {
+        return new ReversePropagationGuidedNeighborhood(vars, 0, 30, seed);
     }
 
 	/**
