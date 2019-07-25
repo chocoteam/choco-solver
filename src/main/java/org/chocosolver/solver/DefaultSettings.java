@@ -15,6 +15,8 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.ESat;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -93,6 +95,19 @@ public class DefaultSettings implements Settings {
 
 
     public DefaultSettings() {
+        // when assert is on, the assert properties is load
+        assert loadAssert():"Cannot load Assert.properties";
+    }
+
+    private boolean loadAssert(){
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
+        try {
+            this.load(inStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
