@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
+import org.chocosolver.util.criteria.Criterion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -51,7 +52,7 @@ public abstract class AbstractDisjunctiveTest {
             Model[] models = buildModels(values);
             int[] nbSolutions = new int[2];
             for(int j = 0; j<nbSolutions.length; j++) {
-                nbSolutions[j] = models[j].getSolver().findAllSolutions(null).size();
+                nbSolutions[j] = models[j].getSolver().findAllSolutions(() -> false).size();
 //                System.out.println(j+":"+nbSolutions[j]);
             }
 
@@ -77,9 +78,28 @@ public abstract class AbstractDisjunctiveTest {
         model.post(new Constraint("DISJUNCTIVE",
                 new PropagatorDisjunctive(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
 
-        int nbSolution = model.getSolver().findAllSolutions(null).size();
+        int nbSolution = model.getSolver().findAllSolutions(() -> false).size();
 
         Assert.assertEquals(nbSolution, 6336);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void test1() {
+        int[][] values = new int[][]{
+                new int[]{66, 72, 11, 77, 83},
+                new int[]{10, 76, 5, 15, 81},
+                new int[]{46, 72, 14, 60, 86}
+        };
+
+        Model model = new Model();
+        Task[] tasks = AbstractCumulativeTest.buildTasks(values, model);
+
+        model.post(new Constraint("DISJUNCTIVE",
+                new PropagatorDisjunctive(tasks, propagator(tasks), propagator(AbstractCumulativeTest.buildOpposite(tasks)))));
+
+        int nbSolution = model.getSolver().findAllSolutions(() -> false).size();
+
+        Assert.assertEquals(nbSolution, 2688);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -93,7 +113,7 @@ public abstract class AbstractDisjunctiveTest {
         Model[] models = buildModels(values);
         int[] nbSolutions = new int[2];
         for(int j = 0; j<nbSolutions.length; j++) {
-            nbSolutions[j] = models[j].getSolver().findAllSolutions(null).size();
+            nbSolutions[j] = models[j].getSolver().findAllSolutions(() -> false).size();
 //                System.out.println(j+":"+nbSolutions[j]);
         }
 

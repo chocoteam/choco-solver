@@ -79,7 +79,7 @@ public class PropDisjunctiveVilim2009 extends DisjunctiveFilter {
                 j = Q.removeAt(0);
                 thetaLambdaTree.addToTheta(j);
             }
-            if(getEnvWithouti(i)>tasks[i].getStart().getUB()) {
+            if(i!=j && getEnvWithouti(i)>tasks[i].getStart().getUB()) {
                 hasFiltered |= tasks[i].getEnd().updateUpperBound(tasks[j].getStart().getUB(), aCause);
             }
         }
