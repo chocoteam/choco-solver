@@ -31,7 +31,7 @@ public class IntDomainMiddle implements IntValueSelector {
 
     // VARIABLES
     public final static boolean FLOOR = true;
-    private final static ToDoubleFunction<IntVar> MIDEDEF = var -> (var.getLB() + var.getUB()) / 2;
+    private final static ToDoubleFunction<IntVar> MIDEDEF = var -> (var.getLB() + var.getUB()) / 2.;
     private final boolean roundingPolicy;
     private final ToDoubleFunction<IntVar> middle;
 

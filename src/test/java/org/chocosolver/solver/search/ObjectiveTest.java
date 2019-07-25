@@ -10,8 +10,10 @@
 package org.chocosolver.solver.search;
 
 
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.reification.PropConditionnal;
@@ -21,6 +23,9 @@ import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -33,18 +38,10 @@ import java.util.Random;
 
 import static java.lang.Math.floorDiv;
 import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.chocosolver.util.ESat.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -331,7 +328,8 @@ public class ObjectiveTest {
             best = objective.getValue();
         }
         assertEquals(best, 34);
-        assertEquals(model.getSolver().getSolutionCount(), 13);
+        assertEquals(model.getSolver().getSolutionCount(), 7);
+        assertEquals(model.getSolver().getNodeCount(), 1432);
     }
     
     
@@ -442,5 +440,45 @@ public class ObjectiveTest {
         assertEquals(om2.getBestSolutionValue(), om1.getBestSolutionValue());
         assertNotNull(om2.toString());
         assertNull(om2.getObjective());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testCP1() {
+        Model model = makeGolombRuler(9);
+        IntVar objective = (IntVar) model.getHook("objective");
+        IntVar[] ticks = (IntVar[]) model.getHook("ticks");
+        Solver solver = model.getSolver();
+        model.setObjective(Model.MINIMIZE, objective);
+        Solution solution = new Solution(model, ticks);
+        solver.attach(solution);
+        int[] t = new int[2];
+
+        solver.setSearch(new DomOverWDeg(ticks, 0L,
+            new IntDomainLast(solution, new IntDomainBest(),
+            (x, v) -> {
+                int c = 0;
+                for (int idx = 0; idx < ticks.length; idx++) {
+                    if (ticks[idx].isInstantiatedTo(solution.getIntVal(ticks[idx]))) {
+                        c++;
+                    }
+                }
+                double d =  (c * 1. / ticks.length);
+                double r = Math.exp(-t[0]++ / 25);
+                if (solver.getRestartCount() > t[1]) {
+                    t[1] += 150;
+                    t[0] = 0;
+                }
+                return d > r;
+            }
+            )
+        ));
+        solver.setRestarts(c -> solver.getFailCount() > c, new LubyCutoffStrategy(2), 512);
+        solver.setNoGoodRecordingFromSolutions(ticks);
+        solver.showShortStatistics();
+        while (model.getSolver().solve()) {
+            ;
+        }
+        assertEquals(model.getSolver().isStopCriterionMet(), false);
+        assertEquals(solver.getBestSolutionValue(), 44);
     }
 }

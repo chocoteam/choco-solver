@@ -10,15 +10,6 @@
 package org.chocosolver.solver.constraints;
 
 
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOf;
-import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
-import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
-import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
-
-import java.util.Arrays;
-import java.util.function.Consumer;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
@@ -38,6 +29,16 @@ import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import java.util.Arrays;
+import java.util.function.Consumer;
+
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.copyOf;
+import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
+import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
+import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -898,16 +899,15 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Apply scheduling instruction
      * @param queues array of queues in which this can be scheduled
-     * @return 0 if already scheduled, its priority otherwise
+     * @return propagator priority
      */
     public int doSchedule(CircularQueue<Propagator>[] queues){
+        int prio = priority.priority;
         if(!scheduled) {
-            int prio = priority.priority;
             queues[prio].addLast(this);
             schedule();
-            return prio;
         }
-        return 0;
+        return prio;
     }
 
     public void doScheduleEvent(int pindice, int mask){

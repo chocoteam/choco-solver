@@ -8,6 +8,16 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Closed issues and pull requests:
+    
+    
+4.10.1 - 26 Jun 2019
+-------------------
+
+### Major features:
 - LNS on other variables (e.g. SetVarLNS)
 - Continuous integration fixed
 - `IntDomainMiddle` now allows an external definition of what middle is, thanks to `ToDoubleFunction<IntVar>`
@@ -15,7 +25,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
-\#611, #615, #617
+\#538, #600, #611, #612, #613, #614, #615, #617, #619, #627, #630
 
 4.10.0 - 12 Dec 2018
 -------------------
