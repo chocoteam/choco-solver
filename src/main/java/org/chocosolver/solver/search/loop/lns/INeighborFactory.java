@@ -47,7 +47,7 @@ public class INeighborFactory {
      * @param vars   the pool of variables to be freezed
      * @return a random neighborhood fixing variables randomly
      */
-    public static IntNeighbor random(int seed, IntVar... vars) {
+    public static IntNeighbor random(long seed, IntVar... vars) {
         return new RandomNeighborhood(vars, 3, seed);
     }
 
@@ -68,7 +68,7 @@ public class INeighborFactory {
      * @param vars     the pool of variables to be freezed
      * @return a propagation-guided neighborhood
      */
-    public static IntNeighbor propagationGuided(int seed, IntVar... vars) {
+    public static IntNeighbor propagationGuided(long seed, IntVar... vars) {
         return new PropagationGuidedNeighborhood(vars, 30, 10, seed);
     }
 
@@ -87,7 +87,7 @@ public class INeighborFactory {
      * @param vars      the pool of variables to be freezed
      * @return a reverse propagation-guided neighborhood
      */
-    public static IntNeighbor reversedPropagationGuided(int seed, IntVar... vars) {
+    public static IntNeighbor reversedPropagationGuided(long seed, IntVar... vars) {
         return new ReversePropagationGuidedNeighborhood(vars, 0, 30, seed);
     }
 
