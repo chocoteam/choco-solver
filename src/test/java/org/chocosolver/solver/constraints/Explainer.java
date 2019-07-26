@@ -32,6 +32,7 @@ public class Explainer {
     public static HashMap<IntVar, IntIterableRangeSet> execute(Solver solver, IntProcedure proc, ICause cause, IntVar v) throws ContradictionException {
         solver.setLearningSignedClauses();
         solver.propagate();
+        solver.getEventObserver().pushDecisionLevel();
         proc.execute(0);
         solver.propagate();
         LearnSignedClauses<ExplanationForSignedClause> learner

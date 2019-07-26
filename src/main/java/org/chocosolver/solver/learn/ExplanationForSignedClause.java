@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.learn;
 
+import java.util.HashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
@@ -27,8 +28,6 @@ import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
-
-import java.util.HashMap;
 
 /**
  * An implementation of {@link IExplanation} dedicated to learn signed clauses
@@ -273,7 +272,9 @@ public class ExplanationForSignedClause extends IExplanation {
      */
     private boolean stop() {
         int max;
-        if (front.isEmpty() || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())) {
+        if (front.isEmpty()
+            || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
+            || mIG.getDecisionLevelAt(max) == 1) {
             if (PROOF) System.out.print("\nbacktrack to ROOT\n-----");
             assertLevel = mIG.getIntVarAt(0)
                     .getModel()

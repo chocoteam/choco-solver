@@ -26,8 +26,9 @@ public interface Learn {
 
     /**
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
+     * @return <i>true</i> if something is learned (one or more clauses)
      */
-    void record(Solver solver);
+    boolean record(Solver solver);
 
     /**
      * Forget some pieces of knowledge.

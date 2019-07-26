@@ -124,6 +124,11 @@ public class EventRecorder extends AbstractEventObserver {
         }
     }
 
+    @Override
+    public void pushDecisionLevel() {
+        mIG.tagDecisionLevel();
+    }
+
     public Optional<Implications> getGI() {
         return Optional.of(mIG);
     }

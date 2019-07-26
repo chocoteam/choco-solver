@@ -43,7 +43,6 @@ public class PropagateBasic implements Propagate {
         //WARNING: keep the order as is (read javadoc for more details)
         solver.getDecisionPath().buildNext();
         solver.getObjectiveManager().postDynamicCut();
-        solver.getEngine().propagate();
         solver.getDecisionPath().apply();
         solver.getEngine().propagate();
     }

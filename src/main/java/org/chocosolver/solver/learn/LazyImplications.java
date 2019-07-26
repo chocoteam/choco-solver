@@ -140,6 +140,10 @@ public class LazyImplications extends Implications {
      * Number of active entries in {@link #entries}
      */
     private int nbEntries;
+    /**
+     * Inform when a decision level changes
+     */
+    private boolean tagDl;
 
     /**
      * Create lazily built implication graph

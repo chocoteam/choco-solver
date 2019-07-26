@@ -10,6 +10,7 @@
 package org.chocosolver.solver;
 
 import static org.chocosolver.solver.Solver.Action.extend;
+import static org.chocosolver.solver.Solver.Action.fixpoint;
 import static org.chocosolver.solver.Solver.Action.initialize;
 import static org.chocosolver.solver.Solver.Action.propagate;
 import static org.chocosolver.solver.Solver.Action.repair;
@@ -93,6 +94,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
          * propagation step
          */
         propagate,
+        /**
+         * fixpoint step
+         */
+        fixpoint,
         /**
          * extension step
          */
@@ -292,6 +297,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 case propagate:
                     propagate(left);
                     break;
+                case fixpoint:
+                    fixpoint();
+                    break;
                 case extend:
                     left = true;
                     extend();
@@ -412,6 +420,21 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.afterDownBranch(left);
     }
 
+    private void fixpoint() {
+        try {
+            mMeasures.incFixpointCount();
+            objectivemanager.postDynamicCut();
+            engine.propagate();
+            action = propagate;
+        } catch (ContradictionException ce) {
+            engine.flush();
+//            mMeasures.incFailCount();
+            jumpTo = 1;
+            action = repair;
+            searchMonitors.onContradiction(ce);
+        }
+    }
+
     /**
      * Search loop extend phase
      */
@@ -430,11 +453,16 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Search loop repair phase
      */
     protected void repair(){
-        L.record(this);
+        if(L.record(this)){
+            // this is done before the reparation,
+            // since restart is a move which can stop the search if the cut fails
+            action = fixpoint;
+        }else{
+            // this is done before the reparation,
+            // since restart is a move which can stop the search if the cut fails
+            action = propagate;
+        }
         searchMonitors.beforeUpBranch();
-        // this is done before the reparation,
-        // since restart is a move which can stop the search if the cut fails
-        action = propagate;
         canBeRepaired = M.repair(this);
         searchMonitors.afterUpBranch();
         if (!canBeRepaired) {
