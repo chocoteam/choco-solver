@@ -77,7 +77,9 @@ public class DefaultSettings implements Settings {
 
     private boolean swapOnPassivate = false;
 
-    private boolean checkDeclaredConstraints = false;
+    private boolean checkDeclaredConstraints = true;
+
+    private boolean printAllUndeclaredConstraints = false;
 
     private byte hybridEngine = 0b00;
 
@@ -329,6 +331,17 @@ public class DefaultSettings implements Settings {
     @Override
     public DefaultSettings setCheckDeclaredConstraints(boolean checkDeclaredConstraints) {
         this.checkDeclaredConstraints = checkDeclaredConstraints;
+        return this;
+    }
+
+    @Override
+    public boolean printAllUndeclaredConstraints() {
+        return printAllUndeclaredConstraints;
+    }
+
+    @Override
+    public Settings setPrintAllUndeclaredConstraints(boolean printAllUndeclaredConstraints) {
+        this.printAllUndeclaredConstraints = printAllUndeclaredConstraints;
         return this;
     }
 

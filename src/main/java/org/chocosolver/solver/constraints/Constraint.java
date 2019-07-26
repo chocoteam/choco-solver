@@ -226,6 +226,24 @@ public class Constraint {
     }
 
     /**
+     * When a constraint has been declared but neither posted or reified,
+     * a call to {@link #ignore()} ensures this constraint will be ignored
+     * when declared constraints are checked.
+     */
+    public final void ignore(){
+        assert mStatus == Status.FREE:"Cannot ignore a posted or reified constraint";
+        Model model = propagators[0].getModel();
+        if(model.getSettings().checkDeclaredConstraints()) {
+            @SuppressWarnings("unchecked")
+            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+            if(instances == null){
+                instances = new HashSet<>();
+                model.addHook("cinstances", instances);
+            }
+            instances.remove(this);
+        }
+    }
+    /**
      * For internal usage only, declare the status of this constraint in the model
      * and, if need be, its position in the constraint list.
      * @param aStatus status of this constraint in the model
@@ -236,6 +254,20 @@ public class Constraint {
         checkNewStatus(aStatus);
         mStatus = aStatus;
         cidx = idx;
+        Model model = propagators[0].getModel();
+        if(model.getSettings().checkDeclaredConstraints()) {
+            @SuppressWarnings("unchecked")
+            Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
+            if(instances == null){
+                instances = new HashSet<>();
+                model.addHook("cinstances", instances);
+            }
+            if(mStatus != Status.FREE) {
+                instances.remove(this);
+            }else{
+                instances.add(this);
+            }
+        }
     }
 
     /**

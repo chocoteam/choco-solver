@@ -9,12 +9,6 @@
  */
 package org.chocosolver.solver.constraints;
 
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-
-import java.util.Arrays;
-import java.util.Random;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -26,6 +20,13 @@ import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * <br/>
@@ -292,28 +293,28 @@ public class ConstraintTest {
         );
         Propagator[] propagators = vars[0].getPropagators();
 
-        Assert.assertEquals(vars[0].getPIndices(), new int[]{0,1,0,0,0,0,0,0});
+        Assert.assertEquals(vars[0].getPIndices(), new int[]{0, 1, 0, 0, 0, 0, 0, 0});
         Assert.assertEquals(vars[0].getPropagators(), propagators);
 
-        Assert.assertEquals(vars[1].getPIndices(), new int[]{1,0,0,0,0,0,0,0});
-        Assert.assertEquals(Arrays.copyOfRange(vars[1].getPropagators(), 0,2), new Propagator[]{propagators[0], propagators[1]});
+        Assert.assertEquals(vars[1].getPIndices(), new int[]{1, 0, 0, 0, 0, 0, 0, 0});
+        Assert.assertEquals(Arrays.copyOfRange(vars[1].getPropagators(), 0, 2), new Propagator[]{propagators[0], propagators[1]});
 
-        Assert.assertEquals(vars[2].getPIndices(), new int[]{2,0,0,0,0,0,0,0});
-        Assert.assertEquals(Arrays.copyOfRange(vars[2].getPropagators(), 0,1), new Propagator[]{propagators[0]});
+        Assert.assertEquals(vars[2].getPIndices(), new int[]{2, 0, 0, 0, 0, 0, 0, 0});
+        Assert.assertEquals(Arrays.copyOfRange(vars[2].getPropagators(), 0, 1), new Propagator[]{propagators[0]});
 
-        Assert.assertEquals(propagators[0].getVIndices(), new int[]{0,0,0});
-        Assert.assertEquals(propagators[1].getVIndices(), new int[]{1,1});
+        Assert.assertEquals(propagators[0].getVIndices(), new int[]{0, 0, 0});
+        Assert.assertEquals(propagators[1].getVIndices(), new int[]{1, 1});
         Assert.assertEquals(propagators[2].getVIndices(), new int[]{2});
         Assert.assertEquals(propagators[3].getVIndices(), new int[]{3});
 
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testJiTee1(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJiTee1() {
         Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
         Model model = new Model("model");
-        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
-        IntVar dim_A = model.intVar("dim_A", new int[] {150, 195, 270, 370, 470});
+        IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
+        IntVar dim_A = model.intVar("dim_A", new int[]{150, 195, 270, 370, 470});
         model.arithm(dim_A, "<=", 271).post();
         model.arithm(load, ">", 400).post();
         model.getEnvironment().worldPush();
@@ -323,24 +324,26 @@ public class ConstraintTest {
         for (int round = 0; round < 350; round++) {
             //a constraint at each round: post and unpost
             int reqInt = (round % 100);
-            if(c!=null)model.unpost(c);
+            if (c != null) model.unpost(c);
             c = model.arithm(dim_A, ">", 5 * reqInt);
             c.post();
-            while (model.getSolver().solve()) {}
-            Assert.assertEquals(model.getSolver().getSolutionCount()>0, 5 * reqInt < 270);
+            while (model.getSolver().solve()) {
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount() > 0, 5 * reqInt < 270);
             model.getEnvironment().worldPopUntil(0);
             model.getSolver().hardReset();
             model.getEnvironment().worldPush();
         }
 
     }
-    @Test(groups="1s", timeOut=60000)
-    public void testJiTee2(){
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJiTee2() {
         Constraint stickyCstr = null;
         Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
         Model model = new Model("model");
-        IntVar load = model.intVar("load", new int[] {0, 100, 200, 300, 400, 500, 600, 700});
-        IntVar dim_A = model.intVar("dim_A", new int[] {150, 195, 270, 370, 470});
+        IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
+        IntVar dim_A = model.intVar("dim_A", new int[]{150, 195, 270, 370, 470});
         model.arithm(dim_A, "<=", 271).post();
         model.arithm(load, ">", 400).post();
         model.getEnvironment().worldPush();
@@ -351,7 +354,7 @@ public class ConstraintTest {
             //Randomly unpost a sticky constraint that remains between iterations. Probability of unpost() annd permanent removal is higher than creation and post()
             if (stickyCstr != null) {
                 int r = rr.nextInt(100);
-                if (r <=12 ) {
+                if (r <= 12) {
                     model.unpost(stickyCstr);
                     stickyCstr = null;
                 }
@@ -366,14 +369,15 @@ public class ConstraintTest {
             int r = 0;
             if (stickyCstr == null) {
                 r = rr.nextInt(100);
-                if (r <=7) {
-                    stickyCstr = model.arithm(load ,"=", r*100 );
+                if (r <= 7) {
+                    stickyCstr = model.arithm(load, "=", r * 100);
                     reqLoad = r * 100;
                     model.post(stickyCstr);
                 }
             }
-            while (model.getSolver().solve()) {}
-            Assert.assertEquals(model.getSolver().getSolutionCount() == 0, reqInt >= 270 || (stickyCstr != null && reqLoad < 500) , ""+round);
+            while (model.getSolver().solve()) {
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount() == 0, reqInt >= 270 || (stickyCstr != null && reqLoad < 500), "" + round);
             model.unpost(c);
             model.getEnvironment().worldPopUntil(0);
             model.getSolver().hardReset();
@@ -381,9 +385,11 @@ public class ConstraintTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testAmIMeYet(){
-        Model model = new Model(new DefaultSettings().setWarnUser(true).setCheckDeclaredConstraints(true));
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAmIMeYet() {
+        Model model = new Model("model", new DefaultSettings()
+                .setCheckDeclaredConstraints(true)
+                .setPrintAllUndeclaredConstraints(true));
 
         IntVar varA = model.intVar("A", 0, 1);
         IntVar varB = model.intVar("B", 0, 1);
@@ -398,22 +404,24 @@ public class ConstraintTest {
         solver.findAllSolutions();
     }
 
-    @Test(groups="10s", timeOut=60000)
-    public void testJitee2(){
-        Model model = new Model("model", new DefaultSettings().setCheckDeclaredConstraints(false));
-        IntVar a= model.intVar("a", 0, 1000, false);
-        IntVar b= model.intVar("b", 0, 100, false);
+    @Test(groups = "10s", timeOut = 60000)
+    public void testJitee2() {
+        Model model = new Model("model", new DefaultSettings()
+                .setCheckDeclaredConstraints(true)
+                .setPrintAllUndeclaredConstraints(true));
+        IntVar a = model.intVar("a", 0, 1000, false);
+        IntVar b = model.intVar("b", 0, 100, false);
 
         IntVar ten = model.intVar(10);
         Constraint modC = model.mod(a, ten, b);
         modC.post();
 
-        int i=0;
+        int i = 0;
 
-        for (int aNow =a.getLB(); aNow<a.getUB(); aNow++) {
+        for (int aNow = a.getLB(); aNow < a.getUB(); aNow++) {
             Constraint ra = model.arithm(a, "=", aNow);
             model.post(ra);
-            for (int bNow =b.getLB(); bNow < b.getUB(); bNow++) {
+            for (int bNow = b.getLB(); bNow < b.getUB(); bNow++) {
                 Constraint rb = model.arithm(b, "=", bNow);
                 model.post(rb);
                 while (model.getSolver().solve()) {

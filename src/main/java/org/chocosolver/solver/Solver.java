@@ -9,21 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import static org.chocosolver.solver.Solver.Action.extend;
-import static org.chocosolver.solver.Solver.Action.initialize;
-import static org.chocosolver.solver.Solver.Action.propagate;
-import static org.chocosolver.solver.Solver.Action.repair;
-import static org.chocosolver.solver.Solver.Action.validate;
-import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -55,6 +40,13 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+
+import java.io.PrintStream;
+import java.util.*;
+
+import static org.chocosolver.solver.Solver.Action.*;
+import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * This class is inspired from :
@@ -327,10 +319,18 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.getSettings().checkDeclaredConstraints() && mModel.getSettings().warnUser()) {
             //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
-            instances
+            Optional<Constraint> undeclared = instances
                     .stream()
                     .filter(c -> c.getStatus() == FREE)
-                    .forEach(c -> getErr().printf("%s is free (neither posted or reified).\n", c.toString()));
+                    .findFirst();
+            if (undeclared.isPresent()) {
+                getErr().print("At least one constraint is free, i.e., neither posted or reified. ).\n");
+                instances
+                        .stream()
+                        .filter(c -> c.getStatus() == FREE)
+                        .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE : 1)
+                        .forEach(c -> getErr().printf("%s is free\n", c.toString()));
+            }
         }
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
@@ -675,7 +675,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public <V extends Variable> AbstractStrategy<V> getSearch() {
         if (M.getChildMoves().size() > 1 && mModel.getSettings().warnUser()) {
-            err.print("This search loop is based on a sequential Move, the strategy returned may not reflect the reality.");
+            err.print("This search loop is based on a sequential Move, the returned strategy may not reflect the reality.");
         }
         return M.getStrategy();
     }

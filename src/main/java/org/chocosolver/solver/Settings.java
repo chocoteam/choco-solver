@@ -153,6 +153,7 @@ public interface Settings {
         properties.setProperty("satsolver.activate", Boolean.toString(enableSAT()));
         properties.setProperty("propagators.swap", Boolean.toString(swapOnPassivate()));
         properties.setProperty("constraints.check", Boolean.toString(checkDeclaredConstraints()));
+        properties.setProperty("constraints.check.printall", Boolean.toString(printAllUndeclaredConstraints()));
         properties.setProperty("propagationEngine.hybridization", Byte.toString(enableHybridizationOfPropagationEngine()));
         properties.setProperty("learnt.nbMax", Integer.toString(this.getNbMaxLearntClauses()));
         properties.setProperty("learnt.ratio", Float.toString(this.getRatioForClauseStoreReduction()));
@@ -461,6 +462,19 @@ public interface Settings {
      * @return the current instance
      */
     Settings setCheckDeclaredConstraints(boolean checkDeclaredConstraints);
+
+    /**
+     * @return <i>true</i> to list all undeclared constraint, <i>false</i> (default value) otherwise.
+     * Only active when {@link #checkDeclaredConstraints()} is on.
+     */
+    boolean printAllUndeclaredConstraints();
+
+    /**
+     * Indicate if all undeclared constraints are listed on console when {@link #checkDeclaredConstraints()} is on.
+     * @param printAllUndeclaredConstraints  {@code true} to list all undeclared constraints
+     * @return the current instance
+     */
+    Settings setPrintAllUndeclaredConstraints(boolean printAllUndeclaredConstraints);
 
     /**
      * This method is called in {@link Model#Model(IEnvironment, String, Settings)} to create the

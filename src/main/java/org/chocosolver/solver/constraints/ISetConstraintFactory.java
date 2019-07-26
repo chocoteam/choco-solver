@@ -399,8 +399,10 @@ public interface ISetConstraintFactory {
 	 * @return a constraint which ensures that <i>sets</i> forms a partition of <i>universe</i>
 	 */
 	default Constraint partition(SetVar[] sets, SetVar universe) {
+		Constraint allDisjoint = allDisjoint(sets);
+		allDisjoint.ignore();
 		return new Constraint(ConstraintsName.SETPARTITION, ArrayUtils.append(
-				allDisjoint(sets).getPropagators(),
+				allDisjoint.getPropagators(),
 				new Propagator[]{new PropUnion(sets, universe), new PropUnion(sets, universe)}
 		));
 	}
