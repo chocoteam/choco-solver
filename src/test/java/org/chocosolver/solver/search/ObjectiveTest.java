@@ -10,6 +10,23 @@
 package org.chocosolver.solver.search;
 
 
+import static java.lang.Math.floorDiv;
+import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertNull;
+
+import java.io.IOException;
+import java.util.Random;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
@@ -32,16 +49,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
-
-import java.io.IOException;
-import java.util.Random;
-
-import static java.lang.Math.floorDiv;
-import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.search.strategy.Search.*;
-import static org.chocosolver.util.ESat.*;
-import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -329,7 +336,7 @@ public class ObjectiveTest {
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getNodeCount(), 1432);
+        assertEquals(model.getSolver().getNodeCount(), 1497);
     }
     
     
