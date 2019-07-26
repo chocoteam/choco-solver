@@ -388,6 +388,7 @@ public class Constraint {
     public static Constraint merge(String name, Constraint... toMerge) {
         ArrayList<Propagator> props = new ArrayList<>();
         for (Constraint c : toMerge) {
+            c.ignore();
             Collections.addAll(props, c.getPropagators());
         }
         return new Constraint(name, props.toArray(new Propagator[0]));
