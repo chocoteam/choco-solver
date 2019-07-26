@@ -9,18 +9,14 @@
 # 1. Stage: Compilation of Choco in a Build Stage
 
 # Using the same image as for the MiniZinc Challenge
-FROM ubuntu:16.04 AS builder
+FROM ubuntu:18.04 AS builder
 
 LABEL maintainer="Charles.Prudhomme@imt-atlantique.fr"
 
 # Updating & installing necessary packages
 RUN apt-get update && \
-	apt-get install software-properties-common -y && \
- 	add-apt-repository ppa:webupd8team/java -y && \
-	apt-get update && \
-	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections  && \
 	apt-get install -y  \
-	oracle-java8-installer \
+	openjdk-11-jdk \
 	maven \
 	git
 
@@ -46,20 +42,17 @@ RUN cd /choco-parsers/ && \
 # 2. Stage: Setup of Choco in the MiniZinc Challenge docker image
 
 # Using the MiniZinc Challenge docker image
-FROM minizinc/mznc2018:1.0
+FROM minizinc/mznc2019:1.0
 
 # Install Java 8
 RUN apt-get update && \
-	apt-get install software-properties-common -y && \
- 	add-apt-repository ppa:webupd8team/java -y && \
-	apt-get update && \
-	echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections  && \
-	apt-get install -y oracle-java8-installer
+	apt-get install -y  \
+	openjdk-11-jdk
 
 
 # Copy Choco's executable from the previous stage across
 COPY --from=builder /choco-parsers/src/main/bash/fzn-exec.sh /entry_data/fzn-exec
-COPY --from=builder /choco-parsers/target/choco-parsers-4.0.5-SNAPSHOT-with-dependencies.jar /entry_data/choco-parsers.jar
+COPY --from=builder /choco-parsers/target/choco-parsers-4.0.6-SNAPSHOT-with-dependencies.jar /entry_data/choco-parsers.jar
 
 # Update execution script
 RUN sed -i 's&DIR=.*&DIR=/entry_data&g' /entry_data/fzn-exec

@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public class FznSettings extends DefaultSettings {
 
-    private boolean print = true;
+    private boolean print = false;
 
     private boolean adhocReification = true;
 
