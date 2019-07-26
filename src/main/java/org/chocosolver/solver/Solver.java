@@ -316,7 +316,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     protected boolean initialize() {
         boolean ok = true;
-        if (mModel.getSettings().checkDeclaredConstraints() && mModel.getSettings().warnUser()) {
+        if (mModel.getSettings().checkDeclaredConstraints()) {
             //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
             Optional<Constraint> undeclared = instances
