@@ -15,7 +15,6 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.ESat;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -105,7 +104,7 @@ public class DefaultSettings implements Settings {
         InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
         try {
             this.load(inStream);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }

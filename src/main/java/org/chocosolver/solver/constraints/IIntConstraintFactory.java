@@ -1360,7 +1360,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Constraint alldiff1 = allDifferent(vars1, "");
         alldiff1.ignore();
         Constraint alldiff2 = allDifferent(vars2, "");
-        alldiff1.ignore();
+        alldiff2.ignore();
         return new Constraint(ConstraintsName.INVERSECHANNELING, ArrayUtils.append(
                 alldiff1.getPropagators(),
                 alldiff2.getPropagators(),
