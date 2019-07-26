@@ -319,10 +319,13 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.getSettings().checkDeclaredConstraints()) {
             //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
-            Optional<Constraint> undeclared = instances
-                    .stream()
-                    .filter(c -> c.getStatus() == FREE)
-                    .findFirst();
+            Optional<Constraint> undeclared = Optional.empty();
+            if(instances!=null) {
+                undeclared = instances
+                        .stream()
+                        .filter(c -> c.getStatus() == FREE)
+                        .findFirst();
+            }
             if (undeclared.isPresent()) {
                 getErr().print("At least one constraint is free, i.e., neither posted or reified. ).\n");
                 instances
