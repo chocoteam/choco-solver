@@ -9,7 +9,9 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.Search;
@@ -92,7 +94,8 @@ public class CryptoTest {
     public void testCS71234(String table){
         //initialize the Tuples: Xor_3_path, Xor_2_path, L_path
         Gen_path();
-        Model model = new Model();
+        Settings settings = new DefaultSettings().setWarnUser(false);
+        Model model = new Model(settings);
 
     	/*   declare all vars at round    */
         IntVar[][] input_at_round = model.intVarMatrix("in", R + 1, block, 0, 1);

@@ -15,6 +15,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.ESat;
 
+import java.io.InputStream;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -75,7 +76,9 @@ public class DefaultSettings implements Settings {
 
     private boolean swapOnPassivate = false;
 
-    private boolean checkDeclaredConstraints = false;
+    private boolean checkDeclaredConstraints = true;
+
+    private boolean printAllUndeclaredConstraints = false;
 
     private byte hybridEngine = 0b00;
 
@@ -93,6 +96,19 @@ public class DefaultSettings implements Settings {
 
 
     public DefaultSettings() {
+        // when assert is on, the assert properties is load
+        assert loadAssert():"Cannot load Assert.properties";
+    }
+
+    private boolean loadAssert(){
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
+        try {
+            this.load(inStream);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -314,6 +330,17 @@ public class DefaultSettings implements Settings {
     @Override
     public DefaultSettings setCheckDeclaredConstraints(boolean checkDeclaredConstraints) {
         this.checkDeclaredConstraints = checkDeclaredConstraints;
+        return this;
+    }
+
+    @Override
+    public boolean printAllUndeclaredConstraints() {
+        return printAllUndeclaredConstraints;
+    }
+
+    @Override
+    public Settings setPrintAllUndeclaredConstraints(boolean printAllUndeclaredConstraints) {
+        this.printAllUndeclaredConstraints = printAllUndeclaredConstraints;
         return this;
     }
 

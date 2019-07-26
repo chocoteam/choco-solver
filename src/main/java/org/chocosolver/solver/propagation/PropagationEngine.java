@@ -95,6 +95,7 @@ public class PropagationEngine {
      * Each of the seven queues deals with on priority.
      * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
      * The lowest priority queue is emptied before one element of the second lowest queue is popped, etc.
+     *
      * @param model the declaring model
      */
     public PropagationEngine(Model model) {
@@ -115,6 +116,7 @@ public class PropagationEngine {
      * Build up internal structure, if not yet done, in order to allow propagation.
      * If new constraints are added after having initializing the engine, dynamic addition is used.
      * A call to clear erase the internal structure, and allow new initialisation.
+     *
      * @throws SolverException if a constraint is declared more than once in this propagation engine
      */
     public void initialize() throws SolverException {
@@ -155,33 +157,34 @@ public class PropagationEngine {
     /**
      * Launch the proapagation, ie, active propagators if necessary, then reach a fix point
      *
-     * @throws ContradictionException if a contradiction occurrs
+     * @throws ContradictionException if a contradiction occurs
      */
     @SuppressWarnings({"NullableProblems"})
     public void propagate() throws ContradictionException {
         activatePropagators();
         do {
             manageModifications();
-            for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(0)) {
-                while (!pro_queue[i].isEmpty()) {
-                    lastProp = pro_queue[i].pollFirst();
-                    // revision of the variable
-                    lastProp.unschedule();
-                    delayedPropagationType = 0;
-                    if (lastProp.reactToFineEvent()) {
-                        lastProp.doFinePropagation();
-                        // now we can check whether a delayed propagation has been scheduled
-                        if (delayedPropagationType > 0) {
-                            lastProp.propagate(delayedPropagationType);
-                        }
-                    } else if (lastProp.isActive()) { // need to be checked due to views
-                        lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+            for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
+                assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
+                lastProp = pro_queue[i].pollFirst();
+                // revision of the variable
+                lastProp.unschedule();
+                delayedPropagationType = 0;
+                if (lastProp.reactToFineEvent()) {
+                    lastProp.doFinePropagation();
+                    // now we can check whether a delayed propagation has been scheduled
+                    if (delayedPropagationType > 0) {
+                        lastProp.propagate(delayedPropagationType);
                     }
-                    if (hybrid < 0b01) {
-                        manageModifications();
-                    }
+                } else if (lastProp.isActive()) { // need to be checked due to views
+                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
                 }
-                notEmpty = notEmpty & ~(1 << i);
+                if (hybrid < 0b01) {
+                    manageModifications();
+                }
+                if (pro_queue[i].isEmpty()) {
+                    notEmpty &= ~(1 << i);
+                }
             }
         } while (!var_queue.isEmpty());
     }
@@ -201,6 +204,7 @@ public class PropagationEngine {
     /**
      * Execute 'coarse' propagation on a newly added propagator
      * or one that should be propagated on backtrack
+     *
      * @param propagator a propagator to propagate
      * @throws ContradictionException if propagation fails
      */
@@ -224,13 +228,9 @@ public class PropagationEngine {
         }
     }
 
-    private int nextNotEmpty(int fromIndex) {
-        int word = notEmpty & (WORD_MASK << fromIndex);
-        if (word != 0) {
-            return Integer.numberOfTrailingZeros(word);
-        } else {
-            return -1;
-        }
+    private int nextNotEmpty() {
+        if (notEmpty == 0) return -1;
+        return Integer.numberOfTrailingZeros(notEmpty);
     }
 
     /**
@@ -243,7 +243,7 @@ public class PropagationEngine {
         while (!var_queue.isEmpty()) {
             var_queue.pollLast().clearEvents();
         }
-        for (int i = nextNotEmpty(0); i > -1; i = nextNotEmpty(i + 1)) {
+        for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
             while (!pro_queue[i].isEmpty()) {
                 // revision of the variable
                 pro_queue[i].pollLast().doFlush();
@@ -258,7 +258,7 @@ public class PropagationEngine {
      *
      * @param variable modified variable
      * @param type     type of modification event
-     * @param cause origin of the modification
+     * @param cause    origin of the modification
      */
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         if (CHECK_SCOPE && Propagator.class.isAssignableFrom(cause.getClass())) {
@@ -300,13 +300,14 @@ public class PropagationEngine {
 
     public void schedule(Propagator prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
-        notEmpty = notEmpty | (1 << prop.doSchedule(pro_queue));
+        notEmpty |= (1 << prop.doSchedule(pro_queue));
     }
 
     /**
      * Exeucte a delayed propagator
+     *
      * @param propagator propagator to execute
-     * @param type type of event to execute
+     * @param type       type of event to execute
      */
     public void delayedPropagation(Propagator propagator, PropagatorEventType type) {
         assert propagator == lastProp;
@@ -316,6 +317,7 @@ public class PropagationEngine {
 
     /**
      * Action to do when a propagator is executed
+     *
      * @param propagator propagator to execute
      */
     public void onPropagatorExecution(Propagator propagator) {
@@ -364,7 +366,7 @@ public class PropagationEngine {
      *
      * @param permanent does the constraint is permanently added
      * @param ps        propagators to add
-     * * @throws SolverException if a constraint is declared more than once in this propagation engine
+     *                  * @throws SolverException if a constraint is declared more than once in this propagation engine
      */
     public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException {
         int nbp = ps.length;
@@ -481,8 +483,8 @@ public class PropagationEngine {
             }
         }
 
-        private void removeAt(int p){
-            if(p < size - 1) {
+        private void removeAt(int p) {
+            if (p < size - 1) {
                 System.arraycopy(elements, p + 1, elements, p, size - p);
                 System.arraycopy(keys, p + 1, keys, p, size - p);
             }
