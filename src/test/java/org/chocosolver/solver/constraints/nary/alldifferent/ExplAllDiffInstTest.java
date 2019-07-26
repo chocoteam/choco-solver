@@ -17,6 +17,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.testng.Assert;
@@ -63,12 +64,16 @@ public class ExplAllDiffInstTest {
         IntVar a = mo.intVar("a", 2, 4);
         IntVar b = mo.intVar("b", 2, 4);
         IntVar c = mo.intVar("c", 2, 4);
+        IntVar d = mo.intVar("d", 2, 4);
         PropAllDiffInst prop = new PropAllDiffInst(new IntVar[]{a, b, c});
         mo.post(new Constraint("test", prop));
         ExplanationForSignedClause.DEFAULT_X = false;
+        IntDecision dec = new IntDecision(null);
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(),
                         i -> {
+                            mo.getSolver().getEventObserver().pushDecisionLevel();
+                            d.instantiateTo(2, dec);
                             b.updateBounds(3, 4, Cause.Null);
                             c.updateBounds(4, 4, Cause.Null);
                         }, prop, a);
