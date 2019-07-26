@@ -91,23 +91,26 @@ public class LazyImplications extends Implications {
         int i;
         // index of direct predecessor (same variable)
         int p;
+        // decision level
+        int dl;
 
         @Override
         public String toString() {
-            return String.format("<%s, %s, %s, %s, %d, %d>", v.getName(), d, c, m, i, p);
+            return String.format("<%s, %s, %s, %s, %d, %d, %d>", v.getName(), d, c, m, i, p, dl);
         }
 
         Entry() {
             d = new IntIterableRangeSet();
         }
 
-        public void set(IntVar v, ICause c, int m, int e, int i, int p) {
+        public void set(IntVar v, ICause c, int m, int e, int i, int p, int dl) {
             this.v = v;
             this.c = c;
             this.m = m;
             this.e = e;
             this.i = i;
             this.p = p;
+            this.dl = dl;
         }
 
         public IntIterableRangeSet getD() {
@@ -164,7 +167,7 @@ public class LazyImplications extends Implications {
         for (IntVar var : ivars) {
             ensureCapacity();
             Entry root = entries[nbEntries] = new Entry();
-            root.set(var, Cause.Null, IntEventType.VOID.getMask(), 0, nbEntries, nbEntries);
+            root.set(var, Cause.Null, IntEventType.VOID.getMask(), 0, nbEntries, nbEntries,1);
             IntIterableSetUtils.copyIn(var, root.getD());
             rootEntries.put(var, root);
             nbEntries++;
@@ -208,6 +211,11 @@ public class LazyImplications extends Implications {
         }
         nbEntries = upto;
         assert !DEBUG || checkIntegrity();
+    }
+
+    @Override
+    public void tagDecisionLevel() {
+        tagDl = true;
     }
 
     @Override
@@ -346,7 +354,12 @@ public class LazyImplications extends Implications {
         } else {
             nentry.getD().clear();
         }
-        nentry.set(var, cause, evt.getMask(), one, nbEntries, prev.i);
+        int dl = entries[nbEntries-1].dl;
+        if(tagDl){
+            tagDl = false;
+            dl++;
+        }
+        nentry.set(var, cause, evt.getMask(), one, nbEntries, prev.i, dl);
         // make a (weak) copy of prev domain and update it wrt to current event
         createDomain(nentry.getD(), prev.d, evt, one);
         // connect everything
@@ -484,6 +497,11 @@ public class LazyImplications extends Implications {
     public int getValueAt(int idx) {
         assert MERGE_CONDITIONS == 0;
         return entries[idx].e;
+    }
+
+    @Override
+    public int getDecisionLevelAt(int idx) {
+        return entries[idx].dl;
     }
 
     @Override

@@ -107,6 +107,13 @@ public abstract class Implications {
     public abstract int getValueAt(int idx);
 
     /**
+     * Get the decision level declared in node <i>idx</i>
+     * @param idx position of the node to query
+     * @return the decision level declared in node <i>idx</i>
+     */
+    public abstract int getDecisionLevelAt(int idx);
+
+    /**
      * Get the {@link IntIterableRangeSet} that represents domain declared in node <i>idx</i>
      * @param idx position of the node to query
      * @return the domain declared in node <i>idx</i>
@@ -140,4 +147,6 @@ public abstract class Implications {
      * Undo the last event stored, use only when dealing with views.
      */
     public abstract void undoLastEvent();
+
+    public abstract void tagDecisionLevel();
 }
