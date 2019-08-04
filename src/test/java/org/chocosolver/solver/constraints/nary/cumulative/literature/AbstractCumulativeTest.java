@@ -126,7 +126,7 @@ public abstract class AbstractCumulativeTest {
             Model[] models = buildModels(values, heights, capacity);
             int[] nbSolutions = new int[2];
             for(int j = 0; j<nbSolutions.length; j++) {
-                nbSolutions[j] = models[j].getSolver().findAllSolutions(null).size();
+                nbSolutions[j] = models[j].getSolver().findAllSolutions(() -> false).size();
 //                System.out.println(j+":"+nbSolutions[j]);
             }
 
@@ -161,7 +161,7 @@ public abstract class AbstractCumulativeTest {
         IntVar cap = model.intVar(capacity);
         model.post(new Constraint("CUMULATIVE", new PropagatorCumulative(tasks, heightsVar, cap, propagator(tasks, heightsVar, cap), propagator(buildOpposite(tasks), heightsVar, cap))));
 
-        int nbSolution = model.getSolver().findAllSolutions(null).size();
+        int nbSolution = model.getSolver().findAllSolutions(() -> false).size();
 
         Assert.assertEquals(nbSolution, 2760);
     }
@@ -185,7 +185,7 @@ public abstract class AbstractCumulativeTest {
         IntVar cap = model.intVar(capacity);
         model.post(new Constraint("CUMULATIVE", new PropagatorCumulative(tasks, heightsVar, cap, propagator(tasks, heightsVar, cap), propagator(buildOpposite(tasks), heightsVar, cap))));
 
-        int nbSolution = model.getSolver().findAllSolutions(null).size();
+        int nbSolution = model.getSolver().findAllSolutions(() -> false).size();
 
         Assert.assertEquals(nbSolution, 11);
     }
