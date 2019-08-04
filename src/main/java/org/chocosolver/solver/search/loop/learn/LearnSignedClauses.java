@@ -57,7 +57,7 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
     /**
      * Build a learned able to learn signed clauses on conflicts and solutions.
      *
-     * @param solver   the solver to exploit
+     * @param solver the solver to exploit
      */
     public LearnSignedClauses(Solver solver) {
         this.mSolver = solver;
@@ -75,13 +75,14 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
     }
 
     @Override
-    public void record(Solver solver) {
+    public boolean record(Solver solver) {
         if (nbsol == solver.getSolutionCount()) {
             onFailure();
         } else {
             nbsol++;
             onSolution();
         }
+        return true;
     }
 
     @Override
@@ -93,7 +94,9 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
 
     private void onFailure() {
         ContradictionException cex = mSolver.getContradictionException();
-        assert (cex.v != null) || (cex.c != null) : this.getClass().getName() + ".onContradiction incoherent state";
+        assert
+            (cex.v != null) || (cex.c != null) :
+            this.getClass().getName() + ".onContradiction incoherent state";
         lastExplanation.learnSignedClause(cex);
 
         int upto = mSolver.getDecisionPath().size() - lastExplanation.getAssertingLevel();
@@ -103,10 +106,11 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
         int i = path.size() - 1;
         IntDecision dec = null;
         // skip refuted bottom decisions
-        while (i > 1 && !(dec = (IntDecision)path.getDecision(i)).hasNext() && dec.getArity() > 1) { /*i == 0 means ROOT */
+        while (i > 1 && !(dec = (IntDecision) path.getDecision(i)).hasNext()
+            && dec.getArity() > 1) { /*i == 0 means ROOT */
             i--;
         }
-        if(dec !=null && dec.getPosition() - lastExplanation.getAssertingLevel()>0){
+        if (dec != null && dec.getPosition() - lastExplanation.getAssertingLevel() > 0) {
             mSolver.getMeasures().incBackjumpCount();
         }
         assert upto >= 0 && upto <= mSolver.getDecisionPath().size();
@@ -119,16 +123,17 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
             lastExplanation.learnSolution(mSolver.getDecisionPath());
             mSolver.setJumpTo(-1);
         }*/
-        if(mSolver.getObjectiveManager().isOptimization()){
+        if (mSolver.getObjectiveManager().isOptimization()) {
             // specific case: we found a solution, now a cut is updated.
             // posting the cut will fail
             try {
                 mSolver.getObjectiveManager().postDynamicCut();
-                throw new UnsupportedOperationException("LearnSignedClauses: posting cut does not fail as expected.");
+                throw new UnsupportedOperationException(
+                    "LearnSignedClauses: posting cut does not fail as expected.");
             } catch (ContradictionException e) {
                 onFailure();
             }
-        }else{
+        } else {
             // extract the decision path to build the nogood
             lastExplanation.learnSolution(mSolver.getDecisionPath());
             mSolver.setJumpTo(-1);
@@ -137,7 +142,7 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
 
     private void addLearntConstraint() {
         if (lastExplanation != null && lastExplanation.getCardinality() > 0
-                && lastExplanation.getCardinality() <= max_card) {
+            && lastExplanation.getCardinality() <= max_card) {
             lastExplanation.extractConstraint(mSolver.getModel(), ngstore);
         }
     }

@@ -921,6 +921,7 @@ public class Model implements IModel {
                 // 1. look for the constraint c
                 int idx = c.getCidxInModel();
                 c.declareAs(Constraint.Status.FREE, -1);
+                c.ignore();
                 // 2. remove it from the network
                 Constraint cm = cstrs[--cIdx];
                 if (idx < cIdx) {

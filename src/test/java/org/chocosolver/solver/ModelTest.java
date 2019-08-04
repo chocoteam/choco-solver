@@ -9,21 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
-import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.MessageFormat;
-import java.util.List;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -37,6 +22,19 @@ import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.MessageFormat;
+import java.util.List;
+
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
+import static org.chocosolver.solver.variables.IntVar.MAX_INT_BOUND;
+import static org.chocosolver.solver.variables.IntVar.MIN_INT_BOUND;
+import static org.chocosolver.util.ESat.FALSE;
+import static org.chocosolver.util.ESat.TRUE;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -598,7 +596,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSettings2() throws IOException {
-        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("DefaultSettings.properties");
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
         Settings settings = new DefaultSettings().load(inStream);
         System.out.printf("%s\n",settings.getWelcomeMessage());
         settings.store(System.out, "Test");

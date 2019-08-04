@@ -24,12 +24,12 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 public class NotMember extends Constraint {
 
     private final IntVar var;
-    private final int[] values;
+    private final IntIterableRangeSet values;
     private final int lb, ub;
 
     // for JSON
     @SuppressWarnings("WeakerAccess")
-    protected NotMember(IntVar var, int lb, int ub, int[] values, Propagator prop) {
+    protected NotMember(IntVar var, int lb, int ub, IntIterableRangeSet values, Propagator prop) {
         super(ConstraintsName.NOTMEMBER, prop);
         this.var = var;
         this.values = values;
@@ -37,8 +37,8 @@ public class NotMember extends Constraint {
         this.ub = ub;
     }
 
-    public NotMember(IntVar var, int[] values) {
-        this(var, 0, 0, values, new PropNotMember(var, new IntIterableRangeSet(values)));
+    public NotMember(IntVar var, IntIterableRangeSet values) {
+        this(var, 0, 0, values, new PropNotMember(var, values));
     }
 
     public NotMember(IntVar var, int lowerbound, int upperbound) {

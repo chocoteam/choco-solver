@@ -17,8 +17,8 @@ import org.chocosolver.solver.Solver;
  */
 public class LearnNothing implements Learn {
     @Override
-    public void record(Solver solver) {
-        // nothing to do by default
+    public boolean record(Solver solver) {
+        return false;
     }
 
     @Override

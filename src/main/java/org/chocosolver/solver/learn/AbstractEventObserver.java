@@ -84,6 +84,8 @@ public abstract class AbstractEventObserver {
     public void instantiateTo(IntVar var, int val, ICause cause, int oldLB, int oldUB) {
     }
 
+    public void pushDecisionLevel(){}
+
     /**
      * Undo the last operation done
      */

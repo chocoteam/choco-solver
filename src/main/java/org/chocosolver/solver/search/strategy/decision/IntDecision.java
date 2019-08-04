@@ -63,6 +63,7 @@ public class IntDecision extends Decision<IntVar> {
     @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
+            var.getModel().getSolver().getEventObserver().pushDecisionLevel();
             assignment.apply(var, value, this);
         } else if (branch == 2) {
             assignment.unapply(var, value, this);

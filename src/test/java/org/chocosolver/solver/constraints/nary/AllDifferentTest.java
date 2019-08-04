@@ -9,19 +9,18 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Random;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-
-import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * <br/>
@@ -317,5 +316,21 @@ public class AllDifferentTest {
         assertEquals(X[14].getUB(), 16);
         assertEquals(X[14].getLB(), -16);
         assertEquals(X[14].getDomainSize(), 2);
+    }
+
+    @Test
+    public void testUF() throws ContradictionException {
+        Model choco = new Model();
+
+        IntVar x0 = choco.intVar(new int[]{0});
+        IntVar x1 = choco.intVar(new int[]{602499212});
+        IntVar x2 = choco.intVar(new int[]{-1578598400,-1578598399,-1578598398,-1578598395,-1578598394});
+
+        choco.post(choco.allDifferent(new IntVar[]{x0, x1, x2}, "BC"));
+        choco.getSolver().propagate();  // Throws contradiction (which is obviously incorrect)
+
+        System.out.println("x0 = " + x0); // should be left untouched
+        System.out.println("x1 = " + x1);  // should be left untouched
+        System.out.println("x2 = " + x2); // should be left untouched
     }
 }

@@ -9,6 +9,21 @@
  */
 package org.chocosolver.solver.learn;
 
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.search.strategy.Search.greedySearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
+import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
@@ -36,22 +51,6 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.util.Arrays.copyOfRange;
-import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.Search.greedySearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
 /**
  *
  * <p>
@@ -77,7 +76,7 @@ public class EventRecorderTest {
             assertFalse(model.getSolver().solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(r.getMeasures().getFailCount(), n - 1);
+            assertEquals(r.getMeasures().getFailCount(), n - 2);
         }
     }
 
@@ -96,7 +95,7 @@ public class EventRecorderTest {
             assertFalse(model.getSolver().solve());
 
             assertEquals(r.getMeasures().getNodeCount(), (n - 2) * 2);
-            assertEquals(r.getMeasures().getFailCount(), n - 1);
+            assertEquals(r.getMeasures().getFailCount(), n - 2);
         }
     }
 
@@ -153,7 +152,7 @@ public class EventRecorderTest {
             model.getSolver().setLearningSignedClauses();
             assertFalse(model.getSolver().solve());
             assertEquals(model.getSolver().getNodeCount(),  m - 1);
-            assertEquals(model.getSolver().getFailCount(), 3);
+            assertEquals(model.getSolver().getFailCount(), 2);
         }
     }
 
@@ -177,7 +176,7 @@ public class EventRecorderTest {
 
         assertFalse(model.getSolver().solve());
         assertEquals(model.getSolver().getNodeCount(),  4);
-        assertEquals(model.getSolver().getFailCount(), 3);
+        assertEquals(model.getSolver().getFailCount(), 2);
 
     }
 
@@ -204,7 +203,7 @@ public class EventRecorderTest {
 
         assertFalse(model.getSolver().solve());
         assertEquals(model.getSolver().getNodeCount(),  5);
-        assertEquals(model.getSolver().getFailCount(), 4);
+        assertEquals(model.getSolver().getFailCount(), 2);
     }
 
 
@@ -797,7 +796,6 @@ public class EventRecorderTest {
         };
         model.cumulative(tasks, new IntVar[]{height1, height2}, model.intVar(3)).post();
         model.arithm(start1, "=", start2).post();
-        ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = true;
         Solver solver = model.getSolver();
         solver.setLearningSignedClauses();
         solver.setSearch(Search.intVarSearch(
@@ -807,7 +805,6 @@ public class EventRecorderTest {
                 start1, start2));
 //
         solver.findSolution();
-        ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = false;
     }
 
     @DataProvider(name = "rcpspP")
@@ -819,7 +816,7 @@ public class EventRecorderTest {
         };
     }
 
-    @Test(groups = "1s,expl", timeOut = 60000, dataProvider = "rcpspP")
+    @Test(groups = "10s,expl", timeOut = 120000, dataProvider = "rcpspP")
     public void testRCPSP(int learn, int nbnodes) throws ContradictionException {
         int[] rc = {13, 13, 12, 15};
         int[][] rr = new int[][]{

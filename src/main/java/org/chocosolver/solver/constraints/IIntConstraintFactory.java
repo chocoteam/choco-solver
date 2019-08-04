@@ -118,7 +118,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param table an array of values
      */
     default Constraint member(IntVar var, int[] table) {
-        return new Member(var, table);
+        return new Member(var, new IntIterableRangeSet(table));
     }
 
     /**
@@ -172,7 +172,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param table an array of values
      */
     default Constraint notMember(IntVar var, int[] table) {
-        return new NotMember(var, table);
+        return new NotMember(var, new IntIterableRangeSet(table));
     }
 
     /**
@@ -1003,7 +1003,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     new PropCircuitSCC(vars, offset, conf)
             };
         }
-        return new Constraint(ConstraintsName.CIRCUIT, ArrayUtils.append(allDifferent(vars, "AC").propagators, props));
+        Constraint alldiff = allDifferent(vars, "AC");
+        alldiff.ignore();
+        return new Constraint(ConstraintsName.CIRCUIT, ArrayUtils.append(alldiff.propagators, props));
     }
 
     /**
@@ -1355,9 +1357,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
         Propagator ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
                 : new PropInverseChannelBC(vars1, vars2, offset1, offset2);
+        Constraint alldiff1 = allDifferent(vars1, "");
+        alldiff1.ignore();
+        Constraint alldiff2 = allDifferent(vars2, "");
+        alldiff2.ignore();
         return new Constraint(ConstraintsName.INVERSECHANNELING, ArrayUtils.append(
-                allDifferent(vars1, "").getPropagators(),
-                allDifferent(vars2, "").getPropagators(),
+                alldiff1.getPropagators(),
+                alldiff2.getPropagators(),
                 new Propagator[]{ip}
         ));
     }
@@ -1430,9 +1436,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint knapsack(IntVar[] occurrences, IntVar weightSum, IntVar energySum,
                                 int[] weight, int[] energy) {
+        Constraint scalar1 = scalar(occurrences, weight, "=", weightSum);
+        scalar1.ignore();
+        Constraint scalar2 = scalar(occurrences, energy, "=", energySum);
+        scalar2.ignore();
         return new Constraint(ConstraintsName.KNAPSACK, ArrayUtils.append(
-                scalar(occurrences, weight, "=", weightSum).propagators,
-                scalar(occurrences, energy, "=", energySum).propagators,
+                scalar1.propagators,
+                scalar2.propagators,
                 new Propagator[]{new PropKnapsack(occurrences, weightSum, energySum, weight, energy)}
         ));
     }
@@ -1866,8 +1876,10 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Model model = vars[0].getModel();
         IntVar nbLoops = model.intVar("nLoops", 0, n, true);
         nbLoops.add(subCircuitLength).eq(n).post();
+        Constraint alldiff = allDifferent(vars, "AC");
+        alldiff.ignore();
         return new Constraint(ConstraintsName.SUBCIRCUIT, ArrayUtils.append(
-                allDifferent(vars, "AC").getPropagators(),
+                alldiff.getPropagators(),
                 ArrayUtils.toArray(
                         new PropKLoops(vars, offset, nbLoops),
                         new PropSubcircuit(vars, offset, subCircuitLength),

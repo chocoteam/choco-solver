@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.learn;
 
+import java.util.HashMap;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
@@ -27,8 +28,6 @@ import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
-
-import java.util.HashMap;
 
 /**
  * An implementation of {@link IExplanation} dedicated to learn signed clauses
@@ -73,8 +72,8 @@ public class ExplanationForSignedClause extends IExplanation {
     /**
      * The decision to refute (ie, point to jump to wrt the current decision path).
      * @implSpec 0 represents the ROOT node,
-     *           any value greater than the decision path is ignored,
-     *           otherwise it represents the decision to refute in the decision path.
+     * any value greater than the decision path is ignored,
+     * otherwise it represents the decision to refute in the decision path.
      */
     private int assertLevel = 0;
     /**
@@ -190,7 +189,7 @@ public class ExplanationForSignedClause extends IExplanation {
 
     private void loop() {
         int current;
-        while (!stop()) {
+        do {
             current = front.pollLastValue();
             mIG.predecessorsOf(current, front);
             if (PROOF) {
@@ -204,7 +203,7 @@ public class ExplanationForSignedClause extends IExplanation {
             }
             // filter irrelevant nodes
             relax();
-        }
+        } while (!stop());
     }
 
     private void explain(ICause cause, int p) {
@@ -213,7 +212,7 @@ public class ExplanationForSignedClause extends IExplanation {
                         && Propagator.class.isAssignableFrom(cause.getClass())
                         && !PropSignedClause.class.isAssignableFrom(cause.getClass())
                         && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
-        ) {
+                ) {
             Propagator<IntVar> propagator = (Propagator<IntVar>) cause;
             Propagator.defaultExplain(propagator, this, front, mIG, p);
         } else {
@@ -266,14 +265,16 @@ public class ExplanationForSignedClause extends IExplanation {
     /**
      * Estimate if conflict analysis can stop:
      * <ul>
-     *     <li>the rightmost node in conflict is a decision</li>
-     *     <li>or it is above the first decision</li>
+     * <li>the rightmost node in conflict is a decision</li>
+     * <li>or it is above the first decision</li>
      * </ul>
      * @return <i>true</i> if the conflict analysis can stop
      */
     private boolean stop() {
         int max;
-        if (front.isEmpty() || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())) {
+        if (front.isEmpty()
+            || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
+            || mIG.getDecisionLevelAt(max) == 1) {
             if (PROOF) System.out.print("\nbacktrack to ROOT\n-----");
             assertLevel = mIG.getIntVarAt(0)
                     .getModel()
@@ -281,13 +282,33 @@ public class ExplanationForSignedClause extends IExplanation {
                     .getDecisionPath()
                     .getDecision(0)
                     .getPosition();
-        } else if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
-            if (PROOF)
-                System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
-            if (ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
-                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
+        } else
+            // check UIP
+            {
+            int prev = front.getLowerValue(max);
+            int dl = mIG.getDecisionLevelAt(max);
+            if (prev == -1 || mIG.getDecisionLevelAt(prev) != dl) {
+                // find backtrack point
+                while (max > 0 && !IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
+                    max--;
+                }
+                //assert mIG.getDecisionLevelAt(max) != dl;
+                assert IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass());
+                if (PROOF)
+                    System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
+                if (ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                    throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
+                }
+                assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
             }
-            assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
+            /*if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
+                if (PROOF)
+                    System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
+                if (ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                    throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
+                }
+                assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
+             */
         }
         return assertLevel != Integer.MAX_VALUE;
     }
@@ -296,28 +317,28 @@ public class ExplanationForSignedClause extends IExplanation {
      * Add a signed literal (<i>var</i> &isin; <i>dom</i>) to this explanation.
      * This is achieved in three steps:
      * <ol>
-     *     <li>signed binary resolution (where 'v' is the pivot variable):
-     *     <pre>
+     * <li>signed binary resolution (where 'v' is the pivot variable):
+     * <pre>
      *         (v &isin; A &or; X), (v &isin; B &or; Y) : (v &isin; (A&cap;B) &or; X &or; Y)
      *     </pre>
-     *     <li>
-     *         simplification:
-     *         <pre>
+     * <li>
+     * simplification:
+     * <pre>
      *             (v &isin; &empty; &or; Z) : (Z)
      *         </pre>
-     *     </li>
-     *     <li>
-     *         join literals:
-     *         <pre>
+     * </li>
+     * <li>
+     * join literals:
+     * <pre>
      *             ((&forall;i v &isin; Ai) &or; Z) : (v &isin; (&cup;i Ai) &or; Z)
      *         </pre>
-     *     </li>
+     * </li>
      *
      *
-     *     </li>
+     * </li>
      * </ol>
-     * @param var signed literal variable
-     * @param dom signed literal domain
+     * @param var   signed literal variable
+     * @param dom   signed literal domain
      * @param pivot <i>true</i> if <i>var</i> is the pivot variable
      */
     public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
