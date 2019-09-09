@@ -297,6 +297,9 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                         </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>org.chocosolver</Automatic-Module-Name>
+                        </manifestEntries>
                     </archive>
                     <finalName>${project.artifactId}-${project.version}-no-dep</finalName>
                 </configuration>
