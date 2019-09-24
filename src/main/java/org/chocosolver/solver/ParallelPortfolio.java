@@ -41,7 +41,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.criteria.Criterion;
 
 /**
  *
@@ -305,12 +304,12 @@ public class ParallelPortfolio {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @SuppressWarnings("unchecked")
-    private void prepare(){
+    public void prepare(){
         isPrepared = true;
         check();
         for(int i=0;i<models.size();i++){
             Solver s = models.get(i).getSolver();
-            s.addStopCriterion((Criterion) () -> getSolverTerminated().get());
+            s.addStopCriterion(() -> getSolverTerminated().get());
             s.plugMonitor((IMonitorSolution) () -> updateFromSolution(s.getModel()));
             if(searchAutoConf){
                 configureModel(i);
@@ -378,11 +377,11 @@ public class ParallelPortfolio {
             case 0:
                 // DWD  + fast restart + LC (+ B2V)
                 if(policy == ResolutionPolicy.SATISFACTION){
-                    solver.setSearch(new DomOverWDeg(ivars,0, new IntDomainMin()));
+                    solver.setSearch(new DomOverWDeg(ivars,workerID, new IntDomainMin()));
                 }else{
                     Solution solution = new Solution(worker, ivars);
                     solver.attach(solution);
-                    solver.setSearch(new DomOverWDeg(ivars,0,
+                    solver.setSearch(new DomOverWDeg(ivars,workerID,
                         new IntDomainLast(solution, new IntDomainBest(), null)));
                 }
                 solver.setNoGoodRecordingFromRestarts();
@@ -423,13 +422,13 @@ public class ParallelPortfolio {
             case 6:
                 // DWD  + fast restart + LC (+ B2V)
                 if(policy == ResolutionPolicy.SATISFACTION){
-                    solver.setSearch(new DomOverWDeg(ivars,0, new IntDomainMin()));
+                    solver.setSearch(new DomOverWDeg(ivars,workerID, new IntDomainMin()));
                 }else{
                     Solution solution = new Solution(worker, ivars);
                     solver.attach(solution);
                     IntVar[] finalIvars = ivars;
                     final int[] t = new int[2];
-                    solver.setSearch(new DomOverWDeg(ivars,0,
+                    solver.setSearch(new DomOverWDeg(ivars,workerID,
                         new IntDomainLast(solution, new IntDomainBest(), (x, v) -> {
                             int c = 0;
                             for (int idx = 0; idx < finalIvars.length; idx++) {
@@ -451,12 +450,16 @@ public class ParallelPortfolio {
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 7:
-                // DWD + LC + CDCL
-                solver.setSearch(new DomOverWDeg(ivars, 0, new IntDomainMin()));
-                solver.setSearch(lastConflict(solver.getSearch()));
-                solver.setLearningSignedClauses();
-                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
-                break;
+                if(policy == ResolutionPolicy.SATISFACTION) {
+                    // DWD  + very fast restart
+                    solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), workerID, new IntDomainMin()));
+                    solver.setNoGoodRecordingFromRestarts();
+                    solver.setLubyRestart(100, new FailCounter(worker, 0), 1000);
+                }else{
+                    // occurrence + LC
+                    solver.setSearch(Search.intVarSearch(new Occurrence<>(), new IntDomainMin(), worker.retrieveIntVars(true)));
+                    solver.setSearch(lastConflict(solver.getSearch()));
+                }
             default:
                 // random search (various seeds) + LNS if optim
                 solver.setSearch(lastConflict(randomSearch(ivars,workerID)));

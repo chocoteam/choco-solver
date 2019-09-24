@@ -14,6 +14,7 @@ import static java.lang.reflect.Array.newInstance;
 import gnu.trove.list.array.TIntArrayList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -656,13 +657,8 @@ public enum ArrayUtils {
         int[] ret = new int[nb];
         ArrayList<Integer> tmp = new ArrayList<>();
         for (int i = 0; i < nb; i++) tmp.add(i);
-
-        for (int i = 0; i < nb; i++) {
-            int idx = r.nextInt(tmp.size());
-            ret[i] = tmp.get(idx);
-        }
-
-        return ret;
+        Collections.shuffle(tmp);
+        return tmp.stream().mapToInt(i -> i).toArray();
 
     }
 
