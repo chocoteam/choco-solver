@@ -407,12 +407,12 @@ public class Search {
     }
 
     /**
-     *
-     * @param vars
-     * @param selected
-     * @param initial
-     * @param strategy
-     * @return
+     * Neighbourhood Search strategy
+     * @param vars variable concerned by the search
+     * @param selected variable for which the value need to be reused (if possible)
+     * @param initial the value we need to try to assign if the variable is selected
+     * @param strategy the strategy to apply if we can/don't select the variable
+     * @return the strategy
      */
     public static AbstractStrategy<IntVar> intNeighbourhoodSearch(IntVar[] vars, boolean[] selected, int[] initial, IntStrategy strategy) {
         List<Integer> initialValues = new LinkedList<>();
