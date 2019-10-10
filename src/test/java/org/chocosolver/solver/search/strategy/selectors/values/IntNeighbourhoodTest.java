@@ -73,13 +73,4 @@ public class IntNeighbourhoodTest {
         assertEquals(selected, valueSelector.selectValue(x), "as we don't have an initial value, we use the selected strategy");
     }
 
-    @Test
-    public void notSelected(){
-        IntNeighbourhood neighbourhood = new IntNeighbourhood(valueSelector, initialValue);
-        assertTrue(x.getDomainSize() > 0, "x needs to have at least a value");
-        int selected = neighbourhood.selectValue(x);
-        assertEquals(initialValue.size(), 0, "there is no initial value");
-        assertEquals(selected, valueSelector.selectValue(x), "as we don't have an initial value, we use the selected strategy");
-    }
-
 }
