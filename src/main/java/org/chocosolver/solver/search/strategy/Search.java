@@ -9,9 +9,8 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -415,10 +414,10 @@ public class Search {
      * @return the strategy
      */
     public static AbstractStrategy<IntVar> intNeighbourhoodSearch(IntVar[] vars, boolean[] selected, int[] initial, IntStrategy strategy) {
-        List<Integer> initialValues = new LinkedList<>();
+        Map<Integer, Integer> initialValues = new HashMap<>();
         for(int i = 0; i < vars.length; i++){
             if(selected[i]){
-                initialValues.add(i, initial[i]);
+                initialValues.put(vars[i].getId(), initial[i]);
             }
         }
         IntNeighbourhood valueSelector = new IntNeighbourhood(strategy.getValSelector(), initialValues);
