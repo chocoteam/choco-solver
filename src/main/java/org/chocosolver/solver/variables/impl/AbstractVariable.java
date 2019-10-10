@@ -467,7 +467,7 @@ public abstract class AbstractVariable implements Variable {
         assert cause != null:"an event's cause is not supposed to be null";
         if(this.cause == null){
             this.cause = cause;
-        }else{
+        }else if (this.cause != cause){
             this.cause = Cause.Null;
         }
         mask |= m;
