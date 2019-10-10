@@ -13,7 +13,7 @@ import java.util.Map;
 import static org.testng.Assert.*;
 
 /**
- * Test for the neighbourhood search strategy
+ * <br/>
  *
  * @author Pierre Tassel
  * @since 10/10/2019
