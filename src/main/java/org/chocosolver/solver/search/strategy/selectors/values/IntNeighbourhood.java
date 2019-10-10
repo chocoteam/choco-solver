@@ -2,9 +2,14 @@ package org.chocosolver.solver.search.strategy.selectors.values;
 
 import org.chocosolver.solver.variables.IntVar;
 
-import java.util.List;
 import java.util.Map;
 
+/**
+ * A Neighbourhood search to find a solution close to the original solution
+ *
+ * @author Pierre Tassel
+ * @since 10/10/2019
+ */
 public class IntNeighbourhood implements IntValueSelector {
 
     private IntValueSelector selector;

@@ -406,11 +406,15 @@ public class Search {
     }
 
     /**
-     * Neighbourhood Search strategy
+     * Neighbourhood Search strategy, try to find a solution close to an assignment given as input
+     * You can give initial value for some variables and the search is going to try to allocate the initial value if
+     * the value is still in the domain. Otherwise, we use another strategy.
+     *
      * @param vars variable concerned by the search
-     * @param selected variable for which the value need to be reused (if possible)
-     * @param initial the value we need to try to assign if the variable is selected
-     * @param strategy the strategy to apply if we can/don't select the variable
+     * @param selected select the variables for which the initial value needs to be reused
+     * @param initial the initial value we need to try to assign to the variable if selected
+     * @param strategy the strategy to apply to select variable and, if we can't/don't select an initial value, the
+     *                 Value Selector to apply
      * @return the strategy
      */
     public static AbstractStrategy<IntVar> intNeighbourhoodSearch(IntVar[] vars, boolean[] selected, int[] initial, IntStrategy strategy) {
