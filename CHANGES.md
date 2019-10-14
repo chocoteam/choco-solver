@@ -8,10 +8,13 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
-
-### Deprecated API (to be removed in next release):
+- fix issues relative to propagation 
+- change constraints' status checking
+- change stop conditions in `ExplanationForSignedClause`
+- add stable module name
 
 ### Closed issues and pull requests:
+\#618
     
     
 4.10.1 - 26 Jun 2019
