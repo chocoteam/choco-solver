@@ -10,13 +10,8 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 
-import static java.lang.Integer.MAX_VALUE;
-
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.Random;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
@@ -36,6 +31,12 @@ import org.chocosolver.util.objects.ArrayVal;
 import org.chocosolver.util.objects.IVal;
 import org.chocosolver.util.objects.IntMap;
 import org.chocosolver.util.objects.MapVal;
+
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.Random;
+
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  * Implementation of the search described in:
@@ -382,21 +383,23 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         }
     }
 
-    private void removeRFMove(){
-    	Solver sl = model.getSolver();
-    	Move m = sl.getMove();
-   	if(m == rfMove){
-		sl.setMove(rfMove.getChildMoves().get(0));
-	}else if(rfMove != null){
-		while(m.getChildMoves()!= null && m.getChildMoves().get(0)!= rfMove){
-		    m = m.getChildMoves().get(0);
-		}
-		if(m.getChildMoves() != rfMove){
-		    m.setChildMoves(rfMove.getChildMoves());
-		}
-    	}
+    private void removeRFMove() {
+        Solver sl = model.getSolver();
+        Move m = sl.getMove();
+        if (rfMove != null) {
+            if (m == rfMove) {
+                sl.setMove(rfMove.getChildMoves().get(0));
+            } else {
+                while (m.getChildMoves() != null && m.getChildMoves().get(0) != rfMove) {
+                    m = m.getChildMoves().get(0);
+                }
+                if (m.getChildMoves() != rfMove) {
+                    m.setChildMoves(rfMove.getChildMoves());
+                }
+            }
+        }
     }
-		
+
     /**
      * Return true if the interval is small enough
      *

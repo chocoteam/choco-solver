@@ -214,20 +214,18 @@ public class Ibex {
      * This function initializes the solving process. Each solution is then retrieved
      * in turn via a call to next_solution(...).
      *
-     * @param
-     *
-     *   bounds                   - the domain in which all solutions will be searched
+     * @param bounds                - the domain in which all solutions will be searched
      *                               (include all variables, real and integer ones).
      *
      * @return
      *
-     *   SUCCESS                 _ - OK
+     *   SUCCESS                    - OK
      *
-     *   DISCRETE_NOT_INSTANCIATED - One discrete variable is not instanciated
+     *   DISCRETE_NOT_INSTANCIATED  - One discrete variable is not instanciated
      *
-     *   BAD_DOMAIN                - The domain has not the expected number of dimensions.
+     *   BAD_DOMAIN                 - The domain has not the expected number of dimensions.
      *
-     *   NOT_BUILT                 - Object not built (build() must be called before))
+     *   NOT_BUILT                  - Object not built (build() must be called before))
      */
     public native int start_solve(double bounds[]);
 

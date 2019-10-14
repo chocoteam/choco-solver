@@ -6,7 +6,7 @@
 
 [![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.org/chocoteam/choco-solver)
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
-[![Coverity](https://scan.coverity.com/projects/8383/badge.svg)](https://scan.coverity.com/projects/choco-solver) 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/alerts/)
 [![Codacy Badge](https://api.codacy.com/project/badge/grade/b0ab28bdd7fd4da095ad72c2c46bce57)](https://www.codacy.com/app/cprudhom/choco-solver)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
 

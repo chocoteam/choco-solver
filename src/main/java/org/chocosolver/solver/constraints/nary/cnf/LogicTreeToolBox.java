@@ -121,13 +121,15 @@ public class LogicTreeToolBox {
             ILogical[] t1cs = n1.getChildren();
             for (int i = 0; i < t1cs.length; i++) {
                 ILogical t1c = t1cs[i];
-                if (t2 != null && t2.isLit()) {
-                    tt.addChild(LogOp.or(t1c, t2));
-                } else {
-                    ILogical[] t2cs = ((LogOp) t2).getChildren();
-                    for (int j = 0; j < t2cs.length; j++) {
-                        ILogical t2c = t2cs[j];
-                        tt.addChild(LogOp.or(t1c, t2c));
+                if (t2 != null) {
+                    if (t2.isLit()) {
+                        tt.addChild(LogOp.or(t1c, t2));
+                    } else {
+                        ILogical[] t2cs = ((LogOp) t2).getChildren();
+                        for (int j = 0; j < t2cs.length; j++) {
+                            ILogical t2c = t2cs[j];
+                            tt.addChild(LogOp.or(t1c, t2c));
+                        }
                     }
                 }
             }

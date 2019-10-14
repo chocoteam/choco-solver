@@ -9,23 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import static org.chocosolver.solver.Solver.Action.extend;
-import static org.chocosolver.solver.Solver.Action.fixpoint;
-import static org.chocosolver.solver.Solver.Action.initialize;
-import static org.chocosolver.solver.Solver.Action.propagate;
-import static org.chocosolver.solver.Solver.Action.repair;
-import static org.chocosolver.solver.Solver.Action.validate;
-import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -57,6 +40,13 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+
+import java.io.PrintStream;
+import java.util.*;
+
+import static org.chocosolver.solver.Solver.Action.*;
+import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * This class is inspired from :
@@ -336,22 +326,21 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (mModel.getSettings().checkDeclaredConstraints()) {
             //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
-            Optional<Constraint> undeclared = Optional.empty();
             if (instances != null) {
-                undeclared = instances
-                    .stream()
-                    .filter(c -> c.getStatus() == FREE)
-                    .findFirst();
-            }
-            if (undeclared.isPresent()) {
-                getErr().print(
-                    "At least one constraint is free, i.e., neither posted or reified. ).\n");
-                instances
-                    .stream()
-                    .filter(c -> c.getStatus() == FREE)
-                    .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
-                        : 1)
-                    .forEach(c -> getErr().printf("%s is free\n", c.toString()));
+                Optional<Constraint> undeclared = instances
+                        .stream()
+                        .filter(c -> c.getStatus() == FREE)
+                        .findFirst();
+                if (undeclared.isPresent()) {
+                    getErr().print(
+                            "At least one constraint is free, i.e., neither posted or reified. ).\n");
+                    instances
+                            .stream()
+                            .filter(c -> c.getStatus() == FREE)
+                            .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
+                                    : 1)
+                            .forEach(c -> getErr().printf("%s is free\n", c.toString()));
+                }
             }
         }
         engine.initialize();

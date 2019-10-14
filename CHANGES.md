@@ -14,7 +14,7 @@ NEXT MILESTONE
 ### Closed issues and pull requests:
 
 
-4.10.1 - 14 Oct 2019
+4.10.2 - 14 Oct 2019
 -------------------
 
 ### Major features:
