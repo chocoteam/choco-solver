@@ -2,7 +2,13 @@
 source ./commons.sh
 #Script to notify the website about a release
 
-set -ex
+function sedInPlace() {
+	if [ $(uname) = "Darwin" ]; then
+		sed -i '' "$1" $2
+	else
+		sed -i'' "$1" $2
+	fi
+}
 
 if [ $1 == "--next" ]; then
     VERSION=$(guess $2)

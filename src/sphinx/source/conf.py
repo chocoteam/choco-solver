@@ -17,7 +17,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-import alabaster
+#import alabaster
 
 # -- General configuration ------------------------------------------------
 
@@ -30,7 +30,7 @@ import alabaster
 extensions = [
     'sphinxcontrib.bibtex',
     'sphinx.ext.mathjax',
-    'alabaster'
+    #'alabaster'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -114,7 +114,7 @@ html_theme = 'alabaster'
 #html_theme_options = {}
 
 # Add any paths that contain custom themes here, relative to this directory.
-html_theme_path = [alabaster.get_path()]
+#html_theme_path = [alabaster.get_path()]
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
