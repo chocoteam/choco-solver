@@ -24,6 +24,7 @@
     </description>
 
     <modules>
+        <module>cutoffseq</module>
         <module>solver</module>
     </modules>
 

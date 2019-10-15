@@ -22,9 +22,9 @@
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
 
-    <name>choco-solver${project.version}: an Open-Source Constraint Solver</name>
-    <url>http://choco-solver.org/</url>
-    <description>The constraint solver 
+    <name>choco-solver</name>
+
+    <description>Open-source constraint solver.
     </description>
 
     <dependencies>
