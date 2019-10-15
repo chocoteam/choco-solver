@@ -14,10 +14,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco</artifactId>
-            <version>4.10.3-SNAPSHOT</version>
-        </parent>
+        <groupId>org.choco-solver</groupId>
+        <artifactId>choco</artifactId>
+        <version>4.10.3-SNAPSHOT</version>
+    </parent>
     <artifactId>cutoffseq</artifactId>
     <packaging>jar</packaging>
 

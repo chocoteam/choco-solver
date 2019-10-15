@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.sat.PropSat;
+import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;

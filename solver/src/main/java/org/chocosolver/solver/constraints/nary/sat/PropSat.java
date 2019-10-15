@@ -7,19 +7,15 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.sat;
-
-import static org.chocosolver.sat.SatSolver.negated;
-import static org.chocosolver.sat.SatSolver.sign;
-import static org.chocosolver.sat.SatSolver.var;
+package org.chocosolver.solver.constraints.nary.sat;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import java.util.ArrayList;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.sat.SatSolver.Clause;
+import org.chocosolver.sat.SatSolver;
+import org.chocosolver.sat.SatSolver.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -27,6 +23,10 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import java.util.ArrayList;
+
+import static org.chocosolver.sat.SatSolver.*;
 
 /**
  * A propagator to deal with clauses and interface a {@link SatSolver}.

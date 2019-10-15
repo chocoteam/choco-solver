@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.objective;
 
-import org.chocosolver.sat.PropSat;
+import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Operator;

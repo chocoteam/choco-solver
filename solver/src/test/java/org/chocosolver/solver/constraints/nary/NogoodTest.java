@@ -12,7 +12,7 @@ package org.chocosolver.solver.constraints.nary;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
-import org.chocosolver.sat.PropNogoods;
+import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;

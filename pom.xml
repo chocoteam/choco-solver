@@ -25,6 +25,7 @@
 
     <modules>
         <module>cutoffseq</module>
+        <module>sat</module>
         <module>solver</module>
     </modules>
 

@@ -14,6 +14,7 @@ import gnu.trove.list.array.TIntArrayList;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -25,9 +26,9 @@ import org.testng.annotations.Test;
 
 import java.util.Random;
 
-import static org.chocosolver.sat.PropNogoods.iseq;
-import static org.chocosolver.sat.PropNogoods.ivalue;
-import static org.chocosolver.sat.PropNogoods.leq;
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.iseq;
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.ivalue;
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.leq;
 
 /**
  * Test class for PropNogoods

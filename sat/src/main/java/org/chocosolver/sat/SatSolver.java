@@ -52,20 +52,20 @@ public class SatSolver implements SatFactory {
     /**
      * static const Literal kUndefinedLiteral = Literal(-2);
      */
-    static final int kUndefinedLiteral = -2;
+    private static final int kUndefinedLiteral = -2;
 
     // If false, the constraints are already unsatisfiable. No part of
     // the solver state may be used!
-    boolean ok_;
+    public boolean ok_;
     // List of problem addClauses.
-    ArrayList<Clause> clauses;
+    public ArrayList<Clause> clauses;
     // List of learnt addClauses.
-    ArrayList<Clause> learnts;
+    public ArrayList<Clause> learnts;
     // 'watches_[lit]' is a list of constraints watching 'lit'(will go
     // there if literal becomes true).
-    TIntObjectHashMap<ArrayList<Watcher>> watches_;
+    private TIntObjectHashMap<ArrayList<Watcher>> watches_;
     // implies_[lit] is a list of literals to set to true if 'lit' becomes true.
-    TIntObjectHashMap<TIntArrayList> implies_;
+    public TIntObjectHashMap<TIntArrayList> implies_;
     // The current assignments.
     TIntObjectHashMap<Boolean> assignment_;
     // Assignment stack; stores all assigments made in the order they
@@ -78,8 +78,8 @@ public class SatSolver implements SatFactory {
     // Number of variables
     int num_vars_;
 
-    TIntArrayList temporary_add_vector_;
-    TIntArrayList touched_variables_;
+    private TIntArrayList temporary_add_vector_;
+    public TIntArrayList touched_variables_;
 
 
     public SatSolver() {
@@ -113,23 +113,9 @@ public class SatSolver implements SatFactory {
 
 
     // Add a clause to the solver.
-    boolean addClause(TIntList ps) {
+    public boolean addClause(TIntList ps) {
         assert 0 == trailMarker();
         if (!ok_) return false;
-
-        /**
-         * std::sort(clause->begin(), clause->end());
-         Literal p = kUndefinedLiteral;
-         int j = 0;
-         for (int i = 0; i < clause->size(); ++i) {
-         if (Value((*clause)[i]) == kTrue || (*clause)[i] == Negated(p)) {
-         return true;
-         } else if (Value((*clause)[i]) != kFalse && (*clause)[i] != p) {
-         (*clause)[j++] = p = (*clause)[i];
-         }
-         }
-         clause->resize(j);
-         */
 
         // Check if clause is satisfied and remove false/duplicated literals:
         ps.sort();
@@ -210,7 +196,7 @@ public class SatSolver implements SatFactory {
     }
 
     // Add a unit clause to the solver.
-    boolean addClause(int l) {
+    public boolean addClause(int l) {
         temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(l);
         return addClause(temporary_add_vector_);
@@ -240,7 +226,7 @@ public class SatSolver implements SatFactory {
     }
 
     // Backtrack until a certain level.
-    void cancelUntil(int level) {
+    public void cancelUntil(int level) {
         if (trailMarker() > level) {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
@@ -274,13 +260,13 @@ public class SatSolver implements SatFactory {
     }
 
     // The current number of original clauses.
-    int nLearnt() {
+    public int nLearnt() {
         return learnts.size();
     }
 
     // Propagates one literal, returns true if successful, false in case
     // of failure.
-    boolean propagateOneLiteral(int lit) {
+    public boolean propagateOneLiteral(int lit) {
         assert ok_;
         touched_variables_.resetQuick();
         if (!propagate()) {
@@ -307,7 +293,7 @@ public class SatSolver implements SatFactory {
     }
 
     // Begins a new decision level.
-    void pushTrailMarker() {
+    private void pushTrailMarker() {
         trail_markers_.add(trail_.size());
     }
 
@@ -321,13 +307,13 @@ public class SatSolver implements SatFactory {
         trail_.add(l);
     }
 
-    void dynUncheckedEnqueue(int l) {
+    private void dynUncheckedEnqueue(int l) {
         touched_variables_.add(l);
     }
 
 
     // Test if fact 'p' contradicts current state, Enqueue otherwise.
-    boolean enqueue(int l) {
+    private boolean enqueue(int l) {
         if (valueLit(l) != Boolean.kUndefined) {
             return valueLit(l) != Boolean.kFalse;
         } else {
@@ -337,7 +323,7 @@ public class SatSolver implements SatFactory {
     }
 
     // Attach a clause to watcher lists.
-    void attachClause(Clause cr) {
+    private void attachClause(Clause cr) {
         assert cr.size() > 1;
         ArrayList<Watcher> l0 = watches_.get(negated(cr._g(0)));
         if (l0 == null) {
@@ -454,8 +440,8 @@ public class SatSolver implements SatFactory {
             }
         }
         if (ws != null) {
-            for (int k = ws.size() - 1; k >= j; k--) {
-                ws.remove(k);
+            if (ws.size() > j) {
+                ws.subList(j, ws.size()).clear();
             }
         }
         return result;
@@ -481,7 +467,7 @@ public class SatSolver implements SatFactory {
      * int(true) is always 1. And int(false) is always 0
      * }
      */
-    protected static int makeLiteral(int var, boolean sign) {
+    public static int makeLiteral(int var, boolean sign) {
         return (2 * var + (sign ? 1 : 0));
     }
 
@@ -499,21 +485,21 @@ public class SatSolver implements SatFactory {
      *          <tt>false</tt> if <i>l</i> is even (<tt>true<tt/> literal)
      *
      */
-    protected static boolean sign(int l) {
+    public static boolean sign(int l) {
         return (l & 1) != 0;
     }
 
     /**
      * inline Variable Var(Literal p) { return Variable(p.value() >> 1); }
      */
-    protected static int var(int l) {
+    public static int var(int l) {
         return (l >> 1);
     }
 
     /**
      * inline Boolean MakeBoolean(bool x) { return Boolean(!x); }
      */
-    protected static Boolean makeBoolean(boolean b) {
+    private static Boolean makeBoolean(boolean b) {
         return (b ? Boolean.kTrue : Boolean.kFalse);
     }
 
@@ -522,7 +508,7 @@ public class SatSolver implements SatFactory {
      * return Boolean((uint8)(a.value() ^ (uint8) b));
      * }
      */
-    protected static Boolean xor(Boolean a, boolean b) {
+    private static Boolean xor(Boolean a, boolean b) {
         return Boolean.make((byte) (a.value() ^ (b ? 1 : 0)));
     }
 
@@ -534,18 +520,18 @@ public class SatSolver implements SatFactory {
      * @author Charles Prud'homme, Laurent Perron
      * @since 12/07/13
      */
-    class Clause {
+    public static class Clause {
         private int[] literals_;
 
-        public Clause(int[] ps) {
+        Clause(int[] ps) {
             literals_ = ps.clone();
         }
 
-        int size() {
+        public int size() {
             return literals_.length;
         }
 
-        int _g(int i) {
+        public int _g(int i) {
             return literals_[i];
         }
 
@@ -574,12 +560,12 @@ public class SatSolver implements SatFactory {
      * @author Charles Prud'homme
      * @since 12/07/13
      */
-    class Watcher {
+    static class Watcher {
 
         Clause clause;
         int blocker;
 
-        public Watcher(final Clause cr, int l) {
+        Watcher(final Clause cr, int l) {
             this.clause = cr;
             this.blocker = l;
         }
