@@ -2,8 +2,6 @@ __author__ = 'kyzrsoze'
 
 import argparse
 import os
-from pylatex import Document, Section, Subsection, Tabular, TikZ, Axis, \
-    Plot, Package, Subsubsection, MultiColumn, Command, NoEscape
 
 from utils import LogExtractor, ChuLogExtractor2, PDFCreator
 

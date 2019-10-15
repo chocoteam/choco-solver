@@ -14,9 +14,9 @@ and to import a JSON format file into a `Model`.
 * [Download](https://github.com/chocoteam/choco-parsers/releases/latest) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-parsers)
 * [Parsing a file](#par)
 * [MiniZinc](./MINIZINC.md)
-* [XCSP3](./XCSP3.md)
-* [MPS](./MPS.md)
-* [JSON](./JSON.md)
+* [XCSP3](XCSP3.md)
+* [MPS](MPS.md)
+* [JSON](JSON.md)
 
 
 <a name="par"></a>
