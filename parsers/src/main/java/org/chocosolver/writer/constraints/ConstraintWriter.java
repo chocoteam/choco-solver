@@ -13,7 +13,7 @@ import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.util.Reflection;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.writer.constraints.binary.BinaryWriterHelper;
 import org.chocosolver.writer.constraints.nary.NaryWriterHelper;

@@ -14,7 +14,7 @@ import org.chocosolver.solver.constraints.set.PropIntCstMemberSet;
 import org.chocosolver.solver.constraints.set.PropIntCstNotMemberSet;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;

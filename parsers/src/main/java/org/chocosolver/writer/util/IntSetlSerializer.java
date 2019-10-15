@@ -6,12 +6,13 @@
  * Licensed under the BSD 4-clause license.
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.util.objects.setDataStructures.iterable;
+package org.chocosolver.writer.util;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.lang.reflect.Type;
 

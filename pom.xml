@@ -27,6 +27,7 @@
         <module>cutoffseq</module>
         <module>sat</module>
         <module>solver</module>
+        <module>parsers</module>
     </modules>
 
     <scm>

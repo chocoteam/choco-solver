@@ -38,6 +38,7 @@ import org.xcsp.parser.entries.XConstraints;
 import org.xcsp.parser.entries.XVariables;
 
 import java.io.File;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 

@@ -10,7 +10,7 @@ package org.chocosolver.writer.constraints.real;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;

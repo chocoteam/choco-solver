@@ -12,6 +12,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.*;
 import java.util.Properties;
 
 /**

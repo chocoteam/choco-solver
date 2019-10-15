@@ -10,7 +10,7 @@ package org.chocosolver.writer.constraints.binary;
 
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;

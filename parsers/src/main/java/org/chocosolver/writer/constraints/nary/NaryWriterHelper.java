@@ -23,7 +23,7 @@ import org.chocosolver.solver.constraints.nary.cumulative.PropGraphCumulative;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;
