@@ -27,6 +27,7 @@
         <module>cutoffseq</module>
         <module>sat</module>
         <module>solver</module>
+        <module>pf4cs</module>
         <module>parsers</module>
     </modules>
 
