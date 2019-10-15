@@ -28,7 +28,7 @@ But also, facilities to interact with the search loop, factories to help modelli
 
 Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2019, IMT Atlantique).
 
-Contact: [choco@mines-nantes.fr](mailto:choco@mines-nantes.fr?subject=[choco]contact)
+Contact: [Choco-solver on Gitter](https://gitter.im/chocoteam/choco-solver#)
 
 ### Overview
 
