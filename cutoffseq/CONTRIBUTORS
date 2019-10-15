@@ -1,0 +1,11 @@
+<!-- This is the official list of people who can contribute
+ (and who have contributed) code to choco-solver project
+ repository.
+ The AUTHORS file lists the copyright holders; this file
+ lists people in alphabetical order of last name. 
+ Contributors must sign the CLA to grant
+ the AUTHORS copyright within the terms of the BSD-4 license.
+-->
+Charles Prud'homme <cprudhom@gmail.com>,
+Arnaud Malapert <arnaud.malapert@unice.fr>,
+
