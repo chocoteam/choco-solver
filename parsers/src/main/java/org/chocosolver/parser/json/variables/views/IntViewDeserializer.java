@@ -8,20 +8,11 @@
  */
 package org.chocosolver.parser.json.variables.views;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-
+import com.google.gson.*;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.view.BoolNotView;
-import org.chocosolver.solver.variables.view.MinusView;
-import org.chocosolver.solver.variables.view.OffsetView;
-import org.chocosolver.solver.variables.view.RealView;
-import org.chocosolver.solver.variables.view.ScaleView;
+import org.chocosolver.solver.variables.view.*;
 
 import java.lang.reflect.Type;
 

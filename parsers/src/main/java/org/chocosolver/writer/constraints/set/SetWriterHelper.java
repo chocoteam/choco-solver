@@ -8,14 +8,14 @@
  */
 package org.chocosolver.writer.constraints.set;
 
+import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.set.PropIntCstMemberSet;
 import org.chocosolver.solver.constraints.set.PropIntCstNotMemberSet;
-import org.chocosolver.util.Reflection;
-import org.chocosolver.solver.Identity;
-import org.chocosolver.writer.constraints.ConstraintWriter;
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;
 import java.util.Arrays;

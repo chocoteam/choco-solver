@@ -8,12 +8,7 @@
  */
 package org.chocosolver.parser.json.variables;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-
+import com.google.gson.*;
 import org.chocosolver.parser.json.JSONHelper;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;

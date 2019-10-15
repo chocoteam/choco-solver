@@ -11,8 +11,8 @@ package org.chocosolver.writer;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.writer.constraints.ConstraintWriter;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.writer.constraints.ConstraintWriter;
 import org.chocosolver.writer.variables.VariableWriter;
 
 import java.io.IOException;

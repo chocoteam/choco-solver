@@ -10,20 +10,8 @@ package org.chocosolver.writer.variables;
 
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.impl.BitsetArrayIntVarImpl;
-import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
-import org.chocosolver.solver.variables.impl.BoolVarImpl;
-import org.chocosolver.solver.variables.impl.FixedBoolVarImpl;
-import org.chocosolver.solver.variables.impl.FixedIntVarImpl;
-import org.chocosolver.solver.variables.impl.FixedRealVarImpl;
-import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
-import org.chocosolver.solver.variables.impl.RealVarImpl;
-import org.chocosolver.solver.variables.impl.SetVarImpl;
-import org.chocosolver.solver.variables.view.BoolNotView;
-import org.chocosolver.solver.variables.view.MinusView;
-import org.chocosolver.solver.variables.view.OffsetView;
-import org.chocosolver.solver.variables.view.RealView;
-import org.chocosolver.solver.variables.view.ScaleView;
+import org.chocosolver.solver.variables.impl.*;
+import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 

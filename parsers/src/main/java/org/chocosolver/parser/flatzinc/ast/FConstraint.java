@@ -10,9 +10,6 @@ package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
@@ -30,14 +27,14 @@ import org.chocosolver.solver.constraints.nary.geost.externalConstraints.Externa
 import org.chocosolver.solver.constraints.nary.geost.externalConstraints.NonOverlapping;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
 import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /*
  * User : CPRUDHOM

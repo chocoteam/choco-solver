@@ -9,7 +9,6 @@
 package org.chocosolver.parser.json;
 
 import com.google.gson.stream.JsonWriter;
-
 import org.chocosolver.parser.json.constraints.JSONConstraintWriter;
 import org.chocosolver.parser.json.variables.JSONVariableWriter;
 import org.chocosolver.writer.ModelWriter;

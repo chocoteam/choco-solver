@@ -9,11 +9,10 @@
 package org.chocosolver.parser.json.constraints;
 
 import com.google.gson.stream.JsonWriter;
-
 import org.chocosolver.parser.json.JSONHelper;
-import org.chocosolver.writer.constraints.ConstraintWriter;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;
 

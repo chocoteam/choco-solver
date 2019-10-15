@@ -11,7 +11,6 @@ package org.chocosolver.parser.json;
 import com.google.gson.GsonBuilder;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonWriter;
-
 import org.chocosolver.parser.json.constraints.ConstraintDeserializer;
 import org.chocosolver.parser.json.variables.IntVarDeserializer;
 import org.chocosolver.parser.json.variables.RealVarDeserializer;
@@ -26,15 +25,7 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntSetlSerializer;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 

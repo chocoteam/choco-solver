@@ -9,10 +9,9 @@
 package org.chocosolver.parser.json.variables;
 
 import com.google.gson.stream.JsonWriter;
-
 import org.chocosolver.parser.json.JSONHelper;
-import org.chocosolver.writer.variables.VariableWriter;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.writer.variables.VariableWriter;
 
 import java.io.IOException;
 

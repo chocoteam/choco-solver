@@ -8,11 +8,12 @@
  */
 package org.chocosolver.writer.constraints.unary;
 
-import java.io.IOException;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.util.Reflection;
 import org.chocosolver.writer.constraints.ConstraintWriter;
+
+import java.io.IOException;
 
 /**
  * <p> Project: choco-json.

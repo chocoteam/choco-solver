@@ -8,21 +8,10 @@
  */
 package org.chocosolver.parser.json;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-
+import com.google.gson.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.view.IView;
 
 import java.util.HashMap;

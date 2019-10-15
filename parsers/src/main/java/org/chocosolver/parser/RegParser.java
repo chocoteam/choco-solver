@@ -8,23 +8,10 @@
  */
 package org.chocosolver.parser;
 
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
-
 import gnu.trove.set.hash.THashSet;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.pf4cs.SetUpException;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
@@ -42,6 +29,15 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * A regular parser with default and common services

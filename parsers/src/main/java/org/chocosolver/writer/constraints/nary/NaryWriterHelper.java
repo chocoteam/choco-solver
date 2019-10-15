@@ -8,20 +8,14 @@
  */
 package org.chocosolver.writer.constraints.nary;
 
-import org.chocosolver.util.Reflection;
 import org.chocosolver.solver.Identity;
-import org.chocosolver.writer.constraints.ConstraintWriter;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.binary.PropBinCSP;
 import org.chocosolver.solver.constraints.extension.nary.PropLargeCSP;
-import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
-import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffAC;
-import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffAdaptative;
-import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffBC;
-import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
+import org.chocosolver.solver.constraints.nary.alldifferent.*;
 import org.chocosolver.solver.constraints.nary.circuit.CircuitConf;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.cumulative.CumulFilter;
@@ -29,6 +23,8 @@ import org.chocosolver.solver.constraints.nary.cumulative.PropGraphCumulative;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.Reflection;
+import org.chocosolver.writer.constraints.ConstraintWriter;
 
 import java.io.IOException;
 import java.util.Arrays;

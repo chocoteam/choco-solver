@@ -11,7 +11,6 @@ package org.chocosolver.parser.flatzinc.parser;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

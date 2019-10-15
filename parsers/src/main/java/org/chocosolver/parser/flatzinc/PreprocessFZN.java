@@ -15,7 +15,6 @@
 
 package org.chocosolver.parser.flatzinc;
 
-import java.io.*;
 import java.util.HashMap;
 
 public class PreprocessFZN {

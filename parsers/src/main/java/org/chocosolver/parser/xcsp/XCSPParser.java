@@ -9,7 +9,6 @@
 package org.chocosolver.parser.xcsp;
 
 import gnu.trove.map.hash.TObjectIntHashMap;
-
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -39,13 +38,7 @@ import org.xcsp.parser.entries.XConstraints;
 import org.xcsp.parser.entries.XVariables;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 

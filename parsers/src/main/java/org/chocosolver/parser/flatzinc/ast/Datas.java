@@ -9,7 +9,6 @@
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.map.hash.THashMap;
-
 import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;

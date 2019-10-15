@@ -10,11 +10,7 @@ package org.chocosolver.parser.json;
 
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.DefaultSettings;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 
 import java.io.File;
 import java.nio.file.Paths;

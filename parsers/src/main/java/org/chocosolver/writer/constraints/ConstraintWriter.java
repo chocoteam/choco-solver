@@ -8,11 +8,7 @@
  */
 package org.chocosolver.writer.constraints;
 
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ConstraintsName;
-import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.ReificationConstraint;
+import org.chocosolver.solver.constraints.*;
 import org.chocosolver.solver.constraints.binary.PropDistanceXYC;
 import org.chocosolver.solver.constraints.binary.PropScale;
 import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
