@@ -1,9 +1,10 @@
-/**
- * This file is part of pf4cs, https://github.com/chocoteam/pf4cs
+/*
+ * This file is part of pf4cs, http://choco-solver.org/
  *
- * Copyright (c) 2017, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
+ *
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.pf4cs;

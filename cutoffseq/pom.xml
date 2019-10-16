@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    This file is part of cutoffseq, https://github.com/chocoteam/cutoffseq
+    This file is part of cutoffseq, http://choco-solver.org/
 
     Copyright (c) 2019, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
+
     See LICENSE file in the project root for full license information.
 
 -->
@@ -19,18 +20,10 @@
         <version>4.10.3-SNAPSHOT</version>
     </parent>
     <artifactId>cutoffseq</artifactId>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>cutoffseq</name>
     <description>Cutoff sequence generator.</description>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.9.10</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
 </project>

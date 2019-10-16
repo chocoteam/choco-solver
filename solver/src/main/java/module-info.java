@@ -1,10 +1,19 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 15/10/2019
  */
-module choco.solver {
+module org.chocosolver.solver {
     exports org.chocosolver.solver;
     exports org.chocosolver.solver.constraints;
     exports org.chocosolver.solver.constraints.binary;
@@ -50,11 +59,12 @@ module choco.solver {
     exports org.chocosolver.util.tools;
 
     requires trove4j;
-    requires transitive choco.cutoffseq;
-    requires choco.sat;
+    requires transitive org.chocosolver.cutoffseq;
+    requires org.chocosolver.sat;
     requires org.jgrapht.core;
     requires cpprof.java;
     requires java.desktop;
     requires xchart;
     requires java.management;
+    requires automaton;
 }

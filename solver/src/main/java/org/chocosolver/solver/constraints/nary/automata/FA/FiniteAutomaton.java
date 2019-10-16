@@ -9,11 +9,11 @@
  */
 package org.chocosolver.solver.constraints.nary.automata.FA;
 
+import dk.brics.automaton.*;
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
-
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.util.tools.StringUtils;
 
@@ -21,18 +21,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import dk.brics.automaton.Automaton;
-import dk.brics.automaton.RegExp;
-import dk.brics.automaton.State;
-import dk.brics.automaton.StatePair;
-import dk.brics.automaton.Transition;
+import java.util.*;
 
 /**
  * Created by IntelliJ IDEA.

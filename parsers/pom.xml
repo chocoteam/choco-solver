@@ -21,7 +21,7 @@
     <artifactId>choco-parsers</artifactId>
     <packaging>jar</packaging>
 
-    <name>A FlatZinc parser for Choco3</name>
+    <name>choco-parsers</name>
     <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
     </description>
 
@@ -29,7 +29,7 @@
         <dependency>
             <groupId>org.choco-solver</groupId>
             <artifactId>choco-solver</artifactId>
-            <version>4.10.1</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -43,12 +43,6 @@
             <artifactId>choco-geost</artifactId>
             <version>3.3.2</version>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.10</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>net.sf.trove4j</groupId>

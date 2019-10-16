@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    This file is part of choco-solver, http://choco-solver.org/
+    This file is part of choco, http://choco-solver.org/
 
     Copyright (c) 2019, IMT Atlantique. All rights reserved.
 
@@ -17,7 +17,7 @@
     <artifactId>choco</artifactId>
     <version>4.10.3-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>Choco-Solver: an Open-Source Constraint Solver</name>
+    <name>choco</name>
     <url>http://choco-solver.org/</url>
     <description>
         A Free and Open-Source library dedicated to Constraint Programming.
@@ -30,6 +30,15 @@
         <module>pf4cs</module>
         <module>parsers</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.0.0-beta1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
@@ -137,8 +146,11 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
+                        <optimize>true</optimize>
+                        <compilerVersion>11</compilerVersion>
                         <source>11</source>
                         <target>11</target>
+                        <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
             </plugins>
@@ -165,18 +177,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <optimize>true</optimize>
-                    <compilerVersion>1.8</compilerVersion>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
-            </plugin>
-            <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.8</version>
@@ -192,7 +192,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>src/etc/header.txt</header>
+                    <header>etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
                     <properties>
                         <year>${maven.build.timestamp}</year>
@@ -275,26 +275,6 @@
                     </archive>
                     <finalName>${project.artifactId}-${project.version}-no-dep</finalName>
                 </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>./src/assembly/with-dep.xml</descriptor>
-                            </descriptors>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
