@@ -38,6 +38,7 @@ branches:
   - master
   - "/^feature.*$/"
   - coverity_scan
+  - modules
 notifications:
   email:
     recipients:
