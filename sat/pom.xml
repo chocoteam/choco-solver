@@ -27,6 +27,10 @@
     <description>A SAT solver, used internally in choco-solver
     </description>
 
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.testng</groupId>

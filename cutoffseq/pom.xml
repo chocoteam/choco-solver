@@ -26,4 +26,8 @@
     <name>cutoffseq</name>
     <description>Cutoff sequence generator.</description>
 
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
 </project>

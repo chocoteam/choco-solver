@@ -72,6 +72,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <main_dir>./</main_dir>
     </properties>
 
     <distributionManagement>
@@ -192,7 +193,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>etc/header.txt</header>
+                    <header>${main_dir}/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
                     <properties>
                         <year>${maven.build.timestamp}</year>
@@ -218,26 +219,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>
-                                org.chocosolver.util.CustomListener
-                            </value>
-                        </property>
-                    </properties>
-                    <!--<groups>1s,10s,1m,10m,30m</groups>-->
-                    <!--<parallel>methods</parallel>
-                    <threadCount>4</threadCount>-->
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

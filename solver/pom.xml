@@ -27,6 +27,10 @@
     <description>Open-source constraint solver.
     </description>
 
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.choco-solver</groupId>
@@ -92,6 +96,24 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>
+                    <properties>
+                        <property>
+                            <name>listener</name>
+                            <value>
+                                org.chocosolver.util.CustomListener
+                            </value>
+                        </property>
+                    </properties>
+                    <groups>1s,10s,ibex,checker</groups>
+                </configuration>
             </plugin>
         </plugins>
     </build>

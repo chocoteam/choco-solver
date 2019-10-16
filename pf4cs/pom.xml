@@ -26,4 +26,8 @@
     <name>pf4cs</name>
     <description>Problem facade for constraint solvers.</description>
 
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
 </project>

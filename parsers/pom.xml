@@ -26,6 +26,10 @@
     <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
     </description>
 
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.choco-solver</groupId>
