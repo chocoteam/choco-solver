@@ -42,13 +42,13 @@ branches:
 notifications:
   email:
     recipients:
-    - choco@emn.fr
+    - charles.prudhomme@imt-atlantique.fr
     on_success: always
     on_failure: always
   webhooks:
     urls:
     - https://webhooks.gitter.im/e/26147fbe9b86b606f67d
-    on_success: change
+    on_success: always
     on_failure: always
     on_start: never
 before_script:

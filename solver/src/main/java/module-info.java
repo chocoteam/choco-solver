@@ -39,6 +39,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.expression.discrete.relational;
     exports org.chocosolver.solver.learn;
     exports org.chocosolver.solver.objective;
+    exports org.chocosolver.solver.search;
     exports org.chocosolver.solver.search.limits;
     exports org.chocosolver.solver.search.loop.move;
     exports org.chocosolver.solver.search.measure;
