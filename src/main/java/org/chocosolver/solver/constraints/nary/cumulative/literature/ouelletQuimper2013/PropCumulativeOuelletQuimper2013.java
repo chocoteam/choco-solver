@@ -223,6 +223,22 @@ public class PropCumulativeOuelletQuimper2013 extends CumulativeFilter {
         }
     }
 
+    private int computeB(int est) {
+        int b = S.nextSetBit(est-min);
+        while(b!=S.length() && S.get(b+1)) {
+            b++;
+        }
+        return b+1+min;
+    }
+
+    private int computeA(int b) {
+        int a = b-1-min;
+        while(a>0 && S.get(a-1)) {
+            a--;
+        }
+        return a+min;
+    }
+
     private boolean filterTimeTabling() throws ContradictionException {
         boolean hasFiltered = false;
 
@@ -231,27 +247,20 @@ public class PropCumulativeOuelletQuimper2013 extends CumulativeFilter {
         T.sort(Comparator.comparingInt(dt -> dt.h));
         int j = 0;
         S.clear();
-        Integer smallest = null, largest = null;
 
         for(DecomposedTask dt : T) {
             while(j<F.size() && F.get(j).h>capacity.getUB()-dt.h) {
                 S.set(F.get(j).est-min, F.get(j).lct-min);
-                smallest = (smallest==null ? F.get(j).est : Math.min(F.get(j).est, smallest));
-                largest = (largest==null ? F.get(j).lct-1 : Math.max(F.get(j).lct-1, largest));
                 j++;
             }
-            if(largest!=null && largest>=dt.est) {
-                int b = S.nextClearBit(Math.max(smallest+1-min, dt.est-min))+min;
-                if(b<largest+2) {
-                    int a = S.previousClearBit(b-min)+min+1;
-                    if(dt.est+dt.p > a) {
-                        int i = dt.idxTask;
-                        if(tasks[i].getStart().getUB() >= tasks[i].getEnd().getLB()) {
-                            hasFiltered |= tasks[i].getStart().updateLowerBound(b, aCause);
-                        } else {
-                            hasFiltered |= tasks[i].getStart().updateLowerBound(Math.min(tasks[i].getStart().getUB(), b), aCause);
-                        }
-                    }
+            int b = computeB(dt.est);
+            int a = computeA(b);
+            if(dt.est+dt.p > a) {
+                int i = dt.idxTask;
+                if(tasks[i].getStart().getUB() >= tasks[i].getEnd().getLB()) {
+                    hasFiltered |= tasks[i].getStart().updateLowerBound(b, aCause);
+                } else {
+                    hasFiltered |= tasks[i].getStart().updateLowerBound(Math.min(tasks[i].getStart().getUB(), b), aCause);
                 }
             }
         }
