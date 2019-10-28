@@ -328,7 +328,7 @@ public class ParallelPortfolio {
                 assert solverVal<=bestVal:solverVal+">"+bestVal;
             }else
                 assert
-                    m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || solverVal >= bestVal :solverVal+"<"+bestVal;
+                        m.getResolutionPolicy() != ResolutionPolicy.MINIMIZE || solverVal >= bestVal :solverVal+"<"+bestVal;
             if(solverVal == bestVal){
                 getSolutionFound().set(true);
                 finder = m;
@@ -382,7 +382,7 @@ public class ParallelPortfolio {
                     Solution solution = new Solution(worker, ivars);
                     solver.attach(solution);
                     solver.setSearch(new DomOverWDeg(ivars,workerID,
-                        new IntDomainLast(solution, new IntDomainBest(), null)));
+                            new IntDomainLast(solution, new IntDomainBest(), null)));
                 }
                 if(ks==0 && kr==0) {
 					solver.setNoGoodRecordingFromRestarts();
@@ -435,25 +435,25 @@ public class ParallelPortfolio {
                     IntVar[] finalIvars = ivars;
                     final int[] t = new int[2];
                     solver.setSearch(new DomOverWDeg(ivars,workerID,
-                        new IntDomainLast(solution, new IntDomainBest(), (x, v) -> {
-                            int c = 0;
-                            for (int idx = 0; idx < finalIvars.length; idx++) {
-                                if (finalIvars[idx].isInstantiatedTo(solution.getIntVal(finalIvars[idx]))) {
-                                    c++;
+                            new IntDomainLast(solution, new IntDomainBest(), (x, v) -> {
+                                int c = 0;
+                                for (int idx = 0; idx < finalIvars.length; idx++) {
+                                    if (finalIvars[idx].isInstantiatedTo(solution.getIntVal(finalIvars[idx]))) {
+                                        c++;
+                                    }
                                 }
-                            }
-                            double d =  (c * 1. / finalIvars.length);
-                            double r = Math.exp(-t[0]++ / 25);
-                            if (solver.getRestartCount() > t[1]) {
-                                t[1] += 150;
-                                t[0] = 0;
-                            }
-                            return d > r;
-                        })));
+                                double d =  (c * 1. / finalIvars.length);
+                                double r = Math.exp(-t[0]++ / 25);
+                                if (solver.getRestartCount() > t[1]) {
+                                    t[1] += 150;
+                                    t[0] = 0;
+                                }
+                                return d > r;
+                            })));
                 }
                 if(ks==0 && kr==0) {
-					solver.setNoGoodRecordingFromRestarts();
-				}
+                    solver.setNoGoodRecordingFromRestarts();
+                }
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
