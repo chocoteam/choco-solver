@@ -384,14 +384,18 @@ public class ParallelPortfolio {
                     solver.setSearch(new DomOverWDeg(ivars,workerID,
                         new IntDomainLast(solution, new IntDomainBest(), null)));
                 }
-                solver.setNoGoodRecordingFromRestarts();
+                if(ks==0 && kr==0) {
+					solver.setNoGoodRecordingFromRestarts();
+				}
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 1:
                 // ABS  + fast restart + LC
                 solver.setSearch(Search.activityBasedSearch(worker.retrieveIntVars(true)));
-                solver.setNoGoodRecordingFromRestarts();
+                if(ks==0 && kr==0) {
+					solver.setNoGoodRecordingFromRestarts();
+				}
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
@@ -415,7 +419,9 @@ public class ParallelPortfolio {
             case 4:
                 // DWD  + fast restart + COS
                 solver.setSearch(Search.conflictOrderingSearch(Search.domOverWDegSearch(worker.retrieveIntVars(true))));
-                solver.setNoGoodRecordingFromRestarts();
+                if(ks==0 && kr==0) {
+					solver.setNoGoodRecordingFromRestarts();
+				}
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
@@ -445,7 +451,9 @@ public class ParallelPortfolio {
                             return d > r;
                         })));
                 }
-                solver.setNoGoodRecordingFromRestarts();
+                if(ks==0 && kr==0) {
+					solver.setNoGoodRecordingFromRestarts();
+				}
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
@@ -453,7 +461,9 @@ public class ParallelPortfolio {
                 if(policy == ResolutionPolicy.SATISFACTION) {
                     // DWD  + very fast restart
                     solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), workerID, new IntDomainMin()));
-                    solver.setNoGoodRecordingFromRestarts();
+                    if(ks==0 && kr==0) {
+						solver.setNoGoodRecordingFromRestarts();
+					}
                     solver.setLubyRestart(100, new FailCounter(worker, 0), 1000);
                 }else{
                     // occurrence + LC
