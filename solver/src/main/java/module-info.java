@@ -36,7 +36,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.nary.alldifferent.conditions;
     exports org.chocosolver.solver.constraints.nary.among;
     exports org.chocosolver.solver.constraints.nary.automata;
-    //exports org.chocosolver.solver.constraints.nary.automata.FA;
+    exports org.chocosolver.solver.constraints.nary.automata.FA;
     //exports org.chocosolver.solver.constraints.nary.automata.FA.utils;
     //exports org.chocosolver.solver.constraints.nary.automata.structure;
     //exports org.chocosolver.solver.constraints.nary.automata.structure.multicostregular;
