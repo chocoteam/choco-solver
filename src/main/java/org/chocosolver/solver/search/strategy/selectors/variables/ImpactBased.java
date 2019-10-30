@@ -223,11 +223,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         }
                         it.dispose();
                     } else { // estimate per subdomains
-                        int step = 0;
                         int size = dsz / split;
                         int a, b;
                         DisposableValueIterator it = v.getValueIterator(true);
                         while (it.hasNext()) {
+                            int step = 0;
                             if (System.currentTimeMillis() > tl) {
                                 break loop;
                             }
@@ -442,11 +442,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                             }
                             it.dispose();
                         } else { // estimate per subdomains
-                            int step = 0;
                             int size = dsz / split;
                             int a,b;
                             DisposableValueIterator it = v.getValueIterator(true);
                             while (it.hasNext()) {
+                                int step = 0;
                                 a = b = it.next();
                                 while(step < size && it.hasNext()) {
                                     b = it.next();
