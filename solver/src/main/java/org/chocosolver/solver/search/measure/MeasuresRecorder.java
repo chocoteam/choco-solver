@@ -82,6 +82,13 @@ public final class MeasuresRecorder extends Measures {
     //**************************************** SETTERS ***************************************************************//
     //****************************************************************************************************************//
 
+    /**
+     * Update the name of the model to Measures
+     * @param name name of the model
+     */
+    public final void setModelName(String name){
+        this.modelName = name;
+    }
 
     /**
      * indicates whether or not the optimum has been found and proved

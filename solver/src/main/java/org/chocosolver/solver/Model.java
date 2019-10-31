@@ -741,6 +741,7 @@ public class Model implements IModel {
      */
     public void setName(String name) {
         this.name = name;
+        this.getSolver().getMeasures().setModelName(name);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
