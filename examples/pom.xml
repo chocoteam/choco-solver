@@ -1,0 +1,152 @@
+<!--
+
+    This file is part of samples, https://github.com/chocoteam/samples
+
+    Copyright (c) 2017, IMT Atlantique. All rights reserved.
+
+    Licensed under the BSD 4-clause license.
+    See LICENSE file in the project root for full license information.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.choco-solver</groupId>
+    <artifactId>samples</artifactId>
+    <version>4.10.1</version>
+    <packaging>jar</packaging>
+
+    <name>Samples</name>
+    <url>https://github.com/chocoteam/samples</url>
+    <description>Choco-solver in practice
+    </description>
+    <licenses>
+        <license>
+            <name>BSD 3-Clause License</name>
+            <url>http://opensource.org/licenses/BSD-3-Clause</url>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <name>Charles Prud'homme</name>
+            <email>charles.prudhomme@mines-nantes.fr</email>
+            <organization>TASC, INRIA Rennes, LINA CNRS UMR 6241</organization>
+            <organizationUrl>http://www.emn.fr/z-info/ppc/</organizationUrl>
+        </developer>
+        <developer>
+            <name>Jean-Guillaume Fages</name>
+            <email>jg.fages@cosling.com</email>
+            <organization>COSLING S.A.S.</organization>
+            <organizationUrl>http://www.cosling.com</organizationUrl>
+        </developer>
+    </developers>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <choco.version>LATEST</choco.version>
+    </properties>
+
+    <scm>
+        <connection>scm:git:git@github.com:chocoteam/samples.git</connection>
+        <url>scm:git:git://github.com/chocoteam/samples</url>
+        <developerConnection>scm:git:git@github.com:chocoteam/samples.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <prerequisites>
+        <maven>3.2.3</maven>
+    </prerequisites>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>pf4cs</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-solver</artifactId>
+            <version>${choco.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.8.8</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+     <pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>ISO-8859-1</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>3.1.0-beta1</version>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <options>
+                                <myoption>TRUE</myoption>
+                            </options>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.mycila</groupId>
+                <artifactId>license-maven-plugin</artifactId>
+                <version>2.11</version>
+                <configuration>
+                    <header>src/etc/header.txt</header>
+                    <!--<header>LICENSE</header>-->
+                    <properties>
+                        <year>${maven.build.timestamp}</year>
+                        <owner>IMT Atlantique</owner>
+                        <project>${project.artifactId}</project>
+                        <prurl>${project.url}</prurl>
+                    </properties>
+                    <mapping>
+                        <template>JAVADOC_STYLE</template>
+                    </mapping>
+                    <includes>
+                        <include>**/*.java</include>
+                        <include>**/*.template</include>
+                        <include>**/pom.xml</include>
+                    </includes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+         </pluginManagement>
+    </build>
+</project>
