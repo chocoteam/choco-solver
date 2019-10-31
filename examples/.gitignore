@@ -2,7 +2,7 @@
 
 #####=== Java ===#####
 
-*.class
+../solver/target/classes/org/chocosolver/solver/constraints/binary/PropModXY.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
