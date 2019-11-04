@@ -1,4 +1,4 @@
-# samples
+# Examples
 Choco-solver in practice
 ========================
 

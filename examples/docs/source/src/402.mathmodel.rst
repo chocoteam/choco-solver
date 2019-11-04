@@ -1,0 +1,69 @@
+=========
+Modelling
+=========
+
+
+Variables
+=========
+
+- A boolean variable :math:`\text{open}_i` per warehouse *i* is needed,
+  set to `true` if the corresponding warehouse is open, `false` otherwise.
+
+    + :math:`\forall i \in [1,5], \text{open}_i = \{0,1\}`
+
+- An integer variable :math:`\text{supplier}_j` per store *j* is needed, it indicates which warehouse supplies it.
+
+    + :math:`\forall j \in [1,10], \text{supplier}_j = [\![1,5]\!]`
+
+- An integer variable :math:`\text{cost}_j` per store *j* is needed too,
+  it stores the cost of being supplied by a warehouse
+  (the range is deduced from the matrix `P`).
+
+    + :math:`\forall j \in [1,10], \text{cost}_j = [\![1, 96]\!]`
+
+- An integer variable :math:`tot_cost` totals all costs:
+
+    + :math:`tot\_cost = [\![1, {+\infty})`
+
+
+Constraints
+===========
+
+- if a warehouse *i* supplies a store *j*, then, the warehouse is open:
+
+    + :math:`\forall j \in [1,10], \text{open}_{\text{supplier}_j} = 1`
+
+  Here :math:`\text{supplier}_j` defines the index the array :math:`\text{open}`
+  to be valuated to `1`. This is a encoded with an `element` constraint.
+
+
+- if a warehouse *i* supplies a store *j*, it is related to a specific cost:
+
+    + :math:`\forall j \in [1,10], P_{j,\text{supplier}_j} = \text{cost}_j`
+
+  Here again, an `element` constraint is used to bind the supplier and the supply cost matrix
+  to the cost of supplying a store.
+
+- the maximum number of stores a warehouse *i* can supply is limited to :math:`K_i`:
+
+    + :math:`\forall i \in [1,5], \sum_{j = 1}^{10} (\text{supplier}_j == i) = \text{occ}_i`
+    + :math:`\forall i \in [1,5], \text{occ}_i \leq K_i`
+    + :math:`\forall i \in [1,5], \text{occ}_i \geq \text{open}_i`
+
+  The first constraint counts the number of occurrences of the value *i* in the array `supplier` and
+  stores the result :math:`\text{occ}_i` variable.
+  This variable is then constrained to be less than or equal to :math:`K_i`, to ensure the capacity is satisfied,
+  but also to be greater or equal to :math:`\text{open}_i` to better propagation.
+
+- the assignment cost has then to be maintained, including fixed costs and supplying costs:
+
+    + :math:`tot\_cost = \sum_{i = 1}^{5} 30 \cdot \text{open}_i + \sum_{j = 1}^{10} \text{cost}_j`
+
+Objective
+=========
+
+The objective is not to simply find a solution but one that minimizes `tot_cost`.
+
+
+`<<description <401.description.html>`_ / `code>> <403.code.html>`_
+

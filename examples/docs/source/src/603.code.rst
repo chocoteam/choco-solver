@@ -1,0 +1,228 @@
+.. _AL_code:
+
+====
+Code
+====
+
+Building DFAs
+=============
+
+Before describing the model, which is very compact, we will see ho the DFAs can be build.
+
+We will focus on a single sequence: `{1, 2, 3}`.
+
+Regexp way
+++++++++++
+
+The regular expression that encodes the sequence is `0*10+1{2}0+1{3}0*`:
+
+- `0*` the word can start with unbounded number of `0` (`*` means zero or more times)
+- `10+` the first block of 1 is followed by at least one `0` (`+` means one or more times)
+- `1{2}0+`
+    + the second block of 2 (`a{n}`  means `a` appears exactly `n` times)
+    + is followed by at least one `0`
+- `1{3}0*` the third -- and last -- block of size 3 is followed by zero or more `0`.
+  Indeed, this the last block of the sequence, so there cannot be other `1` after and `0`s are optional.
+
+Starting and ending `0`s are optional but it has to be defined in the regexp, otherwise some valid words
+may be skipped.
+
+.. caution::
+
+    In Choco, DFAs only accept integer as character.
+    `0*a+` is not a valid grammar, there is no conversion `Character` (java term) to `Integer`.
+    But, numbers are allowed, not only digits. Indeed, some variables can take value greater than `9` !
+    In that case, number are declared using the specific characters `<` and `>`.
+    For example: `0*<11><22>0*` will produce words like `00112200` or `1122` but no `0120`.
+
+
+.. code-block:: java
+    :linenos:
+
+    private void dfa(BoolVar[] cells, int[] rest, Model model) {
+        StringBuilder regexp = new StringBuilder("0*");
+        int m = rest.length;
+        for (int i = 0; i < m; i++) {
+            regexp.append('1').append('{').append(rest[i]).append('}');
+            regexp.append('0');
+            regexp.append(i == m - 1 ? '*' : '+');
+        }
+        IAutomaton auto = new FiniteAutomaton(regexp.toString());
+        model.regular(cells, auto).post();
+    }
+
+
+Constructive way
+++++++++++++++++
+
+The constructive way requires to declare all states of the automaton and links together with transitions.
+A transition corresponds to a character in the word, and a state is *between* two characters of the word.
+
+So there is a need of an initial state from which (through an outgoing  transition) the first character of the word will be provided.
+And at least one final state to which (through an ingoing transition) the last character of the word will be provided.
+
+We note :math:`s_i` the initial state.
+The first character can either be a 0 or a 1, there will be two transitions outgoing from :math:`s_i`.
+Then, transition from :math:`s_i` producing `0` will go to :math:`i_0` (first transition).
+And transition from :math:`s_i` producing `1` will go to :math:`i_1` (second transition).
+:math:`i_0` points to itself providing `0` (third transition).
+Outgoing transition from :math:`i_1` goes to :math:`i_2` and produces `0` (fourth transition).
+Two transitions outgoes from :math:`i_2`:
+one goes to itself (fifth transition, producing `0`),
+one goes to :math:`i_3` (sixth transition, producing `1`).
+:math:`i_3` goes to :math:`i_4` (seventh transition) and produce `1`.
+:math:`i_4` goes to :math:`i_5` (eighth transition) and produce `0`.
+And so on. Below is a graph illustrating the process for the sequence {1, 2}.
+
+.. graphviz::
+
+    digraph g {
+        rankdir = LR;
+        {
+            start [label="" shape=none width=0];
+            si [label=<s<sub>i</sub>> width=0.5];
+            i0 [label=<i<sub>0</sub>> width=0.5];
+            i1 [label=<i<sub>1</sub>> width=0.5];
+            i2 [label=<i<sub>2</sub>> width=0.5];
+            i3 [label=<i<sub>3</sub>> width=0.5];
+            i4 [label=<i<sub>4</sub> (= s<sub>f</sub>)> width=0.5];
+            end [label="" shape=none width=0];
+        }
+        start -> si;
+        si -> i0 [label=0];
+        i0 -> i0 [label=0];
+        si -> i1 [label=1];
+        i0 -> i1 [label=1];
+        i1 -> i2 [label=0];
+        i2 -> i2 [label=0];
+        i2 -> i3 [label=1];
+        i3 -> i4 [label=1];
+        i4 -> i4 [label=0];
+        i4 -> end;
+    }
+
+And here the code for building such a DFA for any sequence:
+
+.. code-block:: java
+    :linenos:
+
+    private void dfa2(BoolVar[] cells, int[] seq, Model model) {
+        FiniteAutomaton auto = new FiniteAutomaton();
+        int si = auto.addState();
+        auto.setInitialState(si); // declare it as initial state
+        int i0 = auto.addState();
+        auto.addTransition(si, i0, 0); // first transition
+        auto.addTransition(i0, i0, 0); // second transition
+        int from = i0;
+        int m = seq.length;
+        for (int i = 0; i < m; i++) {
+            int ii = auto.addState();
+            // word can start with '1'
+            if(i == 0){
+                auto.addTransition(si, ii, 1);
+            }
+            auto.addTransition(from, ii, 1);
+            from = ii;
+            for(int j = 1; j < seq[i]; j++){
+                int jj = auto.addState();
+                auto.addTransition(from, jj, 1);
+                from = jj;
+            }
+            int ii0 = auto.addState();
+            auto.addTransition(from, ii0, 0);
+            auto.addTransition(ii0, ii0, 0);
+            // the word can end with '1' or '0'
+            if(i == m - 1){
+                auto.setFinal(from, ii0);
+            }
+            from = ii0;
+        }
+        model.regular(cells, auto).post();
+    }
+
+
+.. note::
+
+    Even though regexp appears to be easy to use, the constructive way is more expressive.
+
+
+The entire code
+===============
+
+.. code-block:: java
+    :linenos:
+
+    // number of columns
+    int N = 15;
+    // number of rows
+    int M = 15;
+    // sequence of shaded blocks
+    int[][][] BLOCKS =
+            new int[][][]{{
+                    {2},
+                    {4, 2},
+                    {1, 1, 4},
+                    {1, 1, 1, 1},
+                    {1, 1, 1, 1},
+                    {1, 1, 1, 1},
+                    {1, 1, 1, 1},
+                    {1, 1, 1, 1},
+                    {1, 2, 2, 1},
+                    {1, 3, 1},
+                    {2, 1},
+                    {1, 1, 1, 2},
+                    {2, 1, 1, 1},
+                    {1, 2},
+                    {1, 2, 1},
+            }, {
+                    {3},
+                    {3},
+                    {10},
+                    {2},
+                    {2},
+                    {8, 2},
+                    {2},
+                    {1, 2, 1},
+                    {2, 1},
+                    {7},
+                    {2},
+                    {2},
+                    {10},
+                    {3},
+                    {2}}};
+
+    Model model = new Model("Nonogram");
+    // Variables declaration
+    BoolVar[][] cells = model.boolVarMatrix("c", N, M);
+    // Constraint declaration
+    // one regular per row
+    for (int i = 0; i < M; i++) {
+        dfa(cells[i], BLOCKS[0][i], model);
+    }
+    for (int j = 0; j < N; j++) {
+        dfa(ArrayUtils.getColumn(cells, j), BLOCKS[1][j], model);
+    }
+    if(model.getSolver().solve()){
+        for (int i = 0; i < cells.length; i++) {
+            System.out.printf("\t");
+            for (int j = 0; j < cells[i].length; j++) {
+                System.out.printf(cells[i][j].getValue() == 1 ? "#" : " ");
+            }
+            System.out.printf("\n");
+        }
+    }
+
+Things to remember
+==================
+
++ Regular constraint constructs valid fix-sized words on the basis of a vocabulary and a grammar.
+
++ A deterministic finite automaton can either be build with a regular expression or step-by-step.
+
++ Regular constraints are very useful when patterns occur in solutions.
+  For example, when dealing with shifts on a personnal scheduling problem:
+  for example: "a nurse doesn't do a late night shift followed by a day shift the next day".
+
+
+`<<mathematical model <602.mathmodel.html>`_
+

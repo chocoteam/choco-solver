@@ -1,0 +1,22 @@
+==========================
+Introduction to choco-tuto
+==========================
+
+:author: Charles Prud'homme
+
+Presentation
+============
+
+I'm the project leader of `choco-solver`_ since 2008.
+
+It has been a while since I first though of writing a tutorial.
+Now that a new version of Choco, namely 4.0.0, is being released, the time has come to jump in.
+
+This tutorial is written using RST like a private lesson.
+
+If needed, you will find a brief introduction to Constraint programming.
+
+Let's go for a ride now.
+
+
+.. _`choco-solver`: http://choco-solver.org

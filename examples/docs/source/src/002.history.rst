@@ -1,0 +1,62 @@
+============================================
+Choco, a constraint programming java library
+============================================
+
+What is Choco ?
+===============
+
+Choco is a Free and Open-Source Java library dedicated to Constraint Programming.
+It aims at describing hard combinatorial problems in the form of Constraint Satisfaction Problems
+and solving them with Constraint Programming techniques.
+
+A little bit of history
++++++++++++++++++++++++
+
+The first version of Choco was written in 1999 by François Laburthe and Narendra Jussien in
+`Claire <https://en.wikipedia.org/wiki/Claire_(programming_language)>`_.
+The main objective was to provide an open source library for constraint programming
+dedicated to teaching and research.
+
+In 2003, the code was then converted to Java by Hadrien Cambazard, Guillaume Rochart.
+Funded by EMN, Bouygues and Amadeus, I was recruited as project leader in 2008.
+Together with Hadrien Cambazard and Arnaud Malapert, we developed and maintained Choco-v2.
+
+It was then time for a deep refactoring, with main objective to clean up the code and focus on improving
+resolution performances.
+A joint work of Jean-Guillaume Fages and I,
+with the system expertise of Narendra Jussien and Xavier Lorca,
+led to Choco-v3, first released in 2011.
+This version won seven medals in four entries in the `MiniZinc Challenge <http://www.minizinc.org/challenge.html>`_.
+
+More recently, Jean-Guillaume and I wanted to review the API and the last version was born.
+
+.. philosophy of choco
+
+Why "Choco" ?
++++++++++++++
+
+Choco is the acronym of the french sentence:
+"Chouette, une boite à Outils de Contraintes orientée Object" which can be translated into:
+"Great, an object-oriented constraint toolbox".
+
+Why using Choco ?
+=================
+
+.. First, why using a CP solver ?
+
+Choco is one of the more mature free open source Java library for constraint programming.
+In a nutshell:
+
+- three types of variables: integer, boolean and set,
+- more than 70 constraints : the most useful and state-of-the-art implementations,
+- PLM framework allows configurable searches and most wide-spread search strategies,
+- deal with satisfaction and optimization (mono and multi) problems, multi-thread resolution,
+
+But also:
+
+- explanations supported,
+- a MiniZinc and XCSP3 instance parser,
+- graph variables/constraints available,
+- and gentle binding to Ibex: real variables and constraints supported
+
+If that doesn't sound like something familiar to you, let's give a try !
