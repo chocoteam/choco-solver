@@ -1,6 +1,4 @@
-# Examples
-Choco-solver in practice
-========================
+# Choco-solver in practice
 
 
 This project hosts samples based on [choco-solver-4.0.5](https://github.com/chocoteam/choco-solver/releases/tag/4.0.5).
@@ -37,3 +35,15 @@ Create a new project based on samples source and downloads required dependencies
 - [args4j-2.33](http://mvnrepository.com/artifact/args4j/args4j/2.33)
 
 Add them to the classpath of the new project.
+
+# Notebooks about Choco-solver advanced usages
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/chocoteam/notebooks/master)
+
+These notebooks are dedicated to exemplify advanced usages of [Choco-solver](http://choco-solver.org).
+It comes in complement of the [documentation](https://choco-solver.readthedocs.io/en/latest/) and [tutorials](https://choco-tuto.readthedocs.io/en/latest/).
+
+Based on [IJava binder](https://github.com/SpencerPark/ijava-binder).
+
+1. [How to start solving based on a given solution ?](https://nbviewer.jupyter.org/github/chocoteam/choco-solver/blob/master/examples/notebooks/Loading_a_solution.ipynb#)
+2. [How to run CDCL algorithm ?](https://nbviewer.jupyter.org/github/chocoteam/choco-solver/blob/master/examples/notebooks/A_CDCL_overview.ipynb#)
+3. [How to use conditional constraint ?](https://nbviewer.jupyter.org/github/chocoteam/choco-solver/blob/master/examples/notebooks/Conditionnal_constraint.ipynb#)
