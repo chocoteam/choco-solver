@@ -196,7 +196,7 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
         }
         vars[i].updateLowerBound(lb, this);
-        for (int v = ub; v >= ub; v--) {
+        for (int v = ub; v >= lb; v--) {
             int index = residues[i][v - offset[i]];
             if ((currTable.words[index].get() & supports[i][v - offset[i]][index]) == 0L) {
                 index = currTable.intersectIndex(supports[i][v - offset[i]]);
