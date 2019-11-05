@@ -1,16 +1,14 @@
 language: java
-sudo: true
 os:
 - linux
 jdk:
 - openjdk8
+- openjdk11
 cache:
   directories:
   - "$HOME/.m2"
 env:
   global:
-  # COVERITY_SCAN_TOKEN=...
-  - secure: nBb8CI0EjNrMLEMEYz6+dnZK7bNA8CmgJAQPKhwasjeCMCe8GXolU54l79om6rPs0r5YtXrgVX5+2YZgJ7E996cBjkBJbXgZ4hj+hhEqJzxrLnBqNc47Q4EAZYsBmXGt40ctP5vYI60JvGzs8wesNEzcjeTyWMkinhwkFxPGOWs=
   # OSS SONATYPE, CI_DEPLOY_USERNAME=...
   - secure: hGeJ+dPc3AI/lOLIuVPuuo1LRrm432NXTsybYvlxIiRUpTDezHLWp/8okg+e+xF93jQSwzrTV0xBuH6upnixzzRzo/6fepT6OINe6a/W/VyQL7vUqOvypHWahU7a85sypEMZ7xSKohrixIIxx+NHjD61Q1s5kSc/r+yGkbU2pzI=
   # OSS SONATYPE, CI_DEPLOY_PASSWORD=...
@@ -23,11 +21,10 @@ env:
   - GROUP=ibex
   - GROUP=checker
 before_install:
+- jdk_switcher use openjdk8
 - "/bin/sh ./.travis/install-ibex.sh"
 - export JAVA_HOME=$HOME/openjdk11
 - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
-- echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
-  CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 - sudo apt-get install jq
 # to be adapted to new versions of codacy
 - curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
@@ -39,7 +36,6 @@ branches:
   - "/^develop.*$/"
   - master
   - "/^feature.*$/"
-  - coverity_scan
   - modules
 notifications:
   email:
@@ -55,18 +51,6 @@ notifications:
     on_start: never
 before_script:
 - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
-script: if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then export LD_LIBRARY_PATH=/usr/local/lib
-  && mvn clean install -DtestFailureIgnore=true -Dgroups=$GROUP; fi
-addons:
-  coverity_scan:
-    project:
-      name: chocoteam/choco-solver
-      description: Build submitted via Travis CI
-    notification_email: choco@emn.fr
-    build_command_prepend: mvn clean
-    build_command: mvn -DskipTests=true compile
-    branch_pattern: coverity_scan
-    condition: "$GROUP = 1s"
 after_success:
 - bash <(curl -s https://codecov.io/bash)
 - travis-ping chocoteam/choco-parsers --branch master --token ${GH_TOKEN}
@@ -78,7 +62,7 @@ before_deploy:
 deploy:
 - provider: script
   script: "/bin/sh ./.travis/deploy.sh"
-  skip_cleanup: true
+  cleanup: false
   on:
     repo: chocoteam/choco-solver
     branch: master
@@ -86,7 +70,7 @@ deploy:
     condition: "$GROUP = 10s"
 - provider: script
   script: "/bin/sh ./.travis/deploy.sh"
-  skip_cleanup: true
+  cleanup: false
   on:
     repo: chocoteam/choco-solver
     tags: true
