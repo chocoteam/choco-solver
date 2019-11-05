@@ -301,7 +301,7 @@
                             <Automatic-Module-Name>org.chocosolver</Automatic-Module-Name>
                         </manifestEntries>
                     </archive>
-                    <finalName>${project.artifactId}-${project.version}-no-dep</finalName>
+                    <classifier>no-dep</classifier>
                 </configuration>
             </plugin>
             <plugin>

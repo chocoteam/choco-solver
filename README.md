@@ -139,6 +139,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
    <version>4.10.2</version>
+   <classifier>no-dep</classifier>
 </dependency>
 ```
 
