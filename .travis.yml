@@ -53,7 +53,6 @@ before_script:
 - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 after_success:
 - bash <(curl -s https://codecov.io/bash)
-- travis-ping chocoteam/choco-parsers --branch master --token ${GH_TOKEN}
 - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
 
 before_deploy:
