@@ -1,6 +1,4 @@
-dist: xenial
 language: java
-
 jdk:
 - openjdk8
 
@@ -23,8 +21,9 @@ env:
   - GROUP=checker
 before_install:
 - "/bin/sh ./.travis/install-ibex.sh"
+- wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
 - export JAVA_HOME=$HOME/openjdk11
-- $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
+- source ./install-jdk.sh -f 11 -t $JAVA_HOME
 - sudo apt-get install jq
 # to be adapted to new versions of codacy
 - curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
