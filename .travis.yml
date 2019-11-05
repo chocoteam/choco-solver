@@ -1,12 +1,13 @@
+dist: xenial
 language: java
-os:
-- linux
+
 jdk:
 - openjdk8
-- openjdk11
+
 cache:
   directories:
   - "$HOME/.m2"
+
 env:
   global:
   # OSS SONATYPE, CI_DEPLOY_USERNAME=...
@@ -21,7 +22,6 @@ env:
   - GROUP=ibex
   - GROUP=checker
 before_install:
-- jdk_switcher use openjdk8
 - "/bin/sh ./.travis/install-ibex.sh"
 - export JAVA_HOME=$HOME/openjdk11
 - $TRAVIS_BUILD_DIR/install-jdk.sh --install openjdk11 --target $JAVA_HOME
