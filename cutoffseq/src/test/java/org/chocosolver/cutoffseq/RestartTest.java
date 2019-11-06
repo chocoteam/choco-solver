@@ -41,14 +41,14 @@ public class RestartTest {
 		281474976710656L, 562949953421312L, 1125899906842624L
 	};
 	
-	@Test(timeOut=60000)
+	@Test(timeOut=60000, groups = "1s")
 	public void testLubyRestarts() {
 		testCutoffs(new LubyCutoffStrategy(1), LUBY_2, 1);
 		testCutoffs(new LubyCutoffStrategy(4), LUBY_2, 4);
 		testCutoffs(new LubyCutoffStrategy(Integer.MAX_VALUE), LUBY_2, Integer.MAX_VALUE);
 	}
 
-	@Test(timeOut=60000)
+	@Test(timeOut=60000, groups = "1s")
 	public void testGeomRestarts() {
 		testCutoffs(new GeometricalCutoffStrategy(1, 1.3), GEOMETRIC_1_1_3, 1);
 		testCutoffs(new GeometricalCutoffStrategy(4, 1.3), GEOMETRIC_4_1_3, 1);
