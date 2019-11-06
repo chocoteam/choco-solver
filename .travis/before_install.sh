@@ -27,6 +27,6 @@ then
 
   export JAVA_HOME="$J11_HOME"
   echo "$JAVA_HOME"
-  mvn -v
+
   mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 fi
