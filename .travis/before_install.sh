@@ -24,5 +24,7 @@ then
   export JAVA_HOME=$HOME/openjdk11
   /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
 
+  mvn -v
+
   mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 fi
