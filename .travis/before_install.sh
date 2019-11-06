@@ -2,7 +2,7 @@
 
 curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
 
-if [ ${TEST_SUITE} == "ibex" ]
+if [ "${TEST_SUITE}" == "ibex" ]
 then
   set -ex
   # download Ibex and untar it

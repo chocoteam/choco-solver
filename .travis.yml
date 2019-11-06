@@ -67,7 +67,7 @@ deploy:
       repo: chocoteam/choco-solver
       branch: master
       jdk: oraclejdk8
-      condition: TEST_SUITE = 10s
+      if: $TEST_SUITE = 10s
   - provider: script
     script: /bin/sh ./.travis/deploy.sh
     cleanup: false
@@ -75,4 +75,4 @@ deploy:
       repo: chocoteam/choco-solver
       tags: true
       jdk: oraclejdk8
-      condition: $TEST_SUITE = 10s
+      if: $TEST_SUITE = 10s
