@@ -5,6 +5,7 @@ curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/
 if [ "${TEST_SUITE}" == "ibex" ]
 then
   curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
+  echo "$JAVA_HOME"
   export JAVA_HOME=$HOME/openjdk9
   /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 9 -t "$JAVA_HOME"
 
