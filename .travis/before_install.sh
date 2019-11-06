@@ -22,5 +22,6 @@ then
   export LD_LIBRARY_PATH=/usr/local/lib
 
   wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
-  ./install-jdk.sh -f 11
+  export JAVA_HOME=$HOME/openjdk11
+  sudo $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
 fi

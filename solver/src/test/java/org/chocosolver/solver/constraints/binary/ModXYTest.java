@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.unary.PropMember;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -20,8 +21,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * <br/>
@@ -158,12 +157,12 @@ public class ModXYTest extends AbstractBinaryTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testMod2VarsIntoMod1VarMod() {
-        Model model = spy(new Model("model"));
-        IntVar x = model.intVar("x", 0,9);
+        Model model = new Model("model");
+        IntVar x = model.intVar("x", 0, 9);
         IntVar y = model.intVar("y", 5);
         IntVar z = model.intVar("z", 3);
-        model.post(model.mod(x, y, z));
-        verify(model).mod(x, 5, 3);
+        Constraint cstr = model.mod(x, y, z);
+        Assert.assertTrue(cstr.getPropagator(0) instanceof PropMember);
     }
 
     @Test(groups="1s", timeOut=60000)

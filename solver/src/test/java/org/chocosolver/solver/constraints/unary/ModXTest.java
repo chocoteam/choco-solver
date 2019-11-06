@@ -10,14 +10,13 @@
 package org.chocosolver.solver.constraints.unary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -71,9 +70,9 @@ public class ModXTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testMod3VarsIntoMember() {
-		Model model = spy(new Model("model"));
-		IntVar x = model.intVar("x", 0,9);
-		model.post(model.mod(x, 3, 0));
-		verify(model).member(x, new int[]{0, 3, 6, 9});
+		Model model = new Model("model");
+		IntVar x = model.intVar("x", 0, 9);
+		Constraint cstr = model.mod(x, 3, 0);
+		Assert.assertTrue(cstr.getPropagator(0) instanceof PropMember);
 	}
 }
