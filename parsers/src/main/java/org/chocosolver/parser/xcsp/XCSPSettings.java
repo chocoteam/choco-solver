@@ -12,6 +12,7 @@ package org.chocosolver.parser.xcsp;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Settings;
 
+import java.io.InputStream;
 import java.util.Properties;
 
 /**
@@ -25,11 +26,15 @@ public class XCSPSettings extends DefaultSettings {
     private boolean print = false;
 
     public XCSPSettings() {
+        loadProperties();
+    }
+
+    private void loadProperties() {
         this.setEnableSAT(true);
         this.setPrintConstraints(DEBUG);
         this.setWarnUser(DEBUG);
         this.setCheckDeclaredConstraints(DEBUG);
-        this.setHybridizationOfPropagationEngine((byte)0b00);
+        this.setHybridizationOfPropagationEngine((byte) 0b00);
         this.setModelChecker(solver -> true);
         this.setPrintConstraints(DEBUG);
     }
@@ -46,8 +51,9 @@ public class XCSPSettings extends DefaultSettings {
 
     @Override
     public Settings load(Properties properties) {
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
         super.load(properties);
-        this.setPrintConstraints(Boolean.valueOf(properties.get("constraints.print").toString()));
+        this.loadProperties();
         return this;
     }
 

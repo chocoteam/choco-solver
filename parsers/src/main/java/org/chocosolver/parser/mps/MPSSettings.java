@@ -25,10 +25,15 @@ public class MPSSettings extends DefaultSettings {
     private boolean print = false;
 
     public MPSSettings() {
+        loadProperties();
+    }
+
+    private void loadProperties() {
         this.setPrintConstraints(DEBUG);
         this.setWarnUser(DEBUG);
         this.setCheckDeclaredConstraints(DEBUG);
         this.setModelChecker(solver -> true);
+        this.setPrintConstraints(DEBUG);
     }
 
     public boolean printConstraints() {
@@ -40,10 +45,11 @@ public class MPSSettings extends DefaultSettings {
         return this;
     }
 
+
     @Override
     public Settings load(Properties properties) {
         super.load(properties);
-        this.setPrintConstraints(Boolean.valueOf(properties.get("constraints.print").toString()));
+        this.loadProperties();
         return this;
     }
 
@@ -53,4 +59,5 @@ public class MPSSettings extends DefaultSettings {
         properties.setProperty("constraints.print", Boolean.toString(print));
         return properties;
     }
+
 }

@@ -23,7 +23,7 @@ import org.testng.annotations.Test;
  */
 public class JSONRealConstraintTest extends JSONConstraintTest{
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRealCstr(){
         Model model = new Model();
         RealVar x = model.realVar(0., 1.2, 1.E-1);
@@ -37,7 +37,7 @@ public class JSONRealConstraintTest extends JSONConstraintTest{
         eval(model, false);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRealCstr2(){
         Model model = new Model();
         RealVar x = model.realVar(0., 1.2, 1.E-1);
@@ -49,7 +49,7 @@ public class JSONRealConstraintTest extends JSONConstraintTest{
         eval(model, false);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRealCstr3(){
         Model model = new Model();
         RealVar x = model.realVar(0., 1.2, 1.E-1);
@@ -60,7 +60,7 @@ public class JSONRealConstraintTest extends JSONConstraintTest{
         eval(model, true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="ibex", timeOut=60000)
     public void testRealCstr4(){
         Model model = new Model();
         RealVar x = model.realVar(.8, 1.2, 1.E-1);

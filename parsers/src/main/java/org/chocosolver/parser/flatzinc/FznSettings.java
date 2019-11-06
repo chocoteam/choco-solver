@@ -26,8 +26,12 @@ public class FznSettings extends DefaultSettings {
     private boolean adhocReification = true;
 
     public FznSettings() {
+        loadProperties();
+    }
+
+    private void loadProperties() {
         this.setCheckDeclaredConstraints(false);
-//        this.setModelChecker(solver -> true);
+        //        this.setModelChecker(solver -> true);
         this.setHybridizationOfPropagationEngine((byte) 0b10);
         this.setLearntClausesDominancePerimeter(0);
         this.setNbMaxLearntClauses(Integer.MAX_VALUE);
@@ -55,8 +59,7 @@ public class FznSettings extends DefaultSettings {
     @Override
     public Settings load(Properties properties) {
         super.load(properties);
-        this.setPrintConstraints(Boolean.valueOf(properties.get("constraints.print").toString()));
-        this.setAdHocReification(Boolean.valueOf(properties.get("reification.adhoc").toString()));
+        this.loadProperties();
         return this;
     }
 
