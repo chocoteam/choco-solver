@@ -234,16 +234,16 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
     }
 
     private Constraint makeRealConstraint(JsonArray jparams, Model model) {
-        if(jparams.size() == 2) {
+        if (jparams.size() == 2) {
             return model.realIbexGenericConstraint(
                     jparams.get(1).getAsString(),
                     extractVarArray(jparams.get(0).getAsJsonArray())
             );
-        }else{
-            Variable[] params= extractVarArray(jparams.get(0).getAsJsonArray());
+        } else {
+            Variable[] params = extractVarArray(jparams.get(0).getAsJsonArray());
             Constraint c = model.realIbexGenericConstraint(
                     jparams.get(1).getAsString(),
-                    Arrays.copyOfRange(params, 0, params.length-1)
+                    Arrays.copyOfRange(params, 0, params.length - 1)
             );
             c.reifyWith(ModelDeserializer.getBoolVar(jparams.get(2).getAsString()));
             return null;
@@ -659,12 +659,33 @@ public class ConstraintDeserializer implements JsonDeserializer<Constraint> {
                 }
                 break;
             case 5:
-                model.reifyXltYC(
-                        v1,
-                        ModelDeserializer.getIntVar(jparams.get(2).getAsString()),
-                        jparams.get(3).getAsInt(),
-                        ModelDeserializer.getBoolVar(jparams.get(4).getAsString())
-                );
+                switch (jparams.get(1).getAsString()) {
+                    case "=":
+                        model.reifyXeqYC(
+                                v1,
+                                ModelDeserializer.getIntVar(jparams.get(2).getAsString()),
+                                jparams.get(3).getAsInt(),
+                                ModelDeserializer.getBoolVar(jparams.get(4).getAsString())
+                        );
+                        break;
+                    case "!=":
+                        model.reifyXneYC(
+                                v1,
+                                ModelDeserializer.getIntVar(jparams.get(2).getAsString()),
+                                jparams.get(3).getAsInt(),
+                                ModelDeserializer.getBoolVar(jparams.get(4).getAsString())
+                        );
+                        break;
+                    case "<":
+                        model.reifyXltYC(
+                                v1,
+                                ModelDeserializer.getIntVar(jparams.get(2).getAsString()),
+                                jparams.get(3).getAsInt(),
+                                ModelDeserializer.getBoolVar(jparams.get(4).getAsString())
+                        );
+                        break;
+                }
+
                 break;
         }
         return null;

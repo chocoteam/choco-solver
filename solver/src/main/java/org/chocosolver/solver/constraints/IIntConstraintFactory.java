@@ -20,10 +20,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
 import org.chocosolver.solver.constraints.extension.nary.*;
-import org.chocosolver.solver.constraints.nary.PropDiffN;
-import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
-import org.chocosolver.solver.constraints.nary.PropKLoops;
-import org.chocosolver.solver.constraints.nary.PropKnapsack;
+import org.chocosolver.solver.constraints.nary.*;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
@@ -65,8 +62,6 @@ import org.chocosolver.solver.constraints.nary.tree.PropAntiArborescences;
 import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.constraints.unary.PropMember;
-import org.chocosolver.solver.constraints.unary.PropNotMember;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -183,7 +178,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param set a set of values
      */
     default Constraint member(IntVar var, IntIterableRangeSet set) {
-        return new Constraint(ConstraintsName.MEMBER, new PropMember(var, set));
+        return new Member(var, set);
     }
 
     /**
@@ -206,7 +201,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param set a set of values
      */
     default Constraint notMember(IntVar var, IntIterableRangeSet set) {
-        return new Constraint(ConstraintsName.NOTMEMBER, new PropNotMember(var, set));
+        return new NotMember(var, set);
     }
 
     //##################################################################################################################

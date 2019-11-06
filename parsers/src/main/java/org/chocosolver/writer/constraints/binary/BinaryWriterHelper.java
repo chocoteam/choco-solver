@@ -134,6 +134,15 @@ public class BinaryWriterHelper {
                         prop0.getVar(2).getId()
                 );
                 break;
+            case "PropXeqYCReif":
+                writer.writeBasicreification2(
+                        prop0.getVar(0).getId(),
+                        "=",
+                        prop0.getVar(1).getId(),
+                        Reflection.getInt(prop0, "cste"),
+                        prop0.getVar(2).getId()
+                );
+                break;
             case "PropXgtCReif":
                 writer.writeBasicreification1(
                         prop0.getVar(0).getId(),
@@ -188,6 +197,15 @@ public class BinaryWriterHelper {
                         prop0.getVar(0).getId(),
                         "!=",
                         prop0.getVar(1).getId(),
+                        prop0.getVar(2).getId()
+                );
+                break;
+            case "PropXneYCReif":
+                writer.writeBasicreification2(
+                        prop0.getVar(0).getId(),
+                        "!=",
+                        prop0.getVar(1).getId(),
+                        Reflection.getInt(prop0, "cste"),
                         prop0.getVar(2).getId()
                 );
                 break;
