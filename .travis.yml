@@ -4,43 +4,6 @@ cache:
   directories:
     - "$HOME/.m2"
 
-env:
-  global:
-    # OSS SONATYPE, CI_DEPLOY_USERNAME=...
-    - secure: hGeJ+dPc3AI/lOLIuVPuuo1LRrm432NXTsybYvlxIiRUpTDezHLWp/8okg+e+xF93jQSwzrTV0xBuH6upnixzzRzo/6fepT6OINe6a/W/VyQL7vUqOvypHWahU7a85sypEMZ7xSKohrixIIxx+NHjD61Q1s5kSc/r+yGkbU2pzI=
-    # OSS SONATYPE, CI_DEPLOY_PASSWORD=...
-    - secure: bcwHH/i43WCwnHb6C3G3hNgcS/OOVgCVxoXSUPtsYWcLZxb4cV05vUzs5VO/Iiw/YBRHEQM342yCKS46wunqv2wwEXpzWRTJG0Pwpn2tEj4fjp0OzPsiTx9AWYSkbiQjHoIGWC57LgxNzpuqHJsi4xnc9iiwQaV6mdlJP3Ofb7E=
-    # COVERITY_PROJECT_TOKEN=
-    - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
-
-jobs:
-  include:
-    - branches:
-        only:
-          - master
-          - modules
-    - before_install: curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
-    - stage: ibex
-      jdk: openjdk8
-      before_install: "/bin/sh ./.travis/install-ibex.sh"
-      before_script:
-        - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
-        - export LD_LIBRARY_PATH=/usr/local/lib
-      script:
-        - mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
-    - stage: 1s
-      jdk: openjdk11
-      script:
-        - mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
-    - stage: 10s
-      jdk: openjdk11
-      script:
-        - mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
-    - stage: checker
-      jdk: openjdk11
-      script:
-        - mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
-
 notifications:
   email:
     recipients:
@@ -54,6 +17,42 @@ notifications:
     on_failure: always
     on_start: never
 
+env:
+  global:
+    # OSS SONATYPE, CI_DEPLOY_USERNAME=...
+    - secure: hGeJ+dPc3AI/lOLIuVPuuo1LRrm432NXTsybYvlxIiRUpTDezHLWp/8okg+e+xF93jQSwzrTV0xBuH6upnixzzRzo/6fepT6OINe6a/W/VyQL7vUqOvypHWahU7a85sypEMZ7xSKohrixIIxx+NHjD61Q1s5kSc/r+yGkbU2pzI=
+    # OSS SONATYPE, CI_DEPLOY_PASSWORD=...
+    - secure: bcwHH/i43WCwnHb6C3G3hNgcS/OOVgCVxoXSUPtsYWcLZxb4cV05vUzs5VO/Iiw/YBRHEQM342yCKS46wunqv2wwEXpzWRTJG0Pwpn2tEj4fjp0OzPsiTx9AWYSkbiQjHoIGWC57LgxNzpuqHJsi4xnc9iiwQaV6mdlJP3Ofb7E=
+    # COVERITY_PROJECT_TOKEN=
+    - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
+
+branches:
+  only:
+    - master
+    - modules
+jobs:
+  include:
+    - before_install: curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
+    - name: ibex
+      jdk: openjdk8
+      before_install: "/bin/sh ./.travis/install-ibex.sh"
+      before_script:
+        - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
+        - export LD_LIBRARY_PATH=/usr/local/lib
+      env: TEST_SUITE="ibex"
+    - name: 1s
+      jdk: openjdk11
+      env: TEST_SUITE="1s"
+    - name: 10s
+      jdk: openjdk11
+      env: TEST_SUITE="10s"
+    - name: checker
+      jdk: openjdk11
+      env: TEST_SUITE="checker"
+
+script:
+  - mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE
+
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
@@ -61,6 +60,7 @@ after_success:
 before_deploy:
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
   - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+
 deploy:
   - provider: script
     script: "/bin/sh ./.travis/deploy.sh"
