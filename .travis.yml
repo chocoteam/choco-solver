@@ -1,5 +1,6 @@
 os: linux
 language: java
+jdk: openjdk11
 
 cache:
   directories:
@@ -37,16 +38,12 @@ before_install: /bin/bash ./.travis/before_install.sh
 jobs:
   include:
     - name: ibex
-      jdk: openjdk8
       env: TEST_SUITE="ibex"
     - name: 1s
-      jdk: openjdk11
       env: TEST_SUITE="1s"
     - name: 10s
-      jdk: openjdk11
       env: TEST_SUITE="10s"
     - name: checker
-      jdk: openjdk11
       env: TEST_SUITE="checker"
 
 script: mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE

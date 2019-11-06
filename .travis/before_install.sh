@@ -4,6 +4,10 @@ curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/
 
 if [ "${TEST_SUITE}" == "ibex" ]
 then
+  curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
+  export JAVA_HOME=$HOME/openjdk8
+  /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 8 --target $JAVA_HOME
+
   set -ex
   # download Ibex and untar it
   ibexver=2.6.5
@@ -20,7 +24,6 @@ then
 
   export LD_LIBRARY_PATH=/usr/local/lib
 
-  curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
   export JAVA_HOME=$HOME/openjdk11
   /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
 
