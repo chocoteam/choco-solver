@@ -1,3 +1,4 @@
+os: linux
 language: java
 
 cache:
@@ -30,12 +31,16 @@ branches:
   only:
     - master
     - modules
+    
+before_install: curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
+
 jobs:
   include:
-    - before_install: curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
     - name: ibex
       jdk: openjdk8
-      before_install: "/bin/sh ./.travis/install-ibex.sh"
+      before_install:
+        - curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
+        - /bin/sh ./.travis/install-ibex.sh
       before_script:
         - mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
         - export LD_LIBRARY_PATH=/usr/local/lib
@@ -51,6 +56,7 @@ jobs:
       env: TEST_SUITE="checker"
 
 script:
+  - echo $TEST_SUITE
   - mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE
 
 after_success:
@@ -63,18 +69,18 @@ before_deploy:
 
 deploy:
   - provider: script
-    script: "/bin/sh ./.travis/deploy.sh"
+    script: /bin/sh ./.travis/deploy.sh
     cleanup: false
     on:
       repo: chocoteam/choco-solver
       branch: master
       jdk: oraclejdk8
-      condition: "$GROUP = 10s"
+      condition: TEST_SUITE = 10s
   - provider: script
-    script: "/bin/sh ./.travis/deploy.sh"
+    script: /bin/sh ./.travis/deploy.sh
     cleanup: false
     on:
       repo: chocoteam/choco-solver
       tags: true
       jdk: oraclejdk8
-      condition: "$GROUP = 10s"
+      condition: $TEST_SUITE = 10s

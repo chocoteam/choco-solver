@@ -23,10 +23,10 @@ import org.testng.annotations.Test;
  */
 public class SatSolverTest {
 
-    SatSolver sat;
-    int a, b, c, d;
+    private SatSolver sat;
+    private int a, b, c, d;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void setUp() throws Exception {
         sat = new SatSolver();
         a = sat.newVariable();
