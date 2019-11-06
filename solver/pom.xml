@@ -110,7 +110,6 @@
                             </value>
                         </property>
                     </properties>
-                    <groups>1s,10s,ibex,checker</groups>
                 </configuration>
             </plugin>
         </plugins>
