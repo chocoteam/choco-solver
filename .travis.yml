@@ -46,7 +46,7 @@ jobs:
     - name: checker
       env: TEST_SUITE="checker"
 
-script: mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE
+script: mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE -Djava.library.path=/usr/local/lib
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
