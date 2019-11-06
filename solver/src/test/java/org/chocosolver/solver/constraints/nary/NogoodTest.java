@@ -11,16 +11,19 @@ package org.chocosolver.solver.constraints.nary;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-
-import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -110,5 +113,18 @@ public class NogoodTest {
         chocoModel.getSolver().findAllSolutions();
         Assert.assertEquals(chocoModel.getSolver().getSolutionCount(), 4);
     }
+
+    @Test(groups="1s", timeOut=60000)
+        public void test5() {
+        final Model model = new Model();
+        SetVar[] vars = model.setVarArray("vars", 3, new int[]{}, new int[]{1,2});
+        model.getSolver().setNoGoodRecordingFromRestarts();
+        model.getSolver().setSearch(Search.setVarSearch(new Random<SetVar>(29091981L), new SetDomainMin(), true, vars));
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
+        while (model.getSolver().solve()) ;
+        assertEquals(model.getSolver().getSolutionCount(), 64);
+        assertEquals(model.getSolver().getBackTrackCount(), 133);
+    }
+
 
 }

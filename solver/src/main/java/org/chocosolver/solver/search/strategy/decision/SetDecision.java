@@ -16,6 +16,7 @@ import org.chocosolver.util.PoolManager;
 
 /**
  * A decision based on a {@link SetVar}
+ *
  * @author Jean-Guillaume Fages
  * @since Jan. 2013
  */
@@ -37,6 +38,7 @@ public class SetDecision extends Decision<SetVar> {
 
     /**
      * Create an decision based on an {@link SetVar}
+     *
      * @param poolManager decision pool manager, to recycle decisions
      */
     public SetDecision(PoolManager<SetDecision> poolManager) {
@@ -60,7 +62,8 @@ public class SetDecision extends Decision<SetVar> {
 
     /**
      * Instantiate this decision with the parameters
-     * @param v a variable
+     *
+     * @param v     a variable
      * @param value a value
      */
     public void set(SetVar v, int value, DecisionOperator<SetVar> operator) {
@@ -79,6 +82,13 @@ public class SetDecision extends Decision<SetVar> {
     @Override
     public void free() {
         poolManager.returnE(this);
+    }
+
+    /**
+     * @return the current decision operator
+     */
+    public DecisionOperator<SetVar> getDecOp() {
+        return operator;
     }
 
     @Override

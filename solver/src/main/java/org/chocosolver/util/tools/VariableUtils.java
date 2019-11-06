@@ -9,14 +9,15 @@
  */
 package org.chocosolver.util.tools;
 
-import static java.util.Arrays.stream;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
+import static java.util.Arrays.stream;
 
 /**
  * <p>
@@ -49,10 +50,10 @@ public class VariableUtils {
         long[] bounds = new long[2];
         for (int i = 0; i < vars.length; i++) {
             int c = coeffs[i];
-            if(c >= 0) {
+            if (c >= 0) {
                 bounds[0] += vars[i].getLB() * coeffs[i];
                 bounds[1] += vars[i].getUB() * coeffs[i];
-            }else{
+            } else {
                 bounds[0] += vars[i].getUB() * coeffs[i];
                 bounds[1] += vars[i].getLB() * coeffs[i];
             }
@@ -193,13 +194,13 @@ public class VariableUtils {
             vals[0] = 0;
             vals[1] = 0;
             vals[2] = 0;
-            if(yl >= 0){
-                vals[3] = yu-1;
-            }else if(yu <= 0){
-                vals[3] = yl+1;
-            }else{
-                vals[0] = Math.abs(yl)-1;
-                vals[1] = Math.abs(yu)-1;
+            if (yl >= 0) {
+                vals[3] = yu - 1;
+            } else if (yu <= 0) {
+                vals[3] = yl + 1;
+            } else {
+                vals[0] = Math.abs(yl) - 1;
+                vals[1] = Math.abs(yu) - 1;
                 vals[2] = -vals[0];
                 vals[3] = -vals[1];
             }
@@ -214,16 +215,16 @@ public class VariableUtils {
      * @return computes the bounds for "x ^ y"
      */
     public static int[] boundsForPow(IntVar x, IntVar y) {
-      return bound(0, 1,
-          MathUtils.pow(x.getLB(), y.getUB()),
-          MathUtils.pow(x.getUB(), y.getUB()),
-          MathUtils.pow(x.getLB() + 1, y.getUB()),
-          MathUtils.pow(x.getUB() - 1, y.getUB()),
-          MathUtils.pow(x.getLB(), Math.max(0, y.getUB() - 1)),
-          MathUtils.pow(x.getUB(), Math.max(0, y.getUB() - 1)),
-          MathUtils.pow(x.getLB() + 1, Math.max(0, y.getUB() - 1)),
-          MathUtils.pow(x.getUB() - 1, Math.max(0, y.getUB() - 1))
-      );
+        return bound(0, 1,
+                MathUtils.pow(x.getLB(), y.getUB()),
+                MathUtils.pow(x.getUB(), y.getUB()),
+                MathUtils.pow(x.getLB() + 1, y.getUB()),
+                MathUtils.pow(x.getUB() - 1, y.getUB()),
+                MathUtils.pow(x.getLB(), Math.max(0, y.getUB() - 1)),
+                MathUtils.pow(x.getUB(), Math.max(0, y.getUB() - 1)),
+                MathUtils.pow(x.getLB() + 1, Math.max(0, y.getUB() - 1)),
+                MathUtils.pow(x.getUB() - 1, Math.max(0, y.getUB() - 1))
+        );
     }
 
     /**
@@ -329,7 +330,7 @@ public class VariableUtils {
         for (int i = 0; i < vars.length && size > 0; i++) {
             size *= vars[i].getDomainSize();
         }
-        if(size  <= 0 || size == Double.POSITIVE_INFINITY) {
+        if (size <= 0 || size == Double.POSITIVE_INFINITY) {
             size = Double.MAX_VALUE;
         }
         return size;
@@ -358,8 +359,9 @@ public class VariableUtils {
 
     /**
      * Transform an array of int to an array of fixed IntVar
+     *
      * @param values array of ints
-     * @param model model to create IntVar
+     * @param model  model to create IntVar
      * @return
      */
     public static IntVar[] toIntVar(Model model, int... values) {
@@ -386,11 +388,28 @@ public class VariableUtils {
 
     /**
      * @param var a variable
+     * @return <i>true</i> if the variable is an int variable, based on its kind,
+     * <i>false</i> otherwise
+     */
+    public static boolean isInt(Variable var) {
+        return (var.getTypeAndKind() & Variable.INT) != 0;
+    }
+
+    /**
+     * @param var a variable
+     * @return <i>true</i> if the variable is a set variable, based on its kind,
+     * <i>false</i> otherwise
+     */
+    public static boolean isSet(Variable var) {
+        return (var.getTypeAndKind() & Variable.SET) != 0;
+    }
+
+    /**
+     * @param var a variable
      * @return <i>true</i> if the variable is a real variable, based on its kind,
      * <i>false</i> otherwise
      */
     public static boolean isReal(Variable var) {
-        return (var.getTypeAndKind() & Variable.REAL) !=0;
+        return (var.getTypeAndKind() & Variable.REAL) != 0;
     }
-
 }

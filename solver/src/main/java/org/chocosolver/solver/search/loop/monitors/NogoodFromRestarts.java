@@ -9,13 +9,13 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.search.strategy.decision.SetDecision;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
@@ -69,7 +69,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private void extractNogoodFromPath() {
         int d = (int) png.getModel().getSolver().getNodeCount();
         png.getModel().getSolver().getDecisionPath().transferInto(decisions, false);
-        Decision<IntVar> decision;
+        Decision decision;
         int[] lits = new int[d];
         int i = 0;
         while (!decisions.isEmpty()) {
@@ -103,8 +103,25 @@ public class NogoodFromRestarts implements IMonitorRestart {
                 } else {
                     throw new UnsupportedOperationException("NogoodStoreFromRestarts cannot deal with such operator: " + ((IntDecision) decision).getDecOp());
                 }
+            } else if (decision instanceof SetDecision) {
+                SetDecision sd = (SetDecision) decision;
+                if (sd.getDecOp() == DecisionOperatorFactory.makeSetForce()) {
+                    if (sd.hasNext() || sd.getArity() == 1) {
+                        lits[i++] = SatSolver.negated(png.Literal(sd.getDecisionVariable(), sd.getDecisionValue(), true));
+                    } else {
+                        if (i == 0) {
+                            // value can be removed permanently from var!
+                            png.addLearnt(SatSolver.negated(png.Literal(sd.getDecisionVariable(), sd.getDecisionValue(), true)));
+                        } else {
+                            lits[i] = SatSolver.negated(png.Literal(sd.getDecisionVariable(), sd.getDecisionValue(), true));
+                            png.addLearnt(Arrays.copyOf(lits, i + 1));
+                        }
+                    }
+                } else {
+                    throw new UnsupportedOperationException("NogoodStoreFromRestarts cannot deal with such operator: " + ((SetDecision) decision).getDecOp());
+                }
             } else {
-                throw new UnsupportedOperationException("NogoodStoreFromRestarts can only deal with IntDecision.");
+                throw new UnsupportedOperationException("NogoodStoreFromRestarts can only deal with IntDecision and SetDecision.");
             }
         }
     }
