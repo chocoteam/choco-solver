@@ -37,7 +37,7 @@ before_install: /bin/bash ./.travis/before_install.sh
 jobs:
   include:
     - name: ibex
-      jdk: openjdk11
+      jdk: openjdk8
       env: TEST_SUITE="ibex"
     - name: 1s
       jdk: openjdk11

@@ -20,4 +20,7 @@ then
 
   mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
   export LD_LIBRARY_PATH=/usr/local/lib
+
+  wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  ./install-jdk.sh -f 11
 fi
