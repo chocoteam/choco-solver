@@ -24,4 +24,6 @@ module org.chocosolver.parsers {
     requires java.sql;
     requires antlr4.runtime;
     requires trove4j;
+    
+    opens org.chocosolver.parser;
 }
