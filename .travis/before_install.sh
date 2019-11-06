@@ -18,10 +18,11 @@ then
   sudo rm -r ibex-${ibexver}.tar.gz
   sudo rm -r ibex-lib-ibex-${ibexver}
 
-  mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
   export LD_LIBRARY_PATH=/usr/local/lib
 
   curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
   export JAVA_HOME=$HOME/openjdk11
   /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
+
+  mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 fi
