@@ -21,7 +21,7 @@ then
   mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
   export LD_LIBRARY_PATH=/usr/local/lib
 
-  wget https://github.com/sormuras/bach/raw/master/install-jdk.sh
+  curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
   export JAVA_HOME=$HOME/openjdk11
-  sudo $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
+  /bin/bash $TRAVIS_BUILD_DIR/install-jdk.sh -f 11 --target $JAVA_HOME
 fi
