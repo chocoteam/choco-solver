@@ -22,8 +22,10 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.*;
 
@@ -32,12 +34,13 @@ import static org.chocosolver.sat.SatSolver.*;
 
 /**
  * A propagator to store and propagate no-goods.
- *
+ * <p>
  * Created by cprudhom on 20/01/15.
  * Project: choco.
+ *
  * @author Charles Prud'homme
  */
-public class PropNogoods extends Propagator<IntVar> {
+public class PropNogoods extends Propagator<Variable> {
 
     /**
      * No entry value for {@link #lit2val}, {@link #lit2pos} and {@link #var2pos}.
@@ -99,7 +102,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * Since there is no domain-clause, a fix point may not be reached by SatSolver itself.
      * Stores all modified variable to make sure a fix point is reached.
      */
-    private Deque<IntVar> fp;
+    private Deque<Variable> fp;
 
     /**
      * Local-like parameter, for #why() method only, lazily initialized.
@@ -109,7 +112,7 @@ public class PropNogoods extends Propagator<IntVar> {
     /**
      * Store new added variables when {@link #initialized} is <i>false</i>
      */
-    private ArrayList<IntVar> add_var;
+    private ArrayList<Variable> add_var;
 
     /**
      * Indicates if this is initialized or not
@@ -123,7 +126,7 @@ public class PropNogoods extends Propagator<IntVar> {
      */
     public PropNogoods(Model model) {
         super(new BoolVar[]{model.boolVar(true)}, PropagatorPriority.VERY_SLOW, true);
-        this.vars = new IntVar[0];// erase model.ONE from the variable scope
+        this.vars = new Variable[0];// erase model.ONE from the variable scope
 
         int k = 16;
         this.vv2lit = new TLongIntHashMap[k];//new TIntObjectHashMap<>(16, .5f, NO_ENTRY);
@@ -167,6 +170,16 @@ public class PropNogoods extends Propagator<IntVar> {
         }
     }
 
+    private void doVariableBound(Variable var) throws ContradictionException {
+        if (VariableUtils.isInt(var)) {
+            doVariableBound((IntVar) var);
+        } else if (VariableUtils.isSet(var)) {
+            doVariableBound((SetVar) var);
+        } else {
+            throw new UnsupportedOperationException("Unknown case");
+        }
+    }
+
     private void doVariableBound(IntVar var) throws ContradictionException {
         TLongIntHashMap map;
         for (long k : (map = vv2lit[var.getId()]).keys()) {
@@ -189,6 +202,22 @@ public class PropNogoods extends Propagator<IntVar> {
         }
     }
 
+    private void doVariableBound(SetVar var) throws ContradictionException {
+        TLongIntHashMap map;
+        for (long k : (map = vv2lit[var.getId()]).keys()) {
+            int value = ivalue(k);
+            if (iseq(k)) {
+                if (var.getLB().contains(value)) {
+                    VariableBound(map.get(k), true);
+                } else if (!var.getUB().contains(value)) {
+                    VariableBound(map.get(k), false);
+                }
+            } else {
+                throw new UnsupportedOperationException("SetVar does not support that case");
+            }
+        }
+    }
+
     @Override
     public ESat isEntailed() {
         if (vars.length == 0) return ESat.TRUE;
@@ -200,13 +229,23 @@ public class PropNogoods extends Propagator<IntVar> {
             for (int k : sat_.implies_.keys()) {
                 sign = sign(negated(k));
                 var = var(k);
-                IntVar ivar = vars[lit2pos[var]];
+                Variable avar = vars[lit2pos[var]];
                 value = lit2val[var];
                 eq = iseq(value);
                 val = ivalue(value);
-                if ((eq && sign != ivar.contains(val))
-                        || (!eq && sign != ivar.getUB() <= val)) {
-                    OK &= impliesEntailed(sat_.implies_.get(k));
+                if (VariableUtils.isInt(avar)) {
+                    IntVar ivar = (IntVar) avar;
+                    if ((eq && sign != ivar.contains(val))
+                            || (!eq && sign != ivar.getUB() <= val)) {
+                        OK &= impliesEntailed(sat_.implies_.get(k));
+                    }
+                } else if (VariableUtils.isSet(avar)) {
+                    SetVar svar = (SetVar) avar;
+                    if (eq && sign != svar.getLB().contains(val)) {
+                        OK &= impliesEntailed(sat_.implies_.get(k));
+                    }
+                } else {
+                    throw new UnsupportedOperationException("Unknown case");
                 }
             }
             OK &= clauseEntailed(sat_.clauses);
@@ -220,22 +259,36 @@ public class PropNogoods extends Propagator<IntVar> {
         int var;
         long value;
         boolean sign;
-        IntVar ivar;
+        Variable avar;
         for (int l : lits.toArray()) {
             sign = sign(l);
             var = var(l);
-            ivar = vars[lit2pos[var]];
+            avar = vars[lit2pos[var]];
             value = lit2val[var];
-            if (iseq(value)) {
-                if (sign != ivar.contains(ivalue(value))) {
-                    return false;
+            if (VariableUtils.isInt(avar)) {
+                IntVar ivar = (IntVar) avar;
+                if (iseq(value)) {
+                    if (sign != ivar.contains(ivalue(value))) {
+                        return false;
+                    }
+                } else {
+                    if (sign && ivar.getLB() > ivalue(value)) {
+                        return false;
+                    } else if (!sign && ivar.getUB() <= ivalue(value)) {
+                        return false;
+                    }
+                }
+            } else if (VariableUtils.isSet(avar)) {
+                SetVar svar = (SetVar) avar;
+                if (iseq(value)) {
+                    if (sign != svar.getLB().contains(ivalue(value))) {
+                        return false;
+                    }
+                } else {
+                    throw new UnsupportedOperationException("SetVar does not support that case");
                 }
             } else {
-                if (sign && ivar.getLB() > ivalue(value)) {
-                    return false;
-                } else if (!sign && ivar.getUB() <= ivalue(value)) {
-                    return false;
-                }
+                throw new UnsupportedOperationException("Unknown case");
             }
         }
         return true;
@@ -245,25 +298,39 @@ public class PropNogoods extends Propagator<IntVar> {
         int lit, var;
         long value;
         boolean sign;
-        IntVar ivar;
+        Variable avar;
         for (Clause c : clauses) {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
                 sign = sign(lit);
                 var = var(lit);
-                ivar = vars[lit2pos[var]];
+                avar = vars[lit2pos[var]];
                 value = lit2val[var];
-                if (iseq(value)) {
-                    if (sign != ivar.contains(ivalue(value))) {
-                        cnt++;
-                    } else break;
+                if (VariableUtils.isInt(avar)) {
+                    IntVar ivar = (IntVar) avar;
+                    if (iseq(value)) {
+                        if (sign != ivar.contains(ivalue(value))) {
+                            cnt++;
+                        } else break;
+                    } else {
+                        if (sign && ivar.getLB() > ivalue(value)) {
+                            cnt++;
+                        } else if (!sign && ivar.getUB() <= ivalue(value)) {
+                            cnt++;
+                        } else break;
+                    }
+                } else if (VariableUtils.isSet(avar)) {
+                    SetVar svar = (SetVar) avar;
+                    if (iseq(value)) {
+                        if (sign != svar.getLB().contains(ivalue(value))) {
+                            cnt++;
+                        } else break;
+                    } else {
+                        throw new UnsupportedOperationException("SetVar does not support that case");
+                    }
                 } else {
-                    if (sign && ivar.getLB() > ivalue(value)) {
-                        cnt++;
-                    } else if (!sign && ivar.getUB() <= ivalue(value)) {
-                        cnt++;
-                    } else break;
+                    throw new UnsupportedOperationException("Unknown case");
                 }
             }
             if (cnt == c.size()) return false;
@@ -293,7 +360,7 @@ public class PropNogoods extends Propagator<IntVar> {
      * @return the value without the '=' or '&le;' information.
      */
     static int ivalue(long v) {
-        return (int)(iseq(v)?v:v - BITOP);
+        return (int) (iseq(v) ? v : v - BITOP);
     }
 
 
@@ -350,16 +417,84 @@ public class PropNogoods extends Propagator<IntVar> {
 
         int pos;
         if ((pos = var2pos[vid]) == NO_ENTRY) {
-            if(initialized) {
+            if (initialized) {
                 addVariable(ivar);
                 pos = vars.length - 1;
-            }else {
+            } else {
                 add_var.add(ivar);
                 pos = add_var.size() - 1;
             }
             var2pos[vid] = pos;
         }
         long lvalue = eq ? value : leq(value);
+        if ((var = map.get(lvalue)) == NO_ENTRY) {
+            var = sat_.newVariable();
+            map.put(lvalue, var);
+            if (var >= lit2pos.length) {
+                int[] itmp = lit2pos;
+                lit2pos = new int[var + 1];
+                System.arraycopy(itmp, 0, lit2pos, 0, itmp.length);
+                Arrays.fill(lit2pos, itmp.length, var + 1, NO_ENTRY);
+
+                long[] ltmp = lit2val;
+                lit2val = new long[var + 1];
+                System.arraycopy(ltmp, 0, lit2val, 0, ltmp.length);
+                Arrays.fill(lit2val, ltmp.length, var + 1, NO_ENTRY);
+            }
+
+
+            lit2pos[var] = pos;
+            lit2val[var] = lvalue;
+        }
+        return makeLiteral(var, true);
+    }
+
+    /**
+     * Creates or returns if already existing, the literal corresponding to :
+     * <p>
+     * <code>value</code> (<code>in</code>?"&isin;":"&notin;") <code>svar</code>
+     * <p>
+     * where "in" is selected if <code>in</code> is <tt>true</tt>, "not in" otherwise.
+     * <p>
+     * The negation of the literal is managed outside.
+     *
+     * @param svar  an integer variable
+     * @param value a value
+     * @param in    set to <tt>true</tt> to select "&isin;", to <tt>false</tt> to select "&notin;".
+     * @return the literal corresponding to <code>value</code> (<code>in</code>?"&isin;":"&notin;") <code>svar</code>
+     */
+    public int Literal(SetVar svar, int value, boolean in) {
+        // TODO: deal with BoolVar
+        int vid = svar.getId();
+        int var;
+        TLongIntHashMap map;
+        if (vid >= vv2lit.length) {
+            TLongIntHashMap[] tmp = vv2lit;
+            vv2lit = new TLongIntHashMap[vid + 1];
+            System.arraycopy(tmp, 0, vv2lit, 0, tmp.length);
+
+            int[] tmpi = var2pos;
+            var2pos = new int[vid + 1];
+            System.arraycopy(tmpi, 0, var2pos, 0, tmpi.length);
+            Arrays.fill(var2pos, tmpi.length, vid + 1, NO_ENTRY);
+        }
+        if ((map = vv2lit[vid]) == null) {
+            map = new TLongIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
+            vv2lit[vid] = map;
+        }
+
+        int pos;
+        if ((pos = var2pos[vid]) == NO_ENTRY) {
+            if (initialized) {
+                addVariable(svar);
+                pos = vars.length - 1;
+            } else {
+                add_var.add(svar);
+                pos = add_var.size() - 1;
+            }
+            var2pos[vid] = pos;
+        }
+        long lvalue = in ? value : leq(value);
         if ((var = map.get(lvalue)) == NO_ENTRY) {
             var = sat_.newVariable();
             map.put(lvalue, var);
@@ -421,9 +556,23 @@ public class PropNogoods extends Propagator<IntVar> {
     void doReduce(int lit) throws ContradictionException {
         int var = var(lit);
         long value = lit2val[var];
-        IntVar ivar = vars[lit2pos[var]];
+        Variable avar = vars[lit2pos[var]];
+        if (VariableUtils.isInt(avar)) {
+            doReduce((IntVar) avar, sign(lit), value);
+        } else if (VariableUtils.isSet(avar)) {
+            doReduce((SetVar) avar, sign(lit), value);
+        }
+    }
+
+    /**
+     * Reduce the variable.
+     *
+     * @param sign literal to assign
+     * @throws ContradictionException if reduction leads to failure
+     */
+    private void doReduce(IntVar ivar, boolean sign, long value) throws ContradictionException {
         if (iseq(value)) {
-            if (sign(lit)) {
+            if (sign) {
                 ivar.instantiateTo(ivalue(value), this);
             } else {
                 if (ivar.removeValue(ivalue(value), this)) {
@@ -431,13 +580,33 @@ public class PropNogoods extends Propagator<IntVar> {
                 }
             }
         } else {
-            if (sign(lit)) {
+            if (sign) {
                 if (ivar.updateUpperBound(ivalue(value), this)) {
                     fp.push(ivar);
                 }
             } else if (ivar.updateLowerBound(ivalue(value) + 1, this)) {
                 fp.push(ivar);
             }
+        }
+    }
+
+    /**
+     * Reduce the variable.
+     *
+     * @param sign literal to assign
+     * @throws ContradictionException if reduction leads to failure
+     */
+    private void doReduce(SetVar svar, boolean sign, long value) throws ContradictionException {
+        if (iseq(value)) {
+            if (sign) {
+                svar.force(ivalue(value), this);
+            } else {
+                if (svar.remove(ivalue(value), this)) {
+                    fp.push(svar);
+                }
+            }
+        } else {
+            throw new UnsupportedOperationException("SetVar does not support that case");
         }
     }
 
@@ -451,6 +620,7 @@ public class PropNogoods extends Propagator<IntVar> {
      *          [ x = d ] &hArr; ([ x &le; d ] &and; &not;[ x &le; d + 1])
      *     </li>
      * </ol>
+     *
      * @param var an integer variable
      * @return if clauses have been successfully added to the store.
      */
