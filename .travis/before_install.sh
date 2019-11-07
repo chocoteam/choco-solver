@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
-
 if [ "${TRAVIS_JOB_NAME}" == "ibex" ]
 then
   curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
