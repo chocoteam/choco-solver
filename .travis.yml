@@ -60,13 +60,11 @@ jobs:
       name: "checker"
     # then deploy
     - stage: deploy
-      provider: script
-      if: branch = master
-      skip_cleanup: true
-      script: /bin/sh ./.travis/deploy.sh
-    - provider: releases
-      api_key: "GITHUB OAUTH TOKEN"
-      file: "FILE TO UPLOAD"
-      skip_cleanup: true
-      on:
-        tags: true
+      script: skip
+      deploy:
+        provider: script
+        script: /bin/bash ./.travis/deploy.sh
+        skip_cleanup: true
+        on:
+          tags: true
+          branch: master
