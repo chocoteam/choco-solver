@@ -32,44 +32,41 @@ branches:
   only:
     - master
     - modules
-    
+
 before_install: /bin/bash ./.travis/before_install.sh
-
-jobs:
-  include:
-    - name: ibex
-      env: TEST_SUITE="ibex"
-    - name: 1s
-      env: TEST_SUITE="1s"
-    - name: 10s
-      env: TEST_SUITE="10s"
-    - name: checker
-      env: TEST_SUITE="checker"
-
-script: mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE
-
 after_success:
   - bash <(curl -s https://codecov.io/bash)
   - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
-
 before_deploy:
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
   - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
 
-deploy:
-  - provider: script
-    script: /bin/sh ./.travis/deploy.sh
-    cleanup: false
-    on:
-      repo: chocoteam/choco-solver
-      branch: master
-      jdk: oraclejdk8
-      if: $TEST_SUITE = 10s
-  - provider: script
-    script: /bin/sh ./.travis/deploy.sh
-    cleanup: false
-    on:
-      repo: chocoteam/choco-solver
-      tags: true
-      jdk: oraclejdk8
-      if: $TEST_SUITE = 10s
+stages:
+  - test
+  - name: deploy
+    if: branch = master
+
+jobs:
+  include:
+    # first run all tests
+    - stage: test
+      script: mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
+      name: "ibex"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
+      name: "1s"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
+      name: "10s"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
+      name: "checker"
+    # then deploy
+    - stage: deploy
+      provider: script
+      if: branch = master
+      skip_cleanup: true
+      script: /bin/sh ./.travis/deploy.sh
+    - provider: releases
+      api_key: "GITHUB OAUTH TOKEN"
+      file: "FILE TO UPLOAD"
+      skip_cleanup: true
+      on:
+        tags: true
