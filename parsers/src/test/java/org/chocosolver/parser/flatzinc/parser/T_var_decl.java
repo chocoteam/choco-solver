@@ -33,7 +33,7 @@ public class T_var_decl extends GrammarTest {
     Model mSolver;
     Datas datas;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void before() {
         mSolver = new Model(new FznSettings().setEnableViews(true));
         datas = new Datas();

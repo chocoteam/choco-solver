@@ -32,7 +32,7 @@ public class T_flatzinc_model extends GrammarTest {
     Datas datas;
     StringBuilder st;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void before() {
         mSolver = new Model(new FznSettings());
         datas = new Datas();

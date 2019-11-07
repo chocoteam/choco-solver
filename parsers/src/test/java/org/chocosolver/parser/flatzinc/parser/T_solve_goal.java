@@ -28,7 +28,7 @@ public class T_solve_goal extends GrammarTest {
     Model mSolver;
     Datas datas;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void before() {
         mSolver = new Model();
         datas = new Datas();

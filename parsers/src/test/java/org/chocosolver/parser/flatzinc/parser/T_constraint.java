@@ -32,7 +32,7 @@ public class T_constraint extends GrammarTest {
     Model mSolver;
     Datas map;
 
-    @BeforeMethod
+    @BeforeMethod(alwaysRun = true)
     public void before() {
         mSolver = new Model(new FznSettings());
         map = new Datas();
