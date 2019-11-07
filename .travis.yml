@@ -43,22 +43,17 @@ before_deploy:
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
   - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
 
-stages:
-  - test
-  - name: deploy
-    if: branch = master
-
 jobs:
   include:
     # first run all tests
     - stage: test
-      script: mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
+      script: echo "ibex" #mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
       name: "ibex"
-    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
+    - script: echo "1s" #mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
       name: "1s"
-    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
+    - script: echo "10s" #mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
       name: "10s"
-    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
+    - script: echo "checker" #mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
       name: "checker"
     # then deploy
     - stage: deploy
