@@ -14,5 +14,5 @@
  * @since 15/10/2019
  */
 module org.chocosolver.pf4cs {
-    exports org.chocosolver.pf4cs;
+    exports org.chocosolver.pf4cs to org.chocosolver.parsers, org.chocosolver.examples;
 }
