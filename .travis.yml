@@ -38,7 +38,7 @@ before_install:
   - curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
+  - java -jar $TRAVIS_BUILD_DIR/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
 before_deploy:
   - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
   - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
@@ -47,13 +47,13 @@ jobs:
   include:
     # first run all tests
     - stage: test
-      script: echo "ibex" #mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
+      script: mvn clean install -DtestFailureIgnore=true -Dgroups="ibex"
       name: "ibex"
-    - script: echo "1s" #mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="1s"
       name: "1s"
-    - script: echo "10s" #mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="10s"
       name: "10s"
-    - script: echo "checker" #mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
+    - script: mvn clean install -DtestFailureIgnore=true -Dgroups="checker"
       name: "checker"
     # then deploy
     - stage: deploy
@@ -64,11 +64,13 @@ jobs:
           cleanup: false
           on:
             branch: master
-        - provider: releases
-          api_key:
-            secure: ZHDK6ygs4i0rinp0mQHD7nfwct/G1OqmJXrmbAht92TCfa36ffqqD4KFh/+FLO/hXd/PFxsIGVRwcVPtKxaKJ7+cO4jN9iXP4gGDQts83jwsJ/wbgajVfoHjLOJq2+YR+Ai1e21yyqrqZMDX84eW3UFO2BXwqFMPpiQIg/N8YII=
-          cleanup: false
-          #file: todo
-          on:
-            tags: true
-            branch: master
+    - script: skip
+      deploy:
+      - provider: releases
+        api_key:
+          secure: ZHDK6ygs4i0rinp0mQHD7nfwct/G1OqmJXrmbAht92TCfa36ffqqD4KFh/+FLO/hXd/PFxsIGVRwcVPtKxaKJ7+cO4jN9iXP4gGDQts83jwsJ/wbgajVfoHjLOJq2+YR+Ai1e21yyqrqZMDX84eW3UFO2BXwqFMPpiQIg/N8YII=
+        cleanup: false
+        #file: todo
+        on:
+          tags: true
+          branch: master
