@@ -57,7 +57,7 @@ jobs:
       name: "checker"
     # then deploy
     - stage: deploy
-      script: skip
+      script: echo "Ready to deploy"
       deploy:
         - provider: script
           script: /bin/bash ./scripts/deploy.sh
