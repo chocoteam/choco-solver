@@ -34,7 +34,7 @@ branches:
     - modules
 
 before_install:
-  - /bin/bash ./.travis/before_install.sh
+  - /bin/bash ./scripts/before_install.sh
   - curl https://github.com/codacy/codacy-coverage-reporter/releases/download/6.0.0/codacy-coverage-reporter-6.0.0-assembly.jar -o codacy-coverage-reporter-assembly.jar
 after_success:
   - bash <(curl -s https://codecov.io/bash)
@@ -60,10 +60,10 @@ jobs:
       script: skip
       deploy:
         - provider: script
-          script: /bin/bash ./.travis/deploy.sh
+          script: /bin/bash ./scripts/deploy.sh
           cleanup: false
           on:
-            branch: master
+            branch: master, modules
     - script: skip
       deploy:
       - provider: releases
