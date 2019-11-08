@@ -27,10 +27,11 @@ env:
     - secure: bcwHH/i43WCwnHb6C3G3hNgcS/OOVgCVxoXSUPtsYWcLZxb4cV05vUzs5VO/Iiw/YBRHEQM342yCKS46wunqv2wwEXpzWRTJG0Pwpn2tEj4fjp0OzPsiTx9AWYSkbiQjHoIGWC57LgxNzpuqHJsi4xnc9iiwQaV6mdlJP3Ofb7E=
     # COVERITY_PROJECT_TOKEN=
     - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
-  - TEST_SUITE="ibex"
-  - TEST_SUITE="1s"
-  - TEST_SUITE="10s"
-  - TEST_SUITE="checker"
+  jobs:
+      - TEST_SUITE="ibex"
+      - TEST_SUITE="1s"
+      - TEST_SUITE="10s"
+      - TEST_SUITE="checker"
 
 branches:
   only:
@@ -54,8 +55,14 @@ before_deploy:
 jobs:
   include:
     - stage: deploy
-    env: TEST_SUITE=none
-    script: /bin/bash ./scripts/deploy.sh
-    cleanup: false
-    on:
-      branch: master, modules
+      env: TEST_SUITE=none
+      script: /bin/bash ./scripts/deploy.sh
+      cleanup: false
+    - provider: releases
+      api_key:
+        secure: ZHDK6ygs4i0rinp0mQHD7nfwct/G1OqmJXrmbAht92TCfa36ffqqD4KFh/+FLO/hXd/PFxsIGVRwcVPtKxaKJ7+cO4jN9iXP4gGDQts83jwsJ/wbgajVfoHjLOJq2+YR+Ai1e21yyqrqZMDX84eW3UFO2BXwqFMPpiQIg/N8YII=
+      cleanup: false
+      #file: todo
+      on:
+        tags: true
+        branch: master
