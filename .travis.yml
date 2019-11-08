@@ -46,11 +46,7 @@ script: mvn clean install -DtestFailureIgnore=true -Dgroups=$TEST_SUITE
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - java -jar $TRAVIS_BUILD_DIR/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
-
-before_deploy:
-  - echo $GPG_SECRET_KEYS | base64 --decode | gpg --import
-  - echo $GPG_OWNERTRUST | base64 --decode | gpg --import-ownertrust
+  - java -jar ~/codacy-coverage-reporter-assembly.jar report -l Java -r build/reports/jacoco/test/jacocoTestReport.xml
 
 jobs:
   include:
