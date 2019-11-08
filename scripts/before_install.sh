@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "${TRAVIS_JOB_NAME}" == "ibex" ]
+if [ "${TEST_SUITE}" == "ibex" ]
 then
   curl https://raw.githubusercontent.com/sormuras/bach/master/install-jdk.sh > install-jdk.sh
   export J11_HOME="$JAVA_HOME"
