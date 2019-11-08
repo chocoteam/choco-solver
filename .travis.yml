@@ -59,6 +59,7 @@ jobs:
       script: /bin/bash ./scripts/deploy.sh
       cleanup: false
     - provider: releases
+      env: TEST_SUITE=none
       api_key:
         secure: ZHDK6ygs4i0rinp0mQHD7nfwct/G1OqmJXrmbAht92TCfa36ffqqD4KFh/+FLO/hXd/PFxsIGVRwcVPtKxaKJ7+cO4jN9iXP4gGDQts83jwsJ/wbgajVfoHjLOJq2+YR+Ai1e21yyqrqZMDX84eW3UFO2BXwqFMPpiQIg/N8YII=
       cleanup: false
