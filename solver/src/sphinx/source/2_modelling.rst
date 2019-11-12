@@ -159,7 +159,7 @@ A real variable is declared with three doubles defining its bound and a precisio
 
  RealVar x = model.realVar("x", 0.2d, 3.4d, 0.001d);
 
-.. _Ibex solver: http://www.emn.fr/z-info/ibex/
+.. _Ibex solver: http://www.ibex-lib.org/
 
 Views: Creating variables from constraints
 ==========================================
