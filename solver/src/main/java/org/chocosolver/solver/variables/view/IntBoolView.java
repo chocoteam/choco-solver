@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.view;
 
+import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -19,6 +20,7 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
@@ -40,6 +42,10 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  */
 public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
 
+    /**
+     * indicate if the view is fixed
+     */
+    protected IStateBool fixed;
     /**
      * A constant value
      */
@@ -71,6 +77,17 @@ public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
     IntBoolView(final IntVar var, String op, final int cste) {
         super("(" + var.getName() + op + cste + ")", var);
         this.cste = cste;
+        this.fixed = var.getModel().getEnvironment().makeBool(false);
+    }
+
+    @Override
+    public final void notify(IEventType event) throws ContradictionException {
+        if(!fixed.get()) {
+            if(isInstantiated()){
+                this.fixed.set(Boolean.TRUE);
+            }
+            super.notify(event);
+        }
     }
 
     @Override
