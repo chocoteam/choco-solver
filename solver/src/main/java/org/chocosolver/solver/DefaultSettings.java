@@ -100,8 +100,12 @@ public class DefaultSettings implements Settings {
         assert loadAssert():"Cannot load default properties";
     }
 
+    protected String getPropertyName(){
+        return "Assert.properties";
+    }
+
     private boolean loadAssert(){
-        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
+        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream(getPropertyName());
         try {
             this.load(inStream);
         } catch (Exception e) {
