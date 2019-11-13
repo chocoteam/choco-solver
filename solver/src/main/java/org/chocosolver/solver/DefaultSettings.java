@@ -97,7 +97,7 @@ public class DefaultSettings implements Settings {
 
     public DefaultSettings() {
         // when assert is on, the assert properties is load
-        assert loadAssert():"Cannot load Assert.properties";
+        assert loadAssert():"Cannot load default properties";
     }
 
     private boolean loadAssert(){
