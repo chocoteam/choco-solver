@@ -85,8 +85,8 @@ public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
         if(!fixed.get()) {
             if(isInstantiated()){
                 this.fixed.set(Boolean.TRUE);
+                super.notify(event);
             }
-            super.notify(event);
         }
     }
 

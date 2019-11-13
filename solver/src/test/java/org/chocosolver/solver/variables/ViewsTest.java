@@ -33,6 +33,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -861,20 +862,17 @@ public class ViewsTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testMagnusR1() {
-        int n = 20;
-        for (int i = 0; i < 100; i++) {
+        int n = 10;
+        for (int i = 0; i < 500; i++) {
             final Model model = new Model("n=" + n);
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
-            final int m = n;
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intGeView(v, m / 2)
-            )
-                .toArray(IntVar[]::new);
-
+                v -> model.intLeView(v, n / 2)
+            ).toArray(IntVar[]::new);
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();
-            model.getSolver().setSearch(Search.randomSearch(model.retrieveIntVars(true), i));
+            model.getSolver().setSearch(Search.randomSearch(ArrayUtils.append(vars, ges), i));
             Assert.assertTrue(model.getSolver().solve(), "No solution found");
             model.getSolver().printShortStatistics();
         }
@@ -883,19 +881,18 @@ public class ViewsTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testMagnusR2() {
         int n = 20;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 500; i++) {
             final Model model = new Model("n=" + n);
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
-            final int m = n;
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intGeView(v, m / 2)
+                v -> model.intGeView(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();
-            model.getSolver().setSearch(Search.randomSearch(model.retrieveIntVars(true), i));
+            model.getSolver().setSearch(Search.randomSearch(ArrayUtils.append(vars, ges), i));
             Assert.assertTrue(model.getSolver().solve(), "No solution found");
             model.getSolver().printShortStatistics();
         }
@@ -904,19 +901,18 @@ public class ViewsTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testMagnusR3() {
         int n = 20;
-        for (int i = 0; i < 100; i++) {
-            final Model model = new Model("n=" + n);
+        for (int i = 0; i < 500; i++) {
+            final Model model = new Model("i=" + i);
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
-            final int m = n;
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intEqView(v, m / 2)
+                v -> model.intEqView(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();
-            model.getSolver().setSearch(Search.randomSearch(model.retrieveIntVars(true), i));
+            model.getSolver().setSearch(Search.randomSearch(ArrayUtils.append(vars, ges), i));
             Assert.assertTrue(model.getSolver().solve(), "No solution found");
             model.getSolver().printShortStatistics();
         }
@@ -925,19 +921,18 @@ public class ViewsTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testMagnusR4() {
         int n = 20;
-        for (int i = 0; i < 100; i++) {
-            final Model model = new Model("n=" + n);
+        for (int i = 0; i < 500; i++) {
+            final Model model = new Model("i=" + i);
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
-            final int m = n;
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intNeView(v, m / 2)
+                v -> model.intNeView(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();
-            model.getSolver().setSearch(Search.randomSearch(model.retrieveIntVars(true), i));
+            model.getSolver().setSearch(Search.randomSearch(ArrayUtils.append(vars, ges), i));
             Assert.assertTrue(model.getSolver().solve(), "No solution found");
             model.getSolver().printShortStatistics();
         }
