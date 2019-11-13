@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
+import static org.chocosolver.util.tools.VariableUtils.searchSpaceSize;
+
+import java.util.Random;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
@@ -21,10 +24,6 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntList;
-
-import java.util.Random;
-
-import static org.chocosolver.util.tools.VariableUtils.searchSpaceSize;
 
 /**
  * Implementation of the search described in:
@@ -223,11 +222,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                         }
                         it.dispose();
                     } else { // estimate per subdomains
-                        int step = 0;
                         int size = dsz / split;
                         int a, b;
                         DisposableValueIterator it = v.getValueIterator(true);
                         while (it.hasNext()) {
+                            int step = 0;
                             if (System.currentTimeMillis() > tl) {
                                 break loop;
                             }
@@ -442,11 +441,11 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                             }
                             it.dispose();
                         } else { // estimate per subdomains
-                            int step = 0;
                             int size = dsz / split;
                             int a,b;
                             DisposableValueIterator it = v.getValueIterator(true);
                             while (it.hasNext()) {
+                                int step = 0;
                                 a = b = it.next();
                                 while(step < size && it.hasNext()) {
                                     b = it.next();
