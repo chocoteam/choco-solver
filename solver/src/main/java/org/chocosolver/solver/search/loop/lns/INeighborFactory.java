@@ -26,9 +26,9 @@ public class INeighborFactory {
      */
     public static INeighbor blackBox(IntVar... vars) {
         return sequencer(
-                propagationGuided(vars),
-                reversedPropagationGuided(vars),
-                random(vars)
+            propagationGuided(vars),
+            reversedPropagationGuided(vars),
+            random(vars)
         );
     }
 
@@ -38,7 +38,17 @@ public class INeighborFactory {
      * @return a random neighborhood fixing variables randomly
      */
     public static IntNeighbor random(IntVar... vars) {
-        return new RandomNeighborhood(vars, 3, 0);
+        return random(0, vars);
+    }
+
+    /**
+     * Create a random neighborhood fixing variables randomly
+     * @param seed   the seed for randomness
+     * @param vars   the pool of variables to be freezed
+     * @return a random neighborhood fixing variables randomly
+     */
+    public static IntNeighbor random(long seed, IntVar... vars) {
+        return new RandomNeighborhood(vars, 3, seed);
     }
 
     /**
@@ -48,7 +58,18 @@ public class INeighborFactory {
      * @return a propagation-guided neighborhood
      */
     public static IntNeighbor propagationGuided(IntVar... vars) {
-        return new PropagationGuidedNeighborhood(vars, 30, 10, 0);
+        return propagationGuided(0, vars);
+    }
+
+    /**
+     * Create a propagation guided neighborhood fixing variables based on constraint propagation
+     * Based on "Propagation-Guided LNS", Perronn Shaw and Furnon, CP2004
+     * @param seed     the seed for randomness
+     * @param vars     the pool of variables to be freezed
+     * @return a propagation-guided neighborhood
+     */
+    public static IntNeighbor propagationGuided(long seed, IntVar... vars) {
+        return new PropagationGuidedNeighborhood(vars, 30, 10, seed);
     }
 
     /**
@@ -57,10 +78,20 @@ public class INeighborFactory {
      * @return a reverse propagation-guided neighborhood
      */
     public static IntNeighbor reversedPropagationGuided(IntVar... vars) {
-        return new ReversePropagationGuidedNeighborhood(vars, 0, 30, 10);
+        return reversedPropagationGuided(10, vars);
     }
 
-	/**
+    /**
+     * Create a reverse propagation guided neighborhood fixing variables based on constraint propagation
+     * @param seed      the seed for randomness
+     * @param vars      the pool of variables to be freezed
+     * @return a reverse propagation-guided neighborhood
+     */
+    public static IntNeighbor reversedPropagationGuided(long seed, IntVar... vars) {
+        return new ReversePropagationGuidedNeighborhood(vars, 0, 30, seed);
+    }
+
+    /**
      * Creates a composite INeighbor grouping a set of neighbors
      * @param neighbors a set of neighbors to be grouped
      * @return a composite IntNeighbor grouping a set of neighbors
@@ -69,12 +100,12 @@ public class INeighborFactory {
         return new SequenceNeighborhood(neighbors);
     }
 
-	/**
-	 * Creates a random neighborhood fixing a set variable randomly
-	 * @param setVar the set var to be freezed
-	 * @return a random neighborhood fixing a set var randomly
-	 */
-	public static INeighbor setVarRandom(SetVar setVar){
+    /**
+     * Creates a random neighborhood fixing a set variable randomly
+     * @param setVar the set var to be freezed
+     * @return a random neighborhood fixing a set var randomly
+     */
+    public static INeighbor setVarRandom(SetVar setVar){
         return new SetRandomNeighbor(setVar);
     }
 }
