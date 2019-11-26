@@ -40,6 +40,8 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @since 04/02/2013
  */
 public class Task {
+    // TODO : add a height IntVar variable (with associated constructors and all --> 0 if not specified)
+    // TODO : change IIntConstraintFactory and cumulative constraints accordingly ???
 
     //***********************************************************************************
     // VARIABLES
@@ -99,7 +101,9 @@ public class Task {
         start = s;
         duration = start.getModel().intVar(d);
         end = e;
-        declareMonitor();
+        if(!isOffsetView(s, d, e)) {
+            declareMonitor();
+        }
     }
 
     /**
@@ -111,10 +115,23 @@ public class Task {
      * @param e end variable
      */
     public Task(IntVar s, IntVar d, IntVar e) {
+        this(s, d, e, true);
+    }
+
+    /**
+     * Container representing a task:
+     * It ensures that: start + duration = end
+     *
+     * @param s start variable
+     * @param d duration variable
+     * @param e end variable
+     * @param declareMonitor boolean parameter indicating if a TaskMonitor should be declared
+     */
+    public Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor) {
         start = s;
         duration = d;
         end = e;
-        if(!d.isInstantiated() || !isOffsetView(s, d.getValue(), e)) {
+        if(declareMonitor && (!d.isInstantiated() || !isOffsetView(s, d.getValue(), e))) {
             declareMonitor();
         }
     }

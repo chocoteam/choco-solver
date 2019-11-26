@@ -481,7 +481,24 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a task variable.
      */
     default Task taskVar(IntVar s, int p) {
-        return new Task(s, ref().intVar(p), ref().intOffsetView(s, p));
+        return new Task(s, p);
+    }
+
+    /**
+     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
+     * such that: s + p = e, where <i>e</i> is the ending time.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variable, starting time
+     * @param p integer variable, processing time
+     * @return a task variable.
+     */
+    default Task taskVar(IntVar s, IntVar p) {
+        int[] bounds = VariableUtils.boundsForAddition(s, p);
+        IntVar end = ref().intVar(bounds[0], bounds[1]);
+        return new Task(s, p, end);
     }
 
     /**
@@ -493,12 +510,11 @@ public interface IVariableFactory extends ISelf<Model> {
      *
      * @param s integer variable, starting time
      * @param p fixed processing time
+     * @param e integer variable, ending time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p) {
-        int[] bounds = VariableUtils.boundsForAddition(s, p);
-        IntVar end = ref().intVar(bounds[0], bounds[1]);
-        return new Task(s, p, end);
+    default Task taskVar(IntVar s, int p, IntVar e) {
+        return new Task(s, p, e);
     }
 
     /**
@@ -514,7 +530,24 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a task variable.
      */
     default Task taskVar(IntVar s, IntVar p, IntVar e) {
-        return new Task(s, p, e);
+        return taskVar(s, p, e, true);
+    }
+
+    /**
+     * Creates a task variable, made of a starting time <i>s</i>,
+     * a processing time <i>p</i> and an ending time <i>e</i> such that: s + p = e.
+     *
+     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
+     * this will not be done automatically.
+     *
+     * @param s integer variable, starting time
+     * @param p integer variable, processing time
+     * @param e integer variable, ending time
+     * @param declareMonitor boolean parameter indicating if a TaskMonitor should be declared (if several Task share the same starting, processing and ending variables, there is no need to declare several TaskMonitor)
+     * @return a task variable.
+     */
+    default Task taskVar(IntVar s, IntVar p, IntVar e, boolean declareMonitor) {
+        return new Task(s, p, e, declareMonitor);
     }
 
     /**
