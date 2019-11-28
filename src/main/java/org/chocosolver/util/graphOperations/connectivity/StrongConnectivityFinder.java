@@ -72,10 +72,8 @@ public class StrongConnectivityFinder  {
 	// exception is a set of nodes that do not need to be found SCC
 	public void findAllSCC(BitSet exception) {
 		ISet nodes = graph.getNodes();
-		for (int i = 0; i < n; i++) {
-			if (!exception.get(i)) {
-				restriction.set(i, nodes.contains(i));
-			}
+		for (int i = exception.nextClearBit(0); i >= 0 && i < n; i = exception.nextClearBit(i + 1)) {
+		    restriction.set(i, nodes.contains(i));
 		}
 		findAllSCCOf(restriction);
 	}
@@ -100,7 +98,7 @@ public class StrongConnectivityFinder  {
 
 	private void findSingletons(BitSet restriction) {
 		for (int i = restriction.nextSetBit(0); i >= 0; i = restriction.nextSetBit(i + 1)) {
-			if (graph.getPredOf(i).size() * graph.getSuccOf(i).size() == 0) {
+			if (graph.getPredOf(i).size() == 0 || graph.getSuccOf(i).size() == 0) {
 				nodeSCC[i] = nbSCC;
 				sccFirstNode[nbSCC++] = i;
 				restriction.clear(i);
