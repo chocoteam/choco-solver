@@ -66,9 +66,7 @@ public class AlgoAllDiffACFast {
         aCause = cause;
         n = vars.length;
         matching = new int[n];
-        for (int i = 0; i < n; i++) {
-            matching[i] = -1;
-        }
+        Arrays.fill(matching, -1);
         map = new TIntIntHashMap();
         IntVar v;
         int ub;
