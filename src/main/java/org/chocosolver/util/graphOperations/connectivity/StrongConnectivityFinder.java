@@ -72,7 +72,7 @@ public class StrongConnectivityFinder  {
 	public void findAllSCC(BitSet exception) {
 		ISet nodes = graph.getNodes();
 		for (int i = exception.nextClearBit(0); i >= 0 && i < n; i = exception.nextClearBit(i + 1)) {
-		    restriction.set(i, nodes.contains(i));
+		    	restriction.set(i, nodes.contains(i));
 		}
 		findAllSCCOf(restriction);
 	}
@@ -109,17 +109,16 @@ public class StrongConnectivityFinder  {
 		int nb = restriction.cardinality();
 		// trivial case
 		if (nb == 1) {
-		    nodeSCC[start] = nbSCC;
-		    sccFirstNode[nbSCC++] = start;
-		    restriction.clear(start);
-		    return;
+		    	nodeSCC[start] = nbSCC;
+		    	sccFirstNode[nbSCC++] = start;
+		    	restriction.clear(start);
+		    	return;
 		}
 		//initialization
 		int stackIdx = 0;
 		int k = 0;
 		int i = start, j;
 		dfsNumOfNode[i] = k;
-		inf[i] = k;
 		p[i] = i;
 		iterator[i] = graph.getSuccOf(i).iterator();
 		stack[stackIdx++] = i;
