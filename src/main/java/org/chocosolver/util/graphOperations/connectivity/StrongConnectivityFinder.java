@@ -30,7 +30,7 @@ public class StrongConnectivityFinder  {
 	private int nbSCC;
 
 	// util
-	private int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
+	private int[] stack, p, inf, dfsNumOfNode;
 	private Iterator<Integer>[] iterator;
 	private BitSet inStack;
 
@@ -45,7 +45,6 @@ public class StrongConnectivityFinder  {
 		stack = new int[n];
 		p = new int[n];
 		inf = new int[n];
-		nodeOfDfsNum = new int[n];
 		dfsNumOfNode = new int[n];
 		inStack = new BitSet(n);
 		restriction = new BitSet(n);
@@ -91,7 +90,7 @@ public class StrongConnectivityFinder  {
 		findSingletons(restriction);
 		int first = restriction.nextSetBit(0);
 		while (first >= 0) {
-			findSCC(first, restriction, stack, p, inf, nodeOfDfsNum, dfsNumOfNode, inStack);
+			findSCC(first, restriction, stack, p, inf, dfsNumOfNode, inStack);
 			first = restriction.nextSetBit(first);
 		}
 	}
@@ -106,72 +105,57 @@ public class StrongConnectivityFinder  {
 		}
 	}
 
-	private void findSCC(int start, BitSet restriction, int[] stack, int[] p, int[] inf, int[] nodeOfDfsNum, int[] dfsNumOfNode, BitSet inStack) {
+	private void findSCC(int start, BitSet restriction, int[] stack, int[] p, int[] inf, int[] dfsNumOfNode, BitSet inStack) {
 		int nb = restriction.cardinality();
 		// trivial case
 		if (nb == 1) {
-			nodeSCC[start] = nbSCC;
-			sccFirstNode[nbSCC++] = start;
-			restriction.clear(start);
-			return;
+		    nodeSCC[start] = nbSCC;
+		    sccFirstNode[nbSCC++] = start;
+		    restriction.clear(start);
+		    return;
 		}
 		//initialization
 		int stackIdx = 0;
 		int k = 0;
-		int i = k;
-		dfsNumOfNode[start] = k;
-		nodeOfDfsNum[k] = start;
+		int i = start, j;
+		dfsNumOfNode[i] = k;
+		inf[i] = k;
+		p[i] = i;
+		iterator[i] = graph.getSuccOf(i).iterator();
 		stack[stackIdx++] = i;
 		inStack.set(i);
-		p[k] = k;
-		iterator[k] = graph.getSuccOf(start).iterator();
-		int j;
 		// algo
-		while (true) {
-			if (iterator[i].hasNext()) {
-				j = iterator[i].next();
-				if (restriction.get(j)) {
-					if (dfsNumOfNode[j] == 0 && j != start) {
-						k++;
-						nodeOfDfsNum[k] = j;
-						dfsNumOfNode[j] = k;
-						p[k] = i;
-						i = k;
-						iterator[i] = graph.getSuccOf(j).iterator();
-						stack[stackIdx++] = i;
-						inStack.set(i);
-						inf[i] = i;
-					} else if (inStack.get(dfsNumOfNode[j])) {
-						inf[i] = Math.min(inf[i], dfsNumOfNode[j]);
-					}
-				}
-			} else {
-				if (i == 0) {
-					break;
-				}
-				if (inf[i] >= i) {
-					int y, z;
-					do {
-						z = stack[--stackIdx];
-						inStack.clear(z);
-						y = nodeOfDfsNum[z];
-						restriction.clear(y);
-						sccAdd(y);
-					} while (z != i);
-					nbSCC++;
-				}
-				inf[p[i]] = Math.min(inf[p[i]], inf[i]);
-				i = p[i];
+		while (stackIdx != 0) {
+		    if (iterator[i].hasNext()) {
+			j = iterator[i].next();
+			if (restriction.get(j)) {
+			    if (!inStack.get(j)) {
+				k++;
+				dfsNumOfNode[j] = k;
+				inf[j] = k;
+				p[j] = i;
+				i = j;
+				iterator[i] = graph.getSuccOf(i).iterator();
+				stack[stackIdx++] = i;
+				inStack.set(i);
+			    } else {
+				inf[i] = Math.min(inf[i], dfsNumOfNode[j]);
+			    }
 			}
-		}
-		if (inStack.cardinality() > 0) {
-			int y;
-			do {
-				y = nodeOfDfsNum[stack[--stackIdx]];
+		    } else {
+			if (inf[i] >= dfsNumOfNode[i]) {
+			    int y;
+			    do {
+				y = stack[--stackIdx];
+				inStack.clear(y);
 				restriction.clear(y);
 				sccAdd(y);
-			} while (y != start);
-			nbSCC++;
+			    } while (y != i);
+			    nbSCC++;
+			}
+			inf[p[i]] = Math.min(inf[p[i]], inf[i]);
+			i = p[i];
+		    }
 		}
 	}
 
