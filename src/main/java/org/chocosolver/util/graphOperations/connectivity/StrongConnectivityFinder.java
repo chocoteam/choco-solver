@@ -125,36 +125,36 @@ public class StrongConnectivityFinder  {
 		inStack.set(i);
 		// algo
 		while (stackIdx != 0) {
-		    if (iterator[i].hasNext()) {
-			j = iterator[i].next();
-			if (restriction.get(j)) {
-			    if (!inStack.get(j)) {
-				k++;
-				dfsNumOfNode[j] = k;
-				inf[j] = k;
-				p[j] = i;
-				i = j;
-				iterator[i] = graph.getSuccOf(i).iterator();
-				stack[stackIdx++] = i;
-				inStack.set(i);
-			    } else {
-				inf[i] = Math.min(inf[i], dfsNumOfNode[j]);
-			    }
-			}
-		    } else {
-			if (inf[i] >= dfsNumOfNode[i]) {
-			    int y;
-			    do {
-				y = stack[--stackIdx];
-				inStack.clear(y);
-				restriction.clear(y);
-				sccAdd(y);
-			    } while (y != i);
-			    nbSCC++;
-			}
-			inf[p[i]] = Math.min(inf[p[i]], inf[i]);
-			i = p[i];
-		    }
+		    	if (iterator[i].hasNext()) {
+				j = iterator[i].next();
+				if (restriction.get(j)) {
+			    		if (!inStack.get(j)) {
+						k++;
+						dfsNumOfNode[j] = k;
+						inf[j] = k;
+						p[j] = i;
+						i = j;
+						iterator[i] = graph.getSuccOf(i).iterator();
+						stack[stackIdx++] = i;
+						inStack.set(i);
+			    		} else {
+						inf[i] = Math.min(inf[i], dfsNumOfNode[j]);
+			    		}
+				}
+		    	} else {
+				if (inf[i] >= dfsNumOfNode[i]) {
+			    		int y;
+			    		do {
+						y = stack[--stackIdx];
+						inStack.clear(y);
+						restriction.clear(y);
+						sccAdd(y);
+			    		} while (y != i);
+			    		nbSCC++;
+				}
+				inf[p[i]] = Math.min(inf[p[i]], inf[i]);
+				i = p[i];
+		    	}
 		}
 	}
 
