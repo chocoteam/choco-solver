@@ -9,6 +9,11 @@
  */
 package org.chocosolver.solver.constraints.real;
 
+import static java.lang.System.out;
+import static org.testng.Assert.assertEquals;
+
+import java.util.LinkedList;
+import java.util.Random;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -23,12 +28,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.LinkedList;
-import java.util.Random;
-
-import static java.lang.System.out;
-import static org.testng.Assert.assertEquals;
 
 /**
  * -Djava.library.path=-Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.3.1/__build__/plugins/java
@@ -762,7 +761,7 @@ public class RealTest {
     @Test(groups="ignored", timeOut=60000)
     public void testRoberto4(){
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
-        ibex.add_ctr("{0}+{1}=Pi*{2}");
+        ibex.add_ctr("{0}+{1}=pi*{2}");
         Assert.assertTrue(ibex.build());
         double domains[] = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);

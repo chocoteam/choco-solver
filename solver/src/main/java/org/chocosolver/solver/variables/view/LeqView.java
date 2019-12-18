@@ -60,6 +60,7 @@ public final class LeqView extends IntBoolView {
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
+            this.fixed.set(true);
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
             }

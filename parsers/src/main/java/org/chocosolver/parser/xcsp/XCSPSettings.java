@@ -29,6 +29,11 @@ public class XCSPSettings extends DefaultSettings {
         loadProperties();
     }
 
+    @Override
+    protected String getPropertyName() {
+        return "XCSPSettings.properties";
+    }
+
     private void loadProperties() {
         this.setEnableSAT(true);
         this.setPrintConstraints(DEBUG);

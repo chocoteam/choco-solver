@@ -29,6 +29,11 @@ public class FznSettings extends DefaultSettings {
         loadProperties();
     }
 
+    @Override
+    protected String getPropertyName() {
+        return "FZNSettings.properties";
+    }
+
     private void loadProperties() {
         this.setCheckDeclaredConstraints(false);
         //        this.setModelChecker(solver -> true);
