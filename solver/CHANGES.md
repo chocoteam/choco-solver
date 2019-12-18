@@ -6,13 +6,15 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 
 NEXT MILESTONE
 -------------------
+Multi-modules and JPMS-ready.
 
 ### Major features:
+- Move `cutoffseq`, `choco-sat`, `choco-solver`, `pf4cs`, `choco-parsers` and `samples` projects into a (maven) multi-modules project, JPMS-ready 
 
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
-\#647
+\#617, #633, #639, #647
 
 4.10.2 - 14 Oct 2019
 -------------------
