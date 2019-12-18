@@ -103,10 +103,6 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     @Override
     public void fixSomeVariables() throws ContradictionException {
         logSum = Arrays.stream(variables).mapToDouble(v -> Math.log(v.getDomainSize())).sum();
-        for (int i = 0; i < n; i++) {
-            int ds = variables[i].getDomainSize();
-            logSum += Math.log(ds);
-        }
         fgmtSize = (int) (30 * (1 + epsilon));
         fragment.set(0, n); // all variables are frozen
         try {
