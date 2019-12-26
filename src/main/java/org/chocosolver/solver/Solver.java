@@ -20,6 +20,7 @@ import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
+import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.search.loop.Reporting;
 import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.learn.LearnNothing;
@@ -751,6 +752,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public boolean isStopCriterionMet() {
         boolean ismet = false;
         for (int i = 0; i < criteria.size() && !ismet; i++) {
+            if(criteria.get(i) instanceof TimeCounter && this.getNodeCount() <= 0) {
+                continue; // time limit for search is not reached when search is not started
+            }
             ismet = criteria.get(i).isMet();
         }
         return ismet;
