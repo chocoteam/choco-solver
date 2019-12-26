@@ -9,7 +9,9 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -217,5 +219,51 @@ public class TestSolveur {
         assertEquals(model.getSolver().getNodeCount(), 0, "nb nod");
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testStopCriterion() {
+        final Model model = makeNonTrivialModel();
+
+        final Solver solver = model.getSolver();
+
+        final long timeLimit = 2 * 1000000000L;
+
+        solver.addStopCriterion(new TimeCounter(model, timeLimit));
+        Assert.assertFalse(solver.isStopCriterionMet());
+        solver.solve();
+
+        solver.hardReset();
+        solver.addStopCriterion(new TimeCounter(model, timeLimit));
+        Assert.assertFalse(solver.isStopCriterionMet());
+    }
+
+    // Slightly adapted Golomb Ruler instance from:
+    // https://github.com/chocoteam/samples/blob/master/src/main/java/org/chocosolver/samples/integer/GolombRuler.java
+    //
+    // The choice of model is irrelevant to this test, but must not be trivial to solve.
+    private Model makeNonTrivialModel() {
+        int m = 12;
+        Model model = new Model("GolombRuler");
+        IntVar[] ticks = model.intVarArray("a", m, 0, (1 << m + 1) - 1, false);
+
+        model.arithm(ticks[0], "=", 0).post();
+
+        for (int i = 0; i < m - 1; i++) {
+            model.arithm(ticks[i + 1], ">", ticks[i]).post();
+        }
+
+        IntVar[] diffs = model.intVarArray("d", (m * m - m) / 2, 0, (1 << m + 1) - 1, false);
+        IntVar[][] m_diffs = new IntVar[m][m];
+        for (int k = 0, i = 0; i < m - 1; i++) {
+            for (int j = i + 1; j < m; j++, k++) {
+                model.scalar(new IntVar[]{ticks[j], ticks[i]}, new int[]{1, -1}, "=", diffs[k]).post();
+                model.arithm(diffs[k], ">=", (j - i) * (j - i + 1) / 2).post();
+                model.arithm(diffs[k], "-", ticks[m - 1], "<=", -((m - 1 - j + i) * (m - j + i)) / 2).post();
+                model.arithm(diffs[k], "<=", ticks[m - 1], "-", ((m - 1 - j + i) * (m - j + i)) / 2).post();
+                m_diffs[i][j] = diffs[k];
+            }
+        }
+        model.allDifferent(diffs, "BC").post();
+        return model;
+    }
 
 }
