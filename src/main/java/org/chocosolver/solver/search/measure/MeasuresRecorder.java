@@ -98,8 +98,8 @@ public final class MeasuresRecorder extends Measures {
         state = SearchState.NEW;
         objectiveOptimal = false;
         solutionCount = 0;
-        timeCount = 0;
         stopStopwatch();
+        timeCount = 0;
         nodeCount = 0;
         backtrackCount = 0;
         failCount = 0;
