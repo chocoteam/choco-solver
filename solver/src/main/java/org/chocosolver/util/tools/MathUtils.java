@@ -23,6 +23,8 @@ public final class MathUtils {
      */
     public final static double ROUNDED_LOG_PRECISION = 10000;
 
+    public final static double LOG10_2 = Math.log10(2);
+
     private MathUtils() {
         //do nothing
     }
@@ -308,6 +310,10 @@ public final class MathUtils {
         if(x > Integer.MAX_VALUE)return Integer.MAX_VALUE;
         if(x < Integer.MIN_VALUE)return Integer.MIN_VALUE;
         return (int) x;
+    }
+
+    public static double log2(double a){
+        return Math.log10(a) / LOG10_2;
     }
 
 }

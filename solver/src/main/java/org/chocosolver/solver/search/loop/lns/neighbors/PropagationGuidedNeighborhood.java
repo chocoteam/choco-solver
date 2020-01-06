@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * A Propagation Guided LNS
@@ -43,34 +44,33 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
      */
     protected int[] dsize;
     /**
+     * Domain size of each variable in {@link #variables} before propagation
+     */
+    protected int[] bsize;
+    /**
+     * Store the modified variables
+     */
+    protected int[] all;
+    /**
      * For randomness
      */
     protected Random rd;
     /**
      * Intial size of the fragment
      */
-    int fgmtSize;
+    final double desiredSize;
     /**
      * Number of variables modified through propagation to consider while computing the neighbor
      */
     int listSize;
     /**
-     * Restriction parameter
-     */
-    private double epsilon = 1.;
-    /**
      * Logarithmic cardinality of domains
      */
     double logSum = 0.;
     /**
-     * Store the modified variables
-     */
-    protected int[] all;
-    /**
      * Store the variable elligible for propagation
      */
     List<Integer> candidates;
-
     /**
      * Indicate which variables are selected in a fragment
      */
@@ -84,16 +84,16 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
      * Create a propagation-guided neighbor for LNS
      *
      * @param vars     set of variables to consider
-     * @param fgmtSize initial size of the fragment
+     * @param desiredSize desired size of the fragment
      * @param listSize number of modified variable to store while propagating
      * @param seed     for randomness
      */
-    public PropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
+    public PropagationGuidedNeighborhood(IntVar[] vars, double desiredSize, int listSize, long seed) {
         super(vars);
         this.mModel = vars[0].getModel();
         this.n = vars.length;
         this.rd = new Random(seed);
-        this.fgmtSize = fgmtSize;
+        this.desiredSize = desiredSize;
         this.listSize = listSize;
         this.all = new int[n];
         this.candidates = new ArrayList<>();
@@ -102,14 +102,10 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
 
     @Override
     public void fixSomeVariables() throws ContradictionException {
-        logSum = Arrays.stream(variables).mapToDouble(v -> Math.log(v.getDomainSize())).sum();
-        fgmtSize = (int) (30 * (1 + epsilon));
+        logSum = Arrays.stream(variables).mapToDouble(v -> MathUtils.log2(v.getDomainSize())).sum();
+        System.arraycopy(dsize, 0, bsize, 0, dsize.length);
         fragment.set(0, n); // all variables are frozen
-        try {
-            update();
-        }finally {
-            epsilon = (.95 * epsilon) + (.05 * (logSum / fgmtSize));
-        }
+        update();
     }
 
     /**
@@ -118,7 +114,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
      * @throws ContradictionException if the fragment is trivially infeasible
      */
     protected void update() throws ContradictionException {
-        while (logSum > fgmtSize && fragment.cardinality() > 0) {
+        while (logSum > desiredSize && fragment.cardinality() > 0) {
             // 1. pick a variable
             int id = selectVariable();
             // 2. freeze it to its solution value and propagate
@@ -135,7 +131,8 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
                         if (ds == 1) {       // if fixed by side effect
                             fragment.clear(i); // set it has fixed
                         } else if (dsize[i] - ds > 0) {
-                            all[i] = dsize[i] - ds; // add it to candidate list
+                            all[i] = bsize[i] - ds; // add it to candidate list
+                            bsize[i] = ds;
                         }
                     }
                 }
@@ -143,7 +140,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
-                        .sorted(Comparator.comparingInt(i -> all[i]))
+                        .sorted(Comparator.comparingInt(i -> -all[i]))
                         .limit(listSize)
                         .collect(Collectors.toList());
             } else {
@@ -170,13 +167,9 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     }
 
     @Override
-    public void restrictLess() {
-        epsilon += .1 * (logSum / fgmtSize);
-    }
-
-    @Override
     public void init() {
         this.dsize = new int[n];
+        this.bsize = new int[n];
         for (int i = 0; i < n; i++) {
             dsize[i] = variables[i].getDomainSize();
         }
