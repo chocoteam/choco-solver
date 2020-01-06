@@ -100,6 +100,30 @@ public class NogoodFromRestarts implements IMonitorRestart {
                             png.addLearnt(Arrays.copyOf(lits, i + 1));
                         }
                     }
+                } else if (id.getDecOp() == DecisionOperatorFactory.makeIntSplit()) {
+                    if (id.hasNext() || id.getArity() == 1) {
+                        lits[i++] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false));
+                    } else {
+                        if (i == 0) {
+                            // value can be removed permanently from var!
+                            png.addLearnt(SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false)));
+                        } else {
+                            lits[i] = SatSolver.negated(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false));
+                            png.addLearnt(Arrays.copyOf(lits, i + 1));
+                        }
+                    }
+                } else if (id.getDecOp() == DecisionOperatorFactory.makeIntReverseSplit()) {
+                    if (id.hasNext()) {
+                        lits[i++] = png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false);
+                    } else {
+                        if (i == 0) {
+                            // value can be removed permanently from var!
+                            png.addLearnt(png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false));
+                        } else {
+                            lits[i] = png.Literal(id.getDecisionVariable(), id.getDecisionValue(), false);
+                            png.addLearnt(Arrays.copyOf(lits, i + 1));
+                        }
+                    }
                 } else {
                     throw new UnsupportedOperationException("NogoodStoreFromRestarts cannot deal with such operator: " + ((IntDecision) decision).getDecOp());
                 }
