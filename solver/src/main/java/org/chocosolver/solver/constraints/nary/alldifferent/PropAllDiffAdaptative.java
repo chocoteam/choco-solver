@@ -42,7 +42,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      * @param variables array of integer variables
      */
     public PropAllDiffAdaptative(IntVar[] variables) {
-        super(variables);
+        super(variables, true);
         rd = new Random(0);
         calls = success = 1;
     }

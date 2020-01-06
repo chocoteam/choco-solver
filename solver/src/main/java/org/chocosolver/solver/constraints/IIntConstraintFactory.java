@@ -671,7 +671,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars list of variables
      */
     default Constraint allDifferent(IntVar... vars) {
-        return allDifferent(vars, "DEFAULT");
+        return allDifferent(vars, "AC");
     }
 
     /**
@@ -680,19 +680,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * The consistency level should be chosen among "BC", "AC" and "DEFAULT".
      *
      * @param vars        list of variables
-     * @param CONSISTENCY consistency level, among {"BC", "AC"}
+     * @param CONSISTENCY consistency level, among {"BC", "AC_REGIN", "AC", "AC_ZHANG", "DEFAULT"}
      *                    <p>
      *                    <b>BC</b>:
      *                    Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
      *                    A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
      *                    <br/>
-     *                    <b>AC</b>:
+     *                    <b>AC_REGIN</b>:
      *                    Uses Regin algorithm
      *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) on average.
      *                    <p>
+     *                    <b>AC, AC_ZHANG</b>:
+     *                    Uses Zhang improvement of Regin algorithm
+     *                    <p>
      *                    <b>DEFAULT</b>:
      *                    <br/>
-     *                    Uses BC plus a probabilistic AC propagator to get a compromise between BC and AC
+     *                    Uses BC plus a probabilistic AC_ZHANG propagator to get a compromise between BC and AC_ZHANG
      */
     default Constraint allDifferent(IntVar[] vars, String CONSISTENCY) {
         if (vars.length <= 1) return ref().trueConstraint();

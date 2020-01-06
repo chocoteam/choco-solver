@@ -22,6 +22,8 @@ import org.chocosolver.solver.variables.IntVar;
 public class AllDifferent extends Constraint {
 
     public static final String AC= "AC";
+    public static final String AC_REGIN= "AC_REGIN";
+    public static final String AC_ZHANG = "AC_ZHANG";
     public static final String BC= "BC";
     public static final String FC= "FC";
     public static final String NEQS= "NEQS";
@@ -48,8 +50,11 @@ public class AllDifferent extends Constraint {
                 return new Propagator[]{new PropAllDiffInst(VARS)};
             case BC:
                 return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffBC(VARS)};
+            case AC_REGIN:
+                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, false)};
             case AC:
-                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS)};
+            case AC_ZHANG:
+                return new Propagator[]{new PropAllDiffInst(VARS), new PropAllDiffAC(VARS, true)};
             case DEFAULT:
             default: {
                 // adds a Probabilistic AC (only if at least some variables have an enumerated domain)

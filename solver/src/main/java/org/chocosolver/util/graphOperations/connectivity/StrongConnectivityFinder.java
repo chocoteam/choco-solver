@@ -69,6 +69,15 @@ public class StrongConnectivityFinder  {
 		findAllSCCOf(restriction);
 	}
 
+	// exception is a set of nodes that do not need to be found SCC
+	public void findAllSCC(BitSet exception) {
+		ISet nodes = graph.getNodes();
+		for (int i = exception.nextClearBit(0); i >= 0 && i < n; i = exception.nextClearBit(i + 1)) {
+			restriction.set(i, nodes.contains(i));
+		}
+		findAllSCCOf(restriction);
+	}
+
 	public void findAllSCCOf(BitSet restriction) {
 		inStack.clear();
 		for (int i = 0; i < n; i++) {

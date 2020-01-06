@@ -38,19 +38,19 @@ public class AlgoAllDiffAC {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private DirectedGraph digraph;
-    private int[] matching;
-    private int[] nodeSCC;
-    private BitSet free;
-    private StrongConnectivityFinder SCCfinder;
+    int n, n2;
+    DirectedGraph digraph;
+    int[] matching;
+    int[] nodeSCC;
+    BitSet free;
+    StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
     private int[] father;
     private BitSet in;
-    private TIntIntHashMap map;
-    private int[] fifo;
-    private IntVar[] vars;
-    private ICause aCause;
+    TIntIntHashMap map;
+    int[] fifo;
+    protected IntVar[] vars;
+    ICause aCause;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -80,11 +80,15 @@ public class AlgoAllDiffAC {
         }
         n2 = idx;
         fifo = new int[n2];
-        digraph = new DirectedGraph(n2 + 1, SetType.BITSET, false);
+        makeDigraph();
         free = new BitSet(n2);
         father = new int[n2];
         in = new BitSet(n2);
         SCCfinder = new StrongConnectivityFinder(digraph);
+    }
+
+    protected void makeDigraph(){
+        digraph = new DirectedGraph(n2 + 1, SetType.BITSET, false);
     }
 
     //***********************************************************************************
@@ -176,7 +180,7 @@ public class AlgoAllDiffAC {
     // PRUNING
     //***********************************************************************************
 
-    private void buildSCC() {
+    void buildSCC() {
         if (n2 > n * 2) {
             digraph.removeNode(n2);
             digraph.addNode(n2);
@@ -193,25 +197,36 @@ public class AlgoAllDiffAC {
         digraph.removeNode(n2);
     }
 
+    void distinguish() {
+        // void
+    }
+
+    boolean filterVar(int i) throws ContradictionException {
+        boolean filter =false;
+        IntVar v = vars[i];
+        int ub = v.getUB();
+        for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
+            int j = map.get(k);
+            if (nodeSCC[i] != nodeSCC[j]) {
+                if (matching[i] == j) {
+                    filter |= v.instantiateTo(k, aCause);
+                } else {
+                    filter |= v.removeValue(k, aCause);
+                    digraph.removeArc(i, j);
+                }
+            }
+        }
+        return filter;
+    }
+
     private boolean filter() throws ContradictionException {
         boolean filter =false;
+        distinguish();
         buildSCC();
         int j, ub;
         IntVar v;
         for (int i = 0; i < n; i++) {
-            v = vars[i];
-            ub = v.getUB();
-            for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
-                j = map.get(k);
-                if (nodeSCC[i] != nodeSCC[j]) {
-                    if (matching[i] == j) {
-                        filter |= v.instantiateTo(k, aCause);
-                    } else {
-                        filter |= v.removeValue(k, aCause);
-                        digraph.removeArc(i, j);
-                    }
-                }
-            }
+            filter|=filterVar(i);
         }
         for (int i = 0; i < n; i++) {
             v = vars[i];

@@ -10,6 +10,7 @@ Multi-modules and JPMS-ready.
 
 ### Major features:
 - Move `cutoffseq`, `choco-sat`, `choco-solver`, `pf4cs`, `choco-parsers` and `samples` projects into a (maven) multi-modules project, JPMS-ready 
+- Default AC algorithm for `AllDifferent` is now from IJCAI-18 "A Fast Algorithm for Generalized Arc Consistency of the Alldifferent Constraint", Zhang et al. (#644)
 
 ### Deprecated API (to be removed in next release):
 

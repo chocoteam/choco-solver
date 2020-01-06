@@ -56,7 +56,7 @@ public class NaryWriterHelper {
                 if (props[1] instanceof PropAllDiffBC) {
                     consistency = AllDifferent.BC;
                 } else if (props[1] instanceof PropAllDiffAC) {
-                    consistency = AllDifferent.AC;
+                    consistency = AllDifferent.AC_ZHANG;
                 } else if (props[1] instanceof PropNotEqualX_Y) {
                     consistency = AllDifferent.NEQS;
                 }

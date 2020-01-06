@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.nary.alldifferent;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
+import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffACFast;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -46,9 +47,11 @@ public class PropAllDiffAC extends Propagator<IntVar> {
      *
      * @param variables array of integer variables
      */
-    public PropAllDiffAC(IntVar[] variables) {
+    public PropAllDiffAC(IntVar[] variables, boolean fast) {
         super(variables, PropagatorPriority.QUADRATIC, false);
-        this.filter = new AlgoAllDiffAC(variables, this);
+        this.filter = fast ?
+            new AlgoAllDiffACFast(variables, this):
+            new AlgoAllDiffAC(variables, this);
     }
 
     //***********************************************************************************
