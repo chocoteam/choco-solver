@@ -53,6 +53,10 @@ public class MoveLNS implements Move {
      */
     protected long solutions;
     /**
+     * Indicates if a solution has been loaded
+     */
+    protected boolean solutionLoaded;
+    /**
      * Indicate a restart has been triggered
      */
     private boolean freshRestart;
@@ -82,6 +86,7 @@ public class MoveLNS implements Move {
         this.frequency = counter.getLimitValue();
         this.solutions = 0;
         this.freshRestart = false;
+        this.solutionLoaded = false;
     }
 
     @Override
@@ -125,7 +130,7 @@ public class MoveLNS implements Move {
     public boolean extend(Solver solver) {
         boolean extend;
         // when a new fragment is needed (condition: at least one solution has been found)
-        if (solutions > 0) {
+        if (solutions > 0 || solutionLoaded) {
             if (freshRestart) {
                 assert solver.getDecisionPath().size() == 1;
                 assert solver.getDecisionPath().getDecision(0) == RootDecision.ROOT;
@@ -195,11 +200,14 @@ public class MoveLNS implements Move {
         boolean repair = true;
         if(solutions > 0
                 // the second condition is only here for intiale calls, when solutions is not already up to date
-                || solver.getSolutionCount() > 0) {
+                || solver.getSolutionCount() > 0
+                // the third condition is true when a solution was given as input
+                || solutionLoaded) {
             // the detection of a new solution can only be met here
             if (solutions < solver.getSolutionCount()) {
                 assert solutions == solver.getSolutionCount() - 1;
                 solutions++;
+                solutionLoaded = false;
                 neighbor.recordSolution();
                 doRestart(solver);
             }
@@ -235,8 +243,8 @@ public class MoveLNS implements Move {
      */
     public void loadFromSolution(Solution solution, Solver solver){
         neighbor.loadFromSolution(solution);
+        solutionLoaded = true;
         if(solutions == 0){
-            solutions++;
             freshRestart = true;
         }else{
             doRestart(solver);

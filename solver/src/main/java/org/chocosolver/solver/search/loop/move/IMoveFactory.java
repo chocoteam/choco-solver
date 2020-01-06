@@ -14,6 +14,7 @@ import org.chocosolver.cutoffseq.ICutoffStrategy;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.limits.SolutionCounter;
@@ -145,9 +146,46 @@ public interface IMoveFactory extends ISelf<Solver> {
      *
      * @param neighbor         the neighbor for the LNS
      * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
+     * @param bootstrap if a solution is known, it can be given to LNS
+     */
+    default void setLNS(INeighbor neighbor, ICounter restartCounter, Solution bootstrap) {
+        MoveLNS lns = new MoveLNS(ref().getMove(), neighbor, restartCounter);
+        ref().setMove(lns);
+        if(bootstrap != null){
+            lns.loadFromSolution(bootstrap, ref());
+        }
+    }
+
+
+    /**
+     * Creates a Move object based on Large Neighborhood Search.
+     * It encapsulates the current move within a LNS move.
+     * Anytime a solution is encountered, it is recorded and serves as a basis for the <code>INeighbor</code>.
+     * The <code>INeighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
+     * If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
+     *
+     * @see #setLNS(INeighbor, ICounter)
+     * @param neighbor         the neighbor for the LNS
+     * @param bootstrap if a solution is known, it can be given to LNS
+     */
+    default void setLNS(INeighbor neighbor, Solution bootstrap) {
+        setLNS(neighbor, ICounter.Impl.None, bootstrap);
+    }
+
+    /**
+     * Creates a Move object based on Large Neighborhood Search.
+     * It encapsulates the current move within a LNS move.
+     * Anytime a solution is encountered, it is recorded and serves as a basis for the <code>INeighbor</code>.
+     * The <code>INeighbor</code> creates a <i>fragment</i>: selects variables to freeze/unfreeze wrt the last solution found.
+     * If a fragment cannot be extended to a solution, a new one is selected by restarting the search.
+     * If a fragment induces a search space which a too big to be entirely evaluated, restarting the search can be forced
+     * using the <code>restartCriterion</code>. A fast restart strategy is often a good choice.
+     *
+     * @param neighbor         the neighbor for the LNS
+     * @param restartCounter the (fast) restart counter. Initial limit gives the frequency.
      */
     default void setLNS(INeighbor neighbor, ICounter restartCounter) {
-        ref().setMove(new MoveLNS(ref().getMove(), neighbor, restartCounter));
+        setLNS(neighbor, restartCounter, null);
     }
 
 
@@ -162,6 +200,6 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param neighbor         the neighbor for the LNS
      */
     default void setLNS(INeighbor neighbor) {
-        setLNS(neighbor, ICounter.Impl.None);
+        setLNS(neighbor, ICounter.Impl.None, null);
     }
 }
