@@ -9,13 +9,18 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
-
+import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * A Propagation Guided LNS
@@ -26,27 +31,99 @@ import java.util.stream.IntStream;
  * @author Charles Prud'homme
  * @since 08/04/13
  */
-public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeighborhood {
+public class ReversePropagationGuidedNeighborhood extends IntNeighbor{
 
     /**
-     * Create a neighbor for LNS based on PGLNS, which selects variables to not be part of a fragment
+     * Number of variables
+     */
+    protected final int n;
+    /**
+     * Domain size of each variable in {@link #variables}
+     */
+    protected int[] domSiz;
+    /**
+     * Store the modified variables
+     */
+    protected int[] all;
+    /**
+     * For randomness
+     */
+    protected Random rd;
+    /**
+     * Intial size of the fragment
+     */
+    final double desiredSize;
+    /**
+     * Goal size of the fragment
+     */
+    double size;
+    /**
+     * Number of variables modified through propagation to consider while computing the neighbor
+     */
+    int listSize;
+    /**
+     * Logarithmic cardinality of domains
+     */
+    double logSum = 0.;
+    /**
+     * Restriction parameter
+     */
+    private double epsilon = 1.;
+    /**
+     * Store the variable elligible for propagation
+     */
+    List<Integer> candidates;
+    /**
+     * Indicate which variables are selected in a fragment
+     */
+    protected BitSet fragment;
+    /**
+     * Reference to the model
+     */
+    protected Model mModel;
+
+    /**
+     * Create a reverse adaptive neighbor for LNS based on PGLNS, which selects variables to not be part of a fragment
      * @param vars variables to consider
-     * @param fgmtSize initial size of the fragment
+     * @param desiredSize desired size of the fragment
      * @param listSize number of modified variable to store while propagating
      * @param seed for randomness
      */
-    public ReversePropagationGuidedNeighborhood(IntVar[] vars, int fgmtSize, int listSize, long seed) {
-        super(vars, fgmtSize, listSize, seed);
+    public ReversePropagationGuidedNeighborhood(IntVar[] vars, int desiredSize, int listSize, long seed) {
+        super(vars);
+        this.mModel = vars[0].getModel();
+        this.n = vars.length;
+        this.rd = new Random(seed);
+        this.desiredSize = desiredSize;
+        this.listSize = listSize;
+        this.all = new int[n];
+        this.domSiz = new int[n];
+        this.candidates = new ArrayList<>();
+        this.fragment = new BitSet(n);
     }
 
     @Override
+    public void fixSomeVariables() throws ContradictionException {
+        logSum = 0;
+        size = desiredSize * epsilon;
+        fragment.set(0, n); // all variables are frozen
+        try {
+            update();
+            epsilon = (.95 * epsilon) + (.05 * (logSum / size));
+        }catch (ContradictionException ce){
+            epsilon = (.95 * epsilon) + (.05 / size);
+            throw ce;
+        }
+    }
+
     protected void update() throws ContradictionException {
-        while (logSum > fgmtSize && fragment.cardinality() > 0) {
+        while (logSum < size && fragment.cardinality() > 0) {
             // 1. pick a variable
             int id = selectVariable();
 
             // 2. freeze it to its solution value
             if (variables[id].contains(values[id])) {  // to deal with objective variable and related
+                logSum += MathUtils.log2(variables[id].getDomainSize());
 
                 mModel.getEnvironment().worldPush();
                 variables[id].instantiateTo(values[id], Cause.Null);
@@ -59,11 +136,8 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                         if (ds == 1) { // if fixed by side effect
                             fragment.clear(i); // set it has fixed
                         } else {
-                            int closeness = (int) ((dsize[i] - ds) / (dsize[i] * 1.) * 100);
-                            //                            System.out.printf("%d -> %d :%d\n", dsize[i], ds, closeness);
-                            if (closeness > 0) {
-                                all[i] = closeness; // add it to candidate list
-                            }
+                            all[i] = (int) ((domSiz[i] - ds) / (domSiz[i] * 1.) * 100);
+                            // we do not deal with previous reductions
                         }
                     }
                 }
@@ -71,24 +145,45 @@ public class ReversePropagationGuidedNeighborhood extends PropagationGuidedNeigh
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
-                        .sorted(Comparator.comparingInt(i -> all[i]))
+                        .sorted(Comparator.comparingInt(i -> -all[(int) i]))
+                        .sorted(Comparator.reverseOrder())
                         .limit(listSize)
                         .collect(Collectors.toList());
-                logSum = 0;
-                for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
-                    logSum += Math.log(variables[i].getDomainSize());
-                }
             } else {
                 fragment.clear(id);
             }
 
         }
+        // Then freeze variables not selected
         for (int i = fragment.nextSetBit(0); i > -1 && i < n; i = fragment.nextSetBit(i + 1)) {
             if (variables[i].contains(values[i])) {
                 freeze(i);
             }
         }
-//        mModel.getSolver().propagate();
-//        logSum = Arrays.stream(variables).mapToDouble(v -> Math.log(v.getDomainSize())).sum();
     }
+
+    /**
+     * @return a variable id in {@link #variables} to be part of the fragment
+     */
+    int selectVariable() {
+        int id;
+        if (candidates.isEmpty()) {
+            int cc = rd.nextInt(fragment.cardinality());
+            for (id = fragment.nextSetBit(0); id >= 0 && cc > 0; id = fragment.nextSetBit(id + 1)) {
+                cc--;
+            }
+        } else {
+            id = candidates.remove(0);
+        }
+        return id;
+    }
+
+    @Override
+    public void init() {
+        this.domSiz = new int[n];
+        for (int i = 0; i < n; i++) {
+            domSiz[i] = variables[i].getDomainSize();
+        }
+    }
+
 }

@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -42,11 +43,11 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     /**
      * Domain size of each variable in {@link #variables}
      */
-    protected int[] dsize;
+    protected int[] curDoms;
     /**
      * Domain size of each variable in {@link #variables} before propagation
      */
-    protected int[] bsize;
+    protected int[] befDoms;
     /**
      * Store the modified variables
      */
@@ -59,6 +60,10 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
      * Intial size of the fragment
      */
     final double desiredSize;
+    /**
+     * Current size of the fragment
+     */
+    double size;
     /**
      * Number of variables modified through propagation to consider while computing the neighbor
      */
@@ -103,7 +108,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     @Override
     public void fixSomeVariables() throws ContradictionException {
         logSum = Arrays.stream(variables).mapToDouble(v -> MathUtils.log2(v.getDomainSize())).sum();
-        System.arraycopy(dsize, 0, bsize, 0, dsize.length);
+        System.arraycopy(curDoms, 0, befDoms, 0, curDoms.length);
         fragment.set(0, n); // all variables are frozen
         update();
     }
@@ -114,7 +119,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
      * @throws ContradictionException if the fragment is trivially infeasible
      */
     protected void update() throws ContradictionException {
-        while (logSum > desiredSize && fragment.cardinality() > 0) {
+        while (logSum > size && fragment.cardinality() > 0) {
             // 1. pick a variable
             int id = selectVariable();
             // 2. freeze it to its solution value and propagate
@@ -130,9 +135,9 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
                     if (fragment.get(i)) { // if not frozen until now
                         if (ds == 1) {       // if fixed by side effect
                             fragment.clear(i); // set it has fixed
-                        } else if (dsize[i] - ds > 0) {
-                            all[i] = bsize[i] - ds; // add it to candidate list
-                            bsize[i] = ds;
+                        } else if (curDoms[i] - ds > 0) {
+                            all[i] = befDoms[i] - ds; // add it to candidate list
+                            befDoms[i] = ds;
                         }
                     }
                 }
@@ -140,7 +145,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
-                        .sorted(Comparator.comparingInt(i -> -all[i]))
+                        .sorted(Comparator.comparingInt(i -> -all[(int)i]))
                         .limit(listSize)
                         .collect(Collectors.toList());
             } else {
@@ -167,11 +172,28 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
     }
 
     @Override
+    public void loadFromSolution(Solution solution) {
+        super.loadFromSolution(solution);
+        size = desiredSize;
+    }
+
+    @Override
+    public void recordSolution() {
+        super.recordSolution();
+        size = desiredSize;
+    }
+
+    @Override
+    public void restrictLess() {
+        size *= 1.01;
+    }
+
+    @Override
     public void init() {
-        this.dsize = new int[n];
-        this.bsize = new int[n];
+        this.curDoms = new int[n];
+        this.befDoms = new int[n];
         for (int i = 0; i < n; i++) {
-            dsize[i] = variables[i].getDomainSize();
+            curDoms[i] = variables[i].getDomainSize();
         }
     }
 }

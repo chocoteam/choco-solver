@@ -76,22 +76,25 @@ public class LNSTest {
                 r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
                 break;
             case 2:
-                r.setLNS(new PropagationGuidedNeighborhood(objects, 100, 10, 123456L));
+                r.setLNS(new PropagationGuidedNeighborhood(objects, 40, 10, 123456L));
                 break;
             case 3:
-                r.setLNS(new SequenceNeighborhood(
-                        new PropagationGuidedNeighborhood(objects, 100, 10, 123456L),
-                        new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L)
-                ));
+                r.setLNS(new ReversePropagationGuidedNeighborhood(objects, 40, 10, 123456L));
                 break;
             case 4:
                 r.setLNS(new SequenceNeighborhood(
-                        new PropagationGuidedNeighborhood(objects, 100, 10, 123456L),
-                        new ReversePropagationGuidedNeighborhood(objects, 100, 10, 123456L),
-                        new RandomNeighborhood(objects, 200, 123456L)
+                        new PropagationGuidedNeighborhood(objects, 25, 10, 123456L),
+                        new ReversePropagationGuidedNeighborhood(objects, 25, 10, 123456L)
                 ));
                 break;
             case 5:
+                r.setLNS(new SequenceNeighborhood(
+                        new PropagationGuidedNeighborhood(objects, 25, 10, 123456L),
+                        new ReversePropagationGuidedNeighborhood(objects, 25, 10, 123456L),
+                        new RandomNeighborhood(objects, 200, 123456L)
+                ));
+                break;
+            case 6:
                 r.setNoGoodRecordingFromRestarts();
                 r.setLNS(new RandomNeighborhood(objects, 200, 123456L));
                 break;
@@ -108,7 +111,7 @@ public class LNSTest {
 
     @DataProvider(name = "lns")
     public Object[][] createData() {
-        return new Object[][]{{0}, {1}, {2}, {3}, {4}, {5}};
+        return new Object[][]{{0}, {1}, {2}, {3}, {4}, {5}, {6}};
     }
 
 
