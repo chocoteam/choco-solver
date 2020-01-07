@@ -198,7 +198,6 @@ public class LNSTest {
         model.scalar(objects, volumes, "=", scalar).post();
         model.scalar(objects, energies, "=", power).post();
         model.knapsack(objects, scalar, power, volumes, energies).post();
-        model.setObjective(Model.MAXIMIZE, power);
         // ... end of modelling
 
         Solver r = model.getSolver();
@@ -207,13 +206,13 @@ public class LNSTest {
         // let's start the reparation of the previous solution
         // so, reset the search
         r.reset();
+        model.setObjective(Model.MAXIMIZE, power);
         // declaring a neighborhood for LNS, here a random one
         RandomNeighborhood rnd = new RandomNeighborhood(objects, 1, 0);
         // initialize it with the previous (best) solution
         // declare LNS
         r.setLNS(rnd, sol);
-        // limit search
-        r.limitNode(3000);
+        r.limitTime("2s");
         // find the new best solution
         int bw = 0, bp = 0;
         while (r.solve()) {
@@ -221,7 +220,7 @@ public class LNSTest {
             bw = scalar.getValue();
         }
         r.printShortStatistics();
-        Assert.assertEquals(bp, 6937);
+        Assert.assertEquals(bp, 8372);
         Assert.assertEquals(bw, 1092);
     }
 

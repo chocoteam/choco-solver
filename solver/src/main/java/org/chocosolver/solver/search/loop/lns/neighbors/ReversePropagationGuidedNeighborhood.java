@@ -145,8 +145,7 @@ public class ReversePropagationGuidedNeighborhood extends IntNeighbor{
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
-                        .sorted(Comparator.comparingInt(i -> -all[(int) i]))
-                        .sorted(Comparator.reverseOrder())
+                        .sorted(Comparator.comparingInt(i -> -all[i]))
                         .limit(listSize)
                         .collect(Collectors.toList());
             } else {
