@@ -167,6 +167,9 @@ public class PropagationEngine {
             for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
                 assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
                 lastProp = pro_queue[i].pollFirst();
+                if (pro_queue[i].isEmpty()) {
+                    notEmpty &= ~(1 << i);
+                }
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
@@ -181,9 +184,6 @@ public class PropagationEngine {
                 }
                 if (hybrid < 0b01) {
                     manageModifications();
-                }
-                if (pro_queue[i].isEmpty()) {
-                    notEmpty &= ~(1 << i);
                 }
             }
         } while (!var_queue.isEmpty());
