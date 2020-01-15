@@ -39,8 +39,6 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @since 04/02/2013
  */
 public class Task {
-    // TODO : add a height IntVar variable (with associated constructors and all --> 0 if not specified)
-    // TODO : change IIntConstraintFactory and cumulative constraints accordingly ??? (with hieght)
 
     //***********************************************************************************
     // VARIABLES
