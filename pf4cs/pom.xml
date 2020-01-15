@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This file is part of pf4cs, http://choco-solver.org/
+
+    Copyright (c) 2019, IMT Atlantique. All rights reserved.
+
+    Licensed under the BSD 4-clause license.
+
+    See LICENSE file in the project root for full license information.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.choco-solver</groupId>
+        <artifactId>choco</artifactId>
+        <version>4.10.3-SNAPSHOT</version>
+    </parent>
+    <artifactId>pf4cs</artifactId>
+    <version>1.0.4</version>
+    <packaging>jar</packaging>
+
+    <name>pf4cs</name>
+    <description>Problem facade for constraint solvers.</description>
+
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
+</project>

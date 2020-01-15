@@ -1,0 +1,7 @@
+This file is part of ${project}, http://choco-solver.org/
+
+Copyright (c) ${year}, ${owner}. All rights reserved.
+
+Licensed under the BSD 4-clause license.
+
+See LICENSE file in the project root for full license information.

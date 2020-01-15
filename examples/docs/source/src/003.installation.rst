@@ -1,0 +1,79 @@
+============
+Installation
+============
+
+Requirements
+============
+
+You need to have `JDK 8 <http://www.google.com/search?q=JDK%208>`_ installed on your working environment,
+and except if you are an emacs master,
+an `Integrated Development Environment <https://en.wikipedia.org/wiki/Integrated_development_environment>`_ would be needed.
+
+If you just want to try Choco wihtout installing anything, you can have a look at the
+`Choco online IDE <https://chocoide.herokuapp.com>`_.
+
+
+
+Download
+========
+
+The JAR anyone can start with is named *choco-solver-X.y.z-with-dependencies.jar* where
+*X.y.z* denotes the version you want to use, here, |choco_version|.
+It contains the constraint programming API and any needed dependencies.
+
+Choco is available on the `official website <http://choco-solver.org/?q=Download>`_ and
+on `Maven Central Repository <http://search.maven.org/#search%7Cga%7C1%7Corg.choco-solver>`_.
+
+
+Installation
+============
+
+Since Choco is a Java library, it does not need to installed strictly speaking.
+You only have to add it to the classpath of your project.
+
+See instructions for `IntelliJ IDEA <https://www.jetbrains.com/help/idea/2016.1/configuring-module-dependencies-and-libraries.html?origin=old_help>`_
+or `Eclipse <https://wiki.eclipse.org/FAQ_How_do_I_add_an_extra_library_to_my_project's_classpath%3F>`_.
+
+
+As a Maven dependency
++++++++++++++++++++++
+
+
+Choco is available on the `official website <http://choco-solver.org/?q=Download>`_ and, thus, you can edit your
+`pom.xml` with :
+
+.. code-block:: xml
+
+    <dependency>
+        <groupId>org.choco-solver</groupId>
+        <artifactId>choco-solver</artifactId>
+        <version>X.y.z</version>
+    </dependency>
+
+where *X.y.z* denotes the version you want to use, here, |choco_version|.
+
+Building from sources
++++++++++++++++++++++
+
+The source of the released versions are directly available on `GitHub <https://github.com/chocoteam/choco-solver>`_.
+You will then need `Git <https://git-scm.com>`_
+and `Maven 3+ <https://maven.apache.org/download.cgi>`_ on your working environment.
+
+Check everything is alright
+===========================
+
+To make sure you correctly configured your project (with Java 8 and Choco),
+create a new class and copy/paste the following code:
+
+.. code-block:: java
+
+    public static void main(String[] args) {
+        Model model = new Model("A first model");
+        System.out.println(model.getName());
+    }
+
+and execute it.
+The console should output : ::
+
+    A first model
+

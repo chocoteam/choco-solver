@@ -1,0 +1,119 @@
+<!--
+
+    This file is part of choco-parsers, http://choco-solver.org/
+
+    Copyright (c) 2019, IMT Atlantique. All rights reserved.
+
+    Licensed under the BSD 4-clause license.
+
+    See LICENSE file in the project root for full license information.
+
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.choco-solver</groupId>
+        <artifactId>choco</artifactId>
+        <version>4.10.3-SNAPSHOT</version>
+    </parent>
+    <artifactId>choco-parsers</artifactId>
+    <packaging>jar</packaging>
+
+    <name>choco-parsers</name>
+    <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
+    </description>
+
+    <properties>
+        <main_dir>.${file.separator}..</main_dir>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-solver</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>pf4cs</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.choco-solver</groupId>
+            <artifactId>choco-geost</artifactId>
+            <version>3.3.2</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>args4j</groupId>
+            <artifactId>args4j</artifactId>
+            <version>2.33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xcsp</groupId>
+            <artifactId>xcsp3-tools</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4</artifactId>
+            <version>4.7</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi</artifactId>
+            <version>3.16</version>
+            <scope>test</scope>
+        </dependency>
+        <!--  Gson: Java to Json conversion -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.1.1</version>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                jar-with-dependencies
+                            </descriptorRefs>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.0.0-M3</version>
+                <configuration>
+                    <!--suppress UnresolvedMavenProperty -->
+                    <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

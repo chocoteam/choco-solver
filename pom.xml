@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    This file is part of choco-solver, http://choco-solver.org/
+    This file is part of choco, http://choco-solver.org/
 
     Copyright (c) 2019, IMT Atlantique. All rights reserved.
 
@@ -14,15 +14,40 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
-    <artifactId>choco-solver</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>choco</artifactId>
     <version>4.10.3-SNAPSHOT</version>
-    <name>Choco-${project.version}: an Open-Source Constraint Solver</name>
+    <packaging>pom</packaging>
+    <name>choco</name>
     <url>http://choco-solver.org/</url>
-    <description>Choco is a Free and Open-Source Software dedicated to Constraint Programming.
-        It aims at describing real combinatorial problems in the form of Constraint Satisfaction Problems
-        and to solve them with Constraint Programming techniques.
+    <description>
+        A Free and Open-Source library dedicated to Constraint Programming.
     </description>
+
+    <modules>
+        <module>cutoffseq</module>
+        <module>sat</module>
+        <module>solver</module>
+        <module>pf4cs</module>
+        <module>parsers</module>
+        <module>examples</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.0.0-beta1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <scm>
+        <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
+        <url>scm:git:git://github.com/chocoteam/choco-solver</url>
+        <developerConnection>scm:git:git@github.com:chocoteam/choco-solver.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
     <licenses>
         <license>
             <name>BSD 4-Clause License</name>
@@ -44,67 +69,12 @@
             <organizationUrl>http://www.cosling.com</organizationUrl>
         </developer>
     </developers>
-    <scm>
-        <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
-        <url>scm:git:git://github.com/chocoteam/choco-solver</url>
-        <developerConnection>scm:git:git@github.com:chocoteam/choco-solver.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+        <main_dir>./</main_dir>
     </properties>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco-sat</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>cutoffseq</artifactId>
-            <version>1.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>7.0.0-beta1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>2.28.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>net.sf.trove4j</groupId>
-            <artifactId>trove4j</artifactId>
-            <version>3.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>dk.brics.automaton</groupId>
-            <artifactId>automaton</artifactId>
-            <version>1.11-8</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-core</artifactId>
-            <version>1.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.cp-profiler</groupId>
-            <artifactId>cpprof-java</artifactId>
-            <version>1.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.knowm.xchart</groupId>
-            <artifactId>xchart</artifactId>
-            <version>3.5.4</version>
-        </dependency>
-    </dependencies>
 
     <distributionManagement>
         <repository>
@@ -171,38 +141,63 @@
     </profiles>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <!-- defaults for compile and testCompile -->
+                    <configuration>
+                        <release>8</release>
+                        <encoding>UTF-8</encoding>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>default-compile</id>
+                            <configuration>
+                                <!-- compile everything to ensure module-info contains right entries -->
+                                <release>11</release>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>base-compile</id>
+                            <goals>
+                                <goal>compile</goal>
+                            </goals>
+                            <!-- recompile everything for target VM except the module-info.java -->
+                            <configuration>
+                                <excludes>
+                                    <exclude>module-info.java</exclude>
+                                </excludes>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-enforcer-plugin</artifactId>
-            <version>3.0.0-M2</version>
-            <executions>
-              <execution>
-                <id>enforce-maven</id>
-                <goals>
-                  <goal>enforce</goal>
-                </goals>
-                <configuration>
-                  <rules>
-                    <requireMavenVersion>
-                      <version>3.1.1</version>
-                    </requireMavenVersion>
-                  </rules>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
-                <configuration>
-                    <optimize>true</optimize>
-                    <compilerVersion>1.8</compilerVersion>
-                    <source>1.8</source>
-                    <target>1.8</target>
-                    <encoding>UTF-8</encoding>
-                </configuration>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.0.0-M2</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.1.1</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
@@ -220,7 +215,7 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <version>3.0</version>
                 <configuration>
-                    <header>src/etc/header.txt</header>
+                    <header>${main_dir}/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
                     <properties>
                         <year>${maven.build.timestamp}</year>
@@ -249,26 +244,6 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M3</version>
-                <configuration>
-                    <!--suppress UnresolvedMavenProperty -->
-                    <argLine>${argLine} -Xms384m -Xmx768m -Djava.library.path=/usr/local/lib</argLine>
-                    <properties>
-                        <property>
-                            <name>listener</name>
-                            <value>
-                                org.chocosolver.util.CustomListener
-                            </value>
-                        </property>
-                    </properties>
-                    <!--<groups>1s,10s,1m,10m,30m</groups>-->
-                    <!--<parallel>methods</parallel>
-                    <threadCount>4</threadCount>-->
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.1.0</version>
                 <executions>
@@ -287,42 +262,6 @@
                 <configuration>
                     <doclint>none</doclint>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>3.1.2</version>
-                <configuration>
-                    <archive>
-                        <manifest>
-                            <addClasspath>true</addClasspath>
-                        </manifest>
-                        <manifestEntries>
-                            <Automatic-Module-Name>org.chocosolver</Automatic-Module-Name>
-                        </manifestEntries>
-                    </archive>
-                    <finalName>${project.artifactId}-${project.version}-no-dep</finalName>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
-                <executions>
-                    <execution>
-                        <id>make-assembly</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <descriptors>
-                                <descriptor>./src/assembly/with-dep.xml</descriptor>
-                            </descriptors>
-                            <finalName>${project.artifactId}-${project.version}</finalName>
-                            <appendAssemblyId>false</appendAssemblyId>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -345,4 +284,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
