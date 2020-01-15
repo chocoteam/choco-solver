@@ -22,7 +22,6 @@ import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.solver.variables.view.OffsetView;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -41,7 +40,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  */
 public class Task {
     // TODO : add a height IntVar variable (with associated constructors and all --> 0 if not specified)
-    // TODO : change IIntConstraintFactory and cumulative constraints accordingly ???
+    // TODO : change IIntConstraintFactory and cumulative constraints accordingly ??? (with hieght)
 
     //***********************************************************************************
     // VARIABLES
@@ -137,15 +136,21 @@ public class Task {
     }
 
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
-        for(int p = 0; p<s.getNbViews(); p++) {
-            IView view = s.getView(p);
-            if(view instanceof OffsetView) {
-                OffsetView offsetView = (OffsetView) view;
-                if(offsetView.cste == d && offsetView.equals(e)) {
-                    return true;
-                }
+        if(e instanceof OffsetView) {
+            OffsetView offsetView = (OffsetView) e;
+            if(offsetView.cste == d && offsetView.equals(e)) {
+                return true;
             }
         }
+//        for(int p = 0; p<s.getNbViews(); p++) {
+//            IView view = s.getView(p);
+//            if(view instanceof OffsetView) {
+//                OffsetView offsetView = (OffsetView) view;
+//                if(offsetView.cste == d && offsetView.equals(e)) {
+//                    return true;
+//                }
+//            }
+//        }
         return false;
     }
 
@@ -192,6 +197,10 @@ public class Task {
 
     public IntVar getEnd() {
         return end;
+    }
+
+    public IVariableMonitor<IntVar> getMonitor() {
+        return update;
     }
 
     private static void doExplain(IntVar S, IntVar D, IntVar E,

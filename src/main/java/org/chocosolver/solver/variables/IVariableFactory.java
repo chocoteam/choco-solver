@@ -470,84 +470,88 @@ public interface IVariableFactory extends ISelf<Model> {
     //*************************************************************************************
 
     /**
-     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
-     * such that: s + p = e, where <i>e</i> is the ending time.
+     * Creates a task variable, based on a starting time <i>s</i> and a duration <i>d</i>
+     * such that: s + d = e, where <i>e</i> is the ending time.
      *
      * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
      * this will not be done automatically.
      *
      * @param s integer variable, starting time
-     * @param p fixed processing time
+     * @param d fixed duration
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, int p) {
-        return new Task(s, p);
+    default Task taskVar(IntVar s, int d) {
+        return new Task(s, d);
     }
 
     /**
-     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
-     * such that: s + p = e, where <i>e</i> is the ending time.
+     * Creates a task variable, based on a starting time <i>s</i> and a duration <i>d</i>
+     * such that: s + d = e, where <i>e</i> is the ending time.
      *
      * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
      * this will not be done automatically.
      *
      * @param s integer variable, starting time
-     * @param p integer variable, processing time
+     * @param d integer variable, duration
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p) {
-        int[] bounds = VariableUtils.boundsForAddition(s, p);
-        IntVar end = ref().intVar(bounds[0], bounds[1]);
-        return new Task(s, p, end);
+    default Task taskVar(IntVar s, IntVar d) {
+        if(d.isInstantiated()) {
+            return new Task(s, d, ref().intOffsetView(s, d.getValue()));
+        } else {
+            int[] bounds = VariableUtils.boundsForAddition(s, d);
+            IntVar end = ref().intVar(bounds[0], bounds[1]);
+            return new Task(s, d, end);
+        }
     }
 
     /**
-     * Creates a task variable, based on a starting time <i>s</i> and a processing time <i>p</i>
-     * such that: s + p = e, where <i>e</i> is the ending time.
+     * Creates a task variable, based on a starting time <i>s</i> and a duration <i>d</i>
+     * such that: s + d = e, where <i>e</i> is the ending time.
      *
      * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
      * this will not be done automatically.
      *
      * @param s integer variable, starting time
-     * @param p fixed processing time
+     * @param d fixed duration
      * @param e integer variable, ending time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, int p, IntVar e) {
-        return new Task(s, p, e);
+    default Task taskVar(IntVar s, int d, IntVar e) {
+        return new Task(s, d, e);
     }
 
     /**
      * Creates a task variable, made of a starting time <i>s</i>,
-     * a processing time <i>p</i> and an ending time <i>e</i> such that: s + p = e.
+     * a duration <i>d</i> and an ending time <i>e</i> such that: s + d = e.
      *
      * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
      * this will not be done automatically.
      *
      * @param s integer variable, starting time
-     * @param p integer variable, processing time
+     * @param d integer variable, duration
      * @param e integer variable, ending time
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p, IntVar e) {
-        return taskVar(s, p, e, true);
+    default Task taskVar(IntVar s, IntVar d, IntVar e) {
+        return taskVar(s, d, e, true);
     }
 
     /**
      * Creates a task variable, made of a starting time <i>s</i>,
-     * a processing time <i>p</i> and an ending time <i>e</i> such that: s + p = e.
+     * a duration <i>d</i> and an ending time <i>e</i> such that: s + d = e.
      *
      * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
      * this will not be done automatically.
      *
      * @param s integer variable, starting time
-     * @param p integer variable, processing time
+     * @param d integer variable, duration
      * @param e integer variable, ending time
      * @param declareMonitor boolean parameter indicating if a TaskMonitor should be declared (if several Task share the same starting, processing and ending variables, there is no need to declare several TaskMonitor)
      * @return a task variable.
      */
-    default Task taskVar(IntVar s, IntVar p, IntVar e, boolean declareMonitor) {
-        return new Task(s, p, e, declareMonitor);
+    default Task taskVar(IntVar s, IntVar d, IntVar e, boolean declareMonitor) {
+        return new Task(s, d, e, declareMonitor);
     }
 
     /**
