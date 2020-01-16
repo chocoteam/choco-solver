@@ -36,16 +36,14 @@ public class PropDiffN extends Propagator<IntVar> {
     private int n;
     private UndirectedGraph overlappingBoxes;
     private TIntArrayList boxesToCompute;
-    private boolean fast;
     private TIntArrayList pruneList;
 
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
 
-    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy, boolean fast) {
+    public PropDiffN(IntVar[] x, IntVar[] y, IntVar[] dx, IntVar[] dy) {
         super(ArrayUtils.append(x, y, dx, dy), PropagatorPriority.LINEAR, true);
-        this.fast = fast;
         n = x.length;
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new SolverException("PropDiffN variable arrays do not have same size");
@@ -68,9 +66,6 @@ public class PropDiffN extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int idx) {
-        if (fast) {
-            return IntEventType.instantiation();
-        }
         return IntEventType.boundAndInst();
     }
 
@@ -209,8 +204,9 @@ public class PropDiffN extends Propagator<IntVar> {
                     }
                     hasFiltered = true;
                 }
-                if(vars[i + offSet].updateUpperBound(s_j - vars[i + 2 * n + offSet].getLB(), this)
-                    || vars[i + offSet + 2 * n].updateUpperBound(s_j - vars[i + offSet].getLB(), this)) {
+                boolean filtPrun1 = vars[i + offSet].updateUpperBound(s_j - vars[i + 2 * n + offSet].getLB(), this);
+                boolean filtPrun2 = vars[i + offSet + 2 * n].updateUpperBound(s_j - vars[i + offSet].getLB(), this);
+                if(filtPrun1 || filtPrun2) {
                     if(!pruneList.contains(i)) {
                         pruneList.add(i);
                     }
@@ -224,8 +220,9 @@ public class PropDiffN extends Propagator<IntVar> {
                     }
                     hasFiltered = true;
                 }
-                if(vars[j + offSet].updateUpperBound(s_i - vars[j + 2 * n + offSet].getLB(), this)
-                    || vars[j + offSet + 2 * n].updateUpperBound(s_i - vars[j + offSet].getLB(), this)) {
+                boolean filtPrun1 = vars[j + offSet].updateUpperBound(s_i - vars[j + 2 * n + offSet].getLB(), this);
+                boolean filtPrun2 = vars[j + offSet + 2 * n].updateUpperBound(s_i - vars[j + offSet].getLB(), this);
+                if(filtPrun1 || filtPrun2) {
                     if(!pruneList.contains(j)) {
                         pruneList.add(j);
                     }
