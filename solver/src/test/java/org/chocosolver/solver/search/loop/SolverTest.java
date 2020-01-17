@@ -275,6 +275,7 @@ public class SolverTest {
                 }
             }
             search = solver.moveBackward();
+            dec = strategy.getDecision();
         }
         return sol;
     }
@@ -301,5 +302,17 @@ public class SolverTest {
         IntStrategy strategy = inputOrderLBSearch(x1, x2);
         Assert.assertEquals(0, countSolutions(solver, strategy));
     }
+
+
+    @Test(groups = "1s")
+            public void testMoves3() {
+            Model model = new Model();
+            IntVar x1 = model.intVar("x1", 0, 2);
+            IntVar x2 = model.intVar("x2", 4, 5);
+            x1.eq(x2).post();
+            Solver solver = model.getSolver();
+            IntStrategy strategy = inputOrderLBSearch(x1, x2);
+            Assert.assertEquals(0, countSolutions(solver, strategy));
+        }
 
 }

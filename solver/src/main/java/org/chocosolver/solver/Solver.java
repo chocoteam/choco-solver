@@ -689,6 +689,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *         }
      *     }
      *     search = solver.moveBackward();
+     *     dec = strategy.getDecision();
      * }
      * }</pre>
      *
@@ -754,6 +755,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *         }
      *     }
      *     search = solver.moveBackward();
+     *     dec = strategy.getDecision();
      * }
      * }</pre>
      *
