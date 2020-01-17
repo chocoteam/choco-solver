@@ -18,8 +18,12 @@ import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.*;
@@ -255,4 +259,47 @@ public class SolverTest {
         while (model.getSolver().solve()) ;
         assertEquals(r.getMeasures().getSolutionCount(), 4);
     }
+
+
+    private int countSolutions(Solver solver, AbstractStrategy<IntVar> strategy) {
+        Decision<IntVar> dec = null;
+        int sol = 0;
+        boolean search = true;
+        while(search) {
+            if (solver.moveForward(dec)) {
+                dec = strategy.getDecision();
+                if (dec == null) {
+                    sol++;
+                }else {
+                    continue;
+                }
+            }
+            search = solver.moveBackward();
+        }
+        return sol;
+    }
+
+    @Test(groups = "1s")
+    public void testMoves1() {
+        Model model = new Model();
+        IntVar x1 = model.intVar("x1", 0, 2);
+        IntVar x2 = model.intVar("x2", 0, 2);
+        x1.eq(x2).post();
+        Solver solver = model.getSolver();
+        IntStrategy strategy = inputOrderLBSearch(x1, x2);
+        Assert.assertEquals(3, countSolutions(solver, strategy));
+    }
+
+    @Test(groups = "1s")
+        public void testMoves2() {
+        Model model = new Model();
+        IntVar x1 = model.intVar("x1", 0, 2);
+        IntVar x2 = model.intVar("x2", 0, 2);
+        x1.ne(x2).post();
+        x1.eq(x2).post();
+        Solver solver = model.getSolver();
+        IntStrategy strategy = inputOrderLBSearch(x1, x2);
+        Assert.assertEquals(0, countSolutions(solver, strategy));
+    }
+
 }
