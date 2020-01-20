@@ -12,7 +12,6 @@ package org.chocosolver.solver.constraints.nary;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.*;
@@ -107,7 +106,6 @@ public class BitsIntChannelingTest {
         BoolVar[] bits = model.boolVarArray(8);
         IntVar var = model.intVar(-5, -1);
         model.bitsIntChanneling(bits, var).post();
-        assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.getSolver().solve());
     }
 
