@@ -1,0 +1,25 @@
+##########################################################################################
+# Customize file classifications.                                                        #
+# Results from files under any classifier will be excluded from LGTM                     #
+# statistics.                                                                            #
+##########################################################################################
+
+#########################################################################################
+# Use the extraction block to define changes to the default code extraction process     #
+# for one or more languages. The settings for each language are defined in a child      #
+# block, with one or more steps.                                                        #
+#########################################################################################
+
+extraction:
+  # Define settings for Java analysis
+  ####################################
+  java:
+    # The `index` step extracts information from the files in the codebase.
+    index:
+      # Specify the Java version required to build the project.
+      java_version: 11
+      # Specify Maven settings.
+      maven:
+        # Specify the required Maven version.
+        # Default: the Maven version is determined automatically, where feasible.
+        version: 3.5.2
