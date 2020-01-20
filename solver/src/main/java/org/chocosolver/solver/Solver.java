@@ -33,6 +33,7 @@ import org.chocosolver.solver.search.loop.propagate.PropagateBasic;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.trace.IOutputFactory;
@@ -652,6 +653,139 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             environment.worldPop();
         }
         dpath.synchronize();
+    }
+
+
+    /**
+     * <p>
+     * Move forward in the search space by adding a new decision.
+     * A call to this method will :
+     * <ol>
+     *     <li>add <i>dec</i> to the decision path</li>
+     *     <li>push a back-up copy of internal states</li>
+     *     <li>propagate</li>
+     * </ol>
+     *
+     * Steps 1. and 2. are ignored when <i>dec</i> is <i>null</i>.
+     *
+     * In case of success, a call {@link #moveForward(Decision)} is possible.
+     * Otherwise, a call {@link #moveBackward()} is required to keep on exploring the search space.
+     * If no such call is done, the state maybe inconsistent with the decision path.
+     * </p>
+     * <p>
+     * Example of usage: looking for all solutions of a problem.
+     * </p>
+     * <pre> {@code
+     * // Declare model, variables and constraints, then
+     * Decision<IntVar> dec = null;
+     * boolean search = true;
+     * while(search) {
+     *     if (solver.moveForward(dec)) {
+     *         dec = strategy.getDecision();
+     *         if (dec == null) {
+     *             // here a solution is found
+     *         }else {
+     *             continue;
+     *         }
+     *     }
+     *     search = solver.moveBackward();
+     *     dec = strategy.getDecision();
+     * }
+     * }</pre>
+     *
+     * @param decision decision to add, can be <i>null</i>.
+     * @return <i>true</i> if extension is successful, <i>false</i> otherwise.
+     * @see #moveBackward() 
+     * @see #getDecisionPath()
+     * @see AbstractStrategy#getDecision()
+     */
+    public boolean moveForward(Decision decision){
+        if(!engine.isInitialized()){
+            engine.initialize();
+        }
+        if(this.getEnvironment().getWorldIndex()==0){
+            this.getEnvironment().worldPush();
+        }
+        boolean success = true;
+        if (decision != null) { // null means there is no more decision
+            this.getDecisionPath().pushDecision(decision);
+            this.getEnvironment().worldPush();
+            this.getDecisionPath().buildNext();
+        }
+        try{
+            this.getDecisionPath().apply();
+            this.getObjectiveManager().postDynamicCut();
+            this.getEngine().propagate();
+        }catch (ContradictionException cex){
+            engine.flush();
+            success = false;
+        }
+        return success;
+    }
+
+    /**
+     * <p></p>
+     * Move backward in the search space.
+     * A call to this method will :
+     * <ol>
+     *     <li>pop the last copy of internal states</li>
+     *     <li>refute the last decision of the decision path</li>
+     *     <li>propagate</li>
+     * </ol>
+     * If step 2. is not possible or step 3. throws a failure,
+     * the last decision of the decision path is popped and the three-step loop is applied
+     * until a successful refutation or emptying decision path.
+     *
+     * In case of success, a call {@link #moveForward(Decision)} is possible.
+     * </p>
+     * <p>
+     * Example of usage: looking for all solutions of a problem.
+     * </p>
+     <pre> {@code
+     * // Declare model, variables and constraints, then
+     * Decision<IntVar> dec = null;
+     * boolean search = true;
+     * while(search) {
+     *     if (solver.moveForward(dec)) {
+     *         dec = strategy.getDecision();
+     *         if (dec == null) {
+     *             // here a solution is found
+     *         }else {
+     *             continue;
+     *         }
+     *     }
+     *     search = solver.moveBackward();
+     *     dec = strategy.getDecision();
+     * }
+     * }</pre>
+     *
+     * @return <i>true</i> in case of success, <i>false</i> otherwise
+     * @see #moveForward(Decision)
+     * @see #getDecisionPath() 
+     */
+    public boolean moveBackward(){
+        this.getEnvironment().worldPop();
+        boolean success = false;
+        Decision head = dpath.getLastDecision();
+        while (!success && head.getPosition() > 0) {
+            if (head.hasNext()) {
+                this.getEnvironment().worldPush();
+                this.getDecisionPath().buildNext();
+                try {
+                    this.getDecisionPath().apply();
+                    this.getObjectiveManager().postDynamicCut();
+                    this.getEngine().propagate();
+                    success = true;
+                }catch (ContradictionException cex) {
+                    engine.flush();
+                }
+            } else {
+                dpath.synchronize();
+                this.getEnvironment().worldPop();
+            }
+            head = dpath.getLastDecision();
+        }
+        return success;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
