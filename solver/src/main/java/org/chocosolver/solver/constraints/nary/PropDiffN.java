@@ -95,7 +95,7 @@ public class PropDiffN extends Propagator<IntVar> {
         while(hasFiltered) {
             hasFiltered = false;
             if(PropagatorEventType.isFullPropagation(evtmask)) {
-                boxesToCompute.clear();
+                boxesToCompute.resetQuick();
                 for (int i = 0; i < n; i++) {
                     boxesToCompute.add(i);
                     for (int j = i + 1; j < n; j++) {
