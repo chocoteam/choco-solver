@@ -41,10 +41,8 @@ sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  README.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  MINIZINC.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  XCSP3.md
-sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  JSON.md
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/fzn-exec.sh
 sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/xcsp3-exec
-sedInPlace "s%choco-parsers-.*-with-dependencies.jar%choco-parsers-${VERSION}-with-dependencies.jar%"  ./src/main/bash/json-exec.sh
 #Update the poms:wq
 mvn versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false || quit "unable to set new version"
 mvn license:format || quit "unable to format the license"

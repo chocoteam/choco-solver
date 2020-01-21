@@ -10,7 +10,7 @@
 package org.chocosolver.parser;
 
 import org.chocosolver.parser.flatzinc.ChocoFZN;
-import org.chocosolver.parser.json.ChocoJSON;
+import org.chocosolver.parser.mps.ChocoMPS;
 import org.chocosolver.parser.xcsp.ChocoXCSP;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
@@ -33,8 +33,7 @@ public class Parser {
             "0: automatic -- based on file name extension (compression is allowed), " +
             "1: FlatZinc (.fzn)," +
             "2: XCSP3 (.xml)," +
-            "3: MPS (.mps)," +
-            "4: JSON (.json).")
+            "3: MPS (.mps)")
     private int pa = 0;
 
     public static void main(String[] args) throws Exception {
@@ -62,17 +61,16 @@ public class Parser {
         }
         if (pa == 0) {
             String[] parts = instance.split("\\.");
-            int i = parts.length - 1;
-            while (i >= 0) {
-                if (parts[i].equals("fzn")) {
+            for (String part : parts) {
+                if (part.equals("fzn")) {
                     pa = 1;
                     break;
                 }
-                if (parts[i].equals("xml")) {
+                if (part.equals("xml")) {
                     pa = 2;
                     break;
                 }
-                if (parts[i].equals("json")) {
+                if (part.equals("mps")) {
                     pa = 3;
                     break;
                 }
@@ -85,7 +83,7 @@ public class Parser {
                     ChocoXCSP.main(args);
                     break;
                 case 3:
-                    ChocoJSON.main(args);
+                    ChocoMPS.main(args);
                     break;
             }
         }
