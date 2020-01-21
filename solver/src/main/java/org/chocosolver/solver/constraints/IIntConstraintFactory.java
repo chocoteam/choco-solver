@@ -910,11 +910,26 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <br/>
      * The upper bound of var is given by 2<sup>n</sup>, where n is the size of the array bits.
      *
+     * @implNote This constraint is transformed into a table constraint
      * @param bits the array of bits
      * @param var  the numeric value
+     * @see #table(IntVar[], Tuples)
      */
     default Constraint bitsIntChanneling(BoolVar[] bits, IntVar var) {
-        return new Constraint(ConstraintsName.BITSINTCHANNELING, new PropBitChanneling(var, bits));
+        int s = bits.length;
+        int max = (int) Math.pow(2, s) - 1;
+        Tuples tuples = new Tuples(true);
+        for(int v = 0; v <= max; v++){
+            if(var.contains(v)) {
+                int[] t = new int[s + 1];
+                for (int b = 0; b < s; b++) {
+                    t[b] = ((v >>> b) & 1) != 0 ? 1 : 0;
+                }
+                t[s] = v;
+                tuples.add(t);
+            }
+        }
+        return table(ArrayUtils.append(bits, new IntVar[]{var}), tuples);
     }
 
     /**

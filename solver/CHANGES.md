@@ -13,11 +13,12 @@ Multi-modules and JPMS-ready.
 - Default AC algorithm for `AllDifferent` is now from IJCAI-18 "A Fast Algorithm for Generalized Arc Consistency of the Alldifferent Constraint", Zhang et al. (#644)
 - LNS can now be defined with a solution as bootstrap.
 - Add simplify API for current Solver operations (#659)
+- Remove JSON writer/parser (which was actually partially supported and not maintained)
 
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
-\#617, #633, #639, #646, #647, #648
+\#617, #633, #639, #646, #647, #648, #658
 
 4.10.2 - 14 Oct 2019
 -------------------
