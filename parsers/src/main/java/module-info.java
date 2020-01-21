@@ -20,12 +20,10 @@ module org.chocosolver.parsers {
     requires choco.geost;
     requires xcsp3.tools;
     requires args4j;
-    requires gson;
     requires java.sql;
     requires antlr4.runtime;
     requires trove4j;
     
     opens org.chocosolver.parser to args4j;
     opens org.chocosolver.parser.mps to args4j;
-    opens org.chocosolver.parser.json to testng;
 }
