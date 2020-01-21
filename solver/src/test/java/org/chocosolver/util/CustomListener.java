@@ -12,6 +12,9 @@ package org.chocosolver.util;
 import org.testng.ITestResult;
 import org.testng.TestListenerAdapter;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
+
 /**
  * <br/>
  *
@@ -20,11 +23,20 @@ import org.testng.TestListenerAdapter;
  * @since 20/08/2014
  */
 public class CustomListener extends TestListenerAdapter {
-    private int m_count = 0;
+
+    PrintStream original = System.out;
+    PrintStream fake = new PrintStream(new OutputStream() {
+        public void write(int b) {
+            //DO NOTHING
+        }
+    });
+
 
     @Override
     public void onTestStart(ITestResult tr) {
         System.out.print(String.format("\t%s.%s ..", tr.getTestClass().getName(), tr.getName()));
+        original = System.out;
+        System.setOut(fake);
     }
 
     @Override
@@ -43,10 +55,8 @@ public class CustomListener extends TestListenerAdapter {
     }
 
     private void log(ITestResult tr, String RESULT) {
+        System.setOut(original);
         System.out.print(String.format(".. %s (%dms)\n", RESULT, tr.getEndMillis() - tr.getStartMillis()));
-        if (++m_count % 40 == 0) {
-            System.out.println("");
-        }
     }
 
 }
