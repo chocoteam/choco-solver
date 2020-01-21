@@ -534,24 +534,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @return a task variable.
      */
     default Task taskVar(IntVar s, IntVar d, IntVar e) {
-        return taskVar(s, d, e, true);
-    }
-
-    /**
-     * Creates a task variable, made of a starting time <i>s</i>,
-     * a duration <i>d</i> and an ending time <i>e</i> such that: s + d = e.
-     *
-     * A call to {@link Task#ensureBoundConsistency()} is required before launching the resolution,
-     * this will not be done automatically.
-     *
-     * @param s integer variable, starting time
-     * @param d integer variable, duration
-     * @param e integer variable, ending time
-     * @param declareMonitor boolean parameter indicating if a TaskMonitor should be declared (if several Task share the same starting, processing and ending variables, there is no need to declare several TaskMonitor)
-     * @return a task variable.
-     */
-    default Task taskVar(IntVar s, IntVar d, IntVar e, boolean declareMonitor) {
-        return new Task(s, d, e, declareMonitor);
+        return new Task(s, d, e);
     }
 
     /**

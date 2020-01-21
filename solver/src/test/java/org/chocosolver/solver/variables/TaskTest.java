@@ -172,7 +172,7 @@ public class TaskTest {
     }
 
     private void specificToTask(Model m) {
-        // Task(Model model, int est, int lst, int p, int ect, int lct)
+        // Task(Model model, int est, int lst, int d, int ect, int lct)
         Task t1 = new Task(m, 0, 10, 2, 0, 10);
         Assert.assertTrue(hasTaskMonitor(t1));
         Task t2 = new Task(m, 0, 10, 2, 2, 12);
@@ -180,10 +180,10 @@ public class TaskTest {
     }
 
     private void specificToIVariableFactory(Model m) {
-        // taskVar(IntVar s, IntVar p)
+        // taskVar(IntVar s, IntVar d)
         IntVar s = m.intVar(0, 10);
-        IntVar p = m.intVar(1,5);
-        Task t1 = m.taskVar(s, p);
+        IntVar d = m.intVar(1,5);
+        Task t1 = m.taskVar(s, d);
         Assert.assertTrue(hasTaskMonitor(t1));
 
         Task t2 = m.taskVar(s, m.intVar(2));
@@ -232,25 +232,19 @@ public class TaskTest {
         Assert.assertFalse(hasTaskMonitor(t10));
 
         // Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor)
-        Task t11 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10), true);
-        Task t12 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10), true);
+        Task t11 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
+        Task t12 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
         Assert.assertTrue(sameTaskVars(t11, t12));
         Assert.assertTrue(hasTaskMonitor(t11));
         Assert.assertTrue(hasTaskMonitor(t12));
 
-        Task t13 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10), false);
-        Task t14 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10), false);
+        IntVar s13 = m.intVar(0, 10);
+        Task t13 = new Task(s13, m.intVar(d), m.intOffsetView(s13, d));
+        IntVar s14 = m.intVar(0, 10);
+        Task t14 = m.taskVar(s14, m.intVar(d), m.intOffsetView(s14, d));
         Assert.assertTrue(sameTaskVars(t13, t14));
         Assert.assertFalse(hasTaskMonitor(t13));
         Assert.assertFalse(hasTaskMonitor(t14));
-
-        IntVar s15 = m.intVar(0, 10);
-        Task t15 = new Task(s15, m.intVar(d), m.intOffsetView(s15, d), true);
-        IntVar s16 = m.intVar(0, 10);
-        Task t16 = m.taskVar(s16, m.intVar(d), m.intOffsetView(s16, d), true);
-        Assert.assertTrue(sameTaskVars(t15, t16));
-        Assert.assertFalse(hasTaskMonitor(t15));
-        Assert.assertFalse(hasTaskMonitor(t16));
     }
 
     @Test(groups = "1s", timeOut=60000)
@@ -259,14 +253,11 @@ public class TaskTest {
 
         /* Task specific constructors */
         specificToTask(m);
-
         /* Constructing methods in common between Task and IVariableFactory */
         inCommon(m);
-
         /* IVariableFactory specific constructors */
         specificToIVariableFactory(m);
     }
-
 
 }
 

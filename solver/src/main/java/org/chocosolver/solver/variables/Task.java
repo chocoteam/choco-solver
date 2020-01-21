@@ -53,20 +53,20 @@ public class Task {
 
     /**
      * Container representing a task:
-     * It ensures that: start + duration = end, end being an offset view of start + d.
+     * It ensures that: start + duration = end, end being an offset view of start + duration.
      *
      * @param model the Model of the variables
      * @param est earliest starting time
      * @param lst latest starting time
-     * @param p processing time
+     * @param d duration
      * @param ect earliest completion time
      * @param lct latest completion time time
      */
-    public Task(Model model, int est, int lst, int p, int ect, int lct) {
+    public Task(Model model, int est, int lst, int d, int ect, int lct) {
         start = model.intVar(est, lst);
-        duration = model.intVar(p);
-        if(ect == est+p && lct == lst+p) {
-            end = start.getModel().intOffsetView(start, p);
+        duration = model.intVar(d);
+        if(ect == est+d && lct == lst+d) {
+            end = start.getModel().intOffsetView(start, d);
         } else {
             end = model.intVar(ect, lct);
             declareMonitor();
@@ -75,7 +75,7 @@ public class Task {
 
     /**
      * Container representing a task:
-     * It ensures that: start + duration = end, end being an offset view of start + d.
+     * It ensures that: start + duration = end, end being an offset view of start + duration.
      *
      * @param s start variable
      * @param d duration value
@@ -88,7 +88,7 @@ public class Task {
 
     /**
      * Container representing a task:
-     * It ensures that: start + duration = end, end being an offset view of start + d.
+     * It ensures that: start + duration = end, end being an offset view of start + duration.
      *
      * @param s start variable
      * @param d duration value
@@ -112,18 +112,15 @@ public class Task {
      * @param e end variable
      */
     public Task(IntVar s, IntVar d, IntVar e) {
-        this(s, d, e, true);
+        start = s;
+        duration = d;
+        end = e;
+        if(!d.isInstantiated() || !isOffsetView(s, d.getValue(), e)) {
+            declareMonitor();
+        }
     }
 
-    /**
-     * Container representing a task:
-     * It ensures that: start + duration = end
-     *
-     * @param s start variable
-     * @param d duration variable
-     * @param e end variable
-     * @param declareMonitor boolean parameter indicating if a TaskMonitor should be declared
-     */
+    @Deprecated
     public Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor) {
         start = s;
         duration = d;
@@ -136,19 +133,8 @@ public class Task {
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
         if(e instanceof OffsetView) {
             OffsetView offsetView = (OffsetView) e;
-            if(offsetView.cste == d && offsetView.equals(e)) {
-                return true;
-            }
+            return offsetView.cste == d && offsetView.getVariable().equals(s);
         }
-//        for(int p = 0; p<s.getNbViews(); p++) {
-//            IView view = s.getView(p);
-//            if(view instanceof OffsetView) {
-//                OffsetView offsetView = (OffsetView) view;
-//                if(offsetView.cste == d && offsetView.equals(e)) {
-//                    return true;
-//                }
-//            }
-//        }
         return false;
     }
 
@@ -202,9 +188,9 @@ public class Task {
     }
 
     private static void doExplain(IntVar S, IntVar D, IntVar E,
-                                  ExplanationForSignedClause clause,
-                                  ValueSortedMap<IntVar> front,
-                                  Implications ig, int p) {
+        ExplanationForSignedClause clause,
+        ValueSortedMap<IntVar> front,
+        Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
         IntIterableRangeSet dom;
         dom = clause.getComplementSet(S);
@@ -268,8 +254,8 @@ public class Task {
 
         @Override
         public void explain(ExplanationForSignedClause clause,
-                            ValueSortedMap<IntVar> front,
-                            Implications ig, int p) {
+            ValueSortedMap<IntVar> front,
+            Implications ig, int p) {
             doExplain(S, D, E, clause, front, ig, p);
         }
 
