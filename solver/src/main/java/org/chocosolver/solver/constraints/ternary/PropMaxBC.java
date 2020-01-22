@@ -59,6 +59,12 @@ public class PropMaxBC extends Propagator<IntVar> {
                 change |= vars[2].updateLowerBound(vars[0].getLB(), this);
             }
         } while (change);
+        if(vars[0].isInstantiated()){
+            int bst = vars[0].getValue();
+            if(vars[1].isInstantiatedTo(bst) || vars[2].isInstantiatedTo(bst)){
+                setPassive();
+            }
+        }
     }
 
     @Override
