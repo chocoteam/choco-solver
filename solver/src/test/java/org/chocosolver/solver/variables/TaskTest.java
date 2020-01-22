@@ -12,7 +12,9 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.view.OffsetView;
 import org.chocosolver.util.ESat;
+import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -147,8 +149,7 @@ public class TaskTest {
      * @return if an overlapping exists between the tasks
      */
     private boolean collide(Task one, Task two) {
-        return one.getStart().getValue() < two.getEnd().getValue() &&
-                one.getEnd().getValue() > two.getStart().getValue();
+        return one.getStart().getValue() < two.getEnd().getValue() && one.getEnd().getValue() > two.getStart().getValue();
     }
 
     private void checkVariable(IntVar var, int lb, int ub) {
@@ -156,6 +157,107 @@ public class TaskTest {
         assertEquals(var.getUB(), ub);
     }
 
+    ///////////////////////////////////////////////////////////////
+    /////////////////    Task constructors test    ////////////////
+    ///////////////////////////////////////////////////////////////
+
+    private static boolean sameTaskVars(Task t1, Task t2) {
+        return t1.getStart().getLB() == t2.getStart().getLB() && t1.getStart().getUB() == t2.getStart().getUB()
+            && t1.getDuration().getLB() == t2.getDuration().getLB() && t1.getDuration().getUB() == t2.getDuration().getUB()
+            && t1.getEnd().getLB() == t2.getEnd().getLB() && t1.getEnd().getUB() == t2.getEnd().getUB();
+    }
+
+    private static boolean hasTaskMonitor(Task task) {
+        return task.getMonitor() != null;
+    }
+
+    private void specificToTask(Model m) {
+        // Task(Model model, int est, int lst, int d, int ect, int lct)
+        Task t1 = new Task(m, 0, 10, 2, 0, 10);
+        Assert.assertTrue(hasTaskMonitor(t1));
+        Task t2 = new Task(m, 0, 10, 2, 2, 12);
+        Assert.assertFalse(hasTaskMonitor(t2));
+    }
+
+    private void specificToIVariableFactory(Model m) {
+        // taskVar(IntVar s, IntVar d)
+        IntVar s = m.intVar(0, 10);
+        IntVar d = m.intVar(1,5);
+        Task t1 = m.taskVar(s, d);
+        Assert.assertTrue(hasTaskMonitor(t1));
+
+        Task t2 = m.taskVar(s, m.intVar(2));
+        Assert.assertTrue(t2.getEnd() instanceof OffsetView);
+        Assert.assertFalse(hasTaskMonitor(t2));
+    }
+
+    private void inCommon(Model m) {
+        int d = 2;
+
+        // Task(IntVar s, int d)
+        Task t1 = new Task(m.intVar(0, 10), d);
+        Task t2 = m.taskVar(m.intVar(0, 10), d);
+        Assert.assertTrue(sameTaskVars(t1, t2));
+        Assert.assertFalse(hasTaskMonitor(t1));
+        Assert.assertFalse(hasTaskMonitor(t2));
+
+        // Task(IntVar s, int d, IntVar e)
+        Task t3 = new Task(m.intVar(0, 10), d, m.intVar(0, 10));
+        Task t4 = m.taskVar(m.intVar(0, 10), d, m.intVar(0, 10));
+        Assert.assertTrue(sameTaskVars(t3, t4));
+        Assert.assertTrue(hasTaskMonitor(t3));
+        Assert.assertTrue(hasTaskMonitor(t4));
+
+        IntVar s5 = m.intVar(0, 10);
+        Task t5 = new Task(s5, d, m.intOffsetView(s5, d));
+        IntVar s6 = m.intVar(0, 10);
+        Task t6 = m.taskVar(s6, d, m.intOffsetView(s6, d));
+        Assert.assertTrue(sameTaskVars(t5, t6));
+        Assert.assertFalse(hasTaskMonitor(t5));
+        Assert.assertFalse(hasTaskMonitor(t6));
+
+        // Task(IntVar s, IntVar d, IntVar e)
+        Task t7 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
+        Task t8 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
+        Assert.assertTrue(sameTaskVars(t7, t8));
+        Assert.assertTrue(hasTaskMonitor(t7));
+        Assert.assertTrue(hasTaskMonitor(t8));
+
+        IntVar s9 = m.intVar(0, 10);
+        Task t9 = new Task(s9, m.intVar(d), m.intOffsetView(s9, d));
+        IntVar s10 = m.intVar(0, 10);
+        Task t10 = m.taskVar(s10, m.intVar(d), m.intOffsetView(s10, d));
+        Assert.assertTrue(sameTaskVars(t9, t10));
+        Assert.assertFalse(hasTaskMonitor(t9));
+        Assert.assertFalse(hasTaskMonitor(t10));
+
+        // Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor)
+        Task t11 = new Task(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
+        Task t12 = m.taskVar(m.intVar(0, 10), m.intVar(1, 5), m.intVar(0, 10));
+        Assert.assertTrue(sameTaskVars(t11, t12));
+        Assert.assertTrue(hasTaskMonitor(t11));
+        Assert.assertTrue(hasTaskMonitor(t12));
+
+        IntVar s13 = m.intVar(0, 10);
+        Task t13 = new Task(s13, m.intVar(d), m.intOffsetView(s13, d));
+        IntVar s14 = m.intVar(0, 10);
+        Task t14 = m.taskVar(s14, m.intVar(d), m.intOffsetView(s14, d));
+        Assert.assertTrue(sameTaskVars(t13, t14));
+        Assert.assertFalse(hasTaskMonitor(t13));
+        Assert.assertFalse(hasTaskMonitor(t14));
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testingTaskConstructors() {
+        Model m = new Model();
+
+        /* Task specific constructors */
+        specificToTask(m);
+        /* Constructing methods in common between Task and IVariableFactory */
+        inCommon(m);
+        /* IVariableFactory specific constructors */
+        specificToIVariableFactory(m);
+    }
 
 }
 
