@@ -1220,8 +1220,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Model model = X[0].getModel();
         Constraint diffNCons = new Constraint(
                 ConstraintsName.DIFFN,
-                new PropDiffN(X, Y, width, height, false),
-                new PropDiffN(X, Y, width, height, false)
+                new PropDiffN(X, Y, width, height)
         );
         if (addCumulativeReasoning) {
             IntVar[] EX = new IntVar[X.length];
