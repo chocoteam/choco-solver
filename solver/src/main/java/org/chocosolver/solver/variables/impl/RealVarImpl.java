@@ -14,11 +14,16 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.RealEventType;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.RealInterval;
+
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  * An implementation of RealVar, variable for continuous constraints (solved using IBEX).
@@ -45,6 +50,18 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
+    public void silentlyAssign(RealInterval bounds) {
+        this.LB.set(bounds.getLB());
+        this.UB.set(bounds.getUB());
+    }
+
+    @Override
+    public void silentlyAssign(double lb, double ub) {
+        this.LB.set(lb);
+        this.UB.set(ub);
+    }
+
+    @Override
     public double getLB() {
         return LB.get();
     }
@@ -52,6 +69,16 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public double getUB() {
         return UB.get();
+    }
+
+    @Override
+    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
+        intersect(interval.getLB(), interval.getUB(), cause);
+    }
+
+    @Override
+    public void intersect(double l, double u, ICause cause) throws ContradictionException {
+        updateBounds(l, u, cause);
     }
 
     @Override
@@ -163,5 +190,33 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public String toString() {
         return String.format("%s = [%.16f .. %.16f]", name, getLB(), getUB());
+    }
+
+    @Override
+    public void tighten() {
+    }
+
+    @Override
+    public void project(ICause cause) throws ContradictionException {
+    }
+
+    @Override
+    public void collectVariables(TreeSet<RealVar> set) {
+        set.add(this);
+    }
+
+    @Override
+    public void subExps(List<CArExpression> list) {
+        list.add(this);
+    }
+
+    @Override
+    public boolean isolate(RealVar var, List<CArExpression> wx, List<CArExpression> wox) {
+        return var == this;
+    }
+
+    @Override
+    public void init() {
+        // void
     }
 }

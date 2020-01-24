@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
@@ -23,7 +24,11 @@ import org.chocosolver.solver.variables.events.RealEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.RealInterval;
 import org.chocosolver.util.objects.ValueSortedMap;
+
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  * <br/>
@@ -82,6 +87,20 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
+    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
+        intersect(interval.getLB(), interval.getUB(), cause);
+    }
+
+    @Override
+    public void intersect(double l, double u, ICause cause) throws ContradictionException {
+        var.updateBounds(
+                (int) Math.ceil(l),
+                (int) Math.floor(u),
+                cause
+        );
+    }
+
+    @Override
     public boolean updateLowerBound(double value, ICause cause) throws ContradictionException {
         if (var.updateLowerBound((int) Math.ceil(value - precision), this)) {
             super.notifyPropagators(RealEventType.INCLOW, cause);
@@ -125,6 +144,16 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
+    public void silentlyAssign(RealInterval bounds) {
+        silentlyAssign(bounds.getLB(), bounds.getUB());
+    }
+
+    @Override
+    public void silentlyAssign(double l, double u) {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
     public boolean isInstantiated() {
         return var.isInstantiated();
     }
@@ -163,5 +192,35 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     @Override
     public int getTypeAndKind() {
         return VIEW | REAL;
+    }
+
+    @Override
+    public void tighten() {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
+    public void project(ICause cause) throws ContradictionException {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
+    public void collectVariables(TreeSet<RealVar> set) {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
+    public void subExps(List<CArExpression> list) {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
+    public boolean isolate(RealVar var, List<CArExpression> wx, List<CArExpression> wox) {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
+    }
+
+    @Override
+    public void init() {
+        throw new UnsupportedOperationException("Consider using a constraint instead of a view. See: model.eq(RealVar, IntVar)");
     }
 }

@@ -10,6 +10,7 @@
 package org.chocosolver.solver.expression.continuous.relational;
 
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.BoolVar;
 
 /**
  * relational expression over continuous variables
@@ -60,4 +61,30 @@ public interface CReExpression {
      * creates additional variables and posts additional constraints.
      */
     Constraint ibex(double p);
+
+    Constraint equation();
+
+    /**
+     * Posts this as an equation, ie calling {@link #equation()}  first
+     * and {@link Constraint#post()}.
+     */
+    default void post(){
+        equation().post();
+    }
+
+    /**
+     * Reifies this as an equation, ie calling {@link #equation()}  first
+     * and {@link Constraint#reify()}.
+     */
+    default BoolVar reify() {
+        return equation().reify();
+    }
+
+    /**
+     * Reifies this as an equation, ie calling {@link #equation()}  first
+     * and {@link Constraint#reifyWith(BoolVar)}.
+     */
+    default void reifyWith(BoolVar bool) {
+        equation().reifyWith(bool);
+    }
 }

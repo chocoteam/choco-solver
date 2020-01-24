@@ -9,10 +9,16 @@
  */
 package org.chocosolver.solver.expression.continuous.arithmetic;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.relational.BiCReExpression;
 import org.chocosolver.solver.expression.continuous.relational.CReExpression;
 import org.chocosolver.solver.variables.RealVar;
+import org.chocosolver.util.objects.RealInterval;
+
+import java.util.List;
+import java.util.TreeSet;
 
 /**
  *
@@ -23,7 +29,7 @@ import org.chocosolver.solver.variables.RealVar;
  * @author Charles Prud'homme
  * @since 28/04/2016.
  */
-public interface CArExpression {
+public interface CArExpression extends RealInterval {
 
     /**
      * A default empty array
@@ -36,6 +42,25 @@ public interface CArExpression {
      * @return a Model object
      */
     Model getModel();
+
+    /**
+     * Computes the narrowest bounds with respect to sub terms.
+     */
+    void tighten();
+
+    /**
+     * Projects computed bounds to the sub expressions.
+     * @param cause
+     */
+    void project(ICause cause) throws ContradictionException;
+
+    void collectVariables(TreeSet<RealVar> set);
+
+    void subExps(List<CArExpression> list);
+
+    boolean isolate(RealVar var, List<CArExpression> wx, List<CArExpression> wox);
+
+    void init();
 
     /**
      * List of available operator for arithmetic expression
@@ -264,7 +289,7 @@ public interface CArExpression {
 
     /**
      * @param y an expression
-     * @return return the expression "x + y" where this is "x"
+     * @return return the expression "x ^ y" where this is "x"
      */
     default CArExpression pow(CArExpression y) {
         return new BiCArExpression(CArExpression.Operator.POW, this, y);

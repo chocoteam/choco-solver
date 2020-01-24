@@ -9,8 +9,13 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.constraints.real.PropMixed;
+import org.chocosolver.solver.constraints.real.PropMixedElement;
 import org.chocosolver.solver.constraints.real.PropScalarMixed;
 import org.chocosolver.solver.constraints.real.RealConstraint;
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 
 /**
@@ -80,5 +85,40 @@ public interface IRealConstraintFactory {
 	default Constraint scalar(Variable[] vars, double[] coeffs, String op, double bound){
 		return new Constraint(ConstraintsName.MIXEDSCALAR,
 				new PropScalarMixed(vars, coeffs, Operator.get(op), bound));
+	}
+
+	/**
+	 * An arithmetical constraint : x = Y
+	 * @param x a real variable
+	 * @param y an integer variable
+	 * @return an arithmetical constraint
+	 */
+	default Constraint eq(RealVar x, IntVar y){
+		return new Constraint(ConstraintsName.ARITHM,
+				new PropMixed(x, y));
+	}
+
+	/**
+	  * Let 'index' be an integer variable with 'n' values
+	 * and 'value' be a real variable. Given 'n' constant values a1 to an,
+	  * this constraint ensures that:
+	  * <p/>
+	  * <code>x = i iff v = ai</code>
+	  * <p/>
+	  * a1... an sequence is supposed to be ordered (a1&lt;a2&lt;... an)
+	  * <br/>
+	 * @param value a real variable
+	 * @param table a sequence of double values
+	 * @param index an integer variable
+	 * @return an element constraint
+	 */
+	default Constraint element(RealVar value, double[] table, IntVar index){
+		for(int i = 0; i < table.length-2; i++){
+			if(table[i]>=table[i+1]){
+				throw new SolverException("element requires 'table' to be strictly ordered.");
+			}
+		}
+		return new Constraint(ConstraintsName.ELEMENT,
+				new PropMixedElement(value, index, table));
 	}
 }
