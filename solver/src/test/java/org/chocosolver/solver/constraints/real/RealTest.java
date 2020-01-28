@@ -24,6 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -1058,14 +1059,37 @@ public class RealTest {
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
     }
-
+    
     @Test(groups = "1s")
-    public void testElt1(){
+    public void testElt1() {
         Model model = new Model();
         RealVar x = model.realVar("V", 0., 10., 1.e-4);
         IntVar y = model.intVar("I", 0, 5);
         model.element(x, new double[]{-1., .8, Math.PI, 12.}, y).post();
         model.getSolver().findAllSolutions();
         Assert.assertEquals(2, model.getSolver().getSolutionCount());
+    }
+
+    @Test(groups = "ibex", timeOut = 60000)
+    public void testJoao2() {
+        Ibex ibex = new Ibex(new double[]{1.e-1});
+        ibex.add_ctr("{0}>=1.");
+        Assert.assertTrue(ibex.build());
+        double[] domains = new double[]{0.15, 86.0};
+        ibex.contract(0, domains);
+        out.printf("%s\n", Arrays.toString(domains));
+    }
+
+    @Test(groups = "ibex", timeOut = 60000)
+    public void testJoao3() throws ContradictionException {
+        double PRECISION = 1e-8;
+        Model model = new Model();
+        RealVar y = model.realVar("y", -4.0, 4.0, PRECISION);
+        RealVar x = model.realVar("x", -4.0, 4.0, PRECISION);
+        // y - x^2 = 0
+        y.sub(x.pow(2)).eq(0).ibex(PRECISION).post(); // It didn't works
+        // y - x - 1 = 0
+        y.sub(x).sub(1).eq(0).ibex(PRECISION).post();
+        Assert.assertNotNull(model.getSolver().findSolution());
     }
 }
