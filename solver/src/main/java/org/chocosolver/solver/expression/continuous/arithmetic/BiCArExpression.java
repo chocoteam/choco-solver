@@ -171,20 +171,12 @@ public class BiCArExpression implements CArExpression {
                 e2.intersect(RealUtils.sub(e1, this), cause);
                 break;
             case MUL:
-                RealInterval res = RealUtils.odiv_wrt(this, e2, e1);
-                if (res.getLB() > res.getUB()) {
-                    throw model.getSolver().getContradictionException().set(cause, null, "");
-                }
-                e1.intersect(res, cause);
-                res = RealUtils.odiv_wrt(this, e1, e2);
-                if (res.getLB() > res.getUB()) {
-                    throw model.getSolver().getContradictionException().set(cause, null, "");
-                }
-                e2.intersect(res, cause);
+                e1.intersect(RealUtils.odiv_wrt(this, e2, e1), cause);
+                e2.intersect(RealUtils.odiv_wrt(this, e1, e2), cause);
                 break;
             case DIV:
                 e1.intersect(RealUtils.mul(this, e2), cause);
-                e2.intersect(RealUtils.mul(this, e1), cause);
+                e2.intersect(RealUtils.odiv_wrt(e1, this, e2), cause);
                 break;
             case POW:
             case MIN:

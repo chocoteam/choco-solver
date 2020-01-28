@@ -120,6 +120,15 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
+    public void test100() {
+        Model model = new Model();
+        RealVar w = model.realVar("w", 2, 3, 0.1d);
+        RealVar x = model.realVar("x", 0, 4, 0.1d);
+        RealVar y = model.realVar("y", 2, 5, 0.1d);
+        eval(model, x.div(w).eq(y), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
     public void test11() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 4, 0.1d);
