@@ -1070,6 +1070,16 @@ public class RealTest {
         Assert.assertEquals(2, model.getSolver().getSolutionCount());
     }
 
+    @Test(groups = "1s")
+    public void testElt2() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 0., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 5);
+        model.element(x, new double[]{1., 1.0000001, 1.0000002, 1.0000003, 1.0000004}, y).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(5, model.getSolver().getSolutionCount());
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testJoao2() {
         Ibex ibex = new Ibex(new double[]{1.e-1});

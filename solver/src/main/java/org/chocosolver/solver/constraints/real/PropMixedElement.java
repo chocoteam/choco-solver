@@ -93,7 +93,12 @@ public class PropMixedElement extends Propagator<Variable> {
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {
-            return ESat.eval(values[y.getLB()] <= x.getUB() && x.getLB() <= values[y.getUB()]);
+            int idx = y.getValue();
+            return ESat.eval(
+                    values[idx] <= x.getUB() && x.getLB() <= values[idx]
+                            && (idx == 0 || values[idx - 1] < x.getLB())
+                            && (idx == values.length - 1 || x.getUB() < values[idx + 1])
+            );
         }
         return ESat.UNDEFINED;
     }
