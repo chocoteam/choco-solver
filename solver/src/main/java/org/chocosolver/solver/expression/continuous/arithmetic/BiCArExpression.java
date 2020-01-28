@@ -184,7 +184,7 @@ public class BiCArExpression implements CArExpression {
                 break;
             case DIV:
                 e1.intersect(RealUtils.mul(this, e2), cause);
-                e2.intersect(RealUtils.mul(this, e1), cause);
+                e2.intersect(RealUtils.odiv_wrt(e1, this, e2), cause);
                 break;
             case POW:
             case MIN:
