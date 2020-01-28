@@ -72,11 +72,6 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
     }
 
     @Override
-    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
-        intersect(interval.getLB(), interval.getUB(), cause);
-    }
-
-    @Override
     public void intersect(double l, double u, ICause cause) throws ContradictionException {
         updateBounds(l, u, cause);
     }

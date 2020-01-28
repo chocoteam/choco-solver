@@ -71,11 +71,6 @@ public class RealIntervalConstant implements CArExpression {
     }
 
     @Override
-    public void intersect(RealInterval interval, ICause cause) {
-        
-    }
-
-    @Override
     public void intersect(double l, double u, ICause cause) {
 
     }

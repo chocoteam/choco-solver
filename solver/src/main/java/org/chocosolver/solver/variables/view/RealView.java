@@ -87,11 +87,6 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
-        intersect(interval.getLB(), interval.getUB(), cause);
-    }
-
-    @Override
     public void intersect(double l, double u, ICause cause) throws ContradictionException {
         var.updateBounds(
                 (int) Math.ceil(l),
