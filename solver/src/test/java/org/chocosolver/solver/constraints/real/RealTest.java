@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.real;
 import static java.lang.System.out;
 import static org.testng.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Random;
 import org.chocosolver.solver.Model;
@@ -766,5 +767,28 @@ public class RealTest {
         double domains[] = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
+    }
+
+    @Test(groups = "ibex", timeOut = 60000)
+    public void testJoao2() {
+        Ibex ibex = new Ibex(new double[]{1.e-1});
+        ibex.add_ctr("{0}>=1.");
+        Assert.assertTrue(ibex.build());
+        double[] domains = new double[]{0.15, 86.0};
+        ibex.contract(0, domains);
+        out.printf("%s\n", Arrays.toString(domains));
+    }
+
+    @Test(groups = "ibex", timeOut = 60000)
+    public void testJoao3() throws ContradictionException {
+        double PRECISION = 1e-8;
+        Model model = new Model();
+        RealVar y = model.realVar("y", -4.0, 4.0, PRECISION);
+        RealVar x = model.realVar("x", -4.0, 4.0, PRECISION);
+        // y - x^2 = 0
+        y.sub(x.pow(2)).eq(0).ibex(PRECISION).post(); // It didn't works
+        // y - x - 1 = 0
+        y.sub(x).sub(1).eq(0).ibex(PRECISION).post();
+        Assert.assertNotNull(model.getSolver().findSolution());
     }
 }
