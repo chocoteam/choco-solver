@@ -189,11 +189,6 @@ public class UnCArExpression implements CArExpression {
     public void project(ICause cause) throws ContradictionException {
         RealInterval res;
         switch (op) {
-            case NEG:
-            case ABS:
-            case EXP:
-            case LN:
-            case SQRT:
             case COS:
                 res = RealUtils.acos_wrt(this, e);
                 if (res.getLB() > res.getUB()) {
@@ -206,6 +201,11 @@ public class UnCArExpression implements CArExpression {
                     throw model.getSolver().getContradictionException().set(cause, null, "");
                 }
                 break;
+            case NEG:
+            case ABS:
+            case EXP:
+            case LN:
+            case SQRT:
             case TAN:
             case ACOS:
             case ASIN:
