@@ -157,17 +157,17 @@ public class UnCArExpression implements CArExpression {
     public void tighten() {
         RealInterval res;
         switch (op) {
-            case NEG:
-            case ABS:
-            case EXP:
-            case LN:
-            case SQRT:
             case COS:
                 res = RealUtils.cos(e);
                 break;
             case SIN:
                 res = RealUtils.sin(e);
                 break;
+            case NEG:
+            case ABS:
+            case EXP:
+            case LN:
+            case SQRT:
             case TAN:
             case ACOS:
             case ASIN:
