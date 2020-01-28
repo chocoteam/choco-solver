@@ -265,11 +265,6 @@ public class UnCArExpression implements CArExpression {
     }
 
     @Override
-    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
-        intersect(interval.getLB(), interval.getUB(), cause);
-    }
-
-    @Override
     public void intersect(double lb, double ub, ICause cause) throws ContradictionException {
         if (lb > getLB()) {
             l.set(lb);

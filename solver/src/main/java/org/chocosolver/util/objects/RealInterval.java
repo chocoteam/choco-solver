@@ -59,7 +59,9 @@ public interface RealInterval {
      * @param cause who launches the intersection
      * @throws ContradictionException if a failure occurs
      */
-    void intersect(RealInterval interval, ICause cause) throws ContradictionException;
+    default void intersect(RealInterval interval, ICause cause) throws ContradictionException {
+        intersect(interval.getLB(), interval.getUB(), cause);
+    }
 
     /**
      * Modifies the bounds for intersecting with the specified interval.

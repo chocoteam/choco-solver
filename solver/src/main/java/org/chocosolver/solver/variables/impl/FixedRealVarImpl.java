@@ -51,9 +51,7 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
      * @param model model which declares this variable
      */
     public FixedRealVarImpl(String name, double value, Model model) {
-        super(name, model);
-        this.lb = value;
-        this.ub = value;
+        this(name, value, value, model);
     }
 
     /**
@@ -78,11 +76,6 @@ public class FixedRealVarImpl extends AbstractVariable implements RealVar {
     @Override
     public double getUB() {
         return ub;
-    }
-
-    @Override
-    public void intersect(RealInterval interval, ICause cause) throws ContradictionException {
-
     }
 
     @Override
