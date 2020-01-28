@@ -9,15 +9,14 @@
  */
 package org.chocosolver.util.tools;
 
+import static java.util.Arrays.stream;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
-
-import static java.util.Arrays.stream;
 
 /**
  * <p>
@@ -233,7 +232,7 @@ public class VariableUtils {
      * @return computes the bounds for "x ^ y"
      */
     public static double[] boundsForPow(RealVar x, RealVar y) {
-        return bound(
+        return bound(0,
                 Math.pow(x.getLB(), y.getLB()),
                 Math.pow(x.getLB(), y.getUB()),
                 Math.pow(x.getUB(), y.getLB()),
