@@ -122,10 +122,10 @@ public class IbexTest {
     @Test(groups = "ibex", timeOut = 60000)
     public void test11() {
         Model model = new Model();
-        RealVar x = model.realVar("x", 0, 4, 0.1d);
-        RealVar y = model.realVar("y", 2, 5, 0.1d);
-        RealVar z = model.realVar("z", 1, 1.5, 0.1d);
-        eval(model, x.div(y).eq(z), 33);
+        RealVar x = model.realVar("x", 2.5, 4, 0.1d);
+        RealVar y = model.realVar("y", 2, 2.8, 0.1d);
+        RealVar z = model.realVar("z", 1, 1.1, 0.1d);
+        eval(model, x.div(y).eq(z), 32);
     }
 
     @Test(groups = "ibex", timeOut = 60000)
@@ -201,13 +201,22 @@ public class IbexTest {
         eval(model, x.ln().eq(y), 1);
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+     public void test20() {
+         Model model = new Model();
+         RealVar x = model.realVar("x", 3, 5, 0.1d);
+         RealVar y = model.realVar("y", 0, 9, 0.1d);
+         eval(model, x.sqr().eq(y), 1);
+     }
+
     @Test(groups = "ibex", timeOut = 60000)
-    public void test20() {
+    public void test200() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 9, 0.1d);
         RealVar y = model.realVar("y", 3, 5, 0.1d);
         eval(model, x.sqrt().eq(y), 1);
     }
+
 
 
     @Test(groups = "ibex", timeOut = 60000)

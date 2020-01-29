@@ -16,6 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.objects.RealInterval;
 import org.chocosolver.util.tools.RealUtils;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -93,6 +94,11 @@ public class UnCArExpression implements CArExpression {
                             Math.max(Math.log(v.getLB()), Math.log(v.getUB())), p);
                     model.realIbexGenericConstraint("{0}=ln({1})", me, v).post();
                     break;
+                case SQR:
+                    double[] bounds = VariableUtils.boundsForMultiplication(v, v);
+                    me = model.realVar(bounds[0], bounds[1], p);
+                    model.realIbexGenericConstraint("{0}={1}^2", me, v).post();
+                    break;
                 case SQRT:
                     me = model.realVar(Math.min(Math.sqrt(v.getLB()), Math.sqrt(v.getUB())),
                             Math.max(Math.sqrt(v.getLB()), Math.sqrt(v.getUB())), p);
@@ -164,10 +170,27 @@ public class UnCArExpression implements CArExpression {
                 res = RealUtils.sin(e);
                 break;
             case NEG:
+                res = new RealIntervalConstant(-e.getUB(), -e.getLB());
+                break;
+            case SQR:
+                res = RealUtils.iPower(e, 2);
+                break;
+            case SQRT:
+                res = RealUtils.iRoot(e, 2);
+                break;
             case ABS:
+                double linf = e.getLB();
+                double lsup = e.getUB();
+                if(lsup < 0.){
+                    res = new RealIntervalConstant(-lsup, -linf);
+                }else if (linf < 0.){
+                    res = new RealIntervalConstant(0., Math.max(-linf, lsup));
+                }else{
+                    res = new RealIntervalConstant(linf, lsup);
+                }
+                break;
             case EXP:
             case LN:
-            case SQRT:
             case TAN:
             case ACOS:
             case ASIN:
@@ -179,7 +202,7 @@ public class UnCArExpression implements CArExpression {
             case ASINH:
             case ATANH:
             default:
-                throw new UnsupportedOperationException("Equation does not support " + op.name());
+                throw new UnsupportedOperationException("Equation does not support " + op.name()+". Consider using Ibex instead.");
         }
         l.set(res.getLB());
         u.set(res.getUB());
@@ -191,21 +214,24 @@ public class UnCArExpression implements CArExpression {
         switch (op) {
             case COS:
                 res = RealUtils.acos_wrt(this, e);
-                if (res.getLB() > res.getUB()) {
-                    throw model.getSolver().getContradictionException().set(cause, null, "");
-                }
                 break;
             case SIN:
                 res = RealUtils.asin_wrt(this, e);
-                if (res.getLB() > res.getUB()) {
-                    throw model.getSolver().getContradictionException().set(cause, null, "");
-                }
                 break;
             case NEG:
+                res = new RealIntervalConstant(-this.getUB(), -this.getLB());
+                break;
+            case SQR:
+                res = RealUtils.iRoot(this, 2, e);
+                break;
+            case SQRT:
+                res = RealUtils.iPower(this, 2);
+                break;
             case ABS:
+                res = new RealIntervalConstant(-this.getUB(), this.getUB());
+                break;
             case EXP:
             case LN:
-            case SQRT:
             case TAN:
             case ACOS:
             case ASIN:
@@ -217,7 +243,7 @@ public class UnCArExpression implements CArExpression {
             case ASINH:
             case ATANH:
             default:
-                throw new UnsupportedOperationException("Equation does not support " + op.name());
+                throw new UnsupportedOperationException("Equation does not support " + op.name()+". Consider using Ibex instead.");
         }
         e.intersect(res, cause);
     }

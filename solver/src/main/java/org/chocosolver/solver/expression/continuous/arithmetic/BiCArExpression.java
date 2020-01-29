@@ -148,12 +148,22 @@ public class BiCArExpression implements CArExpression {
             case DIV:
                 res = RealUtils.odiv(e1, e2);
                 break;
-            case POW:
             case MIN:
+                res = new RealIntervalConstant(
+                        Math.min(e1.getLB(), e2.getLB()),
+                        Math.min(e1.getUB(), e2.getUB())
+                );
+                break;
             case MAX:
+                res = new RealIntervalConstant(
+                        Math.max(e1.getLB(), e2.getLB()),
+                        Math.max(e1.getUB(), e2.getUB())
+                );
+                break;
+            case POW:
             case ATAN2:
             default:
-                throw new UnsupportedOperationException("Equation does not support " + op.name());
+                throw new UnsupportedOperationException("Equation does not support " + op.name()+". Consider using Ibex instead.");
         }
         l.set(res.getLB());
         u.set(res.getUB());
@@ -178,12 +188,30 @@ public class BiCArExpression implements CArExpression {
                 e1.intersect(RealUtils.mul(this, e2), cause);
                 e2.intersect(RealUtils.odiv_wrt(e1, this, e2), cause);
                 break;
-            case POW:
             case MIN:
+                e1.intersect(this.getLB(), RealUtils.nextFloat(e1.getUB()), cause);
+                e2.intersect(this.getLB(), RealUtils.nextFloat(e2.getUB()), cause);
+                if (e2.getLB() > this.getLB()) {
+                    e1.intersect(RealUtils.prevFloat(e1.getLB()), this.getUB(), cause);
+                }
+                if (e1.getLB() > this.getLB()) {
+                    e2.intersect(RealUtils.prevFloat(e2.getLB()), this.getUB(), cause);
+                }
+                break;
             case MAX:
+                e1.intersect(RealUtils.prevFloat(e1.getLB()), this.getUB(), cause);
+                e2.intersect(RealUtils.prevFloat(e2.getLB()), this.getUB(), cause);
+                if (e2.getUB() < this.getUB()) {
+                    e1.intersect(this.getLB(), RealUtils.nextFloat(e1.getUB()), cause);
+                }
+                if (e1.getUB() < this.getUB()) {
+                    e2.intersect(this.getLB(), RealUtils.nextFloat(e2.getUB()), cause);
+                }
+                break;
+            case POW:
             case ATAN2:
             default:
-                throw new UnsupportedOperationException("Equation does not support " + op.name());
+                throw new UnsupportedOperationException("Equation does not support " + op.name()+". Consider using Ibex instead.");
         }
     }
 

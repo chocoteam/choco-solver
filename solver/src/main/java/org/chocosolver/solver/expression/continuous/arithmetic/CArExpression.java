@@ -97,6 +97,11 @@ public interface CArExpression extends RealInterval {
         DIV {
         },
         /**
+         * square operator
+         */
+        SQR {
+        },
+        /**
          * power operator
          */
         POW {
@@ -356,6 +361,13 @@ public interface CArExpression extends RealInterval {
     default CArExpression ln() {
         return new UnCArExpression(Operator.LN, this);
     }
+
+    /**
+     * @return return the expression "x^2" where this is "x"
+     */
+    default CArExpression sqr() {
+            return new UnCArExpression(Operator.SQR, this);
+        }
 
     /**
      * @return return the expression "sqrt(x)" where this is "x"

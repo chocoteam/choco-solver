@@ -128,14 +128,15 @@ public class ExpressionTest {
         eval(model, x.div(w).eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "ibex", timeOut = 60000)
     public void test11() {
         Model model = new Model();
-        RealVar x = model.realVar("x", 0, 4, 0.1d);
-        RealVar y = model.realVar("y", 2, 5, 0.1d);
-        RealVar z = model.realVar("z", 1, 1.5, 0.1d);
-        eval(model, x.div(y).eq(z), 33);
+        RealVar x = model.realVar("x", 2.5, 4, 0.1d);
+        RealVar y = model.realVar("y", 2, 2.8, 0.1d);
+        RealVar z = model.realVar("z", 1, 1.1, 0.1d);
+        eval(model, x.div(y).eq(z), 32);
     }
+
 
     @Test(groups = "1s", timeOut = 60000)
     public void test12() {
@@ -146,11 +147,30 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
+    public void test120() {
+        Model model = new Model();
+        RealVar w = model.realVar("w", 1, 4, 0.1d);
+        RealVar x = model.realVar("x", 2, 5, 0.1d);
+        RealVar y = model.realVar("y", 1, 3, 0.1d);
+        eval(model, x.min(w).eq(y), 681);
+    }
+
+    @Test(groups = "1s", timeOut = 6000000)
     public void test13() {
         Model model = new Model();
         RealVar x = model.realVar("x", 1, 1, 0.1d);
         RealVar y = model.realVar("y", 0, 5, 0.1d);
         eval(model, x.max(3).eq(y), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test130() {
+        Model model = new Model();
+        RealVar w = model.realVar("w", 1, 4, 0.1d);
+        RealVar x = model.realVar("x", 2, 5, 0.1d);
+        RealVar y = model.realVar("y", 1, 3, 0.1d);
+        model.getSolver().showSolutions();
+        eval(model, x.max(w).eq(y), 345);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -177,7 +197,7 @@ public class ExpressionTest {
         eval(model, x.neg().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test16() {
         Model model = new Model();
         RealVar x = model.realVar("x", -2, 2, 0.1d);
@@ -186,7 +206,7 @@ public class ExpressionTest {
         eval(model, x.pow(2.0d).eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test17() {
         Model model = new Model();
         RealVar x = model.realVar("x", -2, 2, 0.1d);
@@ -194,7 +214,7 @@ public class ExpressionTest {
         eval(model, x.pow(3).eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test18() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -202,7 +222,7 @@ public class ExpressionTest {
         eval(model, x.atan2(3).eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test19() {
         Model model = new Model();
         RealVar x = model.realVar("x", 1, 10, 0.1d);
@@ -212,6 +232,14 @@ public class ExpressionTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void test20() {
+        Model model = new Model();
+        RealVar x = model.realVar("x", 3, 5, 0.1d);
+        RealVar y = model.realVar("y", 0, 9, 0.1d);
+        eval(model, x.sqr().eq(y), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test200() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 9, 0.1d);
         RealVar y = model.realVar("y", 3, 5, 0.1d);
@@ -235,7 +263,7 @@ public class ExpressionTest {
         eval(model, x.sin().eq(y), 2);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test23() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -243,7 +271,7 @@ public class ExpressionTest {
         eval(model, x.tan().eq(y), 2);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test24() {
         Model model = new Model();
         RealVar x = model.realVar("x", -10, 10, 0.1d);
@@ -251,7 +279,7 @@ public class ExpressionTest {
         eval(model, x.acos().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test25() {
         Model model = new Model();
         RealVar x = model.realVar("x", -10, 10, 0.1d);
@@ -259,7 +287,7 @@ public class ExpressionTest {
         eval(model, x.asin().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test26() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 10, 0.1d);
@@ -267,7 +295,7 @@ public class ExpressionTest {
         eval(model, x.atan().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test27() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -275,7 +303,7 @@ public class ExpressionTest {
         eval(model, x.cosh().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test27a() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -283,7 +311,7 @@ public class ExpressionTest {
         eval(model, x.cosh().eq(y), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test28() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -291,7 +319,7 @@ public class ExpressionTest {
         eval(model, x.sinh().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test28a() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -299,7 +327,7 @@ public class ExpressionTest {
         eval(model, x.sinh().eq(y), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test29() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -307,7 +335,7 @@ public class ExpressionTest {
         eval(model, x.tanh().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test29a() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 5, 0.1d);
@@ -315,7 +343,7 @@ public class ExpressionTest {
         eval(model, x.tanh().eq(y), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test30() {
         Model model = new Model();
         RealVar x = model.realVar("x", -5, 5, 0.1d);
@@ -323,7 +351,7 @@ public class ExpressionTest {
         eval(model, x.acosh().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test30a() {
         Model model = new Model();
         RealVar x = model.realVar("x", -5, 5, 0.1d);
@@ -331,7 +359,7 @@ public class ExpressionTest {
         eval(model, x.acosh().eq(y), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test31() {
         Model model = new Model();
         RealVar x = model.realVar("x", 5, 5, 0.1d);
@@ -339,7 +367,7 @@ public class ExpressionTest {
         eval(model, x.asinh().eq(y), 1);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test31a() {
         Model model = new Model();
         RealVar x = model.realVar("x", 2, 3, 0.1d);
@@ -347,7 +375,7 @@ public class ExpressionTest {
         eval(model, x.asinh().eq(y), 0);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
     public void test32() {
         Model model = new Model();
         RealVar x = model.realVar("x", 0, 1, 0.1d);

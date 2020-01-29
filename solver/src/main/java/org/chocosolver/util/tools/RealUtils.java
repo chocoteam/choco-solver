@@ -329,49 +329,70 @@ public class RealUtils {
             return nextFloat(Math.exp(nextFloat(d_hi * nextFloat(Math.log(x)))));
     }
 
-    public static RealInterval evenIRoot(RealInterval i, int p, RealInterval res) {
+    public static RealInterval evenIRoot(RealInterval i, int p) {
         if (i.getUB() < 0) {
             System.err.println("Erreur !!");
         }
-        double inf, sup;
-        if (i.getLB() < 0)
-            inf = 0;
-        else
-            inf = iRoot_lo(i.getLB(), p);
-        sup = iRoot_up(i.getUB(), p);
-
-        if (res.getUB() < inf)
-            return new RealIntervalConstant(-sup, -inf);
-        else if (res.getLB() > sup)
-            return new RealIntervalConstant(inf, sup);
-        else
-            return new RealIntervalConstant(-sup, sup);
-    }
-
-    public static RealInterval oddIRoot(RealInterval i, int p) {
-        double inf, sup;
-        if (i.getLB() >= 0)
-            inf = iRoot_lo(i.getLB(), p);
-        else
-            inf = -iRoot_up(-i.getLB(), p);
-
-        if (i.getUB() >= 0)
-            sup = iRoot_up(i.getUB(), p);
-        else
-            sup = -iRoot_lo(-i.getUB(), p);
+        double inf = i.getLB() < 0. ? 0. : iRoot_lo(i.getLB(), p);
+        double sup = iRoot_up(i.getUB(), p);
         return new RealIntervalConstant(inf, sup);
     }
 
-    public static RealInterval iRoot(RealInterval i, int p, RealInterval res) {
+    public static RealInterval evenIRoot(RealInterval i, int p, RealInterval res) {
+            if (i.getUB() < 0) {
+                System.err.println("Erreur !!");
+            }
+            double inf, sup;
+            if (i.getLB() < 0)
+                inf = 0;
+            else
+                inf = iRoot_lo(i.getLB(), p);
+            sup = iRoot_up(i.getUB(), p);
+
+            if (res.getUB() < inf)
+                return new RealIntervalConstant(-sup, -inf);
+            else if (res.getLB() > sup)
+                return new RealIntervalConstant(inf, sup);
+            else
+                return new RealIntervalConstant(-sup, sup);
+        }
+
+    public static RealInterval oddIRoot(RealInterval i, int p) {
+        double inf, sup;
+        if (i.getLB() >= 0) {
+            inf = iRoot_lo(i.getLB(), p);
+        } else {
+            inf = -iRoot_up(-i.getLB(), p);
+        }
+        if (i.getUB() >= 0) {
+            sup = iRoot_up(i.getUB(), p);
+        } else {
+            sup = -iRoot_lo(-i.getUB(), p);
+        }
+        return new RealIntervalConstant(inf, sup);
+    }
+
+    public static RealInterval iRoot(RealInterval i, int p) {
         if (p <= 1) {
             throw new UnsupportedOperationException();
         }
         if (p % 2 == 0) {
-            return evenIRoot(i, p, res);
+            return evenIRoot(i, p);
         } else {
             return oddIRoot(i, p);
         }
     }
+
+    public static RealInterval iRoot(RealInterval i, int p, RealInterval res) {
+            if (p <= 1) {
+                throw new UnsupportedOperationException();
+            }
+            if (p % 2 == 0) {
+                return evenIRoot(i, p, res);
+            } else {
+                return oddIRoot(i, p);
+            }
+        }
 
     public static RealInterval sinRange(int a, int b) {
         switch (4 * a + b) {
