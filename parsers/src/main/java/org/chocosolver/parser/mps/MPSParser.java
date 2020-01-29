@@ -82,9 +82,10 @@ public class MPSParser {
         this.NEG_INF = ninf;
 
         Reader reader = null;
+        GZIPInputStream gzis = null;
         if (instance.endsWith("mps.gz")) {
             FileInputStream fin = new FileInputStream(instance);
-            GZIPInputStream gzis = new GZIPInputStream(fin);
+            gzis = new GZIPInputStream(fin);
             reader = new InputStreamReader(gzis);
         } else {
             reader = new FileReader(instance);
@@ -110,6 +111,9 @@ public class MPSParser {
         }
         build(model, maximize, ibex, noeq);
         reader.close();
+        if(gzis != null) {
+            gzis.close();
+        }
     }
 
     private void readName(BufferedReader br) throws IOException {
