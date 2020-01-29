@@ -1059,7 +1059,7 @@ public class RealTest {
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
     }
-    
+
     @Test(groups = "1s")
     public void testElt1() {
         Model model = new Model();
