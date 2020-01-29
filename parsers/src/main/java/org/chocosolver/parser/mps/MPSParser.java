@@ -109,6 +109,7 @@ public class MPSParser {
             }
         }
         build(model, maximize, ibex, noeq);
+        reader.close();
     }
 
     private void readName(BufferedReader br) throws IOException {
