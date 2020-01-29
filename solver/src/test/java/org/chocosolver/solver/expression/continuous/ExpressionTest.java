@@ -149,10 +149,10 @@ public class ExpressionTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test120() {
         Model model = new Model();
-        RealVar w = model.realVar("w", 1, 4, 0.1d);
-        RealVar x = model.realVar("x", 2, 5, 0.1d);
-        RealVar y = model.realVar("y", 1, 3, 0.1d);
-        eval(model, x.min(w).eq(y), 681);
+        RealVar w = model.realVar("w", 1.6, 1.8, 0.1d);
+        RealVar x = model.realVar("x", 1.8, 2.5, 0.1d);
+        RealVar y = model.realVar("y", 1.7, 2, 0.1d);
+        eval(model, x.min(w).eq(y), 16);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -169,7 +169,6 @@ public class ExpressionTest {
         RealVar w = model.realVar("w", 1.6, 1.8, 0.1d);
         RealVar x = model.realVar("x", 1.8, 2.5, 0.1d);
         RealVar y = model.realVar("y", 1.7, 2, 0.1d);
-        model.getSolver().showSolutions();
         eval(model, x.max(w).eq(y), 9);
     }
 
