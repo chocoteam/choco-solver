@@ -191,20 +191,20 @@ public class BiCArExpression implements CArExpression {
             case MIN:
                 e1.intersect(this.getLB(), RealUtils.nextFloat(e1.getUB()), cause);
                 e2.intersect(this.getLB(), RealUtils.nextFloat(e2.getUB()), cause);
-                if (e2.getLB() > this.getLB()) {
+                if (e2.getLB() > this.getUB()) {
                     e1.intersect(RealUtils.prevFloat(e1.getLB()), this.getUB(), cause);
                 }
-                if (e1.getLB() > this.getLB()) {
+                if (e1.getLB() > this.getUB()) {
                     e2.intersect(RealUtils.prevFloat(e2.getLB()), this.getUB(), cause);
                 }
                 break;
             case MAX:
                 e1.intersect(RealUtils.prevFloat(e1.getLB()), this.getUB(), cause);
                 e2.intersect(RealUtils.prevFloat(e2.getLB()), this.getUB(), cause);
-                if (e2.getUB() < this.getUB()) {
+                if (e2.getUB() < this.getLB()) {
                     e1.intersect(this.getLB(), RealUtils.nextFloat(e1.getUB()), cause);
                 }
-                if (e1.getUB() < this.getUB()) {
+                if (e1.getUB() < this.getLB()) {
                     e2.intersect(this.getLB(), RealUtils.nextFloat(e2.getUB()), cause);
                 }
                 break;

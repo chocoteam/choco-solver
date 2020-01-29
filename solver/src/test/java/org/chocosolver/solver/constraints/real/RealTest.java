@@ -291,7 +291,7 @@ public class RealTest {
         solver.solve();
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
         public void testHM2a() {
         Model model = new Model("Default model");
         double precision = 1.e-1;
@@ -796,7 +796,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
         public void testMove4a() {
         Model model = new Model();
         RealVar[] y = model.realVarArray(3, -10., 10., 1.E-5);
@@ -876,6 +876,24 @@ public class RealTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJuha2a() {
+        Model model = new Model("model");
+        IntVar foo = model.intVar("foo", new int[]{0,15, 20});
+        IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
+        RealVar rfoo = model.realVar("rfoo", 0,20, 1e-5);
+        RealVar rwow = model.realVar("rwow", 1,4, 1e-5);
+        model.eq(rfoo, foo).post();
+        model.eq(rwow, wow).post();
+        rfoo.div(rwow).eq(4.5).post();
+        model.arithm(foo, "!=", 10).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(foo, wow));
+        solver.showSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
+    public void testJuha2b() {
         Model model = new Model("model");
         IntVar foo = model.intVar("foo", 0, 20);
         IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
