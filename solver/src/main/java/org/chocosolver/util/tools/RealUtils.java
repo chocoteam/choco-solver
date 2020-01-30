@@ -18,6 +18,7 @@ import org.chocosolver.util.objects.RealInterval;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @author Guillaum Rochart
  * @since 23/01/2020
  */
 public class RealUtils {
@@ -26,32 +27,65 @@ public class RealUtils {
     
     private static final double NEG_ZER0 = 0.0 * -1.0;
 
+    /**
+     * Returns the double value just after 'x'.
+     * @param x a double
+     * @return the floating point just after 'x'.
+     */
     public static double nextFloat(double x) {
-        if (x < 0)
+        if (x < 0) {
             return Double.longBitsToDouble(Double.doubleToLongBits(x) - 1);
-        else if (x == 0)
+        } else if (x == 0) {
             return Double.longBitsToDouble(1);
-        else if (x < Double.POSITIVE_INFINITY)
+        } else if (x < Double.POSITIVE_INFINITY) {
             return Double.longBitsToDouble(Double.doubleToLongBits(x) + 1);
-        else
+        } else {
             return x; // nextFloat(infty) = infty
+        }
     }
 
+    /**
+     * Returns the double value just before 'x'.
+     * @param x a double
+     * @return the floating point just before 'x'.
+     */
     public static double prevFloat(double x) {
-        if (x == 0.0)
+        if (x == 0.0) {
             return -nextFloat(0.0);
-        else
+        } else {
             return -nextFloat(-x);
+        }
     }
 
+    /**
+     * Returns an interval that represents the result of an addition between interval 'x' and 'y'.
+     * <p>[l(x)+l(y), u(x)+u(y)]</p>
+     * @param x an interval
+     * @param y an interval
+     * @return an interval that represents the result of the addition 'x + y'
+     */
     public static RealInterval add(RealInterval x, RealInterval y) {
         return new RealIntervalConstant(prevFloat(x.getLB() + y.getLB()), nextFloat(x.getUB() + y.getUB()));
     }
 
+    /**
+     * Returns an interval that represents the result of a difference between interval 'x' and 'y'.
+     * <p>[l(x)-l(y), u(x)-u(y)]</p>
+     * @param x an interval
+     * @param y an interval
+     * @return an interval that represents the result of the difference : 'x - y'
+     */
     public static RealInterval sub(RealInterval x, RealInterval y) {
         return new RealIntervalConstant(prevFloat(x.getLB() - y.getUB()), nextFloat(x.getUB() - y.getLB()));
     }
 
+    /**
+     * Returns an interval that represents the result of a multiplication between interval 'x' and 'y'.
+     * The results depends on whether 'x' or 'y' overlap 0.0 or not.
+     * @param x an interval
+     * @param y an interval
+     * @return an interval that represents the result of the multiplication : 'x * y'
+     */
     public static RealInterval mul(RealInterval x, RealInterval y) {
         double i, s;
 
@@ -97,16 +131,15 @@ public class RealUtils {
                 }
             }
         }
-
         return new RealIntervalConstant(i, s);
     }
 
     /**
-     * y should not contain 0 !
-     *
-     * @param x
-     * @param y
-     * @return TODO
+     * Returns an interval that represents the result of a division of 'x' by 'y'.
+     * The results depends on whether 'x' or 'y' overlap 0.0 or not.
+     * @param x an interval
+     * @param y an interval
+     * @return an interval that represents the result of the division : 'x / y'.
      */
     public static RealInterval odiv(RealInterval x, RealInterval y) {
         if (y.getLB() <= 0.0 && y.getUB() >= 0.0) {
@@ -146,6 +179,14 @@ public class RealUtils {
         }
     }
 
+    /**
+     * Returns an interval that represents the result of a division of 'x' by 'y'.
+     * 'res' is the one that will intersect the resulting interval
+     * and is given to provide sharpest interval when 0.0 is overlapped.
+     * @param x an interval
+     * @param y an interval
+     * @return an interval that represents the result of the division : 'x / y'.
+     */
     public static RealInterval odiv_wrt(RealInterval x, RealInterval y, RealInterval res) {
         if (y.getLB() > 0.0 || y.getUB() < 0.0) {  // y != 0
             return odiv(x, y);
@@ -166,43 +207,52 @@ public class RealUtils {
                 if ((resl > tmp_neg || resl == 0.0) && resl < tmp_pos) resl = tmp_pos;
                 if ((resh < tmp_pos || resh == 0.0) && resh > tmp_neg) resh = tmp_neg;
             }
-
             return new RealIntervalConstant(resl, resh);
         }
     }
 
-    public static boolean isCanonical(RealInterval i, double precision) {
-        double inf = i.getLB();
-        double sup = i.getUB();
-        if (sup - inf < precision) return true;
-        if (nextFloat(inf) >= sup) return true;
-        return false;
-    }
-
+    /**
+     * Given an interval 'i = [a,b]' returns an interval [a, a + (b-a)/2].
+     * @param i an interval
+     * @return the first half of 'i'
+     */
     public static RealInterval firstHalf(RealInterval i) {
         double inf = i.getLB();
-        if (inf == Double.NEGATIVE_INFINITY) inf = -Double.MAX_VALUE;
+        if (inf == Double.NEGATIVE_INFINITY) {
+            inf = -Double.MAX_VALUE;
+        }
         double sup = i.getUB();
-        if (sup == Double.POSITIVE_INFINITY) sup = Double.MAX_VALUE;
+        if (sup == Double.POSITIVE_INFINITY) {
+            sup = Double.MAX_VALUE;
+        }
         return new RealIntervalConstant(i.getLB(), inf + sup / 2.0 - inf / 2.0);
     }
 
+    /**
+     * Given an interval 'i = [a,b]' returns an interval [a + (b-a)/2, b].
+     * @param i an interval
+     * @return the second half of 'i'
+     */
     public static RealInterval secondHalf(RealInterval i) {
         double inf = i.getLB();
-        if (inf == Double.NEGATIVE_INFINITY) inf = -Double.MAX_VALUE;
+        if (inf == Double.NEGATIVE_INFINITY) {
+            inf = -Double.MAX_VALUE;
+        }
         double sup = i.getUB();
-        if (sup == Double.POSITIVE_INFINITY) sup = Double.MAX_VALUE;
+        if (sup == Double.POSITIVE_INFINITY) {
+            sup = Double.MAX_VALUE;
+        }
         return new RealIntervalConstant(inf + sup / 2.0 - inf / 2.0, i.getUB());
     }
 
-    public static double iPower_lo(double x, int p) {   // TODO : to check !
+    private static double iPower_lo(double x, int p) {   // TODO : to check !
         // x >= 0 et p > 1 entier
         if (x == 0) return 0;
         if (x == 1) return 1;
         return prevFloat(Math.exp(prevFloat(p * prevFloat(Math.log(x)))));
     }
 
-    public static double iPower_up(double x, int p) {
+    private static double iPower_up(double x, int p) {
         if (x == 0) return 0;
         if (x == 1) return 1;
         return nextFloat(Math.exp(nextFloat(p * nextFloat(Math.log(x)))));
@@ -247,7 +297,7 @@ public class RealUtils {
         return new RealIntervalConstant(inf, sup);
     }
 
-    public static RealInterval oddIPower(RealInterval i, int p) {
+    private static RealInterval oddIPower(RealInterval i, int p) {
         double inf, sup;
         if (i.getLB() >= 0.0) {
             if (i.getLB() == Double.POSITIVE_INFINITY) {
@@ -288,6 +338,13 @@ public class RealUtils {
         return new RealIntervalConstant(inf, sup);
     }
 
+    /**
+     * Returns an interval that represents the result of 'i^p', where 'p' is an integer.
+     * The results depends on whether 'p' is odd or even.
+     * @param i an interval
+     * @param p an integer
+     * @return an interval that represents the result of : 'i^p'.
+     */
     public static RealInterval iPower(RealInterval i, int p) {
         if (p <= 1) {
             throw new UnsupportedOperationException();
@@ -299,7 +356,7 @@ public class RealUtils {
         }
     }
 
-    public static double iRoot_lo(double x, int p) { // TODO : to check !!
+    private static double iRoot_lo(double x, int p) { // TODO : to check !!
         double d_lo = prevFloat(1.0 / (double) p);
         double d_hi = nextFloat(1.0 / (double) p);
         if (x == Double.POSITIVE_INFINITY) {
@@ -314,7 +371,7 @@ public class RealUtils {
             return prevFloat(Math.exp(prevFloat(d_lo * prevFloat(Math.log(x)))));
     }
 
-    public static double iRoot_up(double x, int p) {
+    private static double iRoot_up(double x, int p) {
         double d_lo = prevFloat(1.0 / (double) p);
         double d_hi = nextFloat(1.0 / (double) p);
         if (x == Double.POSITIVE_INFINITY) {
@@ -329,7 +386,7 @@ public class RealUtils {
             return nextFloat(Math.exp(nextFloat(d_hi * nextFloat(Math.log(x)))));
     }
 
-    public static RealInterval evenIRoot(RealInterval i, int p) {
+    private static RealInterval evenIRoot(RealInterval i, int p) {
         if (i.getUB() < 0) {
             System.err.println("Erreur !!");
         }
@@ -338,7 +395,7 @@ public class RealUtils {
         return new RealIntervalConstant(inf, sup);
     }
 
-    public static RealInterval evenIRoot(RealInterval i, int p, RealInterval res) {
+    private static RealInterval evenIRoot(RealInterval i, int p, RealInterval res) {
             if (i.getUB() < 0) {
                 System.err.println("Erreur !!");
             }
@@ -357,7 +414,7 @@ public class RealUtils {
                 return new RealIntervalConstant(-sup, sup);
         }
 
-    public static RealInterval oddIRoot(RealInterval i, int p) {
+    private static RealInterval oddIRoot(RealInterval i, int p) {
         double inf, sup;
         if (i.getLB() >= 0) {
             inf = iRoot_lo(i.getLB(), p);
@@ -372,6 +429,13 @@ public class RealUtils {
         return new RealIntervalConstant(inf, sup);
     }
 
+    /**
+     * Returns an interval that represents the result of 'i^(1/p)', where 'p' is an integer.
+     * The results depends on whether 'p' is odd or even.
+     * @param i an interval
+     * @param p an integer
+     * @return an interval that represents the result of : 'i^(1/p)'.
+     */
     public static RealInterval iRoot(RealInterval i, int p) {
         if (p <= 1) {
             throw new UnsupportedOperationException();
@@ -383,123 +447,136 @@ public class RealUtils {
         }
     }
 
+    /**
+     * Returns an interval that represents the result of 'i^(1/p)', where 'p' is an integer.
+     * The results depends on whether 'p' is odd or even.
+     * 'res' is the one that will intersect the resulting interval
+     * and is given to provide sharpest interval when 0.0 is overlapped.
+     * @param i an interval
+     * @param p an integer
+     * @param res interval that will intersect the resulting interval
+     * @return an interval that represents the result of : 'i^(1/p)'.
+     */
     public static RealInterval iRoot(RealInterval i, int p, RealInterval res) {
-            if (p <= 1) {
-                throw new UnsupportedOperationException();
-            }
-            if (p % 2 == 0) {
-                return evenIRoot(i, p, res);
-            } else {
-                return oddIRoot(i, p);
-            }
+        if (p <= 1) {
+            throw new UnsupportedOperationException();
         }
+        if (p % 2 == 0) {
+            return evenIRoot(i, p, res);
+        } else {
+            return oddIRoot(i, p);
+        }
+    }
 
-    public static RealInterval sinRange(int a, int b) {
+    private static RealInterval sinRange(int a, int b) {
         switch (4 * a + b) {
-            case 0:
-                System.err.println("Erreur !");
-                return null;
             case 1:
                 return new RealIntervalConstant(1.0, 1.0);
             case 2:
-                return new RealIntervalConstant(0.0, 1.0);
-            case 3:
-                System.err.println("Erreur !");
-                return null;
-            case 4:
-                System.err.println("Erreur !");
-                return null;
-            case 5:
-                System.err.println("Erreur !");
-                return null;
-            case 6:
-                return new RealIntervalConstant(0.0, 0.0);
-            case 7:
-                return new RealIntervalConstant(-1.0, 0.0);
-            case 8:
-                return new RealIntervalConstant(-1.0, 0.0);
-            case 9:
-                System.err.println("Erreur !");
-                return null;
-            case 10:
-                System.err.println("Erreur !");
-                return null;
-            case 11:
-                return new RealIntervalConstant(-1.0, -1.0);
-            case 12:
-                return new RealIntervalConstant(0.0, 0.0);
             case 13:
                 return new RealIntervalConstant(0.0, 1.0);
-            case 14:
-                System.err.println("Erreur !");
-                return null;
-            case 15:
-                System.err.println("Erreur !");
-                return null;
+            case 6:
+            case 12:
+                return new RealIntervalConstant(0.0, 0.0);
+            case 7:
+            case 8:
+                return new RealIntervalConstant(-1.0, 0.0);
+            case 11:
+                return new RealIntervalConstant(-1.0, -1.0);
+            default:
+                throw new UnsupportedOperationException();
         }
-        throw new UnsupportedOperationException();
     }
 
-    public static RealInterval cos(RealInterval interval) {
-        if (interval.getUB() - interval.getLB() > prevFloat(1.5 * prevFloat(Math.PI))) {
+    /**
+     * Returns an interval that represents the result of 'cos(i)'.
+     * @param i an interval
+     * @return the result of 'cos(i)'
+     */
+    public static RealInterval cos(RealInterval i) {
+        if (i.getUB() - i.getLB() > prevFloat(1.5 * prevFloat(Math.PI))) {
             return new RealIntervalConstant(-1.0, 1.0);
         }
         int nlo, nup;
-        if (interval.getLB() >= 0)
-            nlo = (int) Math.floor(prevFloat(prevFloat(interval.getLB() * 2.0) / nextFloat(Math.PI)));
-        else
-            nlo = (int) Math.floor(prevFloat(prevFloat(interval.getLB() * 2.0) / prevFloat(Math.PI)));
-        if (interval.getUB() >= 0)
-            nup = (int) Math.floor(nextFloat(nextFloat(interval.getUB() * 2.0) / prevFloat(Math.PI)));
-        else
-            nup = (int) Math.floor(nextFloat(nextFloat(interval.getUB() * 2.0) / nextFloat(Math.PI)));
-
-        if ((((nup - nlo) % 4) + 4) % 4 == 3) return new RealIntervalConstant(-1.0, 1.0);
-
-        double clo = Math.min(prevFloat(Math.cos(interval.getLB())), prevFloat(Math.cos(interval.getUB())));
-        double cup = Math.max(nextFloat(Math.cos(interval.getLB())), nextFloat(Math.cos(interval.getUB())));
-
-        if ((((nup - nlo) % 4) + 4) % 4 == 0) return new RealIntervalConstant(clo, cup);
-
+        if (i.getLB() >= 0) {
+            nlo = (int) Math.floor(prevFloat(prevFloat(i.getLB() * 2.0) / nextFloat(Math.PI)));
+        } else {
+            nlo = (int) Math.floor(prevFloat(prevFloat(i.getLB() * 2.0) / prevFloat(Math.PI)));
+        }
+        if (i.getUB() >= 0) {
+            nup = (int) Math.floor(nextFloat(nextFloat(i.getUB() * 2.0) / prevFloat(Math.PI)));
+        } else {
+            nup = (int) Math.floor(nextFloat(nextFloat(i.getUB() * 2.0) / nextFloat(Math.PI)));
+        }
+        if ((((nup - nlo) % 4) + 4) % 4 == 3) {
+            return new RealIntervalConstant(-1.0, 1.0);
+        }
+        double clo = Math.min(prevFloat(Math.cos(i.getLB())), prevFloat(Math.cos(i.getUB())));
+        double cup = Math.max(nextFloat(Math.cos(i.getLB())), nextFloat(Math.cos(i.getUB())));
+        if ((((nup - nlo) % 4) + 4) % 4 == 0) {
+            return new RealIntervalConstant(clo, cup);
+        }
         RealInterval mask = sinRange((((nlo + 1) % 4) + 4) % 4, (((nup + 1) % 4) + 4) % 4);
-        if (mask.getLB() < clo) clo = mask.getLB();
-        if (mask.getUB() > cup) cup = mask.getUB();
-
+        if (mask.getLB() < clo) {
+            clo = mask.getLB();
+        }
+        if (mask.getUB() > cup) {
+            cup = mask.getUB();
+        }
         return new RealIntervalConstant(clo, cup);
     }
 
-    public static RealInterval sin(RealInterval interval) {
-        if (interval.getUB() - interval.getLB() > prevFloat(1.5 * prevFloat(Math.PI))) {
+    /**
+     * Returns an interval that represents the result of 'sin(i)'.
+     * @param i an interval
+     * @return the result of 'sin(i)'
+     */
+    public static RealInterval sin(RealInterval i) {
+        if (i.getUB() - i.getLB() > prevFloat(1.5 * prevFloat(Math.PI))) {
             return new RealIntervalConstant(-1.0, 1.0);
         }
         int nlo, nup;
-        if (interval.getLB() >= 0)
-            nlo = (int) Math.floor(prevFloat(prevFloat(interval.getLB() * 2.0) / nextFloat(Math.PI)));
-        else
-            nlo = (int) Math.floor(prevFloat(prevFloat(interval.getLB() * 2.0) / prevFloat(Math.PI)));
-        if (interval.getUB() >= 0)
-            nup = (int) Math.floor(nextFloat(nextFloat(interval.getUB() * 2.0) / prevFloat(Math.PI)));
-        else
-            nup = (int) Math.floor(nextFloat(nextFloat(interval.getUB() * 2.0) / nextFloat(Math.PI)));
+        if (i.getLB() >= 0) {
+            nlo = (int) Math.floor(prevFloat(prevFloat(i.getLB() * 2.0) / nextFloat(Math.PI)));
+        } else {
+            nlo = (int) Math.floor(prevFloat(prevFloat(i.getLB() * 2.0) / prevFloat(Math.PI)));
+        }
+        if (i.getUB() >= 0) {
+            nup = (int) Math.floor(nextFloat(nextFloat(i.getUB() * 2.0) / prevFloat(Math.PI)));
+        } else {
+            nup = (int) Math.floor(nextFloat(nextFloat(i.getUB() * 2.0) / nextFloat(Math.PI)));
+        }
+        if ((((nup - nlo) % 4) + 4) % 4 == 3) {
+            return new RealIntervalConstant(-1.0, 1.0);
+        }
+        double clo = Math.min(prevFloat(Math.sin(i.getLB())), prevFloat(Math.sin(i.getUB())));
+        double cup = Math.max(nextFloat(Math.sin(i.getLB())), nextFloat(Math.sin(i.getUB())));
 
-        if ((((nup - nlo) % 4) + 4) % 4 == 3) return new RealIntervalConstant(-1.0, 1.0);
-
-        double clo = Math.min(prevFloat(Math.sin(interval.getLB())), prevFloat(Math.sin(interval.getUB())));
-        double cup = Math.max(nextFloat(Math.sin(interval.getLB())), nextFloat(Math.sin(interval.getUB())));
-
-        if ((((nup - nlo) % 4) + 4) % 4 == 0) return new RealIntervalConstant(clo, cup);
-
+        if ((((nup - nlo) % 4) + 4) % 4 == 0) {
+            return new RealIntervalConstant(clo, cup);
+        }
         RealInterval mask = sinRange(((nlo % 4) + 4) % 4, ((nup % 4) + 4) % 4);
-        if (mask.getLB() < clo) clo = mask.getLB();
-        if (mask.getUB() > cup) cup = mask.getUB();
-
+        if (mask.getLB() < clo) {
+            clo = mask.getLB();
+        }
+        if (mask.getUB() > cup) {
+            cup = mask.getUB();
+        }
         return new RealIntervalConstant(clo, cup);
     }
 
-    public static RealInterval asin_wrt(RealInterval interval, RealInterval res) {
+    /**
+     * Returns an interval that represents the result of a division of 'asin(i)'.
+     * 'res' is the one that will intersect the resulting interval
+     * and is given to provide sharpest interval.
+     * @param i an interval
+     * @param res an interval
+     * @return an interval that represents the result of the division : 'asin(i)'.
+     */
+    public static RealInterval asin_wrt(RealInterval i, RealInterval res) {
         double retSup = Double.POSITIVE_INFINITY, retInf = Double.NEGATIVE_INFINITY;
-        double asinl = prevFloat(Math.asin(interval.getLB()));
-        double asinu = nextFloat(Math.asin(interval.getUB()));
+        double asinl = prevFloat(Math.asin(i.getLB()));
+        double asinu = nextFloat(Math.asin(i.getUB()));
 
         // Lower bound
         int modSup = (int) Math.floor((res.getLB() + nextFloat(Math.PI)) / prevFloat(2 * Math.PI));
@@ -516,7 +593,7 @@ public class RealUtils {
             decInf = 0.0;
         }
 
-        if (interval.getLB() > -1.0) {
+        if (i.getLB() > -1.0) {
             if ((res.getLB() > nextFloat(nextFloat(-Math.PI) - asinl + decSup)) &&
                     (res.getLB() < prevFloat(asinl + decInf))) {
                 retInf = prevFloat(asinl + decInf);
@@ -527,7 +604,7 @@ public class RealUtils {
             }
         }
 
-        if (interval.getUB() < 1.0) {
+        if (i.getUB() < 1.0) {
             if ((res.getLB() > asinu + decSup) &&
                     (res.getLB() < prevFloat(prevFloat(Math.PI) - asinu) + decInf)) {
                 retInf = prevFloat(prevFloat(Math.PI) - asinu) + decInf;
@@ -548,7 +625,7 @@ public class RealUtils {
             decInf = 0.0;
         }
 
-        if (interval.getLB() > -1.0) {
+        if (i.getLB() > -1.0) {
             if ((res.getUB() > nextFloat(nextFloat(-Math.PI) - asinl + decSup)) &&
                     (res.getUB() < prevFloat(asinl + decInf))) {
                 retSup = nextFloat(nextFloat(-Math.PI) - asinl + decSup);
@@ -559,7 +636,7 @@ public class RealUtils {
             }
         }
 
-        if (interval.getUB() < 1.0) {
+        if (i.getUB() < 1.0) {
             if ((res.getUB() > asinu + decSup) &&
                     (res.getUB() < prevFloat(prevFloat(Math.PI) - asinu) + decInf)) {
                 retSup = asinu + decSup;
@@ -569,10 +646,18 @@ public class RealUtils {
         return new RealIntervalConstant(retInf, retSup);
     }
 
-    public static RealInterval acos_wrt(RealInterval interval, RealInterval res) {
+    /**
+     * Returns an interval that represents the result of a division of 'acos(i)'.
+     * 'res' is the one that will intersect the resulting interval
+     * and is given to provide sharpest.
+     * @param i an interval
+     * @param res an interval
+     * @return an interval that represents the result of the division : 'acos(i)'.
+     */
+    public static RealInterval acos_wrt(RealInterval i, RealInterval res) {
         double retSup = Double.POSITIVE_INFINITY, retInf = Double.NEGATIVE_INFINITY;
-        double acosl = prevFloat(Math.acos(interval.getUB()));
-        double acosu = nextFloat(Math.acos(interval.getLB()));
+        double acosl = prevFloat(Math.acos(i.getUB()));
+        double acosu = nextFloat(Math.acos(i.getLB()));
 
         // Lower bound
         int modSup = (int) Math.floor(res.getLB() / prevFloat(2 * Math.PI));
@@ -589,7 +674,7 @@ public class RealUtils {
             decInf = 0.0;
         }
 
-        if (interval.getUB() < 1.0) {
+        if (i.getUB() < 1.0) {
             if ((res.getLB() > nextFloat(decSup - acosl)) &&
                     (res.getLB() < prevFloat(decInf + acosl))) {
                 retInf = prevFloat(decInf + acosl);
@@ -600,7 +685,7 @@ public class RealUtils {
             }
         }
 
-        if (interval.getLB() > -1.0) {
+        if (i.getLB() > -1.0) {
             if ((res.getLB() > nextFloat(acosu + decSup)) &&
                     (res.getLB() < prevFloat(2 * prevFloat(Math.PI) - acosu + decInf))) {
                 retInf = prevFloat(2 * prevFloat(Math.PI) - acosu + decInf);
@@ -621,7 +706,7 @@ public class RealUtils {
             decInf = 0.0;
         }
 
-        if (interval.getUB() < 1.0) {
+        if (i.getUB() < 1.0) {
             if ((res.getUB() > nextFloat(decSup - acosl)) &&
                     (res.getUB() < prevFloat(decInf + acosl))) {
                 retSup = nextFloat(decSup - acosl);
@@ -632,7 +717,7 @@ public class RealUtils {
             }
         }
 
-        if (interval.getLB() > -1.0) {
+        if (i.getLB() > -1.0) {
             if ((res.getUB() > nextFloat(acosu + decSup)) &&
                     (res.getUB() < prevFloat(2 * prevFloat(Math.PI) - acosu + decInf))) {
                 retSup = nextFloat(acosu + decSup);
