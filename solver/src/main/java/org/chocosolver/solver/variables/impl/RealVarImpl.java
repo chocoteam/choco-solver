@@ -51,8 +51,7 @@ public class RealVarImpl extends AbstractVariable implements RealVar {
 
     @Override
     public void silentlyAssign(RealInterval bounds) {
-        this.LB.set(bounds.getLB());
-        this.UB.set(bounds.getUB());
+	silentlyAssign(bounds.getLB(), bounds.getUB());
     }
 
     @Override
