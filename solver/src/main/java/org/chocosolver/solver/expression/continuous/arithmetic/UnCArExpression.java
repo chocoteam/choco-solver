@@ -16,7 +16,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.objects.RealInterval;
 import org.chocosolver.util.tools.RealUtils;
-import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -95,14 +94,24 @@ public class UnCArExpression implements CArExpression {
                     model.realIbexGenericConstraint("{0}=ln({1})", me, v).post();
                     break;
                 case SQR:
-                    double[] bounds = VariableUtils.boundsForMultiplication(v, v);
-                    me = model.realVar(bounds[0], bounds[1], p);
+                    RealInterval res2 = RealUtils.iPower(v, 2);
+                    me = model.realVar(res2.getLB(), res2.getUB(), p);
                     model.realIbexGenericConstraint("{0}={1}^2", me, v).post();
                     break;
                 case SQRT:
-                    me = model.realVar(Math.min(Math.sqrt(v.getLB()), Math.sqrt(v.getUB())),
-                            Math.max(Math.sqrt(v.getLB()), Math.sqrt(v.getUB())), p);
+                    RealInterval res2_ = RealUtils.iRoot(v, 2);
+                    me = model.realVar(res2_.getLB(), res2_.getUB(), p);
                     model.realIbexGenericConstraint("{0}=sqrt({1})", me, v).post();
+                    break;
+                case CUB:
+                    RealInterval res3 = RealUtils.iPower(v, 2);
+                    me = model.realVar(res3.getLB(), res3.getUB(), p);
+                    model.realIbexGenericConstraint("{0}={1}^3", me, v).post();
+                    break;
+                case CBRT:
+                    RealInterval res3_ = RealUtils.iRoot(v, 2);
+                    me = model.realVar(res3_.getLB(), res3_.getUB(), p);
+                    model.realIbexGenericConstraint("{0}=cbrt({1})", me, v).post();
                     break;
                 case COS:
                     me = model.realVar(-1.0, 1.0, p);
@@ -178,6 +187,12 @@ public class UnCArExpression implements CArExpression {
             case SQRT:
                 res = RealUtils.iRoot(e, 2);
                 break;
+            case CUB:
+                res = RealUtils.iPower(e, 3);
+                break;
+            case CBRT:
+                res = RealUtils.iRoot(e, 3);
+                break;
             case ABS:
                 double linf = e.getLB();
                 double lsup = e.getUB();
@@ -226,6 +241,12 @@ public class UnCArExpression implements CArExpression {
                 break;
             case SQRT:
                 res = RealUtils.iPower(this, 2);
+                break;
+            case CUB:
+                res = RealUtils.iRoot(this, 3, e);
+                break;
+            case CBRT:
+                res = RealUtils.iPower(this, 3);
                 break;
             case ABS:
                 res = new RealIntervalConstant(-this.getUB(), this.getUB());

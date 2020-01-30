@@ -245,6 +245,22 @@ public class ExpressionTest {
         eval(model, x.sqrt().eq(y), 1);
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void test201() {
+        Model model = new Model();
+        RealVar x = model.realVar("x", 2, 4, 0.1d);
+        RealVar y = model.realVar("y", 0, 8, 0.1d);
+        eval(model, x.cub().eq(y), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test202() {
+        Model model = new Model();
+        RealVar x = model.realVar("x", 0, 8, 0.1d);
+        RealVar y = model.realVar("y", 2, 4, 0.1d);
+        eval(model, x.cbrt().eq(y), 1);
+    }
+
 
     @Test(groups = "1s", timeOut = 60000)
     public void test21() {

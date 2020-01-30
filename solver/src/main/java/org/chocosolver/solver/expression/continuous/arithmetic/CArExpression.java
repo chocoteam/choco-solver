@@ -119,6 +119,11 @@ public interface CArExpression extends RealInterval {
         SQR {
         },
         /**
+         * cubic operator
+         */
+        CUB {
+        },
+        /**
          * power operator
          */
         POW {
@@ -152,6 +157,11 @@ public interface CArExpression extends RealInterval {
          * square root operator
          */
         SQRT {
+        },
+        /**
+         * cubic root operator
+         */
+        CBRT {
         },
         /**
          * cosine operator
@@ -391,6 +401,20 @@ public interface CArExpression extends RealInterval {
      */
     default CArExpression sqrt() {
         return new UnCArExpression(Operator.SQRT, this);
+    }
+
+    /**
+     * @return return the expression "x^3" where this is "x"
+     */
+    default CArExpression cub() {
+        return new UnCArExpression(Operator.CUB, this);
+    }
+
+    /**
+     * @return return the expression "cbrt(x)" where this is "x"
+     */
+    default CArExpression cbrt() {
+        return new UnCArExpression(Operator.CBRT, this);
     }
 
     /**
