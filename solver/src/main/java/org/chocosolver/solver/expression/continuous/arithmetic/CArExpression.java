@@ -32,11 +32,6 @@ import java.util.TreeSet;
 public interface CArExpression extends RealInterval {
 
     /**
-     * A default empty array
-     */
-    CArExpression[] NO_CHILD = new CArExpression[0];
-
-    /**
      * Return the associated model
      *
      * @return a Model object
@@ -50,16 +45,38 @@ public interface CArExpression extends RealInterval {
 
     /**
      * Projects computed bounds to the sub expressions.
-     * @param cause
+     * @param cause reference to the instance of
+     * {@link org.chocosolver.solver.expression.continuous.relational.PropEquation} involving this
      */
     void project(ICause cause) throws ContradictionException;
 
+    /**
+     * Collects real variables involved in this expression and add them into 'set'.
+     * @param set an ordered set of involved real variables
+     */
     void collectVariables(TreeSet<RealVar> set);
 
+    /**
+     * Collects sub-expressions composing this expression and add them to 'list'.
+     * @param list list of sub-expressions of this.
+     */
     void subExps(List<CArExpression> list);
 
+    /**
+     * Considering 'var' and this expression,
+     * fills 'wx' with sub-expressions involving 'var' and
+     * fills 'wox' with sub-expressions not involving 'var'.
+     * @param var a real variable
+     * @param wx list of sub-expressions involving 'var'
+     * @param wox list of sub-expressions not involving 'var'
+     * @return 'true' if this expression involves 'var'.
+     */
     boolean isolate(RealVar var, List<CArExpression> wx, List<CArExpression> wox);
 
+    /**
+     * Initializes this expression when this serves as input of
+     * {@link org.chocosolver.solver.expression.continuous.relational.PropEquation}.
+     */
     void init();
 
     /**
