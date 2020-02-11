@@ -117,13 +117,15 @@ public class NogoodFromRestarts implements IMonitorRestart {
         if (decision instanceof IntDecision) {
             IntDecision id = (IntDecision) decision;
             return asLit(
-                nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), id.getDecOp(),
+                nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), 
+                id.getDecOp(),
                 id.getDecisionValue()
             );
         } else if (decision instanceof SetDecision) {
             SetDecision id = (SetDecision) decision;
             return asLit(
-                nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), id.getDecOp(),
+                nogoodStealer.getById(id.getDecisionVariable(), png.getModel()), 
+                id.getDecOp(),
                 id.getDecisionValue()
             );
         } else {
