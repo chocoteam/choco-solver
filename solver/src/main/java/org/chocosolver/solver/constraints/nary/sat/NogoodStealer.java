@@ -87,7 +87,8 @@ public class NogoodStealer {
                 for (int i = 0; i < vars0.length; i++) {
                     if (vars0[i].getId() != vars1[i].getId()
                         || !vars0[i].getName().equals(vars1[i].getName())
-                        || vars0[i].getNbProps() != vars1[i].getNbProps()) {
+                        || vars0[i].getNbProps() != vars1[i].getNbProps()
+                    ) {
                         return false;
                     }
                 }
