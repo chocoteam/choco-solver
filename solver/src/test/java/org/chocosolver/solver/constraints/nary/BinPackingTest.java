@@ -9,12 +9,17 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -86,9 +91,38 @@ public class BinPackingTest {
 		}else{
 			model.binPacking(itemBin,itemSize,binLoad,offset).post();
 		}
-		System.out.println(model.getSolver().isSatisfied());
+//		System.out.println(model.getSolver().isSatisfied());
 		model.getSolver().solve();
 		assertEquals(0, model.getSolver().getSolutionCount());
+	}
+
+	@Test(groups="1s", timeOut=60000, dataProvider = "params")
+	public void test4(boolean useNoSumFiltering) {
+		int[] itemSize = new int[]{10, 10, 10, 9, 9, 9, 9, 2, 1};
+		Model model = new Model();
+		IntVar[] itemBin = model.intVarArray(itemSize.length, 0,1);
+		IntVar[] binLoad = model.intVarArray(2, 0, 69);
+
+		try {
+			binLoad[0].updateBounds(34, 35, Cause.Null);
+		} catch(ContradictionException ex) {
+			ex.printStackTrace();
+			Assert.fail();
+		}
+
+		model.post(
+			new Constraint(
+				ConstraintsName.BINPACKING,
+				new PropBinPacking(itemBin, itemSize, binLoad, 0, useNoSumFiltering)
+			)
+		);
+
+		Assert.assertFalse(model.getSolver().solve());
+		if(useNoSumFiltering) {
+			Assert.assertEquals(model.getSolver().getNodeCount(), 0);
+		} else {
+			Assert.assertNotEquals(model.getSolver().getNodeCount(), 0);
+		}
 	}
 
 	private static Constraint bpDecomposition(IntVar[] itemBin, int[] itemSize, IntVar[] binLoad, int offset){
