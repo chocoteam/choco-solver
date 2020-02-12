@@ -176,74 +176,77 @@ public class XCSPParser implements XCallbacks2 {
             return model.intVar(node.arrayOfVals());
         }
         XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
-        ArExpression[] aes = null;
-        ReExpression[] res = null;
         if(type.isLogicalOperator()&& type.arityMax>1 || type.equals(Types.TypeExpr.NOT)){
-            res = extractRe(sons);
-        }else{
-            aes = extractAr(sons);
-        }
-        switch (type) {
-            // arithmetic
+            ReExpression[] res = extractRe(sons);
+            switch (type) {
+                // logical
+                case AND:
+                    return new NaLoExpression(LoExpression.Operator.AND, res);
+                case OR:
+                    return new NaLoExpression(LoExpression.Operator.OR, res);
+                case XOR:
+                    return new BiLoExpression(LoExpression.Operator.XOR, res[0], res[1]);
+                case IFF:
+                    return new NaLoExpression(LoExpression.Operator.IFF, res);
+                case IMP:
+                    return new NaLoExpression(LoExpression.Operator.OR, res);
+                case NOT:
+                    return res[0].not();
+                default:
+                    throw new UnsupportedOperationException("Unknown type : " + type);
+            }
+        } else {
+            ArExpression[] aes = extractAr(sons);
+            switch (type) {
+                // arithmetic
 //            return this == ADD || this == SUB || this == MUL || this == DIV || this == MOD || this == POW || this == DIST;
-            case ADD:
-                return new NaArExpression(ArExpression.Operator.ADD, aes);
-            case SUB:
-                return aes[0].sub(aes[1]);
-            case MUL:
-                return new NaArExpression(ArExpression.Operator.MUL, aes);
-            case MIN:
-                return new NaArExpression(ArExpression.Operator.MIN, aes);
-            case MAX:
-                return new NaArExpression(ArExpression.Operator.MAX, aes);
-            case DIV:
-                return aes[0].div(aes[1]);
-            case MOD:
-                return aes[0].mod(aes[1]);
-            case POW:
-                return aes[0].pow(aes[1]);
-            case DIST:
-                return aes[0].dist(aes[1]);
-            case NEG:
-                return aes[0].neg();
-            case ABS:
-                return aes[0].abs();
-            case SQR:
-                return aes[0].sqr();
-            // relationnal
-            case LT:
-                return aes[0].lt(aes[1]);
-            case LE:
-                return aes[0].le(aes[1]);
-            case GE:
-                return aes[0].ge(aes[1]);
-            case GT:
-                return aes[0].gt(aes[1]);
-            case NE:
-                return aes[0].ne(aes[1]);
-            case EQ:
-                if(aes.length == 2){
-                    return aes[0].eq(aes[1]);
-                }else{
-                    return new NaReExpression(ReExpression.Operator.EQ, aes);
-                }
-            // logical
-            case AND:
-                return new NaLoExpression(LoExpression.Operator.AND, res);
-            case OR:
-                return new NaLoExpression(LoExpression.Operator.OR, res);
-            case XOR:
-                return new BiLoExpression(LoExpression.Operator.XOR, res[0], res[1]);
-            case IFF:
-                return new NaLoExpression(LoExpression.Operator.IFF, res);
-            case IMP:
-                return new NaLoExpression(LoExpression.Operator.OR, res);
-            case NOT:
-                return res[0].not();
-            case IF:
-                return ((ReExpression)aes[0]).ift(aes[1], aes[2]);
-            default:
-                throw new UnsupportedOperationException("Unknown type : " + type);
+                case ADD:
+                    return new NaArExpression(ArExpression.Operator.ADD, aes);
+                case SUB:
+                    return aes[0].sub(aes[1]);
+                case MUL:
+                    return new NaArExpression(ArExpression.Operator.MUL, aes);
+                case MIN:
+                    return new NaArExpression(ArExpression.Operator.MIN, aes);
+                case MAX:
+                    return new NaArExpression(ArExpression.Operator.MAX, aes);
+                case DIV:
+                    return aes[0].div(aes[1]);
+                case MOD:
+                    return aes[0].mod(aes[1]);
+                case POW:
+                    return aes[0].pow(aes[1]);
+                case DIST:
+                    return aes[0].dist(aes[1]);
+                case NEG:
+                    return aes[0].neg();
+                case ABS:
+                    return aes[0].abs();
+                case SQR:
+                    return aes[0].sqr();
+                // relationnal
+                case LT:
+                    return aes[0].lt(aes[1]);
+                case LE:
+                    return aes[0].le(aes[1]);
+                case GE:
+                    return aes[0].ge(aes[1]);
+                case GT:
+                    return aes[0].gt(aes[1]);
+                case NE:
+                    return aes[0].ne(aes[1]);
+                case EQ:
+                    if (aes.length == 2) {
+                        return aes[0].eq(aes[1]);
+                    } else {
+                        return new NaReExpression(ReExpression.Operator.EQ, aes);
+                    }
+                    // logical
+                case IF:
+                    return ((ReExpression)aes[0]).ift(aes[1], aes[2]);
+                default:
+                    throw new UnsupportedOperationException("Unknown type : " + type);
+            }
         }
     }
 

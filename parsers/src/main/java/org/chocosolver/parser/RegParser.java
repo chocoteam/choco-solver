@@ -185,7 +185,9 @@ public abstract class RegParser implements IParser {
         defaultSettings = createDefaultSettings();
         if (settingsFile != null) {
             try {
-                defaultSettings.load(new FileInputStream(settingsFile));
+                FileInputStream fileInputStream = new FileInputStream(settingsFile);
+                defaultSettings.load(fileInputStream);
+                fileInputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
