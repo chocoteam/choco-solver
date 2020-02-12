@@ -9,8 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.sat;
 
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.iseq;
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.ivalue;
+import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.leq;
+
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import java.util.Random;
 import org.chocosolver.sat.SatSolver;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
@@ -22,10 +27,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-
-import static org.chocosolver.solver.constraints.nary.sat.PropNogoods.*;
 
 /**
  * Test class for PropNogoods
@@ -262,8 +263,6 @@ public class PropNogoodsTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testIseq(){
-        Model model = new Model("nogoods");
-        PNG = model.getNogoodStore().getPropNogoods();
         Random rnd = new Random();
         for(int i = 0 ; i < 1_000_000; i++){
             rnd.setSeed(i);
