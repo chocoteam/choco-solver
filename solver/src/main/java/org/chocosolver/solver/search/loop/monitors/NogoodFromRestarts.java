@@ -151,9 +151,9 @@ public class NogoodFromRestarts implements IMonitorRestart {
 
     private int asLit(SetVar var, DecisionOperator<SetVar> op, int val) {
         int l;
-        if (op == DecisionOperatorFactory.makeSetForce()) {
+        if (DecisionOperatorFactory.makeSetForce().equals(op)) {
             l = SatSolver.negated(png.Literal(var, val, true));
-        } else if (op == DecisionOperatorFactory.makeSetRemove()) {
+        } else if (DecisionOperatorFactory.makeSetRemove().equals(op)) {
             l = png.Literal(var, val, true);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
