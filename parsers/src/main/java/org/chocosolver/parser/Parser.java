@@ -59,6 +59,7 @@ public class Parser {
                 return;
             }
         }
+        assert instance != null;
         if (pa == 0) {
             String[] parts = instance.split("\\.");
             for (String part : parts) {

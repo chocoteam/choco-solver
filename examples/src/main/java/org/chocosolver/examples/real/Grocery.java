@@ -73,7 +73,7 @@ public class Grocery extends AbstractProblem {
         int sum = 0;
         long prod = 1;
         for (int i = 0; i < 4; i++) {
-            sum += realitemCost[i].getUB();
+            sum += (int) realitemCost[i].getUB();
             prod *= itemCost[i].getValue();
             System.out.println("item " + i + " : " + itemCost[i].getValue());
         }
