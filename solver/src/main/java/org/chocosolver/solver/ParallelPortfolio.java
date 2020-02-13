@@ -26,11 +26,13 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
 import org.chocosolver.solver.constraints.real.RealConstraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.loop.monitors.NogoodFromRestarts;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
@@ -117,6 +119,9 @@ public class ParallelPortfolio {
     /** whether or not to use default search configurations for the different threads **/
     private boolean searchAutoConf;
 
+    /** This manager is used to synchronize nogood sharing.*/
+    private NogoodStealer manager = NogoodStealer.NONE;
+
     /** Stores whether or not prepare() method has been called */
     private boolean isPrepared = false;
 
@@ -154,6 +159,18 @@ public class ParallelPortfolio {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////          API          //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Calling this method will ensure that workers equipped with a restart policy not only
+     * record nogoods from themselves (based on {@link NogoodFromRestarts}) but also based on
+     * other workers of the portfolio.
+     * @implSpec
+     * It is assumed that all models in this portfolio are equivalent (ie, each variable has
+     * the same ID in each worker).
+     */
+    public void stealNogoodsOnRestarts() {
+        this.manager = new NogoodStealer();
+    }
 
     /**
      * <p>
@@ -384,20 +401,22 @@ public class ParallelPortfolio {
                     solver.setSearch(new DomOverWDeg(ivars,workerID,
                         new IntDomainLast(solution, new IntDomainBest(), null)));
                 }
-                solver.setNoGoodRecordingFromRestarts();
+                solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 1:
                 // ABS  + fast restart + LC
                 solver.setSearch(Search.activityBasedSearch(worker.retrieveIntVars(true)));
-                solver.setNoGoodRecordingFromRestarts();
+                // ABS does not share no good, it restarts too much at the beginning
+                solver.plugMonitor(new NogoodFromRestarts(worker));
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 2:
                 // input order + LC
                 solver.setSearch(Search.inputOrderLBSearch(worker.retrieveIntVars(true)));
+                manager.add(worker);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
             case 3:
@@ -411,15 +430,16 @@ public class ParallelPortfolio {
                     solver.setSearch(lastConflict(solver.getSearch()));
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
                 }
+                manager.add(worker);
                 break;
             case 4:
                 // DWD  + fast restart + COS
                 solver.setSearch(Search.conflictOrderingSearch(Search.domOverWDegSearch(worker.retrieveIntVars(true))));
-                solver.setNoGoodRecordingFromRestarts();
+                solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
-            case 6:
+            case 5:
                 // DWD  + fast restart + LC (+ B2V)
                 if(policy == ResolutionPolicy.SATISFACTION){
                     solver.setSearch(new DomOverWDeg(ivars,workerID, new IntDomainMin()));
@@ -445,20 +465,21 @@ public class ParallelPortfolio {
                             return d > r;
                         })));
                 }
-                solver.setNoGoodRecordingFromRestarts();
+                solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                 solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 solver.setSearch(lastConflict(solver.getSearch()));
                 break;
-            case 7:
+            case 6:
                 if(policy == ResolutionPolicy.SATISFACTION) {
                     // DWD  + very fast restart
                     solver.setSearch(new DomOverWDeg(worker.retrieveIntVars(true), workerID, new IntDomainMin()));
-                    solver.setNoGoodRecordingFromRestarts();
+                    solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                     solver.setLubyRestart(100, new FailCounter(worker, 0), 1000);
                 }else{
                     // occurrence + LC
                     solver.setSearch(Search.intVarSearch(new Occurrence<>(), new IntDomainMin(), worker.retrieveIntVars(true)));
                     solver.setSearch(lastConflict(solver.getSearch()));
+                    manager.add(worker);
                 }
             default:
                 // random search (various seeds) + LNS if optim
@@ -466,6 +487,8 @@ public class ParallelPortfolio {
                 if(policy!=ResolutionPolicy.SATISFACTION){
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
                 }
+                solver.plugMonitor(new NogoodFromRestarts(worker, manager));
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
                 break;
         }
         // complete with set default search

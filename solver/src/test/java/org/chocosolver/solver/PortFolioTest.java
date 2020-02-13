@@ -9,16 +9,18 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
-import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.chocosolver.solver.ModelTest.knapsack;
+import static org.chocosolver.solver.search.strategy.Search.activityBasedSearch;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.chocosolver.solver.ModelTest.knapsack;
-import static org.chocosolver.solver.search.strategy.Search.*;
+import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ProblemMaker;
+import org.testng.Assert;
+import org.testng.annotations.Test;
 
 /**
  * <br/>
@@ -42,6 +44,24 @@ public class PortFolioTest {
 
         Assert.assertEquals(pares.getBestModel().getSolver().getSolutionCount(), 1);
         System.gc();
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void testP11() {
+        ParallelPortfolio pares = new ParallelPortfolio();
+        int n = 6; // number of solvers to use
+        for (int i = 0; i < n; i++) {
+            pares.addModel(ProblemMaker.makeGolombRuler(10));
+        }
+        pares.stealNogoodsOnRestarts();
+        int nbSols = 0;
+        while(pares.solve()){
+            nbSols++;
+        }
+        Model finder = pares.getBestModel();
+        Assert.assertTrue(nbSols > 0);
+        Assert.assertNotNull(finder);
+        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 55);
     }
 
     @Test(groups="10s", timeOut=60000)
