@@ -73,9 +73,8 @@ public class PropBinPacking extends Propagator<IntVar> {
         public void execute(int bin) throws ContradictionException {
             bin -= offset;
             if(bin >= 0 && bin < nbAvailableBins && P[bin].contains(item)) {
-                sumP[bin].add(-itemSize[item]);
                 P[bin].remove(item);
-                binLoad[bin].updateUpperBound(sumP[bin].get(), PropBinPacking.this);
+                binLoad[bin].updateUpperBound(sumP[bin].add(-itemSize[item]), PropBinPacking.this);
             }
         }
     };
@@ -167,8 +166,7 @@ public class PropBinPacking extends Propagator<IntVar> {
     private void removeItemFromBin(int binIdx, int itemIdx) throws ContradictionException {
         if(P[binIdx].contains(itemIdx)) {
             P[binIdx].remove(itemIdx);
-            sumP[binIdx].add(-itemSize[itemIdx]);
-            binLoad[binIdx].updateUpperBound(sumP[binIdx].get(), this);
+            binLoad[binIdx].updateUpperBound(sumP[binIdx].add(-itemSize[itemIdx]), this);
             binsToProcess.set(binIdx);
             if(itemBin[itemIdx].isInstantiated()) {
                 updateRAfterInstantiation(itemBin[itemIdx].getValue() - offset, itemIdx);
@@ -177,16 +175,12 @@ public class PropBinPacking extends Propagator<IntVar> {
     }
 
     protected void updateRAfterInstantiation(int binIdx, int itemIdx) throws ContradictionException {
-        if(!R[binIdx].contains(itemIdx)) {
-            R[binIdx].add(itemIdx);
-            sumR[binIdx].add(itemSize[itemIdx]);
-            binLoad[binIdx].updateLowerBound(sumR[binIdx].get(), this);
+        if(R[binIdx].add(itemIdx)) {
+            binLoad[binIdx].updateLowerBound(sumR[binIdx].add(itemSize[itemIdx]), this);
             binsToProcess.set(binIdx);
             for(int k = 0; k<nbAvailableBins; k++) {
-                if(k != binIdx && P[k].contains(itemIdx)) {
-                    P[k].remove(itemIdx);
-                    sumP[k].add(-itemSize[itemIdx]);
-                    binLoad[k].updateUpperBound(sumP[k].get(), this);
+                if(k != binIdx && P[k].remove(itemIdx)) {
+                    binLoad[k].updateUpperBound(sumP[k].add(-itemSize[itemIdx]), this);
                     binsToProcess.set(k);
                 }
             }
