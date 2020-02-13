@@ -878,26 +878,19 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         for(int j = 1; j<binLoad.length; j++) {
             maxCapa = Math.max(maxCapa, binLoad[j].getUB());
         }
+        int thresholdCapa = (int) Math.ceil(1.0*maxCapa/2);
         List<IntVar> list = new ArrayList<>(itemBin.length);
         for(int i = 0; i<itemBin.length; i++) {
-            if(itemSize[i] > (int) Math.ceil(1.0*maxCapa/2)) {
+            if(itemSize[i] > thresholdCapa) {
                 list.add(itemBin[i]);
             }
-        }
-        Constraint diffConstraint;
-        if(list.size() > 2) {
-            diffConstraint = model.allDifferent(list.toArray(new IntVar[0]));
-        } else if(list.size() == 2) {
-            diffConstraint = model.arithm(list.get(0), "!=", list.get(1));
-        } else {
-            diffConstraint = model.trueConstraint();
         }
 
         return Constraint.merge(
             ConstraintsName.BINPACKING,
             new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
             model.sum(binLoad, "=", sum),
-            diffConstraint
+            model.allDifferent(list.toArray(new IntVar[0]))
         );
     }
 
