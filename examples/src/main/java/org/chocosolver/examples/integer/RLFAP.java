@@ -207,10 +207,9 @@ public class RLFAP extends AbstractProblem {
                 data[i] = domains.get(i);
                 Arrays.sort(data[i]);
             }
-
+            f.close();
             return data;
-        } catch (IOException
-                e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -236,7 +235,7 @@ public class RLFAP extends AbstractProblem {
             for (int i = 0; i < ints.size(); i++) {
                 data[i] = ints.get(i);
             }
-
+            f.close();
             return data;
         } catch (IOException
                 e) {
@@ -268,6 +267,7 @@ public class RLFAP extends AbstractProblem {
             for (int i = 0; i < ints.size(); i++) {
                 data[i] = ints.get(i);
             }
+            f.close();
             return data;
         } catch (IOException
                 e) {

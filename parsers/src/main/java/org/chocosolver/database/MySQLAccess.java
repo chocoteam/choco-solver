@@ -39,8 +39,11 @@ public class MySQLAccess {
     private ResultSet resultSet;
 
     public MySQLAccess(File mysqlProperties) {
+        FileInputStream fileInputStream;
         try {
-            properties.load(new FileInputStream(mysqlProperties));
+            fileInputStream = new FileInputStream(mysqlProperties);
+            properties.load(fileInputStream);
+            fileInputStream.close();
         } catch (Exception e) {
             System.err.println("Unable to load " + mysqlProperties + " file from classpath.\n" + e);
             System.exit(1);
