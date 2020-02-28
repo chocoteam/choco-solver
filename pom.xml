@@ -282,6 +282,14 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.github.danielflower.mavenplugins</groupId>
+                <artifactId>multi-module-maven-release-plugin</artifactId>
+                <version>3.2.4</version>
+                <configuration>
+                    <noChangesAction>FailBuild</noChangesAction>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
