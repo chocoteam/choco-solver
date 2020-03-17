@@ -45,8 +45,8 @@ public class PropNValue extends Propagator<IntVar> {
         }
         list.sort();
         concernedValues = list.toArray();
-        possibleValues = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
-        mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+        possibleValues = SetFactory.makeStoredSet(SetType.BITSET, concernedValues[0], model);
+        mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, concernedValues[0], model);
         witness = new int[concernedValues.length];
         Arrays.fill(witness, -1);
         listForRandomPick = new TIntArrayList();
