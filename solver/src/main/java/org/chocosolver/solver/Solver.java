@@ -346,6 +346,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
+        getMeasures().incDepth();
         // end note
 
         mMeasures.startStopwatch();
@@ -652,6 +653,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             getMeasures().decDepth();
             environment.worldPop();
         }
+        getMeasures().incDepth();
+        assert getMeasures().getCurrentDepth() == dpath.size();
         dpath.synchronize();
     }
 
