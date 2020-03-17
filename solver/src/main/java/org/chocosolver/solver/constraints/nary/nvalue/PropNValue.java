@@ -35,18 +35,17 @@ public class PropNValue extends Propagator<IntVar> {
         super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, true);
         this.nValue = nvalue;
         n = vars.length;
-        TIntArrayList list = new TIntArrayList();
+        TIntHashSet set = new TIntHashSet();
+        int min = Integer.MAX_VALUE;
         for(int i = 0; i<vars.length; i++) {
             for(int value = vars[i].getLB(); value <= vars[i].getUB(); value = vars[i].nextValue(value)) {
-                if(!list.contains(value)) {
-                    list.add(value);
-                }
+                set.add(value);
+                min = Math.min(min, value);
             }
         }
-        list.sort();
-        concernedValues = list.toArray();
-        possibleValues = SetFactory.makeStoredSet(SetType.BITSET, concernedValues[0], model);
-        mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, concernedValues[0], model);
+        concernedValues = set.toArray();
+        possibleValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
+        mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         witness = new int[concernedValues.length];
         Arrays.fill(witness, -1);
         listForRandomPick = new TIntArrayList();
