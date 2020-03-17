@@ -12,6 +12,8 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.util.ArrayList;
+import java.util.List;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
@@ -31,8 +33,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
-import org.chocosolver.solver.constraints.nary.binPacking.PropItemToLoad;
-import org.chocosolver.solver.constraints.nary.binPacking.PropLoadToItem;
+import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
 import org.chocosolver.solver.constraints.nary.channeling.*;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
@@ -869,13 +870,27 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Model model = itemBin[0].getModel();
         // redundant filtering
         int sum = 0;
-        for (int is : itemSize) {
-            sum += is;
+        for (int i = 0; i<itemSize.length; i++) {
+            sum += itemSize[i];
         }
-        return Constraint.merge(ConstraintsName.BINPACKING, new Constraint(ConstraintsName.BINPACKING,
-                        new PropItemToLoad(itemBin, itemSize, binLoad, offset),
-                        new PropLoadToItem(itemBin, itemSize, binLoad, offset)),
-                model.sum(binLoad, "=", sum)
+
+        int maxCapa = binLoad[0].getUB();
+        for(int j = 1; j<binLoad.length; j++) {
+            maxCapa = Math.max(maxCapa, binLoad[j].getUB());
+        }
+        int thresholdCapa = (int) Math.ceil(1.0*maxCapa/2);
+        List<IntVar> list = new ArrayList<>(itemBin.length);
+        for(int i = 0; i<itemBin.length; i++) {
+            if(itemSize[i] > thresholdCapa) {
+                list.add(itemBin[i]);
+            }
+        }
+
+        return Constraint.merge(
+            ConstraintsName.BINPACKING,
+            new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
+            model.sum(binLoad, "=", sum),
+            model.allDifferent(list.toArray(new IntVar[0]))
         );
     }
 

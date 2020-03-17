@@ -193,7 +193,7 @@ public class AirPlaneLanding extends AbstractProblem {
             data[i][1] = sc.nextInt(); // earliest landing time
             data[i][2] = sc.nextInt(); // target landing time
             data[i][3] = sc.nextInt(); // latest landing time
-            Double tt = Double.parseDouble(sc.next(decimalPattern));
+            double tt = Double.parseDouble(sc.next(decimalPattern));
             data[i][4] = (int) Math.ceil(tt); // penalty C per unit of time for landing before target
             tt = Double.parseDouble(sc.next(decimalPattern));
             data[i][5] = (int) Math.ceil(tt); // penalty C per unit of time for landing after target
