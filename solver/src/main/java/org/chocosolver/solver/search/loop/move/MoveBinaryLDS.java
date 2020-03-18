@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -59,7 +59,6 @@ public class MoveBinaryLDS extends MoveBinaryDFS {
     @Override
     public boolean repair(Solver solver) {
         solver.getMeasures().incBackTrackCount();
-        solver.getMeasures().decDepth();
         solver.getEnvironment().worldPop();
         boolean repaired = rewind(solver);
         // increase the discrepancy max, if allowed, when the root node is reached

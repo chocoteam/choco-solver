@@ -15,6 +15,7 @@ Multi-modules and JPMS-ready.
 - Add simplify API for current Solver operations (#659)
 - Remove JSON writer/parser (which was actually partially supported and not maintained)
 - Add a pure java alternative to Ibex (#666)
+- Simplify code for the nValues constraint (using a watching/witnessing reasoning)
 
 ### Deprecated API (to be removed in next release):
 

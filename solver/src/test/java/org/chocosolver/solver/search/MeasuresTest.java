@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -117,7 +117,6 @@ public class MeasuresTest {
         mr1.startStopwatch();
         Thread.sleep(10);
         mr1.incBackTrackCount();
-        mr1.incDepth();
         mr1.incFailCount();
         mr1.incNodeCount();
         mr1.incSolutionCount();

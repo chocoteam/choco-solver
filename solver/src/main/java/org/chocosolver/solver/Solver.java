@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -409,7 +409,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     protected void propagate(boolean left) {
         searchMonitors.beforeDownBranch(left);
-        mMeasures.incDepth();
         try {
             mMeasures.incFixpointCount();
             P.execute(this);
@@ -649,7 +648,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         IEnvironment environment = mModel.getEnvironment();
         while (environment.getWorldIndex() > searchWorldIndex) {
             getMeasures().incBackTrackCount();
-            getMeasures().decDepth();
             environment.worldPop();
         }
         dpath.synchronize();
@@ -1281,7 +1279,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     @Override
     public long getCurrentDepth() {
-        return getMeasures().getCurrentDepth();
+        return getDecisionPath().size();
     }
 
     @Override

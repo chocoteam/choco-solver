@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -52,6 +52,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -1687,11 +1688,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(ConstraintsName.NVALUES,
-                // at least
-                new PropAtLeastNValues(vars, vals, nValues),
-                // at most
-                new PropAtMostNValues(vars, vals, nValues),
-                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules));
+            new PropNValue(vars, nValues),
+            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+        );
     }
 
     /**
