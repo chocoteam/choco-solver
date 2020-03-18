@@ -117,7 +117,6 @@ public class MeasuresTest {
         mr1.startStopwatch();
         Thread.sleep(10);
         mr1.incBackTrackCount();
-        mr1.incDepth();
         mr1.incFailCount();
         mr1.incNodeCount();
         mr1.incSolutionCount();

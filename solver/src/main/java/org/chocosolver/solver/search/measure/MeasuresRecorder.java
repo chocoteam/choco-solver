@@ -124,9 +124,8 @@ public final class MeasuresRecorder extends Measures {
      */
     public final void incNodeCount() {
         nodeCount++;
-        if (depth > maxDepth) {
-            maxDepth = depth;
-        }
+        depth = getCurrentDepth();
+        maxDepth = Math.max(maxDepth, depth);
     }
 
     /**
@@ -171,19 +170,6 @@ public final class MeasuresRecorder extends Measures {
         solutionCount++;
     }
 
-    /**
-     * Increments current depth
-     */
-    public final void incDepth() {
-        depth++;
-    }
-
-    /**
-     * Decrements current depth
-     */
-    public final void decDepth() {
-        depth--;
-    }
 
     /**
      * Update the current search state
