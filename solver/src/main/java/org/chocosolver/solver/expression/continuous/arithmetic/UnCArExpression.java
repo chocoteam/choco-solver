@@ -109,9 +109,9 @@ public class UnCArExpression implements CArExpression {
                     model.realIbexGenericConstraint("{0}={1}^3", me, v).post();
                     break;
                 case CBRT:
-                    RealInterval res3_ = RealUtils.iRoot(v, 2);
+                    RealInterval res3_ = RealUtils.iRoot(v, 3);
                     me = model.realVar(res3_.getLB(), res3_.getUB(), p);
-                    model.realIbexGenericConstraint("{0}=cbrt({1})", me, v).post();
+                    model.realIbexGenericConstraint("{0}={1}^(1/3)", me, v).post();
                     break;
                 case COS:
                     me = model.realVar(-1.0, 1.0, p);
