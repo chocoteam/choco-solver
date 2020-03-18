@@ -1,15 +1,13 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2019, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
 package org.chocosolver.solver.search;
-
-import static org.chocosolver.solver.search.strategy.Search.conflictHistorySearch;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
@@ -19,6 +17,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.Test;
+
+import static org.chocosolver.solver.search.strategy.Search.conflictHistorySearch;
 
 /**
  * @author Jean-Guillaume Fages

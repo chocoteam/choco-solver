@@ -510,7 +510,7 @@ public class Search {
      * @return a strategy that lets Ibex terminates the solving process.
      */
     public static AbstractStrategy ibexSolving(Model model) {
-        return new AbstractStrategy<>(model.getVars()) {
+        return new AbstractStrategy<Variable>(model.getVars()) {
             IbexDecision dec = new IbexDecision(model);
 
             @Override
