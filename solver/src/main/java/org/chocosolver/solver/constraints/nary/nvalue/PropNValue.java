@@ -1,13 +1,17 @@
 /*
-@author Arthur Godet <arth.godet@gmail.com>
-@since 13/03/2020
-*/
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
+
 package org.chocosolver.solver.constraints.nary.nvalue;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.Arrays;
-import java.util.Random;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -20,6 +24,13 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Arrays;
+import java.util.Random;
+
+/**
+ * @author Arthur Godet <arth.godet@gmail.com>
+ * @since 13/03/2020
+*/
 public class PropNValue extends Propagator<IntVar> {
     private IntVar nValue;
     private final int n;
