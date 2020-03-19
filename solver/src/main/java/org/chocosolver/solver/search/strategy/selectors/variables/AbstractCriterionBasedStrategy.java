@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
@@ -25,7 +26,7 @@ import org.chocosolver.util.objects.IntMap;
  * @author Charles Prud'homme
  * @since 26/02/2020.
  */
-public abstract class AbsctractCriterionBasedStrategy extends AbstractStrategy<IntVar> {
+public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<IntVar> {
 
     /**
      * Randomness to break ties
@@ -49,8 +50,8 @@ public abstract class AbsctractCriterionBasedStrategy extends AbstractStrategy<I
      */
     IntMap pid2arity;
 
-    public AbsctractCriterionBasedStrategy(IntVar[] vars, long seed,
-        IntValueSelector valueSelector) {
+    public AbstractCriterionBasedStrategy(IntVar[] vars, long seed,
+                                          IntValueSelector valueSelector) {
         super(vars);
         this.random = new java.util.Random(seed);
         this.valueSelector = valueSelector;
@@ -105,4 +106,22 @@ public abstract class AbsctractCriterionBasedStrategy extends AbstractStrategy<I
     }
 
     protected abstract double weight(IntVar v);
+
+    protected final int futVars(Propagator prop) {
+        int pid = prop.getId();
+        int futVars = pid2arity.get(pid);
+        if (futVars == -1) {
+            futVars = 0;
+            for (int i = 0; i < prop.getNbVars(); i++) {
+                if (!prop.getVar(i).isInstantiated()) {
+                    if (++futVars > 1) {
+                        break;
+                    }
+                }
+            }
+            futVars = prop.arity();
+            pid2arity.put(pid, futVars);
+        }
+        return futVars;
+    }
 }

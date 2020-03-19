@@ -31,7 +31,7 @@ import org.chocosolver.solver.variables.IntVar;
  */
 @SuppressWarnings("rawtypes")
 public class ConflictHistorySearch
-    extends AbsctractCriterionBasedStrategy
+    extends AbstractCriterionBasedStrategy
     implements IMonitorContradiction, IMonitorRestart {
 
     /**
@@ -93,8 +93,7 @@ public class ConflictHistorySearch
             // update q
             q.put(p, (1 - a) * qj + a * r.get(p));
             // update r
-            double rj = r.get(p);
-            r.put(p, 1d / (conflicts - rj + 1));
+            r.put(p, 1d / (conflicts - conflict.get(p) + 1));
             // decrease a
             a = Math.max(0.06, a - STEP);
             // update conflicts
@@ -109,13 +108,7 @@ public class ConflictHistorySearch
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
             Propagator prop = v.getPropagator(i);
-            int pid = prop.getId();
-            int futVars = pid2arity.get(pid);
-            if (futVars == -1) {
-                futVars = prop.arity();
-                pid2arity.put(pid, futVars);
-            }
-            if (futVars > 1) {
+            if (futVars(prop) > 1) {
                 w += q.get(prop) + D;
             }
         }

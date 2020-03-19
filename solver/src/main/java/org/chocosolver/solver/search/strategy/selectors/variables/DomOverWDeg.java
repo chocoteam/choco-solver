@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  * @since 12/07/12
  */
 @SuppressWarnings("rawtypes")
-public class DomOverWDeg extends AbsctractCriterionBasedStrategy implements IMonitorContradiction {
+public class DomOverWDeg extends AbstractCriterionBasedStrategy implements IMonitorContradiction {
 
     /**
      * Map (propagator - weight), where weight is the number of times the propagator fails.
@@ -90,18 +90,8 @@ public class DomOverWDeg extends AbsctractCriterionBasedStrategy implements IMon
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
             Propagator prop = v.getPropagator(i);
-            int pid = prop.getId();
-            // if the propagator has been already evaluated
-            if (pid2arity.get(pid) > -1) {
+            if (futVars(prop) > 1) {
                 w += p2w.get(prop.getId());
-            } else {
-                // the arity of this propagator is not yet known
-                int futVars = prop.arity();
-                assert futVars > -1;
-                pid2arity.put(pid, futVars);
-                if (futVars > 1) {
-                    w += p2w.get(prop.getId());
-                }
             }
         }
         return w * 1.d / v.getDomainSize();
