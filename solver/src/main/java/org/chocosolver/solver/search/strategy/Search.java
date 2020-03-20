@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -21,39 +19,16 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IbexDecision;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMax;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMiddle;
-import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.values.RealValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
-import org.chocosolver.solver.search.strategy.selectors.values.SetValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.variables.ActivityBased;
-import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
-import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
-import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
-import org.chocosolver.solver.search.strategy.selectors.variables.GeneralizedMinDomVarSelector;
-import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
-import org.chocosolver.solver.search.strategy.selectors.variables.Random;
-import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.search.strategy.strategy.ConflictOrderingSearch;
-import org.chocosolver.solver.search.strategy.strategy.GreedyBranching;
-import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
-import org.chocosolver.solver.search.strategy.strategy.LastConflict;
-import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
-import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
-import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
+import org.chocosolver.solver.search.strategy.selectors.values.*;
+import org.chocosolver.solver.search.strategy.selectors.variables.*;
+import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Search {
 
@@ -104,7 +79,7 @@ public class Search {
             throw new UnsupportedOperationException(
                 "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
-        return new LastConflict(formerSearch.getVariables()[0].getModel(), formerSearch, k);
+        return new LastConflict<>(formerSearch.getVariables()[0].getModel(), formerSearch, k);
     }
 
     /**
@@ -337,6 +312,18 @@ public class Search {
     public static AbstractStrategy<IntVar> activityBasedSearch(IntVar... vars) {
         return new ActivityBased(vars);
     }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Conflict History</code>
+     * and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     */
+    public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
+        return new ConflictHistorySearch(vars, 0, new IntDomainMin());
+    }
+
 
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in - the domain in case

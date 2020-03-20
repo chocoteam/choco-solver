@@ -7,7 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-
 package org.chocosolver.solver.constraints.nary.nvalue;
 
 import gnu.trove.list.array.TIntArrayList;
