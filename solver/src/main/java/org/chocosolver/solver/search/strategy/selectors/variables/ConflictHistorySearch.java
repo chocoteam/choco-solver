@@ -49,10 +49,6 @@ public class ConflictHistorySearch
      */
     private double a = .4d;
     /**
-     * Reward value of each propagator.
-     */
-    private final TObjectDoubleMap<Propagator> r = new TObjectDoubleHashMap<>(10, 0.5f, 0.0);
-    /**
      * The number of conflicts which have occurred since the beginning of the search.
      */
     private int conflicts = 0;
@@ -90,10 +86,10 @@ public class ConflictHistorySearch
         if (cex.c instanceof Propagator) {
             Propagator p = (Propagator) cex.c;
             double qj = q.get(p);
+            // compute the reward
+            double r = 1d / (conflicts - conflict.get(p) + 1);
             // update q
-            q.put(p, (1 - a) * qj + a * r.get(p));
-            // update r
-            r.put(p, 1d / (conflicts - conflict.get(p) + 1));
+            q.put(p, (1 - a) * qj + a * r);
             // decrease a
             a = Math.max(0.06, a - STEP);
             // update conflicts
