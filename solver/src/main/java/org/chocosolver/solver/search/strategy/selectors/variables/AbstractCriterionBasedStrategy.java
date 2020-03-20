@@ -119,7 +119,6 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
                     }
                 }
             }
-            futVars = prop.arity();
             pid2arity.put(pid, futVars);
         }
         return futVars;
