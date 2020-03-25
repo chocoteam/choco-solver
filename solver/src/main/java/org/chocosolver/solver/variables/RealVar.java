@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
+import org.chocosolver.util.objects.RealInterval;
 
 /**
  * An interface to declare variable for continuous constraints (solved using IBEX).
@@ -21,20 +22,6 @@ import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
  * @since 18/07/12
  */
 public interface RealVar extends Variable, CArExpression {
-
-    /**
-     * Retrieves the lower bound of the variable
-     *
-     * @return the lower bound
-     */
-    double getLB();
-
-    /**
-     * Retrieves the upper bound of the variable
-     *
-     * @return the upper bound
-     */
-    double getUB();
 
     /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
@@ -103,4 +90,7 @@ public interface RealVar extends Variable, CArExpression {
         return this;
     }
 
+    void silentlyAssign(RealInterval bounds);
+
+    void silentlyAssign(double lb, double ub);
 }

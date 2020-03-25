@@ -15,6 +15,8 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
 import org.chocosolver.solver.variables.RealVar;
 
+import java.util.TreeSet;
+
 /**
  * Binary relational expression over continuous expressions
  * <p>
@@ -72,6 +74,14 @@ public class BiCReExpression implements CReExpression {
         throw new SolverException("Unexpected case");
     }
 
+
+    @Override
+    public Constraint equation() {
+        CArExpression expression = e1.sub(e2);
+        TreeSet<RealVar> vars = new TreeSet<>();
+        expression.collectVariables(vars);
+        return new Constraint("Equation", new PropEquation(vars.toArray(new RealVar[0]),expression, op));
+    }
 
     @Override
     public String toString() {

@@ -9,12 +9,6 @@
  */
 package org.chocosolver.solver.constraints.real;
 
-import static java.lang.System.out;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.Random;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -29,6 +23,13 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Random;
+
+import static java.lang.System.out;
+import static org.testng.Assert.assertEquals;
 
 /**
  * -Djava.library.path=-Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.3.1/__build__/plugins/java
@@ -171,6 +172,24 @@ public class RealTest {
 
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+        public void testFreemajb2b() {
+        Model model = new Model();
+
+        RealVar x = model.realVar("x", 0.0, 5.0, 0.001);
+        out.println("Before solving:");
+
+        x.gt(1.4142).equation().post();
+        x.lt(3.1416).equation().post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }
+        out.printf("%s\n", model.toString());
+
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testFreemajb3() {
         Model model = new Model();
@@ -215,6 +234,48 @@ public class RealTest {
         while (solver.solve()) ;
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+        public void testHM1a() {
+        Model model = new Model("Test model");
+        double precision = 1.e-6;
+        double MAX_VALUE = 10000;
+        double MIN_VALUE = -10000;
+        RealVar weldingCurrent = model.realVar("weldingCurrent", 120, 250, precision);
+        RealVar MTBF_WS = model.realVar("MTBF_WS", MIN_VALUE, MAX_VALUE, precision);
+        RealVar MTBF_MT = model.realVar("MTBF_MT", MIN_VALUE, MAX_VALUE, precision);
+        RealVar global_min = model.realVar("global_min", MIN_VALUE, MAX_VALUE, precision);
+        Solver solver = model.getSolver();
+        weldingCurrent.mul(.5).eq(MTBF_WS).equation().post();
+        weldingCurrent.add(100).eq(MTBF_MT).equation().post();
+        global_min.eq(weldingCurrent.min(MTBF_WS).min(MTBF_MT)).equation().post();
+        model.setPrecision(precision);
+        model.setObjective(false, global_min);
+        solver.showDecisions(() -> "" + solver.getNodeCount());
+        while (solver.solve()) ;
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+            public void testHM1b() {
+        Model model = new Model("Test model");
+        double precision = 1.e-6;
+        double MAX_VALUE = 10000;
+        double MIN_VALUE = -10000;
+        RealVar weldingCurrent = model.realVar("weldingCurrent", 120, 250, precision);
+        RealVar MTBF_WS = model.realVar("MTBF_WS", MIN_VALUE, MAX_VALUE, precision);
+        RealVar MTBF_MT = model.realVar("MTBF_MT", MIN_VALUE, MAX_VALUE, precision);
+        RealVar global_min = model.realVar("global_min", MIN_VALUE, MAX_VALUE, precision);
+        Solver solver = model.getSolver();
+
+        weldingCurrent.div(2).eq(MTBF_WS).equation().post();
+        weldingCurrent.add(100).eq(MTBF_MT).equation().post();
+        global_min.eq(weldingCurrent.min(MTBF_WS).min(MTBF_MT)).equation().post();
+        model.setPrecision(precision);
+        model.setObjective(false, global_min);
+        solver.showDecisions(() -> "" + solver.getNodeCount());
+        while (solver.solve()) ;
+    }
+
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testHM2() {
         Model model = new Model("Default model");
@@ -225,6 +286,25 @@ public class RealTest {
         Solver solver = model.getSolver();
         model.realIbexGenericConstraint("932.6-(8.664*{0})+(0.02678*({0}^2))-(0.000028*({0}^3)) = {1}", current, MTBF_MT).post();
         model.realIbexGenericConstraint("min(20,{0}) = {1}", MTBF_MT, MTBF).post();//MTBF;
+        model.setPrecision(precision);
+        model.setObjective(false, MTBF);
+        solver.solve();
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = UnsupportedOperationException.class)
+        public void testHM2a() {
+        Model model = new Model("Default model");
+        double precision = 1.e-1;
+        RealVar current = model.realVar("current", 121, 248, precision);
+        RealVar MTBF = model.realVar("MTBF", 0, 300, precision);
+        RealVar MTBF_MT = model.realVar("MTBF_MT", 0, 200, precision);
+        Solver solver = model.getSolver();
+        model.realVar(932.6)
+                .sub(current.mul(8.664))
+                .add(model.realVar(0.02678).mul(current.pow(2)))
+                .add(model.realVar(0.000028).mul(current.pow(3)))
+                .eq(MTBF_MT).post();
+        MTBF_MT.min(20).eq(MTBF).post();
         model.setPrecision(precision);
         model.setObjective(false, MTBF);
         solver.solve();
@@ -310,6 +390,51 @@ public class RealTest {
         assertEquals(solver.getSolutionCount(), 10);
     }
 
+    @Test(groups = "1S")
+    public void testJiiTee1a() throws Exception {
+        Model model = new Model("model");
+        RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
+        IntVar ll = model.intVar("ll", 1, 5, false);
+        BoolVar[] dim_A_guards = new BoolVar[5];
+        dim_A_guards[0] = dim_A.eq(150.).reify();
+        dim_A_guards[1] = dim_A.eq(195.).reify();
+        dim_A_guards[2] = dim_A.eq(270.).reify();
+        dim_A_guards[3] = dim_A.eq(370.).reify();
+        dim_A_guards[4] = dim_A.eq(470.).reify();
+
+        Constraint bigA = dim_A.gt(300).equation();
+        Constraint smallA = dim_A.lt(200).equation();
+
+        // The following or does not work.
+        // the first 'and' within 'or' works, the second does not
+        // if the order is reversed, also the results change: the results of the first 'and' are found
+        // How to get these both?
+        model.or(
+                model.and(
+                        bigA,
+                        model.arithm(ll, "<", 3)),
+                model.and(
+                        smallA,
+                        model.arithm(ll, ">=", 3))
+        ).post();
+        model.sum(dim_A_guards, "=", 1).post();
+        LinkedList<Variable> printVars = new LinkedList<Variable>();
+        printVars.add(dim_A);
+        printVars.add(ll);
+        Solver solver = model.getSolver();
+
+        /*try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+        }*/
+        int i = 0;
+        while (solver.solve()) {
+            i++;
+        }
+        assertEquals(solver.getSolutionCount(), 10);
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testPeter() {
         Random ds = new Random();
@@ -341,6 +466,46 @@ public class RealTest {
         while (model.getSolver().solve()) {}
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+        public void testPetera() {
+        Random ds = new Random();
+        Model model = new Model();
+        RealVar[] rv1 = model.realVarArray(10, 0, 10, 0.1d);
+        RealVar[] rv2 = model.realVarArray(10, 0, 10, 0.1d);
+        RealVar opt = model.realVar(0, 100, 0.1d);
+        RealVar srv1 = model.realVar(0, 100, 0.1d);
+        RealVar srv2 = model.realVar(0, 100, 0.1d);
+        BoolVar[] bv1 = model.boolVarArray(10);
+        BoolVar[] bv2 = model.boolVarArray(10);
+        srv1.eq(
+                rv1[0].add(rv1[0]).add(rv1[1]).add(rv1[2]).add(rv1[3]).add(rv1[4])
+                        .add(rv1[5]).add(rv1[6]).add(rv1[7]).add(rv1[8]).add(rv1[9])
+        ).post();
+        srv1.eq(
+                rv2[0].add(rv2[0]).add(rv2[1]).add(rv2[2]).add(rv2[3]).add(rv2[4])
+                        .add(rv2[5]).add(rv2[6]).add(rv2[7]).add(rv2[8]).add(rv2[9])
+        ).post();
+        for (int i = 0; i < 10; ++i) {
+            model.ifThenElse(bv1[i],
+                    rv1[i].eq(ds.nextDouble() * 10.0).equation(),
+                    rv1[i].eq(0.0).equation()
+            );
+            model.ifThenElse(bv2[i],
+                    rv2[i].eq(ds.nextDouble() * 10.0).equation(),
+                    rv2[i].eq(0.0).equation()
+            );
+            model.arithm(bv1[i], "!=", bv2[i]).post();
+        }
+        //NO CRASH
+        //	model.realIbexGenericConstraint("{0}={1}+{2}", opt, srv1, srv2).post();
+        //CRASH
+        opt.eq(srv1.max(srv2)).post();
+        model.setObjective(false, opt);
+
+        while (model.getSolver().solve()) {
+        }
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testJiTee1() throws ContradictionException {
         double[] posA = new double[]{150.0, 195.0, 270.0, 370.0, 470.0};
@@ -363,6 +528,29 @@ public class RealTest {
         }
         model.getSolver().findSolution();
     }
+
+    @Test(groups = "ibex", timeOut = 60000)
+    public void testJiTee1a() {
+        double[] posA = new double[]{150.0, 195.0, 270.0, 370.0, 470.0};
+        Model model = new Model("model");
+        IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
+        double min = 150.0;
+        double max = 470.0;
+        RealVar dim_A = model.realVar("dim_A", min, max, 1.0E-5);
+        BoolVar[] rVarGuards = new BoolVar[posA.length];
+        for (int i = 0; i < posA.length; i++) {
+            rVarGuards[i] = dim_A.eq(posA[i]).reify();
+        }
+        model.sum(rVarGuards, "=", 1).post();
+        dim_A.le(271.).post();
+        model.arithm(load, ">", 400).post();
+        for (int i = 0; i < 500; i++) {
+            dim_A.gt(i);
+            System.gc();
+        }
+        model.getSolver().findSolution();
+    }
+
 
     @Test(groups = "ibex", timeOut = 60000)
     public void testPostUnpost() {
@@ -608,6 +796,24 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
 
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+        public void testMove4a() {
+        Model model = new Model();
+        RealVar[] y = model.realVarArray(3, -10., 10., 1.E-5);
+        y[0].pow(2).mul(y[1]).pow(2).mul(y[2]).pow(2).eq(1).post();
+        y[0].pow(2).eq(y[1].pow(2)).post();
+        y[0].abs().eq(y[1].abs()).post();
+        model.realIbexGenericConstraint(
+                "{0}^2*{1}^2*{2}^2=1;\n" +
+                        "{0}^2={1}^2;\n" +
+                        "abs({0})=abs({2});",
+                y).post();
+        Solver solver = model.getSolver();
+
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 8);
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testMove5() {
         Model model = new Model();
@@ -622,6 +828,21 @@ public class RealTest {
         solver.setSearch(Search.realVarSearch(1.E-1, y));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 100);
+    }
+
+    @Test(groups = "ibex", timeOut = 60000)
+        public void testMove5a() {
+        Model model = new Model();
+        RealVar y = model.realVar(-10., 10., 1.E-1);
+        BoolVar b = model.boolVar();
+        model.and(
+                y.ge(1.).equation(),
+                y.le(2.).equation()
+        ).reifyWith(b);
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.realVarSearch(1.E-1, y));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 101);
     }
 
     @Test(groups="ibex", timeOut=60000)
@@ -653,6 +874,38 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
+    @Test(groups="1s", timeOut=60000)
+    public void testJuha2a() {
+        Model model = new Model("model");
+        IntVar foo = model.intVar("foo", new int[]{0,15, 20});
+        IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
+        RealVar rfoo = model.realVar("rfoo", 0,20, 1e-5);
+        RealVar rwow = model.realVar("rwow", 1,4, 1e-5);
+        model.eq(rfoo, foo).post();
+        model.eq(rwow, wow).post();
+        rfoo.div(rwow).eq(4.5).post();
+        model.arithm(foo, "!=", 10).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(foo, wow));
+        solver.showSolutions();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = UnsupportedOperationException.class)
+    public void testJuha2b() {
+        Model model = new Model("model");
+        IntVar foo = model.intVar("foo", 0, 20);
+        IntVar wow = model.intVar("wow", new int[]{1, 2, 4});
+        RealVar rfoo = model.realIntView(foo, 1E-5);
+        RealVar rwow = model.realIntView(wow, 1E-5);
+        rfoo.div(rwow).eq(4.5).post();
+        model.arithm(foo, "!=", 10).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(foo, wow));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
 
     @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
     public void testJuha3(){
@@ -672,6 +925,27 @@ public class RealTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
+
+    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    public void testJuha3a() {
+        Model model = new Model("model" + Thread.currentThread().getId());
+        IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
+        RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
+        BoolVar[] dim_A_guards = new BoolVar[5];
+        dim_A_guards[0] = dim_A.eq(150.).reify();
+        dim_A_guards[1] = dim_A.eq(195.).reify();
+        dim_A_guards[2] = dim_A.eq(270.).reify();
+        dim_A_guards[3] = dim_A.eq(370.).reify();
+        dim_A_guards[4] = dim_A.eq(470.).reify();
+        model.sum(dim_A_guards, "=", 1).post();
+        RealVar dim_H_asReal = model.realVar(dim_H.getLB(), dim_H.getUB(), 1.0E-5);
+        model.eq(dim_H_asReal, dim_H).post();
+        dim_A.add(dim_H_asReal).gt(2500.).post();
+
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
+    }
+
 
     private static synchronized void build(Ibex ibex){
         ibex.build();
@@ -718,7 +992,25 @@ public class RealTest {
         RealVar z_b = model.realVar("Z_b", 0, 270, 90.0d);
 
         model.post(model.realIbexGenericConstraint("{0}={1}+cos({2})", x_b, x_a, z_a));
-        model.post(model.realIbexGenericConstraint("{0}={1}+sin({2})", y_b, y_a, z_a));
+        model.post(model.realIbexGenericConstraint("{0}={1}+sin({2})", y_b, y_a, z_b));
+        Assert.assertNotNull(model.getSolver().findSolution());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFN1a() {
+        Model model = new Model("Environment generation problem");
+        //A
+        RealVar x_a = model.realVar("X_a", 0, 2, 1.0d);
+        RealVar y_a = model.realVar("Y_a", 0, 2, 1.0d);
+        RealVar z_a = model.realVar("Z_a", 0, 270, 90.0d);
+
+        //A
+        RealVar x_b = model.realVar("X_b", 0, 2, 1.0d);
+        RealVar y_b = model.realVar("Y_b", 0, 2, 1.0d);
+        RealVar z_b = model.realVar("Z_b", 0, 270, 90.0d);
+
+        x_b.eq(x_a.add(z_a.cos())).post();
+        y_b.eq(y_a.add(z_b.sin())).post();
         Assert.assertNotNull(model.getSolver().findSolution());
     }
 
@@ -750,6 +1042,23 @@ public class RealTest {
     }
 
     @Test(groups="ibex", timeOut=60000)
+    public void testRoberto1a() {
+        Model model = new Model();
+        double precision = 1.e-4;
+
+        RealVar var1 = model.realVar("var1", 0.1);
+        RealVar var2 = model.realVar("var2", 0.2);
+        RealVar var3 = model.realVar("var3", -5, 5, precision);
+
+        var1.add(var2).eq(var3).post();
+        
+        Solver solver = model.getSolver();
+
+
+        Assert.assertTrue(solver.solve());
+    }
+
+    @Test(groups="ibex", timeOut=60000)
     public void testRoberto3(){
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
         ibex.add_ctr("{0}+{1}={2}");
@@ -767,6 +1076,26 @@ public class RealTest {
         double domains[] = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
+    }
+
+    @Test(groups = "1s")
+    public void testElt1() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 0., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 5);
+        model.element(x, new double[]{-1., .8, Math.PI, 12.}, y).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(2, model.getSolver().getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void testElt2() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 0., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 5);
+        model.element(x, new double[]{1., 1.0000001, 1.0000002, 1.0000003, 1.0000004}, y).post();
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(5, model.getSolver().getSolutionCount());
     }
 
     @Test(groups = "ibex", timeOut = 60000)

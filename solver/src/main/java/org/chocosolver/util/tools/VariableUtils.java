@@ -9,14 +9,16 @@
  */
 package org.chocosolver.util.tools;
 
-import static java.util.Arrays.stream;
-
-import java.util.Arrays;
-import java.util.stream.IntStream;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.objects.RealInterval;
+
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
+import static java.util.Arrays.stream;
 
 /**
  * <p>
@@ -101,7 +103,8 @@ public class VariableUtils {
      * @return computes the bounds for "x - y"
      */
     public static double[] boundsForSubstraction(RealVar x, RealVar y) {
-        return new double[]{x.getLB() - y.getUB(), x.getUB() - y.getLB()};
+        RealInterval res = RealUtils.sub(x, y);
+        return new double[]{res.getLB(), res.getUB()};
     }
 
 
@@ -125,12 +128,8 @@ public class VariableUtils {
      * @return computes the bounds for "x * y"
      */
     public static double[] boundsForMultiplication(RealVar x, RealVar y) {
-        return bound(
-                x.getLB() * y.getLB(),
-                x.getLB() * y.getUB(),
-                x.getUB() * y.getLB(),
-                x.getUB() * y.getUB()
-        );
+        RealInterval res = RealUtils.mul(x, y);
+        return new double[]{res.getLB(), res.getUB()};
     }
 
     /**
@@ -167,12 +166,8 @@ public class VariableUtils {
      * @return computes the bounds for "x / y"
      */
     public static double[] boundsForDivision(RealVar x, RealVar y) {
-        return bound(
-                x.getLB() / y.getLB(),
-                x.getLB() / y.getUB(),
-                x.getUB() / y.getLB(),
-                x.getUB() / y.getUB()
-        );
+        RealInterval res = RealUtils.odiv(x, y);
+        return new double[]{res.getLB(), res.getUB()};
     }
 
     /**
