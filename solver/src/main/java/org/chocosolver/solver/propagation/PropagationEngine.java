@@ -92,7 +92,7 @@ public class PropagationEngine {
     /**
      * For dynamyc addition, avoid creating a new lambda at each call
      */
-    private final Consumer<Propagator> consumer = new Consumer<>() {
+    private final Consumer<Propagator> consumer = new Consumer<Propagator>() {
         @Override
         public void accept(Propagator propagator) {
             awake_queue.addLast(propagator);
