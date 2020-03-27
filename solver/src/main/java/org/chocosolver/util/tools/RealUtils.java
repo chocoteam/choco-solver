@@ -142,7 +142,7 @@ public class RealUtils {
      * @return an interval that represents the result of the division : 'x / y'.
      */
     public static RealInterval odiv(RealInterval x, RealInterval y) {
-        if (y.getLB() <= 0.0 && y.getUB() >= 0.0) {
+        if (y.getLB() >= 0.0 && y.getUB() <= 0.0) {
             throw new UnsupportedOperationException();
         } else {
             double yl = y.getLB();

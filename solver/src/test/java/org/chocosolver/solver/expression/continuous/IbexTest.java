@@ -10,6 +10,7 @@
 package org.chocosolver.solver.expression.continuous;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.relational.CReExpression;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.Assert;
@@ -394,6 +395,19 @@ public class IbexTest {
         RealVar x = model.realVar("x", 0, 1, 0.1d);
         RealVar y = model.realVar("y", 1, 1, 0.1d);
         eval(model, x.atanh().eq(y), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2() throws ContradictionException {
+        Model model = new Model();
+        RealVar x = model.realVar(360.0, 360.0, 0.0001);
+        RealVar y = model.realVar(0.0, 4.0, 0.0001);
+        RealVar z = model.realVar(0.0, 360.0, 0.0001);
+
+        // It's working on version 4.10.2 of choco-sover but not 4.10.3-SNAPSHOT
+        y.eq(4.0).ibex(.001).post();
+        z.eq(x.div(y)).ibex(.001).post();
+
     }
 
 }
