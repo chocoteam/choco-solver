@@ -85,6 +85,10 @@ public class OperationTrail implements IOperationTrail {
      * Comits a world: merging it with the previous one.
      */
     public void worldCommit(int worldIndex) {
+        final int wsl = worldStartLevels[worldIndex];
+        while (currentLevel > wsl) {
+            valueStack[--currentLevel] = null;
+        }
     }
 
     /**

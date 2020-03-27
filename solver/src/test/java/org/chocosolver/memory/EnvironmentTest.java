@@ -9,6 +9,12 @@
  */
 package org.chocosolver.memory;
 
+import org.chocosolver.memory.trailing.EnvironmentTrailing;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -147,6 +153,169 @@ public class EnvironmentTest {
             Assert.fail();
         }catch (IndexOutOfBoundsException e){}
     }
+    
+    @Test(groups = "1s")
+    public void testConor1() {
+        int N = 10;
+        // 1. Modeling part
+        Model model = new Model("all-interval series of size " + N);
+        // 1.a declare the variables
+        IntVar[] S = model.intVarArray("s", N, 0, N - 1, false);
+        IntVar[] V = model.intVarArray("V", N - 1, 1, N - 1, false);
+        // 1.b post the constraints
+        for (int i = 0; i < N - 1; i++) {
+            model.distance(S[i + 1], S[i], "=", V[i]).post();
+        }
+        model.allDifferent(S).post();
+        model.allDifferent(V).post();
+        S[1].gt(S[0]).post();
+        V[1].gt(V[N - 2]).post();
 
+        // 2. Solving part
+        Solver solver = model.getSolver();
+        // 2.a define a search strategy
+        solver.setSearch(Search.minDomLBSearch(S));
+        solver.solve();
+        model.getEnvironment().worldCommit();
+    }
+
+    @Test(groups = "1s")
+        public void testConor2() {
+        int N = 3;
+        // 1. Modeling part
+        Model model = new Model("all-interval series of size " + N);
+        // 1.a declare the variables
+        IntVar[] S = model.intVarArray("s", N, 0, N - 1, false);
+        model.allDifferent(S, "NEQS").post();
+        // 2. Solving part
+        Solver solver = model.getSolver();
+        // 2.a define a search strategy
+        solver.setSearch(Search.minDomLBSearch(S));
+        solver.showDecisions();
+        solver.solve();
+        model.getEnvironment().worldCommit();
+        while(model.getEnvironment().getWorldIndex()>0){
+            model.getEnvironment().worldPop();
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testConor3() {
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        IStateInt snt = env.makeInt(0);
+        env.worldPush();
+        snt.set(2);
+        env.worldPush();
+        snt.set(4);
+        env.worldPush();
+        snt.set(6);
+        Assert.assertEquals(snt.get(), 6);
+        env.worldCommit();
+        Assert.assertEquals(snt.get(), 6);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), 2);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), 0);
+    }
+
+    @Test(groups = "1s")
+        public void testConor4() {
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        IStateLong snt = env.makeLong(0L);
+        env.worldPush();
+        snt.set(2L);
+        env.worldPush();
+        snt.set(4L);
+        env.worldPush();
+        snt.set(6L);
+        Assert.assertEquals(snt.get(), 6L);
+        env.worldCommit();
+        Assert.assertEquals(snt.get(), 6L);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), 2L);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), 0L);
+    }
+
+    @Test(groups = "1s")
+    public void testConor5() {
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        IStateBool snt = env.makeBool(true);
+        env.worldPush();
+        snt.set(false);
+        env.worldPush();
+        snt.set(true);
+        env.worldPush();
+        snt.set(false);
+        Assert.assertEquals(snt.get(), false);
+        env.worldCommit();
+        Assert.assertEquals(snt.get(), false);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), false);
+        env.worldPop();
+        Assert.assertEquals(snt.get(), true);
+    }
+
+    @Test(groups = "1s")
+        public void testConor6() {
+        EnvironmentTrailing env = new EnvironmentTrailing();
+        final int[] val = {0};
+        env.worldPush();
+        val[0] = 2;
+        env.save(() -> val[0] = 0);
+        env.worldPush();
+        val[0] = 4;
+        env.save(() -> val[0] = 2);
+        env.worldPush();
+        val[0] = 6;
+        env.save(() -> val[0] = 4);
+        Assert.assertEquals(val[0], 6);
+        env.worldCommit();
+        Assert.assertEquals(val[0], 6);
+        env.worldPop();
+        Assert.assertEquals(val[0], 2);
+        env.worldPop();
+        Assert.assertEquals(val[0], 0);
+    }
+
+    @Test(groups = "1s")
+    public void testWorldCommit() {
+        Model model = new Model();
+
+        IntVar a = model.intVar(0, 10);
+        IntVar b = model.intVar(0, 10);
+        a.lt(b).post();
+        model.getEnvironment().worldPush();
+
+
+        IntVar c = model.intVar(0, 10);
+        c.lt(a).post();
+        try {
+            model.getSolver().propagate();
+        } catch (Exception e) {
+        }
+        model.getEnvironment().worldPush();
+
+        b.lt(9).post();
+        try {
+            model.getSolver().propagate();
+        } catch (Exception e) {
+        }
+        model.getEnvironment().worldPush();
+
+        // Commit thrice - all the way back
+        model.getEnvironment().worldCommit();
+        model.getEnvironment().worldCommit();
+        model.getEnvironment().worldCommit();
+
+        try {
+            c.instantiateTo(2, Cause.Null);
+            model.getSolver().propagate();
+            assert b.getLB() == 4 : b;
+            assert b.getUB() == 8 : b;
+        } catch (Exception e) {
+            assert false;
+        }
+    }
 }
 
