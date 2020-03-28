@@ -1485,13 +1485,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * For example:<br/>
      * - vars= (<4,2,2>,<2,3,1>,<4,2,1><1,3,0>)<br/>
      * - SORTEDvars= (<1,3,0>,<2,3,1>,<4,2,2>,<4,2,1>)<br/>
-     * - PERMvars= (2,1,3,0)<br/>
+     * - PERMvars= (4,2,1,3)<br/>
      * - K = 2<br/>
      *
      * @param vars       a tuple of array of variables
      * @param PERMvars   array of permutation variables, domains should be [1,vars.length]  -- Can be null
      * @param SORTEDvars a tuple of array of variables sorted in increasing order
-     * @param K          key perfixes size (0 &le; k &le; m, where m is the size of the array of variable)
+     * @param K          key prefix size (0 &le; k &le; m, where m is the size of the array of variable)
      * @return a keySort constraint
      */
     default Constraint keySort(IntVar[][] vars, IntVar[] PERMvars, IntVar[][] SORTEDvars, int K) {
