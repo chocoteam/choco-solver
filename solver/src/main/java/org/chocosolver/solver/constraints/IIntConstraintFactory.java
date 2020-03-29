@@ -1483,7 +1483,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <p>
      * <p>
      * For example:<br/>
-     * - vars= (<4,2,2>,<2,3,1>,<4,2,1><1,3,0>)<br/>
+     * - vars= (<4,2,2>,<2,3,1>,<4,2,1>,<1,3,0>)<br/>
      * - SORTEDvars= (<1,3,0>,<2,3,1>,<4,2,2>,<4,2,1>)<br/>
      * - PERMvars= (4,2,1,3)<br/>
      * - K = 2<br/>
