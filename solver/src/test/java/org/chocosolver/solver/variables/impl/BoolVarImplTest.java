@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -159,6 +161,18 @@ public class BoolVarImplTest {
         Assert.assertEquals(1, rit.max());
         rit.previous();
         Assert.assertFalse(rit.hasPrevious());
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testIterator() throws Exception {
+        setUp();
+        Iterator<Integer> iter = var.iterator();
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertEquals(iter.next().intValue(), 0);
+        Assert.assertTrue(iter.hasNext());
+        Assert.assertEquals(iter.next().intValue(), 1);
+        Assert.assertFalse(iter.hasNext());
+        Assert.assertThrows(NoSuchElementException.class, () -> iter.next());
     }
 
     @Test(groups="1s", timeOut=60000)

@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.iterators;
 
+import java.util.NoSuchElementException;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Iterator;
@@ -82,6 +83,9 @@ public class IntVarValueIterator implements Iterator<Integer> {
 	@Override
 	public Integer next() {
 		value = var.nextValue(value);
+		if(value > ub) {
+			throw new NoSuchElementException("IntVarValueIterator for IntVar "+var+" has no more element");
+		}
 		return value;
 	}
 }
