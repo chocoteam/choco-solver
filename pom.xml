@@ -11,7 +11,7 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
@@ -54,6 +54,7 @@
             <url>https://spdx.org/licenses/BSD-4-Clause.html</url>
         </license>
     </licenses>
+
     <developers>
         <developer>
             <name>Charles Prud'homme</name>
@@ -67,6 +68,12 @@
             <email>jg.fages@cosling.com</email>
             <organization>COSLING S.A.S.</organization>
             <organizationUrl>http://www.cosling.com</organizationUrl>
+        </developer>
+        <developer>
+            <name>Arthur Godet</name>
+            <email>arth.godet@gmail.com</email>
+            <organization>TASC, LS2N CNRS UMR 6241</organization>
+            <organizationUrl>https://www.imt-atlantique.fr/fr/recherche-et-innovation/laboratoires/ls2n</organizationUrl>
         </developer>
     </developers>
 
@@ -138,6 +145,30 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>noIbex</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <version>3.0.0-M4</version>
+                        <configuration>
+                            <groups>1s,10s,checker</groups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -173,6 +204,53 @@
                                     <exclude>module-info.java</exclude>
                                 </excludes>
                             </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.1.1</version>
+                    <configuration>
+                        <configLocation>checkstyle.xml</configLocation>
+                        <encoding>UTF-8</encoding>
+                        <consoleOutput>false</consoleOutput>
+                        <failsOnError>false</failsOnError>
+                        <linkXRef>false</linkXRef>
+                        <excludes>**/module-info.java</excludes>
+                        <violationIgnore>AtclauseOrder,
+                            InvalidJavadocPosition,
+                            JavadocBlockTagLocation,
+                            JavadocContentLocation,
+                            JavadocMethod,
+                            JavadocPackage,
+                            JavadocParagraph,
+                            JavadocStyle,
+                            JavadocTagContinuationIndentation,
+                            JavadocType,
+                            JavadocVariable,
+                            MissingJavadocMethod,
+                            MissingJavadocPackage,
+                            MissingJavadocType,
+                            NonEmptyAtclauseDescription,
+                            SingleLineJavadoc,
+                            SummaryJavadoc,
+                            WriteTag</violationIgnore>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>[8.31,)</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
                         </execution>
                     </executions>
                 </plugin>
@@ -261,6 +339,9 @@
                 <version>3.1.0</version>
                 <configuration>
                     <doclint>none</doclint>
+                    <sourceFileExcludes>
+                        <sourceFileExclude>module-info.java</sourceFileExclude>
+                    </sourceFileExcludes>
                 </configuration>
             </plugin>
             <plugin>
@@ -282,7 +363,168 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.4</version>
+            </plugin>
         </plugins>
     </build>
+
+    <!-- =============================================================== -->
+    <!-- Gestion des rapports -->
+    <!-- =============================================================== -->
+    <reporting>
+        <plugins>
+            <!-- ===== Rapport d'information général sur le projet ===== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>index</report>
+                            <report>summary</report>
+                            <report>plugins</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <!-- ===== Rapport sur les tests ===== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>2.20</version>
+                <configuration>
+                    <linkXRef>false</linkXRef>
+                </configuration>
+                <!-- reportSet d'agrégation des rapports des sous-projets (modules) -->
+                <reportSets>
+                    <reportSet>
+                        <id>aggregate</id>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                        <!-- ne pas exécuter ce sous-rapport dans les sous-projets -->
+                        <inherited>false</inherited>
+                        <configuration>
+                            <aggregate>true</aggregate>
+                        </configuration>
+                    </reportSet>
+
+                    <!-- reportSet non agrégé, exécuté dans tous les sous-projets (modules) -->
+                    <reportSet>
+                        <id>modules</id>
+                        <!-- exécuter ce sous-rapport dans les sous-projets -->
+                        <inherited>true</inherited>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                        <configuration>
+                            <aggregate>false</aggregate>
+                        </configuration>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <!-- ===== Rapport d'analyse de couverture du code par Jacoco ===== -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- select non-aggregate reports -->
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <!-- ===== Rapport d'analyse du code par Checkstyle ===== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.1.1</version>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <encoding>UTF-8</encoding>
+                    <consoleOutput>false</consoleOutput>
+                    <failsOnError>false</failsOnError>
+                    <linkXRef>false</linkXRef>
+                    <excludes>**/module-info.java</excludes>
+                    <violationIgnore>AtclauseOrder,
+                        InvalidJavadocPosition,
+                        JavadocBlockTagLocation,
+                        JavadocContentLocation,
+                        JavadocMethod,
+                        JavadocPackage,
+                        JavadocParagraph,
+                        JavadocStyle,
+                        JavadocTagContinuationIndentation,
+                        JavadocType,
+                        JavadocVariable,
+                        MissingJavadocMethod,
+                        MissingJavadocPackage,
+                        MissingJavadocType,
+                        NonEmptyAtclauseDescription,
+                        SingleLineJavadoc,
+                        SummaryJavadoc,
+                        WriteTag</violationIgnore>
+                </configuration>
+                <reportSets>
+                    <!-- reportSet exécuté dans tous les modules -->
+                    <reportSet>
+                        <reports>
+                            <report>checkstyle</report>
+                        </reports>
+                    </reportSet>
+                    <!-- reportSet d'agrégation des rapports des sous-modules -->
+                    <reportSet>
+                        <id>checkstyle-aggregate</id>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <skipExec>true</skipExec>
+                        </configuration>
+                        <reports>
+                            <report>checkstyle-aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <!-- ===== Génération de la Javadoc ===== -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <source>8</source>
+<!--                    <sourceFileExcludes>-->
+<!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
+<!--                    </sourceFileExcludes>-->
+                </configuration>
+                <reportSets>
+                    <!-- reportSet exécuté dans tous les modules -->
+                    <reportSet>
+                        <reports>
+                            <report>javadoc</report>
+                        </reports>
+                    </reportSet>
+                    <!-- reportSet d'agrégation des rapports des sous-modules -->
+                    <reportSet>
+                        <id>aggregate</id>
+                        <inherited>false</inherited>
+                        <reports>
+                            <report>aggregate</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>
