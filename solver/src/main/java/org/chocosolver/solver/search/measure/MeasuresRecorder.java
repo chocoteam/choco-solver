@@ -61,6 +61,10 @@ public final class MeasuresRecorder extends Measures {
         return super.getTimeCountInNanoSeconds();
     }
 
+    public void updateTimeToBestSolution() {
+        timeToBestSolution = currentNanoTime.getAsLong();
+    }
+
     /**
      * Start the stopwatch, to compute resolution time
      *

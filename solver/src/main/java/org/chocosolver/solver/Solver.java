@@ -490,7 +490,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         feasible = TRUE;
         mMeasures.incSolutionCount();
-        objectivemanager.updateBestSolution();
+        if(mModel.getResolutionPolicy() == ResolutionPolicy.SATISFACTION && mMeasures.getSolutionCount() == 1) {
+            mMeasures.updateTimeToBestSolution();
+        } else if(mModel.getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
+            boolean bestSolutionHasBeenUpdated = objectivemanager.updateBestSolution();
+            if(bestSolutionHasBeenUpdated) {
+                mMeasures.updateTimeToBestSolution();
+            }
+        }
         searchMonitors.onSolution();
         jumpTo = 1;
         action = repair;
@@ -1221,6 +1228,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         return getMeasures().getTimeCountInNanoSeconds();
     }
 
+    @Override
+    public long getTimeToBestSolutionInNanoSeconds() {
+        return getMeasures().getTimeToBestSolutionInNanoSeconds();
+    }
 
     @Override
     public long getReadingTimeCountInNanoSeconds() {

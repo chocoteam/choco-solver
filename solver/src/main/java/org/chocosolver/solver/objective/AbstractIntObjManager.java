@@ -39,23 +39,30 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     }
 
     @Override
-    public synchronized void updateBestLB(Number lb) {
+    public synchronized boolean updateBestLB(Number lb) {
         if (bestProvedLB.intValue() < lb.intValue()) {
             bestProvedLB = lb;
+            return true;
         }
+        return false;
     }
 
     @Override
-    public synchronized void updateBestUB(Number ub) {
+    public synchronized boolean updateBestUB(Number ub) {
         if (bestProvedUB.intValue() > ub.intValue()) {
             bestProvedUB = ub;
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void updateBestSolution() {
-        if(!objective.isInstantiated()) throw new SolverException("objective variable ("+objective+") is not instantiated on solution. Check constraints and/or decision variables.");
-        updateBestSolution(objective.getValue());
+    public boolean updateBestSolution() {
+        if(!objective.isInstantiated()) {
+            throw new SolverException(
+                "objective variable (" + objective + ") is not instantiated on solution. Check constraints and/or decision variables.");
+        }
+        return updateBestSolution(objective.getValue());
     }
 
     @Override
@@ -94,8 +101,8 @@ class MinIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public void updateBestSolution(Number n) {
-        updateBestUB(n);
+    public boolean updateBestSolution(Number n) {
+        return updateBestUB(n);
     }
 
     @Override
@@ -134,8 +141,8 @@ class MaxIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public void updateBestSolution(Number n) {
-        updateBestLB(n);
+    public boolean updateBestSolution(Number n) {
+        return updateBestLB(n);
     }
 
     @Override
