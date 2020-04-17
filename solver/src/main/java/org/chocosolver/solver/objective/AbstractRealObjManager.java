@@ -32,23 +32,27 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     }
 
     @Override
-    public synchronized void updateBestLB(Number lb) {
+    public synchronized boolean updateBestLB(Number lb) {
         if (bestProvedLB.doubleValue() < lb.doubleValue()) {
             bestProvedLB = lb;
+            return true;
         }
+        return false;
     }
 
     @Override
-    public synchronized void updateBestUB(Number ub) {
+    public synchronized boolean updateBestUB(Number ub) {
         if (bestProvedUB.doubleValue() > ub.doubleValue()) {
             bestProvedUB = ub;
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void updateBestSolution() {
+    public boolean updateBestSolution() {
         assert objective.isInstantiated();
-        updateBestSolution(objective.getUB());
+        return updateBestSolution(objective.getUB());
     }
 
     @Override
@@ -93,8 +97,8 @@ class MinRealObjManager extends AbstractRealObjManager {
     }
 
     @Override
-    public void updateBestSolution(Number n) {
-        updateBestUB(n);
+    public boolean updateBestSolution(Number n) {
+        return updateBestUB(n);
     }
 
     @Override
@@ -123,8 +127,8 @@ class MaxRealObjManager extends AbstractRealObjManager {
     }
 
     @Override
-    public void updateBestSolution(Number n) {
-        updateBestLB(n);
+    public boolean updateBestSolution(Number n) {
+        return updateBestLB(n);
     }
 
     @Override

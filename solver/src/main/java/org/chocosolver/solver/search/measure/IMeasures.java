@@ -51,6 +51,18 @@ public interface IMeasures extends Serializable {
     long getTimeCountInNanoSeconds();
 
     /**
+     * @return the time count (in seconds), including initial propagation time count
+     */
+    default float getTimeToBestSolution() {
+        return getTimeCountInNanoSeconds() / IN_SEC;
+    }
+
+    /**
+     * @return the time count (in nano seconds), including initial propagation time count
+     */
+    long getTimeToBestSolutionInNanoSeconds();
+
+    /**
      * @return the reading time count (in sec)
      */
     default float getReadingTimeCount() {

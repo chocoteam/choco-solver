@@ -121,7 +121,7 @@ final class SATManager implements IObjectiveManager<Variable> {
     }
 
     private SATManager() {}
-        
+
     /**
      * readResolve method to preserve singleton property
      */
@@ -152,12 +152,12 @@ final class SATManager implements IObjectiveManager<Variable> {
     }
 
     @Override
-    public void updateBestLB(Number lb) {
+    public boolean updateBestLB(Number lb) {
         throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
     }
 
     @Override
-    public void updateBestUB(Number ub) {
+    public boolean updateBestUB(Number ub) {
         throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
     }
 
@@ -172,13 +172,14 @@ final class SATManager implements IObjectiveManager<Variable> {
     }
 
     @Override
-    public void updateBestSolution(Number n) {
+    public boolean updateBestSolution(Number n) {
         throw new UnsupportedOperationException("not a mono-objective optimization problem");
     }
 
     @Override
-    public void updateBestSolution() {
+    public boolean updateBestSolution() {
         // nothing to do
+        return false;
     }
 
     @Override

@@ -46,27 +46,29 @@ public interface IBoundsManager extends Serializable {
      * States that lb is a global lower bound on the problem
      *
      * @param lb lower bound
+     * @return true iff the lower bound has been updated
      */
-    void updateBestLB(Number lb);
+    boolean updateBestLB(Number lb);
 
     /**
      * States that ub is a global upper bound on the problem
      *
      * @param ub upper bound
+     * @return true iff the upper bound has been updated
      */
-    void updateBestUB(Number ub);
+    boolean updateBestUB(Number ub);
 
-    /**
-     * States that b is global bounds on the problem
-     *
-     * @param b lower and upper bounds
-     */
-    default void updateBestBounds(IBoundsManager b) {
-        if(isOptimization()) {
-            updateBestLB(b.getBestLB());
-            updateBestUB(b.getBestUB());
-        }
-    }
+    //    /**
+    //     * States that b is global bounds on the problem
+    //     *
+    //     * @param b lower and upper bounds
+    //     */
+    //    default void updateBestBounds(IBoundsManager b) {
+    //        if(isOptimization()) {
+    //            updateBestLB(b.getBestLB());
+    //            updateBestUB(b.getBestUB());
+    //        }
+    //    }
 
     /**
      * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
