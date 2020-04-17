@@ -28,7 +28,7 @@ import org.testng.annotations.Test;
 public class EnvironmentTest {
 
     @DataProvider(name = "env")
-    private Object[][] env() {
+    public Object[][] env() {
         return new IEnvironment[][]{
                 {new EnvironmentBuilder().fromFlat().build()},
                 {new EnvironmentBuilder().fromChunk().build()}
@@ -38,14 +38,14 @@ public class EnvironmentTest {
     @Test(groups = "1s", timeOut = 60000, dataProvider = "env")
     public void testBool(IEnvironment environment) {
         IStateBool prim = environment.makeBool(true);
-        Assert.assertEquals(prim.get(), true);
+        Assert.assertTrue(prim.get());
         prim.set(false);
-        Assert.assertEquals(prim.get(), false);
+        Assert.assertFalse(prim.get());
         environment.worldPush();
         prim.set(true);
-        Assert.assertEquals(prim.get(), true);
+        Assert.assertTrue(prim.get());
         environment.worldPop();
-        Assert.assertEquals(prim.get(), false);
+        Assert.assertFalse(prim.get());
         Assert.assertEquals(prim.toString(), "false");
     }
 
@@ -101,24 +101,24 @@ public class EnvironmentTest {
     private void testBitset(IEnvironment environment, int size, int max, int i8, int i9, int i10) {
         IStateBitSet prim = environment.makeBitSet(size);
         prim.set(i8);
-        Assert.assertEquals(prim.get(i8), true);
-        Assert.assertEquals(prim.get(i9), false);
-        Assert.assertEquals(prim.get(i10), false);
+        Assert.assertTrue(prim.get(i8));
+        Assert.assertFalse(prim.get(i9));
+        Assert.assertFalse(prim.get(i10));
         prim.clear(i8, i10+1);
         prim.set(i9, true);
-        Assert.assertEquals(prim.get(i8), false);
-        Assert.assertEquals(prim.get(i9), true);
-        Assert.assertEquals(prim.get(i10), false);
+        Assert.assertFalse(prim.get(i8));
+        Assert.assertTrue(prim.get(i9));
+        Assert.assertFalse(prim.get(i10));
         environment.worldPush();
         prim.set(i8, i10+1);
         prim.set(i9, false);
-        Assert.assertEquals(prim.get(i8), true);
-        Assert.assertEquals(prim.get(i9), false);
-        Assert.assertEquals(prim.get(i10), true);
+        Assert.assertTrue(prim.get(i8));
+        Assert.assertFalse(prim.get(i9));
+        Assert.assertTrue(prim.get(i10));
         environment.worldPop();
-        Assert.assertEquals(prim.get(i8), false);
-        Assert.assertEquals(prim.get(i9), true);
-        Assert.assertEquals(prim.get(i10), false);
+        Assert.assertFalse(prim.get(i8));
+        Assert.assertTrue(prim.get(i9));
+        Assert.assertFalse(prim.get(i10));
 
         Assert.assertEquals(prim.nextSetBit(-1), i9);
         Assert.assertEquals(prim.nextSetBit(max), -1);
@@ -141,17 +141,17 @@ public class EnvironmentTest {
 
         Assert.assertEquals(prim.toString(), "{" + i9 + "}");
         Assert.assertEquals(prim.cardinality(), 1);
-        Assert.assertEquals(prim.isEmpty(), false);
+        Assert.assertFalse(prim.isEmpty());
 
         prim.clear();
 
         Assert.assertEquals(prim.toString(), "{}");
         Assert.assertEquals(prim.cardinality(), 0);
-        Assert.assertEquals(prim.isEmpty(), true);
+        Assert.assertTrue(prim.isEmpty());
         try{
             prim.set(-1);
             Assert.fail();
-        }catch (IndexOutOfBoundsException e){}
+        } catch (IndexOutOfBoundsException ignored) { }
     }
     
     @Test(groups = "1s")
@@ -247,13 +247,13 @@ public class EnvironmentTest {
         snt.set(true);
         env.worldPush();
         snt.set(false);
-        Assert.assertEquals(snt.get(), false);
+        Assert.assertFalse(snt.get());
         env.worldCommit();
-        Assert.assertEquals(snt.get(), false);
+        Assert.assertFalse(snt.get());
         env.worldPop();
-        Assert.assertEquals(snt.get(), false);
+        Assert.assertFalse(snt.get());
         env.worldPop();
-        Assert.assertEquals(snt.get(), true);
+        Assert.assertTrue(snt.get());
     }
 
     @Test(groups = "1s")

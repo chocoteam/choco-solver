@@ -10,17 +10,15 @@
 package org.chocosolver.solver.constraints.checker.correctness;
 
 import gnu.trove.map.hash.THashMap;
+import java.util.Arrays;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Random;
-
-import static java.lang.System.arraycopy;
-import static java.util.Arrays.copyOfRange;
-import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.testng.Assert.fail;
+import org.testng.Assert;
 
 /**
  * <br/>
@@ -42,7 +40,7 @@ public class CorrectnessChecker {
             for (int ide = 0; ide < densities.length; ide++) {
                 for (int h = 0; h < homogeneous.length; h++) {
                     map.clear();
-                    int[][] domains = buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
+                    int[][] domains = DomainBuilder.buildFullDomains(nbVar, lowerB, ds, r, densities[ide], homogeneous[h]);
                     Model ref = referencePropagation(modeler, nbVar, domains, map, parameters);
                     if (ref == null) break; // no solution found for this generated problem
                     // otherwise, link original domains with reference one.
@@ -57,26 +55,26 @@ public class CorrectnessChecker {
                             int val = values[v];
                             int[][] _domains = new int[nbVar][];
 
-                            arraycopy(domains, 0, _domains, 0, d);
+                            System.arraycopy(domains, 0, _domains, 0, d);
                             _domains[d] = new int[]{val};
-                            arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
+                            System.arraycopy(domains, d + 1, _domains, d + 1, nbVar - (d + 1));
 
                             Model test = modeler.model(nbVar, _domains, null, parameters);
+                            final String format = String
+                                .format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d", ds, ide, h, rvars[d], val, loop, seed);
                             try {
                                 if (test.getSolver().solve()) {
-                                    System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
-                                            ds, ide, h, rvars[d], val, loop, seed));
+                                    System.out.println(format);
                                     System.out.println(String.format("REF:\n%s\n", ref));
                                     ref.getEnvironment().worldPop();
                                     System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
-                                    fail("one solution found");
+                                    Assert.fail("one solution found");
                                 }
                             } catch (Exception e) {
                                 System.out.println(e.getMessage());
-                                System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
-                                        ds, ide, h, rvars[d], val, loop, seed));
+                                System.out.println(format);
                                 System.out.println("REF:\n" + ref + "\nTEST:\n" + test);
-                                fail();
+                                Assert.fail();
                             }
                         }
                     }
@@ -97,7 +95,7 @@ public class CorrectnessChecker {
         } catch (Exception e) {
             System.out.println(e.getMessage());
             System.out.println("REF:\n" + ref + "\n");
-            fail();
+            Assert.fail();
         }
         return ref;
     }
@@ -110,7 +108,7 @@ public class CorrectnessChecker {
                 _values[k++] = domain[i];
             }
         }
-        return copyOfRange(_values, 0, k);
+        return Arrays.copyOfRange(_values, 0, k);
     }
 
 }
