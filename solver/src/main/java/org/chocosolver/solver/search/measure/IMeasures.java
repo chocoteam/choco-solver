@@ -159,8 +159,9 @@ public interface IMeasures extends Serializable {
         if (hasObjective()) {
             st.append(getBoundsManager()).append(", ");
         }
-        st.append(String.format("Resolution time %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
+        st.append(String.format("Resolution time %.3fs, Time to first/best solution %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
                 getTimeCount(),
+                getTimeToBestSolution(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
@@ -220,19 +221,27 @@ public interface IMeasures extends Serializable {
         if (hasObjective()) {
             st.append("\t").append(getBoundsManager()).append(",\n");
         }
-        st.append(String.format("\tBuilding time : %,.3fs" +
-                        "\n\tResolution time : %,.3fs\n\tNodes: %,d (%,.1f n/s) \n\tBacktracks: %,d\n" +
-                        "\tBackjumps: %,d\n\tFails: %,d\n\t" +
-                        "Restarts: %,d",
+        st.append(
+            String.format(
+                "\tBuilding time : %,.3fs\n" +
+                    "\tResolution time : %,.3fs\n" +
+                    "\tTime to first/best solution : %,.3fs\n" +
+                    "\tNodes: %,d (%,.1f n/s) \n" +
+                    "\tBacktracks: %,d\n" +
+                    "\tBackjumps: %,d\n" +
+                    "\tFails: %,d\n" +
+                    "\tRestarts: %,d",
                 getReadingTimeCount(),
                 getTimeCount(),
+                getTimeToBestSolution(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getBackjumpCount(),
                 getFailCount(),
                 getRestartCount()
-        ));
+            )
+        );
         return st.toString();
     }
 
@@ -258,16 +267,18 @@ public interface IMeasures extends Serializable {
      * @return statistics in a CSV format
      */
     default String toCSV() {
-        // solutionCount;buildingTime(sec);initTime(sec);initPropag(sec);totalTime(sec);objective;nodes;backtracks;fails;restarts;fineProp;coarseProp;
-        return String.format("%d;%.3f;%.3f;%e;%d;%d;%d;%d;",
+        // solutionCount;buildingTime(sec);totalTime(sec);timeToBest(sec);objective;nodes;backtracks;fails;restarts;
+        return String.format("%d;%.3f;%.3f;%.3f;%e;%d;%d;%d;%d;",
                 getSolutionCount(),
                 getReadingTimeCount(),
                 getTimeCount(),
+                getTimeToBestSolution(),
                 hasObjective() ? getBestSolutionValue().doubleValue() : 0,
                 getNodeCount(),
                 getBackTrackCount(),
                 getFailCount(),
-                getRestartCount());
+                getRestartCount()
+        );
     }
 
 }
