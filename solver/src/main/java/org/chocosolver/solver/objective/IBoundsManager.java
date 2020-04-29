@@ -58,18 +58,6 @@ public interface IBoundsManager extends Serializable {
      */
     boolean updateBestUB(Number ub);
 
-    //    /**
-    //     * States that b is global bounds on the problem
-    //     *
-    //     * @param b lower and upper bounds
-    //     */
-    //    default void updateBestBounds(IBoundsManager b) {
-    //        if(isOptimization()) {
-    //            updateBestLB(b.getBestLB());
-    //            updateBestUB(b.getBestUB());
-    //        }
-    //    }
-
     /**
      * @return the best solution value found so far (returns the initial bound if no solution has been found yet)
      */
