@@ -376,11 +376,11 @@
     </build>
 
     <!-- =============================================================== -->
-    <!-- Gestion des rapports -->
+    <!-- Managing reports -->
     <!-- =============================================================== -->
     <reporting>
         <plugins>
-            <!-- ===== Rapport d'information général sur le projet ===== -->
+            <!-- ===== Report on general information on the projet ===== -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -395,7 +395,7 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!-- ===== Rapport sur les tests ===== -->
+            <!-- ===== Report on tests ===== -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
@@ -403,24 +403,24 @@
                 <configuration>
                     <linkXRef>false</linkXRef>
                 </configuration>
-                <!-- reportSet d'agrégation des rapports des sous-projets (modules) -->
+                <!-- reportSet aggregating reports of modules -->
                 <reportSets>
                     <reportSet>
                         <id>aggregate</id>
                         <reports>
                             <report>report</report>
                         </reports>
-                        <!-- ne pas exécuter ce sous-rapport dans les sous-projets -->
+                        <!-- do not execute this reportSet in modules -->
                         <inherited>false</inherited>
                         <configuration>
                             <aggregate>true</aggregate>
                         </configuration>
                     </reportSet>
 
-                    <!-- reportSet non agrégé, exécuté dans tous les sous-projets (modules) -->
+                    <!-- non-aggregated report to be executed in modules -->
                     <reportSet>
                         <id>modules</id>
-                        <!-- exécuter ce sous-rapport dans les sous-projets -->
+                        <!-- execute this reportSet in modules -->
                         <inherited>true</inherited>
                         <reports>
                             <report>report</report>
@@ -431,7 +431,7 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!-- ===== Rapport d'analyse de couverture du code par Jacoco ===== -->
+            <!-- ===== Report on code coverage analysis by Jacoco ===== -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -444,7 +444,7 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!-- ===== Rapport d'analyse du code par Checkstyle ===== -->
+            <!-- ===== Report on code analysis by Checkstyle ===== -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -476,13 +476,13 @@
                         WriteTag</violationIgnore>
                 </configuration>
                 <reportSets>
-                    <!-- reportSet exécuté dans tous les modules -->
+                    <!-- reportSet executed in all modules -->
                     <reportSet>
                         <reports>
                             <report>checkstyle</report>
                         </reports>
                     </reportSet>
-                    <!-- reportSet d'agrégation des rapports des sous-modules -->
+                    <!-- reportSet aggregating reports of modules -->
                     <reportSet>
                         <id>checkstyle-aggregate</id>
                         <inherited>false</inherited>
@@ -495,7 +495,7 @@
                     </reportSet>
                 </reportSets>
             </plugin>
-            <!-- ===== Génération de la Javadoc ===== -->
+            <!-- ===== Generating Javadoc ===== -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
@@ -508,13 +508,13 @@
 <!--                    </sourceFileExcludes>-->
                 </configuration>
                 <reportSets>
-                    <!-- reportSet exécuté dans tous les modules -->
+                    <!-- reportSet executed in all modules -->
                     <reportSet>
                         <reports>
                             <report>javadoc</report>
                         </reports>
                     </reportSet>
-                    <!-- reportSet d'agrégation des rapports des sous-modules -->
+                    <!-- reportSet aggregating reports of modules -->
                     <reportSet>
                         <id>aggregate</id>
                         <inherited>false</inherited>
