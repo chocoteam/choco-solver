@@ -159,15 +159,20 @@ public interface IMeasures extends Serializable {
         if (hasObjective()) {
             st.append(getBoundsManager()).append(", ");
         }
-        st.append(String.format("Resolution time %.3fs, Time to first/best solution %.3fs, %d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
+        st.append(
+            String.format(
+                "Resolution time %.3fs, "
+                    + (hasObjective() ? String.format("Time to best solution %.3fs, ", getTimeToBestSolution()) : "")
+                    + "%d Nodes (%,.1f n/s), %d Backtracks, %d Backjumps, %d Fails, %d Restarts",
                 getTimeCount(),
-                getTimeToBestSolution(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
                 getBackjumpCount(),
                 getFailCount(),
-                getRestartCount()));
+                getRestartCount()
+            )
+        );
         return st.toString();
     }
 
@@ -225,7 +230,7 @@ public interface IMeasures extends Serializable {
             String.format(
                 "\tBuilding time : %,.3fs\n" +
                     "\tResolution time : %,.3fs\n" +
-                    "\tTime to first/best solution : %,.3fs\n" +
+                    (hasObjective() ? String.format("\tTime to best solution : %,.3fs\n",getTimeToBestSolution()) : "") +
                     "\tNodes: %,d (%,.1f n/s) \n" +
                     "\tBacktracks: %,d\n" +
                     "\tBackjumps: %,d\n" +
@@ -233,7 +238,6 @@ public interface IMeasures extends Serializable {
                     "\tRestarts: %,d",
                 getReadingTimeCount(),
                 getTimeCount(),
-                getTimeToBestSolution(),
                 getNodeCount(),
                 getNodeCount() / getTimeCount(),
                 getBackTrackCount(),
