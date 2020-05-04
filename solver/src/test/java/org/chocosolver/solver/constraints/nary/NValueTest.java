@@ -16,7 +16,9 @@ package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -127,5 +129,24 @@ public class NValueTest {
 
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testNValuesOrderSearch() {
+	    Model model = new Model();
+	    IntVar[] x = model.intVarArray("x", 10, 0, 10, false);
+	    IntVar n = model.intVar("n", 1, 10, true);
+	    model.nValues(x, n).post();
+	    model.getSolver().setSearch(Search.inputOrderLBSearch(ArrayUtils.append(new IntVar[]{n}, x)));
+	    model.getSolver().solve();
+
+        Model model2 = new Model();
+        IntVar[] x2 = model.intVarArray("x2", 10, 0, 10, false);
+        IntVar n2 = model.intVar("n2", 1, 10, true);
+        model2.nValues(x2, n2).post();
+        model.getSolver().setSearch(Search.inputOrderLBSearch(ArrayUtils.concat(x, n)));
+        model2.getSolver().solve();
+
+        Assert.assertEquals(model.getSolver().getSolutionCount(), model2.getSolver().getSolutionCount());
     }
 }
