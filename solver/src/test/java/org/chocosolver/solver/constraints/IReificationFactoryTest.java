@@ -49,7 +49,7 @@ public class IReificationFactoryTest {
     }
 
     @DataProvider(name = "two")
-    private Object[][] domains(){
+    public Object[][] domains(){
         return new int[][][]{
                 {{0,5},{0,5}},
                 {{0,5},{3,3}},

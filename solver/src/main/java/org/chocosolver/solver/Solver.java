@@ -329,18 +329,18 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
             if (instances != null) {
                 Optional<Constraint> undeclared = instances
-                        .stream()
-                        .filter(c -> c.getStatus() == FREE)
-                        .findFirst();
+                    .stream()
+                    .filter(c -> c.getStatus() == FREE)
+                    .findFirst();
                 if (undeclared.isPresent()) {
                     getErr().print(
-                            "At least one constraint is free, i.e., neither posted or reified. ).\n");
+                        "At least one constraint is free, i.e., neither posted or reified. ).\n");
                     instances
-                            .stream()
-                            .filter(c -> c.getStatus() == FREE)
-                            .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
-                                    : 1)
-                            .forEach(c -> getErr().printf("%s is free\n", c.toString()));
+                        .stream()
+                        .filter(c -> c.getStatus() == FREE)
+                        .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
+                                                                                    : 1)
+                        .forEach(c -> getErr().printf("%s is free\n", c.toString()));
                 }
             }
         }
@@ -431,7 +431,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             action = propagate;
         } catch (ContradictionException ce) {
             engine.flush();
-//            mMeasures.incFailCount();
+            //            mMeasures.incFailCount();
             jumpTo = 1;
             action = repair;
             searchMonitors.onContradiction(ce);
@@ -482,15 +482,22 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean validate() {
         if (!getModel().getSettings().checkModel(this)) {
             throw new SolverException("The current solution does not satisfy the checker." +
-                "Either (a) the search strategy is not complete or " +
-                "(b) the model is not constrained enough or " +
-                "(c) a constraint's checker (\"isSatisfied()\") is not correct or " +
-                "(d) some constraints' filtering algorithm (\"propagate(...)\") is not correct.\n" +
-                Reporting.fullReport(mModel));
+                                          "Either (a) the search strategy is not complete or " +
+                                          "(b) the model is not constrained enough or " +
+                                          "(c) a constraint's checker (\"isSatisfied()\") is not correct or " +
+                                          "(d) some constraints' filtering algorithm (\"propagate(...)\") is not correct.\n" +
+                                          Reporting.fullReport(mModel));
         }
         feasible = TRUE;
         mMeasures.incSolutionCount();
-        objectivemanager.updateBestSolution();
+        if(mModel.getResolutionPolicy() == ResolutionPolicy.SATISFACTION && mMeasures.getSolutionCount() == 1) {
+            mMeasures.updateTimeToBestSolution();
+        } else if(mModel.getResolutionPolicy() != ResolutionPolicy.SATISFACTION) {
+            boolean bestSolutionHasBeenUpdated = objectivemanager.updateBestSolution();
+            if(bestSolutionHasBeenUpdated) {
+                mMeasures.updateTimeToBestSolution();
+            }
+        }
         searchMonitors.onSolution();
         jumpTo = 1;
         action = repair;
@@ -693,7 +700,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param decision decision to add, can be <i>null</i>.
      * @return <i>true</i> if extension is successful, <i>false</i> otherwise.
-     * @see #moveBackward() 
+     * @see #moveBackward()
      * @see #getDecisionPath()
      * @see AbstractStrategy#getDecision()
      */
@@ -759,7 +766,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @return <i>true</i> in case of success, <i>false</i> otherwise
      * @see #moveForward(Decision)
-     * @see #getDecisionPath() 
+     * @see #getDecisionPath()
      */
     public boolean moveBackward(){
         this.getEnvironment().worldPop();
@@ -1044,8 +1051,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         if (M.getChildMoves().size() > 1) {
             throw new UnsupportedOperationException("The Move declared is composed of many Moves.\n" +
-                    "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
-                    "An iteration over it child moves is needed: this.getMove().getChildMoves().");
+                                                        "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
+                                                        "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
             //noinspection unchecked
             M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
@@ -1221,6 +1228,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         return getMeasures().getTimeCountInNanoSeconds();
     }
 
+    @Override
+    public long getTimeToBestSolutionInNanoSeconds() {
+        return getMeasures().getTimeToBestSolutionInNanoSeconds();
+    }
 
     @Override
     public long getReadingTimeCountInNanoSeconds() {
