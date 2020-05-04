@@ -116,7 +116,7 @@ public class PropNValue extends Propagator<IntVar> {
             }
         }
         nValue.updateBounds(mandatoryValues.size(), possibleValues.size(), this);
-        if(nValue.isInstantiated()) {
+        if(nValue.isInstantiated() && mandatoryValues.size() == nValue.getValue()) {
             for(int i = 0; i<n; i++) {
                 for(int value = vars[i].getLB(); value <= vars[i].getUB(); value = vars[i].nextValue(value)) {
                     if(!mandatoryValues.contains(value)) {
