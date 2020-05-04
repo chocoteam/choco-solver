@@ -58,6 +58,11 @@ public class Measures implements IMeasures, Cloneable {
     protected long timeCount;
 
     /**
+     * Gives the time to get the best (or first in case of satisfaction problems) solution.
+     */
+    protected long timeToBestSolution;
+
+    /**
      * Counts the time spent into reading the model
      */
     protected long readingTimeCount;
@@ -174,6 +179,10 @@ public class Measures implements IMeasures, Cloneable {
         return timeCount;
     }
 
+    @Override
+    public long getTimeToBestSolutionInNanoSeconds() {
+        return timeToBestSolution;
+    }
 
     @Override
     public long getReadingTimeCountInNanoSeconds() {
