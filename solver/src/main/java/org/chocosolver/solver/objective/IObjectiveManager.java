@@ -31,12 +31,12 @@ public interface IObjectiveManager<V extends Variable> extends IBoundsManager, I
     /**
      * Informs the manager that a new solution has been found
      */
-    void updateBestSolution(Number n);
+    boolean updateBestSolution(Number n);
 
     /**
      * Informs the manager that a new solution has been found
      */
-    void updateBestSolution();
+    boolean updateBestSolution();
 
     /**
      * Set a user-defined cut computer to avoid "worse" solutions
