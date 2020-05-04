@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.nvalue;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -34,7 +35,7 @@ public class PropNValue extends Propagator<IntVar> {
     private IntVar nValue;
     private final int n;
     private int[] concernedValues;
-    private int[] witness;
+    private IStateInt[] witness;
     private ISet mandatoryValues;
     private ISet possibleValues;
     private TIntArrayList listForRandomPick;
@@ -55,11 +56,11 @@ public class PropNValue extends Propagator<IntVar> {
         concernedValues = set.toArray();
         possibleValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
-        witness = new int[concernedValues.length];
-        Arrays.fill(witness, -1);
         listForRandomPick = new TIntArrayList();
+        witness = new IStateInt[concernedValues.length];
         for(int j = 0; j<witness.length; j++) {
             possibleValues.add(concernedValues[j]);
+            witness[j] = getModel().getEnvironment().makeInt(-1);
             selectRandomWitness(j);
         }
     }
@@ -77,7 +78,7 @@ public class PropNValue extends Propagator<IntVar> {
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if(idxVarInProp < n) {
             for(int j = 0; j<concernedValues.length; j++) {
-                if(witness[j] == idxVarInProp && !vars[idxVarInProp].contains(concernedValues[j])) {
+                if(witness[j].get() == idxVarInProp && !vars[idxVarInProp].contains(concernedValues[j])) {
                     selectRandomWitness(j);
                 }
             }
@@ -94,7 +95,7 @@ public class PropNValue extends Propagator<IntVar> {
         for(int i = 0; i<n; i++) {
             if(vars[i].isInstantiatedTo(value)) {
                 mandatoryValues.add(value);
-                witness[idxConcernedValue] = i;
+                witness[idxConcernedValue].set(i);
                 return;
             } else if(vars[i].contains(value)) {
                 listForRandomPick.add(i);
@@ -102,15 +103,16 @@ public class PropNValue extends Propagator<IntVar> {
         }
         if(listForRandomPick.size() == 0) {
             possibleValues.remove(value);
-            witness[idxConcernedValue] = -1;
+            witness[idxConcernedValue].set(-1);
         } else {
-            witness[idxConcernedValue] = listForRandomPick.getQuick(rnd.nextInt(listForRandomPick.size()));
+            witness[idxConcernedValue].set(listForRandomPick.getQuick(rnd.nextInt(listForRandomPick.size())));
         }
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if(PropagatorEventType.isFullPropagation(evtmask)) {
+            nValue.updateUpperBound(vars.length-1, this);
             for(int j = 0; j<witness.length; j++) {
                 selectRandomWitness(j);
             }
