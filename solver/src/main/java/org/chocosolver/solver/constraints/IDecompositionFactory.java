@@ -113,7 +113,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         IntVar[] results = new IntVar[matrix.length];
         for (int r = 0; r < matrix.length; r++) {
             int min = Stream.of(matrix[r]).mapToInt(IntVar::getLB).min().orElse(IntVar.MIN_INT_BOUND);
-            int max = Stream.of(matrix[r]).mapToInt(IntVar::getLB).max().orElse(IntVar.MAX_INT_BOUND);
+            int max = Stream.of(matrix[r]).mapToInt(IntVar::getUB).max().orElse(IntVar.MAX_INT_BOUND);
             results[r] = ref().intVar("val[" + r + "]", min, max);
             ref().element(results[r], matrix[r], colIndex, colOffset).post();
         }

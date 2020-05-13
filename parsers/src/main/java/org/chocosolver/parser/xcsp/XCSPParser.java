@@ -1439,7 +1439,6 @@ public class XCSPParser implements XCallbacks2 {
     ////////////////////////////////////////// OBJECTIVE ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
     private IntVar optSum(IntVar[] vars) {
         int[] bounds = VariableUtils.boundsForAddition(vars);
         IntVar res = model.intVar("SUM", bounds[0], bounds[1], true);
@@ -1496,6 +1495,7 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private void buildObjective(boolean maximize, Types.TypeObjective type, IntVar[] vars, int[] coeffs) {
+        // Only SUM supports coeffs
         switch (type) {
             case SUM:
                 model.setObjective(maximize, optScalar(vars, coeffs));
