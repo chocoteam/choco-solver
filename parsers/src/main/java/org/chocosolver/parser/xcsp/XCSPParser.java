@@ -34,7 +34,7 @@ import org.xcsp.common.Condition;
 import org.xcsp.common.Types;
 import org.xcsp.common.predicates.XNode;
 import org.xcsp.common.predicates.XNodeParent;
-import org.xcsp.parser.XCallbacks2;
+import org.xcsp.parser.callbacks.XCallbacks2;
 import org.xcsp.parser.entries.XConstraints;
 import org.xcsp.parser.entries.XVariables;
 
@@ -137,8 +137,8 @@ public class XCSPParser implements XCallbacks2 {
                 return buildAr(sons[0]).gt(buildAr(sons[1]));
             case NE:
                 return buildAr(sons[0]).ne(buildAr(sons[1]));
-            case IN:
-                return buildAr(sons[0]).ne(buildAr(sons[1]));
+            /*case IN:
+                return buildAr(sons[0]).in(buildAr(sons[1]));*/
             case EQ:
                 if(sons.length == 2){
                     return buildAr(sons[0]).eq(buildAr(sons[1]));
@@ -165,7 +165,6 @@ public class XCSPParser implements XCallbacks2 {
 
 
 
-    @SuppressWarnings("ConstantConditions")
     private ArExpression buildAr(XNode<XVariables.XVarInteger> node) {
         Types.TypeExpr type = node.type;
         if (type == Types.TypeExpr.VAR) {
@@ -256,11 +255,11 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private IntVar[] vars(XVariables.XVarInteger[] vars) {
-        return Arrays.stream(vars).map(v -> var(v)).toArray(IntVar[]::new);
+        return Arrays.stream(vars).map(this::var).toArray(IntVar[]::new);
     }
 
     private IntVar[][] vars(XVariables.XVarInteger[][] vars) {
-        return Arrays.stream(vars).map(v -> vars(v)).toArray(IntVar[][]::new);
+        return Arrays.stream(vars).map(this::vars).toArray(IntVar[][]::new);
     }
 
     private BoolVar bool(XVariables.XVarInteger var) {
@@ -268,11 +267,15 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     private BoolVar[] bools(XVariables.XVarInteger[] vars) {
-        return Arrays.stream(vars).map(v -> bool(v)).toArray(BoolVar[]::new);
+        return Arrays.stream(vars).map(this::bool).toArray(BoolVar[]::new);
     }
 
     private BoolVar[][] bools(XVariables.XVarInteger[][] vars) {
-        return Arrays.stream(vars).map(v -> bools(v)).toArray(BoolVar[][]::new);
+        return Arrays.stream(vars).map(this::bools).toArray(BoolVar[][]::new);
+    }
+
+    private IntVar[] vars(XNode<XVariables.XVarInteger>[] trees) {
+        return Arrays.stream(trees).map(t -> buildAr(t).intVar()).toArray(IntVar[]::new);
     }
 
     public String printSolution() {
@@ -514,16 +517,6 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
-    public void buildCtrAllDifferent(String id, XNodeParent<XVariables.XVarInteger>[] trees) {
-        IntVar[] elts = new IntVar[trees.length];
-        int k = 0;
-        for (XNodeParent<XVariables.XVarInteger> tree : trees) {
-            elts[k++] = buildAr(tree).intVar();
-        }
-        model.allDifferent(elts).post();
-    }
-
-    @Override
     public void buildCtrAllDifferent(String id, XVariables.XVarInteger[] list) {
         model.allDifferent(vars(list)).post();
     }
@@ -712,16 +705,6 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
-    public void buildCtrSum(String id, XNodeParent<XVariables.XVarInteger>[] trees, int[] coeffs, Condition condition) {
-        IntVar[] res = new IntVar[trees.length];
-        int k = 0;
-        for (XNodeParent<XVariables.XVarInteger> tree : trees) {
-            res[k++] = buildAr(tree).intVar();
-        }
-        buildSum(res, coeffs, condition);
-    }
-
-    @Override
     public void buildCtrSum(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] _coeffs, Condition condition) {
         IntVar[] res = new IntVar[list.length];
         for (int i = 0; i < list.length; i++) {
@@ -863,7 +846,7 @@ public class XCSPParser implements XCallbacks2 {
             auto.addTransition(f, t, v);
         }
         auto.setInitialState(s2s.get(startState));
-        auto.setFinal(Arrays.stream(finalStates).mapToInt(s -> s2s.get(s)).toArray());
+        auto.setFinal(Arrays.stream(finalStates).mapToInt(s2s::get).toArray());
         model.regular(vars(list), auto).post();
     }
 
@@ -1033,6 +1016,26 @@ public class XCSPParser implements XCallbacks2 {
         if (rank == Types.TypeRank.ANY) {
             model.element(var(value), list, var(index), startIndex).post();
         } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, value);
+    }
+
+    @Override
+    public void buildCtrElement(String id, int[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, int value) {
+        model.element(model.intVar(value), matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex);
+    }
+
+    @Override
+    public void buildCtrElement(String id, int[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, XVariables.XVarInteger value) {
+        model.element(var(value), matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex);
+    }
+
+    @Override
+    public void buildCtrElement(String id, XVariables.XVarInteger[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, int value) {
+        model.element(model.intVar(value), vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
+    }
+
+    @Override
+    public void buildCtrElement(String id, XVariables.XVarInteger[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, XVariables.XVarInteger value) {
+        model.element(var(value), vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
     }
 
     @Override
@@ -1436,6 +1439,76 @@ public class XCSPParser implements XCallbacks2 {
     ////////////////////////////////////////// OBJECTIVE ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    private IntVar optSum(IntVar[] vars) {
+        int[] bounds = VariableUtils.boundsForAddition(vars);
+        IntVar res = model.intVar("SUM", bounds[0], bounds[1], true);
+        model.sum(vars, "=", res).post();
+        return res;
+    }
+
+    private IntVar optScalar(IntVar[] vars, int[] coeffs) {
+        int[] bounds = VariableUtils.boundsForScalar(vars, coeffs);
+        IntVar res = model.intVar("SCALAR", bounds[0], bounds[1], true);
+        model.scalar(vars, coeffs, "=", res).post();
+        return res;
+    }
+
+    private IntVar optMin(IntVar[] vars) {
+        int[] bounds = VariableUtils.boundsForMinimum(vars);
+        IntVar res = model.intVar("MIN", bounds[0], bounds[1]);
+        model.min(res, vars).post();
+        return res;
+    }
+
+    private IntVar optMax(IntVar[] vars) {
+        int[] bounds = VariableUtils.boundsForMaximum(vars);
+        IntVar res = model.intVar("MAX", bounds[0], bounds[1]);
+        model.max(res, vars).post();
+        return res;
+    }
+
+    private IntVar optNValues(IntVar[] vars) {
+        IntVar res = model.intVar("NVALUES", 0, vars.length);
+        model.nValues(vars, res).post();
+        return res;
+    }
+
+    private void buildObjective(boolean maximize, Types.TypeObjective type, IntVar[] vars) {
+        switch (type) {
+            case SUM:
+                model.setObjective(maximize, optSum(vars));
+                break;
+            case MINIMUM:
+                model.setObjective(maximize, optMin(vars));
+                break;
+            case MAXIMUM:
+                model.setObjective(maximize, optMax(vars));
+                break;
+            case NVALUES:
+                model.setObjective(maximize, optNValues(vars));
+                break;
+            case EXPRESSION:
+            case PRODUCT:
+            case LEX:
+                throw new UnsupportedOperationException("Unknown objective");
+        }
+    }
+
+    private void buildObjective(boolean maximize, Types.TypeObjective type, IntVar[] vars, int[] coeffs) {
+        // Only SUM supports coeffs
+        switch (type) {
+            case SUM:
+                model.setObjective(maximize, optScalar(vars, coeffs));
+                break;
+            case MINIMUM:
+            case MAXIMUM:
+            case NVALUES:
+            case EXPRESSION:
+            case PRODUCT:
+            case LEX:
+                throw new UnsupportedOperationException("Unknown objective");
+        }
+    }
 
     @Override
     public void buildObjToMinimize(String id, XVariables.XVarInteger x) {
@@ -1447,122 +1520,54 @@ public class XCSPParser implements XCallbacks2 {
         model.setObjective(true, var(x));
     }
 
-    private IntVar optSum(XVariables.XVarInteger[] list) {
-        IntVar[] vars = vars(list);
-        int[] bounds = VariableUtils.boundsForAddition(vars);
-        IntVar res = model.intVar("SUM", bounds[0], bounds[1], true);
-        model.sum(vars, "=", res).post();
-        return res;
+    @Override
+    public void buildObjToMaximize(String id, XNodeParent<XVariables.XVarInteger> tree) {
+        model.setObjective(true, buildAr(tree).intVar());
     }
 
-    private IntVar optScalar(XVariables.XVarInteger[] list, int[] coeffs) {
-        IntVar[] vars = vars(list);
-        int[] bounds = VariableUtils.boundsForScalar(vars, coeffs);
-        IntVar res = model.intVar("SCALAR", bounds[0], bounds[1], true);
-        model.scalar(vars, coeffs, "=", res).post();
-        return res;
-    }
-
-    private IntVar optMin(XVariables.XVarInteger[] list) {
-        IntVar[] vars = vars(list);
-        int[] bounds = VariableUtils.boundsForMinimum(vars);
-        IntVar res = model.intVar("MIN", bounds[0], bounds[1]);
-        model.min(res, vars).post();
-        return res;
-    }
-
-    private IntVar optMax(XVariables.XVarInteger[] list) {
-        IntVar[] vars = vars(list);
-        int[] bounds = VariableUtils.boundsForMaximum(vars);
-        IntVar res = model.intVar("MAX", bounds[0], bounds[1]);
-        model.max(res, vars).post();
-        return res;
-    }
-
-    private IntVar optNValues(XVariables.XVarInteger[] list) {
-        IntVar[] vars = vars(list);
-        IntVar res = model.intVar("NVALUES", 0, list.length);
-        model.nValues(vars, res).post();
-        return res;
+    @Override
+    public void buildObjToMinimize(String id, XNodeParent<XVariables.XVarInteger> tree) {
+        model.setObjective(false, buildAr(tree).intVar());
     }
 
     @Override
     public void buildObjToMinimize(String id, Types.TypeObjective type, XVariables.XVarInteger[] list) {
-        switch (type) {
-            case SUM:
-                model.setObjective(false, optSum(list));
-                break;
-            case MINIMUM:
-                model.setObjective(false, optMin(list));
-                break;
-            case MAXIMUM:
-                model.setObjective(false, optMax(list));
-                break;
-            case NVALUES:
-                model.setObjective(false, optNValues(list));
-                break;
-            case EXPRESSION:
-            case PRODUCT:
-            case LEX:
-                throw new UnsupportedOperationException("Unknown objective");
-        }
+        buildObjective(false, type, vars(list));
     }
 
     @Override
     public void buildObjToMaximize(String id, Types.TypeObjective type, XVariables.XVarInteger[] list) {
-        switch (type) {
-            case SUM:
-                model.setObjective(true, optSum(list));
-                break;
-            case MINIMUM:
-                model.setObjective(true, optMin(list));
-                break;
-            case MAXIMUM:
-                model.setObjective(true, optMax(list));
-                break;
-            case NVALUES:
-                model.setObjective(true, optNValues(list));
-                break;
-            case EXPRESSION:
-            case PRODUCT:
-            case LEX:
-                throw new UnsupportedOperationException("Unknown objective");
-        }
+        buildObjective(true, type, vars(list));
+    }
+
+    @Override
+    public void buildObjToMinimize(String id, Types.TypeObjective type, XNode<XVariables.XVarInteger>[] trees) {
+        buildObjective(false, type, vars(trees));
+    }
+
+    @Override
+    public void buildObjToMaximize(String id, Types.TypeObjective type, XNode<XVariables.XVarInteger>[] trees) {
+        buildObjective(true, type, vars(trees));
     }
 
     @Override
     public void buildObjToMinimize(String id, Types.TypeObjective type, XVariables.XVarInteger[] list, int[] coeffs) {
-        switch (type) {
-            case SUM:
-                model.setObjective(false, optScalar(list, coeffs));
-                break;
-            case MINIMUM:
-            case MAXIMUM:
-            case NVALUES:
-            case EXPRESSION:
-            case PRODUCT:
-            case LEX:
-                throw new UnsupportedOperationException("Unknown objective");
-        }
-
+        buildObjective(false, type, vars(list), coeffs);
     }
 
 
     @Override
     public void buildObjToMaximize(String id, Types.TypeObjective type, XVariables.XVarInteger[] list, int[] coeffs) {
-        switch (type) {
-            case SUM:
-                model.setObjective(true, optScalar(list, coeffs));
-                break;
-            case MINIMUM:
-            case MAXIMUM:
-            case NVALUES:
-            case EXPRESSION:
-            case PRODUCT:
-            case LEX:
-                throw new UnsupportedOperationException("Unknown objective");
-        }
+        buildObjective(true, type, vars(list), coeffs);
     }
 
+    @Override
+    public void buildObjToMinimize(String id, Types.TypeObjective type, XNode<XVariables.XVarInteger>[] trees, int[] coeffs) {
+        buildObjective(false, type, vars(trees), coeffs);
+    }
 
+    @Override
+    public void buildObjToMaximize(String id, Types.TypeObjective type, XNode<XVariables.XVarInteger>[] trees, int[] coeffs) {
+        buildObjective(true, type, vars(trees), coeffs);
+    }
 }

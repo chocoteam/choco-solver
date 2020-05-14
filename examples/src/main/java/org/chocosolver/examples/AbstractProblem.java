@@ -40,7 +40,7 @@ public abstract class AbstractProblem implements IProblem<Model> {
     private boolean userInterruption = true;
 
     @Override
-    public void setUp(String... args) throws SetUpException{
+    public boolean setUp(String... args) throws SetUpException{
         CmdLineParser parser = new CmdLineParser(this);
         try {
             parser.parseArgument(args);
@@ -48,9 +48,9 @@ public abstract class AbstractProblem implements IProblem<Model> {
             System.err.println(e.getMessage());
             System.err.println("java " + this.getClass() + " [options...]");
             parser.printUsage(System.err);
-            System.err.println();
-            throw new SetUpException("Invalid problem options");
+            return false;
         }
+        return true;
     }
 
     /**

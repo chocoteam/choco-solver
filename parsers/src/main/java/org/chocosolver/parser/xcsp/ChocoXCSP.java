@@ -18,10 +18,11 @@ public class ChocoXCSP {
     public static void main(String[] args) throws Exception {
         XCSP xscp = new XCSP();
         xscp.addListener(new BaseXCSPListener(xscp));
-        xscp.setUp(args);
-        xscp.createSolver();
-        xscp.buildModel();
-        xscp.configureSearch();
-        xscp.solve();
+        if(xscp.setUp(args)) {
+            xscp.createSolver();
+            xscp.buildModel();
+            xscp.configureSearch();
+            xscp.solve();
+        }
     }
 }

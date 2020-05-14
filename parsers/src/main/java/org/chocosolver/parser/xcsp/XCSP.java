@@ -19,7 +19,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.kohsuke.args4j.Option;
-import org.xcsp.checker.SolutionChecker;
+import org.xcsp.parser.callbacks.SolutionChecker;
 
 import java.io.ByteArrayInputStream;
 import java.nio.file.Paths;

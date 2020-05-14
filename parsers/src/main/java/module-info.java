@@ -26,4 +26,6 @@ module org.chocosolver.parsers {
     
     opens org.chocosolver.parser to args4j;
     opens org.chocosolver.parser.mps to args4j;
+    opens org.chocosolver.parser.xcsp to args4j;
+    opens org.chocosolver.parser.flatzinc to args4j;
 }

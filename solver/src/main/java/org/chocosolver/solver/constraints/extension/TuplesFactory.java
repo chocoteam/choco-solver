@@ -163,6 +163,33 @@ public class TuplesFactory {
     }
 
     /**
+     * Generate valid tuples for an element constraint : MATRIX[ROWINDEX-ROWOFFSET][COLINDEX-COLOFFSET] = VALUE
+     *
+     * @param VALUE  an integer variable taking its value in MATRIX
+     * @param MATRIX  an array of integer values
+     * @param ROWINDEX  an integer variable representing the row of value of VALUE in MATRIX
+     * @param ROWOFFSET offset matching ROWINDEX.LB and MATRIX[0] (Generally 0)
+     * @param COLINDEX  an integer variable representing the column of value of VALUE in MATRIX
+     * @param COLOFFSET offset matching COLINDEX.LB and MATRIX[][0] (Generally 0)
+     * @return a Tuples object, reserved for a table constraint
+     */
+    public static Tuples element(IntVar VALUE, int[][] MATRIX,
+                                 IntVar ROWINDEX, int ROWOFFSET,
+                                 IntVar COLINDEX, int COLOFFSET) {
+        Tuples t = new Tuples(true);
+        for(int i  = 0; i < MATRIX.length; i++) {
+            for (int j = 0; j < MATRIX[i].length; j++) {
+                if (ROWINDEX.contains(i - ROWOFFSET)
+                        && COLINDEX.contains(j - COLOFFSET)
+                        && VALUE.contains(MATRIX[i][j])) {
+                    t.add(i, j, MATRIX[i - - ROWOFFSET][j - COLOFFSET]);
+                }
+            }
+        }
+        return t;
+    }
+
+    /**
      * Generate valid tuples for minimum constraint: VAR1 % m = VAR2
      *
      * @return a Tuples object, reserved for a table constraint

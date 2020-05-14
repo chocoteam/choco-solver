@@ -20,11 +20,14 @@ package org.chocosolver.pf4cs;
 public interface IUpDown {
 
     /**
-     * Set up the concrete class with the arugments defined by <i>args</i>.
+     * Set up the concrete class with the arguments defined by <i>args</i>.
      * @param args arguments to set up the concrete class.
      * @throws SetUpException if one or more argument is not valid.
+     * @return true if argument parsing goes right
      */
-    default void setUp(String... args) throws SetUpException{}
+    default boolean setUp(String... args) throws SetUpException{
+        return true;
+    }
 
     /**
      * Action to run on exit.

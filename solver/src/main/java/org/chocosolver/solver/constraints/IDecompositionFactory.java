@@ -11,7 +11,6 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
-
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -20,6 +19,8 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
@@ -75,6 +76,51 @@ public interface IDecompositionFactory extends ISelf<Model> {
             ).post();
         }
     }
+
+    /**
+     * Creates an element constraint: value = matrix[rowIndex-offset][colIndex-colOffset]
+     *
+     * @param value     an integer variable taking its value in matrix
+     * @param matrix    a matrix of integer values
+     * @param rowIndex  index of the selected row
+     * @param rowOffset offset for row index
+     * @param colIndex  index of the selected column
+     * @param colOffset offset for column index
+     */
+    default IntVar[] element(IntVar value, int[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
+        IntVar[] results = new IntVar[matrix.length];
+        for (int r = 0; r < matrix.length; r++) {
+            int min = IntStream.of(matrix[r]).min().orElse(IntVar.MIN_INT_BOUND);
+            int max = IntStream.of(matrix[r]).max().orElse(IntVar.MAX_INT_BOUND);
+            results[r] = ref().intVar("val["+r+"]", min, max);
+            ref().element(results[r], matrix[r], colIndex, colOffset).post();
+        }
+        ref().element(value, results, rowIndex, rowOffset).post();
+        return results;
+    }
+
+    /**
+     * Creates an element constraint: value = matrix[rowIndex-offset][colIndex-colOffset]
+     *
+     * @param value     an integer variable taking its value in matrix
+     * @param matrix    a matrix of integer variables
+     * @param rowIndex  index of the selected row
+     * @param rowOffset offset for row index
+     * @param colIndex  index of the selected column
+     * @param colOffset offset for column index
+     */
+    default IntVar[] element(IntVar value, IntVar[][] matrix, IntVar rowIndex, int rowOffset, IntVar colIndex, int colOffset) {
+        IntVar[] results = new IntVar[matrix.length];
+        for (int r = 0; r < matrix.length; r++) {
+            int min = Stream.of(matrix[r]).mapToInt(IntVar::getLB).min().orElse(IntVar.MIN_INT_BOUND);
+            int max = Stream.of(matrix[r]).mapToInt(IntVar::getUB).max().orElse(IntVar.MAX_INT_BOUND);
+            results[r] = ref().intVar("val[" + r + "]", min, max);
+            ref().element(results[r], matrix[r], colIndex, colOffset).post();
+        }
+        ref().element(value, results, rowIndex, rowOffset).post();
+        return results;
+    }
+
 
     /**
      * Creates and <b>posts</b> a decomposition of a regular constraint.

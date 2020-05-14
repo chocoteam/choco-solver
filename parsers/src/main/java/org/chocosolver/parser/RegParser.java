@@ -128,7 +128,7 @@ public abstract class RegParser implements IParser {
     /**
      * Action to do on user interruption
      */
-    protected final Thread statOnKill;
+    protected final Thread statOnKill = actionOnKill();
 
     /**
      * Execution time
@@ -143,8 +143,6 @@ public abstract class RegParser implements IParser {
     protected RegParser(String parser_cmd) {
         this.time = System.currentTimeMillis();
         this.parser_cmd = parser_cmd;
-        statOnKill = actionOnKill();
-        Runtime.getRuntime().addShutdownHook(statOnKill);
     }
 
     public abstract char getCommentChar();
@@ -166,7 +164,7 @@ public abstract class RegParser implements IParser {
     }
 
     @Override
-    public final void setUp(String... args) throws SetUpException {
+    public final boolean setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
         System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
@@ -176,8 +174,7 @@ public abstract class RegParser implements IParser {
             System.err.println(e.getMessage());
             System.err.println(parser_cmd + " [options...] file");
             cmdparser.printUsage(System.err);
-            System.err.println();
-            return;
+            return false;
         }
         cmdparser.getArguments();
         tl_ = TimeUtils.convertInMilliseconds(tl);
@@ -192,6 +189,8 @@ public abstract class RegParser implements IParser {
                 e.printStackTrace();
             }
         }
+        Runtime.getRuntime().addShutdownHook(statOnKill);
+        return true;
     }
 
     /**
