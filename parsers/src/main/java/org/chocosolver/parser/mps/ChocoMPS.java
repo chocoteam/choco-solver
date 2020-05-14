@@ -18,11 +18,12 @@ public class ChocoMPS {
     public static void main(String[] args) throws Exception {
         MPS mps = new MPS();
 //        mps.addListener(new BaseXCSPListener(mps)); //todo
-        mps.setUp(args);
-        mps.getSettings().setMinCardinalityForSumDecomposition(mps.split);
-        mps.createSolver();
-        mps.buildModel();
-        mps.configureSearch();
-        mps.solve();
+        if(mps.setUp(args)) {
+            mps.getSettings().setMinCardinalityForSumDecomposition(mps.split);
+            mps.createSolver();
+            mps.buildModel();
+            mps.configureSearch();
+            mps.solve();
+        }
     }
 }

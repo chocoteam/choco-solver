@@ -27,7 +27,7 @@ package org.chocosolver.pf4cs;
 public interface IProblem<M> extends IUpDown {
 
     @Override
-    void setUp(String... args) throws SetUpException;
+    boolean setUp(String... args) throws SetUpException;
 
     /**
      * Call the model creation.
