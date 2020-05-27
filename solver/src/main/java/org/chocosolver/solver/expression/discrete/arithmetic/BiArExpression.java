@@ -111,7 +111,7 @@ public class BiArExpression implements ArExpression {
                     me = model.intVar(model.generateName("pow_exp_"), bounds[0], bounds[1]);
                     Tuples tuples = new Tuples(true);
                     for(int val1 : v1){
-                        for(int val2 : v1){
+                        for(int val2 : v2){
                             int res = (int)Math.pow(val1, val2);
                             if(me.contains(res)) {
                                 tuples.add(val1, val2, res);
