@@ -11,13 +11,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.view.BoolNotView;
-import org.chocosolver.solver.variables.view.EqView;
-import org.chocosolver.solver.variables.view.LeqView;
-import org.chocosolver.solver.variables.view.MinusView;
-import org.chocosolver.solver.variables.view.OffsetView;
-import org.chocosolver.solver.variables.view.RealView;
-import org.chocosolver.solver.variables.view.ScaleView;
+import org.chocosolver.solver.variables.view.*;
 
 import static java.lang.Math.max;
 
@@ -262,11 +256,17 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (!x.contains(c)) {
             return ref().boolVar(false);
         } else {
-            int p = checkDeclaredView(x, c, EqView.class);
-            if(p >= 0){
-                return x.getView(p).asBoolVar();
-            }else {
-                return new EqView(x, c);
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(x, c, EqView.class);
+                if (p >= 0) {
+                    return x.getView(p).asBoolVar();
+                } else {
+                    return new EqView(x, c);
+                }
+            }else{
+                BoolVar b = ref().boolVar();
+                ref().reifyXeqC(x, c, b);
+                return b;
             }
         }
     }
@@ -284,11 +284,17 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (!x.contains(c)) {
             return ref().boolVar(true);
         } else {
-            int p = checkDeclaredView(x, c, EqView.class);
-            if(p >= 0){
-                return x.getView(p).asBoolVar().not();
-            }else {
-                return new EqView(x, c).not();
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(x, c, EqView.class);
+                if (p >= 0) {
+                    return x.getView(p).asBoolVar().not();
+                } else {
+                    return new EqView(x, c).not();
+                }
+            } else {
+                BoolVar b = ref().boolVar();
+                ref().reifyXneC(x, c, b);
+                return b;
             }
         }
     }
@@ -306,11 +312,17 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (x.getLB() > c) {
             return ref().boolVar(false);
         } else {
-            int p = checkDeclaredView(x, c, LeqView.class);
-            if(p >= 0){
-                return x.getView(p).asBoolVar();
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(x, c, LeqView.class);
+                if (p >= 0) {
+                    return x.getView(p).asBoolVar();
+                } else {
+                    return new LeqView(x, c);
+                }
             }else {
-                return new LeqView(x, c);
+                BoolVar b = ref().boolVar();
+                ref().reifyXltC(x, c +1, b);
+                return b;
             }
         }
     }
@@ -328,11 +340,17 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (x.getUB() < c) {
             return ref().boolVar(false);
         } else {
-            int p = checkDeclaredView(x, c - 1, LeqView.class);
-            if(p >= 0){
-                return x.getView(p).asBoolVar().not();
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(x, c - 1, LeqView.class);
+                if (p >= 0) {
+                    return x.getView(p).asBoolVar().not();
+                } else {
+                    return new LeqView(x, c - 1).not();
+                }
             }else {
-                return new LeqView(x, c - 1).not();
+                BoolVar b = ref().boolVar();
+                ref().reifyXgtC(x, c - 1, b);
+                return b;
             }
         }
     }
