@@ -22,7 +22,7 @@ Multi-modules and JPMS-ready.
 ### Deprecated API (to be removed in next release):
 
 ### Closed issues and pull requests:
-\#617, #633, #639, #646, #647, #648, #658, #667
+\#617, #633, #639, #646, #647, #648, #658, #667, #689
 
 4.10.2 - 14 Oct 2019
 -------------------

@@ -12,7 +12,6 @@ package org.chocosolver.solver.constraints.real;
 import gnu.trove.list.TDoubleList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
-
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
@@ -146,6 +145,8 @@ public class IbexHandler {
                     if (reif == Ibex.FALSE_OR_TRUE) {
                         prop.reified.setToTrue(prop);
                         filter = true;
+                    } else if (reif == Ibex.FALSE) {
+                        prop.fails();
                     } else {
                         injectDomains(prop);
                         // Validated by G. Chabert:

@@ -10,6 +10,8 @@
 package org.chocosolver.solver.expression.continuous;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.expression.continuous.relational.CReExpression;
 import org.chocosolver.solver.variables.RealVar;
 import org.testng.Assert;
@@ -398,4 +400,18 @@ public class ExpressionTest {
         eval(model, x.atanh().eq(y), 1);
     }
 
+    @Test(groups = "1s")
+    public void testAR1() {
+        Model model = new Model("Environment Generation");
+        RealVar x_a = model.realVar("X_a", .1d, 4.d, 1.E-1);
+        Constraint c1 = x_a.gt(0.8).equation();
+        Constraint c2 = x_a.lt(3).equation();
+        Constraint c3 = x_a.gt(0.7).equation();
+        Constraint c4 = x_a.lt(4).equation();
+        Constraint server = model.and(c1, c2);
+        Constraint client = model.and(c3, c4);
+        model.not(model.or(model.not(server), client)).post();
+        Solver solver = model.getSolver();
+        Assert.assertFalse(solver.solve());
+    }
 }
