@@ -18,6 +18,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.Implications;
+import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -48,12 +49,6 @@ import static org.chocosolver.util.ESat.UNDEFINED;
  * @since 27/10/2016.
  */
 public class ClauseStore extends Propagator<IntVar> {
-
-    public static boolean ASSERT_UNIT_PROP = true;
-
-    public static boolean PRINT_CLAUSE = false;
-
-    public static boolean INTERVAL_TREE = true;
 
     /**
      * Signed clause unique ID -- for toString() mainly
@@ -123,7 +118,7 @@ public class ClauseStore extends Propagator<IntVar> {
      * Declare a new signed clause in this store
      */
     public void add(IntVar[] vars, IntIterableRangeSet[] ranges) {
-        if (INTERVAL_TREE) {
+        if (XParameters.INTERVAL_TREE) {
             SignedClause cl = new SignedClause(vars, ranges);
             attach(new Watcher(cl.pos[0], cl));
             attach(new Watcher(cl.pos[1], cl));
@@ -132,15 +127,15 @@ public class ClauseStore extends Propagator<IntVar> {
                 last = cl;
                 last.activity = clauseInc;
                 last.rawActivity = 1;
-                if (PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
             } else {
-                if (PRINT_CLAUSE) System.out.printf("add: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) System.out.printf("add: %s\n", cl);
                 this.clauses.add(cl);
             }
             mSolver.getEngine().dynamicAddition(true, cl);
         } else {
             PropSignedClause cl = PropSignedClause.makeFromIn(vars, ranges);
-            if (PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+            if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
             new Constraint("SC", cl).post();
         }
     }
@@ -208,14 +203,14 @@ public class ClauseStore extends Propagator<IntVar> {
     }
 
     /**
-     * Try to delete sclauses from this nogood store.
+     * Try to delete signed clauses from this nogood store.
      */
     public void forget() {
         decayActivity();
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
         } else if (last != null) {
-            if (ASSERT_UNIT_PROP) {
+            if (XParameters.ASSERT_UNIT_PROP) {
                 check(last);
             }
             detectDominance();

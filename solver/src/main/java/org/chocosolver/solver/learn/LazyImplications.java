@@ -48,22 +48,6 @@ import java.util.HashMap;
  */
 public class LazyImplications extends Implications {
 
-    @SuppressWarnings("WeakerAccess")
-    public static boolean DEBUG = false;
-
-    /**
-     * <ul>
-     *     <li>
-     *         0: merge is disabled
-     *     </li>
-     *     <li>
-     *         1: merge two consecutive entries with the same variable and cause
-     *     </li>
-     * </ul>
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static final int MERGE_CONDITIONS = 0;
-
     /**
      * An entry < v, D, c, m, p, n> where :
      *     <ul>
@@ -210,7 +194,7 @@ public class LazyImplications extends Implications {
             }
         }
         nbEntries = upto;
-        assert !DEBUG || checkIntegrity();
+        assert !XParameters.DEBUG_INTEGRITY || checkIntegrity();
     }
 
     @Override
@@ -239,7 +223,7 @@ public class LazyImplications extends Implications {
 
     /**
      * Return <i>true</i> if two entries, based on the same variable, can be merged.
-     * It depends on {@link #MERGE_CONDITIONS} which can be set to:
+     * It depends on {@link XParameters#MERGE_CONDITIONS} which can be set to:
      * <ul>
      *     <li>
      *         0: merge is disabled
@@ -259,7 +243,7 @@ public class LazyImplications extends Implications {
      */
     @SuppressWarnings("ConstantConditions")
     private boolean mergeConditions(Entry prev, ICause cause) {
-        switch (MERGE_CONDITIONS){
+        switch (XParameters.MERGE_CONDITIONS){
             default:
             case 0:
                 return false;
@@ -392,7 +376,7 @@ public class LazyImplications extends Implications {
         }else{
             addEntry(var, cause, evt, one, root, prev);
         }
-        assert !DEBUG || checkIntegrity();
+        assert !XParameters.DEBUG_INTEGRITY || checkIntegrity();
     }
 
 
@@ -495,7 +479,7 @@ public class LazyImplications extends Implications {
 
     @Override
     public int getValueAt(int idx) {
-        assert MERGE_CONDITIONS == 0;
+        assert XParameters.MERGE_CONDITIONS == 0;
         return entries[idx].e;
     }
 

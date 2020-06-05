@@ -43,26 +43,6 @@ import java.util.HashMap;
 public class ExplanationForSignedClause extends IExplanation {
 
     /**
-     * Set to false when skip assertion that
-     * no left branch are backtracked to
-     */
-    public static boolean ASSERT_NO_LEFT_BRANCH = true;
-    /**
-     * Set to true to force all cause to use default explanations
-     */
-    public static boolean DEFAULT_X = false;
-    /**
-     * FOR DEBUGGING PURPOSE ONLY.
-     * Set to true to output proofs
-     */
-    public static boolean PROOF = false;
-    /**
-     * FOR DEBUGGING PURPOSE ONLY.
-     * Set to true to output proofs with details
-     */
-    public static boolean FINE_PROOF = PROOF;
-
-    /**
      * Conflicting nodes
      */
     private ValueSortedMap<IntVar> front;
@@ -166,10 +146,10 @@ public class ExplanationForSignedClause extends IExplanation {
      */
     public void learnSignedClause(ContradictionException cex) {
         recycle();
-        if (PROOF) System.out.print("<-----");
+        if (XParameters.PROOF) System.out.print("<-----");
         initFront(cex);
         loop();
-        if (PROOF) System.out.print(">\n");
+        if (XParameters.PROOF) System.out.print(">\n");
     }
 
     private void initFront(ContradictionException cex) {
@@ -177,7 +157,7 @@ public class ExplanationForSignedClause extends IExplanation {
         // deal with global conflict
         if (cex.v == null) {
             if (Propagator.class.isAssignableFrom(cex.c.getClass())) {
-                if (PROOF) {
+                if (XParameters.PROOF) {
                     System.out.printf("\nCstr: %s\n", cex.c);
                     System.out.print("Pivot: none\n");
                 }
@@ -193,13 +173,13 @@ public class ExplanationForSignedClause extends IExplanation {
         do {
             current = front.pollLastValue();
             mIG.predecessorsOf(current, front);
-            if (PROOF) {
+            if (XParameters.PROOF) {
                 System.out.printf("\nCstr: %s\n", mIG.getCauseAt(current));
                 System.out.printf("Pivot: %s = %s\n", mIG.getIntVarAt(current).getName(),
                         mIG.getDomainAt(current));
             }
             explain(mIG.getCauseAt(current), current);
-            if (PROOF) {
+            if (XParameters.PROOF) {
                 System.out.printf("Expl: %s\n-----", literals);
             }
             // filter irrelevant nodes
@@ -209,7 +189,7 @@ public class ExplanationForSignedClause extends IExplanation {
 
     private void explain(ICause cause, int p) {
         if (p == -1 ||
-                DEFAULT_X
+                XParameters.DEFAULT_X
                         && Propagator.class.isAssignableFrom(cause.getClass())
                         && !PropSignedClause.class.isAssignableFrom(cause.getClass())
                         && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
@@ -233,7 +213,7 @@ public class ExplanationForSignedClause extends IExplanation {
                 if (b.isInstantiated()) {
                     IntIterableRangeSet set = getFreeSet();
                     set.add(1 - b.getValue());
-                    if (FINE_PROOF) System.out.print("Reif: ");
+                    if (XParameters.FINE_PROOF) System.out.print("Reif: ");
                     addLiteral(b, set, false);
                 } else {
                     throw new UnsupportedOperationException("Oh nooo!");
@@ -276,7 +256,7 @@ public class ExplanationForSignedClause extends IExplanation {
         if (front.isEmpty()
             || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
             || mIG.getDecisionLevelAt(max) == 1) {
-            if (PROOF) System.out.print("\nbacktrack to ROOT\n-----");
+            if (XParameters.PROOF) System.out.print("\nbacktrack to ROOT\n-----");
             assertLevel = mIG.getIntVarAt(0)
                     .getModel()
                     .getSolver()
@@ -284,7 +264,9 @@ public class ExplanationForSignedClause extends IExplanation {
                     .getDecision(0)
                     .getPosition();
         } else
-            // check UIP
+            /*// check UIP
+              // WARNING: the following code does not work. It cannot be applied stricto-senso from SAT
+              // Since a variable may have been modified more than once in a decision level, unlike SAT
             {
             int prev = front.getLowerValue(max);
             int dl = mIG.getDecisionLevelAt(max);
@@ -302,14 +284,14 @@ public class ExplanationForSignedClause extends IExplanation {
                 }
                 assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
             }
-            /*if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
-                if (PROOF)
+            /*/if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
+                if (XParameters.PROOF)
                     System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
-                if (ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                if (XParameters.ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
                     throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
                 }
                 assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
-             */
+             //*/
         }
         return assertLevel != Integer.MAX_VALUE;
     }
@@ -352,7 +334,7 @@ public class ExplanationForSignedClause extends IExplanation {
         if (var.isBool()) {
             dom.retainBetween(0, 1);
             if (!dom.contains(0) && !dom.contains(1)) {
-                if (FINE_PROOF)
+                if (XParameters.FINE_PROOF)
                     System.out.printf("%s: %s -- skip\n", var.getName(), dom);
                 if (pivot) {
                     literals.remove(var);
@@ -369,33 +351,33 @@ public class ExplanationForSignedClause extends IExplanation {
         IntIterableRangeSet rset = literals.get(var);
         if (rset == null) {
             if (dom.size() > 0) {
-                if (FINE_PROOF) System.out.printf("%s: %s\n", var.getName(), dom);
+                if (XParameters.FINE_PROOF) System.out.printf("%s: %s\n", var.getName(), dom);
                 literals.put(var, dom);
             } else {
-                if (FINE_PROOF)
+                if (XParameters.FINE_PROOF)
                     System.out.printf("%s: %s -- skip\n", var.getName(), dom);
                 returnSet(dom);
             }
         } else {
             if (pivot) {
-                if (FINE_PROOF)
+                if (XParameters.FINE_PROOF)
                     System.out.printf("%s: %s ∩ %s", var.getName(), rset, dom);
                 IntIterableSetUtils.intersectionOf(rset, dom);
-                if (FINE_PROOF) System.out.printf(" = %s", rset);
+                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
             } else {
-                if (FINE_PROOF)
+                if (XParameters.FINE_PROOF)
                     System.out.printf("%s: %s ∪ %s", var.getName(), rset, dom);
                 IntIterableSetUtils.unionOf(rset, dom);
-                if (FINE_PROOF) System.out.printf(" = %s", rset);
+                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
             }
             if (rset.size() == 0) {
                 assert !var.isBool() || rset.contains(0) || !rset.contains(1);
-                if (FINE_PROOF) System.out.print(" -- remove");
+                if (XParameters.FINE_PROOF) System.out.print(" -- remove");
                 literals.remove(var);
                 front.remove(var);
                 returnSet(rset);
             }
-            if (FINE_PROOF) System.out.print("\n");
+            if (XParameters.FINE_PROOF) System.out.print("\n");
             returnSet(dom);
         }
     }
