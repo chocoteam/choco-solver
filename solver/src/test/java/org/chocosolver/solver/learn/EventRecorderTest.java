@@ -9,28 +9,12 @@
  */
 package org.chocosolver.solver.learn;
 
-import static java.util.Arrays.copyOfRange;
-import static java.util.Arrays.fill;
-import static org.chocosolver.solver.search.strategy.Search.greedySearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderUBSearch;
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnSignedClauses;
 import org.chocosolver.solver.search.strategy.Search;
@@ -39,8 +23,10 @@ import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandom;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.selectors.variables.Random;
 import org.chocosolver.solver.search.strategy.selectors.variables.Smallest;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
@@ -50,6 +36,14 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Arrays.copyOfRange;
+import static java.util.Arrays.fill;
+import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.testng.Assert.*;
 
 /**
  *
@@ -217,15 +211,15 @@ public class EventRecorderTest {
                 break;
             case 1: {
                 System.out.print("SCL    :");
-                ExplanationForSignedClause.ASSERT_NO_LEFT_BRANCH = false;
-                ClauseStore.INTERVAL_TREE = false;
+                XParameters.ASSERT_NO_LEFT_BRANCH = false;
+                XParameters.INTERVAL_TREE = false;
 
                 model.getSolver().setLearningSignedClauses();
                 break;
             }
             case 2: {
                 System.out.print("SCL (TREE)    :");
-                ClauseStore.INTERVAL_TREE = true;
+                XParameters.INTERVAL_TREE = true;
                 model.getSolver().setLearningSignedClauses();
                 break;
             }
@@ -721,7 +715,7 @@ public class EventRecorderTest {
 //        s.getSolver().setCBJLearning(true);
         r.setSearch(inputOrderUBSearch(B), greedySearch(inputOrderLBSearch(X)));
 //
-        ClauseStore.ASSERT_UNIT_PROP = false;
+        XParameters.ASSERT_UNIT_PROP = false;
 
         while (model.getSolver().solve()) ;
     }
@@ -810,14 +804,42 @@ public class EventRecorderTest {
     @DataProvider(name = "rcpspP")
     public Object[][] rcpspP(){
         return new Object[][]{
-                {0, 1_380_772},
-                {1, 148}, // 254s
-                {2, 148},
+                {0, 1_380_772, 0, true},
+                {1, 148, 0, true}, // 254s
+                {1, 148, 0, false}, // 254s
+                {2, 148, 0, true},
+                {2, 148, 0, false},
         };
     }
 
+    @DataProvider(name = "fuzzy")
+    public Object[][] fuzzy() {
+        int n = 1000;
+        Object[][] params = new Object[2 * n][2];
+        long seed = System.currentTimeMillis();
+        for (int i = 0, k = 0; i < n; i++) {
+            params[k++] = new Object[]{seed + i, true};
+            params[k++] = new Object[]{seed + i, false};
+        }
+        return params;
+    }
+
+    @Test(groups = "1s,expl", timeOut = 120000, dataProvider = "fuzzy")
+    public void testFuzzy1(long seed, boolean iviews) {
+        rcpsp(1, 0, seed, iviews);
+    }
+
+    @Test(groups = "1s, expl", timeOut = 120000, dataProvider = "fuzzy")
+    public void testFuzzy2(long seed, boolean iviews) {
+        rcpsp(2, 0, seed, iviews);
+    }
+
     @Test(groups = "10s,expl", timeOut = 120000, dataProvider = "rcpspP")
-    public void testRCPSP(int learn, int nbnodes) throws ContradictionException {
+    public void testRCPSP(int learn, int nbnodes, long seed, boolean eviews) {
+        rcpsp(learn, nbnodes, seed, eviews);
+    }
+
+    private void rcpsp(int learn, int nbnodes, long seed, boolean eviews) {
         int[] rc = {13, 13, 12, 15};
         int[][] rr = new int[][]{
                 {5, 10, 5, 0, 3, 0, 0, 5, 1, 2, 0, 10, 0, 9, 3, 10, 0, 6, 0, 0, 2, 0, 1, 1, 0, 0, 0, 0, 0, 9},
@@ -858,38 +880,39 @@ public class EventRecorderTest {
                 {}
         };
 
-        Model model = new Model(new EnvironmentBuilder().fromChunk().build(), "rcpcp-00", new DefaultSettings().setHybridizationOfPropagationEngine((byte)0b00));
+        Model model = new Model(
+                new EnvironmentBuilder()
+                        .fromChunk()
+                        .build(),
+                "rcpcp-00",
+                new DefaultSettings()
+                        .setHybridizationOfPropagationEngine((byte) 0b00)
+                        .setEnableViews(eviews));
         IntVar[] S = model.intVarArray("S", 30, 0, 160, false);
-        IntVar[] D = new IntVar[30];
-        int[]ds = {10, 4, 1, 3, 5, 10, 1, 4, 6, 8, 7, 7, 4, 3, 10, 3, 4, 3, 7, 5, 1, 10, 8, 1, 6, 4, 7, 6, 9, 4};
-        for(int i = 0 ; i < 30; i++){
-            D[i] = model.intVar("D_"+i, ds[i]);
-        }
-        IntVar[] E = model.intVarArray("E", 30, 0, 160, false);
+        int[] ds = {10, 4, 1, 3, 5, 10, 1, 4, 6, 8, 7, 7, 4, 3, 10, 3, 4, 3, 7, 5, 1, 10, 8, 1, 6, 4, 7, 6, 9, 4};
         Task[] T = new Task[30];
         for (int i = 0; i < 30; i++) {
-            T[i] = new Task(S[i], D[i], E[i]);
-            T[i].ensureBoundConsistency();
+            T[i] = new Task(S[i], ds[i]);
         }
         IntVar objective = model.intVar("objective", 0, 161, false);
 
         // successors
         for (int i = 0; i < 30; i++) {
             for (int j = 0; j < suc[i].length; j++) {
-                model.arithm(S[i], "+", D[i], "<=", S[suc[i][j] - 1]).post();
+                model.arithm(S[i], "+", T[i].getDuration(), "<=", S[suc[i][j] - 1]).post();
             }
-            model.arithm(E[i], "<=", objective).post();
+            model.arithm(T[i].getEnd(), "<=", objective).post();
         }
         // redundant constraints
         for (int i = 0; i < 29; i++) {
             for (int j = i + 1; j < 30; j++) {
                 boolean found = false;
                 for (int k = 0; k < 4 && !found; k++) {
-                    if (rr[k][i] > 0 && rr[k][j] > 0 && rr[k][i] + rr[k][j]> rc[k]) {
+                    if (rr[k][i] > 0 && rr[k][j] > 0 && rr[k][i] + rr[k][j] > rc[k]) {
                         BoolVar b1 = model.boolVar();
-                        model.reifyXltYC(S[i], S[j], -D[i].getValue() + 1, b1);
+                        model.reifyXltYC(S[i], S[j], -ds[i] + 1, b1);
                         BoolVar b2 = model.boolVar();
-                        model.reifyXltYC(S[j], S[i], -D[j].getValue() + 1, b2);
+                        model.reifyXltYC(S[j], S[i], -ds[j] + 1, b2);
                         model.arithm(b1, "+", b2, ">", 0).post();
                         found = true;
                     }
@@ -912,17 +935,27 @@ public class EventRecorderTest {
                     rs.stream().mapToInt(IntVar::getLB).toArray(),
                     rc[i]);
         }
+        model.setObjective(false, objective);
         Solver solver = model.getSolver();
         solver.setSearch(Search.intVarSearch(
-                new Smallest(),
-                new IntDomainMin(),
+                seed > 0 && seed % 2 == 0 ? new Random<>(seed): new Smallest(),
+                seed < 0 && seed % 3 == 0 ? new IntDomainRandom(seed): new IntDomainMin(),
                 ArrayUtils.append(S, new IntVar[]{objective})));
         configure(model, learn);
-        Runtime.getRuntime().addShutdownHook(new Thread(solver::printShortStatistics));
-        solver.findOptimalSolution(objective, false);
-        Assert.assertEquals(solver.getBoundsManager().getBestSolutionValue(), 53);
-        Assert.assertEquals(solver.getSolutionCount(), 5);
-        Assert.assertEquals(solver.getNodeCount(), nbnodes);
+        Thread t =  new Thread(solver::printShortStatistics);
+        Runtime.getRuntime().addShutdownHook(t);
+        //solver.findOptimalSolution(objective, false);
+        if (solver.solve()) {
+            do ;
+            while (solver.solve());
+        }
+        solver.printShortStatistics();
+        Assert.assertEquals(solver.getBoundsManager().getBestSolutionValue(), 53, "seed :" + seed);
+        if (seed == 0) {
+            Assert.assertEquals(solver.getSolutionCount(), 5);
+            Assert.assertEquals(solver.getNodeCount(), nbnodes);
+        }
+        Runtime.getRuntime().removeShutdownHook(t);
     }
 
 }

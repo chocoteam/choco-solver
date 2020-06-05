@@ -9,19 +9,20 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
-import static org.chocosolver.solver.constraints.Explainer.execute;
-
-import java.util.HashMap;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.HashMap;
+
+import static org.chocosolver.solver.constraints.Explainer.execute;
 
 /**
  * <p>
@@ -67,7 +68,7 @@ public class ExplAllDiffInstTest {
         IntVar d = mo.intVar("d", 2, 4);
         PropAllDiffInst prop = new PropAllDiffInst(new IntVar[]{a, b, c});
         mo.post(new Constraint("test", prop));
-        ExplanationForSignedClause.DEFAULT_X = false;
+        XParameters.DEFAULT_X = false;
         IntDecision dec = new IntDecision(null);
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(),
