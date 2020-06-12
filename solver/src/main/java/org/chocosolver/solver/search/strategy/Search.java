@@ -290,24 +290,42 @@ public class Search {
 
     /**
      * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
-     * it to its lower bound
+     * it to its lower bound.
      *
      * @param vars list of variables
      * @return assignment strategy
+     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
+     * Boussemart et al. ECAI 2004.
+     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
         return new DomOverWDeg(vars, 0, new IntDomainMin());
     }
 
     /**
+     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
+     * it to its lower bound, where the weight incrementer is "ca.cd".
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
+     */
+    public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
+        return new DomOverWDegRef(vars, 0, new IntDomainMin());
+    }
+
+    /**
      * Create an Activity based search strategy.
      * <p>
-     * <b>"Activity-Based Search for Black-Box Constraint Propagramming Solver"<b/>,
-     * Laurent Michel and Pascal Van Hentenryck, CPAIOR12. <br/> Uses public static parameters
+     * <br/> Uses public static parameters
      * (GAMMA=0.999d, DELTA=0.2d, ALPHA=8, RESTART=1.1d, FORCE_SAMPLING=1)
      *
      * @param vars collection of variables
      * @return an Activity based search strategy.
+     * @implNote This is based on "Activity-Based Search for Black-Box Constraint Programming Solvers."
+     * Michel et al. CPAIOR 2012.
+     * <a href="https://dblp.org/rec/conf/cpaior/MichelH12">https://dblp.org/rec/conf/cpaior/MichelH12</a>
      */
     public static AbstractStrategy<IntVar> activityBasedSearch(IntVar... vars) {
         return new ActivityBased(vars);
@@ -319,6 +337,9 @@ public class Search {
      *
      * @param vars list of variables
      * @return assignment strategy
+     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
+     * Habet et al. SAC 2019.
+     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
         return new ConflictHistorySearch(vars, 0, new IntDomainMin());

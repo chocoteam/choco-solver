@@ -13,6 +13,7 @@ import org.chocosolver.solver.variables.Variable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -26,6 +27,7 @@ public class VariableSelectorWithTies<V extends Variable> implements VariableSel
     private final VariableEvaluator<V>[] heuristics;
     private ArrayList<V> oldv = new ArrayList<>();
     private ArrayList<V> newv = new ArrayList<>();
+    private Predicate<V> predicate = (v -> !v.isInstantiated());
 
 
     @SafeVarargs
@@ -33,6 +35,9 @@ public class VariableSelectorWithTies<V extends Variable> implements VariableSel
         this.heuristics = heuristics;
     }
 
+    public void addPredicate(Predicate<V> predicate){
+        this.predicate = this.predicate.and(predicate);
+    }
 
     @Override
     public V getVariable(V[] variables) {
@@ -40,7 +45,7 @@ public class VariableSelectorWithTies<V extends Variable> implements VariableSel
         newv.clear();
         Collections.addAll(oldv, variables);
         // 1. remove instantied variables
-        newv.addAll(oldv.stream().filter(v -> !v.isInstantiated()).collect(Collectors.toList()));
+        newv.addAll(oldv.stream().filter(this.predicate).collect(Collectors.toList()));
         if (newv.size() == 0) return null;
 
         // Then apply each heuristic one by one

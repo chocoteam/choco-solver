@@ -37,6 +37,7 @@ public class BlackBoxTest {
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::activityBasedSearch},
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::domOverWDegSearch},
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::conflictHistorySearch},
+				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::domOverWDegRefSearch},
 		};
 	}
 
@@ -49,6 +50,7 @@ public class BlackBoxTest {
 		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findAllSolutions();
+		solver.printShortStatistics();
 		Assert.assertEquals(solver.getSolutionCount(), 100);
 	}
 
@@ -61,6 +63,7 @@ public class BlackBoxTest {
 		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findOptimalSolution((IntVar) model.getHook("objective"), false);
+		solver.printShortStatistics();
 		Assert.assertEquals(solver.getObjectiveManager().getBestSolutionValue(), 34);
 	}
 
@@ -73,6 +76,7 @@ public class BlackBoxTest {
 		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findAllSolutions();
+		solver.printShortStatistics();
 		Assert.assertEquals(solver.getSolutionCount(), 724);
 	}
 }

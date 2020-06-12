@@ -218,7 +218,7 @@ public interface ReExpression extends ArExpression {
     /**
      * @param y1 an arithmetic expression
      * @param y2 an arithmetic expression
-     * @return return "if(b,y1,y2" where this is "b"
+     * @return return "if(b,y1,y2)" where this is "b"
      */
     default ArExpression ift(ArExpression y1, ArExpression y2) {
         return new IfArExpression(this, y1, y2);
