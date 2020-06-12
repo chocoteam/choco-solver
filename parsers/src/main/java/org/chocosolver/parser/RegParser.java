@@ -13,8 +13,7 @@ import gnu.trove.set.hash.THashSet;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.*;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
@@ -225,12 +224,12 @@ public abstract class RegParser implements IParser {
         if (nb_cores == 1 && exp) {
             solver.setLearningSignedClauses();
             // THEN PARAMETERS
-            ExplanationForSignedClause.DEFAULT_X = dftexp;
-            ExplanationForSignedClause.PROOF = ExplanationForSignedClause.FINE_PROOF = false;
-            ClauseStore.PRINT_CLAUSE = false;
-            ClauseStore.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
-            ExplanationForSignedClause.ASSERT_NO_LEFT_BRANCH = false;
-            ClauseStore.INTERVAL_TREE = true;
+            XParameters.DEFAULT_X = dftexp;
+            XParameters.PROOF = XParameters.FINE_PROOF = false;
+            XParameters.PRINT_CLAUSE = false;
+            XParameters.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
+            XParameters.ASSERT_NO_LEFT_BRANCH = false;
+            XParameters.INTERVAL_TREE = true;
             if (solver.hasObjective()) {
                 solver.setRestartOnSolutions();
             }
