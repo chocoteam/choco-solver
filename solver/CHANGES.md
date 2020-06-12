@@ -9,6 +9,7 @@ NEXT MILESTONE
 Multi-modules and JPMS-ready.
 
 ### Major features:
+- Add dom/wdeg with refinement (["Refining Constraint Weighting." Wattez et al. ICTAI 2019.](https://dblp.org/rec/conf/ictai/WattezLPT19))
 - Move `cutoffseq`, `choco-sat`, `choco-solver`, `pf4cs`, `choco-parsers` and `samples` projects into a (maven) multi-modules project, JPMS-ready 
 - Default AC algorithm for `AllDifferent` is now from IJCAI-18 "A Fast Algorithm for Generalized Arc Consistency of the Alldifferent Constraint", Zhang et al. (#644)
 - LNS can now be defined with a solution as bootstrap.
