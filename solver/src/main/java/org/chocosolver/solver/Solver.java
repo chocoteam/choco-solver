@@ -44,6 +44,7 @@ import org.chocosolver.util.criteria.Criterion;
 
 import java.io.PrintStream;
 import java.util.*;
+import java.util.function.Predicate;
 
 import static org.chocosolver.solver.Solver.Action.*;
 import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
@@ -328,10 +329,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             //noinspection unchecked
             Set<Constraint> instances = (Set<Constraint>) mModel.getHook("cinstances");
             if (instances != null) {
+                Predicate<Constraint> freed =
+                        c -> (c.getStatus() == FREE) || (
+                                c.getOpposite() != null && c.getOpposite().getStatus() == FREE);
                 Optional<Constraint> undeclared = instances
                         .stream()
-                        .filter(c -> c.getStatus() == FREE)
-                        .filter(c -> c.getOpposite() == null || c.getOpposite().getStatus() == FREE)
+                        .filter(freed)
                         .findFirst();
                 if (undeclared.isPresent()) {
                     getErr().print(
