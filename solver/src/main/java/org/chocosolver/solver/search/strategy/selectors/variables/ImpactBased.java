@@ -9,21 +9,22 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import static org.chocosolver.util.tools.VariableUtils.searchSpaceSize;
-
-import java.util.Random;
 import org.chocosolver.memory.IStateDouble;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.IntList;
+
+import java.util.Random;
+
+import static org.chocosolver.util.tools.VariableUtils.searchSpaceSize;
 
 /**
  * Implementation of the search described in:
@@ -39,6 +40,10 @@ import org.chocosolver.util.objects.IntList;
  */
 public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorContradiction, ICause {
 
+    /**
+     * The way value is selected for a given variable
+     */
+    private IntValueSelector valueSelector = new ImpactValueSelector();
     private final int aging; // aging parameter
     private double[][] Ilabel; // impact per labeling
     private int[] offsets; // initial lower bound of each variable
@@ -73,15 +78,20 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * <b>"Impact-Based Search Strategies for Constraint Programming",
      * Philippe Refalo, CP2004.</b>
      *
-     * @param ivariables variables of the problem (should be integers)
-     * @param alpha      aging parameter
-     * @param split      split parameter for subdomains computation
-     * @param nodeImpact force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
-     * @param seed       a seed for random
-     * @param initOnly   only apply the initialisation phase, do not update impact thereafter
+     * @param ivariables    variables of the problem (should be integers)
+     * @param valueSelector a value selector. When set to null, the internal one based on impacts will be used.
+     * @param alpha         aging parameter
+     * @param split         split parameter for subdomains computation
+     * @param nodeImpact    force update of impacts every <code>nodeImpact</code> nodes. Set value to 0 to avoid using it.
+     * @param seed          a seed for random
+     * @param initOnly      only apply the initialisation phase, do not update impact thereafter
      */
-    public ImpactBased(IntVar[] ivariables, int alpha, int split, int nodeImpact, long seed, boolean initOnly) { //TODO: node impacts
+    public ImpactBased(IntVar[] ivariables, IntValueSelector valueSelector,
+                       int alpha, int split, int nodeImpact, long seed, boolean initOnly) { //TODO: node impacts
         super(ivariables);
+        if (valueSelector != null) {
+            this.valueSelector = valueSelector;
+        }
         this.model = ivariables[0].getModel();
         this.aging = alpha;
         this.split = (int) Math.pow(2, split);
@@ -91,8 +101,14 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         this.initOnly = initOnly;
     }
 
-    public ImpactBased(IntVar[] vars, boolean initOnly){
-        this(vars,2,512,2048,0,initOnly);
+    public ImpactBased(IntVar[] vars, int i, int i1, int i2, long seed, boolean initOnly) {
+        this(vars,
+                null,
+                2,
+                512,
+                2048,
+                0,
+                initOnly);
     }
 
     @Override
@@ -102,38 +118,15 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         }
         if (currentVar == -1 || vars[currentVar] != variable) {
             // retrieve indice of the variable in vars
-			for(int i=0;i<vars.length;i++){
-				if(vars[i]==variable){
-					currentVar = i;
-				}
-			}
-            assert vars[currentVar] == variable;
-        }
-        bests.clear();
-        double bestImpact = Double.POSITIVE_INFINITY;
-        if (variable.hasEnumeratedDomain()) {
-            DisposableValueIterator it = variable.getValueIterator(true);
-            int o = offsets[currentVar];
-            while (it.hasNext()) {
-                int val = it.next();
-                double impact = Ilabel[currentVar][val - o];
-                if (impact < bestImpact) {
-                    bests.clear();
-                    bests.add(val);
-                    bestImpact = impact;
-                } else if (impact == bestImpact) {
-                    bests.add(val);
+            for (int i = 0; i < vars.length; i++) {
+                if (vars[i] == variable) {
+                    currentVar = i;
                 }
             }
-            it.dispose();
-
-            currentVal = bests.get(random.nextInt(bests.size()));
-        } else {
-            int lb = variable.getLB();
-            int ub = variable.getUB();
-            currentVal = random.nextBoolean() ? lb : ub;
+            assert vars[currentVar] == variable;
         }
-        return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
+        int currentVal = valueSelector.selectValue(variable);
+        return makeIntDecision(variable, currentVal);
     }
 
     @Override
@@ -164,30 +157,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
         return computeDecision(best);
     }
 
-    /**
-     * Define a time limit on initialisation phase.
-     * When the limit is reached, computing impacts on ROOT node stops and the search can start.
-     * @param timeLimit in milliseconds
-     */
-    public void setInitialisationTimeLimit(long timeLimit) {
-        if (timeLimit > -1) {
-            this.initTimeLimit = timeLimit;
-        }
-    }
-
-    /**
-     * Define a time limit on reevaluation phase (done every {@link #nodeImpact} nodes).
-     * When the limit is reached, reevaluting impacts stops and the search can go on.
-     * @param timeLimit in milliseconds
-     */
-    public void setReevaluationTimeLimit(long timeLimit) {
-        if (timeLimit > -1) {
-            this.reevalTimeLimit = timeLimit;
-        }
-    }
-
     @Override
-    public boolean init(){
+    public boolean init() {
         long tl = System.currentTimeMillis() + this.initTimeLimit;
         if (!initOnly && !model.getSolver().getSearchMonitors().contains(this)) {
             model.getSolver().plugMonitor(this);
@@ -231,12 +202,12 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                                 break loop;
                             }
                             a = b = it.next();
-                            while(step < size && it.hasNext()) {
+                            while (step < size && it.hasNext()) {
                                 b = it.next();
                                 step++;
                             }
-                            double im =  computeImpactB(v, a, b, before);
-                            for(int j = a; j <=b; j++){
+                            double im = computeImpactB(v, a, b, before);
+                            for (int j = a; j <= b; j++) {
                                 Ilabel[i][j - offset] = im;
                             }
                         }
@@ -260,7 +231,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 //            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
             return false;
         } else if (System.currentTimeMillis() > tl) {
-            if(model.getSettings().warnUser()) {
+            if (model.getSettings().warnUser()) {
                 model.getSolver().getErr().print("impact Search stops its init phase -- reach time limit!");
             }
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
@@ -291,7 +262,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     @Override
     public void afterDownBranch(boolean left) {
-        if(left){
+        if (left) {
             if (currentVar > -1) { // if the decision was computed by another strategy
                 if (asgntFailed) {
                     updateImpact(1.0d, currentVar, currentVal);
@@ -358,7 +329,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 model.getSolver().getEngine().flush();
             }
             return 1.0d;
-        }finally {
+        } finally {
             model.getEnvironment().worldPop();
         }
     }
@@ -392,7 +363,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                 model.getSolver().getEngine().flush();
             }
             return 1.0d;
-        }finally {
+        } finally {
             model.getEnvironment().worldPop();
         }
     }
@@ -442,17 +413,17 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                             it.dispose();
                         } else { // estimate per subdomains
                             int size = dsz / split;
-                            int a,b;
+                            int a, b;
                             DisposableValueIterator it = v.getValueIterator(true);
                             while (it.hasNext()) {
                                 int step = 0;
                                 a = b = it.next();
-                                while(step < size && it.hasNext()) {
+                                while (step < size && it.hasNext()) {
                                     b = it.next();
                                     step++;
                                 }
-                                double im =  computeImpactB(v, a, b, before);
-                                for(int j = a; j <=b; j++){
+                                double im = computeImpactB(v, a, b, before);
+                                for (int j = a; j <= b; j++) {
                                     updateImpact(im, idx, j);
                                 }
                             }
@@ -469,13 +440,45 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
                     }
                 }
             }
-            if(idx == vars.length){
+            if (idx == vars.length) {
                 idx = 0;
             }
             if (learnsAndFails) {
                 learnsAndFails = false;
             }
 //            System.out.printf(".. 100%%\n");
+        }
+    }
+
+    private class ImpactValueSelector implements IntValueSelector {
+
+        @Override
+        public int selectValue(IntVar var) {
+            bests.clear();
+            double bestImpact = Double.POSITIVE_INFINITY;
+            if (var.hasEnumeratedDomain()) {
+                DisposableValueIterator it = var.getValueIterator(true);
+                int o = offsets[currentVar];
+                while (it.hasNext()) {
+                    int val = it.next();
+                    double impact = Ilabel[currentVar][val - o];
+                    if (impact < bestImpact) {
+                        bests.clear();
+                        bests.add(val);
+                        bestImpact = impact;
+                    } else if (impact == bestImpact) {
+                        bests.add(val);
+                    }
+                }
+                it.dispose();
+
+                currentVal = bests.get(random.nextInt(bests.size()));
+            } else {
+                int lb = var.getLB();
+                int ub = var.getUB();
+                currentVal = random.nextBoolean() ? lb : ub;
+            }
+            return currentVal;
         }
     }
 }

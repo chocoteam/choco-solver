@@ -1,25 +1,20 @@
-/*
- * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
- * See LICENSE file in the project root for full license information.
- */
-// Generated from org/chocosolver/parser/flatzinc/Flatzinc4Lexer.g4 by ANTLR 4.2
+// Generated from org/chocosolver/parser/flatzinc/Flatzinc4Lexer.g4 by ANTLR 4.5
 package org.chocosolver.parser.flatzinc;
 
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.TokenStream;
+import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Lexer extends Lexer {
+	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
+
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -33,14 +28,6 @@ public class Flatzinc4Lexer extends Lexer {
 		"DEFAULT_MODE"
 	};
 
-	public static final String[] tokenNames = {
-		"<INVALID>",
-		"BOOL", "'true'", "'false'", "'int'", "'float'", "'set'", "'of'", "'array'", 
-		"'var'", "'par'", "'predicate'", "'constraint'", "'solve'", "'satisfy'", 
-		"'minimize'", "'maximize'", "'..'", "'.'", "'{'", "'}'", "','", "'['", 
-		"']'", "'='", "'+'", "'-'", "';'", "':'", "'::'", "'('", "')'", "IDENTIFIER", 
-		"COMMENT", "WS", "INT_CONST", "STRING", "CHAR"
-	};
 	public static final String[] ruleNames = {
 		"BOOL", "TRUE", "FALSE", "INT", "FLOAT", "SET", "OF", "ARRAY", "VAR", 
 		"PAR", "PREDICATE", "CONSTRAINT", "SOLVE", "SATISFY", "MINIMIZE", "MAXIMIZE", 
@@ -48,6 +35,53 @@ public class Flatzinc4Lexer extends Lexer {
 		"DC", "LP", "RP", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "STRING", 
 		"CHAR", "EXPONENT", "ESC_SEQ", "OCTAL_ESC", "HEX_DIGIT", "UNICODE_ESC"
 	};
+
+	private static final String[] _LITERAL_NAMES = {
+		null, "'bool'", "'true'", "'false'", "'int'", "'float'", "'set'", "'of'", 
+		"'array'", "'var'", "'par'", "'predicate'", "'constraint'", "'solve'", 
+		"'satisfy'", "'minimize'", "'maximize'", "'..'", "'.'", "'{'", "'}'", 
+		"','", "'['", "']'", "'='", "'+'", "'-'", "';'", "':'", "'::'", "'('", 
+		"')'"
+	};
+	private static final String[] _SYMBOLIC_NAMES = {
+		null, "BOOL", "TRUE", "FALSE", "INT", "FLOAT", "SET", "OF", "ARRAY", "VAR", 
+		"PAR", "PREDICATE", "CONSTRAINT", "SOLVE", "SATISFY", "MINIMIZE", "MAXIMIZE", 
+		"DD", "DO", "LB", "RB", "CM", "LS", "RS", "EQ", "PL", "MN", "SC", "CL", 
+		"DC", "LP", "RP", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "STRING", 
+		"CHAR"
+	};
+	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
+
+	/**
+	 * @deprecated Use {@link #VOCABULARY} instead.
+	 */
+	@Deprecated
+	public static final String[] tokenNames;
+	static {
+		tokenNames = new String[_SYMBOLIC_NAMES.length];
+		for (int i = 0; i < tokenNames.length; i++) {
+			tokenNames[i] = VOCABULARY.getLiteralName(i);
+			if (tokenNames[i] == null) {
+				tokenNames[i] = VOCABULARY.getSymbolicName(i);
+			}
+
+			if (tokenNames[i] == null) {
+				tokenNames[i] = "<INVALID>";
+			}
+		}
+	}
+
+	@Override
+	@Deprecated
+	public String[] getTokenNames() {
+		return tokenNames;
+	}
+
+	@Override
+
+	public Vocabulary getVocabulary() {
+		return VOCABULARY;
+	}
 
 
 	public Flatzinc4Lexer(CharStream input) {
@@ -57,9 +91,6 @@ public class Flatzinc4Lexer extends Lexer {
 
 	@Override
 	public String getGrammarFileName() { return "Flatzinc4Lexer.g4"; }
-
-	@Override
-	public String[] getTokenNames() { return tokenNames; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }

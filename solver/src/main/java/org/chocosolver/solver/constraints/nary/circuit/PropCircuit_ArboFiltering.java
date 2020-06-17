@@ -58,7 +58,7 @@ public class PropCircuit_ArboFiltering extends Propagator<IntVar> {
         this.connectedGraph = new DirectedGraph(n + 1, SetType.BITSET, false);
         domFinder = new SimpleDominatorsFinder(n, connectedGraph);
         if (conf == CircuitConf.RD) {
-            rd = new Random(0);
+            rd = new Random(vars[0].getModel().getSeed());
         }
     }
 

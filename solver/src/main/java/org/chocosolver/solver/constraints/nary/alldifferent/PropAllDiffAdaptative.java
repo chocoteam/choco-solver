@@ -43,7 +43,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
      */
     public PropAllDiffAdaptative(IntVar[] variables) {
         super(variables, true);
-        rd = new Random(0);
+        rd = new Random(vars[0].getModel().getSeed());
         calls = success = 1;
     }
 

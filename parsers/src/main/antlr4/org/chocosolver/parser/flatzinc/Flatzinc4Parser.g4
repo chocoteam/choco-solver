@@ -23,21 +23,16 @@ public Datas datas;
 
 // the model
 public Model mModel;
-
-
-public boolean allSolutions, freeSearch;
 }
 
 
 // PARSER RULES
 
-flatzinc_model [Model aModel, Datas datas, boolean allSolutions, boolean freeSearch]
+flatzinc_model [Model aModel, Datas datas]
 	:
 	{
     this.mModel = aModel;
     this.datas = datas;
-    this.allSolutions = allSolutions;
-    this.freeSearch = freeSearch;
     }
        (pred_decl)* (param_decl | var_decl)* (constraint)* solve_goal
 	;

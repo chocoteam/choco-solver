@@ -11,8 +11,14 @@ package org.chocosolver.solver.constraints.nary.nvalue;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import java.util.stream.IntStream;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
 import static org.chocosolver.util.tools.ArrayUtils.concat;
@@ -75,7 +81,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                         mandatory = true;
                         mate[i] = -2;
                         break;
-                    }else{
+                    } else {
                         if (mate[i] == -1) {
                             mate[i] = v;
                         } else {
@@ -98,20 +104,20 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         if (count < countMax && countMax == vars[n].getLB()) {
             for (int i = concernedValues.length - 1; i >= 0; i--) {
                 if (mate[i] >= 0) {
-                    if(vars[mate[i]].instantiateTo(concernedValues[i], this)){
+                    if (vars[mate[i]].instantiateTo(concernedValues[i], this)) {
                         again = true;
                     }
                 }
             }
-            if(!again){
+            if (!again) {
                 int nbInst = 0;
                 for (int i = 0; i < n; i++) {
                     if (vars[i].isInstantiated()) {
                         nbInst++;
                     }
                 }
-				// remove used variables when alldiff is required over uninstantiated variables
-                if(n-nbInst == countMax - count){
+                // remove used variables when alldiff is required over uninstantiated variables
+                if (n - nbInst == countMax - count) {
                     for (int i = concernedValues.length - 1; i >= 0; i--) {
                         boolean mandatory = false;
                         int value = concernedValues[i];
@@ -123,8 +129,8 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                         }
                         if (mandatory) {
                             for (int v = 0; v < n; v++) {
-                                if(!vars[v].isInstantiated()){
-                                    if(vars[v].removeValue(value, this)){
+                                if (!vars[v].isInstantiated()) {
+                                    if (vars[v].removeValue(value, this)) {
                                         again = true;
                                     }
                                 }
@@ -136,7 +142,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         }
         if (count >= vars[n].getUB()) {
             setPassive();
-        }else if(again){
+        } else if (again) {
             propagate(0);// fix point is required as not all possible values add a mate
         }
     }
@@ -175,6 +181,59 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    private boolean explainForallDiffForall(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, IntStream Indexes) {
+        final boolean[] flag = {false};
+        int[] indices = Indexes.toArray();
+        IntIterableRangeSet union = IntStream
+                .of(indices)
+                .mapToObj(i -> ig.getDomainAt(front.getValue(vars[i])))
+                .collect(IntIterableRangeSet::new,
+                        IntIterableRangeSet::addAll,
+                        IntIterableRangeSet::addAll);
+        IntStream
+                .of(indices)
+                .mapToObj(i -> vars[i])
+                .forEach(v -> {
+                    IntIterableRangeSet dom = e.getRootSet(v);
+                    dom.removeAll(union);
+                    flag[0] |= !dom.isEmpty();
+                    e.addLiteral(v, dom, false);
+                });
+        return flag[0];
+    }
+
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        if (false) {
+            Propagator.defaultExplain(this, explanation, front, ig, p);
+            return;
+        }
+        IntStream X = IntStream.rangeClosed(0, vars.length - 2);
+        IntStream N = IntStream.rangeClosed(vars.length - 1, vars.length - 1);
+        IntVar pivot = ig.getIntVarAt(p);
+        switch (ig.getEventMaskAt(p)) {
+            case 2://INCLOW
+                Propagator.defaultExplain(this, explanation, front, ig, p);
+                break;
+            case 4://DECUPP
+                if (explainForallDiffForall(explanation, front, ig, pivot, X)) {
+                    IntIterableRangeSet set = explanation.getSet(pivot);//ig.getDomainAt(p);
+                    explanation.addLiteral(pivot, set, true);
+                } else {
+                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                }
+                break;
+            case 8://INSTANTIATE
+                Propagator.defaultExplain(this, explanation, front, ig, p);
+                break;
+            case 1://REMOVE
+            case 0://VOID
+            case 6://BOUND inclow+decup
+            default:
+                throw new UnsupportedOperationException("Unknown event type explanation");
+        }
     }
 
 }

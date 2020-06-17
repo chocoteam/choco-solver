@@ -43,7 +43,7 @@ public class PropSubcircuitDominatorFilter extends Propagator<IntVar> {
 	// offset (usually 0 but 1 with MiniZinc)
 	private int offSet;
 	// random function
-	private Random rd = new Random(0);
+	private Random rd = new Random(vars[0].getModel().getSeed());
 	// random function
 	private int[] rootCandidates;
 	// auto adapt whether to propagate or not

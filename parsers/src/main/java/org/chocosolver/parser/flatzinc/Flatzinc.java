@@ -9,7 +9,6 @@
  */
 package org.chocosolver.parser.flatzinc;
 
-import java.io.IOException;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
 import org.chocosolver.parser.ParserListener;
@@ -23,7 +22,7 @@ import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
@@ -60,7 +59,7 @@ public class Flatzinc extends RegParser {
     public Flatzinc(boolean all, boolean free, int nb_cores, long tl) {
         super("ChocoFZN");
         this.all = all;
-        this.free = free;
+        this.free = free ;
         this.nb_cores = nb_cores;
         this.tl_ = tl;
         this.defaultSettings = new FznSettings();
@@ -137,7 +136,7 @@ public class Flatzinc extends RegParser {
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
-        parser.flatzinc_model(target, data, all, free);
+        parser.flatzinc_model(target, data);
     }
 
     @Override

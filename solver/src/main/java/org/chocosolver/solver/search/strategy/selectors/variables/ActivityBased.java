@@ -22,6 +22,7 @@ import org.chocosolver.solver.search.loop.move.MoveRestart;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
@@ -99,6 +100,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     //////////////////////////////
 
     private final Model model;
+    private IntValueSelector valueSelector = new ActivityValueSelector();
     private final IntMap v2i;
     private final IntVar[] vars;
 
@@ -128,10 +130,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private Move rfMove;
 
-    public ActivityBased(final Model model, IntVar[] vars, double g, double d, int a, int samplingIterationForced, long seed) {
+    public ActivityBased(final Model model, IntVar[] vars, IntValueSelector valueSelector,
+                         double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
         this.model = model;
         this.vars = vars;
+        if(valueSelector != null){
+            this.valueSelector = valueSelector;
+        }
         A = new double[vars.length];
         mA = new double[vars.length];
         sA = new double[vars.length];
@@ -155,7 +161,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     }
 
     public ActivityBased(IntVar[] vars){
-        this(vars[0].getModel(),vars,0.999d, 0.2d, 8, 1,0);
+        this(vars[0].getModel(),
+                vars,
+                null,
+                0.999d,
+                0.2d,
+                8,
+                1,
+                0);
     }
 
     @Override
@@ -219,41 +232,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 			}
             assert vars[currentVar] == variable;
         }
-        currentVal = variable.getLB();
-        if (sampling) {
-            int ds = variable.getDomainSize();
-            int n = random.nextInt(ds);
-            if (variable.hasEnumeratedDomain()) {
-                while (n-- > 0) {
-                    currentVal = variable.nextValue(currentVal);
-                }
-            } else {
-                currentVal += n;
-            }
-        } else {
-            if (variable.hasEnumeratedDomain()) {
-                bests.clear();
-                double bestVal = Double.MAX_VALUE;
-                DisposableValueIterator it = variable.getValueIterator(true);
-                while (it.hasNext()) {
-                    int value = it.next();
-                    double current = vAct[currentVar].activity(value);
-                    if (current < bestVal) {
-                        bests.clear();
-                        bests.add(value);
-                        bestVal = current;
-                    } else {
-                        bests.add(value);
-                    }
-                }
-                currentVal = bests.get(random.nextInt(bests.size()));
-            } else {
-                int lb = variable.getLB();
-                int ub = variable.getUB();
-                currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
-                        lb : ub;
-            }
-        }
+        int currentVal = valueSelector.selectValue(variable);
         return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 
@@ -414,6 +393,49 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             return (a / mA[idx]) < d;
         }
         return true;
+    }
+
+    private class ActivityValueSelector implements IntValueSelector {
+
+        @Override
+        public int selectValue(IntVar variable) {
+            currentVal = variable.getLB();
+            if (sampling) {
+                int ds = variable.getDomainSize();
+                int n = random.nextInt(ds);
+                if (variable.hasEnumeratedDomain()) {
+                    while (n-- > 0) {
+                        currentVal = variable.nextValue(currentVal);
+                    }
+                } else {
+                    currentVal += n;
+                }
+            } else {
+                if (variable.hasEnumeratedDomain()) {
+                    bests.clear();
+                    double bestVal = Double.MAX_VALUE;
+                    DisposableValueIterator it = variable.getValueIterator(true);
+                    while (it.hasNext()) {
+                        int value = it.next();
+                        double current = vAct[currentVar].activity(value);
+                        if (current < bestVal) {
+                            bests.clear();
+                            bests.add(value);
+                            bestVal = current;
+                        } else {
+                            bests.add(value);
+                        }
+                    }
+                    currentVal = bests.get(random.nextInt(bests.size()));
+                } else {
+                    int lb = variable.getLB();
+                    int ub = variable.getUB();
+                    currentVal = vAct[currentVar].activity(lb) < vAct[currentVar].activity(ub) ?
+                            lb : ub;
+                }
+            }
+            return currentVal;
+        }
     }
 
 }

@@ -13,17 +13,22 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 /**
  * Cumulative propagator
@@ -203,4 +208,108 @@ public class PropCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
+    private  IntVar pivotDuration(int[] ind, IntVar pivot){
+        IntVar duration = pivot;
+        for(int i : ind){
+            if(vars[i] == pivot){
+                duration = vars[i+n];
+            }
+        }
+        return duration;
+    }
+    private  int getInd(IntVar pivot){
+        int ind = -1;
+        for(int i = 0; i<vars.length;i++){
+            if(vars[i] == pivot){
+                ind = i;
+            }
+        }
+        if(ind==-1){throw new UnsupportedOperationException("Unfindable variable ");}
+        return ind;
+    }
+    private void explainInc(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+        boolean flag = false;
+        for (int i : indS) {
+            if(ig.getDomainAt(front.getValue(pivot)).min() >= (val - ig.getDomainAt(front.getValue(pivotDuration(indD,pivot))).min())
+                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min())
+                    && ig.getDomainAt(front.getValue(vars[i])).max() < val){
+                IntIterableRangeSet set = e.getRootSet(vars[i]);
+                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min(),val-1);
+                e.addLiteral(vars[i], set, false);
+                flag = true;
+            }
+        }
+        if(flag){
+            IntIterableRangeSet set = e.getRootSet(pivot);
+            set.removeBetween(val - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
+            e.addLiteral(pivot, set, true);
+        }
+    }
+    private void explainDec(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+        boolean flag = false;
+        for (int i : indS) {
+            if(ig.getDomainAt(front.getValue(pivot)).min() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
+                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
+                    && ig.getDomainAt(front.getValue(vars[i])).max() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())){
+                IntIterableRangeSet set = e.getRootSet(vars[i]);
+                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);
+                e.addLiteral(vars[i], set, false);
+                flag = true;
+            }
+        }
+        if(flag){
+            IntIterableRangeSet set = e.getRootSet(pivot);
+            set.removeBetween(val,val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);//pivot apparais 2 fois, on fais l'union des sets
+            e.addLiteral(pivot, set, true);
+        }
+    }
+    @Override
+    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+        int[] indS = IntStream.range(0, n).toArray();
+        int[] indD = IntStream.range(n, n * 2).toArray();
+        int[] indE = IntStream.range(n * 2, n * 3).toArray();
+        int[] indH = IntStream.range(n * 3, n * 4).toArray();
+        IntVar pivot = ig.getIntVarAt(p);
+        int val;
+        switch (ig.getEventMaskAt(p)) {
+            case 2://INCLOW
+                if(getInd(pivot)<n){
+                    if(ig.getDomainAt(p).cardinality()>0){
+                        val = ig.getDomainAt(p).min();
+                    }else{
+                        val = ig.getDomainAt(front.getValue(pivot)).max()+1;
+                        throw new UnsupportedOperationException("Unknown val");
+                    }
+                    explainInc(explanation, front, ig, pivot, indS, indD, indE, val);
+                    System.out.println("inc : "+explanation.toString());
+                }else{
+                    System.out.println(n+"   "+getInd(pivot));
+                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                    System.out.println("inc default "+explanation.toString());
+                }
+                break;
+            case 4://DECUPP
+                if(getInd(pivot)<3*n&&getInd(pivot)>=2*n) {
+                    if (ig.getDomainAt(p).cardinality() > 0) {
+                        val = ig.getDomainAt(p).max() + 1 - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
+                    } else {
+                        val = ig.getDomainAt(front.getValue(pivot)).min() - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
+                        throw new UnsupportedOperationException("Unknown val");
+                    }
+                    explainDec(explanation, front, ig, pivot, indS, indD, indE, val);
+                    System.out.println("dec : "+explanation.toString());
+                }else{
+                    System.out.println(n+"   "+getInd(pivot));
+                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                    System.out.println("dec default " + explanation.toString());
+                }
+                break;
+            case 8://INSTANTIATE
+            case 1://REMOVE
+            case 0://VOID
+            case 6://BOUND inclow+decup
+            default:
+                throw new UnsupportedOperationException("Unknown event type explanation");
+        }
+    }
 }

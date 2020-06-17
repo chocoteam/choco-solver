@@ -1,20 +1,13 @@
-/*
- * This file is part of choco-parsers, http://choco-solver.org/
- *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
- *
- * Licensed under the BSD 4-clause license.
- *
- * See LICENSE file in the project root for full license information.
- */
-// Generated from org/chocosolver/parser/flatzinc/Flatzinc4Parser.g4 by ANTLR 4.2
+// Generated from org/chocosolver/parser/flatzinc/Flatzinc4Parser.g4 by ANTLR 4.5
 package org.chocosolver.parser.flatzinc;
 
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.atn.ATN;
+import org.antlr.v4.runtime.atn.ATNDeserializer;
+import org.antlr.v4.runtime.atn.ParserATNSimulator;
+import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.misc.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
@@ -26,22 +19,17 @@ import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {
+	static { RuntimeMetaData.checkVersion("4.5", RuntimeMetaData.VERSION); }
+
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		PAR=10, DD=17, RS=23, FLOAT=5, SET=6, ARRAY=8, LP=30, VAR=9, LS=22, CHAR=37, 
-		DO=18, CONSTRAINT=12, INT=4, MAXIMIZE=16, COMMENT=33, INT_CONST=35, SC=27, 
-		SATISFY=14, OF=7, IDENTIFIER=32, WS=34, MN=26, TRUE=2, PREDICATE=11, SOLVE=13, 
-		CL=28, CM=21, EQ=24, RB=20, BOOL=1, LB=19, STRING=36, FALSE=3, MINIMIZE=15, 
-		PL=25, RP=31, DC=29;
-	public static final String[] tokenNames = {
-		"<INVALID>", "BOOL", "'true'", "'false'", "'int'", "'float'", "'set'", 
-		"'of'", "'array'", "'var'", "'par'", "'predicate'", "'constraint'", "'solve'", 
-		"'satisfy'", "'minimize'", "'maximize'", "'..'", "'.'", "'{'", "'}'", 
-		"','", "'['", "']'", "'='", "'+'", "'-'", "';'", "':'", "'::'", "'('", 
-		"')'", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "STRING", "CHAR"
-	};
+		BOOL=1, TRUE=2, FALSE=3, INT=4, FLOAT=5, SET=6, OF=7, ARRAY=8, VAR=9, 
+		PAR=10, PREDICATE=11, CONSTRAINT=12, SOLVE=13, SATISFY=14, MINIMIZE=15, 
+		MAXIMIZE=16, DD=17, DO=18, LB=19, RB=20, CM=21, LS=22, RS=23, EQ=24, PL=25, 
+		MN=26, SC=27, CL=28, DC=29, LP=30, RP=31, IDENTIFIER=32, COMMENT=33, WS=34, 
+		INT_CONST=35, STRING=36, CHAR=37;
 	public static final int
 		RULE_flatzinc_model = 0, RULE_par_type = 1, RULE_par_type_u = 2, RULE_var_type = 3, 
 		RULE_var_type_u = 4, RULE_index_set = 5, RULE_expr = 6, RULE_id_expr = 7, 
@@ -56,11 +44,55 @@ public class Flatzinc4Parser extends Parser {
 		"pred_decl", "pred_param", "pred_param_type", "par_pred_param_type", "var_pred_param_type"
 	};
 
-	@Override
-	public String getGrammarFileName() { return "Flatzinc4Parser.g4"; }
+	private static final String[] _LITERAL_NAMES = {
+		null, "'bool'", "'true'", "'false'", "'int'", "'float'", "'set'", "'of'", 
+		"'array'", "'var'", "'par'", "'predicate'", "'constraint'", "'solve'", 
+		"'satisfy'", "'minimize'", "'maximize'", "'..'", "'.'", "'{'", "'}'", 
+		"','", "'['", "']'", "'='", "'+'", "'-'", "';'", "':'", "'::'", "'('", 
+		"')'"
+	};
+	private static final String[] _SYMBOLIC_NAMES = {
+		null, "BOOL", "TRUE", "FALSE", "INT", "FLOAT", "SET", "OF", "ARRAY", "VAR", 
+		"PAR", "PREDICATE", "CONSTRAINT", "SOLVE", "SATISFY", "MINIMIZE", "MAXIMIZE", 
+		"DD", "DO", "LB", "RB", "CM", "LS", "RS", "EQ", "PL", "MN", "SC", "CL", 
+		"DC", "LP", "RP", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "STRING", 
+		"CHAR"
+	};
+	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
+
+	/**
+	 * @deprecated Use {@link #VOCABULARY} instead.
+	 */
+	@Deprecated
+	public static final String[] tokenNames;
+	static {
+		tokenNames = new String[_SYMBOLIC_NAMES.length];
+		for (int i = 0; i < tokenNames.length; i++) {
+			tokenNames[i] = VOCABULARY.getLiteralName(i);
+			if (tokenNames[i] == null) {
+				tokenNames[i] = VOCABULARY.getSymbolicName(i);
+			}
+
+			if (tokenNames[i] == null) {
+				tokenNames[i] = "<INVALID>";
+			}
+		}
+	}
 
 	@Override
-	public String[] getTokenNames() { return tokenNames; }
+	@Deprecated
+	public String[] getTokenNames() {
+		return tokenNames;
+	}
+
+	@Override
+
+	public Vocabulary getVocabulary() {
+		return VOCABULARY;
+	}
+
+	@Override
+	public String getGrammarFileName() { return "Flatzinc4Parser.g4"; }
 
 	@Override
 	public String[] getRuleNames() { return ruleNames; }
@@ -78,9 +110,6 @@ public class Flatzinc4Parser extends Parser {
 	// the model
 	public Model mModel;
 
-
-	public boolean allSolutions, freeSearch;
-
 	public Flatzinc4Parser(TokenStream input) {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
@@ -88,48 +117,44 @@ public class Flatzinc4Parser extends Parser {
 	public static class Flatzinc_modelContext extends ParserRuleContext {
 		public Model aModel;
 		public Datas datas;
-		public boolean allSolutions;
-		public boolean freeSearch;
-		public Pred_declContext pred_decl(int i) {
-			return getRuleContext(Pred_declContext.class,i);
-		}
-		public Param_declContext param_decl(int i) {
-			return getRuleContext(Param_declContext.class,i);
-		}
-		public List<ConstraintContext> constraint() {
-			return getRuleContexts(ConstraintContext.class);
+		public Solve_goalContext solve_goal() {
+			return getRuleContext(Solve_goalContext.class,0);
 		}
 		public List<Pred_declContext> pred_decl() {
 			return getRuleContexts(Pred_declContext.class);
 		}
+		public Pred_declContext pred_decl(int i) {
+			return getRuleContext(Pred_declContext.class,i);
+		}
 		public List<Param_declContext> param_decl() {
 			return getRuleContexts(Param_declContext.class);
+		}
+		public Param_declContext param_decl(int i) {
+			return getRuleContext(Param_declContext.class,i);
+		}
+		public List<Var_declContext> var_decl() {
+			return getRuleContexts(Var_declContext.class);
 		}
 		public Var_declContext var_decl(int i) {
 			return getRuleContext(Var_declContext.class,i);
 		}
-		public Solve_goalContext solve_goal() {
-			return getRuleContext(Solve_goalContext.class,0);
-		}
-		public List<Var_declContext> var_decl() {
-			return getRuleContexts(Var_declContext.class);
+		public List<ConstraintContext> constraint() {
+			return getRuleContexts(ConstraintContext.class);
 		}
 		public ConstraintContext constraint(int i) {
 			return getRuleContext(ConstraintContext.class,i);
 		}
 		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
-		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState, Model aModel, Datas datas, boolean allSolutions, boolean freeSearch) {
+		public Flatzinc_modelContext(ParserRuleContext parent, int invokingState, Model aModel, Datas datas) {
 			super(parent, invokingState);
 			this.aModel = aModel;
 			this.datas = datas;
-			this.allSolutions = allSolutions;
-			this.freeSearch = freeSearch;
 		}
 		@Override public int getRuleIndex() { return RULE_flatzinc_model; }
 	}
 
-	public final Flatzinc_modelContext flatzinc_model(Model aModel,Datas datas,boolean allSolutions,boolean freeSearch) throws RecognitionException {
-		Flatzinc_modelContext _localctx = new Flatzinc_modelContext(_ctx, getState(), aModel, datas, allSolutions, freeSearch);
+	public final Flatzinc_modelContext flatzinc_model(Model aModel,Datas datas) throws RecognitionException {
+		Flatzinc_modelContext _localctx = new Flatzinc_modelContext(_ctx, getState(), aModel, datas);
 		enterRule(_localctx, 0, RULE_flatzinc_model);
 		int _la;
 		try {
@@ -138,8 +163,6 @@ public class Flatzinc4Parser extends Parser {
 
 			    this.mModel = aModel;
 			    this.datas = datas;
-			    this.allSolutions = allSolutions;
-			    this.freeSearch = freeSearch;
 			    
 			setState(46);
 			_errHandler.sync(this);
@@ -147,7 +170,8 @@ public class Flatzinc4Parser extends Parser {
 			while (_la==PREDICATE) {
 				{
 				{
-				setState(43); pred_decl();
+				setState(43);
+				pred_decl();
 				}
 				}
 				setState(48);
@@ -163,13 +187,14 @@ public class Flatzinc4Parser extends Parser {
 				switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
 				case 1:
 					{
-					setState(49); param_decl();
+					setState(49);
+					param_decl();
 					}
 					break;
-
 				case 2:
 					{
-					setState(50); var_decl();
+					setState(50);
+					var_decl();
 					}
 					break;
 				}
@@ -184,14 +209,16 @@ public class Flatzinc4Parser extends Parser {
 			while (_la==CONSTRAINT) {
 				{
 				{
-				setState(56); constraint();
+				setState(56);
+				constraint();
 				}
 				}
 				setState(61);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(62); solve_goal();
+			setState(62);
+			solve_goal();
 			}
 		}
 		catch (RecognitionException re) {
@@ -210,22 +237,22 @@ public class Flatzinc4Parser extends Parser {
 		public Index_setContext d;
 		public Par_type_uContext p;
 		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
+		public List<Index_setContext> index_set() {
+			return getRuleContexts(Index_setContext.class);
+		}
 		public Index_setContext index_set(int i) {
 			return getRuleContext(Index_setContext.class,i);
 		}
 		public Par_type_uContext par_type_u() {
 			return getRuleContext(Par_type_uContext.class,0);
 		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public List<Index_setContext> index_set() {
-			return getRuleContexts(Index_setContext.class);
-		}
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public Par_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -245,9 +272,12 @@ public class Flatzinc4Parser extends Parser {
 
 				        List<Declaration> decls = new ArrayList();
 				    
-				setState(65); match(ARRAY);
-				setState(66); match(LS);
-				setState(67); ((Par_typeContext)_localctx).d = index_set();
+				setState(65);
+				match(ARRAY);
+				setState(66);
+				match(LS);
+				setState(67);
+				((Par_typeContext)_localctx).d = index_set();
 				decls.add(((Par_typeContext)_localctx).d.decl);
 				setState(75);
 				_errHandler.sync(this);
@@ -255,8 +285,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(69); match(CM);
-					setState(70); ((Par_typeContext)_localctx).d = index_set();
+					setState(69);
+					match(CM);
+					setState(70);
+					((Par_typeContext)_localctx).d = index_set();
 					decls.add(((Par_typeContext)_localctx).d.decl);
 					}
 					}
@@ -264,9 +296,12 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(78); match(RS);
-				setState(79); match(OF);
-				setState(80); ((Par_typeContext)_localctx).p = par_type_u();
+				setState(78);
+				match(RS);
+				setState(79);
+				match(OF);
+				setState(80);
+				((Par_typeContext)_localctx).p = par_type_u();
 
 				    ((Par_typeContext)_localctx).decl =  new DArray(decls,((Par_typeContext)_localctx).p.decl);
 				    
@@ -278,7 +313,8 @@ public class Flatzinc4Parser extends Parser {
 			case SET:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(83); ((Par_typeContext)_localctx).p = par_type_u();
+				setState(83);
+				((Par_typeContext)_localctx).p = par_type_u();
 
 				    ((Par_typeContext)_localctx).decl =  ((Par_typeContext)_localctx).p.decl;
 				    
@@ -302,10 +338,10 @@ public class Flatzinc4Parser extends Parser {
 	public static class Par_type_uContext extends ParserRuleContext {
 		public Declaration decl;
 		public TerminalNode BOOL() { return getToken(Flatzinc4Parser.BOOL, 0); }
+		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
 		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
 		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
-		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
 		public Par_type_uContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -321,7 +357,8 @@ public class Flatzinc4Parser extends Parser {
 			case BOOL:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(88); match(BOOL);
+				setState(88);
+				match(BOOL);
 
 				    ((Par_type_uContext)_localctx).decl = DBool.me;
 				    
@@ -330,7 +367,8 @@ public class Flatzinc4Parser extends Parser {
 			case FLOAT:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(90); match(FLOAT);
+				setState(90);
+				match(FLOAT);
 
 				    ((Par_type_uContext)_localctx).decl = DFloat.me;
 				    
@@ -339,9 +377,12 @@ public class Flatzinc4Parser extends Parser {
 			case SET:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(92); match(SET);
-				setState(93); match(OF);
-				setState(94); match(INT);
+				setState(92);
+				match(SET);
+				setState(93);
+				match(OF);
+				setState(94);
+				match(INT);
 
 				    ((Par_type_uContext)_localctx).decl = DSetOfInt.me;
 				    
@@ -350,7 +391,8 @@ public class Flatzinc4Parser extends Parser {
 			case INT:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(96); match(INT);
+				setState(96);
+				match(INT);
 
 				    ((Par_type_uContext)_localctx).decl = DInt.me;
 				    
@@ -376,23 +418,23 @@ public class Flatzinc4Parser extends Parser {
 		public Index_setContext d;
 		public Var_type_uContext vt;
 		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
-		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
-		public Var_type_uContext var_type_u() {
-			return getRuleContext(Var_type_uContext.class,0);
+		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
+		public List<Index_setContext> index_set() {
+			return getRuleContexts(Index_setContext.class);
 		}
 		public Index_setContext index_set(int i) {
 			return getRuleContext(Index_setContext.class,i);
 		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public List<Index_setContext> index_set() {
-			return getRuleContexts(Index_setContext.class);
+		public Var_type_uContext var_type_u() {
+			return getRuleContext(Var_type_uContext.class,0);
 		}
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public Var_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -412,9 +454,12 @@ public class Flatzinc4Parser extends Parser {
 
 				    List<Declaration> decls = new ArrayList();
 				    
-				setState(101); match(ARRAY);
-				setState(102); match(LS);
-				setState(103); ((Var_typeContext)_localctx).d = index_set();
+				setState(101);
+				match(ARRAY);
+				setState(102);
+				match(LS);
+				setState(103);
+				((Var_typeContext)_localctx).d = index_set();
 				decls.add(((Var_typeContext)_localctx).d.decl);
 				setState(111);
 				_errHandler.sync(this);
@@ -422,8 +467,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(105); match(CM);
-					setState(106); ((Var_typeContext)_localctx).d = index_set();
+					setState(105);
+					match(CM);
+					setState(106);
+					((Var_typeContext)_localctx).d = index_set();
 					decls.add(((Var_typeContext)_localctx).d.decl);
 					}
 					}
@@ -431,10 +478,14 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(114); match(RS);
-				setState(115); match(OF);
-				setState(116); match(VAR);
-				setState(117); ((Var_typeContext)_localctx).vt = var_type_u();
+				setState(114);
+				match(RS);
+				setState(115);
+				match(OF);
+				setState(116);
+				match(VAR);
+				setState(117);
+				((Var_typeContext)_localctx).vt = var_type_u();
 
 				    ((Var_typeContext)_localctx).decl =  new DArray(decls, ((Var_typeContext)_localctx).vt.decl);
 				    
@@ -443,8 +494,10 @@ public class Flatzinc4Parser extends Parser {
 			case VAR:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(120); match(VAR);
-				setState(121); ((Var_typeContext)_localctx).vt = var_type_u();
+				setState(120);
+				match(VAR);
+				setState(121);
+				((Var_typeContext)_localctx).vt = var_type_u();
 
 				    ((Var_typeContext)_localctx).decl = ((Var_typeContext)_localctx).vt.decl;
 				    
@@ -470,22 +523,22 @@ public class Flatzinc4Parser extends Parser {
 		public Token i1;
 		public Token i2;
 		public Token i;
-		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public TerminalNode BOOL() { return getToken(Flatzinc4Parser.BOOL, 0); }
+		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
-		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
 		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
-		public TerminalNode FLOAT() { return getToken(Flatzinc4Parser.FLOAT, 0); }
+		public TerminalNode OF() { return getToken(Flatzinc4Parser.OF, 0); }
 		public Var_type_uContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -502,53 +555,57 @@ public class Flatzinc4Parser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(126); match(BOOL);
+				setState(126);
+				match(BOOL);
 
 				    ((Var_type_uContext)_localctx).decl =  DBool.me;
 				    
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(128); match(FLOAT);
+				setState(128);
+				match(FLOAT);
 
 				    ((Var_type_uContext)_localctx).decl =  DFloat.me;
 				    
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(130); match(INT);
+				setState(130);
+				match(INT);
 
 				    ((Var_type_uContext)_localctx).decl =  DInt.me;
 				    
 				}
 				break;
-
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(132); ((Var_type_uContext)_localctx).i1 = match(INT_CONST);
-				setState(133); match(DD);
-				setState(134); ((Var_type_uContext)_localctx).i2 = match(INT_CONST);
+				setState(132);
+				((Var_type_uContext)_localctx).i1 = match(INT_CONST);
+				setState(133);
+				match(DD);
+				setState(134);
+				((Var_type_uContext)_localctx).i2 = match(INT_CONST);
 
 				     ((Var_type_uContext)_localctx).decl =  new DInt2(EInt.make((((Var_type_uContext)_localctx).i1!=null?((Var_type_uContext)_localctx).i1.getText():null)), EInt.make((((Var_type_uContext)_localctx).i2!=null?((Var_type_uContext)_localctx).i2.getText():null)));
 				     
 				}
 				break;
-
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 
 				    ArrayList<EInt> values = new ArrayList();
 				    
-				setState(137); match(LB);
-				setState(138); ((Var_type_uContext)_localctx).i = match(INT_CONST);
+				setState(137);
+				match(LB);
+				setState(138);
+				((Var_type_uContext)_localctx).i = match(INT_CONST);
 				values.add(EInt.make((((Var_type_uContext)_localctx).i!=null?((Var_type_uContext)_localctx).i.getText():null)));
 				setState(145);
 				_errHandler.sync(this);
@@ -556,8 +613,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(140); match(CM);
-					setState(141); ((Var_type_uContext)_localctx).i = match(INT_CONST);
+					setState(140);
+					match(CM);
+					setState(141);
+					((Var_type_uContext)_localctx).i = match(INT_CONST);
 					values.add(EInt.make((((Var_type_uContext)_localctx).i!=null?((Var_type_uContext)_localctx).i.getText():null)));
 					}
 					}
@@ -565,37 +624,45 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(148); match(RB);
+				setState(148);
+				match(RB);
 
 				    ((Var_type_uContext)_localctx).decl =  new DManyInt(values);
 				    
 				}
 				break;
-
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(150); match(SET);
-				setState(151); match(OF);
-				setState(152); ((Var_type_uContext)_localctx).i1 = match(INT_CONST);
-				setState(153); match(DD);
-				setState(154); ((Var_type_uContext)_localctx).i2 = match(INT_CONST);
+				setState(150);
+				match(SET);
+				setState(151);
+				match(OF);
+				setState(152);
+				((Var_type_uContext)_localctx).i1 = match(INT_CONST);
+				setState(153);
+				match(DD);
+				setState(154);
+				((Var_type_uContext)_localctx).i2 = match(INT_CONST);
 
 				    ((Var_type_uContext)_localctx).decl =  new DSet(new DInt2(EInt.make((((Var_type_uContext)_localctx).i1!=null?((Var_type_uContext)_localctx).i1.getText():null)), EInt.make((((Var_type_uContext)_localctx).i2!=null?((Var_type_uContext)_localctx).i2.getText():null))));
 				    
 				}
 				break;
-
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
 
 				    ArrayList<EInt> values = new ArrayList();
 				    
-				setState(157); match(SET);
-				setState(158); match(OF);
-				setState(159); match(LB);
-				setState(160); ((Var_type_uContext)_localctx).i = match(INT_CONST);
+				setState(157);
+				match(SET);
+				setState(158);
+				match(OF);
+				setState(159);
+				match(LB);
+				setState(160);
+				((Var_type_uContext)_localctx).i = match(INT_CONST);
 				values.add(EInt.make((((Var_type_uContext)_localctx).i!=null?((Var_type_uContext)_localctx).i.getText():null)));
 				setState(167);
 				_errHandler.sync(this);
@@ -603,8 +670,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(162); match(CM);
-					setState(163); ((Var_type_uContext)_localctx).i = match(INT_CONST);
+					setState(162);
+					match(CM);
+					setState(163);
+					((Var_type_uContext)_localctx).i = match(INT_CONST);
 					values.add(EInt.make((((Var_type_uContext)_localctx).i!=null?((Var_type_uContext)_localctx).i.getText():null)));
 					}
 					}
@@ -612,7 +681,8 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(170); match(RB);
+				setState(170);
+				match(RB);
 
 				    ((Var_type_uContext)_localctx).decl =  new DSet(new DManyInt(values));
 				    
@@ -636,10 +706,10 @@ public class Flatzinc4Parser extends Parser {
 		public Token i1;
 		public Token i2;
 		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
 		public Index_setContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -656,9 +726,12 @@ public class Flatzinc4Parser extends Parser {
 			case INT_CONST:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(174); ((Index_setContext)_localctx).i1 = match(INT_CONST);
-				setState(175); match(DD);
-				setState(176); ((Index_setContext)_localctx).i2 = match(INT_CONST);
+				setState(174);
+				((Index_setContext)_localctx).i1 = match(INT_CONST);
+				setState(175);
+				match(DD);
+				setState(176);
+				((Index_setContext)_localctx).i2 = match(INT_CONST);
 
 				    ((Index_setContext)_localctx).decl =  new DInt2(EInt.make((((Index_setContext)_localctx).i1!=null?((Index_setContext)_localctx).i1.getText():null)), EInt.make((((Index_setContext)_localctx).i2!=null?((Index_setContext)_localctx).i2.getText():null)));
 				    
@@ -667,7 +740,8 @@ public class Flatzinc4Parser extends Parser {
 			case INT:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(178); match(INT);
+				setState(178);
+				match(INT);
 
 				    ((Index_setContext)_localctx).decl =  DInt.me;
 				    
@@ -697,32 +771,32 @@ public class Flatzinc4Parser extends Parser {
 		public ExprContext e;
 		public Id_exprContext ie;
 		public Token STRING;
-		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public ExprContext expr(int i) {
-			return getRuleContext(ExprContext.class,i);
-		}
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
 		public TerminalNode INT_CONST(int i) {
 			return getToken(Flatzinc4Parser.INT_CONST, i);
 		}
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public Id_exprContext id_expr() {
-			return getRuleContext(Id_exprContext.class,0);
-		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode STRING() { return getToken(Flatzinc4Parser.STRING, 0); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
-		}
-		public List<ExprContext> expr() {
-			return getRuleContexts(ExprContext.class);
 		}
 		public Bool_constContext bool_const() {
 			return getRuleContext(Bool_constContext.class,0);
 		}
-		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
+		public List<ExprContext> expr() {
+			return getRuleContexts(ExprContext.class);
+		}
+		public ExprContext expr(int i) {
+			return getRuleContext(ExprContext.class,i);
+		}
+		public Id_exprContext id_expr() {
+			return getRuleContext(Id_exprContext.class,0);
+		}
+		public TerminalNode STRING() { return getToken(Flatzinc4Parser.STRING, 0); }
 		public ExprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -739,22 +813,25 @@ public class Flatzinc4Parser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(182); match(LB);
-				setState(183); match(RB);
+				setState(182);
+				match(LB);
+				setState(183);
+				match(RB);
 
 				    ((ExprContext)_localctx).exp =  new ESetList(new ArrayList());
 				    
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 
 				    ArrayList<EInt> values = new ArrayList();
 				    
-				setState(186); match(LB);
-				setState(187); ((ExprContext)_localctx).i = match(INT_CONST);
+				setState(186);
+				match(LB);
+				setState(187);
+				((ExprContext)_localctx).i = match(INT_CONST);
 				values.add(EInt.make((((ExprContext)_localctx).i!=null?((ExprContext)_localctx).i.getText():null)));
 				setState(194);
 				_errHandler.sync(this);
@@ -762,8 +839,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(189); match(CM);
-					setState(190); ((ExprContext)_localctx).i = match(INT_CONST);
+					setState(189);
+					match(CM);
+					setState(190);
+					((ExprContext)_localctx).i = match(INT_CONST);
 					values.add(EInt.make((((ExprContext)_localctx).i!=null?((ExprContext)_localctx).i.getText():null)));
 					}
 					}
@@ -771,33 +850,36 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(197); match(RB);
+				setState(197);
+				match(RB);
 
 				    ((ExprContext)_localctx).exp =  new ESetList(values);
 				    
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(199); ((ExprContext)_localctx).b = bool_const();
+				setState(199);
+				((ExprContext)_localctx).b = bool_const();
 
 				    ((ExprContext)_localctx).exp = EBool.make(((ExprContext)_localctx).b.value);
 				    
 				}
 				break;
-
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(202); ((ExprContext)_localctx).i1 = match(INT_CONST);
+				setState(202);
+				((ExprContext)_localctx).i1 = match(INT_CONST);
 				setState(205);
 				_la = _input.LA(1);
 				if (_la==DD) {
 					{
-					setState(203); match(DD);
-					setState(204); ((ExprContext)_localctx).i2 = match(INT_CONST);
+					setState(203);
+					match(DD);
+					setState(204);
+					((ExprContext)_localctx).i2 = match(INT_CONST);
 					}
 				}
 
@@ -810,19 +892,20 @@ public class Flatzinc4Parser extends Parser {
 				    
 				}
 				break;
-
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 
 				    ArrayList<Expression> exps = new ArrayList();
 				    
-				setState(209); match(LS);
+				setState(209);
+				match(LS);
 				setState(221);
 				_la = _input.LA(1);
 				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << TRUE) | (1L << FALSE) | (1L << LB) | (1L << LS) | (1L << IDENTIFIER) | (1L << INT_CONST) | (1L << STRING))) != 0)) {
 					{
-					setState(210); ((ExprContext)_localctx).e = expr();
+					setState(210);
+					((ExprContext)_localctx).e = expr();
 					exps.add(((ExprContext)_localctx).e.exp);
 					setState(218);
 					_errHandler.sync(this);
@@ -830,8 +913,10 @@ public class Flatzinc4Parser extends Parser {
 					while (_la==CM) {
 						{
 						{
-						setState(212); match(CM);
-						setState(213); ((ExprContext)_localctx).e = expr();
+						setState(212);
+						match(CM);
+						setState(213);
+						((ExprContext)_localctx).e = expr();
 						exps.add(((ExprContext)_localctx).e.exp);
 						}
 						}
@@ -842,7 +927,8 @@ public class Flatzinc4Parser extends Parser {
 					}
 				}
 
-				setState(223); match(RS);
+				setState(223);
+				match(RS);
 
 				    if(exps.size()>0){
 				        ((ExprContext)_localctx).exp =  new EArray(exps);
@@ -852,21 +938,21 @@ public class Flatzinc4Parser extends Parser {
 				    
 				}
 				break;
-
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(225); ((ExprContext)_localctx).ie = id_expr();
+				setState(225);
+				((ExprContext)_localctx).ie = id_expr();
 
 				    ((ExprContext)_localctx).exp =  ((ExprContext)_localctx).ie.exp;
 				    
 				}
 				break;
-
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(228); ((ExprContext)_localctx).STRING = match(STRING);
+				setState(228);
+				((ExprContext)_localctx).STRING = match(STRING);
 
 				    ((ExprContext)_localctx).exp =  new EString((((ExprContext)_localctx).STRING!=null?((ExprContext)_localctx).STRING.getText():null));
 				    
@@ -890,21 +976,21 @@ public class Flatzinc4Parser extends Parser {
 		public Token IDENTIFIER;
 		public ExprContext e;
 		public Token i;
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
 		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public TerminalNode INT_CONST() { return getToken(Flatzinc4Parser.INT_CONST, 0); }
 		public Id_exprContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -925,9 +1011,12 @@ public class Flatzinc4Parser extends Parser {
 
 				    ArrayList<Expression> exps = new ArrayList();
 				    
-				setState(233); ((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-				setState(234); match(LP);
-				setState(235); ((Id_exprContext)_localctx).e = expr();
+				setState(233);
+				((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+				setState(234);
+				match(LP);
+				setState(235);
+				((Id_exprContext)_localctx).e = expr();
 				exps.add(((Id_exprContext)_localctx).e.exp);
 				setState(243);
 				_errHandler.sync(this);
@@ -935,8 +1024,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(237); match(CM);
-					setState(238); ((Id_exprContext)_localctx).e = expr();
+					setState(237);
+					match(CM);
+					setState(238);
+					((Id_exprContext)_localctx).e = expr();
 					exps.add(((Id_exprContext)_localctx).e.exp);
 					}
 					}
@@ -944,30 +1035,34 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(246); match(RP);
+				setState(246);
+				match(RP);
 
 				    ((Id_exprContext)_localctx).exp =  new EAnnotation(new EIdentifier(datas, (((Id_exprContext)_localctx).IDENTIFIER!=null?((Id_exprContext)_localctx).IDENTIFIER.getText():null)), exps);
 				    
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(249); ((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-				setState(250); match(LS);
-				setState(251); ((Id_exprContext)_localctx).i = match(INT_CONST);
-				setState(252); match(RS);
+				setState(249);
+				((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+				setState(250);
+				match(LS);
+				setState(251);
+				((Id_exprContext)_localctx).i = match(INT_CONST);
+				setState(252);
+				match(RS);
 
 				    ((Id_exprContext)_localctx).exp =  new EIdArray(datas, (((Id_exprContext)_localctx).IDENTIFIER!=null?((Id_exprContext)_localctx).IDENTIFIER.getText():null), Integer.parseInt((((Id_exprContext)_localctx).i!=null?((Id_exprContext)_localctx).i.getText():null)));
 				    
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(254); ((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+				setState(254);
+				((Id_exprContext)_localctx).IDENTIFIER = match(IDENTIFIER);
 
 				    ((Id_exprContext)_localctx).exp =  new EIdentifier(datas, (((Id_exprContext)_localctx).IDENTIFIER!=null?((Id_exprContext)_localctx).IDENTIFIER.getText():null));
 				    
@@ -991,14 +1086,14 @@ public class Flatzinc4Parser extends Parser {
 		public Token IDENTIFIER;
 		public ExprContext e;
 		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
-		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
 		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
 		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Par_typeContext par_type() {
 			return getRuleContext(Par_typeContext.class,0);
+		}
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
 		}
 		public Param_declContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1012,12 +1107,18 @@ public class Flatzinc4Parser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(258); ((Param_declContext)_localctx).pt = par_type();
-			setState(259); match(CL);
-			setState(260); ((Param_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-			setState(261); match(EQ);
-			setState(262); ((Param_declContext)_localctx).e = expr();
-			setState(263); match(SC);
+			setState(258);
+			((Param_declContext)_localctx).pt = par_type();
+			setState(259);
+			match(CL);
+			setState(260);
+			((Param_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+			setState(261);
+			match(EQ);
+			setState(262);
+			((Param_declContext)_localctx).e = expr();
+			setState(263);
+			match(SC);
 
 			    // Parameter(Datas datas, Declaration type, String identifier, Expression expression)
 			    FParameter.make_parameter(datas, ((Param_declContext)_localctx).pt.decl, (((Param_declContext)_localctx).IDENTIFIER!=null?((Param_declContext)_localctx).IDENTIFIER.getText():null), ((Param_declContext)_localctx).e.exp);
@@ -1042,9 +1143,8 @@ public class Flatzinc4Parser extends Parser {
 		public Token eq;
 		public ExprContext e;
 		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
-		public ExprContext expr() {
-			return getRuleContext(ExprContext.class,0);
-		}
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Var_typeContext var_type() {
 			return getRuleContext(Var_typeContext.class,0);
 		}
@@ -1052,8 +1152,9 @@ public class Flatzinc4Parser extends Parser {
 			return getRuleContext(AnnotationsContext.class,0);
 		}
 		public TerminalNode EQ() { return getToken(Flatzinc4Parser.EQ, 0); }
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
+		public ExprContext expr() {
+			return getRuleContext(ExprContext.class,0);
+		}
 		public Var_declContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1067,20 +1168,27 @@ public class Flatzinc4Parser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(266); ((Var_declContext)_localctx).vt = var_type();
-			setState(267); match(CL);
-			setState(268); ((Var_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-			setState(269); ((Var_declContext)_localctx).anns = annotations();
+			setState(266);
+			((Var_declContext)_localctx).vt = var_type();
+			setState(267);
+			match(CL);
+			setState(268);
+			((Var_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+			setState(269);
+			((Var_declContext)_localctx).anns = annotations();
 			setState(272);
 			_la = _input.LA(1);
 			if (_la==EQ) {
 				{
-				setState(270); ((Var_declContext)_localctx).eq = match(EQ);
-				setState(271); ((Var_declContext)_localctx).e = expr();
+				setState(270);
+				((Var_declContext)_localctx).eq = match(EQ);
+				setState(271);
+				((Var_declContext)_localctx).e = expr();
 				}
 			}
 
-			setState(274); match(SC);
+			setState(274);
+			match(SC);
 
 				FVariable.make_variable(datas, ((Var_declContext)_localctx).vt.decl, (((Var_declContext)_localctx).IDENTIFIER!=null?((Var_declContext)_localctx).IDENTIFIER.getText():null), ((Var_declContext)_localctx).anns.anns, ((Var_declContext)_localctx).eq!=null?((Var_declContext)_localctx).e.exp:null, mModel);
 			    
@@ -1101,24 +1209,24 @@ public class Flatzinc4Parser extends Parser {
 		public Token IDENTIFIER;
 		public ExprContext e;
 		public AnnotationsContext anns;
+		public TerminalNode CONSTRAINT() { return getToken(Flatzinc4Parser.CONSTRAINT, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode CONSTRAINT() { return getToken(Flatzinc4Parser.CONSTRAINT, 0); }
 		public AnnotationsContext annotations() {
 			return getRuleContext(AnnotationsContext.class,0);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public ConstraintContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1136,10 +1244,14 @@ public class Flatzinc4Parser extends Parser {
 			    //  Model aModel, String id, List<Expression> exps, List<EAnnotation> annotations
 			    ArrayList<Expression> exps = new ArrayList();
 			    
-			setState(278); match(CONSTRAINT);
-			setState(279); ((ConstraintContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-			setState(280); match(LP);
-			setState(281); ((ConstraintContext)_localctx).e = expr();
+			setState(278);
+			match(CONSTRAINT);
+			setState(279);
+			((ConstraintContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+			setState(280);
+			match(LP);
+			setState(281);
+			((ConstraintContext)_localctx).e = expr();
 			exps.add(((ConstraintContext)_localctx).e.exp);
 			setState(289);
 			_errHandler.sync(this);
@@ -1147,8 +1259,10 @@ public class Flatzinc4Parser extends Parser {
 			while (_la==CM) {
 				{
 				{
-				setState(283); match(CM);
-				setState(284); ((ConstraintContext)_localctx).e = expr();
+				setState(283);
+				match(CM);
+				setState(284);
+				((ConstraintContext)_localctx).e = expr();
 				exps.add(((ConstraintContext)_localctx).e.exp);
 				}
 				}
@@ -1156,9 +1270,12 @@ public class Flatzinc4Parser extends Parser {
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(292); match(RP);
-			setState(293); ((ConstraintContext)_localctx).anns = annotations();
-			setState(294); match(SC);
+			setState(292);
+			match(RP);
+			setState(293);
+			((ConstraintContext)_localctx).anns = annotations();
+			setState(294);
+			match(SC);
 
 			    String name = (((ConstraintContext)_localctx).IDENTIFIER!=null?((ConstraintContext)_localctx).IDENTIFIER.getText():null);
 			    FConstraint.valueOf(name).build(mModel, datas, name, exps, ((ConstraintContext)_localctx).anns.anns);
@@ -1179,14 +1296,14 @@ public class Flatzinc4Parser extends Parser {
 	public static class Solve_goalContext extends ParserRuleContext {
 		public AnnotationsContext anns;
 		public ResolutionContext res;
+		public TerminalNode SOLVE() { return getToken(Flatzinc4Parser.SOLVE, 0); }
+		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public AnnotationsContext annotations() {
 			return getRuleContext(AnnotationsContext.class,0);
 		}
 		public ResolutionContext resolution() {
 			return getRuleContext(ResolutionContext.class,0);
 		}
-		public TerminalNode SOLVE() { return getToken(Flatzinc4Parser.SOLVE, 0); }
-		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
 		public Solve_goalContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1199,10 +1316,14 @@ public class Flatzinc4Parser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(297); match(SOLVE);
-			setState(298); ((Solve_goalContext)_localctx).anns = annotations();
-			setState(299); ((Solve_goalContext)_localctx).res = resolution();
-			setState(300); match(SC);
+			setState(297);
+			match(SOLVE);
+			setState(298);
+			((Solve_goalContext)_localctx).anns = annotations();
+			setState(299);
+			((Solve_goalContext)_localctx).res = resolution();
+			setState(300);
+			match(SC);
 
 			    FGoal.define_goal(mModel, ((Solve_goalContext)_localctx).anns.anns,((Solve_goalContext)_localctx).res.rtype,((Solve_goalContext)_localctx).res.exp);
 			    
@@ -1223,12 +1344,12 @@ public class Flatzinc4Parser extends Parser {
 		public ResolutionPolicy rtype;
 		public Expression exp;
 		public ExprContext e;
-		public TerminalNode MAXIMIZE() { return getToken(Flatzinc4Parser.MAXIMIZE, 0); }
+		public TerminalNode MINIMIZE() { return getToken(Flatzinc4Parser.MINIMIZE, 0); }
 		public ExprContext expr() {
 			return getRuleContext(ExprContext.class,0);
 		}
+		public TerminalNode MAXIMIZE() { return getToken(Flatzinc4Parser.MAXIMIZE, 0); }
 		public TerminalNode SATISFY() { return getToken(Flatzinc4Parser.SATISFY, 0); }
-		public TerminalNode MINIMIZE() { return getToken(Flatzinc4Parser.MINIMIZE, 0); }
 		public ResolutionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1244,8 +1365,10 @@ public class Flatzinc4Parser extends Parser {
 			case MINIMIZE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(303); match(MINIMIZE);
-				setState(304); ((ResolutionContext)_localctx).e = expr();
+				setState(303);
+				match(MINIMIZE);
+				setState(304);
+				((ResolutionContext)_localctx).e = expr();
 
 				    ((ResolutionContext)_localctx).rtype = ResolutionPolicy.MINIMIZE;
 				    ((ResolutionContext)_localctx).exp = ((ResolutionContext)_localctx).e.exp;
@@ -1255,8 +1378,10 @@ public class Flatzinc4Parser extends Parser {
 			case MAXIMIZE:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(307); match(MAXIMIZE);
-				setState(308); ((ResolutionContext)_localctx).e = expr();
+				setState(307);
+				match(MAXIMIZE);
+				setState(308);
+				((ResolutionContext)_localctx).e = expr();
 
 				    ((ResolutionContext)_localctx).rtype = ResolutionPolicy.MAXIMIZE;
 				    ((ResolutionContext)_localctx).exp = ((ResolutionContext)_localctx).e.exp;
@@ -1266,7 +1391,8 @@ public class Flatzinc4Parser extends Parser {
 			case SATISFY:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(311); match(SATISFY);
+				setState(311);
+				match(SATISFY);
 
 				    ((ResolutionContext)_localctx).rtype = ResolutionPolicy.SATISFACTION;
 				    ((ResolutionContext)_localctx).exp = null;
@@ -1291,16 +1417,16 @@ public class Flatzinc4Parser extends Parser {
 	public static class AnnotationsContext extends ParserRuleContext {
 		public List<EAnnotation> anns;
 		public AnnotationContext e;
-		public List<AnnotationContext> annotation() {
-			return getRuleContexts(AnnotationContext.class);
-		}
+		public List<TerminalNode> DC() { return getTokens(Flatzinc4Parser.DC); }
 		public TerminalNode DC(int i) {
 			return getToken(Flatzinc4Parser.DC, i);
+		}
+		public List<AnnotationContext> annotation() {
+			return getRuleContexts(AnnotationContext.class);
 		}
 		public AnnotationContext annotation(int i) {
 			return getRuleContext(AnnotationContext.class,i);
 		}
-		public List<TerminalNode> DC() { return getTokens(Flatzinc4Parser.DC); }
 		public AnnotationsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1323,8 +1449,10 @@ public class Flatzinc4Parser extends Parser {
 			while (_la==DC) {
 				{
 				{
-				setState(316); match(DC);
-				setState(317); ((AnnotationsContext)_localctx).e = annotation();
+				setState(316);
+				match(DC);
+				setState(317);
+				((AnnotationsContext)_localctx).e = annotation();
 				_localctx.anns.add(((AnnotationsContext)_localctx).e.ann);
 				}
 				}
@@ -1349,19 +1477,19 @@ public class Flatzinc4Parser extends Parser {
 		public EAnnotation ann;
 		public Token IDENTIFIER;
 		public ExprContext e;
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
 		public List<ExprContext> expr() {
 			return getRuleContexts(ExprContext.class);
 		}
-		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public ExprContext expr(int i) {
 			return getRuleContext(ExprContext.class,i);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public AnnotationContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1378,13 +1506,16 @@ public class Flatzinc4Parser extends Parser {
 
 			    ArrayList<Expression> exps = new ArrayList();
 			    
-			setState(326); ((AnnotationContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+			setState(326);
+			((AnnotationContext)_localctx).IDENTIFIER = match(IDENTIFIER);
 			setState(341);
 			_la = _input.LA(1);
 			if (_la==LP) {
 				{
-				setState(327); match(LP);
-				setState(328); ((AnnotationContext)_localctx).e = expr();
+				setState(327);
+				match(LP);
+				setState(328);
+				((AnnotationContext)_localctx).e = expr();
 				exps.add(((AnnotationContext)_localctx).e.exp);
 				setState(336);
 				_errHandler.sync(this);
@@ -1392,8 +1523,10 @@ public class Flatzinc4Parser extends Parser {
 				while (_la==CM) {
 					{
 					{
-					setState(330); match(CM);
-					setState(331); ((AnnotationContext)_localctx).e = expr();
+					setState(330);
+					match(CM);
+					setState(331);
+					((AnnotationContext)_localctx).e = expr();
 					exps.add(((AnnotationContext)_localctx).e.exp);
 					}
 					}
@@ -1401,7 +1534,8 @@ public class Flatzinc4Parser extends Parser {
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(339); match(RP);
+				setState(339);
+				match(RP);
 				}
 			}
 
@@ -1423,8 +1557,8 @@ public class Flatzinc4Parser extends Parser {
 
 	public static class Bool_constContext extends ParserRuleContext {
 		public boolean value;
-		public TerminalNode FALSE() { return getToken(Flatzinc4Parser.FALSE, 0); }
 		public TerminalNode TRUE() { return getToken(Flatzinc4Parser.TRUE, 0); }
+		public TerminalNode FALSE() { return getToken(Flatzinc4Parser.FALSE, 0); }
 		public Bool_constContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1440,14 +1574,16 @@ public class Flatzinc4Parser extends Parser {
 			case TRUE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(345); match(TRUE);
+				setState(345);
+				match(TRUE);
 				((Bool_constContext)_localctx).value =  true;
 				}
 				break;
 			case FALSE:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(347); match(FALSE);
+				setState(347);
+				match(FALSE);
 				((Bool_constContext)_localctx).value =  false;
 				}
 				break;
@@ -1468,21 +1604,21 @@ public class Flatzinc4Parser extends Parser {
 
 	public static class Pred_declContext extends ParserRuleContext {
 		public Token IDENTIFIER;
+		public TerminalNode PREDICATE() { return getToken(Flatzinc4Parser.PREDICATE, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
+		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
 		public List<Pred_paramContext> pred_param() {
 			return getRuleContexts(Pred_paramContext.class);
 		}
-		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
-		public TerminalNode LP() { return getToken(Flatzinc4Parser.LP, 0); }
-		public TerminalNode PREDICATE() { return getToken(Flatzinc4Parser.PREDICATE, 0); }
 		public Pred_paramContext pred_param(int i) {
 			return getRuleContext(Pred_paramContext.class,i);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode RP() { return getToken(Flatzinc4Parser.RP, 0); }
 		public TerminalNode SC() { return getToken(Flatzinc4Parser.SC, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
 		public Pred_declContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1496,26 +1632,34 @@ public class Flatzinc4Parser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(351); match(PREDICATE);
-			setState(352); ((Pred_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
-			setState(353); match(LP);
-			setState(354); pred_param();
+			setState(351);
+			match(PREDICATE);
+			setState(352);
+			((Pred_declContext)_localctx).IDENTIFIER = match(IDENTIFIER);
+			setState(353);
+			match(LP);
+			setState(354);
+			pred_param();
 			setState(359);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==CM) {
 				{
 				{
-				setState(355); match(CM);
-				setState(356); pred_param();
+				setState(355);
+				match(CM);
+				setState(356);
+				pred_param();
 				}
 				}
 				setState(361);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(362); match(RP);
-			setState(363); match(SC);
+			setState(362);
+			match(RP);
+			setState(363);
+			match(SC);
 
 			//        LOGGER.info("\% skip predicate : "+ (((Pred_declContext)_localctx).IDENTIFIER!=null?((Pred_declContext)_localctx).IDENTIFIER.getText():null));
 				
@@ -1533,10 +1677,10 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Pred_paramContext extends ParserRuleContext {
-		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public Pred_param_typeContext pred_param_type() {
 			return getRuleContext(Pred_param_typeContext.class,0);
 		}
+		public TerminalNode CL() { return getToken(Flatzinc4Parser.CL, 0); }
 		public TerminalNode IDENTIFIER() { return getToken(Flatzinc4Parser.IDENTIFIER, 0); }
 		public Pred_paramContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1550,9 +1694,12 @@ public class Flatzinc4Parser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(366); pred_param_type();
-			setState(367); match(CL);
-			setState(368); match(IDENTIFIER);
+			setState(366);
+			pred_param_type();
+			setState(367);
+			match(CL);
+			setState(368);
+			match(IDENTIFIER);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1567,11 +1714,11 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Pred_param_typeContext extends ParserRuleContext {
-		public Var_pred_param_typeContext var_pred_param_type() {
-			return getRuleContext(Var_pred_param_typeContext.class,0);
-		}
 		public Par_pred_param_typeContext par_pred_param_type() {
 			return getRuleContext(Par_pred_param_typeContext.class,0);
+		}
+		public Var_pred_param_typeContext var_pred_param_type() {
+			return getRuleContext(Var_pred_param_typeContext.class,0);
 		}
 		public Pred_param_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1588,14 +1735,15 @@ public class Flatzinc4Parser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(370); par_pred_param_type();
+				setState(370);
+				par_pred_param_type();
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(371); var_pred_param_type();
+				setState(371);
+				var_pred_param_type();
 				}
 				break;
 			}
@@ -1612,34 +1760,34 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Par_pred_param_typeContext extends ParserRuleContext {
-		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
-		public TerminalNode INT_CONST(int i) {
-			return getToken(Flatzinc4Parser.INT_CONST, i);
-		}
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public Index_setContext index_set(int i) {
-			return getRuleContext(Index_setContext.class,i);
-		}
-		public TerminalNode OF(int i) {
-			return getToken(Flatzinc4Parser.OF, i);
-		}
-		public List<Index_setContext> index_set() {
-			return getRuleContexts(Index_setContext.class);
-		}
-		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
-		public TerminalNode CM(int i) {
-			return getToken(Flatzinc4Parser.CM, i);
-		}
-		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
-		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
-		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
 		public Par_typeContext par_type() {
 			return getRuleContext(Par_typeContext.class,0);
 		}
+		public List<TerminalNode> INT_CONST() { return getTokens(Flatzinc4Parser.INT_CONST); }
+		public TerminalNode INT_CONST(int i) {
+			return getToken(Flatzinc4Parser.INT_CONST, i);
+		}
+		public TerminalNode DD() { return getToken(Flatzinc4Parser.DD, 0); }
+		public TerminalNode LB() { return getToken(Flatzinc4Parser.LB, 0); }
+		public TerminalNode RB() { return getToken(Flatzinc4Parser.RB, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
+		public TerminalNode CM(int i) {
+			return getToken(Flatzinc4Parser.CM, i);
+		}
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
+		public TerminalNode OF(int i) {
+			return getToken(Flatzinc4Parser.OF, i);
+		}
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
+		public List<Index_setContext> index_set() {
+			return getRuleContexts(Index_setContext.class);
+		}
+		public Index_setContext index_set(int i) {
+			return getRuleContext(Index_setContext.class,i);
+		}
+		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
 		public Par_pred_param_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1656,219 +1804,280 @@ public class Flatzinc4Parser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(374); par_type();
+				setState(374);
+				par_type();
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(375); match(INT_CONST);
-				setState(376); match(DD);
-				setState(377); match(INT_CONST);
+				setState(375);
+				match(INT_CONST);
+				setState(376);
+				match(DD);
+				setState(377);
+				match(INT_CONST);
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(378); match(LB);
-				setState(379); match(INT_CONST);
+				setState(378);
+				match(LB);
+				setState(379);
+				match(INT_CONST);
 				setState(384);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(380); match(CM);
-					setState(381); match(INT_CONST);
+					setState(380);
+					match(CM);
+					setState(381);
+					match(INT_CONST);
 					}
 					}
 					setState(386);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(387); match(RB);
+				setState(387);
+				match(RB);
 				}
 				break;
-
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(388); match(SET);
-				setState(389); match(OF);
-				setState(390); match(INT_CONST);
-				setState(391); match(DD);
-				setState(392); match(INT_CONST);
+				setState(388);
+				match(SET);
+				setState(389);
+				match(OF);
+				setState(390);
+				match(INT_CONST);
+				setState(391);
+				match(DD);
+				setState(392);
+				match(INT_CONST);
 				}
 				break;
-
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
-				setState(393); match(SET);
-				setState(394); match(OF);
-				setState(395); match(LB);
-				setState(396); match(INT_CONST);
+				setState(393);
+				match(SET);
+				setState(394);
+				match(OF);
+				setState(395);
+				match(LB);
+				setState(396);
+				match(INT_CONST);
 				setState(401);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(397); match(CM);
-					setState(398); match(INT_CONST);
+					setState(397);
+					match(CM);
+					setState(398);
+					match(INT_CONST);
 					}
 					}
 					setState(403);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(404); match(RB);
+				setState(404);
+				match(RB);
 				}
 				break;
-
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
-				setState(405); match(ARRAY);
-				setState(406); match(LS);
-				setState(407); index_set();
+				setState(405);
+				match(ARRAY);
+				setState(406);
+				match(LS);
+				setState(407);
+				index_set();
 				setState(412);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(408); match(CM);
-					setState(409); index_set();
+					setState(408);
+					match(CM);
+					setState(409);
+					index_set();
 					}
 					}
 					setState(414);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(415); match(RS);
-				setState(416); match(OF);
-				setState(417); match(INT_CONST);
-				setState(418); match(DD);
-				setState(419); match(INT_CONST);
+				setState(415);
+				match(RS);
+				setState(416);
+				match(OF);
+				setState(417);
+				match(INT_CONST);
+				setState(418);
+				match(DD);
+				setState(419);
+				match(INT_CONST);
 				}
 				break;
-
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
-				setState(421); match(ARRAY);
-				setState(422); match(LS);
-				setState(423); index_set();
+				setState(421);
+				match(ARRAY);
+				setState(422);
+				match(LS);
+				setState(423);
+				index_set();
 				setState(428);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(424); match(CM);
-					setState(425); index_set();
+					setState(424);
+					match(CM);
+					setState(425);
+					index_set();
 					}
 					}
 					setState(430);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(431); match(RS);
-				setState(432); match(OF);
-				setState(433); match(LB);
-				setState(434); match(INT_CONST);
+				setState(431);
+				match(RS);
+				setState(432);
+				match(OF);
+				setState(433);
+				match(LB);
+				setState(434);
+				match(INT_CONST);
 				setState(439);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(435); match(CM);
-					setState(436); match(INT_CONST);
+					setState(435);
+					match(CM);
+					setState(436);
+					match(INT_CONST);
 					}
 					}
 					setState(441);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(442); match(RB);
+				setState(442);
+				match(RB);
 				}
 				break;
-
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
-				setState(444); match(ARRAY);
-				setState(445); match(LS);
-				setState(446); index_set();
+				setState(444);
+				match(ARRAY);
+				setState(445);
+				match(LS);
+				setState(446);
+				index_set();
 				setState(451);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(447); match(CM);
-					setState(448); index_set();
+					setState(447);
+					match(CM);
+					setState(448);
+					index_set();
 					}
 					}
 					setState(453);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(454); match(RS);
-				setState(455); match(OF);
-				setState(456); match(SET);
-				setState(457); match(OF);
-				setState(458); match(INT_CONST);
-				setState(459); match(DD);
-				setState(460); match(INT_CONST);
+				setState(454);
+				match(RS);
+				setState(455);
+				match(OF);
+				setState(456);
+				match(SET);
+				setState(457);
+				match(OF);
+				setState(458);
+				match(INT_CONST);
+				setState(459);
+				match(DD);
+				setState(460);
+				match(INT_CONST);
 				}
 				break;
-
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
-				setState(462); match(ARRAY);
-				setState(463); match(LS);
-				setState(464); index_set();
+				setState(462);
+				match(ARRAY);
+				setState(463);
+				match(LS);
+				setState(464);
+				index_set();
 				setState(469);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(465); match(CM);
-					setState(466); index_set();
+					setState(465);
+					match(CM);
+					setState(466);
+					index_set();
 					}
 					}
 					setState(471);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(472); match(RS);
-				setState(473); match(OF);
-				setState(474); match(SET);
-				setState(475); match(OF);
-				setState(476); match(LB);
-				setState(477); match(INT_CONST);
+				setState(472);
+				match(RS);
+				setState(473);
+				match(OF);
+				setState(474);
+				match(SET);
+				setState(475);
+				match(OF);
+				setState(476);
+				match(LB);
+				setState(477);
+				match(INT_CONST);
 				setState(482);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(478); match(CM);
-					setState(479); match(INT_CONST);
+					setState(478);
+					match(CM);
+					setState(479);
+					match(INT_CONST);
 					}
 					}
 					setState(484);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(485); match(RB);
+				setState(485);
+				match(RB);
 				}
 				break;
 			}
@@ -1885,29 +2094,29 @@ public class Flatzinc4Parser extends Parser {
 	}
 
 	public static class Var_pred_param_typeContext extends ParserRuleContext {
-		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
-		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
-		public Index_setContext index_set(int i) {
-			return getRuleContext(Index_setContext.class,i);
-		}
 		public Var_typeContext var_type() {
 			return getRuleContext(Var_typeContext.class,0);
 		}
+		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
+		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
+		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
 		public TerminalNode OF(int i) {
 			return getToken(Flatzinc4Parser.OF, i);
 		}
+		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public TerminalNode ARRAY() { return getToken(Flatzinc4Parser.ARRAY, 0); }
+		public TerminalNode LS() { return getToken(Flatzinc4Parser.LS, 0); }
 		public List<Index_setContext> index_set() {
 			return getRuleContexts(Index_setContext.class);
 		}
+		public Index_setContext index_set(int i) {
+			return getRuleContext(Index_setContext.class,i);
+		}
 		public TerminalNode RS() { return getToken(Flatzinc4Parser.RS, 0); }
-		public TerminalNode INT() { return getToken(Flatzinc4Parser.INT, 0); }
+		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
 		public TerminalNode CM(int i) {
 			return getToken(Flatzinc4Parser.CM, i);
 		}
-		public TerminalNode VAR() { return getToken(Flatzinc4Parser.VAR, 0); }
-		public List<TerminalNode> OF() { return getTokens(Flatzinc4Parser.OF); }
-		public List<TerminalNode> CM() { return getTokens(Flatzinc4Parser.CM); }
-		public TerminalNode SET() { return getToken(Flatzinc4Parser.SET, 0); }
 		public Var_pred_param_typeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1924,46 +2133,60 @@ public class Flatzinc4Parser extends Parser {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(489); var_type();
+				setState(489);
+				var_type();
 				}
 				break;
-
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(490); match(VAR);
-				setState(491); match(SET);
-				setState(492); match(OF);
-				setState(493); match(INT);
+				setState(490);
+				match(VAR);
+				setState(491);
+				match(SET);
+				setState(492);
+				match(OF);
+				setState(493);
+				match(INT);
 				}
 				break;
-
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(494); match(ARRAY);
-				setState(495); match(LS);
-				setState(496); index_set();
+				setState(494);
+				match(ARRAY);
+				setState(495);
+				match(LS);
+				setState(496);
+				index_set();
 				setState(501);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				while (_la==CM) {
 					{
 					{
-					setState(497); match(CM);
-					setState(498); index_set();
+					setState(497);
+					match(CM);
+					setState(498);
+					index_set();
 					}
 					}
 					setState(503);
 					_errHandler.sync(this);
 					_la = _input.LA(1);
 				}
-				setState(504); match(RS);
-				setState(505); match(OF);
-				setState(506); match(VAR);
-				setState(507); match(SET);
-				setState(508); match(OF);
-				setState(509); match(INT);
+				setState(504);
+				match(RS);
+				setState(505);
+				match(OF);
+				setState(506);
+				match(VAR);
+				setState(507);
+				match(SET);
+				setState(508);
+				match(OF);
+				setState(509);
+				match(INT);
 				}
 				break;
 			}

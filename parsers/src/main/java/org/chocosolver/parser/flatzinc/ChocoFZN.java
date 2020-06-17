@@ -23,7 +23,7 @@ public class ChocoFZN {
         Flatzinc fzn = new Flatzinc();
         fzn.addListener(new BaseFlatzincListener(fzn));
         if(fzn.setUp(args)) {
-            fzn.getSettings().setMinCardinalityForSumDecomposition(fzn.sum);
+            fzn.getSettings();
             fzn.createSolver();
             fzn.buildModel();
             fzn.configureSearch();

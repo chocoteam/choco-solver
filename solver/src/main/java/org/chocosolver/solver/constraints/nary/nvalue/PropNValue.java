@@ -38,7 +38,7 @@ public class PropNValue extends Propagator<IntVar> {
     private ISet mandatoryValues;
     private ISet possibleValues;
     private TIntArrayList listForRandomPick;
-    private Random rnd = new Random(0);
+    private Random rnd = new Random(vars[0].getModel().getSeed());
 
     public PropNValue(IntVar[] vars, IntVar nvalue) {
         super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, true);

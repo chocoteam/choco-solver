@@ -10,7 +10,6 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
@@ -28,11 +27,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -174,6 +169,11 @@ public class Model implements IModel {
      * Resolution policy (sat/min/max)
      */
     private ResolutionPolicy policy = ResolutionPolicy.SATISFACTION;
+
+    /**
+     * A seed for randomness
+     */
+    private long seed = 0L;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
@@ -705,6 +705,26 @@ public class Model implements IModel {
      */
     public void setPrecision(double p) {
         this.precision = p;
+    }
+
+    /**
+     * Sets the seed used for random number generator using a single
+     * {@code long} seed.
+     *
+     * @see java.util.Random#setSeed(long)
+     *
+     * @param seed the initial seed
+     */
+    public void setSeed(long seed) {
+        this.seed = seed;
+    }
+
+    /**
+     * Gets the seed used random number generator.
+     * @return the seed
+     */
+    public long getSeed() {
+        return this.seed;
     }
 
     /**

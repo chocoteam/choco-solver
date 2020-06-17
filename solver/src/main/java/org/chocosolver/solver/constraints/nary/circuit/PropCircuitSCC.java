@@ -64,7 +64,7 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		}
 		this.conf = conf;
 		if(conf==CircuitConf.RD){ 
-			rd = new Random(0);
+			rd = new Random(vars[0].getModel().getSeed());
 		}
 	}
 

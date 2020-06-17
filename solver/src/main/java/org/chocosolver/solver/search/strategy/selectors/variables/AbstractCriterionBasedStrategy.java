@@ -37,7 +37,7 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
      */
     private IStateInt last;
     /**
-     * /** The way value is selected for a given variable
+     * The way value is selected for a given variable
      */
     private IntValueSelector valueSelector;
     /**
