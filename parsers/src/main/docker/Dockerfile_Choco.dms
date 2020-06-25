@@ -29,30 +29,21 @@ RUN cd /choco-solver/ && \
     mvn -q clean install -DskipTests && \
     cd ..
 
-# Retrieval of Choco-parsers
-RUN git clone https://github.com/chocoteam/choco-parsers.git /choco-parsers
-
-# Building Choco-parsers :
-RUN cd /choco-parsers/ && \
-	git fetch -q && git checkout -q master && \
-    mvn -q clean install -DskipTests && \
-    cd ..
-
 #------------------------------------------------------------------------------#
 # 2. Stage: Setup of Choco in the MiniZinc Challenge docker image
 
 # Using the MiniZinc Challenge docker image
-FROM minizinc/mznc2019:1.0
+FROM minizinc/mznc2020:latest
 
-# Install Java 8
+# Install Java 11
 RUN apt-get update && \
 	apt-get install -y  \
 	openjdk-11-jdk
 
 
 # Copy Choco's executable from the previous stage across
-COPY --from=builder /choco-parsers/src/main/bash/fzn-exec.sh /entry_data/fzn-exec
-COPY --from=builder /choco-parsers/target/choco-parsers-4.0.6-SNAPSHOT-with-dependencies.jar /entry_data/choco-parsers.jar
+COPY --from=builder /choco-solver/parsers/src/main/bash/fzn-exec.sh /entry_data/fzn-exec
+COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.3-SNAPSHOT-with-dependencies.jar /entry_data/choco-parsers.jar
 
 # Update execution script
 RUN sed -i 's&DIR=.*&DIR=/entry_data&g' /entry_data/fzn-exec
