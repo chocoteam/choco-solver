@@ -270,4 +270,16 @@ public class ParserParameters {
             }
         }
     }
+
+    public static class LimConf{
+        final long time; // in ms
+        final int sols;
+        final int runs;
+
+        public LimConf(long time, int sols, int runs) {
+            this.time = time;
+            this.sols = sols;
+            this.runs = runs;
+        }
+    }
 }

@@ -31,7 +31,7 @@ public class FlatzincModelTest {
 
         InputStream in = new ByteArrayInputStream(("var 1 .. 2: a::output_var;" + "constraint int_ne(a, 1);" + "solve satisfy;").getBytes());
 
-        Flatzinc fzn = new Flatzinc(false, 0, 1, -1);
+        Flatzinc fzn = new Flatzinc(false, 0, 1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
@@ -47,7 +47,7 @@ public class FlatzincModelTest {
                 "constraint int_ne(a, 1);\n" +
                 "solve satisfy;").getBytes());
 
-        Flatzinc fzn = new Flatzinc(false, 0, 1, -1);
+        Flatzinc fzn = new Flatzinc(false, 0, 1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
@@ -65,7 +65,7 @@ public class FlatzincModelTest {
                 "constraint int_ne(q[1], q[2]);\n" +
                 "solve satisfy;").getBytes());
 
-        Flatzinc fzn = new Flatzinc(false, 0, 1, -1);
+        Flatzinc fzn = new Flatzinc(false, 0, 1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
@@ -85,7 +85,7 @@ public class FlatzincModelTest {
                 "constraint globalCardinalityLowUpChoco(vars, covers, lbound, ubound,false);\n" +
                 "solve satisfy;").getBytes());
 
-        Flatzinc fzn = new Flatzinc(false, 0, 1, -1);
+        Flatzinc fzn = new Flatzinc(false, 0, 1);
         fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);

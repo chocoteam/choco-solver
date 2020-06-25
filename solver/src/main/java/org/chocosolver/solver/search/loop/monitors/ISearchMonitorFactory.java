@@ -12,11 +12,7 @@ package org.chocosolver.solver.search.loop.monitors;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.BacktrackCounter;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.limits.NodeCounter;
-import org.chocosolver.solver.search.limits.SolutionCounter;
-import org.chocosolver.solver.search.limits.TimeCounter;
+import org.chocosolver.solver.search.limits.*;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.TimeUtils;
@@ -99,6 +95,16 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
     default void limitSolution(long limit) {
         limitSearch(new SolutionCounter(ref().getModel(), limit));
     }
+
+    /**
+     * Defines a limit over the number of restarts during the resolution.
+     * When the limit is reached, the resolution is stopped.
+     * @param limit maximal number of solutions
+     */
+    default void limitRestart(long limit) {
+        limitSearch(new RestartCounter(ref().getModel(), limit));
+    }
+
 
     /**
      * Defines a limit over the run time.

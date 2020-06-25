@@ -21,7 +21,6 @@ import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.tools.TimeUtils;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -60,8 +59,10 @@ public abstract class RegParser implements IParser {
             "4: JSON (.json).")
     private int pa = 0;
 
-    @Option(name = "-tl", aliases = {"--time-limit"}, metaVar = "TL", usage = "Time limit.")
-    protected String tl = "-1";
+    @Option(name = "-limit",
+            handler = LimitHandler.class,
+            usage = "Resolution limits (XXhYYmZZs,Nruns,Msols) where each is optional.")
+    protected ParserParameters.LimConf limits = new ParserParameters.LimConf(-1,-1,-1);
 
     @Option(name = "-stat", aliases = {
             "--print-statistics"}, usage = "Print statistics on each solution (default: false).")
@@ -110,11 +111,7 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
     protected File settingsFile = null;
-
-    /**
-     * Default time limit, as long, in ms
-     */
-    protected long tl_ = -1;
+    
     /**
      * List of listeners
      */
@@ -185,7 +182,6 @@ public abstract class RegParser implements IParser {
             return false;
         }
         cmdparser.getArguments();
-        tl_ = TimeUtils.convertInMilliseconds(tl);
         listeners.forEach(ParserListener::afterParsingParameters);
         defaultSettings = createDefaultSettings();
         if (settingsFile != null) {
@@ -268,8 +264,14 @@ public abstract class RegParser implements IParser {
             }
         }
         for (int i = 0; i < nb_cores; i++) {
-            if (tl_ > -1) {
-                portfolio.getModels().get(i).getSolver().limitTime(tl);
+            if (limits.time > -1) {
+                portfolio.getModels().get(i).getSolver().limitTime(limits.time);
+            }
+            if(limits.sols > -1){
+                portfolio.getModels().get(i).getSolver().limitSolution(limits.sols);
+            }
+            if(limits.runs > -1){
+                portfolio.getModels().get(i).getSolver().limitRestart(limits.runs);
             }
             makeComplementarySearch(portfolio.getModels().get(i));
         }
@@ -297,6 +299,6 @@ public abstract class RegParser implements IParser {
 
     protected boolean runInTime() {
         long rtime = (System.currentTimeMillis() - time);
-        return tl_ < 0 || rtime < tl_;
+        return limits.time < 0 || rtime < limits.time;
     }
 }
