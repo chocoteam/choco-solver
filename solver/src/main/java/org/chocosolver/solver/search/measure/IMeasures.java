@@ -54,7 +54,7 @@ public interface IMeasures extends Serializable {
      * @return the time count (in seconds), including initial propagation time count
      */
     default float getTimeToBestSolution() {
-        return getTimeCountInNanoSeconds() / IN_SEC;
+        return getTimeToBestSolutionInNanoSeconds() / IN_SEC;
     }
 
     /**
@@ -272,14 +272,16 @@ public interface IMeasures extends Serializable {
      */
     default String toCSV() {
         // solutionCount;buildingTime(sec);totalTime(sec);timeToBest(sec);objective;nodes;backtracks;fails;restarts;
-        return String.format("%d;%.3f;%.3f;%.3f;%e;%d;%d;%d;%d;",
+        return String.format("%c;%d;%.3f;%.3f;%.3f;%d;%d;%d;%d;%d;%d;",
+                getSearchState().toString().charAt(0),
                 getSolutionCount(),
                 getReadingTimeCount(),
                 getTimeCount(),
                 getTimeToBestSolution(),
-                hasObjective() ? getBestSolutionValue().doubleValue() : 0,
+                hasObjective() ? getBestSolutionValue().intValue() : 0,
                 getNodeCount(),
                 getBackTrackCount(),
+                getBackjumpCount(),
                 getFailCount(),
                 getRestartCount()
         );

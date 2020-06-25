@@ -210,6 +210,10 @@ public class XCSP extends RegParser {
         if (stat) {
             solver.getOut().printf("c %s \n", solver.getMeasures().toOneLineString());
         }
+        if(csv){
+            solver.getOut().print("c ");
+            solver.printCSVStatistics();
+        }
         if(cs) {
             try {
                 new SolutionChecker(true, instance, new ByteArrayInputStream(output.toString().getBytes()));

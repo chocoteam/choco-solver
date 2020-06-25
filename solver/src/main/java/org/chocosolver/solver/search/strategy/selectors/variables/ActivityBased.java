@@ -232,7 +232,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 			}
             assert vars[currentVar] == variable;
         }
-        int currentVal = valueSelector.selectValue(variable);
+        currentVal = valueSelector.selectValue(variable);
         return model.getSolver().getDecisionPath().makeIntDecision(variable, DecisionOperatorFactory.makeIntEq(), currentVal);
     }
 

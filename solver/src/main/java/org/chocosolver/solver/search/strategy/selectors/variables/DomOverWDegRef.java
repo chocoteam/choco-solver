@@ -17,7 +17,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
-import java.util.Arrays;
 import java.util.HashMap;
 
 /**
@@ -106,7 +105,13 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
                 double[] ws = p2w.get(prop.getId());
                 if (ws != null) {
                     int idx = v.getIndexInPropagator(i);
-                    assert idx < ws.length : prop + " : " + idx + " / " + Arrays.toString(ws);
+                    if(idx >= ws.length){
+                        // may happen propagators (like PropNogoods) with dynamic variable addition
+                        double[] nws = new double[prop.getNbVars()];
+                        System.arraycopy(ws, 0, nws, 0, ws.length);
+                        p2w.replace(prop.getId(), nws);
+                        ws = nws;
+                    }
                     w += ws[idx];
                 }
             }

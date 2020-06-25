@@ -133,7 +133,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -f"
+    ARGS=$ARGS" -f 1"
 fi
 
 if test "${STAT}" = "yes"

@@ -47,7 +47,7 @@ public class T_flatzinc_model extends GrammarTest {
         } catch (IOException e) {
             Assert.fail();
         }
-        fp.flatzinc_model(mSolver, datas, false, false);
+        fp.flatzinc_model(mSolver, datas);
         mSolver.getSolver().solve();
     }
 
