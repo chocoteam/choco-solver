@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.nvalue;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -55,11 +56,11 @@ public class PropNValue extends Propagator<IntVar> {
         concernedValues = set.toArray();
         possibleValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
-        witness = new int[concernedValues.length];
-        Arrays.fill(witness, -1);
         listForRandomPick = new TIntArrayList();
+        witness = new int[concernedValues.length];
         for(int j = 0; j<witness.length; j++) {
             possibleValues.add(concernedValues[j]);
+            witness[j] = -1;
             selectRandomWitness(j);
         }
     }
@@ -102,7 +103,6 @@ public class PropNValue extends Propagator<IntVar> {
         }
         if(listForRandomPick.size() == 0) {
             possibleValues.remove(value);
-            witness[idxConcernedValue] = -1;
         } else {
             witness[idxConcernedValue] = listForRandomPick.getQuick(rnd.nextInt(listForRandomPick.size()));
         }
@@ -111,12 +111,13 @@ public class PropNValue extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if(PropagatorEventType.isFullPropagation(evtmask)) {
+            nValue.updateUpperBound(Math.max(vars.length-1, concernedValues.length), this);
             for(int j = 0; j<witness.length; j++) {
                 selectRandomWitness(j);
             }
         }
         nValue.updateBounds(mandatoryValues.size(), possibleValues.size(), this);
-        if(nValue.isInstantiated()) {
+        if(nValue.isInstantiated() && mandatoryValues.size() == nValue.getValue()) {
             for(int i = 0; i<n; i++) {
                 for(int value = vars[i].getLB(); value <= vars[i].getUB(); value = vars[i].nextValue(value)) {
                     if(!mandatoryValues.contains(value)) {
