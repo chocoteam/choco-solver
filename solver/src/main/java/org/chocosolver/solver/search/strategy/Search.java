@@ -9,12 +9,15 @@
  */
 package org.chocosolver.solver.search.strategy;
 
+import org.chocosolver.cutoffseq.GeometricalCutoffStrategy;
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -43,7 +46,7 @@ public class Search {
      * @return last conflict strategy
      */
     public static <V extends Variable> AbstractStrategy<V> lastConflict(
-        AbstractStrategy<V> formerSearch) {
+            AbstractStrategy<V> formerSearch) {
         return lastConflict(formerSearch, 1);
     }
 
@@ -51,17 +54,17 @@ public class Search {
      * Search heuristic combined with a constraint performing strong consistency on the next
      * decision variable and branching on the value with the best objective bound (for optimization)
      * and branches on the lower bound for SAT problems.
-     *
+     * <p>
      * BEWARE: ONLY FOR INTEGERS (lets the former search work for other variable types)
      *
      * @param formerSearch default search to branch on variables (defines the variable selector and
-     * the value selector when this does not hold)
+     *                     the value selector when this does not hold)
      * @return best bound strategy
      */
     public static AbstractStrategy<IntVar> bestBound(AbstractStrategy<IntVar> formerSearch) {
         if (formerSearch == null) {
             throw new UnsupportedOperationException(
-                "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+                    "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new BoundSearch(formerSearch);
     }
@@ -74,10 +77,10 @@ public class Search {
      * @return last conflict strategy
      */
     public static <V extends Variable> AbstractStrategy<V> lastConflict(
-        AbstractStrategy<V> formerSearch, int k) {
+            AbstractStrategy<V> formerSearch, int k) {
         if (formerSearch == null) {
             throw new UnsupportedOperationException(
-                "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
+                    "the search strategy in parameter cannot be null! Consider using Search.defaultSearch(model)");
         }
         return new LastConflict<>(formerSearch.getVariables()[0].getModel(), formerSearch, k);
     }
@@ -89,9 +92,9 @@ public class Search {
      * @return last conflict strategy
      */
     public static <V extends Variable> AbstractStrategy<V> conflictOrderingSearch(
-        AbstractStrategy<V> formerSearch) {
+            AbstractStrategy<V> formerSearch) {
         return new ConflictOrderingSearch<>(formerSearch.getVariables()[0].getModel(),
-            formerSearch);
+                formerSearch);
     }
 
     /**
@@ -122,14 +125,14 @@ public class Search {
     /**
      * Generic strategy to branch on set variables
      *
-     * @param varS variable selection strategy
-     * @param valS integer  selection strategy
+     * @param varS         variable selection strategy
+     * @param valS         integer  selection strategy
      * @param enforceFirst branching order true = enforce first; false = remove first
-     * @param sets SetVar array to branch on
+     * @param sets         SetVar array to branch on
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(VariableSelector<SetVar> varS, SetValueSelector valS,
-        boolean enforceFirst, SetVar... sets) {
+                                           boolean enforceFirst, SetVar... sets) {
         return new SetStrategy(sets, varS, valS, enforceFirst);
     }
 
@@ -158,15 +161,15 @@ public class Search {
      * where 'e' is given by epsilon.
      * </p>
      *
-     * @param varS variable selection strategy
-     * @param valS strategy to select where to split domains
-     * @param epsilon gap for refutation
-     * @param rvars RealVar array to branch on
+     * @param varS      variable selection strategy
+     * @param valS      strategy to select where to split domains
+     * @param epsilon   gap for refutation
+     * @param rvars     RealVar array to branch on
      * @param leftFirst select left range first
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
-        double epsilon, boolean leftFirst, RealVar... rvars) {
+                                             double epsilon, boolean leftFirst, RealVar... rvars) {
         return new RealStrategy(rvars, varS, valS, epsilon, leftFirst);
     }
 
@@ -181,7 +184,7 @@ public class Search {
      * </p>
      *
      * @param epsilon gap for refutation
-     * @param reals variables to branch on
+     * @param reals   variables to branch on
      * @return a strategy to instantiate real variables
      */
     public static RealStrategy realVarSearch(double epsilon, RealVar... reals) {
@@ -190,7 +193,7 @@ public class Search {
 
     /**
      * Generic strategy to branch on real variables, based on domain splitting.
-     *
+     * <p>
      * A real decision is like:
      * <ul>
      * <li>left branch: X &le; v</li>
@@ -199,21 +202,21 @@ public class Search {
      * where epsilon is given or equal to the smallest precision among rvars divide by 10.
      * </p>
      *
-     * @param varS variable selection strategy
-     * @param valS strategy to select where to split domains
+     * @param varS      variable selection strategy
+     * @param valS      strategy to select where to split domains
      * @param leftFirst select left range first
-     * @param rvars RealVar array to branch on
+     * @param rvars     RealVar array to branch on
      * @return a strategy to instantiate reals
      */
     public static RealStrategy realVarSearch(VariableSelector<RealVar> varS, RealValueSelector valS,
-        boolean leftFirst, RealVar... rvars) {
+                                             boolean leftFirst, RealVar... rvars) {
         return realVarSearch(varS, valS, Double.NaN, leftFirst, rvars);
     }
 
     /**
      * strategy to branch on real variables by choosing sequentially the next variable domain to
      * split in two, wrt the middle value.
-     *
+     * <p>
      * A real decision is like:
      * <ul>
      * <li>left branch: X &le; v</li>
@@ -235,17 +238,17 @@ public class Search {
     /**
      * Builds your own search strategy based on <b>binary</b> decisions.
      *
-     * @param varSelector defines how to select a variable to branch on.
-     * @param valSelector defines how to select a value in the domain of the selected variable
+     * @param varSelector      defines how to select a variable to branch on.
+     * @param valSelector      defines how to select a value in the domain of the selected variable
      * @param decisionOperator defines how to modify the domain of the selected variable with the
-     * selected value
-     * @param vars variables to branch on
+     *                         selected value
+     * @param vars             variables to branch on
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-        IntValueSelector valSelector,
-        DecisionOperator<IntVar> decisionOperator,
-        IntVar... vars) {
+                                           IntValueSelector valSelector,
+                                           DecisionOperator<IntVar> decisionOperator,
+                                           IntVar... vars) {
         return new IntStrategy(vars, varSelector, valSelector, decisionOperator);
     }
 
@@ -256,12 +259,12 @@ public class Search {
      *
      * @param varSelector defines how to select a variable to branch on.
      * @param valSelector defines how to select a value in the domain of the selected variable
-     * @param vars variables to branch on
+     * @param vars        variables to branch on
      * @return a custom search strategy
      */
     public static IntStrategy intVarSearch(VariableSelector<IntVar> varSelector,
-        IntValueSelector valSelector,
-        IntVar... vars) {
+                                           IntValueSelector valSelector,
+                                           IntVar... vars) {
         return intVarSearch(varSelector, valSelector, DecisionOperatorFactory.makeIntEq(), vars);
     }
 
@@ -277,7 +280,7 @@ public class Search {
         Model model = vars[0].getModel();
         IntValueSelector valueSelector;
         if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
-            || !(model.getObjective() instanceof IntVar)) {
+                || !(model.getObjective() instanceof IntVar)) {
             valueSelector = new IntDomainMin();
         } else {
             valueSelector = new IntDomainBest();
@@ -377,7 +380,7 @@ public class Search {
      * @return a assignment strategy
      */
     public static AbstractStrategy<IntVar> objectiveStrategy(IntVar objective,
-        OptimizationPolicy optPolicy) {
+                                                             OptimizationPolicy optPolicy) {
         return new ObjectiveStrategy(objective, optPolicy);
     }
 
@@ -495,11 +498,11 @@ public class Search {
             boolean max = r.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
             if ((objective.getTypeAndKind() & Variable.REAL) != 0) {
                 strats.add(
-                    realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(),
-                        !max, (RealVar) objective));
+                        realVarSearch(new Cyclic<>(), max ? new RealDomainMax() : new RealDomainMin(),
+                                !max, (RealVar) objective));
             } else {
                 strats.add(
-                    max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
+                        max ? minDomUBSearch((IntVar) objective) : minDomLBSearch((IntVar) objective));
             }
         }
 
@@ -543,5 +546,372 @@ public class Search {
                 }
             }
         };
+    }
+
+    /**
+     * Enum for commonly used variable selectors.
+     *
+     * <p>To declare a variable selector to be part of a search strategy,
+     * use the following code:
+     * <pre>
+     *     {@code
+     *     AbstractStrategy<IntVar> strat = Search.VarH.CHS.make(solver, vars, Search.VarH.MIN, true);
+     *     solver.setSearch(strat);
+     * </pre>
+     */
+    public enum VarH {
+        /**
+         * To select variables according Activity-based Search.
+         * {@code valueSelector} parameter is ignored.
+         *
+         * @see ActivityBased
+         */
+        ABS {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return ACTIVITY.make(solver, vars, Search.ValH.DEFAULT, last);
+            }
+        },
+        /**
+         * To select variables according to {@link #ABS}
+         * Values can be selected with another heuristic.
+         *
+         * @see ActivityBased
+         */
+        ACTIVITY {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                Model model = solver.getModel();
+                return new ActivityBased(model,
+                        vars,
+                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last),
+                        0.999d,
+                        0.2d,
+                        8,
+                        1,
+                        model.getSeed());
+            }
+        },
+        /**
+         * To select variables according to Conflict History-based Search.
+         *
+         * @see ConflictHistorySearch
+         */
+        CHS {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return new ConflictHistorySearch(vars,
+                        solver.getModel().getSeed(),
+                        valueSelector.make(solver, last));
+            }
+        },
+        /**
+         * To select variables according to the size of their current domain.
+         *
+         * @see FirstFail
+         */
+        DOM {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return Search.intVarSearch(
+                        new FirstFail(solver.getModel()),
+                        valueSelector.make(solver, last),
+                        vars);
+            }
+        },
+        /**
+         * To select variables to constraint weighting.
+         *
+         * @see DomOverWDeg
+         */
+        DOMWDEG {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return new DomOverWDeg(vars,
+                        solver.getModel().getSeed(),
+                        valueSelector.make(solver, last));
+            }
+        },
+        /**
+         * To select variables to refined constraint weighting.
+         *
+         * @see DomOverWDegRef
+         */
+        DOMWDEGR {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return new DomOverWDegRef(vars,
+                        solver.getModel().getSeed(),
+                        valueSelector.make(solver, last),
+                        "CACD");
+            }
+        },
+        /**
+         * To select {@link Search#defaultSearch(Model)}
+         */
+        DEFAULT {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                //noinspection unchecked
+                return defaultSearch(solver.getModel());
+            }
+        },
+        /**
+         * To select variables according to Impact-based Search.
+         * {@code valueSelector} parameter is ignored.
+         *
+         * @see ImpactBased
+         */
+        IBS {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return IBS.make(solver, vars, Search.ValH.DEFAULT, last);
+            }
+        },
+        /**
+         * To select variables according to Impact-based Search.
+         * Values can be selected with another heuristic.
+         *
+         * @see ImpactBased
+         */
+        IMPACT {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return new ImpactBased(vars,
+                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last),
+                        2,
+                        512,
+                        2048,
+                        solver.getModel().getSeed(),
+                        false);
+            }
+        },
+        /**
+         * To select variables according to their order in {@code vars}.
+         */
+        INPUT {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return Search.intVarSearch(
+                        new InputOrder<>(solver.getModel()),
+                        valueSelector.make(solver, last),
+                        vars);
+            }
+        },
+        /**
+         * To select variables randomly.
+         */
+        RAND {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                return Search.intVarSearch(
+                        new Random<>(solver.getModel().getSeed()),
+                        valueSelector.make(solver, last),
+                        vars);
+            }
+        },
+        ;
+
+        /**
+         * Declare the search strategy based on parameters
+         *
+         * @param solver        target solver
+         * @param vars          array of integer variables
+         * @param valueSelector the value selector enum
+         * @param last          set to {@code true} to use {@link IntDomainLast} meta value strategy.
+         * @return a search strategy on {@code IntVar[]}
+         */
+        public abstract AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last);
+    }
+
+    /**
+     * Enum for commonly used value selectors.
+     *
+     * <p>To declare a value selector to be part of a search strategy,
+     * use the following code:
+     * <pre>
+     *     {@code
+     *     AbstractStrategy<IntVar> strat = Search.VarH.CHS.declare(solver, vars, Search.VarH.MIN, true);
+     *     solver.setSearch(strat);
+     * </pre>
+     */
+    public enum ValH {
+        /**
+         * To select the best value according to the best objective bound.
+         *
+         * @see IntDomainBest
+         */
+        BEST {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                if (solver.getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return MIN.make(solver, last);
+                }
+                return last(solver, new IntDomainBest(), last);
+            }
+        },
+        /**
+         * Return {@link #BEST}.
+         */
+        DEFAULT {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return BEST.make(solver, last);
+            }
+        },
+        /**
+         * To select the maximal value in the current domain of the selected variable.
+         *
+         * @see IntDomainMax
+         */
+        MAX {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMax(), last);
+            }
+        },
+        /**
+         * To select the median value in the current domain of the selected variable.
+         *
+         * @see IntDomainMedian
+         */
+        MED {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMedian(), last);
+            }
+        },
+        /**
+         * To select the minimal value in the current domain of the selected variable.
+         *
+         * @see IntDomainMin
+         */
+        MIN {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMin(), last);
+            }
+        },
+        /**
+         * To select values randomly.
+         *
+         * @see IntDomainRandom
+         */
+        RAND {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainRandom(solver.getModel().getSeed()), last);
+            }
+        };
+
+        /**
+         * Build the value selector
+         *
+         * @param solver solver to use in
+         * @param last   set to {@code true} to use meta value selector based on last solution found.
+         * @return a value selector
+         */
+        public abstract IntValueSelector make(Solver solver, boolean last);
+
+        /**
+         * If {@code last} is set to {@code true}, add {@link IntDomainLast} meta value selector.
+         *
+         * @param solver   the solver to record solutions from
+         * @param selector the defined value selector
+         * @param last     use meta value selector.
+         * @return a value selector
+         */
+        IntValueSelector last(Solver solver, IntValueSelector selector, boolean last) {
+            if (last) {
+                // default
+                Model model = solver.getModel();
+                if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return selector;
+                }
+                final IntVar[] vars = model.retrieveIntVars(true);
+                Solution lastSolution = new Solution(model, vars);
+                model.getSolver().attach(lastSolution);
+                return new IntDomainLast(lastSolution, selector, null);
+            } else {
+                return selector;
+            }
+        }
+    }
+
+    /**
+     * Enum for commonly used value restarting policies.
+     *
+     * <p>To declare a value selector to be part of a search strategy,
+     * use the following code:
+     * <pre>
+     *     {@code
+     *     Search.Restarts.LUBY.declare(solver, 50, 5000);
+     * </pre>
+     */
+    public enum Restarts {
+        /**
+         * Define no restart strategy.
+         *
+         * @apiNote Does not remove or erase previously defined restart policy
+         */
+        NONE {
+            @Override
+            public void declare(Solver solver, int cutoff, double factor, int offset) {
+                // nothing to do
+            }
+        },
+        /**
+         * To use a monotonic restart strategy.
+         * <p>This policy will restart every {@code cutoff} failures, until {@code offset} restarts occur.
+         *
+         * @implNote {@code factor} is ignored.
+         * @see MonotonicRestartStrategy
+         */
+        MONOTONIC {
+            @Override
+            public void declare(Solver solver, int cutoff, double factor, int offset) {
+                solver.setRestarts(
+                        count -> solver.getFailCount() >= count,
+                        new MonotonicRestartStrategy(cutoff),
+                        offset
+                );
+                solver.setNoGoodRecordingFromRestarts();
+            }
+        },
+        /**
+         * To use a Luby restart strategy.
+         *
+         * @implNote {@code factor} is ignored.
+         * @see LubyCutoffStrategy
+         */
+        LUBY {
+            @Override
+            public void declare(Solver solver, int cutoff, double factor, int offset) {
+                solver.setRestarts(
+                        count -> solver.getFailCount() >= count,
+                        new LubyCutoffStrategy(cutoff),
+                        offset
+                );
+                solver.setNoGoodRecordingFromRestarts();
+            }
+        },
+        /**
+         * To use a geometric restart strategy.
+         *
+         * @see GeometricalCutoffStrategy
+         */
+        GEOMETRIC {
+            @Override
+            public void declare(Solver solver, int cutoff, double factor, int offset) {
+                solver.setRestarts(
+                        count -> solver.getFailCount() >= count,
+                        new GeometricalCutoffStrategy(cutoff, factor),
+                        offset
+                );
+                solver.setNoGoodRecordingFromRestarts();
+            }
+        };
+
+        public abstract void declare(Solver solver, int cutoff, double factor, int offset);
     }
 }

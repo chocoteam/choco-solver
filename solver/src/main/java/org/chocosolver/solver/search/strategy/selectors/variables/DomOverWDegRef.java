@@ -21,11 +21,10 @@ import java.util.HashMap;
 
 /**
  * Implementation of refined DowOverWDeg.
- * @implNote
- * This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
- * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
  *
  * @author Charles Prud'homme
+ * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+ * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
  * @since 12/06/20
  */
 @SuppressWarnings("rawtypes")
@@ -87,6 +86,14 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
         if (cex.c instanceof Propagator) {
             Propagator<IntVar> p = (Propagator<IntVar>) cex.c;
             double[] weigths = p2w.computeIfAbsent(p.getId(), k -> new double[p.getNbVars()]);
+            if (p.getNbVars() >= weigths.length) {
+                // may happen propagators (like PropNogoods) with dynamic variable addition
+                double[] nws = new double[p.getNbVars()];
+                System.arraycopy(weigths, 0, nws, 0, weigths.length);
+                p2w.replace(p.getId(), nws);
+                weigths = nws;
+            }
+            incWeight.clearCache();
             for (int i = 0; i < p.getNbVars(); i++) {
                 if (!p.getVar(i).isInstantiated()) {
                     weigths[i] += 1d / incWeight.inc(p, p.getVar(i));
@@ -105,7 +112,7 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
                 double[] ws = p2w.get(prop.getId());
                 if (ws != null) {
                     int idx = v.getIndexInPropagator(i);
-                    if(idx >= ws.length){
+                    if (idx >= ws.length) {
                         // may happen propagators (like PropNogoods) with dynamic variable addition
                         double[] nws = new double[prop.getNbVars()];
                         System.arraycopy(ws, 0, nws, 0, ws.length);
@@ -134,14 +141,28 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
             }
         },
         CA {
+            Propagator p;
+            int fv;
+
+            @Override
+            void clearCache() {
+                p = null;
+                fv = 0;
+            }
+
             @Override
             public int inc(Propagator p, IntVar x) {
+                if (this.p == p) {
+                    return this.fv;
+                }
                 int futVars = 0;
                 for (int i = 0; i < p.getNbVars(); i++) {
                     if (!p.getVar(i).isInstantiated()) {
                         futVars++;
                     }
                 }
+                this.p = p;
+                fv = futVars;
                 return futVars;
             }
         },
@@ -153,11 +174,19 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
         },
         CACD {
             @Override
+            void clearCache() {
+                CA.clearCache();
+            }
+
+            @Override
             public int inc(Propagator p, IntVar x) {
                 return CA.inc(p, x) * CD.inc(p, x);
             }
         };
 
         abstract int inc(Propagator p, IntVar x);
+
+        void clearCache() {
+        }
     }
 }

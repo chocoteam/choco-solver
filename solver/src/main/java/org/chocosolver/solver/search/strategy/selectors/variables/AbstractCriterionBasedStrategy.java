@@ -101,8 +101,8 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
         }
         int currentVal = valueSelector.selectValue(variable);
         return variable.getModel().getSolver().getDecisionPath()
-            .makeIntDecision(variable, DecisionOperatorFactory
-                .makeIntEq(), currentVal);
+                .makeIntDecision(variable, DecisionOperatorFactory
+                        .makeIntEq(), currentVal);
     }
 
     protected abstract double weight(IntVar v);
@@ -111,16 +111,21 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
         int pid = prop.getId();
         int futVars = pid2arity.get(pid);
         if (futVars == -1) {
-            futVars = 0;
-            for (int i = 0; i < prop.getNbVars(); i++) {
-                if (!prop.getVar(i).isInstantiated()) {
-                    if (++futVars > 1) {
-                        break;
-                    }
+            futVars = computeFutvars(prop, pid);
+        }
+        return futVars;
+    }
+
+    private int computeFutvars(Propagator prop, int pid) {
+        int futVars = 0;
+        for (int i = 0; i < prop.getNbVars(); i++) {
+            if (!prop.getVar(i).isInstantiated()) {
+                if (++futVars > 1) {
+                    break;
                 }
             }
-            pid2arity.put(pid, futVars);
         }
+        pid2arity.put(pid, futVars);
         return futVars;
     }
 }
