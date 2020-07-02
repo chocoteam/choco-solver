@@ -12,8 +12,6 @@ package org.chocosolver.solver.constraints;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.ArrayList;
-import java.util.List;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.*;
@@ -22,7 +20,10 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
 import org.chocosolver.solver.constraints.extension.nary.*;
-import org.chocosolver.solver.constraints.nary.*;
+import org.chocosolver.solver.constraints.nary.PropDiffN;
+import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
+import org.chocosolver.solver.constraints.nary.PropKLoops;
+import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
@@ -34,7 +35,10 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
-import org.chocosolver.solver.constraints.nary.channeling.*;
+import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
+import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelBC;
 import org.chocosolver.solver.constraints.nary.circuit.*;
 import org.chocosolver.solver.constraints.nary.count.PropCountVar;
 import org.chocosolver.solver.constraints.nary.count.PropCount_AC;
@@ -48,11 +52,7 @@ import org.chocosolver.solver.constraints.nary.min_max.PropBoolMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropBoolMin;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
-import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
+import org.chocosolver.solver.constraints.nary.nvalue.*;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -75,8 +75,10 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -1688,7 +1690,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(ConstraintsName.NVALUES,
-            new PropNValue(vars, nValues),
+                //ew PropNValue(vars, nValues),
+                // at least
+                new PropAtLeastNValues(vars, vals, nValues),
+                // at most
+                new PropAtMostNValues(vars, vals, nValues),
             new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
         );
     }

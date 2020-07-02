@@ -22,7 +22,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
- * Source: "Conflist History Based Branching Heuristic for CSP Solving", Habet and Terrioux.
+ * Source: "Conflict History Based Branching Heuristic for CSP Solving", Habet and Terrioux.
  * <p>
  * Project: choco.
  *

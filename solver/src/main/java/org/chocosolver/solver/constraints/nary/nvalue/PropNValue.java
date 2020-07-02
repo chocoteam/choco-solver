@@ -41,7 +41,7 @@ public class PropNValue extends Propagator<IntVar> {
     private Random rnd = new Random(vars[0].getModel().getSeed());
 
     public PropNValue(IntVar[] vars, IntVar nvalue) {
-        super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, true);
+        super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, false);
         this.nValue = nvalue;
         n = vars.length;
         TIntHashSet set = new TIntHashSet();
@@ -102,7 +102,6 @@ public class PropNValue extends Propagator<IntVar> {
         }
         if(listForRandomPick.size() == 0) {
             possibleValues.remove(value);
-            witness[idxConcernedValue] = -1;
         } else {
             witness[idxConcernedValue] = listForRandomPick.getQuick(rnd.nextInt(listForRandomPick.size()));
         }
@@ -111,12 +110,13 @@ public class PropNValue extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if(PropagatorEventType.isFullPropagation(evtmask)) {
+            nValue.updateUpperBound(Math.max(vars.length-1, concernedValues.length), this);
             for(int j = 0; j<witness.length; j++) {
                 selectRandomWitness(j);
             }
         }
         nValue.updateBounds(mandatoryValues.size(), possibleValues.size(), this);
-        if(nValue.isInstantiated()) {
+        if(nValue.isInstantiated() && mandatoryValues.size() == nValue.getValue()) {
             for(int i = 0; i<n; i++) {
                 for(int value = vars[i].getLB(); value <= vars[i].getUB(); value = vars[i].nextValue(value)) {
                     if(!mandatoryValues.contains(value)) {
@@ -125,6 +125,22 @@ public class PropNValue extends Propagator<IntVar> {
                 }
             }
             setPassive();
+        } else if(nValue.isInstantiated() && mandatoryValues.size() > nValue.getValue()) {
+            fails();
+        } else if(nValue.isInstantiated() && nValue.getValue() == concernedValues.length) {
+            boolean hasFiltered;
+            do {
+                hasFiltered = false;
+                for(int i = 0; i < n; i++) {
+                    if(vars[i].isInstantiated()) {
+                        for(int j = 0; j < n; j++) {
+                            if(i != j) {
+                                hasFiltered |= vars[j].removeValue(vars[i].getValue(), this);
+                            }
+                        }
+                    }
+                }
+            } while(hasFiltered);
         }
     }
 
