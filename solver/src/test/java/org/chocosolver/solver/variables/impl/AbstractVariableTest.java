@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
+import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -226,5 +227,19 @@ public class AbstractVariableTest {
         Assert.assertEquals(v.pindices[0], 0);
         Assert.assertEquals(props[0].getVIndices(), new int[]{0});
     }
+
+    @Test(groups = "1s")
+    public void testFixed() {
+        Model model = new Model();
+        IntVar var = model.intVar(0, 10);
+        IntVar fix = model.intVar(10);
+        IVariableMonitor<IntVar> mon = (v, e) -> {
+        };
+        var.addMonitor(mon);
+        fix.addMonitor(mon);
+        var.removeMonitor(mon);
+        fix.removeMonitor(mon);
+    }
+
 
 }

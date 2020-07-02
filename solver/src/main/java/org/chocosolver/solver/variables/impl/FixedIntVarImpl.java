@@ -245,8 +245,14 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
+    public void removeMonitor(IVariableMonitor monitor) {
+    }
+
+    @Override//void (a constant receives no event)
     public void subscribeView(IView view) {
     }
+
+
 
     @SuppressWarnings("unchecked")
     @Override
