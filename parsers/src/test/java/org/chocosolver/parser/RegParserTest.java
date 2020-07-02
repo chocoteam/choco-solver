@@ -154,9 +154,9 @@ public class RegParserTest {
     public void testVarl1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.varH, Search.ValH.DEFAULT);
-        p.parseArgument("-f", "-varl", "max", "/file");
-        Assert.assertEquals(parser.varH, Search.ValH.MAX);
+        Assert.assertEquals(parser.valH, Search.ValH.DEFAULT);
+        p.parseArgument("-f", "-valh", "max", "/file");
+        Assert.assertEquals(parser.valH, Search.ValH.MAX);
     }
 
     @Test(groups = "1s", expectedExceptions = CmdLineException.class)

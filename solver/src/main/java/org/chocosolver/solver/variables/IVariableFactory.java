@@ -850,9 +850,6 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param MAX  upper bound of the domain
      */
     default void checkRealDomainRange(String NAME, double MIN, double MAX) {
-        if (MIN <= Integer.MIN_VALUE || MAX >= Integer.MAX_VALUE) {
-            throw new SolverException(NAME + ": consider reducing the bounds to avoid unexpected results");
-        }
         if (MAX < MIN) {
             throw new SolverException(NAME + ": wrong domain definition, lower bound > upper bound");
         }
