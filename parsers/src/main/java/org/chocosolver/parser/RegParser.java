@@ -10,15 +10,12 @@
 package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.pf4cs.SetUpException;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ParallelPortfolio;
-import org.chocosolver.solver.Settings;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.kohsuke.args4j.Argument;
@@ -32,8 +29,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * A regular parser with default and common services
@@ -61,8 +56,8 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-limit",
             handler = LimitHandler.class,
-            usage = "Resolution limits (XXhYYmZZs,Nruns,Msols) where each is optional.")
-    protected ParserParameters.LimConf limits = new ParserParameters.LimConf(-1,-1,-1);
+            usage = "Resolution limits (XXhYYmZZs,Nruns,Msols) where each is optional (no space allowed).")
+    protected ParserParameters.LimConf limits = new ParserParameters.LimConf(-1, -1, -1);
 
     @Option(name = "-stat", aliases = {
             "--print-statistics"}, usage = "Print statistics on each solution (default: false).")
@@ -73,25 +68,43 @@ public abstract class RegParser implements IParser {
     protected boolean csv = false;
 
     @Option(name = "-f", aliases = {
-            "--free-search"}, usage = "Ignore search strategy (in {0, 1, 2}, default is 0)")
-    protected int free = 0;
+            "--free-search"}, usage = "Ignore search strategy.")
+    protected boolean free = false;
 
-    @Option(name = "-varH", aliases = {"--varHeuristic"},
+    @Option(name = "-varh", aliases = {"--varHeuristic"},
+            depends = {"-f"},
             usage = "Define the variable heuristic to use.")
-    public ParserParameters.VarH varH = ParserParameters.VarH.UNDEF;
+    public Search.VarH varH = Search.VarH.DEFAULT;
 
-    @Option(name = "-valH", aliases = {"--valHeuristic"},
+    @Option(name = "-valh", aliases = {"--valHeuristic"},
+            depends = {"-f"},
             usage = "Define the value heuristic to use.")
-    public ParserParameters.ValH valH = ParserParameters.ValH.UNDEF;
+    public Search.ValH valH = Search.ValH.DEFAULT;
 
-    @Option(name = "-rst", aliases = {"--restarts"},
+    @Option(name = "-restarts",
             handler = RestartHandler.class,
-            usage = "Define the restart heuristic to use. Expected format: (policy,cutoff,offset)")
-    public ParserParameters.ResConf restarts = new ParserParameters.ResConf(ParserParameters.ResPol.UNDEF, 0,0);
+            depends = {"-f"},
+            usage = "Define the restart heuristic to use. Expected format: (policy,cutoff,offset)  (no space allowed)")
+    public ParserParameters.ResConf restarts =
+            new ParserParameters.ResConf(Search.Restarts.LUBY, 500, 5000);
 
-    @Option(name = "-metaH", aliases = {"--metaHeuristic"},
-            usage = "Define the meta heuristic to use.")
-    public ParserParameters.MetaH metaH = ParserParameters.MetaH.LC1;
+    @Option(name = "-lc",
+            aliases = {"--lact-conflict"},
+            depends = {"-f"},
+            forbids = {"-cos"},
+            usage = "Tell the solver to use last-conflict reasoning.")
+    protected int lc = 1;
+
+    @Option(name = "-cos",
+            depends = {"-f"},
+            forbids = {"-lc"},
+            usage = "Tell the solver to use conflict ordering search.")
+    protected boolean cos = false;
+
+    @Option(name = "-last",
+            depends = {"-f"},
+            usage = "Tell the solver to use use progress (or phase) saving.")
+    protected boolean last = false;
 
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     public boolean all = false;
@@ -111,7 +124,7 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
     protected File settingsFile = null;
-    
+
     /**
      * List of listeners
      */
@@ -241,36 +254,54 @@ public abstract class RegParser implements IParser {
                     solver.setRestartOnSolutions();
                 }
             }
-            if (free == 1) {
-                System.out.printf("%s set search to: default\n", getCommentChar());
-                solver.getMove().removeStrategy();
-                solver.setMove(new MoveBinaryDFS());
-                solver.setSearch(Search.defaultSearch(solver.getModel()));
-                solver.setNoGoodRecordingFromRestarts();
-                solver.setNoGoodRecordingFromSolutions(getModel().retrieveIntVars(true));
-                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500),
-                        5000);
-                solver.setSearch(lastConflict(solver.getSearch()));
-            } else if (free == 2) {
-                System.out.printf("%s set search to: (%s,%s) + %s + %s\n", getCommentChar(), varH,valH, restarts.pol, metaH);
+            if (free) {
+                System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
+                if(lc > 0 || cos || last){
+                    System.out.printf("%s add techniques: ", getCommentChar());
+                    if(cos){
+                        System.out.print("-cos ");
+                    }else if(lc>0){
+                        System.out.printf("-lc %d ", lc);
+                    }
+                    if(last){
+                        System.out.print("-last");
+                    }
+                    System.out.print("\n");
+                }
+                IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
                 IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
                         .map(Variable::asIntVar)
+                        .filter(v -> v != obj)
                         .toArray(IntVar[]::new);
                 solver.getMove().removeStrategy();
                 solver.setMove(new MoveBinaryDFS());
-                varH.declare(solver, dvars, valH);
+                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, last);
+
+                if (obj != null) {
+                    boolean max = solver.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
+                    solver.setSearch(
+                            strategy,
+                            max ? Search.minDomUBSearch(obj) : Search.minDomLBSearch((obj))
+                    );
+                } else {
+                    solver.setSearch(strategy);
+                }
+                if(cos){
+                    solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
+                }else if(lc>0){
+                    solver.setSearch(Search.lastConflict(solver.getSearch(), lc));
+                }
                 restarts.declare(solver);
-                metaH.declare(solver);
             }
         }
         for (int i = 0; i < nb_cores; i++) {
             if (limits.time > -1) {
                 portfolio.getModels().get(i).getSolver().limitTime(limits.time);
             }
-            if(limits.sols > -1){
+            if (limits.sols > -1) {
                 portfolio.getModels().get(i).getSolver().limitSolution(limits.sols);
             }
-            if(limits.runs > -1){
+            if (limits.runs > -1) {
                 portfolio.getModels().get(i).getSolver().limitRestart(limits.runs);
             }
             makeComplementarySearch(portfolio.getModels().get(i));

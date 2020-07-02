@@ -132,7 +132,7 @@ do
 done
 
 FILE="$1"
-ARGS=" -tl '${TIME_LIMIT}s' -p ${NB_NODES} -x 0"
+ARGS=" -limit(${TIME_LIMIT}s) -p ${NB_NODES} -x 0"
 
 CMD="java -server -Xmx${MEM_LIMIT}m -jar ${CHOCO_JAR} \"${FILE}\" ${ARGS}"
 

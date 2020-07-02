@@ -9,6 +9,7 @@
  */
 package org.chocosolver.parser;
 
+import org.chocosolver.solver.search.strategy.Search;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.OptionDef;
@@ -35,27 +36,28 @@ public class RestartHandler extends OneArgumentOptionHandler<ParserParameters.Re
      */
     @Override
     public String getDefaultMetaVariable() {
-        return "(String,int,double?,int)";
+        return "[String,int,double?,int]";
     }
 
 
     @Override
     protected ParserParameters.ResConf parse(String argument) throws NumberFormatException, CmdLineException {
-        if (argument.startsWith("(")) argument = argument.substring(1);
-        if (argument.endsWith(")")) argument = argument.substring(0, argument.length() - 1);
+        if (argument.startsWith("[")) argument = argument.substring(1);
+        if (argument.endsWith("]")) argument = argument.substring(0, argument.length() - 1);
         String[] pars = argument.split(",");
         switch (pars.length) {
             case 3:
                 return new ParserParameters.ResConf(
-                        ParserParameters.ResPol.valueOf(pars[0].toUpperCase()),
+                        Search.Restarts.valueOf(pars[0].toUpperCase()),
                         Integer.parseInt(pars[1]),
                         Integer.parseInt(pars[2])
                 );
             case 4:
                 return new ParserParameters.ResConf(
-                        ParserParameters.ResPol.valueOf(pars[0].toUpperCase()),
+                        Search.Restarts.valueOf(pars[0].toUpperCase()),
                         Integer.parseInt(pars[1]),
-                        Integer.parseInt(pars[2])
+                        Double.parseDouble(pars[2]),
+                        Integer.parseInt(pars[3])
                 );
             default:
                 throw new CmdLineException(owner,

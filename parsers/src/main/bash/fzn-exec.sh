@@ -124,7 +124,7 @@ do
 done
 
 FILE="$1"
-ARGS=" -tl $TIME_LIMIT -p $NB_NODES"
+ARGS=" -limit=($TIME_LIMIT) -p $NB_NODES"
 
 if test "${STOP_AT_FIRST}" = "no"
 then

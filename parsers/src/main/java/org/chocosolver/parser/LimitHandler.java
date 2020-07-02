@@ -35,20 +35,20 @@ public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimC
     }
 
     /**
-     * Returns {@code "(String+)"}.
+     * Returns {@code "[String+]"}.
      *
-     * @return return "(String+)";
+     * @return return "[String+]";
      */
     @Override
     public String getDefaultMetaVariable() {
-        return "(String+)";
+        return "[String+]";
     }
 
 
     @Override
     protected ParserParameters.LimConf parse(String argument) throws NumberFormatException, CmdLineException {
-        if (argument.startsWith("(")) argument = argument.substring(1);
-        if (argument.endsWith(")")) argument = argument.substring(0, argument.length() - 1);
+        if (argument.startsWith("[")) argument = argument.substring(1);
+        if (argument.endsWith("]")) argument = argument.substring(0, argument.length() - 1);
         String[] pars = argument.split(",");
         long time = -1;
         int sols = -1;
@@ -61,7 +61,7 @@ public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimC
             }
             matcher = Sp.matcher(params);
             if (matcher.find() && matcher.groupCount() == 1) {
-                runs = Integer.parseInt(matcher.group(1));
+                sols = Integer.parseInt(matcher.group(1));
                 continue;
             }
             time = TimeUtils.convertInMilliseconds(params);

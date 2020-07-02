@@ -53,10 +53,10 @@ public class Flatzinc extends RegParser {
     //***********************************************************************************
 
     public Flatzinc() {
-        this(false, 0, 1);
+        this(false, false, 1);
     }
 
-    public Flatzinc(boolean all, int free, int nb_cores) {
+    public Flatzinc(boolean all, boolean free, int nb_cores) {
         super("ChocoFZN");
         this.all = all;
         this.free = free ;
