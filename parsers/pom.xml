@@ -111,6 +111,9 @@
             <plugin>
                 <groupId>org.antlr</groupId>
                 <artifactId>antlr4-maven-plugin</artifactId>
+                <!--version 4.5 is the last one that generates
+                in the right ouptut directory
+                without specific configurations -->
                 <version>4.5</version>
                 <configuration>
                     <listener>false</listener>

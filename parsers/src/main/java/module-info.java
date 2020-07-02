@@ -14,7 +14,7 @@
  * @since 15/10/2019
  */
 module org.chocosolver.parsers {
-    exports org.chocosolver.parser to args4j;
+    exports org.chocosolver.parser to args4j, testng;
     requires transitive org.chocosolver.pf4cs;
     requires transitive org.chocosolver.solver;
     requires choco.geost;

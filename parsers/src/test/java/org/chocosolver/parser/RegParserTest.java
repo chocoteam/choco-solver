@@ -28,7 +28,7 @@ public class RegParserTest {
     RegParser parser;
 
     @BeforeMethod(alwaysRun = true)
-    private void before() {
+    public void before() {
         parser = new RegParser("test") {
             @Override
             public char getCommentChar() {

@@ -55,7 +55,7 @@ public class ParserTest {
     private void run(String file) throws SetUpException {
         String[] args = new String[]{
                 file,
-                "-tl", "60s",
+                "-limit", "[60s]",
                 "-stat",
                 "-prec", "1.0E-4D",
                 "-ninf", "-999.D",
