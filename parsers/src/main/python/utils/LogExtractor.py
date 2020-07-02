@@ -71,7 +71,7 @@ class LogExtractor:
             if re.search(self.ropt, last):
                 # extract values
                 solution.append(float(parts[10][:-1].replace(',', '.')))  # time
-                solution.append(parts[11])  # nodes
+                solution.append(parts[16])  # nodes
                 if parts[4] == 'MINIMIZE':
                     solution.append('MIN')
                 else:

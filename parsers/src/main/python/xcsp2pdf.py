@@ -6,22 +6,27 @@ from pylatex import Document, Section, Subsection, Tabular, TikZ, Axis, \
     Plot, Package, Subsubsection, MultiColumn, Command, NoEscape
 
 from utils import LogExtractor as le, PDFCreator
+from pathlib import Path
+
+home = str(Path.home())
 
 parser = argparse.ArgumentParser(description='Pretty XCSP3 log files.')
 parser.add_argument(
     "-fl", "--filelist",
     help='File containing name of XCSP3 files to pretty.',
     default=
-    '/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/inst/2018/xcsp18.txt'
-                    #'/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/inst/2018/xcsp3-sm.txt'
-    # '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/inst/2018/xcsp3-sat.txt'
+    # home + '/cloudUniv/50-Choco/XCSP/Challenges/inst/2018/xcsp3-5s.txt'
+    "/Users/kyzrsoze/cloudUniv/50-Choco/XCSP/Challenges/inst/2018/all.txt"
 )
 parser.add_argument(
     "-d", "--directory",
     help="Log files directory.",
     default=[
-        '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/logs/xcps18/20190513',
-        '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/logs/xcps18/20190612'
+        # home + '/cloudUniv/50-Choco/XCSP/Challenges/logs/xcps18/20200617',
+        # '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/logs/xcps18/20200629'
+        "/Users/kyzrsoze/Sources/XCSP3/logs/20200626",
+        "/Users/kyzrsoze/Sources/XCSP3/logs/20200629",
+        "/Users/kyzrsoze/Sources/XCSP3/logs/20200630"
     ]
 )
 parser.add_argument(
@@ -29,12 +34,16 @@ parser.add_argument(
     help='Configurations to evaluate, \'name\'',
     nargs='+',
     default=[
-        'IBS+',
-        'IDL+IBS',
-        'CPL+IBS',
-        'MIXED',
-        'PROB'
-        ]
+        'CUR',
+        'WDEG',
+        'CACD',
+        'CACDMIN',
+        'CHS',
+        'CHSMIN',
+         #'BB1',
+         #'BB2',
+        # 'ABS'
+    ]
 )
 
 parser.add_argument(
@@ -48,9 +57,9 @@ parser.add_argument(
     default=True,
 )
 
+maxtime = 899.  # 599.
+maxobj = 999999999
 
-maxtime=2399.#599.
-maxobj=999999999
 
 def addTimePlots(doc, options, coords):
     with doc.create(Subsection('CPU Time')):
@@ -73,14 +82,14 @@ def addObjPlots(doc, options, objs, pol):
 
 args = parser.parse_args()
 
-lex = le.LogExtractor("xcsp",maxobj=maxobj, maxtime=maxtime)
+lex = le.LogExtractor("xcsp", maxobj=maxobj, maxtime=maxtime)
 
 optPerSol = {}
 fnames = []
 options = args.configurations
 # analyse all solutions from all configurations
 with open(args.filelist, 'r') as f:
-   for fname in f:
+    for fname in f:
         fname = fname.replace('\n', '')
         print(fname)
         fname = os.path.basename(fname)
@@ -89,16 +98,15 @@ with open(args.filelist, 'r') as f:
         m = 0.
         for o in range(len(options)):
             d = 0
-            while(d < len(args.directory)-1 and
-                  os.path.isfile(os.path.join(args.directory[d], fname + '+' + options[o] + '.log')) is False):
-                d = d+1
+            while (d < len(args.directory) - 1 and
+                   os.path.isfile(os.path.join(args.directory[d], fname + '+' + options[o] + '.log')) is False):
+                d = d + 1
             solution = lex.read(args.directory[d], fname, options[o])
             optPerSol[fname].append(solution)
             m = max(m, float(solution[1]))
         if m < 2:
             print("clear " + fname)
             optPerSol[fname].clear()
-
 
 timPerOpt = {}
 for opt in options:  # init
@@ -125,4 +133,4 @@ for fname in fnames:
 
 pdf = PDFCreator.PDFCreator()
 pdf.publish(filelist=args.filelist, options=options, timPerOpt=timPerOpt, optPerSol=optPerSol, fnames=fnames,
-            maxtime=maxtime, bestever={},details="xcsp")
+            maxtime=maxtime, bestever={}, details="xcsp")

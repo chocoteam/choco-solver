@@ -130,8 +130,8 @@ class PDFCreator:
                             elif times[i] > 0:
                                 coords1.append((i, 0))
                                 coords2.append((i, times[i]))
-                        plot.append(Plot(name="Instance", coordinates=coords1))
-                        plot.append(Plot(name="Instance", coordinates=coords2))
+                        plot.append(Plot(name=opt2, coordinates=coords1))
+                        plot.append(Plot(name=opt1, coordinates=coords2))
 
                 subsection = Subsection("2nd view")
                 doc.append(subsection)
