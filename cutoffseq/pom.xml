@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>4.10.3-SNAPSHOT</version>
+        <version>4.10.3</version>
     </parent>
     <artifactId>cutoffseq</artifactId>
     <version>1.0.5</version>

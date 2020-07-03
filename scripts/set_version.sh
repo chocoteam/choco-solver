@@ -1,5 +1,6 @@
 #!/bin/bash
-source ./commons.sh
+dir="$(dirname "$0")"
+source ${dir}/commons.sh
 #Script to notify the website about a release
 
 function sedInPlace() {
@@ -40,21 +41,14 @@ then
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./src/main/java/org/chocosolver/solver/DefaultSettings.java
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        welcome.message=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR;%"  ./src/main/resources/DefaultSettings.properties
-    ## The doc
-    sedInPlace "s%\*\* Choco .*%** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR%"  ./src/sphinx/source/3_solving.rst
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/DefaultSettings.java
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        welcome.message=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR;%"  ./solver/src/main/resources/Assert.properties
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION
     REGEX="s%NEXT MILESTONE*%${VERSION} - ${d}%"
     sedInPlace "${REGEX}" CHANGES.md
-    # add a new empty line in CHANGES.md
-    sedInPlace "s%copyright = .*%copyright = u'${YEAR}, Jean-Guillaume Fages, Xavier Lorca, Charles Prud\\\'homme'%" ./src/sphinx/source/conf.py
-    sedInPlace "s%release = .*%release = '${VERSION}'%" ./src/sphinx/source/conf.py
-
-    cd ./src/sphinx/
-    make latexpdf
+  
 else
 
     sedInPlace '6 i\
