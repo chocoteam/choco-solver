@@ -9,21 +9,29 @@ NEXT MILESTONE
 Multi-modules and JPMS-ready.
 
 ### Major features:
-- Add dom/wdeg with refinement (["Refining Constraint Weighting." Wattez et al. ICTAI 2019.](https://dblp.org/rec/conf/ictai/WattezLPT19))
 - Move `cutoffseq`, `choco-sat`, `choco-solver`, `pf4cs`, `choco-parsers` and `samples` projects into a (maven) multi-modules project, JPMS-ready 
+#### Additions
+- Add Conflict History Search (["Conflict history based search for constraint satisfaction problem." Habetand Terrioux,SAC 19](https://dblp.org/rec/conf/sac/HabetT19) (#676)
+- Add dom/wdeg with refinement (["Refining Constraint Weighting." Wattez et al. ICTAI 2019.](https://dblp.org/rec/conf/ictai/WattezLPT19))
 - Default AC algorithm for `AllDifferent` is now from IJCAI-18 "A Fast Algorithm for Generalized Arc Consistency of the Alldifferent Constraint", Zhang et al. (#644)
+- Add a pure java alternative to Ibex (#666)
 - LNS can now be defined with a solution as bootstrap.
 - Add simplify API for current Solver operations (#659)
-- Remove JSON writer/parser (which was actually partially supported and not maintained) (#664)
-- Add a pure java alternative to Ibex (#666)
 - Simplify code for the nValues constraint (using a watching/witnessing reasoning) (#674)
-- Conflict History Search is added as a black box: "Conflict history based search for constraint satisfaction problem", Habet and Terrioux, SAC 19 (#676)
-- Make IntVarValueIterator next() method throw a NoSuchElementException (#682)
+- Replace former Bin Packing propagators by Paul Shaw propagator (#671)
+- Improving PropDiffN performance (#663)
+- Add nogood stealing for `ParallelPortfolio` (#669)
+- Adding of new constructors for Task objects (#662)
+#### Removals
+- Remove JSON writer/parser (which was actually partially supported and not maintained) (#664)
 
 ### Deprecated API (to be removed in next release):
+- `Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor)`
+- `AbstractProblem.readArgs(String... args)`
 
-### Closed issues and pull requests:
-\#617, #633, #639, #645, #646, #647, #648, #658, #667, #689, #691
+
+### Other closed issues and pull requests:
+\#617, #633, #637, #639, #645, #646, #647, #648, #658, #665, #667, #678, #682, #686, #689, #691
 
 4.10.2 - 14 Oct 2019
 -------------------
