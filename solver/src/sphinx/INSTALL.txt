@@ -1,2 +1,0 @@
-Everything that should be knwow about the generation of the website is detailled here:
-http://daler.github.io/sphinxdoc-test/includeme.html
