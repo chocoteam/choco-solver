@@ -60,7 +60,7 @@ else
     \
     ### Deprecated API (to be removed in next release):\
     \
-    ### Closed issues and pull requests:\
+    ### Other closed issues and pull requests:\
     \
     ' CHANGES.md
 fi

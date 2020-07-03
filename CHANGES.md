@@ -4,8 +4,18 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
+NEXT MILESTONE
+--------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+
+
 4.10.3 - 03 Jul 2020
--------------------
+--------------------
 Multi-modules and JPMS-ready.
 
 ### Major features:
