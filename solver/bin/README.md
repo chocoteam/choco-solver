@@ -14,9 +14,6 @@ This document reports the release process.
 
     $ mvn -U versions:display-plugin-updates
 
-And update README.md with the correct versions of dependencies
-
-    $ mvn dependency:list | grep :compile | cut -c11- | cut -d : -f1-2,4
 
 And run license check:
 

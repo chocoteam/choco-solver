@@ -20,7 +20,7 @@
         <version>4.10.3-SNAPSHOT</version>
     </parent>
     <artifactId>pf4cs</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <packaging>jar</packaging>
 
     <name>pf4cs</name>

@@ -75,34 +75,13 @@ In order to ease the process, we established a [contribution guide](CONTRIBUTING
 that should be reviewed before starting any contribution as
 it lists the requirements and good practices to ease the contribution process.
 
-##### Promoting is contributing !  
-
-[![Choco-solver](http://www.choco-solver.org/img/banner.svg)](http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
-
-Following are code snippets to add on your website to help us promoting Choco-solver.
-
-**html**:
-
-```html
-<a href="http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge">
-<img border="0" alt="Choco-solver" src="http://www.choco-solver.org/img/banner.svg" width="160" height="18">
-</a>
-```
-
-**Markdown**:
-
-```md
-[![Choco-solver](http://www.choco-solver.org/img/banner.svg)](http://www.choco-solver.org/?utm_source=badge&utm_medium=badge&utm_campaign=badge)
-```
 
 And thank you for giving back to choco-solver.
 Please meet our team of cho-coders : 
 
-- [@jgFages](https://github.com/jgFages) (Jean-Guillaume Fages)
 - [@cprudhom](https://github.com/cprudhom) (Charles Prud'homme)
-
-
-##### Donating is contributing too!
+- [@ArthurGodet](https://github.com/ArthurGodet) (Arthur Godet)
+- [@jgFages](https://github.com/jgFages) (Jean-Guillaume Fages)
 
 Supporting Choco with financial aid favors long-term support and development.
 Our expenses are varied: fees (GitHub organization, Domain name, etc), funding PhD students or internships, conferences, hardware renewal, ...
@@ -172,23 +151,7 @@ The next step is to add the jar file to your classpath of your application and a
 
 ### Dependencies ###
 
-The required dependencies for compilation are:
-
-    de.erichseifert.vectorgraphics2d:VectorGraphics2D:0.13
-    org.jheaps:jheaps:0.10
-    org.jgrapht:jgrapht-core:1.3.1
-    org.choco-solver:cutoffseq:1.0.5
-    com.github.cp-profiler:cpprof-java:1.3.0
-    dk.brics.automaton:automaton:1.11-8
-    org.choco-solver:choco-sat:1.0.2
-    net.sf.trove4j:trove4j:3.0.3
-    org.knowm.xchart:xchart:3.5.4
-    com.google.protobuf:protobuf-java:2.6.1
-
-
-They are available on [Maven Repository](http://mvnrepository.com/).
-
-To declare continuous constraints, [Ibex-2.6.5](http://www.ibex-lib.org/download) needs to be installed
+To declare continuous constraints, [Ibex-2.8.7](http://www.ibex-lib.org/download) needs to be installed
 (instructions are given on Ibex website).
 
 
