@@ -72,19 +72,6 @@ public abstract class AbstractProblem implements IProblem<Model> {
     public void tearDown() {
     }
 
-    /**
-     * @deprecated
-     * @see #setUp(String...)
-     */
-    @Deprecated
-    public final boolean readArgs(String... args) {
-        try {
-            setUp(args);
-        } catch (SetUpException e) {
-            return false;
-        }
-        return true;
-    }
 
     private boolean userInterruption() {
         return userInterruption;

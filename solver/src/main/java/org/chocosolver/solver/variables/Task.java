@@ -120,16 +120,6 @@ public class Task {
         }
     }
 
-    @Deprecated
-    public Task(IntVar s, IntVar d, IntVar e, boolean declareMonitor) {
-        start = s;
-        duration = d;
-        end = e;
-        if(declareMonitor && (!d.isInstantiated() || !isOffsetView(s, d.getValue(), e))) {
-            declareMonitor();
-        }
-    }
-
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
         if(e instanceof OffsetView) {
             OffsetView offsetView = (OffsetView) e;
