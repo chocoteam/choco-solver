@@ -18,7 +18,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,9 +38,6 @@ public class Flatzinc extends RegParser {
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
-
-    @Option(name = "-cum", aliases = {"--cumulative"}, usage = "Cumulative decomposition (default: GLB).")
-    protected String cumDecomp = "GLB";
 
     // Contains mapping with variables and output prints
     public Datas[] datas;
@@ -105,7 +101,7 @@ public class Flatzinc extends RegParser {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, all, stat);
-            threadModel.addHook("CUMULATIVE", cumDecomp);
+            threadModel.addHook("CUMULATIVE", "GLB");
         }
         listeners.forEach(ParserListener::afterSolverCreation);
     }
