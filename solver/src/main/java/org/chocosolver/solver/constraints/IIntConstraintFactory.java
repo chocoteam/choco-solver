@@ -412,7 +412,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param var1   first variable
      * @param var2   second variable
-     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "FC"}
+     * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
         Propagator p;
@@ -420,6 +420,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
         } else {
             switch (algo) {
+                case "CT+":
+                    p = new PropCompactTable(new IntVar[]{var1, var2}, tuples);
+                    break;
                 case "AC2001":
                     p = new PropBinAC2001(var1, var2, tuples);
                     break;
