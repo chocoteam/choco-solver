@@ -8,6 +8,7 @@ NEXT MILESTONE
 --------------------
 
 ### Major features:
+- Change search strategies in ParallelPortfolio
 
 ### Deprecated API (to be removed in next release):
 
