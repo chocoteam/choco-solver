@@ -1,0 +1,29 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK 1.8
+      uses: actions/setup-java@v1
+      with:
+        java-version: 1.8
+    - name: Test with Maven
+      run: |
+        mvn -B test --file pom.xml -Dgroups="1s"
+        mvn -B test --file pom.xml -Dgroups="10s"
+        mvn -B test --file pom.xml -Dgroups="ibex"
+        mvn -B test --file pom.xml -Dgroups="checker"
+    
