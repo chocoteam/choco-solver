@@ -90,8 +90,8 @@ public class RealUtils {
         double i, s;
 
         if ((x.getLB() == 0.0 && x.getUB() == 0.0) || (y.getLB() == 0.0 && y.getUB() == 0.0)) {
-            i = 0.0;
-            s = NEG_ZER0; // Ca peut etre utile pour rejoindre des intervalles : si on veut aller de -5 a 0,
+            i = NEG_ZER0; // Ca peut etre utile pour rejoindre des intervalles : si on veut aller de -5 a 0,
+            s = 0.0;
             // ca sera 0-.
         } else {
             if (x.getLB() >= 0.0) {
@@ -143,7 +143,7 @@ public class RealUtils {
      */
     public static RealInterval odiv(RealInterval x, RealInterval y) {
         if (y.getLB() >= 0.0 && y.getUB() <= 0.0) {
-            throw new UnsupportedOperationException();
+            throw new ArithmeticException("the divisor is 0");
         } else {
             double yl = y.getLB();
             double yh = y.getUB();
@@ -171,8 +171,8 @@ public class RealUtils {
                     i = prevFloat(x.getLB() / yl);
                     s = nextFloat(x.getUB() / yl);
                 } else {
-                    i = prevFloat(x.getUB() / yh);
-                    s = nextFloat(x.getLB() / yh);
+                    i = Double.NEGATIVE_INFINITY;
+                    s = Double.POSITIVE_INFINITY;
                 }
             }
             return new RealIntervalConstant(i, s);

@@ -132,6 +132,14 @@ public class IbexTest {
         eval(model, x.div(w).eq(y), 1);
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void test101() {
+        Model model = new Model();
+        RealVar w = model.realVar("w", -10, 10, 1e-8);
+        RealVar x = model.realVar("x", -10, 10, 1e-8);
+        eval(model, x.div(w).eq(1e-8), 0);
+    }
+
     @Test(groups = "ibex", timeOut = 60000)
     public void test11() {
         Model model = new Model();

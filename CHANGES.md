@@ -13,7 +13,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-
+\#692
 
 4.10.3 - 03 Jul 2020
 --------------------
