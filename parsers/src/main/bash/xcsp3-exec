@@ -132,7 +132,7 @@ do
 done
 
 FILE="$1"
-ARGS=" -tl '${TIME_LIMIT}s' -p $NB_NODES"
+ARGS=" -limit=[${TIME_LIMIT}s] -p $NB_NODES -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
 
 CMD="java -server -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 

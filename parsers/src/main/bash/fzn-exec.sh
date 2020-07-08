@@ -124,7 +124,7 @@ do
 done
 
 FILE="$1"
-ARGS=" -limit=($TIME_LIMIT) -p $NB_NODES"
+ARGS=" -limit=[$TIME_LIMIT] -p $NB_NODES"
 
 if test "${STOP_AT_FIRST}" = "no"
 then
@@ -133,7 +133,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -f 1"
+    ARGS=$ARGS" -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
 fi
 
 if test "${STAT}" = "yes"
