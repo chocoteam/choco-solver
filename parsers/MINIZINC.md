@@ -54,3 +54,8 @@ To avoid declaring the `-jar` option, you can export it once before calling the 
    `PARSER_JAR=/path/to/choco-parsers-4.0.5-with-dependencies.jar`
    
    `sh ./src/chocoxcsp/xcsp3_exec [<options>] [<file>]`
+
+
+### Dockerfile
+
+Some Choco-solver Docker images for the MiniZinc Challenge are available on [hub.docker.com/](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn/general).
