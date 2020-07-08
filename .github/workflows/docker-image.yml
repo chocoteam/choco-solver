@@ -22,4 +22,4 @@ jobs:
         repository: chocoteam/choco-solver-mzn
         #tag: $(date +%s)
         tag_with_sha: true
-        dockerfile: parsers/src/main/docker/Dockerfile_choco.dms
+        dockerfile: parsers/src/main/docker/Dockerfile_Choco.dms
