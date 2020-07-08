@@ -20,6 +20,6 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: chocoteam/choco-solver-mzn
-        #tag: $(date +%s)
-        tag_with_sha: true
         dockerfile: parsers/src/main/docker/Dockerfile_Choco.dms
+        tag_with_ref: true
+        push: ${{ startsWith(github.ref, 'refs/tags/') }}
