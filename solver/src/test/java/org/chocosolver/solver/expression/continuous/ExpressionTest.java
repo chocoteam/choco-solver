@@ -133,9 +133,9 @@ public class ExpressionTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test101() {
         Model model = new Model();
-        RealVar w = model.realVar("w", -10, 10, 1e-8);
-        RealVar x = model.realVar("x", -10, 10, 1e-8);
-        eval(model, x.div(w).eq(1e-8), 0);
+        RealVar w = model.realVar("w", -2, 2, .1d);
+        RealVar x = model.realVar("x", -2, 2, .1d);
+        eval(model, x.div(w).eq(.1d), 32);
     }
 
 
