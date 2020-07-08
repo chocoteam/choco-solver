@@ -169,3 +169,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+#####=== ANTLR4 ===#####
+*.interp
+*.tokens
