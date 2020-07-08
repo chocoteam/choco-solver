@@ -24,6 +24,5 @@ jobs:
       run: |
         mvn -B test --file pom.xml -Dgroups="1s"
         mvn -B test --file pom.xml -Dgroups="10s"
-        mvn -B test --file pom.xml -Dgroups="ibex"
         mvn -B test --file pom.xml -Dgroups="checker"
     
