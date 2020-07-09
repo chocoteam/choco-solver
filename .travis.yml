@@ -28,10 +28,10 @@ env:
     # COVERITY_PROJECT_TOKEN=
     - secure: mGSoZXHuppx4dFkpUZkv/0q46/Rh5wleKrqchXpBSEKaWcYEl0FhGCAZz+yCgoqnbu/oqZ5mdwtOdqrBNIdzKfpXSjvReHJijGTMUNHpn1j06nYY+ar5OFDBZcmublf7S93aG0LzxLzqvDvmUKxBiOsFgKr3A/NPJwhB21dYDSE=
   jobs:
-      - TEST_SUITE="ibex"
-      - TEST_SUITE="1s"
-      - TEST_SUITE="10s"
-      - TEST_SUITE="checker"
+    - TEST_SUITE="ibex"
+    - TEST_SUITE="1s"
+    - TEST_SUITE="10s"
+    - TEST_SUITE="checker"
 
 branches:
   only:
@@ -62,4 +62,6 @@ jobs:
       #file: todo
       on:
         tags: true
-        branch: master
+          branch:
+            - master
+            - /(\d+\.)?(\d+\.)?(\*|\d+)$/
