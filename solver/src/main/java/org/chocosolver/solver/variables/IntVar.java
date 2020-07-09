@@ -12,10 +12,12 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.function.Consumer;
@@ -249,6 +251,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
 
     /**
      * Returns the range of this domain, that is, the difference between the upper bound and the lower bound.
+     *
      * @return the range of this domain
      */
     int getRange();
@@ -324,8 +327,8 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *     // operate on value v here
      * }
      * vit.dispose();</pre>
-     *
-     *
+     * <p>
+     * <p>
      * To top-down iterate over the values in a <code>IntVar</code>,
      * use the following loop:
      *
@@ -362,7 +365,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *     rit.next();
      * }
      * rit.dispose();</pre>
-     *
+     * <p>
      * To top-down iterate over the values in a <code>IntVar</code>,
      * use the following loop:
      *
@@ -412,16 +415,16 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
     /**
-     * @param evt   original event
+     * @param evt original event
      * @return transforms the original event wrt this IntVar
      */
-    default IEventType transformEvent(IEventType evt){
+    default IEventType transformEvent(IEventType evt) {
         return evt;
     }
 
 
     @Override
-    default IntVar intVar(){
+    default IntVar intVar() {
         return this;
     }
 
@@ -433,5 +436,85 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     @Override
     default boolean isExpressionLeaf() {
         return true;
+    }
+
+    /**
+     * Joins {@code set} with {@code this} signed literal.
+     *
+     * @param set         set of ints to join this signed literal with
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void joinWith(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        explanation.addLiteral(this, set, false);
+    }
+
+    /**
+     * Joins [{@code l}, {@code u}] with {@code this} signed literal.
+     *
+     * @param l           inclusive lower bound
+     * @param u           inclusive upper bound
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void joinWith(int l, int u, ExplanationForSignedClause explanation) {
+        joinWith(explanation.getFreeSet(l, u), explanation);
+    }
+
+    /**
+     * Joins {{@code v}} with {@code this} signed literal.
+     *
+     * @param v           int value
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void joinWith(int v, ExplanationForSignedClause explanation) {
+        joinWith(explanation.getFreeSet(v), explanation);
+    }
+
+    /**
+     * Crosses {@code set} with {@code this} signed literal.
+     *
+     * @param set         set of ints to cross this signed literal with
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void crossWith(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        explanation.addLiteral(this, set, true);
+    }
+
+    /**
+     * Crosses [{@code l}, {@code u}] with {@code this} signed literal.
+     *
+     * @param l           inclusive lower bound
+     * @param u           inclusive upper bound
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void crossWith(int l, int u, ExplanationForSignedClause explanation) {
+        crossWith(explanation.getFreeSet(l, u), explanation);
+    }
+
+    /**
+     * Crosses {{@code v}} with {@code this} signed literal.
+     *
+     * @param v           int value
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void crossWith(int v, ExplanationForSignedClause explanation) {
+        crossWith(explanation.getFreeSet(v), explanation);
     }
 }
