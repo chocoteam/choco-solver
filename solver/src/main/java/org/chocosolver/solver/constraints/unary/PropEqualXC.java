@@ -77,7 +77,7 @@ public class PropEqualXC extends Propagator<IntVar> {
                         Implications ig, int p) {
         IntIterableRangeSet set = explanation.getFreeSet();
         set.add(constant);
-        explanation.addLiteral(vars[0], set, true);
+        vars[0].crossWith(set, explanation);
     }
 
     @Override

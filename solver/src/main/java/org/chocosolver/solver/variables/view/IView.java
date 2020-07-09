@@ -63,9 +63,9 @@ public interface IView extends ICause, Variable {
         IntVar pivot = ig.getIntVarAt(p);
         IntVar other = (this == pivot ? getVariable() : (IntVar)this);
         IntIterableRangeSet dom = explanation.getComplementSet(other);
-        explanation.addLiteral(other, dom, false);
+        other.joinWith(dom, explanation);
         dom = explanation.getComplementSet(pivot);
         unionOf(dom, ig.getDomainAt(p));
-        explanation.addLiteral(pivot, dom, true);
+        pivot.crossWith(dom, explanation);
     }
 }

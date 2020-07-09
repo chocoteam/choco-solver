@@ -329,7 +329,7 @@ public class MoveLNS implements Move {
             IntVar pivot = ig.getIntVarAt(p);
             IntIterableRangeSet dom = explanation.getComplementSet(pivot);
             IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
-            explanation.addLiteral(pivot, dom, true);
+            pivot.crossWith(dom, explanation);
         }
     }
 }

@@ -894,7 +894,11 @@ public class ClauseStore extends Propagator<IntVar> {
                     set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                     i++;
                 } while (i < mvars.length && mvars[i - 1] == mvars[i]);
-                explanation.addLiteral(v, set, (v == pivot));
+                if(v == pivot){
+                    v.crossWith(set, explanation);
+                }else{
+                    v.joinWith(set, explanation);
+                }
             }
         }
 

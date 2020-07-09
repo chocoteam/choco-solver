@@ -186,23 +186,23 @@ public class Task {
         dom = clause.getComplementSet(S);
         if (S == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(S, dom, true);
+            S.crossWith(dom, clause);
         } else {
-            clause.addLiteral(S, dom, false);
+            S.joinWith(dom, clause);
         }
         dom = clause.getComplementSet(D);
         if (D == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(D, dom, true);
+            D.crossWith(dom, clause);
         } else {
-            clause.addLiteral(D, dom, false);
+            D.joinWith(dom, clause);
         }
         dom = clause.getComplementSet(E);
         if (E == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(E, dom, true);
+            E.crossWith(dom, clause);
         } else {
-            clause.addLiteral(E, dom, false);
+            E.joinWith(dom, clause);
         }
     }
 

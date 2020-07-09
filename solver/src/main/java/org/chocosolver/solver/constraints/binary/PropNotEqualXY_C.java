@@ -79,15 +79,16 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        boolean isPivot;
         int m;
         IntIterableRangeSet set0, set1;
-        if (isPivot = (ig.getIntVarAt(p) == vars[0])) {
+        if (ig.getIntVarAt(p) == vars[0]) {
             m = explanation.getSet(vars[1]).min();
             set0 = explanation.getRootSet(vars[0]);
             set1 = explanation.getRootSet(vars[1]);
             set0.remove(cste - m);
             set1.remove(m);
+            vars[0].crossWith(set0, explanation);
+            vars[1].joinWith(set1, explanation);
         } else {
             assert explanation.getSet(vars[0]).size() == 1;
             m = explanation.getSet(vars[0]).min();
@@ -95,9 +96,9 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
             set0 = explanation.getRootSet(vars[0]);
             set0.remove(m);
             set1.remove(cste - m);
+            vars[0].joinWith(set0, explanation);
+            vars[1].crossWith(set1, explanation);
         }
-        explanation.addLiteral(vars[0], set0, isPivot);
-        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override

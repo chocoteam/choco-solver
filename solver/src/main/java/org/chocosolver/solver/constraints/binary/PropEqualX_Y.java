@@ -167,6 +167,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             set2 = explanation.getSet(vars[1]);
             set0.retainAll(set2);
             explanation.returnSet(set2);
+            vars[0].crossWith(set0, explanation);
+            vars[1].joinWith(set1, explanation);
         }else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == vars[1];
             set0 = explanation.getComplementSet(vars[0]);
@@ -174,9 +176,9 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             set2 = explanation.getSet(vars[0]);
             set1.retainAll(set2);
             explanation.returnSet(set2);
+            vars[0].joinWith(set0, explanation);
+            vars[1].crossWith(set1, explanation);
         }
-        explanation.addLiteral(vars[0], set0, isPivot);
-        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override

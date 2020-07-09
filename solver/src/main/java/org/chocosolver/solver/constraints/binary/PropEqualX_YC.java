@@ -147,14 +147,15 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
         IntIterableRangeSet set0, set1, set2;
-        boolean isPivot;
-        if (isPivot = (ig.getIntVarAt(p) == vars[0])) { // case a. (see javadoc)
+        if (ig.getIntVarAt(p) == vars[0]) { // case a. (see javadoc)
             set1 = explanation.getComplementSet(vars[1]);
             set0 = explanation.getRootSet(vars[0]);
             set2 = explanation.getSet(vars[1]);
             set2.plus(cste);
             set0.retainAll(set2);
             explanation.returnSet(set2);
+            vars[0].crossWith(set0, explanation);
+            vars[1].joinWith(set1, explanation);
         } else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == vars[1];
             set0 = explanation.getComplementSet(vars[0]);
@@ -163,9 +164,9 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             set2.minus(cste);
             set1.retainAll(set2);
             explanation.returnSet(set2);
+            vars[0].joinWith(set0, explanation);
+            vars[1].crossWith(set1, explanation);
         }
-        explanation.addLiteral(vars[0], set0, isPivot);
-        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override

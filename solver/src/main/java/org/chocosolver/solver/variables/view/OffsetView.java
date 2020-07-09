@@ -301,6 +301,8 @@ public final class OffsetView extends IntView<IntVar> {
             set2.plus(cste);
             set0.retainAll(set2);
             explanation.returnSet(set2);
+            this.crossWith(set0, explanation);
+            getVariable().joinWith(set1, explanation);
         } else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == getVariable();
             set0 = explanation.getComplementSet(this);
@@ -309,8 +311,8 @@ public final class OffsetView extends IntView<IntVar> {
             set2.minus(cste);
             set1.retainAll(set2);
             explanation.returnSet(set2);
+            this.joinWith(set0, explanation);
+            getVariable().crossWith(set1, explanation);
         }
-        explanation.addLiteral(this, set0, isPivot);
-        explanation.addLiteral(getVariable(), set1, !isPivot);
     }
 }

@@ -146,13 +146,13 @@ public class PropAllDiffInst extends Propagator<IntVar> {
             if(vars[i].isInstantiatedTo(dbef.min()) && vars[i]!= pivot){
                 IntIterableRangeSet set = explanation.getRootSet(vars[i]);
                 set.remove(dbef.min());
-                explanation.addLiteral(vars[i], set, false);
+                vars[i].joinWith(set, explanation);
                 break;
             }
         }
         IntIterableRangeSet set = explanation.getRootSet(pivot);
         set.removeAll(dbef);
-        explanation.addLiteral(pivot, set, true);
+        pivot.crossWith(set, explanation);
         explanation.returnSet(dbef);
     }
 

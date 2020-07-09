@@ -144,9 +144,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
                 dy = explanation.getRootSet(vars[y]);
                 dy.removeBetween(b, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[x], dx, false);
-                explanation.addLiteral(vars[y], dy, false);
-                explanation.addLiteral(vars[z], dz, true);
+                vars[x].joinWith(dx, explanation);
+                vars[y].joinWith(dy, explanation);
+                vars[z].crossWith(dz, explanation);
             } else if (pivot == vars[x]) {
                 int a = ig.getDomainAt(front.getValue(vars[y])).max();
                 int b = ig.getDomainAt(front.getValue(vars[z])).min();
@@ -156,9 +156,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dy.removeBetween(IntIterableRangeSet.MIN, a);
                 dz = explanation.getRootSet(vars[z]);
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[x], dx, true);
-                explanation.addLiteral(vars[y], dy, false);
-                explanation.addLiteral(vars[z], dz, false);
+                vars[x].crossWith(dx, explanation);
+                vars[y].joinWith(dy, explanation);
+                vars[z].joinWith(dz, explanation);
             } else {
                 int a = ig.getDomainAt(front.getValue(vars[x])).max();
                 int b = ig.getDomainAt(front.getValue(vars[z])).min();
@@ -168,9 +168,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
                 dz = explanation.getRootSet(vars[z]);
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[x], dx, false);
-                explanation.addLiteral(vars[y], dy, true);
-                explanation.addLiteral(vars[z], dz, false);
+                vars[x].joinWith(dx, explanation);
+                vars[y].crossWith(dy, explanation);
+                vars[z].joinWith(dz, explanation);
             }
         } else if (IntEventType.isDecupp(m)) {
             if (pivot == vars[z]) {
@@ -182,9 +182,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
                 dy = explanation.getRootSet(vars[y]);
                 dy.removeBetween(IntIterableRangeSet.MIN, b);
-                explanation.addLiteral(vars[x], dx, false);
-                explanation.addLiteral(vars[y], dy, false);
-                explanation.addLiteral(vars[z], dz, true);
+                vars[x].joinWith(dx, explanation);
+                vars[y].joinWith(dy, explanation);
+                vars[z].crossWith(dz, explanation);
             } else if (pivot == vars[x]) {
                 int a = ig.getDomainAt(front.getValue(vars[y])).min();
                 int b = ig.getDomainAt(front.getValue(vars[z])).max();
@@ -194,9 +194,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dy.removeBetween(a, IntIterableRangeSet.MAX);
                 dz = explanation.getRootSet(vars[z]);
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
-                explanation.addLiteral(vars[x], dx, true);
-                explanation.addLiteral(vars[y], dy, false);
-                explanation.addLiteral(vars[z], dz, false);
+                vars[x].crossWith(dx, explanation);
+                vars[y].joinWith(dy, explanation);
+                vars[z].joinWith(dz, explanation);
             } else {
                 int a = ig.getDomainAt(front.getValue(vars[x])).min();
                 int b = ig.getDomainAt(front.getValue(vars[z])).max();
@@ -206,9 +206,9 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
                 dz = explanation.getRootSet(vars[z]);
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
-                explanation.addLiteral(vars[x], dx, false);
-                explanation.addLiteral(vars[y], dy, true);
-                explanation.addLiteral(vars[z], dz, false);
+                vars[x].joinWith(dx, explanation);
+                vars[y].crossWith(dy, explanation);
+                vars[z].joinWith(dz, explanation);
             }
         } else { // remove
             assert IntEventType.isRemove(m);

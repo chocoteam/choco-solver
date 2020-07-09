@@ -346,7 +346,7 @@ public class PropScalar extends PropSum {
         }else {
             domain.retainBetween(la2, ua2);
         }
-        explanation.addLiteral(vars[a], domain, true);
+        vars[a].crossWith(domain, explanation);
         i = 0;
         for (; i < pos; i++) {
             int min = IntIterableRangeSet.MIN;
@@ -368,7 +368,7 @@ public class PropScalar extends PropSum {
                 }else{
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].joinWith(domain, explanation);
             }
         }
         for (; i < l; i++) {
@@ -393,7 +393,7 @@ public class PropScalar extends PropSum {
                 }else {
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].joinWith(domain, explanation);
             }
         }
     }

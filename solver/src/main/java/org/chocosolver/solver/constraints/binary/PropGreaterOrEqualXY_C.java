@@ -116,6 +116,8 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
             set1 = explanation.getComplementSet(vars[1]);
             set0.retainBetween(cste - m, IntIterableRangeSet.MAX);
             set1.retainBetween(m + 1, IntIterableRangeSet.MAX);
+            vars[0].crossWith(set0, explanation);
+            vars[1].joinWith(set1, explanation);
         } else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == vars[1];
             m = explanation.getSet(vars[0]).max();
@@ -123,9 +125,9 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
             set1 = explanation.getRootSet(vars[1]);
             set0.retainBetween(m + 1, IntIterableRangeSet.MAX);
             set1.retainBetween(cste - m, IntIterableRangeSet.MAX);
+            vars[0].joinWith(set0, explanation);
+            vars[1].crossWith(set1, explanation);
         }
-        explanation.addLiteral(vars[0], set0, isPivot);
-        explanation.addLiteral(vars[1], set1, !isPivot);
     }
 
     @Override

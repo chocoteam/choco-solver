@@ -124,23 +124,23 @@ public class PropMax extends Propagator<IntVar> {
             if (IntEventType.isInclow(mask)) {
                 IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
                 setn.retainBetween(m, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[n], setn, true);
+                vars[n].crossWith(setn, explanation);
                 for (int i = 0; i < n; i++) {
                     if (ig.getDomainAt(front.getValue(vars[i])).min() == m) {
                         IntIterableRangeSet seti = explanation.getRootSet(vars[i]);
                         seti.removeBetween(m, IntIterableRangeSet.MAX);
-                        explanation.addLiteral(vars[i], seti, false);
+                        vars[i].joinWith(seti, explanation);
                     }
                 }
             } else if (IntEventType.isDecupp(mask)) {
                 IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
                 setn.retainBetween(IntIterableRangeSet.MIN, m);
-                explanation.addLiteral(vars[n], setn, true);
+                vars[n].crossWith(setn, explanation);
                 for (int i = 0; i < n; i++) {
                     if (ig.getDomainAt(front.getValue(vars[i])).max() == m) {
                         IntIterableRangeSet seti = explanation.getRootSet(vars[i]);
                         seti.removeBetween(IntIterableRangeSet.MIN, m);
-                        explanation.addLiteral(vars[i], seti, false);
+                        vars[i].joinWith(seti, explanation);
                     }
                 }
             }
@@ -149,17 +149,17 @@ public class PropMax extends Propagator<IntVar> {
             if (IntEventType.isInclow(mask)) {
                 IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
                 setn.retainBetween(IntIterableRangeSet.MIN, m - 1);
-                explanation.addLiteral(vars[n], setn, false);
+                vars[n].joinWith(setn, explanation);
                 IntIterableRangeSet seti = explanation.getRootSet(pivot);
                 seti.retainBetween(m, IntIterableRangeSet.MAX);
-                explanation.addLiteral(pivot, seti, true);
+                pivot.crossWith(seti, explanation);
             } else if (IntEventType.isDecupp(mask)) {
                 IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
                 setn.retainBetween(m + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[n], setn, false);
+                vars[n].joinWith(setn, explanation);
                 IntIterableRangeSet seti = explanation.getRootSet(pivot);
                 seti.retainBetween(IntIterableRangeSet.MIN, m);
-                explanation.addLiteral(pivot, seti, true);
+                pivot.crossWith(seti, explanation);
             }
         }
     }

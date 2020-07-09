@@ -22,9 +22,7 @@ import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * This propagator manages a signed clause: a disjunction of unary membership constraints.
@@ -384,7 +382,11 @@ public class PropSignedClause extends Propagator<IntVar> {
                 set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                 i++;
             } while (i < mvars.length && mvars[i - 1] == mvars[i]);
-            explanation.addLiteral(v, set, (v == pivot));
+            if(v == pivot){
+                v.crossWith(set, explanation);
+            } else {
+                v.joinWith(set, explanation);
+            }
         }
     }
 

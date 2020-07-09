@@ -82,7 +82,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
                         Implications ig, int p) {
         IntIterableRangeSet set = explanation.getRootSet(vars[0]);
         set.retainBetween(constant, IntIterableRangeSet.MAX);
-        explanation.addLiteral(vars[0], set, true);
+        vars[0].crossWith(set, explanation);
     }
 
     @Override

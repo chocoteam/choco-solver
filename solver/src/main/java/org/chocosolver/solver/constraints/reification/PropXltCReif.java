@@ -117,27 +117,27 @@ public class PropXltCReif extends Propagator<IntVar> {
         IntVar pivot = ig.getIntVarAt(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X < c holds
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), true);
+                vars[1].crossWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getComplementSet(vars[0]);
                 dom0.retainBetween(cste, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[0],dom0, false);
+                vars[0].joinWith(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), false);
+                vars[1].joinWith(explanation.getFreeSet(0), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste - 1);
-                explanation.addLiteral(vars[0], dom0, true);
+                vars[0].crossWith(dom0, explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), true);
+                vars[1].crossWith(explanation.getFreeSet(0), explanation);
                 IntIterableRangeSet dom0 = explanation.getComplementSet(vars[0]);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste - 1);
-                explanation.addLiteral(vars[0], dom0, false);
+                vars[0].joinWith(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), false);
+                vars[1].joinWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
                 dom0.retainBetween(cste, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[0], dom0, true);
+                vars[0].crossWith(dom0, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

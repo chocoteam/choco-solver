@@ -208,23 +208,23 @@ public final class EqView extends IntBoolView {
         int value = getValue();
         if (value == 1) { // b is true and X = c holds
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(1), true);
+                this.crossWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(var);
                 dom0.remove(cste);
-                explanation.addLiteral(var, dom0, false);
+                var.joinWith(dom0, explanation);
             } else if (pivot == var) { // x is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), false);
-                explanation.addLiteral(var, explanation.getFreeSet(cste), true);
+                this.joinWith(explanation.getFreeSet(0), explanation);
+                var.crossWith(explanation.getFreeSet(cste), explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), true);
-                explanation.addLiteral(var, explanation.getFreeSet(cste), false);
+                this.crossWith(explanation.getFreeSet(0), explanation);
+                var.joinWith(explanation.getFreeSet(cste), explanation);
             } else if (pivot == var) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(this, explanation.getFreeSet(1), false);
+                this.joinWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(var);
                 dom0.remove(cste);
-                explanation.addLiteral(var, dom0, true);
+                var.crossWith(dom0, explanation);
             }
         }
     }

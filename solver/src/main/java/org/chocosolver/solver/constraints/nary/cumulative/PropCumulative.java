@@ -235,14 +235,14 @@ public class PropCumulative extends Propagator<IntVar> {
                     && ig.getDomainAt(front.getValue(vars[i])).max() < val){
                 IntIterableRangeSet set = e.getRootSet(vars[i]);
                 set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min(),val-1);
-                e.addLiteral(vars[i], set, false);
+                vars[i].joinWith(set, e);
                 flag = true;
             }
         }
         if(flag){
             IntIterableRangeSet set = e.getRootSet(pivot);
             set.removeBetween(val - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            e.addLiteral(pivot, set, true);
+            pivot.crossWith(set, e);
         }
     }
     private void explainDec(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
@@ -253,14 +253,14 @@ public class PropCumulative extends Propagator<IntVar> {
                     && ig.getDomainAt(front.getValue(vars[i])).max() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())){
                 IntIterableRangeSet set = e.getRootSet(vars[i]);
                 set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);
-                e.addLiteral(vars[i], set, false);
+                vars[i].joinWith(set, e);
                 flag = true;
             }
         }
         if(flag){
             IntIterableRangeSet set = e.getRootSet(pivot);
             set.removeBetween(val,val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            e.addLiteral(pivot, set, true);
+            pivot.crossWith(set, e);
         }
     }
     @Override

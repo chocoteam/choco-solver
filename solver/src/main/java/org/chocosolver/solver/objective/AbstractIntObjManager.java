@@ -120,9 +120,7 @@ class MinIntObjManager extends AbstractIntObjManager {
         ValueSortedMap<IntVar> front,
         Implications ig,
         int p) {
-        explanation.addLiteral(objective,
-                               explanation.getFreeSet(IntIterableRangeSet.MIN, bestProvedUB.intValue() - 1),
-                               true);
+        objective.crossWith(explanation.getFreeSet(IntIterableRangeSet.MIN, bestProvedUB.intValue() - 1), explanation);
     }
 
 }
@@ -160,8 +158,6 @@ class MaxIntObjManager extends AbstractIntObjManager {
         ValueSortedMap<IntVar> front,
         Implications ig,
         int p) {
-        explanation.addLiteral(objective,
-                               explanation.getFreeSet(bestProvedLB.intValue() + 1, IntIterableRangeSet.MAX),
-                               true);
+        objective.crossWith(explanation.getFreeSet(bestProvedLB.intValue() + 1, IntIterableRangeSet.MAX), explanation);
     }
 }

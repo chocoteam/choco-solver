@@ -120,23 +120,23 @@ public class PropXinSReif extends Propagator<IntVar> {
         IntVar pivot = ig.getIntVarAt(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X > c holds
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), true);
+                vars[1].crossWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet set0 = explanation.getRootSet(vars[0]);
                 set0.removeAll(this.set);
-                explanation.addLiteral(vars[0], set0, false);
+                vars[0].joinWith(set0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), false);
-                explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(set), true);
+                vars[1].joinWith(explanation.getFreeSet(0), explanation);
+                vars[0].crossWith(explanation.getFreeSet().copyFrom(set), explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), true);
-                explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(set), false);
+                vars[1].crossWith(explanation.getFreeSet(0), explanation);
+                vars[0].joinWith(explanation.getFreeSet().copyFrom(set), explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), false);
+                vars[1].joinWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet set0 = explanation.getRootSet(vars[0]);
                 set0.removeAll(this.set);
-                explanation.addLiteral(vars[0], set0, true);
+                vars[0].crossWith(set0, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

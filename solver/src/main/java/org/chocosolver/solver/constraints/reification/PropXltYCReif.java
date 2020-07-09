@@ -148,69 +148,69 @@ public class PropXltYCReif extends Propagator<IntVar> {
         set1 = explanation.getRootSet(vars[1]);
         if (vars[2].isInstantiatedTo(1)) { // b is true and X < Y + c holds
             if (pivot == vars[2]) { // b is the pivot, case a. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(1), true);
+                vars[2].crossWith(explanation.getFreeSet(1), explanation);
                 // deal with alternatives
                 if(front.getValue(vars[0]) > front.getValue(vars[1])){
                     int n = ig.getDomainAt(front.getValue(vars[1])).min();
                     set0.retainBetween(n+cste, IntIterableRangeSet.MAX);
-                    explanation.addLiteral(vars[0], set0, false);
+                    vars[0].joinWith(set0, explanation);
                     set1.retainBetween(IntIterableRangeSet.MIN, n - 1);
-                    explanation.addLiteral(vars[1], set1, false);
+                    vars[1].joinWith(set1, explanation);
                 }else{
                     int m = ig.getDomainAt(front.getValue(vars[0])).max();
                     set0.retainBetween(m+1, IntIterableRangeSet.MAX);
-                    explanation.addLiteral(vars[0], set0, false);
+                    vars[0].joinWith(set0, explanation);
                     set1.retainBetween(IntIterableRangeSet.MIN, m - cste);
-                    explanation.addLiteral(vars[1], set1, false);
+                    vars[1].joinWith(set1, explanation);
                 }
             } else if (pivot == vars[0]) { // x is the pivot, case d. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(0), false);
+                vars[2].joinWith(explanation.getFreeSet(0), explanation);
                 int n = ig.getDomainAt(front.getValue(vars[1])).max();
                 set0.retainBetween(IntIterableRangeSet.MIN, n + cste - 1);
-                explanation.addLiteral(vars[0], set0, true);
+                vars[0].crossWith(set0, explanation);
                 set1.retainBetween(n + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[1], set1, false);
+                vars[1].joinWith(set1, explanation);
             } else if (pivot == vars[1]) { // y is the pivot, case c. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(0), false);
+                vars[2].joinWith(explanation.getFreeSet(0), explanation);
                 int m = ig.getDomainAt(front.getValue(vars[0])).min();
                 set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
-                explanation.addLiteral(vars[0], set0, false);
+                vars[0].joinWith(set0, explanation);
                 set1.retainBetween(m - cste + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[1], set1, true);
+                vars[1].crossWith(set1, explanation);
             }
         } else if (vars[2].isInstantiatedTo(0)) {
             if (pivot == vars[2]) { // b is the pivot, case b. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(0), true);
+                vars[2].crossWith(explanation.getFreeSet(0), explanation);
                 set0 = explanation.getRootSet(vars[0]);
                 set1 = explanation.getRootSet(vars[1]);
                 // deal with alternatives
                 if(front.getValue(vars[0]) > front.getValue(vars[1])){
                     int n = ig.getDomainAt(front.getValue(vars[1])).max();
                     set0.retainBetween(IntIterableRangeSet.MIN, n + cste - 1);
-                    explanation.addLiteral(vars[0], set0, false);
+                    vars[0].joinWith(set0, explanation);
                     set1.retainBetween(n + 1, IntIterableRangeSet.MAX);
-                    explanation.addLiteral(vars[1], set1, false);
+                    vars[1].joinWith(set1, explanation);
                 }else{
                     int m = ig.getDomainAt(front.getValue(vars[0])).min();
                     set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
-                    explanation.addLiteral(vars[0], set0, false);
+                    vars[0].joinWith(set0, explanation);
                     set1.retainBetween(m - cste + 1, IntIterableRangeSet.MAX);
-                    explanation.addLiteral(vars[1], set1, false);
+                    vars[1].joinWith(set1, explanation);
                 }
             } else if (pivot == vars[0]) { // x is the pivot, case f. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(1), false);
+                vars[2].joinWith(explanation.getFreeSet(1), explanation);
                 int n = ig.getDomainAt(front.getValue(vars[1])).min();
                 set0.retainBetween(n + cste, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[0], set0, true);
+                vars[0].crossWith(set0, explanation);
                 set1.retainBetween(IntIterableRangeSet.MIN, n - 1);
-                explanation.addLiteral(vars[1], set1, false);
+                vars[1].joinWith(set1, explanation);
             } else if (pivot == vars[1]) { // y is the pivot, case e. in javadoc
-                explanation.addLiteral(vars[2], explanation.getFreeSet(1), false);
+                vars[2].joinWith(explanation.getFreeSet(1), explanation);
                 int m = ig.getDomainAt(front.getValue(vars[0])).max();
                 set0.retainBetween(m + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(vars[0], set0, false);
+                vars[0].joinWith(set0, explanation);
                 set1.retainBetween(IntIterableRangeSet.MIN, m - cste);
-                explanation.addLiteral(vars[1], set1, true);
+                vars[1].crossWith(set1, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

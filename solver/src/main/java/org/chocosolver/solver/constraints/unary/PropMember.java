@@ -97,7 +97,7 @@ public class PropMember extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(range), true);
+        vars[0].crossWith(explanation.getFreeSet().copyFrom(range), explanation);
     }
 
     @Override

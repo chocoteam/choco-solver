@@ -204,27 +204,27 @@ public final class LeqView extends IntBoolView {
         int value = getValue();
         if (value == 1) { // b is true and X < c holds
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(1), true);
+                this.crossWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getComplementSet(var);
                 dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(var,dom0, false);
+                var.joinWith(dom0, explanation);
             } else /*if (pivot == var)*/ { // x is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), false);
+                this.joinWith(explanation.getFreeSet(0), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(var);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste);
-                explanation.addLiteral(var, dom0, true);
+                var.crossWith(dom0, explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), true);
+                this.crossWith(explanation.getFreeSet(0), explanation);
                 IntIterableRangeSet dom0 = explanation.getComplementSet(var);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste);
-                explanation.addLiteral(var, dom0, false);
+                var.joinWith(dom0, explanation);
             } else /*if (pivot == vars[0])*/ { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(this, explanation.getFreeSet(1), false);
+                this.joinWith(explanation.getFreeSet(1), explanation);
                 IntIterableRangeSet dom0 = explanation.getRootSet(var);
                 dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
-                explanation.addLiteral(var, dom0, true);
+                var.crossWith(dom0, explanation);
             }
         }
     }

@@ -84,7 +84,7 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
                         Implications ig, int p) {
         IntIterableRangeSet set = explanation.getRootSet(vars[0]);
         set.retainBetween(IntIterableRangeSet.MIN, constant);
-        explanation.addLiteral(vars[0], set, true);
+        vars[0].crossWith(set, explanation);
     }
 
     @Override

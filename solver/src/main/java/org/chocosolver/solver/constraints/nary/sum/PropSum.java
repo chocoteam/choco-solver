@@ -524,7 +524,7 @@ public class PropSum extends Propagator<IntVar> {
         }else {
             domain.retainBetween(la2, ua2);
         }
-        explanation.addLiteral(vars[a], domain, true);
+        vars[a].crossWith(domain, explanation);
 
         i = 0;
         for (; i < pos; i++) {
@@ -545,7 +545,7 @@ public class PropSum extends Propagator<IntVar> {
                 }else {
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].joinWith(domain, explanation);
             }
         }
         for (; i < l; i++) {
@@ -566,7 +566,7 @@ public class PropSum extends Propagator<IntVar> {
                 }else {
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].joinWith(domain, explanation);
             }
         }
     }
@@ -587,7 +587,7 @@ public class PropSum extends Propagator<IntVar> {
             }
             domain = explanation.getComplementSet(vars[i]);
             domain.retainBetween(min, max);
-            explanation.addLiteral(vars[i], domain, false);
+            vars[i].joinWith(domain, explanation);
         }
         for (; i < l; i++) {
             int min = IntIterableRangeSet.MIN;
@@ -600,7 +600,7 @@ public class PropSum extends Propagator<IntVar> {
             }
             domain = explanation.getComplementSet(vars[i]);
             domain.retainBetween(min, max);
-            explanation.addLiteral(vars[i], domain, false);
+            vars[i].joinWith(domain, explanation);
         }
         if(model.getSettings().explainGlobalFailureInSum() && !this.isReified()){
             explainGlobal(explanation, front, ig, F, E);

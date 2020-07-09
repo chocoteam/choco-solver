@@ -280,9 +280,12 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     @Override
     public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
-        boolean thisPivot = (this == pivot);
-        int value = thisPivot ? getValue() : 1 - getValue();
-        explanation.addLiteral(this, explanation.getFreeSet(value), thisPivot);
-        explanation.addLiteral(var, explanation.getFreeSet(value), !thisPivot);
+        if(this == pivot){
+            this.crossWith(getValue(), explanation);
+            var.joinWith(getValue(), explanation);
+        }else{
+            this.joinWith(1 - getValue(), explanation);
+            var.crossWith(1 - getValue(), explanation);
+        }
     }
 }

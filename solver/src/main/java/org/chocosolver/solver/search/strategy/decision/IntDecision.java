@@ -212,7 +212,7 @@ public class IntDecision extends Decision<IntVar> {
                         Implications ig, int p) {
         IntIterableRangeSet dom = explanation.getComplementSet(var);
         IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
-        explanation.addLiteral(var, dom, true);
+        var.crossWith(dom, explanation);
     }
 
     @Override

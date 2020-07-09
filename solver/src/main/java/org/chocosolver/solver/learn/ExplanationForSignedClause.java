@@ -133,7 +133,7 @@ public class ExplanationForSignedClause extends IExplanation {
                         dom.retainBetween(dec.getDecisionValue(), IntIterableRangeSet.MAX);
                     }
                 }
-                addLiteral(var, dom, false);
+                var.joinWith(dom, this);
             }
         }
     }
@@ -214,7 +214,7 @@ public class ExplanationForSignedClause extends IExplanation {
                     IntIterableRangeSet set = getFreeSet();
                     set.add(1 - b.getValue());
                     if (XParameters.FINE_PROOF) System.out.print("Reif: ");
-                    addLiteral(b, set, false);
+                    b.joinWith(1 - b.getValue(), this);
                 } else {
                     throw new UnsupportedOperationException("Oh nooo!");
                 }
