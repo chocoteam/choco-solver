@@ -62,6 +62,4 @@ jobs:
       #file: todo
       on:
         tags: true
-          branch: master
-          tag: /(\d+\.)?(\d+\.)?(\*|\d+)$/
         branch: master
