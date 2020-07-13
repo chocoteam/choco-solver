@@ -26,9 +26,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * An implementation of {@link IExplanation} dedicated to learn signed clauses
@@ -45,13 +44,14 @@ public class ExplanationForSignedClause extends IExplanation {
     /**
      * Conflicting nodes
      */
-    private ValueSortedMap<IntVar> front;
+    private final ValueSortedMap<IntVar> front;
     /**
      * Literals that explains the conflict
      */
-    private HashMap<IntVar, IntIterableRangeSet> literals;
+    private final HashSet<IntVar> literals;
     /**
      * The decision to refute (ie, point to jump to wrt the current decision path).
+     *
      * @implSpec 0 represents the ROOT node,
      * any value greater than the decision path is ignored,
      * otherwise it represents the decision to refute in the decision path.
@@ -62,11 +62,11 @@ public class ExplanationForSignedClause extends IExplanation {
      */
     private final Implications mIG;
 
-    private PoolManager<IntIterableRangeSet> manager;
+    private final PoolManager<IntIterableRangeSet> manager;
 
     public ExplanationForSignedClause(Implications ig) {
         front = new ValueSortedMap<>();
-        literals = new HashMap<>();
+        literals = new HashSet<>();
         manager = new PoolManager<>();
         mIG = ig;
     }
@@ -77,14 +77,14 @@ public class ExplanationForSignedClause extends IExplanation {
     @Override
     public void extractConstraint(Model mModel, ClauseStore ngstore) {
         ClauseBuilder ngb = mModel.getClauseBuilder();
-        literals.forEach(ngb::put);
+        literals.forEach(v -> ngb.put(v, v.getLit().export())); // TODO : improve
         ngb.buildNogood(mModel);
     }
 
     @Override
     public void recycle() {
         front.clear();
-        literals.forEach((v, r) -> returnSet(r));
+        literals.forEach(IntVar::flushLit);
         literals.clear();
         assertLevel = Integer.MAX_VALUE;
     }
@@ -142,6 +142,7 @@ public class ExplanationForSignedClause extends IExplanation {
      * From a given conflict, defined by <i>cex</i> and the current implication graph <i>mIG</i>,
      * this method will compute the signed clause inferred from the conflict.
      * A call to {@link #extractConstraint(Model, ClauseStore)} will return the computed result.
+     *
      * @param cex the conflict
      */
     public void learnSignedClause(ContradictionException cex) {
@@ -180,7 +181,9 @@ public class ExplanationForSignedClause extends IExplanation {
             }
             explain(mIG.getCauseAt(current), current);
             if (XParameters.PROOF) {
-                System.out.printf("Expl: %s\n-----", literals);
+                System.out.print("Expl: {");
+                literals.forEach(v -> System.out.printf("%s ∈ %s,", v, v.getLit()));
+                System.out.print("}\n-----");
             }
             // filter irrelevant nodes
             relax();
@@ -227,7 +230,7 @@ public class ExplanationForSignedClause extends IExplanation {
         while (!front.isEmpty() && (l = front.getLastValue()) != k) {
             // remove variable in 'front' but not in literals
             // achieved lazily by only evaluating the right-most one
-            if (!literals.containsKey(mIG.getIntVarAt(l))) {
+            if (!literals.contains(mIG.getIntVarAt(l))) {
                 front.pollLastValue();
             } else {
                 int p = mIG.getPredecessorOf(l);
@@ -249,6 +252,7 @@ public class ExplanationForSignedClause extends IExplanation {
      * <li>the rightmost node in conflict is a decision</li>
      * <li>or it is above the first decision</li>
      * </ul>
+     *
      * @return <i>true</i> if the conflict analysis can stop
      */
     private boolean stop() {
@@ -325,61 +329,40 @@ public class ExplanationForSignedClause extends IExplanation {
      * @param pivot <i>true</i> if <i>var</i> is the pivot variable
      */
     public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        assert literals.values().stream().noneMatch(d -> d.equals(dom)) : "try to add a dom already declare";
-        /*if(VariableUtils.isConstant(var) && !dom.contains(var.getValue())){
-            if(FINE_PROOF.getAsBoolean())System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-            returnSet(dom);
-            return;
-        }*/
-        if (var.isBool()) {
-            dom.retainBetween(0, 1);
-            if (!dom.contains(0) && !dom.contains(1)) {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-                if (pivot) {
-                    literals.remove(var);
-                    front.remove(var);
-                }
-                returnSet(dom);
-                return;
-            }
+        //assert literals.values().stream().noneMatch(d -> d.equals(dom)) : "try to add a dom already declare";
+        if (pivot) {
+            var.intersectLit(dom, this);
+        } else {
+            var.unionLit(dom, this);
         }
-        addLiteralInternal(var, dom, pivot);
     }
 
-    private void addLiteralInternal(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        IntIterableRangeSet rset = literals.get(var);
-        if (rset == null) {
-            if (dom.size() > 0) {
-                if (XParameters.FINE_PROOF) System.out.printf("%s: %s\n", var.getName(), dom);
-                literals.put(var, dom);
-            } else {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-                returnSet(dom);
-            }
-        } else {
-            if (pivot) {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s ∩ %s", var.getName(), rset, dom);
-                IntIterableSetUtils.intersectionOf(rset, dom);
-                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
-            } else {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s ∪ %s", var.getName(), rset, dom);
-                IntIterableSetUtils.unionOf(rset, dom);
-                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
-            }
-            if (rset.size() == 0) {
-                assert !var.isBool() || rset.contains(0) || !rset.contains(1);
-                if (XParameters.FINE_PROOF) System.out.print(" -- remove");
-                literals.remove(var);
-                front.remove(var);
-                returnSet(rset);
-            }
-            if (XParameters.FINE_PROOF) System.out.print("\n");
-            returnSet(dom);
-        }
+    /**
+     * Remove {@code var} from {@link #literals} and {@link #front}
+     *
+     * @param var a variable
+     */
+    public void removeLit(IntVar var) {
+        literals.remove(var);
+        front.remove(var);
+    }
+
+    /**
+     * Add {@code var} to {@link #literals}
+     *
+     * @param var a variable
+     */
+    public void addLit(IntVar var) {
+        literals.add(var);
+    }
+
+    /**
+     * Check if {@code var} is in {@link #literals}
+     *
+     * @param var a variable
+     */
+    public boolean contains(IntVar var) {
+        return literals.contains(var);
     }
 
     /**
@@ -485,7 +468,7 @@ public class ExplanationForSignedClause extends IExplanation {
         return front;
     }
 
-    public HashMap<IntVar, IntIterableRangeSet> getLiterals() {
+    public HashSet<IntVar> getLiterals() {
         return literals;
     }
 
@@ -493,8 +476,8 @@ public class ExplanationForSignedClause extends IExplanation {
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append('{');
-        for (IntVar v : literals.keySet()) {
-            st.append(v.getName()).append('\u2208').append(literals.get(v)).append(',');
+        for (IntVar v : literals) {
+            st.append(v.getName()).append('\u2208').append(v.getLit()).append(',');
         }
         st.append('}');
         return st.toString();
