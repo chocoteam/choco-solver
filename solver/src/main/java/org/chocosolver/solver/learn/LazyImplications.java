@@ -153,6 +153,7 @@ public class LazyImplications extends Implications {
             Entry root = entries[nbEntries] = new Entry();
             root.set(var, Cause.Null, IntEventType.VOID.getMask(), 0, nbEntries, nbEntries,1);
             root.getD().copyFrom(var);
+            root.d.lock();
             var.createLit(root.d);
             rootEntries.put(var, root);
             nbEntries++;
@@ -189,6 +190,7 @@ public class LazyImplications extends Implications {
     private void synchronize(int upto) {
         for (int p = upto; p < nbEntries; p++) {
             Entry e = entries[p];
+            e.getD().unlock();
             Entry root = rootEntries.get(e.v);
             if (root.p >= upto) {
                 root.setPrev(e.p);
@@ -262,7 +264,9 @@ public class LazyImplications extends Implications {
      */
     private void mergeEntry(IntEventType evt, int one, Entry nentry){
         nentry.m |= evt.getMask();
+        nentry.getD().unlock();
         mergeDomain(nentry.getD(), evt, one);
+        nentry.getD().lock();
     }
 
     /**
@@ -347,6 +351,7 @@ public class LazyImplications extends Implications {
         nentry.set(var, cause, evt.getMask(), one, nbEntries, prev.i, dl);
         // make a (weak) copy of prev domain and update it wrt to current event
         createDomain(nentry.getD(), prev.d, evt, one);
+        nentry.getD().lock();
         // connect everything
         root.setPrev(nbEntries);
 

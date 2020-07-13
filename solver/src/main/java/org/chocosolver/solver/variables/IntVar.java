@@ -465,6 +465,8 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *
      * @param set         set of ints to join this signed literal with
      * @param explanation the explanation
+     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
+     * Before this methods ends, {@code set} is recycled and <b>must not be used</b>.
      * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
      * It can be called many times on the same variable while explaning a cause
      * since it applies a union operation on signed literal.
@@ -546,8 +548,10 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * Perform the intersection of this internal signed literal and {@code set}:
      * <p>{@code lit} = {@code set} ∩ {@code lit}
      *
-     * @param set         set of ints to cross this signed literal with
+     * @param set         set of ints to cross this signed literal with.
      * @param explanation the explanation
+     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
+     * Before this methods ends, {@code set} is recycled and <b>must no be used</b>.
      * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
      * It can be called only once on the pivot variable while explaining a cause
      * since it applies an intersection operation on signed literal.

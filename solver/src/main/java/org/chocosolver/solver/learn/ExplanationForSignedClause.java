@@ -388,12 +388,15 @@ public class ExplanationForSignedClause extends IExplanation {
         IntIterableRangeSet set = manager.getE();
         if (set == null) {
             return new IntIterableRangeSet();
+        }else{
+            set.unlock();
         }
         return set;
     }
 
     public void returnSet(IntIterableRangeSet set) {
         set.clear();
+        set.lock();
         manager.returnE(set);
     }
 
