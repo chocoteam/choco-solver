@@ -72,4 +72,8 @@ public class XParameters {
      * Otherwise, each clause is turned into a constraint.
      */
     public static boolean INTERVAL_TREE = true;
+    /**
+     * Allow locking {@link org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet}
+     */
+    public static boolean ALLOW_LOCK = true;
 }
