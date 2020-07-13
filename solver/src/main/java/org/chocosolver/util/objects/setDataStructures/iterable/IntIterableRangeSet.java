@@ -11,6 +11,8 @@ package org.chocosolver.util.objects.setDataStructures.iterable;
 
 
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -51,7 +53,9 @@ public class IntIterableRangeSet implements IntIterableSet {
      */
     protected int CARDINALITY;
 
-    /** Create an ISet iterator */
+    /**
+     * Create an ISet iterator
+     */
     private ISetIterator iter;
 
     /**
@@ -95,6 +99,7 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     /**
      * Create an interval-based ordered set initialized to singleton {e}
+     *
      * @param e singleton value
      */
     public IntIterableRangeSet(int e) {
@@ -106,11 +111,22 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     /**
      * Create an interval-based ordered set initialized to an array of values
+     *
      * @param values some values
      */
     public IntIterableRangeSet(int[] values) {
         this();
         addAll(values);
+    }
+
+    /**
+     * Create an interval-based ordered set initialized to an array of values
+     *
+     * @param var an integer variable
+     */
+    public IntIterableRangeSet(IntVar var) {
+        this();
+        copyFrom(var);
     }
 
     //***********************************************************************************
@@ -251,6 +267,19 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
         }
         return CARDINALITY > c;
+    }
+
+    public boolean addAll(IntVar var) {
+        int c = this.CARDINALITY;
+        int s2 = this.SIZE >> 1;
+        if (s2 > 0) {
+            DisposableRangeIterator rit = var.getRangeIterator(true);
+            while(rit.hasNext()){
+                this.addBetween(rit.min(), rit.max());
+                rit.next();
+            }
+        }
+        return CARDINALITY < c;
     }
 
     public boolean addAll(IntIterableRangeSet set) {
@@ -657,6 +686,24 @@ public class IntIterableRangeSet implements IntIterableSet {
         return this;
     }
 
+    /**
+     * Copy the domain of {@code var} in {@code this}.
+     * First, it clears {@code this}, then it fills it with the value in {@code var}.
+     *
+     * @param var an integer variable
+     */
+    public void copyFrom(IntVar var) {
+        this.clear();
+        DisposableRangeIterator rit = var.getRangeIterator(true);
+        while (rit.hasNext()) {
+            int lb = rit.min();
+            int ub = rit.max();
+            this.pushRange(lb,ub);
+            rit.next();
+        }
+        rit.dispose();
+    }
+
     @Override
     public int size() {
         return CARDINALITY;
@@ -821,6 +868,7 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     /**
      * Push a range at the end of this set
+     *
      * @param lb lower bound of the range
      * @param ub upper bound of the range
      */
@@ -845,6 +893,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      * calling :
      * <pre>set.flip().flip()</pre>
      * goes back to the original set.
+     *
      * @return this turned into its complement, based on {@link #MIN} and {@link #MAX}
      */
     public IntIterableRangeSet flip() {
@@ -856,6 +905,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      * calling :
      * <pre>set.flip().flip()</pre>
      * goes back to the original set.
+     *
      * @return this turned into its complement, based on <i>lb</i>, <i>ub</i>
      */
     public IntIterableRangeSet flip(int lb, int ub) {
@@ -913,7 +963,98 @@ public class IntIterableRangeSet implements IntIterableSet {
     }
 
     /**
+     * @param lb an int
+     * @param ub an int
+     * @return <i>true</i> if the intesection between {@code this} and [{@code lb}, {@code ub}] is not empty,
+     * <i>false</i> otherwise.
+     */
+    @SuppressWarnings("Duplicates")
+    public boolean intersect(int lb, int ub) {
+        int s1 = this.SIZE >> 1;
+        int s2 = ub - lb + 1;
+        if (s1 > 0 && s2 > 0) {
+            int i = 0;
+            int lbi, ubi;
+            lbi = this.ELEMENTS[0];
+            ubi = this.ELEMENTS[1];
+            while (i < s1) {
+                if ((lbi <= lb && lb <= ubi) || (lb <= lbi && lbi <= ub)) {
+                    return true;
+                } else if (ubi <= ub && ++i < s1) {
+                    lbi = this.ELEMENTS[i << 1];
+                    ubi = this.ELEMENTS[(i << 1) + 1];
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param set a set
+     * @return <i>true</i> if intersection of {@code this} and {@code set} is not empty,
+     * <i>false</i> otherwise.
+     */
+    @SuppressWarnings("Duplicates")
+    public boolean intersect(IntIterableRangeSet set) {
+        int s1 = this.SIZE >> 1;
+        int s2 = set.SIZE >> 1;
+        if (s1 > 0 && s2 > 0) {
+            int i = 0, j = 0;
+            int lbi, ubi, lbj, ubj;
+            lbi = this.ELEMENTS[0];
+            ubi = this.ELEMENTS[1];
+            lbj = set.ELEMENTS[0];
+            ubj = set.ELEMENTS[1];
+            while (i < s1 && j < s2) {
+                if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
+                    return true;
+                }
+                if (ubi <= ubj && ++i < s1) {
+                    lbi = this.ELEMENTS[i << 1];
+                    ubi = this.ELEMENTS[(i << 1) + 1];
+                } else if (ubj <= ubi && ++j < s2) {
+                    lbj = set.ELEMENTS[j << 1];
+                    ubj = set.ELEMENTS[(j << 1) + 1];
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * @param var a variable
+     * @return <i>true</i> if intersection of {@code var} and {@code set} is not empty,
+     * <i>false</i> otherwise.
+     */
+    @SuppressWarnings("Duplicates")
+    public boolean intersect(IntVar var) {
+        int s1 = var.getDomainSize();
+        int s2 = this.SIZE >> 1;
+        if (s1 > 0 && s2 > 0) {
+            int j = 0;
+            int lbi, ubi, lbj, ubj;
+            lbi = var.getLB();
+            ubi = var.nextValueOut(lbi) - 1;
+            lbj = this.ELEMENTS[0];
+            ubj = this.ELEMENTS[1];
+            while (lbi < Integer.MAX_VALUE && j < s2) {
+                if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
+                    return true;
+                }
+                if (ubi <= ubj && (lbi = var.nextValue(ubi)) < Integer.MAX_VALUE) {
+                    ubi = var.nextValueOut(lbi) - 1;
+                } else if (ubj <= ubi && ++j < s2) {
+                    lbj = this.ELEMENTS[j << 1];
+                    ubj = this.ELEMENTS[(j << 1) + 1];
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Apply the operation <i>c</i> on each value in this set
+     *
      * @param c an operation
      */
     public void forEachValueIn(IntConsumer c) {
@@ -926,6 +1067,7 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     /**
      * Apply the operation <i>c</i> on each value in : ]{@link #min()}, {@link #max()}[ \ this set.
+     *
      * @param c an operation
      */
     public void forEachValueOut(IntConsumer c) {
