@@ -9,22 +9,18 @@
 # 1. Stage: Compilation of Choco in a Build Stage
 
 # Using the same image as for the MiniZinc Challenge
-FROM ubuntu:18.04 AS builder
+#FROM ubuntu:18.04 AS builder
+FROM openjdk:11-jdk AS builder
 
 LABEL maintainer="Charles.Prudhomme@imt-atlantique.fr"
 
 # Updating & installing necessary packages
 RUN apt-get update && \
-	apt-get install -y  \
-	openjdk-11-jdk \
-	maven \
-	git
+	apt-get install -y maven git
 
-# Retrieval of Choco-solver
-RUN git clone https://github.com/chocoteam/choco-solver.git /choco-solver
-
-# Building Choco-solver :
-RUN cd /choco-solver/ && \
+# Get and build of Choco-solver
+RUN	git clone https://github.com/chocoteam/choco-solver.git /choco-solver
+RUN	cd /choco-solver/ && \
     git fetch -q && git checkout -q master && \
     mvn -q clean install -DskipTests && \
     cd ..
@@ -38,7 +34,7 @@ FROM minizinc/mznc2020:latest
 # Install Java 11
 RUN apt-get update && \
 	apt-get install -y  \
-	openjdk-11-jdk
+	openjdk-11-jre
 
 
 # Copy Choco's executable from the previous stage across
