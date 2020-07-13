@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -23,7 +22,6 @@ import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
@@ -280,8 +278,8 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         if(this == pivot){
             this.intersectLit(getValue(), explanation);
             var.unionLit(getValue(), explanation);

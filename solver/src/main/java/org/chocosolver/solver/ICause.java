@@ -12,9 +12,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.ValueSortedMap;
 
 import java.util.function.Consumer;
 
@@ -42,15 +40,10 @@ public interface ICause  {
      *     Optionally, this method can update <i>front</i> by looking for a predecessor of any node
      *     that seems more relevant than the declared one.
      * </p>
-     * @param explanation explanation to compute
-     * @param front ordered map of (variable,node> in the conflict frontier of the implication graph.
-     * @param implicationGraph an implication graph
      * @param pivot the pivot node out of <i>front</i>
+     * @param explanation explanation to compute
      */
-    default void explain(ExplanationForSignedClause explanation,
-                         ValueSortedMap<IntVar> front,
-                         Implications implicationGraph,
-                         int pivot){
+    default void explain(int pivot, ExplanationForSignedClause explanation){
         throw new SolverException("Undefined explain(...) method for " + this.getClass().getSimpleName());
     }
 

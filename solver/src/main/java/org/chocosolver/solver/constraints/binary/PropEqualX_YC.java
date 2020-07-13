@@ -13,12 +13,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.procedure.IntProcedure;
 
@@ -143,18 +141,16 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         IntIterableRangeSet set0, set1;
-        if (ig.getIntVarAt(p) == vars[0]) { // case a. (see javadoc)
+        if (explanation.readVar(p) == vars[0]) { // case a. (see javadoc)
             set1 = explanation.complement(vars[1]);
             set0 = explanation.domain(vars[1]);
             set0.plus(cste);
             vars[0].intersectLit(set0, explanation);
             vars[1].unionLit(set1, explanation);
         } else { // case b. (see javadoc)
-            assert ig.getIntVarAt(p) == vars[1];
+            assert explanation.readVar(p) == vars[1];
             set0 = explanation.complement(vars[0]);
             set1 = explanation.domain(vars[0]);
             set1.minus(cste);

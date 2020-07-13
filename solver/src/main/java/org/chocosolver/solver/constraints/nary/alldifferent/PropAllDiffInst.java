@@ -15,11 +15,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
@@ -137,10 +135,10 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      *
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         IntIterableRangeSet dbef = explanation.domain(pivot);
-        dbef.removeAll(ig.getDomainAt(p));
+        dbef.removeAll(explanation.readDom(p));
         assert dbef.size() == 1;
         for(int i = 0; i < vars.length; i++){
             if(vars[i].isInstantiatedTo(dbef.min()) && vars[i]!= pivot){
@@ -153,7 +151,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         IntIterableRangeSet set = explanation.universe();
         set.removeAll(dbef);
         pivot.intersectLit(set, explanation);
-        explanation.returnSet(dbef);
     }
 
 }

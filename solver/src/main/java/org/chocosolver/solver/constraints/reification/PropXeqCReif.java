@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
@@ -114,8 +112,8 @@ public class PropXeqCReif extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X = c holds
             if (pivot == vars[1]) { // b is the pivot
                 vars[1].intersectLit(1, explanation);

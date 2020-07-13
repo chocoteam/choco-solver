@@ -13,9 +13,7 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.function.Consumer;
@@ -116,10 +114,7 @@ class MinIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-        ValueSortedMap<IntVar> front,
-        Implications ig,
-        int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         objective.intersectLit(IntIterableRangeSet.MIN, bestProvedUB.intValue() - 1, explanation);
     }
 
@@ -154,10 +149,7 @@ class MaxIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-        ValueSortedMap<IntVar> front,
-        Implications ig,
-        int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         objective.intersectLit(bestProvedLB.intValue() + 1, IntIterableRangeSet.MAX, explanation);
     }
 }

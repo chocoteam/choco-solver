@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -131,15 +129,15 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
 //        super.explain(explanation, front, ig, p);
-        int m = ig.getEventMaskAt(p);
-        IntVar pivot = ig.getIntVarAt(p);
+        int m = explanation.readMask(p);
+        IntVar pivot = explanation.readVar(p);
         IntIterableRangeSet dx, dy, dz;
         if (IntEventType.isInclow(m)) {
             if (pivot == vars[z]) {
-                int a = ig.getDomainAt(front.getValue(vars[x])).min();
-                int b = ig.getDomainAt(front.getValue(vars[y])).min();
+                int a = explanation.readDom(vars[x]).min();
+                int b = explanation.readDom(vars[y]).min();
                 dz = explanation.universe();
                 dz.retainBetween(a + b, IntIterableRangeSet.MAX);
                 dx = explanation.universe();
@@ -150,8 +148,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 vars[y].unionLit(dy, explanation);
                 vars[z].intersectLit(dz, explanation);
             } else if (pivot == vars[x]) {
-                int a = ig.getDomainAt(front.getValue(vars[y])).max();
-                int b = ig.getDomainAt(front.getValue(vars[z])).min();
+                int a = explanation.readDom(vars[y]).max();
+                int b = explanation.readDom(vars[z]).min();
                 dx = explanation.universe();
                 dx.retainBetween(b - a, IntIterableRangeSet.MAX);
                 dy = explanation.universe();
@@ -162,8 +160,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 vars[y].unionLit(dy, explanation);
                 vars[z].unionLit(dz, explanation);
             } else {
-                int a = ig.getDomainAt(front.getValue(vars[x])).max();
-                int b = ig.getDomainAt(front.getValue(vars[z])).min();
+                int a = explanation.readDom(vars[x]).max();
+                int b = explanation.readDom(vars[z]).min();
                 dy = explanation.universe();
                 dy.retainBetween(b - a, IntIterableRangeSet.MAX);
                 dx = explanation.universe();
@@ -176,8 +174,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             }
         } else if (IntEventType.isDecupp(m)) {
             if (pivot == vars[z]) {
-                int a = ig.getDomainAt(front.getValue(vars[x])).max();
-                int b = ig.getDomainAt(front.getValue(vars[y])).max();
+                int a = explanation.readDom(vars[x]).max();
+                int b = explanation.readDom(vars[y]).max();
                 dz = explanation.universe();
                 dz.retainBetween(IntIterableRangeSet.MIN, a + b);
                 dx = explanation.universe();
@@ -188,8 +186,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 vars[y].unionLit(dy, explanation);
                 vars[z].intersectLit(dz, explanation);
             } else if (pivot == vars[x]) {
-                int a = ig.getDomainAt(front.getValue(vars[y])).min();
-                int b = ig.getDomainAt(front.getValue(vars[z])).max();
+                int a = explanation.readDom(vars[y]).min();
+                int b = explanation.readDom(vars[z]).max();
                 dx = explanation.universe();
                 dx.retainBetween(IntIterableRangeSet.MIN, b - a);
                 dy = explanation.universe();
@@ -200,8 +198,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 vars[y].unionLit(dy, explanation);
                 vars[z].unionLit(dz, explanation);
             } else {
-                int a = ig.getDomainAt(front.getValue(vars[x])).min();
-                int b = ig.getDomainAt(front.getValue(vars[z])).max();
+                int a = explanation.readDom(vars[x]).min();
+                int b = explanation.readDom(vars[z]).max();
                 dy = explanation.universe();
                 dy.retainBetween(IntIterableRangeSet.MIN, b - a);
                 dx = explanation.universe();
@@ -214,7 +212,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             }
         } else { // remove
             assert IntEventType.isRemove(m);
-            Propagator.defaultExplain(this, explanation, front, ig, p);
+            Propagator.defaultExplain(this, p, explanation);
         }
     }
 }

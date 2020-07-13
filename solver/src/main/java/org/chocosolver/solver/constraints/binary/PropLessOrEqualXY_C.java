@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.MathUtils;
 
@@ -103,13 +101,11 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         IntIterableRangeSet set0, set1;
         int m;
-        if(ig.getIntVarAt(p) == vars[0]){ // case a. (see javadoc)
-            m = explanation.domain(vars[1]).min();
+        if(explanation.readVar(p) == vars[0]){ // case a. (see javadoc)
+            m = explanation.readDom(vars[1]).min();
             set0 = explanation.empty();
             set0.addBetween(IntIterableRangeSet.MIN, cste - m);
             set1 = explanation.complement(vars[1]);
@@ -117,8 +113,8 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
             vars[0].intersectLit(set0, explanation);
             vars[1].unionLit(set1, explanation);
         }else{ // case b. (see javadoc)
-            assert ig.getIntVarAt(p) == vars[1];
-            m = explanation.domain(vars[0]).min();
+            assert explanation.readVar(p) == vars[1];
+            m = explanation.readDom(vars[0]).min();
             set0 = explanation.complement(vars[0]);
             set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
             set1 = explanation.empty();

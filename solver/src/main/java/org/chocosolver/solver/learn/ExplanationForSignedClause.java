@@ -197,11 +197,11 @@ public class ExplanationForSignedClause extends IExplanation {
                         && Propagator.class.isAssignableFrom(cause.getClass())
                         && !PropSignedClause.class.isAssignableFrom(cause.getClass())
                         && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
-                ) {
+        ) {
             Propagator<IntVar> propagator = (Propagator<IntVar>) cause;
-            Propagator.defaultExplain(propagator, this, front, mIG, p);
+            Propagator.defaultExplain(propagator, p,this);
         } else {
-            cause.explain(this, front, mIG, p);
+            cause.explain(p, this);
         }
         // check reification
         checkReification(cause, p);
@@ -258,8 +258,8 @@ public class ExplanationForSignedClause extends IExplanation {
     private boolean stop() {
         int max;
         if (front.isEmpty()
-            || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
-            || mIG.getDecisionLevelAt(max) == 1) {
+                || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
+                || mIG.getDecisionLevelAt(max) == 1) {
             if (XParameters.PROOF) System.out.print("\nbacktrack to ROOT\n-----");
             assertLevel = mIG.getIntVarAt(0)
                     .getModel()
@@ -289,13 +289,13 @@ public class ExplanationForSignedClause extends IExplanation {
                 assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
             }
             /*/if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
-                if (XParameters.PROOF)
-                    System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
-                if (XParameters.ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
-                    throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
-                }
-                assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
-             //*/
+            if (XParameters.PROOF)
+                System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
+            if (XParameters.ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
+            }
+            assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
+            //*/
         }
         return assertLevel != Integer.MAX_VALUE;
     }
@@ -401,21 +401,13 @@ public class ExplanationForSignedClause extends IExplanation {
     }
 
     /**
-     * @param p position
-     * @return a set which contains a copy of the domain of the var at position <i>p</i>
-     */
-    public IntIterableRangeSet domain(int p) {
-        IntIterableRangeSet set = empty();
-        set.copyFrom(mIG.getDomainAt(p));
-        return set;
-    }
-
-    /**
      * @param var a variable
      * @return a set which contains a copy of the domain of <i>var</i> at its front position
      */
     public IntIterableRangeSet domain(IntVar var) {
-        return domain(front.getValue(var));
+        IntIterableRangeSet set = empty();
+        set.copyFrom(readDom(var));
+        return set;
     }
 
     /**
@@ -426,7 +418,7 @@ public class ExplanationForSignedClause extends IExplanation {
     public IntIterableRangeSet complement(IntVar var) {
         IntIterableRangeSet set = empty();
         set.copyFrom(mIG.getRootDomain(var));
-        set.removeAll(mIG.getDomainAt(front.getValue(var)));
+        set.removeAll(readDom(var));
         return set;
     }
 
@@ -435,7 +427,7 @@ public class ExplanationForSignedClause extends IExplanation {
      *
      * @return a full set
      */
-    public IntIterableRangeSet universe(){
+    public IntIterableRangeSet universe() {
         IntIterableRangeSet set = empty();
         set.addBetween(IntIterableRangeSet.MIN, IntIterableRangeSet.MAX);
         return set;
@@ -453,6 +445,67 @@ public class ExplanationForSignedClause extends IExplanation {
 
     public ValueSortedMap<IntVar> getFront() {
         return front;
+    }
+
+    public Implications getImplicationGraph(){
+        return mIG;
+    }
+
+    /**
+     * Return the variable stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the variable at position {@code p} in {@link #mIG}.
+     */
+    public IntVar readVar(int p) {
+        return mIG.getIntVarAt(p);
+    }
+
+    /**
+     * Return the event mask stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the event mask at position {@code p} in {@link #mIG}
+     */
+    public int readMask(int p) {
+        return mIG.getEventMaskAt(p);
+    }
+
+    /**
+     * Return the value stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the value at position {@code p} in {@link #mIG}
+     */
+    public int readValue(int p) {
+            return mIG.getEventMaskAt(p);
+        }
+
+
+    /**
+     * Return the domain stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the domain at position {@code p} in {@link #mIG}
+     * @implNote <b>read-only</b> method.
+     * Object returned by this method is not intended to be modified.
+     */
+    public IntIterableRangeSet readDom(int p) {
+        return mIG.getDomainAt(p);
+    }
+
+    /**
+     * Return the domain stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param var variable to read
+     * @return the domain at position {@code p} in {@link #mIG}
+     * @implNote <b>read-only</b> method.
+     * Object returned by this method is not intended to be modified.
+     * @implSpec position of {@code var} in {@link #mIG} is retrieved
+     * through {@link #front}
+     */
+    public IntIterableRangeSet readDom(IntVar var) {
+        return mIG.getDomainAt(front.getValue(var));
     }
 
     public HashSet<IntVar> getLiterals() {

@@ -12,11 +12,9 @@ package org.chocosolver.solver.constraints.nary.min_max;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
@@ -116,17 +114,17 @@ public class PropMax extends Propagator<IntVar> {
 
     @SuppressWarnings("Duplicates")
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
-        int mask = ig.getEventMaskAt(p);
-        int m = ig.getValueAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
+        int mask = explanation.readMask(p);
+        int m = explanation.readValue(p);
         if (pivot == vars[n]) {
             if (IntEventType.isInclow(mask)) {
                 IntIterableRangeSet setn = explanation.empty();
                 setn.addBetween(m, IntIterableRangeSet.MAX);
                 vars[n].intersectLit(setn, explanation);
                 for (int i = 0; i < n; i++) {
-                    if (ig.getDomainAt(front.getValue(vars[i])).min() == m) {
+                    if (explanation.readDom(vars[i]).min() == m) {
                         IntIterableRangeSet seti = explanation.universe();
                         seti.removeBetween(m, IntIterableRangeSet.MAX);
                         vars[i].unionLit(seti, explanation);
@@ -137,7 +135,7 @@ public class PropMax extends Propagator<IntVar> {
                 setn.addBetween(IntIterableRangeSet.MIN, m);
                 vars[n].intersectLit(setn, explanation);
                 for (int i = 0; i < n; i++) {
-                    if (ig.getDomainAt(front.getValue(vars[i])).max() == m) {
+                    if (explanation.readDom(vars[i]).max() == m) {
                         IntIterableRangeSet seti = explanation.universe();
                         seti.removeBetween(IntIterableRangeSet.MIN, m);
                         vars[i].unionLit(seti, explanation);

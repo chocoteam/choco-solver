@@ -14,7 +14,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -25,7 +24,6 @@ import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.RealInterval;
-import org.chocosolver.util.objects.ValueSortedMap;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -65,7 +63,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause clause, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause clause) {
         throw new UnsupportedOperationException();
     }
 

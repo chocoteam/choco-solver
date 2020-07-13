@@ -12,12 +12,10 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
@@ -59,13 +57,13 @@ public interface IView extends ICause, Variable {
      */
     void notify(IEventType event) throws ContradictionException;
 
-    default void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    default void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         IntVar other = (this == pivot ? getVariable() : (IntVar)this);
         IntIterableRangeSet dom = explanation.complement(other);
         other.unionLit(dom, explanation);
         dom = explanation.complement(pivot);
-        unionOf(dom, ig.getDomainAt(p));
+        unionOf(dom, explanation.readDom(p));
         pivot.intersectLit(dom, explanation);
     }
 }

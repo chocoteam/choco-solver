@@ -14,12 +14,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -227,80 +225,80 @@ public class PropCumulative extends Propagator<IntVar> {
         if(ind==-1){throw new UnsupportedOperationException("Unfindable variable ");}
         return ind;
     }
-    private void explainInc(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+    private void explainInc(ExplanationForSignedClause explanation, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
         boolean flag = false;
         for (int i : indS) {
-            if(ig.getDomainAt(front.getValue(pivot)).min() >= (val - ig.getDomainAt(front.getValue(pivotDuration(indD,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).max() < val){
-                IntIterableRangeSet set = e.universe();
-                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min(),val-1);
-                vars[i].unionLit(set, e);
+            if(explanation.readDom(pivot).min() >= (val - explanation.readDom(pivotDuration(indD,pivot)).min())
+                    && explanation.readDom(vars[i]).min() >= (val - explanation.readDom(vars[indD[i]]).min())
+                    && explanation.readDom(vars[i]).max() < val){
+                IntIterableRangeSet set = explanation.universe();
+                set.removeBetween(val - explanation.readDom(vars[indD[i]]).min(),val-1);
+                vars[i].unionLit(set, explanation);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = e.universe();
-            set.removeBetween(val - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, e);
+            IntIterableRangeSet set = explanation.universe();
+            set.removeBetween(val - explanation.readDom(pivotDuration(indS,pivot)).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
+            pivot.intersectLit(set, explanation);
         }
     }
-    private void explainDec(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+    private void explainDec(ExplanationForSignedClause explanation, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
         boolean flag = false;
         for (int i : indS) {
-            if(ig.getDomainAt(front.getValue(pivot)).min() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).max() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())){
-                IntIterableRangeSet set = e.universe();
-                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);
-                vars[i].unionLit(set, e);
+            if(explanation.readDom(pivot).min() < (val + explanation.readDom(pivotDuration(indS,pivot)).min())
+                    && explanation.readDom(vars[i]).min() >= (val - explanation.readDom(vars[indD[i]]).min() + explanation.readDom(pivotDuration(indS,pivot)).min())
+                    && explanation.readDom(vars[i]).max() < (val + explanation.readDom(pivotDuration(indS,pivot)).min())){
+                IntIterableRangeSet set = explanation.universe();
+                set.removeBetween(val - explanation.readDom(vars[indD[i]]).min() + explanation.readDom(pivotDuration(indS,pivot)).min(),val + explanation.readDom(pivotDuration(indS,pivot)).min()-1);
+                vars[i].unionLit(set, explanation);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = e.universe();
-            set.removeBetween(val,val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, e);
+            IntIterableRangeSet set = explanation.universe();
+            set.removeBetween(val,val + explanation.readDom(pivotDuration(indS,pivot)).min()-1);//pivot apparais 2 fois, on fais l'union des sets
+            pivot.intersectLit(set, explanation);
         }
     }
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         int[] indS = IntStream.range(0, n).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
         int[] indE = IntStream.range(n * 2, n * 3).toArray();
         int[] indH = IntStream.range(n * 3, n * 4).toArray();
-        IntVar pivot = ig.getIntVarAt(p);
+        IntVar pivot = explanation.readVar(p);
         int val;
-        switch (ig.getEventMaskAt(p)) {
+        switch (explanation.readMask(p)) {
             case 2://INCLOW
                 if(getInd(pivot)<n){
-                    if(ig.getDomainAt(p).cardinality()>0){
-                        val = ig.getDomainAt(p).min();
+                    if(explanation.readDom(p).cardinality()>0){
+                        val = explanation.readDom(p).min();
                     }else{
-                        val = ig.getDomainAt(front.getValue(pivot)).max()+1;
+                        val = explanation.readDom(pivot).max()+1;
                         throw new UnsupportedOperationException("Unknown val");
                     }
-                    explainInc(explanation, front, ig, pivot, indS, indD, indE, val);
+                    explainInc(explanation, pivot, indS, indD, indE, val);
                     System.out.println("inc : "+explanation.toString());
                 }else{
                     System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                    Propagator.defaultExplain(this, p, explanation);
                     System.out.println("inc default "+explanation.toString());
                 }
                 break;
             case 4://DECUPP
                 if(getInd(pivot)<3*n&&getInd(pivot)>=2*n) {
-                    if (ig.getDomainAt(p).cardinality() > 0) {
-                        val = ig.getDomainAt(p).max() + 1 - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
+                    if (explanation.readDom(p).cardinality() > 0) {
+                        val = explanation.readDom(p).max() + 1 - explanation.readDom(pivotDuration(indS,pivot)).min();
                     } else {
-                        val = ig.getDomainAt(front.getValue(pivot)).min() - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
+                        val = explanation.readDom(pivot).min() - explanation.readDom(pivotDuration(indS,pivot)).min();
                         throw new UnsupportedOperationException("Unknown val");
                     }
-                    explainDec(explanation, front, ig, pivot, indS, indD, indE, val);
+                    explainDec(explanation, pivot, indS, indD, indE, val);
                     System.out.println("dec : "+explanation.toString());
                 }else{
                     System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                    Propagator.defaultExplain(this, p, explanation);
                     System.out.println("dec default " + explanation.toString());
                 }
                 break;

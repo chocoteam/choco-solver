@@ -12,10 +12,8 @@ package org.chocosolver.solver.constraints.nary.nvalue;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.stream.IntStream;
@@ -183,12 +181,12 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         return ESat.UNDEFINED;
     }
 
-    private boolean explainForallDiffForall(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, IntStream Indexes) {
+    private boolean explainForallDiffForall(ExplanationForSignedClause e, IntVar pivot, IntStream Indexes) {
         final boolean[] flag = {false};
         int[] indices = Indexes.toArray();
         IntIterableRangeSet union = IntStream
                 .of(indices)
-                .mapToObj(i -> ig.getDomainAt(front.getValue(vars[i])))
+                .mapToObj(i -> e.readDom(vars[i]))
                 .collect(IntIterableRangeSet::new,
                         IntIterableRangeSet::addAll,
                         IntIterableRangeSet::addAll);
@@ -205,28 +203,28 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         if (false) {
-            Propagator.defaultExplain(this, explanation, front, ig, p);
+            Propagator.defaultExplain(this, p, explanation);
             return;
         }
         IntStream X = IntStream.rangeClosed(0, vars.length - 2);
         IntStream N = IntStream.rangeClosed(vars.length - 1, vars.length - 1);
-        IntVar pivot = ig.getIntVarAt(p);
-        switch (ig.getEventMaskAt(p)) {
+        IntVar pivot = explanation.readVar(p);
+        switch (explanation.readMask(p)) {
             case 2://INCLOW
-                Propagator.defaultExplain(this, explanation, front, ig, p);
+                Propagator.defaultExplain(this, p, explanation);
                 break;
             case 4://DECUPP
-                if (explainForallDiffForall(explanation, front, ig, pivot, X)) {
+                if (explainForallDiffForall(explanation, pivot, X)) {
                     IntIterableRangeSet set = explanation.domain(pivot);//ig.getDomainAt(p);
                     pivot.intersectLit(set, explanation);
                 } else {
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
+                    Propagator.defaultExplain(this, p, explanation);
                 }
                 break;
             case 8://INSTANTIATE
-                Propagator.defaultExplain(this, explanation, front, ig, p);
+                Propagator.defaultExplain(this, p, explanation);
                 break;
             case 1://REMOVE
             case 0://VOID

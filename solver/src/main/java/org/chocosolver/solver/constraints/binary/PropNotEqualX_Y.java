@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -87,14 +85,12 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         int m;
         IntIterableRangeSet set0, set1;
-        if (ig.getIntVarAt(p) == vars[0]) {
-            assert explanation.domain(vars[1]).size() == 1;
-            m = explanation.domain(vars[1]).min();
+        if (explanation.readVar(p) == vars[0]) {
+            assert explanation.readDom(vars[1]).size() == 1;
+            m = explanation.readDom(vars[1]).min();
             set0 = explanation.universe();
             set1 = explanation.universe();
             set0.remove(m);
@@ -102,8 +98,8 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
             vars[0].intersectLit(set0, explanation);
             vars[1].unionLit(set1, explanation);
         } else {
-            assert explanation.domain(vars[0]).size() == 1;
-            m = explanation.domain(vars[0]).min();
+            assert explanation.readDom(vars[0]).size() == 1;
+            m = explanation.readDom(vars[0]).min();
             set0 = explanation.universe();
             set1 = explanation.universe();
             set0.remove(m);
