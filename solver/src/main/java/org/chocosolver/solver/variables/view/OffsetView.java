@@ -295,24 +295,18 @@ public final class OffsetView extends IntView<IntVar> {
         IntIterableRangeSet set0, set1, set2;
         boolean isPivot;
         if (isPivot = (ig.getIntVarAt(p) == this)) { // case a. (see javadoc)
-            set1 = explanation.getComplementSet(getVariable());
-            set0 = explanation.getRootSet(this);
-            set2 = explanation.getSet(getVariable());
-            set2.plus(cste);
-            set0.retainAll(set2);
-            explanation.returnSet(set2);
-            this.crossWith(set0, explanation);
-            getVariable().joinWith(set1, explanation);
+            set1 = explanation.complement(getVariable());
+            set0 = explanation.domain(getVariable());
+            set0.plus(cste);
+            this.intersectLit(set0, explanation);
+            getVariable().unionLit(set1, explanation);
         } else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == getVariable();
-            set0 = explanation.getComplementSet(this);
-            set1 = explanation.getRootSet(getVariable());
-            set2 = explanation.getSet(this);
-            set2.minus(cste);
-            set1.retainAll(set2);
-            explanation.returnSet(set2);
-            this.joinWith(set0, explanation);
-            getVariable().crossWith(set1, explanation);
+            set0 = explanation.complement(this);
+            set1 = explanation.domain(this);
+            set1.minus(cste);
+            this.unionLit(set0, explanation);
+            getVariable().intersectLit(set1, explanation);
         }
     }
 }

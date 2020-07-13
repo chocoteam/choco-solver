@@ -139,20 +139,20 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     @Override
     public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
-        IntIterableRangeSet dbef = explanation.getSet(pivot);
+        IntIterableRangeSet dbef = explanation.domain(pivot);
         dbef.removeAll(ig.getDomainAt(p));
         assert dbef.size() == 1;
         for(int i = 0; i < vars.length; i++){
             if(vars[i].isInstantiatedTo(dbef.min()) && vars[i]!= pivot){
-                IntIterableRangeSet set = explanation.getRootSet(vars[i]);
+                IntIterableRangeSet set = explanation.universe();
                 set.remove(dbef.min());
-                vars[i].joinWith(set, explanation);
+                vars[i].unionLit(set, explanation);
                 break;
             }
         }
-        IntIterableRangeSet set = explanation.getRootSet(pivot);
+        IntIterableRangeSet set = explanation.universe();
         set.removeAll(dbef);
-        pivot.crossWith(set, explanation);
+        pivot.intersectLit(set, explanation);
         explanation.returnSet(dbef);
     }
 

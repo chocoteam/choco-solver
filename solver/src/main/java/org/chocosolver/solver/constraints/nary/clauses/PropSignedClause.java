@@ -377,15 +377,15 @@ public class PropSignedClause extends Propagator<IntVar> {
             if (front.getValueOrDefault(v, -1) == -1) { // see javadoc for motivation of these two lines
                 ig.findPredecessor(front, v, p);
             }
-            set = explanation.getFreeSet();
+            set = explanation.empty();
             do {
                 set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                 i++;
             } while (i < mvars.length && mvars[i - 1] == mvars[i]);
             if(v == pivot){
-                v.crossWith(set, explanation);
+                v.intersectLit(set, explanation);
             } else {
-                v.joinWith(set, explanation);
+                v.unionLit(set, explanation);
             }
         }
     }

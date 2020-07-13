@@ -138,28 +138,23 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet set0, set1, set2;
+        IntIterableRangeSet set0, set1;
         if (ig.getIntVarAt(p) == vars[0]) { // case a. (see javadoc)
-            set1 = explanation.getComplementSet(vars[1]);
-            set0 = explanation.getRootSet(vars[0]);
-            set2 = explanation.getSet(vars[1]);
-            set2.times(-1);
-            set2.plus(cste);
-            set0.retainAll(set2);
-            explanation.returnSet(set2);
-            vars[0].crossWith(set0, explanation);
-            vars[1].joinWith(set1, explanation);
+            set1 = explanation.complement(vars[1]);
+            set0 = explanation.domain(vars[1]);
+            set0.times(-1);
+            set0.plus(cste);
+            vars[0].intersectLit(set0, explanation);
+            vars[1].unionLit(set1, explanation);
         } else { // case b. (see javadoc)
             assert ig.getIntVarAt(p) == vars[1];
-            set0 = explanation.getComplementSet(vars[0]);
-            set1 = explanation.getRootSet(vars[1]);
-            set2 = explanation.getSet(vars[0]);
-            set2.times(-1);
-            set2.plus(cste);
-            set1.retainAll(set2);
-            explanation.returnSet(set2);
-            vars[0].joinWith(set0, explanation);
-            vars[1].crossWith(set1, explanation);
+            set0 = explanation.complement(vars[0]);
+            set1 = explanation.domain(vars[0]);
+            set1.times(-1);
+            set1.plus(cste);
+            explanation.returnSet(set1);
+            vars[0].unionLit(set0, explanation);
+            vars[1].intersectLit(set1, explanation);
         }
     }
 

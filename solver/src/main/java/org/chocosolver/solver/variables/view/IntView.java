@@ -20,11 +20,9 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
+import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -68,6 +66,11 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
      * Value iterator allowing for(int i:this) loops
      */
     private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+
+    /**
+     * Signed Literal
+     */
+    protected SignedLiteral literal;
 
     /**
      * Create a view based on {@code var}
@@ -445,5 +448,21 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     public void forEachIntVar(Consumer<IntVar> action) {
         action.accept(var);
         action.accept(this);
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Set(rootDomain);
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

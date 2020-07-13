@@ -233,16 +233,16 @@ public class PropCumulative extends Propagator<IntVar> {
             if(ig.getDomainAt(front.getValue(pivot)).min() >= (val - ig.getDomainAt(front.getValue(pivotDuration(indD,pivot))).min())
                     && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min())
                     && ig.getDomainAt(front.getValue(vars[i])).max() < val){
-                IntIterableRangeSet set = e.getRootSet(vars[i]);
+                IntIterableRangeSet set = e.universe();
                 set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min(),val-1);
-                vars[i].joinWith(set, e);
+                vars[i].unionLit(set, e);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = e.getRootSet(pivot);
+            IntIterableRangeSet set = e.universe();
             set.removeBetween(val - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.crossWith(set, e);
+            pivot.intersectLit(set, e);
         }
     }
     private void explainDec(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
@@ -251,16 +251,16 @@ public class PropCumulative extends Propagator<IntVar> {
             if(ig.getDomainAt(front.getValue(pivot)).min() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
                     && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
                     && ig.getDomainAt(front.getValue(vars[i])).max() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())){
-                IntIterableRangeSet set = e.getRootSet(vars[i]);
+                IntIterableRangeSet set = e.universe();
                 set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);
-                vars[i].joinWith(set, e);
+                vars[i].unionLit(set, e);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = e.getRootSet(pivot);
+            IntIterableRangeSet set = e.universe();
             set.removeBetween(val,val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.crossWith(set, e);
+            pivot.intersectLit(set, e);
         }
     }
     @Override

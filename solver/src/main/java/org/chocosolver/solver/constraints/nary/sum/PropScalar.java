@@ -340,13 +340,11 @@ public class PropScalar extends PropSum {
                 ua2 = divFloor(-la * ca + E, -ca);
             }
         }
-        domain = explanation.getRootSet(vars[a]);
-        if(la2 > ua2){
-            domain.clear();
-        }else {
+        domain = explanation.empty();
+        if(la2 <= ua2){
             domain.retainBetween(la2, ua2);
         }
-        vars[a].crossWith(domain, explanation);
+        vars[a].intersectLit(domain, explanation);
         i = 0;
         for (; i < pos; i++) {
             int min = IntIterableRangeSet.MIN;
@@ -361,14 +359,14 @@ public class PropScalar extends PropSum {
                 if (!o.equals(LE)) { // ie, GE or EQ
                     min = divCeil(-E + c[i] * dom_before.max() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la), c[i]);
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else{
                     domain.retainBetween(min, max);
                 }
-                vars[i].joinWith(domain, explanation);
+                vars[i].unionLit(domain, explanation);
             }
         }
         for (; i < l; i++) {
@@ -386,14 +384,14 @@ public class PropScalar extends PropSum {
                             -(-E + c[i] * dom_before.min() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la)) // done
                             , -c[i]);
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else {
                     domain.retainBetween(min, max);
                 }
-                vars[i].joinWith(domain, explanation);
+                vars[i].unionLit(domain, explanation);
             }
         }
     }
@@ -425,8 +423,7 @@ public class PropScalar extends PropSum {
                     max = divFloor(-(-E + c[i] * dom_before.min()), -c[i]);
                 }
             }
-            domain = explanation.getRootSet(vars[i]);
-            domain = domain.duplicate();
+            domain = explanation.root(vars[i]);
             domain.retainBetween(min, max);
             ngb.put(vars[i], domain);
             int k = 0;
@@ -448,10 +445,9 @@ public class PropScalar extends PropSum {
                             min = dom_before.min();
                         }
                     }
-                    domain = explanation.getRootSet(vars[k]);
-                    domain = domain.duplicate();
+                    domain = explanation.root(vars[k]);
                     domain.removeBetween(min, max);
-                    ngb.put(vars[k], domain.duplicate());
+                    ngb.put(vars[k], domain);
                 }
             }
             ngb.buildNogood(model);

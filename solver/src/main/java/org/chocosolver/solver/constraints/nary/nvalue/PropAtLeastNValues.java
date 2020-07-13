@@ -196,10 +196,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 .of(indices)
                 .mapToObj(i -> vars[i])
                 .forEach(v -> {
-                    IntIterableRangeSet dom = e.getRootSet(v);
+                    IntIterableRangeSet dom = e.universe();
                     dom.removeAll(union);
                     flag[0] |= !dom.isEmpty();
-                    v.joinWith(dom, e);
+                    v.unionLit(dom, e);
                 });
         return flag[0];
     }
@@ -219,8 +219,8 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 break;
             case 4://DECUPP
                 if (explainForallDiffForall(explanation, front, ig, pivot, X)) {
-                    IntIterableRangeSet set = explanation.getSet(pivot);//ig.getDomainAt(p);
-                    pivot.crossWith(set, explanation);
+                    IntIterableRangeSet set = explanation.domain(pivot);//ig.getDomainAt(p);
+                    pivot.intersectLit(set, explanation);
                 } else {
                     Propagator.defaultExplain(this, explanation, front, ig, p);
                 }

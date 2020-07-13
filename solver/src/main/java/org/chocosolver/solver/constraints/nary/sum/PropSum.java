@@ -9,10 +9,6 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
-import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.constraints.Operator.GE;
-import static org.chocosolver.solver.constraints.Operator.LE;
-
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -25,6 +21,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+
+import static org.chocosolver.solver.constraints.Operator.*;
 
 /**
  * A propagator for SUM(x_i) o b
@@ -518,13 +516,11 @@ public class PropSum extends Propagator<IntVar> {
                 ua2 = la + E;
             }
         }
-        domain = explanation.getRootSet(vars[a]);
-        if(la2 > ua2){
-            domain.clear();
-        }else {
-            domain.retainBetween(la2, ua2);
+        domain = explanation.empty();
+        if(la2 <= ua2){
+            domain.addBetween(la2, ua2);
         }
-        vars[a].crossWith(domain, explanation);
+        vars[a].intersectLit(domain, explanation);
 
         i = 0;
         for (; i < pos; i++) {
@@ -538,14 +534,14 @@ public class PropSum extends Propagator<IntVar> {
                 if (!o.equals(LE)) { // ie, GE or EQ
                     min = -E + dom_before.max() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la);
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else {
                     domain.retainBetween(min, max);
                 }
-                vars[i].joinWith(domain, explanation);
+                vars[i].unionLit(domain, explanation);
             }
         }
         for (; i < l; i++) {
@@ -559,14 +555,14 @@ public class PropSum extends Propagator<IntVar> {
                 if (!o.equals(LE)) { // ie, GE or EQ
                     max = -(-E - dom_before.min() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la));
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else {
                     domain.retainBetween(min, max);
                 }
-                vars[i].joinWith(domain, explanation);
+                vars[i].unionLit(domain, explanation);
             }
         }
     }
@@ -585,9 +581,9 @@ public class PropSum extends Propagator<IntVar> {
             }else /*E < 0*/{
                 min = dom_before.max() + 1;
             }
-            domain = explanation.getComplementSet(vars[i]);
+            domain = explanation.complement(vars[i]);
             domain.retainBetween(min, max);
-            vars[i].joinWith(domain, explanation);
+            vars[i].unionLit(domain, explanation);
         }
         for (; i < l; i++) {
             int min = IntIterableRangeSet.MIN;
@@ -598,9 +594,9 @@ public class PropSum extends Propagator<IntVar> {
             }else /*E < 0*/{ // ie, GE or EQ
                 max = dom_before.min() - 1;
             }
-            domain = explanation.getComplementSet(vars[i]);
+            domain = explanation.complement(vars[i]);
             domain.retainBetween(min, max);
-            vars[i].joinWith(domain, explanation);
+            vars[i].unionLit(domain, explanation);
         }
         if(model.getSettings().explainGlobalFailureInSum() && !this.isReified()){
             explainGlobal(explanation, front, ig, F, E);
@@ -633,8 +629,7 @@ public class PropSum extends Propagator<IntVar> {
                     max = -(-E - dom_before.min());
                 }
             }
-            domain = explanation.getRootSet(vars[i]);
-            domain = domain.duplicate();
+            domain = explanation.root(vars[i]);
             domain.retainBetween(min, max);
             ngb.put(vars[i], domain);
             int k = 0;
@@ -656,10 +651,9 @@ public class PropSum extends Propagator<IntVar> {
                             min = dom_before.min();
                         }
                     }
-                    domain = explanation.getRootSet(vars[k]);
-                    domain = domain.duplicate();
+                    domain = explanation.root(vars[k]);
                     domain.removeBetween(min, max);
-                    ngb.put(vars[k], domain.duplicate());
+                    ngb.put(vars[k], domain);
                 }
             }
             ngb.buildNogood(model);

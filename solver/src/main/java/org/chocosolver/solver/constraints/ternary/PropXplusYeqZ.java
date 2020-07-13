@@ -34,23 +34,25 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     /**
      * Position of X in {@link #vars}
      */
-    private int x = 0;
+    private final int x = 0;
     /**
      * Position of Y in {@link #vars}
      */
-    private int y = 1;
+    private final int y = 1;
     /**
      * Position of Z in {@link #vars}
      */
-    private int z = 2;
+    private final int z = 2;
     /**
      * Set to <tt>true</tt> if X, Y and Z are bounded
      */
-    private boolean allbounded;
+    private final boolean allbounded;
     /**
      * Temporary structure to ease filtering
      */
-    private IntIterableRangeSet r1, r2, r3;
+    private final IntIterableRangeSet r1;
+    private final IntIterableRangeSet r2;
+    private final IntIterableRangeSet r3;
 
     /**
      * Create propagator for ternary sum: X + Y =Z
@@ -91,8 +93,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int ub = vars[v1].getUB() + vars[v2].getUB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
         if (!allbounded) {
-            IntIterableSetUtils.copyIn(vars[v1], r1);
-            IntIterableSetUtils.copyIn(vars[v2], r2);
+            r1.copyFrom(vars[v1]);
+            r2.copyFrom(vars[v2]);
             IntIterableSetUtils.plus(r3, r1, r2);
             change |= vars[vr].removeAllValuesBut(r3, this);
         }
@@ -112,8 +114,8 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int ub = vars[v1].getUB() - vars[v2].getLB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
         if (!allbounded) {
-            IntIterableSetUtils.copyIn(vars[v1], r1);
-            IntIterableSetUtils.copyIn(vars[v2], r2);
+            r1.copyFrom(vars[v1]);
+            r2.copyFrom(vars[v2]);
             IntIterableSetUtils.minus(r3, r1, r2);
             change |= vars[vr].removeAllValuesBut(r3, this);
         }
@@ -138,77 +140,77 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             if (pivot == vars[z]) {
                 int a = ig.getDomainAt(front.getValue(vars[x])).min();
                 int b = ig.getDomainAt(front.getValue(vars[y])).min();
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.retainBetween(a + b, IntIterableRangeSet.MAX);
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].joinWith(dx, explanation);
-                vars[y].joinWith(dy, explanation);
-                vars[z].crossWith(dz, explanation);
+                vars[x].unionLit(dx, explanation);
+                vars[y].unionLit(dy, explanation);
+                vars[z].intersectLit(dz, explanation);
             } else if (pivot == vars[x]) {
                 int a = ig.getDomainAt(front.getValue(vars[y])).max();
                 int b = ig.getDomainAt(front.getValue(vars[z])).min();
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.retainBetween(b - a, IntIterableRangeSet.MAX);
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.removeBetween(IntIterableRangeSet.MIN, a);
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].crossWith(dx, explanation);
-                vars[y].joinWith(dy, explanation);
-                vars[z].joinWith(dz, explanation);
+                vars[x].intersectLit(dx, explanation);
+                vars[y].unionLit(dy, explanation);
+                vars[z].unionLit(dz, explanation);
             } else {
                 int a = ig.getDomainAt(front.getValue(vars[x])).max();
                 int b = ig.getDomainAt(front.getValue(vars[z])).min();
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.retainBetween(b - a, IntIterableRangeSet.MAX);
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].joinWith(dx, explanation);
-                vars[y].crossWith(dy, explanation);
-                vars[z].joinWith(dz, explanation);
+                vars[x].unionLit(dx, explanation);
+                vars[y].intersectLit(dy, explanation);
+                vars[z].unionLit(dz, explanation);
             }
         } else if (IntEventType.isDecupp(m)) {
             if (pivot == vars[z]) {
                 int a = ig.getDomainAt(front.getValue(vars[x])).max();
                 int b = ig.getDomainAt(front.getValue(vars[y])).max();
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.retainBetween(IntIterableRangeSet.MIN, a + b);
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].joinWith(dx, explanation);
-                vars[y].joinWith(dy, explanation);
-                vars[z].crossWith(dz, explanation);
+                vars[x].unionLit(dx, explanation);
+                vars[y].unionLit(dy, explanation);
+                vars[z].intersectLit(dz, explanation);
             } else if (pivot == vars[x]) {
                 int a = ig.getDomainAt(front.getValue(vars[y])).min();
                 int b = ig.getDomainAt(front.getValue(vars[z])).max();
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.retainBetween(IntIterableRangeSet.MIN, b - a);
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.removeBetween(a, IntIterableRangeSet.MAX);
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].crossWith(dx, explanation);
-                vars[y].joinWith(dy, explanation);
-                vars[z].joinWith(dz, explanation);
+                vars[x].intersectLit(dx, explanation);
+                vars[y].unionLit(dy, explanation);
+                vars[z].unionLit(dz, explanation);
             } else {
                 int a = ig.getDomainAt(front.getValue(vars[x])).min();
                 int b = ig.getDomainAt(front.getValue(vars[z])).max();
-                dy = explanation.getRootSet(vars[y]);
+                dy = explanation.universe();
                 dy.retainBetween(IntIterableRangeSet.MIN, b - a);
-                dx = explanation.getRootSet(vars[x]);
+                dx = explanation.universe();
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
-                dz = explanation.getRootSet(vars[z]);
+                dz = explanation.universe();
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].joinWith(dx, explanation);
-                vars[y].crossWith(dy, explanation);
-                vars[z].joinWith(dz, explanation);
+                vars[x].unionLit(dx, explanation);
+                vars[y].intersectLit(dy, explanation);
+                vars[z].unionLit(dz, explanation);
             }
         } else { // remove
             assert IntEventType.isRemove(m);

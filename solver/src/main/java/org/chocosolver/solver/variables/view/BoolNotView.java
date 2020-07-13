@@ -20,9 +20,11 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
@@ -281,11 +283,28 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
         if(this == pivot){
-            this.crossWith(getValue(), explanation);
-            var.joinWith(getValue(), explanation);
+            this.intersectLit(getValue(), explanation);
+            var.unionLit(getValue(), explanation);
         }else{
-            this.joinWith(1 - getValue(), explanation);
-            var.crossWith(1 - getValue(), explanation);
+            this.unionLit(1 - getValue(), explanation);
+            var.intersectLit(1 - getValue(), explanation);
         }
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if(this.literal != null){
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Boolean();
+    }
+
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

@@ -117,27 +117,27 @@ public class PropXltCReif extends Propagator<IntVar> {
         IntVar pivot = ig.getIntVarAt(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X < c holds
             if (pivot == vars[1]) { // b is the pivot
-                vars[1].crossWith(explanation.getFreeSet(1), explanation);
-                IntIterableRangeSet dom0 = explanation.getComplementSet(vars[0]);
+                vars[1].intersectLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.complement(vars[0]);
                 dom0.retainBetween(cste, IntIterableRangeSet.MAX);
-                vars[0].joinWith(dom0, explanation);
+                vars[0].unionLit(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
-                vars[1].joinWith(explanation.getFreeSet(0), explanation);
-                IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
-                dom0.retainBetween(IntIterableRangeSet.MIN, cste - 1);
-                vars[0].crossWith(dom0, explanation);
+                vars[1].unionLit(0, explanation);
+                IntIterableRangeSet dom0 = explanation.empty();
+                dom0.addBetween(IntIterableRangeSet.MIN, cste - 1);
+                vars[0].intersectLit(dom0, explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
-                vars[1].crossWith(explanation.getFreeSet(0), explanation);
-                IntIterableRangeSet dom0 = explanation.getComplementSet(vars[0]);
+                vars[1].intersectLit(0, explanation);
+                IntIterableRangeSet dom0 = explanation.complement(vars[0]);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste - 1);
-                vars[0].joinWith(dom0, explanation);
+                vars[0].unionLit(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                vars[1].joinWith(explanation.getFreeSet(1), explanation);
-                IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
-                dom0.retainBetween(cste, IntIterableRangeSet.MAX);
-                vars[0].crossWith(dom0, explanation);
+                vars[1].unionLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.empty();
+                dom0.addBetween(cste, IntIterableRangeSet.MAX);
+                vars[0].intersectLit(dom0, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

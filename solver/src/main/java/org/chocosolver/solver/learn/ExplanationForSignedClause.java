@@ -103,37 +103,38 @@ public class ExplanationForSignedClause extends IExplanation {
                 dec = (IntDecision) path.getDecision(i);
                 IntIterableRangeSet dom = null;
                 IntVar var = dec.getDecisionVariable();
-                literals.get(var);
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        dom = getRootSet(var);
+                        dom = universe();
                         dom.remove(dec.getDecisionValue());
                     } else {
-                        dom = getFreeSet(dec.getDecisionValue());
+                        dom = empty();
+                        dom.add(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        dom = getFreeSet(dec.getDecisionValue());
+                        dom = empty();
+                        dom.add(dec.getDecisionValue());
                     } else {
-                        dom = getRootSet(var);
+                        dom = universe();
                         dom.remove(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
-                    dom = getRootSet(var);
+                    dom = universe();
                     if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(dec.getDecisionValue() + 1, IntIterableRangeSet.MAX);
                     } else {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntReverseSplit())) { // >=
-                    dom = getRootSet(var);
+                    dom = universe();
                     if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue() - 1);
                     } else {
                         dom.retainBetween(dec.getDecisionValue(), IntIterableRangeSet.MAX);
                     }
                 }
-                var.joinWith(dom, this);
+                var.unionLit(dom, this);
             }
         }
     }
@@ -214,10 +215,10 @@ public class ExplanationForSignedClause extends IExplanation {
                 assert !propagator.isReifiedAndSilent();
                 mIG.findPredecessor(front, b, p == -1 ? mIG.size() : p);
                 if (b.isInstantiated()) {
-                    IntIterableRangeSet set = getFreeSet();
+                    IntIterableRangeSet set = empty();
                     set.add(1 - b.getValue());
                     if (XParameters.FINE_PROOF) System.out.print("Reif: ");
-                    b.joinWith(1 - b.getValue(), this);
+                    b.unionLit(1 - b.getValue(), this);
                 } else {
                     throw new UnsupportedOperationException("Oh nooo!");
                 }
@@ -237,8 +238,7 @@ public class ExplanationForSignedClause extends IExplanation {
                 // todo improve
                 // go left as long as the right-most variable in 'front' contradicts 'literals'
                 if (p < l /* to avoid going "before" root */
-                        && !IntIterableSetUtils.intersect(
-                        literals.get(mIG.getIntVarAt(l)), mIG.getDomainAt(p))) {
+                        && mIG.getIntVarAt(l).getLit().disjoint(mIG.getDomainAt(p))) {
                     front.replace(mIG.getIntVarAt(l), p);
                 }
             }
@@ -381,41 +381,14 @@ public class ExplanationForSignedClause extends IExplanation {
 
     /**
      * Return an empty set available (created and returned) or create a new one
+     *
      * @return a free set
      */
-    public IntIterableRangeSet getFreeSet() {
+    public IntIterableRangeSet empty() {
         IntIterableRangeSet set = manager.getE();
         if (set == null) {
             return new IntIterableRangeSet();
         }
-        return set;
-    }
-
-    /**
-     * Return an available set (created and returned) or create a new one
-     * then add 'val' to it.
-     * @return a free set
-     */
-    public IntIterableRangeSet getFreeSet(int val) {
-        IntIterableRangeSet set = manager.getE();
-        if (set == null) {
-            set = new IntIterableRangeSet();
-        }
-        set.add(val);
-        return set;
-    }
-
-    /**
-     * Return an available set (created and returned) or create a new one
-     * then add range ['a','b'] to it.
-     * @return a free set
-     */
-    public IntIterableRangeSet getFreeSet(int a, int b) {
-        IntIterableRangeSet set = manager.getE();
-        if (set == null) {
-            set = new IntIterableRangeSet();
-        }
-        set.addBetween(a, b);
         return set;
     }
 
@@ -428,8 +401,8 @@ public class ExplanationForSignedClause extends IExplanation {
      * @param p position
      * @return a set which contains a copy of the domain of the var at position <i>p</i>
      */
-    public IntIterableRangeSet getSet(int p) {
-        IntIterableRangeSet set = getFreeSet();
+    public IntIterableRangeSet domain(int p) {
+        IntIterableRangeSet set = empty();
         set.copyFrom(mIG.getDomainAt(p));
         return set;
     }
@@ -438,8 +411,8 @@ public class ExplanationForSignedClause extends IExplanation {
      * @param var a variable
      * @return a set which contains a copy of the domain of <i>var</i> at its front position
      */
-    public IntIterableRangeSet getSet(IntVar var) {
-        return getSet(front.getValue(var));
+    public IntIterableRangeSet domain(IntVar var) {
+        return domain(front.getValue(var));
     }
 
     /**
@@ -447,19 +420,30 @@ public class ExplanationForSignedClause extends IExplanation {
      * @return a set which contains a copy of the complement domain of <i>var</i> at its front position
      * wrt to its root domain
      */
-    public IntIterableRangeSet getComplementSet(IntVar var) {
-        IntIterableRangeSet set = getFreeSet();
+    public IntIterableRangeSet complement(IntVar var) {
+        IntIterableRangeSet set = empty();
         set.copyFrom(mIG.getRootDomain(var));
         set.removeAll(mIG.getDomainAt(front.getValue(var)));
         return set;
     }
 
     /**
-     * @param var a variable
-     * @return a set which contains a copy of the root domain of <i>var</i>
+     * Return (-&infin;,+&infin;) set (created and returned).
+     *
+     * @return a full set
      */
-    public IntIterableRangeSet getRootSet(IntVar var) {
-        IntIterableRangeSet set = getFreeSet();
+    public IntIterableRangeSet universe(){
+        IntIterableRangeSet set = empty();
+        set.addBetween(IntIterableRangeSet.MIN, IntIterableRangeSet.MAX);
+        return set;
+    }
+
+    /**
+     * @param var a variable
+     * @return a <b>copy</b> of the root domain of <i>var</i>
+     */
+    public IntIterableRangeSet root(IntVar var) {
+        IntIterableRangeSet set = empty();
         set.copyFrom(mIG.getRootDomain(var));
         return set;
     }

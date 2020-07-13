@@ -122,43 +122,43 @@ public class PropMin extends Propagator<IntVar> {
         int m = ig.getValueAt(p);
         if (pivot == vars[n]) {
             if (IntEventType.isInclow(mask)) {
-                IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
-                setn.retainBetween(m, IntIterableRangeSet.MAX);
-                vars[n].crossWith(setn, explanation);
+                IntIterableRangeSet setn = explanation.empty();
+                setn.addBetween(m, IntIterableRangeSet.MAX);
+                vars[n].intersectLit(setn, explanation);
                 for (int i = 0; i < n; i++) {
                     if (ig.getDomainAt(front.getValue(vars[i])).min() == m) {
-                        IntIterableRangeSet seti = explanation.getRootSet(vars[i]);
+                        IntIterableRangeSet seti = explanation.universe();
                         seti.removeBetween(m, IntIterableRangeSet.MAX);
-                        vars[i].joinWith(seti, explanation);
+                        vars[i].unionLit(seti, explanation);
                     }
                 }
             } else if (IntEventType.isDecupp(mask)) {
-                IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
-                setn.retainBetween(IntIterableRangeSet.MIN, m);
-                vars[n].crossWith(setn, explanation);
+                IntIterableRangeSet setn = explanation.empty();
+                setn.addBetween(IntIterableRangeSet.MIN, m);
+                vars[n].intersectLit(setn, explanation);
                 for (int i = 0; i < n; i++) {
                     if (ig.getDomainAt(front.getValue(vars[i])).max() == m) {
-                        IntIterableRangeSet seti = explanation.getRootSet(vars[i]);
+                        IntIterableRangeSet seti = explanation.universe();
                         seti.removeBetween(IntIterableRangeSet.MIN, m);
-                        vars[i].joinWith(seti, explanation);
+                        vars[i].unionLit(seti, explanation);
                     }
                 }
             }
         } else {
             if (IntEventType.isInclow(mask)) {
-                IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
-                setn.retainBetween(IntIterableRangeSet.MIN, m - 1);
-                vars[n].joinWith(setn, explanation);
-                IntIterableRangeSet seti = explanation.getRootSet(pivot);
-                seti.retainBetween(m, IntIterableRangeSet.MAX);
-                pivot.crossWith(seti, explanation);
+                IntIterableRangeSet setn = explanation.empty();
+                setn.addBetween(IntIterableRangeSet.MIN, m - 1);
+                vars[n].unionLit(setn, explanation);
+                IntIterableRangeSet seti = explanation.empty();
+                seti.addBetween(m, IntIterableRangeSet.MAX);
+                pivot.intersectLit(seti, explanation);
             } else if (IntEventType.isDecupp(mask)) {
-                IntIterableRangeSet setn = explanation.getRootSet(vars[n]);
-                setn.retainBetween(m + 1, IntIterableRangeSet.MAX);
-                vars[n].joinWith(setn, explanation);
-                IntIterableRangeSet seti = explanation.getRootSet(pivot);
-                seti.retainBetween(IntIterableRangeSet.MIN, m);
-                pivot.crossWith(seti, explanation);
+                IntIterableRangeSet setn = explanation.empty();
+                setn.addBetween(m + 1, IntIterableRangeSet.MAX);
+                vars[n].unionLit(setn, explanation);
+                IntIterableRangeSet seti = explanation.empty();
+                seti.addBetween(IntIterableRangeSet.MIN, m);
+                pivot.intersectLit(seti, explanation);
             }
         }
     }

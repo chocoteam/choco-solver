@@ -93,23 +93,23 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         int m;
         IntIterableRangeSet set0, set1;
         if (ig.getIntVarAt(p) == vars[0]) {
-            assert explanation.getSet(vars[1]).size() == 1;
-            m = explanation.getSet(vars[1]).min();
-            set0 = explanation.getRootSet(vars[0]);
-            set1 = explanation.getRootSet(vars[1]);
+            assert explanation.domain(vars[1]).size() == 1;
+            m = explanation.domain(vars[1]).min();
+            set0 = explanation.universe();
+            set1 = explanation.universe();
             set0.remove(m);
             set1.remove(m);
-            vars[0].crossWith(set0, explanation);
-            vars[1].joinWith(set1, explanation);
+            vars[0].intersectLit(set0, explanation);
+            vars[1].unionLit(set1, explanation);
         } else {
-            assert explanation.getSet(vars[0]).size() == 1;
-            m = explanation.getSet(vars[0]).min();
-            set0 = explanation.getRootSet(vars[0]);
-            set1 = explanation.getRootSet(vars[1]);
+            assert explanation.domain(vars[0]).size() == 1;
+            m = explanation.domain(vars[0]).min();
+            set0 = explanation.universe();
+            set1 = explanation.universe();
             set0.remove(m);
             set1.remove(m);
-            vars[0].joinWith(set0, explanation);
-            vars[1].crossWith(set1, explanation);
+            vars[0].unionLit(set0, explanation);
+            vars[1].intersectLit(set1, explanation);
         }
     }
 

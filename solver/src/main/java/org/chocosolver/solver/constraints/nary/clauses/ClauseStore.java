@@ -528,9 +528,12 @@ public class ClauseStore extends Propagator<IntVar> {
 
         private int id;
 
+        IntIterableRangeSet uua;
+
         SignedClause(IntVar[] vars, IntIterableRangeSet[] ranges) {
             super(new IntVar[]{vars[0], vars[0]}, computePriority(vars.length), false, false);
             this.vars = new IntVar[0];
+            this.uua = new IntIterableRangeSet();
             setActive0();
             this.id = SID++;
             // TODO: accurately select literals
@@ -624,14 +627,14 @@ public class ClauseStore extends Propagator<IntVar> {
          */
         private void detectHiddenUUA() throws ContradictionException {
             IntVar one = null;
-            IntIterableRangeSet set = new IntIterableRangeSet();
+            this.uua.clear();
             fl:
             for (int i = 0; i < pos.length; i++) {
                 switch (check(i)) {
                     case UNDEFINED:
                         if (one == null || one == mvars[i]) {
                             one = mvars[i];
-                            set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
+                            uua.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                         } else {
                             one = null;
                             break fl;
@@ -643,7 +646,7 @@ public class ClauseStore extends Propagator<IntVar> {
                 }
             }
             if (one != null) {
-                if (one.removeAllValuesBut(set, this)) {
+                if (one.removeAllValuesBut(uua, this)) {
                     setPassiveAndLock();
                 } else setPassive();
             }
@@ -889,15 +892,15 @@ public class ClauseStore extends Propagator<IntVar> {
                 if (front.getValueOrDefault(v, -1) == -1) { // see javadoc for motivation of these two lines
                     ig.findPredecessor(front, v, p);
                 }
-                set = explanation.getFreeSet();
+                set = explanation.empty();
                 do {
                     set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                     i++;
                 } while (i < mvars.length && mvars[i - 1] == mvars[i]);
                 if(v == pivot){
-                    v.crossWith(set, explanation);
+                    v.intersectLit(set, explanation);
                 }else{
-                    v.joinWith(set, explanation);
+                    v.unionLit(set, explanation);
                 }
             }
         }

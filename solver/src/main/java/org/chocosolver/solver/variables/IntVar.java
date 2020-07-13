@@ -13,8 +13,10 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -439,7 +441,27 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
     /**
-     * Joins {@code set} with {@code this} signed literal.
+     * Create the signed literal.
+     * @param rootDomain the domain at root node
+     */
+    void createLit(IntIterableRangeSet rootDomain);
+
+    /**
+     * @return the current signed literal
+     * @implSpec a call to {@link #createLit(IntIterableRangeSet)} is required
+     */
+    SignedLiteral getLit();
+
+    /**
+     * Flush the current signed literal
+     */
+    default void flushLit() {
+        this.getLit().clear();
+    }
+
+    /**
+     * Perform the union of this internal signed literal and {@code set}:
+     * <p>{@code lit} = {@code set} ∪ {@code lit}
      *
      * @param set         set of ints to join this signed literal with
      * @param explanation the explanation
@@ -447,12 +469,27 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called many times on the same variable while explaning a cause
      * since it applies a union operation on signed literal.
      */
-    default void joinWith(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        explanation.addLiteral(this, set, false);
+    default void unionLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        this.getLit().addAll(set);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s -- skip\n", getName(), set);
+            }
+        } else {
+            explanation.addLit(this);
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∪ %s", getName(), getLit(), set);
+            }
+        }
+        if (XParameters.FINE_PROOF) {
+            System.out.print("\n");
+        }
+        explanation.returnSet(set);
     }
 
     /**
-     * Joins [{@code l}, {@code u}] with {@code this} signed literal.
+     * Perform the union of this internal signed literal and the range [{@code l}, {@code u}]:
+     * <p>{@code lit} = [{@code l}, {@code u}] ∪ {@code lit}
      *
      * @param l           inclusive lower bound
      * @param u           inclusive upper bound
@@ -461,12 +498,26 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called many times on the same variable while explaning a cause
      * since it applies a union operation on signed literal.
      */
-    default void joinWith(int l, int u, ExplanationForSignedClause explanation) {
-        joinWith(explanation.getFreeSet(l, u), explanation);
+    default void unionLit(int l, int u, ExplanationForSignedClause explanation) {
+        this.getLit().addBetween(l, u);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: [%d, %d] -- skip\n", getName(), l, u);
+            }
+        } else {
+            explanation.addLit(this);
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
+            }
+        }
+        if (XParameters.FINE_PROOF) {
+            System.out.print("\n");
+        }
     }
 
     /**
-     * Joins {{@code v}} with {@code this} signed literal.
+     * Perform the union of this internal signed literal and {{@code v}}:
+     * <p>{@code lit} = {{@code v}} ∪ {@code lit}
      *
      * @param v           int value
      * @param explanation the explanation
@@ -474,12 +525,26 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called many times on the same variable while explaning a cause
      * since it applies a union operation on signed literal.
      */
-    default void joinWith(int v, ExplanationForSignedClause explanation) {
-        joinWith(explanation.getFreeSet(v), explanation);
+    default void unionLit(int v, ExplanationForSignedClause explanation) {
+        this.getLit().add(v);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: {%d} -- skip\n", getName(), v);
+            }
+        } else {
+            explanation.addLit(this);
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
+            }
+        }
+        if (XParameters.FINE_PROOF) {
+            System.out.print("\n");
+        }
     }
 
     /**
-     * Crosses {@code set} with {@code this} signed literal.
+     * Perform the intersection of this internal signed literal and {@code set}:
+     * <p>{@code lit} = {@code set} ∩ {@code lit}
      *
      * @param set         set of ints to cross this signed literal with
      * @param explanation the explanation
@@ -487,12 +552,31 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called only once on the pivot variable while explaining a cause
      * since it applies an intersection operation on signed literal.
      */
-    default void crossWith(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        explanation.addLiteral(this, set, true);
+    default void intersectLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ %s", getName(), getLit(), set);
+            }
+            this.getLit().retainAll(set);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+            explanation.returnSet(set);
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(set, explanation);
+        }
     }
 
     /**
-     * Crosses [{@code l}, {@code u}] with {@code this} signed literal.
+     * Perform the intersection of this internal signed literal and the range [{@code l}, {@code u}]:
+     * <p>{@code lit} = [{@code l}, {@code u}] ∩ {@code lit}
      *
      * @param l           inclusive lower bound
      * @param u           inclusive upper bound
@@ -501,12 +585,30 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called only once on the pivot variable while explaining a cause
      * since it applies an intersection operation on signed literal.
      */
-    default void crossWith(int l, int u, ExplanationForSignedClause explanation) {
-        crossWith(explanation.getFreeSet(l, u), explanation);
+    default void intersectLit(int l, int u, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ [%d,%d]", getName(), getLit(), l, u);
+            }
+            this.getLit().retainBetween(l, u);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(l, u, explanation);
+        }
     }
 
     /**
-     * Crosses {{@code v}} with {@code this} signed literal.
+     * Perform the intersection of this internal signed literal and {{@code v}}:
+     * <p>{@code lit} = {{@code v}} ∩ {@code lit}
      *
      * @param v           int value
      * @param explanation the explanation
@@ -514,7 +616,24 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * It can be called only once on the pivot variable while explaining a cause
      * since it applies an intersection operation on signed literal.
      */
-    default void crossWith(int v, ExplanationForSignedClause explanation) {
-        crossWith(explanation.getFreeSet(v), explanation);
+    default void intersectLit(int v, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ {%d}", getName(), getLit(), v);
+            }
+            this.getLit().retain(v);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(v, explanation);
+        }
     }
 }

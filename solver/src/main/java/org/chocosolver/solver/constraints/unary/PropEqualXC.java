@@ -75,9 +75,9 @@ public class PropEqualXC extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet set = explanation.getFreeSet();
+        IntIterableRangeSet set = explanation.empty();
         set.add(constant);
-        vars[0].crossWith(set, explanation);
+        vars[0].intersectLit(set, explanation);
     }
 
     @Override

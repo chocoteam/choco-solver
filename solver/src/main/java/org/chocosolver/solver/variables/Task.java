@@ -183,26 +183,26 @@ public class Task {
         Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
         IntIterableRangeSet dom;
-        dom = clause.getComplementSet(S);
+        dom = clause.complement(S);
         if (S == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            S.crossWith(dom, clause);
+            S.intersectLit(dom, clause);
         } else {
-            S.joinWith(dom, clause);
+            S.unionLit(dom, clause);
         }
-        dom = clause.getComplementSet(D);
+        dom = clause.complement(D);
         if (D == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            D.crossWith(dom, clause);
+            D.intersectLit(dom, clause);
         } else {
-            D.joinWith(dom, clause);
+            D.unionLit(dom, clause);
         }
-        dom = clause.getComplementSet(E);
+        dom = clause.complement(E);
         if (E == pivot) {
             unionOf(dom, ig.getDomainAt(p));
-            E.crossWith(dom, clause);
+            E.intersectLit(dom, clause);
         } else {
-            E.joinWith(dom, clause);
+            E.unionLit(dom, clause);
         }
     }
 

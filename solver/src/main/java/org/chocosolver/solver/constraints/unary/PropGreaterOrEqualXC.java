@@ -80,9 +80,9 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet set = explanation.getRootSet(vars[0]);
-        set.retainBetween(constant, IntIterableRangeSet.MAX);
-        vars[0].crossWith(set, explanation);
+        IntIterableRangeSet set = explanation.empty();
+        set.addBetween(constant, IntIterableRangeSet.MAX);
+        vars[0].intersectLit(set, explanation);
     }
 
     @Override

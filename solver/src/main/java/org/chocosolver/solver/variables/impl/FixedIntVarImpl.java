@@ -19,11 +19,13 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -61,10 +63,16 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
+     * Signed Literal
+     */
+    protected SignedLiteral literal;
+
+    /**
      * Creates a variable whom domain is natively reduced to the singleton {<code>constante</code>}.
-     * @param name name of the variable
+     *
+     * @param name      name of the variable
      * @param constante value its domain is reduced to
-     * @param model the declaring model
+     * @param model     the declaring model
      */
     public FixedIntVarImpl(String name, int constante, Model model) {
         super(name, model);
@@ -143,11 +151,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
-        if (lb > constante){
+        if (lb > constante) {
             assert cause != null;
             model.getSolver().getEventObserver().updateLowerBound(this, lb, constante, cause);
             this.contradiction(cause, "outside domain update bound");
-        }else if(ub < constante){
+        } else if (ub < constante) {
             model.getSolver().getEventObserver().updateUpperBound(this, ub, constante, cause);
             this.contradiction(cause, "outside domain update bound");
         }
@@ -200,9 +208,9 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public int nextValueOut(int v) {
-        if(v == constante -1){
+        if (v == constante - 1) {
             return constante + 1;
-        }else{
+        } else {
             return v + 1;
         }
     }
@@ -218,9 +226,9 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
 
     @Override
     public int previousValueOut(int v) {
-        if(v == constante + 1){
+        if (v == constante + 1) {
             return constante - 1;
-        }else{
+        } else {
             return v - 1;
         }
     }
@@ -251,7 +259,6 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     @Override//void (a constant receives no event)
     public void subscribeView(IView view) {
     }
-
 
 
     @SuppressWarnings("unchecked")
@@ -409,5 +416,21 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     public Iterator<Integer> iterator() {
         _javaIterator.reset();
         return _javaIterator;
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Set(rootDomain);
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

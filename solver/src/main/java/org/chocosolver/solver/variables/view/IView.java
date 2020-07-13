@@ -62,10 +62,10 @@ public interface IView extends ICause, Variable {
     default void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
         IntVar pivot = ig.getIntVarAt(p);
         IntVar other = (this == pivot ? getVariable() : (IntVar)this);
-        IntIterableRangeSet dom = explanation.getComplementSet(other);
-        other.joinWith(dom, explanation);
-        dom = explanation.getComplementSet(pivot);
+        IntIterableRangeSet dom = explanation.complement(other);
+        other.unionLit(dom, explanation);
+        dom = explanation.complement(pivot);
         unionOf(dom, ig.getDomainAt(p));
-        pivot.crossWith(dom, explanation);
+        pivot.intersectLit(dom, explanation);
     }
 }

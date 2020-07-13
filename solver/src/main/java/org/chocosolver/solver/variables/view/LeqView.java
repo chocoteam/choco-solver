@@ -204,27 +204,27 @@ public final class LeqView extends IntBoolView {
         int value = getValue();
         if (value == 1) { // b is true and X < c holds
             if (pivot == this) { // b is the pivot
-                this.crossWith(explanation.getFreeSet(1), explanation);
-                IntIterableRangeSet dom0 = explanation.getComplementSet(var);
+                this.intersectLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.complement(var);
                 dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
-                var.joinWith(dom0, explanation);
+                var.unionLit(dom0, explanation);
             } else /*if (pivot == var)*/ { // x is the pivot
-                this.joinWith(explanation.getFreeSet(0), explanation);
-                IntIterableRangeSet dom0 = explanation.getRootSet(var);
-                dom0.retainBetween(IntIterableRangeSet.MIN, cste);
-                var.crossWith(dom0, explanation);
+                this.unionLit(0, explanation);
+                IntIterableRangeSet dom0 = explanation.empty();
+                dom0.addBetween(IntIterableRangeSet.MIN, cste);
+                var.intersectLit(dom0, explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
-                this.crossWith(explanation.getFreeSet(0), explanation);
-                IntIterableRangeSet dom0 = explanation.getComplementSet(var);
+                this.intersectLit(0, explanation);
+                IntIterableRangeSet dom0 = explanation.complement(var);
                 dom0.retainBetween(IntIterableRangeSet.MIN, cste);
-                var.joinWith(dom0, explanation);
+                var.unionLit(dom0, explanation);
             } else /*if (pivot == vars[0])*/ { // x is the pivot, case e. in javadoc
-                this.joinWith(explanation.getFreeSet(1), explanation);
-                IntIterableRangeSet dom0 = explanation.getRootSet(var);
-                dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
-                var.crossWith(dom0, explanation);
+                this.unionLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.empty();
+                dom0.addBetween(cste + 1, IntIterableRangeSet.MAX);
+                var.intersectLit(dom0, explanation);
             }
         }
     }

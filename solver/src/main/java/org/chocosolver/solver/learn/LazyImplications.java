@@ -152,7 +152,8 @@ public class LazyImplications extends Implications {
             ensureCapacity();
             Entry root = entries[nbEntries] = new Entry();
             root.set(var, Cause.Null, IntEventType.VOID.getMask(), 0, nbEntries, nbEntries,1);
-            IntIterableSetUtils.copyIn(var, root.getD());
+            root.getD().copyFrom(var);
+            var.createLit(root.d);
             rootEntries.put(var, root);
             nbEntries++;
         }
@@ -507,9 +508,5 @@ public class LazyImplications extends Implications {
     public void copyComplementSet(IntVar var, IntIterableRangeSet set, IntIterableRangeSet dest) {
         dest.copyFrom(rootEntries.get(var).d);
         dest.removeAll(set);
-    }
-
-    public Entry getEntry(int p) {
-        return entries[p];
     }
 }

@@ -838,14 +838,14 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             var = (IntVar) prop.vars[i];
             if (var == pivot) {
                 if (!found) {
-                    dom = explanation.getComplementSet(var);
+                    dom = explanation.complement(var);
                     // when a variable appears more than once AND is pivot : should be treated only once
                     unionOf(dom, ig.getDomainAt(p));
                     found = true;
-                    var.crossWith(dom, explanation);
+                    var.intersectLit(dom, explanation);
                 }
             }else{
-                var.joinWith(explanation.getComplementSet(var), explanation);
+                var.unionLit(explanation.complement(var), explanation);
             }
         }
         assert found || p == -1 : pivot + " not declared in scope of " + prop;

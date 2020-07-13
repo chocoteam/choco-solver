@@ -82,9 +82,9 @@ public class PropLessOrEqualXC extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet set = explanation.getRootSet(vars[0]);
-        set.retainBetween(IntIterableRangeSet.MIN, constant);
-        vars[0].crossWith(set, explanation);
+        IntIterableRangeSet set = explanation.empty();
+        set.addBetween(IntIterableRangeSet.MIN, constant);
+        vars[0].intersectLit(set, explanation);
     }
 
     @Override

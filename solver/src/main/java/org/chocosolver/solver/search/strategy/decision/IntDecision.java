@@ -210,9 +210,9 @@ public class IntDecision extends Decision<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet dom = explanation.getComplementSet(var);
+        IntIterableRangeSet dom = explanation.complement(var);
         IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
-        var.crossWith(dom, explanation);
+        var.intersectLit(dom, explanation);
     }
 
     @Override

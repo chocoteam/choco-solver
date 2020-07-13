@@ -327,9 +327,9 @@ public class MoveLNS implements Move {
         @Override
         public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
             IntVar pivot = ig.getIntVarAt(p);
-            IntIterableRangeSet dom = explanation.getComplementSet(pivot);
+            IntIterableRangeSet dom = explanation.complement(pivot);
             IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
-            pivot.crossWith(dom, explanation);
+            pivot.intersectLit(dom, explanation);
         }
     }
 }

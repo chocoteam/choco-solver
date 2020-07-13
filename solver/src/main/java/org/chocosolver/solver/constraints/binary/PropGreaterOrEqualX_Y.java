@@ -110,22 +110,22 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
         IntIterableRangeSet set0, set1;
         int m;
         if(ig.getIntVarAt(p) == vars[0]){ // case a. (see javadoc)
-            m = explanation.getSet(vars[1]).min();
-            set0 = explanation.getRootSet(vars[0]);
-            set0.retainBetween(m, IntIterableRangeSet.MAX);
-            set1 = explanation.getComplementSet(vars[1]);
+            m = explanation.domain(vars[1]).min();
+            set0 = explanation.empty();
+            set0.addBetween(m, IntIterableRangeSet.MAX);
+            set1 = explanation.complement(vars[1]);
             set1.retainBetween(IntIterableRangeSet.MIN, m - 1);
-            vars[0].crossWith(set0, explanation);
-            vars[1].joinWith(set1, explanation);
+            vars[0].intersectLit(set0, explanation);
+            vars[1].unionLit(set1, explanation);
         }else{ // case b. (see javadoc)
             assert ig.getIntVarAt(p) == vars[1];
-            m = explanation.getSet(vars[0]).max();
-            set1 = explanation.getRootSet(vars[1]);
-            set1.retainBetween(IntIterableRangeSet.MIN, m);
-            set0 = explanation.getComplementSet(vars[0]);
+            m = explanation.domain(vars[0]).max();
+            set1 = explanation.empty();
+            set1.addBetween(IntIterableRangeSet.MIN, m);
+            set0 = explanation.complement(vars[0]);
             set0.retainBetween(m + 1, IntIterableRangeSet.MAX);
-            vars[0].joinWith(set0, explanation);
-            vars[1].crossWith(set1, explanation);
+            vars[0].unionLit(set0, explanation);
+            vars[1].intersectLit(set1, explanation);
         }
     }
 

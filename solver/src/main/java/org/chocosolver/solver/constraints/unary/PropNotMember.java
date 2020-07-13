@@ -69,7 +69,7 @@ public class PropNotMember extends Propagator<IntVar> {
     public ESat isEntailed() {
         if(IntIterableSetUtils.includedIn(vars[0], range)){
             return ESat.FALSE;
-        }else if(IntIterableSetUtils.intersect(vars[0], range)){
+        }else if(range.intersect(vars[0])){
             return ESat.UNDEFINED;
         }
         return ESat.TRUE;
@@ -97,9 +97,9 @@ public class PropNotMember extends Propagator<IntVar> {
     public void explain(ExplanationForSignedClause explanation,
                         ValueSortedMap<IntVar> front,
                         Implications ig, int p) {
-        IntIterableRangeSet set = explanation.getRootSet(vars[0]);
+        IntIterableRangeSet set = explanation.universe();
         set.removeAll(range);
-        vars[0].crossWith(set, explanation);
+        vars[0].intersectLit(set, explanation);
     }
 
     @Override
