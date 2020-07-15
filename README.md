@@ -103,10 +103,12 @@ or directly from the [latest release](https://github.com/chocoteam/choco-solver/
 
 In the following, we distinguish two usages of Choco:
 
-- as a standalone application: the jar file includes all required dependencies,
+- as a standalone library: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging: `choco-solver-4.10.3.jar` or `choco-solver-4.10.3-no-dep.jar`.
+The name of the jar file terms the packaging: 
+- `choco-solver-4.10.3-jar-with-dependencies.jar` or
+- `choco-solver-4.10.3.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
