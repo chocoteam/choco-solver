@@ -1,5 +1,3 @@
-include "alldifferent.mzn";
-include "increasing.mzn";
 %-----------------------------------------------------------------------------%
 % Requires that the multiset of values in 'x' are the same as the
 % multiset of values in 'y' but 'y' is in sorted order.

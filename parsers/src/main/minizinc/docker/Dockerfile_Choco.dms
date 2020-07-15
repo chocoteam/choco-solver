@@ -45,4 +45,4 @@ COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.4-SNAPSHOT-j
 RUN sed -i 's&DIR=.*&DIR=/entry_data&g' /entry_data/fzn-choco
 
 # Copy Choco's MiniZinc library from the previous stage across
-COPY --from=builder /choco-solver/parsers/src/main/mzn_lib/* /entry_data/mzn-lib/
+COPY --from=builder /choco-solver/parsers/src/main/minizinc/mzn_lib/* /entry_data/mzn-lib/
