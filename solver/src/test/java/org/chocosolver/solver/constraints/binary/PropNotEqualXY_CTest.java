@@ -61,9 +61,9 @@ public class PropNotEqualXY_CTest {
         Implications ig = Mockito.mock(LazyImplications.class);
 
         Mockito.when(ig.getIntVarAt(0)).thenReturn(p);
-        Mockito.when(expl.getSet(o)).thenReturn(oD);
-        Mockito.when(expl.getRootSet(o)).thenReturn(oR.duplicate());
-        Mockito.when(expl.getRootSet(p)).thenReturn(pR.duplicate());
+        Mockito.when(expl.domain(o)).thenReturn(oD);
+        Mockito.when(expl.root(o)).thenReturn(oR.duplicate());
+        Mockito.when(expl.root(p)).thenReturn(pR.duplicate());
 
 
         ArgumentCaptor<IntIterableRangeSet> dom = ArgumentCaptor.forClass(IntIterableRangeSet.class);
@@ -78,7 +78,7 @@ public class PropNotEqualXY_CTest {
                     return null;
                 }).when(expl).addLiteral(eq(p), dom.capture(), eq(true));
 
-        prop.explain(expl, front, ig, 0);
+        prop.explain(0, expl);
     }
 
 }

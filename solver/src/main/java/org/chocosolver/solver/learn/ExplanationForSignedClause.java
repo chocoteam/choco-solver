@@ -201,7 +201,7 @@ public class ExplanationForSignedClause extends IExplanation {
                         && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
         ) {
             Propagator<IntVar> propagator = (Propagator<IntVar>) cause;
-            Propagator.defaultExplain(propagator, p,this);
+            Propagator.defaultExplain(propagator, p, this);
         } else {
             cause.explain(p, this);
         }
@@ -301,38 +301,16 @@ public class ExplanationForSignedClause extends IExplanation {
     }
 
     /**
-     * Add a signed literal (<i>var</i> &isin; <i>dom</i>) to this explanation.
-     * This is achieved in three steps:
-     * <ol>
-     * <li>signed binary resolution (where 'v' is the pivot variable):
-     * <pre>
-     *         (v &isin; A &or; X), (v &isin; B &or; Y) : (v &isin; (A&cap;B) &or; X &or; Y)
-     *     </pre>
-     * <li>
-     * simplification:
-     * <pre>
-     *             (v &isin; &empty; &or; Z) : (Z)
-     *         </pre>
-     * </li>
-     * <li>
-     * join literals:
-     * <pre>
-     *             ((&forall;i v &isin; Ai) &or; Z) : (v &isin; (&cup;i Ai) &or; Z)
-     *         </pre>
-     * </li>
-     *
-     *
-     * </li>
-     * </ol>
-     *
-     * @param var   signed literal variable
-     * @param dom   signed literal domain
-     * @param pivot <i>true</i> if <i>var</i> is the pivot variable
+     * @see IntVar#unionLit(int, ExplanationForSignedClause)
+     * @see IntVar#unionLit(int, int, ExplanationForSignedClause)
+     * @see IntVar#unionLit(IntIterableRangeSet, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(int, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(int, int, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(IntIterableRangeSet, ExplanationForSignedClause)
      * @deprecated
      */
     @Deprecated
     public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        //assert literals.values().stream().noneMatch(d -> d.equals(dom)) : "try to add a dom already declare";
         if (pivot) {
             var.intersectLit(dom, this);
         } else {
@@ -391,7 +369,7 @@ public class ExplanationForSignedClause extends IExplanation {
         IntIterableRangeSet set = manager.getE();
         if (set == null) {
             return new IntIterableRangeSet();
-        }else{
+        } else {
             set.unlock();
         }
         return set;
@@ -449,7 +427,7 @@ public class ExplanationForSignedClause extends IExplanation {
         return front;
     }
 
-    public Implications getImplicationGraph(){
+    public Implications getImplicationGraph() {
         return mIG;
     }
 
@@ -480,8 +458,8 @@ public class ExplanationForSignedClause extends IExplanation {
      * @return the value at position {@code p} in {@link #mIG}
      */
     public int readValue(int p) {
-            return mIG.getEventMaskAt(p);
-        }
+        return mIG.getEventMaskAt(p);
+    }
 
 
     /**

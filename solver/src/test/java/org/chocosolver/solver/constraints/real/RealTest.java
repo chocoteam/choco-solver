@@ -390,7 +390,7 @@ public class RealTest {
         assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups = "1S")
+    @Test(groups = "1s")
     public void testJiiTee1a() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);

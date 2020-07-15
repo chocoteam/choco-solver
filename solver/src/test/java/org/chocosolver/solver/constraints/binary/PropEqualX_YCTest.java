@@ -67,9 +67,9 @@ public class PropEqualX_YCTest {
         Mockito.when(ig.getIntVarAt(0)).thenReturn(p);
         IntIterableRangeSet comp = oR.duplicate();
         comp.removeAll(oD);
-        Mockito.when(expl.getComplementSet(o)).thenReturn(comp);
-        Mockito.when(expl.getRootSet(p)).thenReturn(pR);
-        Mockito.when(expl.getSet(o)).thenReturn(oD.duplicate());
+        Mockito.when(expl.complement(o)).thenReturn(comp);
+        Mockito.when(expl.root(p)).thenReturn(pR);
+        Mockito.when(expl.domain(o)).thenReturn(oD.duplicate());
 
         ArgumentCaptor<IntIterableRangeSet> dom = ArgumentCaptor.forClass(IntIterableRangeSet.class);
         Mockito.doAnswer(
@@ -83,7 +83,7 @@ public class PropEqualX_YCTest {
                     return null;
                 }).when(expl).addLiteral(eq(p), dom.capture(), eq(true));
 
-        prop.explain(expl, front, ig, 0);
+        prop.explain(0, expl);
     }
 
 }
