@@ -137,7 +137,7 @@ Note that if you want to test snapshot release, you should update your `pom.xml`
 </repository>
 ```
 
-### As a stand-alone application ###
+### As a stand-alone library ###
 
 The jar file contains all required dependencies.
 The next step is simply to add the jar file to your classpath of your application.

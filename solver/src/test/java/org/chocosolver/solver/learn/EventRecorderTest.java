@@ -806,9 +806,9 @@ public class EventRecorderTest {
         return new Object[][]{
                 {0, 1_380_772, 0, true},
                 {1, 148, 0, true}, // 254s
-                {1, 148, 0, false}, // 254s
+                {1, 154, 0, false}, // 254s
                 {2, 148, 0, true},
-                {2, 148, 0, false},
+                {2, 154, 0, false},
         };
     }
 
@@ -824,17 +824,17 @@ public class EventRecorderTest {
         return params;
     }
 
-    @Test(groups = "1s,expl", timeOut = 120000, dataProvider = "fuzzy")
+    @Test(groups = {"1s","expl"}, timeOut = 120000, dataProvider = "fuzzy")
     public void testFuzzy1(long seed, boolean iviews) {
         rcpsp(1, 0, seed, iviews);
     }
 
-    @Test(groups = "1s, expl", timeOut = 120000, dataProvider = "fuzzy")
+    @Test(groups = {"1s", "expl"}, timeOut = 120000, dataProvider = "fuzzy")
     public void testFuzzy2(long seed, boolean iviews) {
         rcpsp(2, 0, seed, iviews);
     }
 
-    @Test(groups = "10s,expl", timeOut = 120000, dataProvider = "rcpspP")
+    @Test(groups = {"10s","expl"}, timeOut = 120000, dataProvider = "rcpspP")
     public void testRCPSP(int learn, int nbnodes, long seed, boolean eviews) {
         rcpsp(learn, nbnodes, seed, eviews);
     }
