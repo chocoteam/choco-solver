@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.variables.impl.siglit;
 
-import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
@@ -312,9 +311,7 @@ public interface SignedLiteral {
 
         @Override
         public IntIterableRangeSet export() {
-            if(XParameters.INTERSECT_ROOT){
-                lit.retainAll(root);
-            }
+            lit.retainAll(root);
             return lit.duplicate();
         }
 

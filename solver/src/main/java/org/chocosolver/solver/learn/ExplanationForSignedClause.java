@@ -324,10 +324,13 @@ public class ExplanationForSignedClause extends IExplanation {
      *
      * </li>
      * </ol>
+     *
      * @param var   signed literal variable
      * @param dom   signed literal domain
      * @param pivot <i>true</i> if <i>var</i> is the pivot variable
+     * @deprecated
      */
+    @Deprecated
     public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
         //assert literals.values().stream().noneMatch(d -> d.equals(dom)) : "try to add a dom already declare";
         if (pivot) {
