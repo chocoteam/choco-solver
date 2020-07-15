@@ -103,25 +103,21 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
      */
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set0, set1;
+        IntIterableRangeSet set;
         int m;
         if (explanation.readVar(p) == vars[0]) { // case a. (see javadoc)
             m = explanation.readDom(vars[1]).max();
-            set0 = explanation.empty();
-            set0.addBetween(cste - m, IntIterableRangeSet.MAX);
-            set1 = explanation.complement(vars[1]);
-            set1.retainBetween(m + 1, IntIterableRangeSet.MAX);
-            vars[0].intersectLit(set0, explanation);
-            vars[1].unionLit(set1, explanation);
+            set = explanation.complement(vars[1]);
+            set.retainBetween(m + 1, IntIterableRangeSet.MAX);
+            vars[0].intersectLit(cste - m, IntIterableRangeSet.MAX, explanation);
+            vars[1].unionLit(set, explanation);
         } else { // case b. (see javadoc)
             assert explanation.readVar(p) == vars[1];
             m = explanation.readDom(vars[0]).max();
-            set0 = explanation.complement(vars[0]);
-            set0.retainBetween(m + 1, IntIterableRangeSet.MAX);
-            set1 = explanation.empty();
-            set1.addBetween(cste - m, IntIterableRangeSet.MAX);
-            vars[0].unionLit(set0, explanation);
-            vars[1].intersectLit(set1, explanation);
+            set = explanation.complement(vars[0]);
+            set.retainBetween(m + 1, IntIterableRangeSet.MAX);
+            vars[0].unionLit(set, explanation);
+            vars[1].intersectLit(cste - m, IntIterableRangeSet.MAX, explanation);
         }
     }
 

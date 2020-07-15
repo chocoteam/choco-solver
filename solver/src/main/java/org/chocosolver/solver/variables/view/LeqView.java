@@ -208,9 +208,7 @@ public final class LeqView extends IntBoolView {
                 var.unionLit(dom0, explanation);
             } else /*if (pivot == var)*/ { // x is the pivot
                 this.unionLit(0, explanation);
-                IntIterableRangeSet dom0 = explanation.empty();
-                dom0.addBetween(IntIterableRangeSet.MIN, cste);
-                var.intersectLit(dom0, explanation);
+                var.intersectLit(IntIterableRangeSet.MIN, cste, explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
@@ -220,9 +218,7 @@ public final class LeqView extends IntBoolView {
                 var.unionLit(dom0, explanation);
             } else /*if (pivot == vars[0])*/ { // x is the pivot, case e. in javadoc
                 this.unionLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.empty();
-                dom0.addBetween(cste + 1, IntIterableRangeSet.MAX);
-                var.intersectLit(dom0, explanation);
+                var.intersectLit(cste + 1, IntIterableRangeSet.MAX, explanation);
             }
         }
     }

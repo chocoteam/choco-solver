@@ -121,9 +121,7 @@ public class PropXltCReif extends Propagator<IntVar> {
                 vars[0].unionLit(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
                 vars[1].unionLit(0, explanation);
-                IntIterableRangeSet dom0 = explanation.empty();
-                dom0.addBetween(IntIterableRangeSet.MIN, cste - 1);
-                vars[0].intersectLit(dom0, explanation);
+                vars[0].intersectLit(IntIterableRangeSet.MIN, cste - 1, explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
@@ -133,9 +131,7 @@ public class PropXltCReif extends Propagator<IntVar> {
                 vars[0].unionLit(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
                 vars[1].unionLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.empty();
-                dom0.addBetween(cste, IntIterableRangeSet.MAX);
-                vars[0].intersectLit(dom0, explanation);
+                vars[0].intersectLit(cste, IntIterableRangeSet.MAX, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

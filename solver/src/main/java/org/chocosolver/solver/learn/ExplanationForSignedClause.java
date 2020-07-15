@@ -183,7 +183,9 @@ public class ExplanationForSignedClause extends IExplanation {
             explain(mIG.getCauseAt(current), current);
             if (XParameters.PROOF) {
                 System.out.print("Expl: {");
-                literals.forEach(v -> System.out.printf("%s ∈ %s,", v, v.getLit()));
+                literals.stream()
+                        //.sorted(Comparator.comparingInt(Identity::getId))
+                        .forEach(v -> System.out.printf("%s ∈ %s,", v, v.getLit()));
                 System.out.print("}\n-----");
             }
             // filter irrelevant nodes
@@ -215,8 +217,6 @@ public class ExplanationForSignedClause extends IExplanation {
                 assert !propagator.isReifiedAndSilent();
                 mIG.findPredecessor(front, b, p == -1 ? mIG.size() : p);
                 if (b.isInstantiated()) {
-                    IntIterableRangeSet set = empty();
-                    set.add(1 - b.getValue());
                     if (XParameters.FINE_PROOF) System.out.print("Reif: ");
                     b.unionLit(1 - b.getValue(), this);
                 } else {
@@ -416,8 +416,7 @@ public class ExplanationForSignedClause extends IExplanation {
      * wrt to its root domain
      */
     public IntIterableRangeSet complement(IntVar var) {
-        IntIterableRangeSet set = empty();
-        set.copyFrom(mIG.getRootDomain(var));
+        IntIterableRangeSet set = root(var);
         set.removeAll(readDom(var));
         return set;
     }
@@ -516,9 +515,9 @@ public class ExplanationForSignedClause extends IExplanation {
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append('{');
-        for (IntVar v : literals) {
-            st.append(v.getName()).append('\u2208').append(v.getLit()).append(',');
-        }
+        literals.stream()
+                //.sorted(Comparator.comparingInt(Identity::getId))
+                .forEach(v -> st.append(v.getName()).append('\u2208').append(v.getLit()).append(','));
         st.append('}');
         return st.toString();
 

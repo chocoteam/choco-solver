@@ -1058,6 +1058,8 @@ public class IntIterableRangeSet implements IntIterableSet {
                 } else if (ubi <= ub && ++i < s1) {
                     lbi = this.ELEMENTS[i << 1];
                     ubi = this.ELEMENTS[(i << 1) + 1];
+                }else{
+                    break;
                 }
             }
         }

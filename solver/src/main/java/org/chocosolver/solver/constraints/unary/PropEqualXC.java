@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * Unary propagator ensuring:
@@ -71,9 +70,7 @@ public class PropEqualXC extends Propagator<IntVar> {
      */
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set = explanation.empty();
-        set.add(constant);
-        vars[0].intersectLit(set, explanation);
+        vars[0].intersectLit(constant, explanation);
     }
 
     @Override

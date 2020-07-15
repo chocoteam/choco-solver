@@ -337,7 +337,7 @@ public class PropScalar extends PropSum {
         }
         domain = explanation.empty();
         if(la2 <= ua2){
-            domain.retainBetween(la2, ua2);
+            domain.addBetween(la2, ua2);
         }
         vars[a].intersectLit(domain, explanation);
         i = 0;

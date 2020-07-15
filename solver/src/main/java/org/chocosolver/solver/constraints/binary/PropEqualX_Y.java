@@ -155,12 +155,12 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
         if(explanation.readVar(p) == vars[0]) { // case a. (see javadoc)
-            vars[0].intersectLit(explanation.readDom(vars[1]), explanation);
+            vars[0].intersectLit(explanation.domain(vars[1]), explanation);
             vars[1].unionLit(explanation.complement(vars[1]), explanation);
         }else { // case b. (see javadoc)
             assert explanation.readVar(p) == vars[1];
             vars[0].unionLit(explanation.complement(vars[0]), explanation);
-            vars[1].intersectLit(explanation.readDom(vars[0]), explanation);
+            vars[1].intersectLit(explanation.domain(vars[0]), explanation);
         }
     }
 

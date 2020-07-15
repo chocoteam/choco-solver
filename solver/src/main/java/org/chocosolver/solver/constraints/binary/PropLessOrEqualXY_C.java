@@ -102,25 +102,21 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
      */
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set0, set1;
+        IntIterableRangeSet set;
         int m;
         if(explanation.readVar(p) == vars[0]){ // case a. (see javadoc)
             m = explanation.readDom(vars[1]).min();
-            set0 = explanation.empty();
-            set0.addBetween(IntIterableRangeSet.MIN, cste - m);
-            set1 = explanation.complement(vars[1]);
-            set1.retainBetween(IntIterableRangeSet.MIN, m - 1);
-            vars[0].intersectLit(set0, explanation);
-            vars[1].unionLit(set1, explanation);
+            set = explanation.complement(vars[1]);
+            set.retainBetween(IntIterableRangeSet.MIN, m - 1);
+            vars[0].intersectLit(IntIterableRangeSet.MIN, cste - m, explanation);
+            vars[1].unionLit(set, explanation);
         }else{ // case b. (see javadoc)
             assert explanation.readVar(p) == vars[1];
             m = explanation.readDom(vars[0]).min();
-            set0 = explanation.complement(vars[0]);
-            set0.retainBetween(IntIterableRangeSet.MIN, m - 1);
-            set1 = explanation.empty();
-            set1.addBetween(IntIterableRangeSet.MIN, cste - m);
-            vars[0].unionLit(set0, explanation);
-            vars[1].intersectLit(set1, explanation);
+            set = explanation.complement(vars[0]);
+            set.retainBetween(IntIterableRangeSet.MIN, m - 1);
+            vars[0].unionLit(set, explanation);
+            vars[1].intersectLit(IntIterableRangeSet.MIN, cste - m, explanation);
         }
     }
 

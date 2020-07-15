@@ -76,9 +76,7 @@ public class PropGreaterOrEqualXC extends Propagator<IntVar> {
      */
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set = explanation.empty();
-        set.addBetween(constant, IntIterableRangeSet.MAX);
-        vars[0].intersectLit(set, explanation);
+        vars[0].intersectLit(constant, IntIterableRangeSet.MAX, explanation);
     }
 
     @Override

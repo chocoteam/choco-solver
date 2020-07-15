@@ -138,76 +138,64 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
             if (pivot == vars[z]) {
                 int a = explanation.readDom(vars[x]).min();
                 int b = explanation.readDom(vars[y]).min();
-                dz = explanation.universe();
-                dz.retainBetween(a + b, IntIterableRangeSet.MAX);
                 dx = explanation.universe();
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
                 dy = explanation.universe();
                 dy.removeBetween(b, IntIterableRangeSet.MAX);
                 vars[x].unionLit(dx, explanation);
                 vars[y].unionLit(dy, explanation);
-                vars[z].intersectLit(dz, explanation);
+                vars[z].intersectLit(a + b, IntIterableRangeSet.MAX, explanation);
             } else if (pivot == vars[x]) {
                 int a = explanation.readDom(vars[y]).max();
                 int b = explanation.readDom(vars[z]).min();
-                dx = explanation.universe();
-                dx.retainBetween(b - a, IntIterableRangeSet.MAX);
                 dy = explanation.universe();
                 dy.removeBetween(IntIterableRangeSet.MIN, a);
                 dz = explanation.universe();
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
-                vars[x].intersectLit(dx, explanation);
+                vars[x].intersectLit(b - a, IntIterableRangeSet.MAX, explanation);
                 vars[y].unionLit(dy, explanation);
                 vars[z].unionLit(dz, explanation);
             } else {
                 int a = explanation.readDom(vars[x]).max();
                 int b = explanation.readDom(vars[z]).min();
-                dy = explanation.universe();
-                dy.retainBetween(b - a, IntIterableRangeSet.MAX);
                 dx = explanation.universe();
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
                 dz = explanation.universe();
                 dz.removeBetween(b, IntIterableRangeSet.MAX);
                 vars[x].unionLit(dx, explanation);
-                vars[y].intersectLit(dy, explanation);
+                vars[y].intersectLit(b - a, IntIterableRangeSet.MAX, explanation);
                 vars[z].unionLit(dz, explanation);
             }
         } else if (IntEventType.isDecupp(m)) {
             if (pivot == vars[z]) {
                 int a = explanation.readDom(vars[x]).max();
                 int b = explanation.readDom(vars[y]).max();
-                dz = explanation.universe();
-                dz.retainBetween(IntIterableRangeSet.MIN, a + b);
                 dx = explanation.universe();
                 dx.removeBetween(IntIterableRangeSet.MIN, a);
                 dy = explanation.universe();
                 dy.removeBetween(IntIterableRangeSet.MIN, b);
                 vars[x].unionLit(dx, explanation);
                 vars[y].unionLit(dy, explanation);
-                vars[z].intersectLit(dz, explanation);
+                vars[z].intersectLit(IntIterableRangeSet.MIN, a + b, explanation);
             } else if (pivot == vars[x]) {
                 int a = explanation.readDom(vars[y]).min();
                 int b = explanation.readDom(vars[z]).max();
-                dx = explanation.universe();
-                dx.retainBetween(IntIterableRangeSet.MIN, b - a);
                 dy = explanation.universe();
                 dy.removeBetween(a, IntIterableRangeSet.MAX);
                 dz = explanation.universe();
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
-                vars[x].intersectLit(dx, explanation);
+                vars[x].intersectLit(IntIterableRangeSet.MIN, b - a, explanation);
                 vars[y].unionLit(dy, explanation);
                 vars[z].unionLit(dz, explanation);
             } else {
                 int a = explanation.readDom(vars[x]).min();
                 int b = explanation.readDom(vars[z]).max();
-                dy = explanation.universe();
-                dy.retainBetween(IntIterableRangeSet.MIN, b - a);
                 dx = explanation.universe();
                 dx.removeBetween(a, IntIterableRangeSet.MAX);
                 dz = explanation.universe();
                 dz.removeBetween(IntIterableRangeSet.MIN, b);
                 vars[x].unionLit(dx, explanation);
-                vars[y].intersectLit(dy, explanation);
+                vars[y].intersectLit(IntIterableRangeSet.MIN, b - a, explanation);
                 vars[z].unionLit(dz, explanation);
             }
         } else { // remove

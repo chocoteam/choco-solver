@@ -120,9 +120,7 @@ public class PropMin extends Propagator<IntVar> {
         int m = explanation.readValue(p);
         if (pivot == vars[n]) {
             if (IntEventType.isInclow(mask)) {
-                IntIterableRangeSet setn = explanation.empty();
-                setn.addBetween(m, IntIterableRangeSet.MAX);
-                vars[n].intersectLit(setn, explanation);
+                vars[n].intersectLit(m, IntIterableRangeSet.MAX, explanation);
                 for (int i = 0; i < n; i++) {
                     if (explanation.readDom(vars[i]).min() == m) {
                         IntIterableRangeSet seti = explanation.universe();
@@ -131,9 +129,7 @@ public class PropMin extends Propagator<IntVar> {
                     }
                 }
             } else if (IntEventType.isDecupp(mask)) {
-                IntIterableRangeSet setn = explanation.empty();
-                setn.addBetween(IntIterableRangeSet.MIN, m);
-                vars[n].intersectLit(setn, explanation);
+                vars[n].intersectLit(IntIterableRangeSet.MIN, m, explanation);
                 for (int i = 0; i < n; i++) {
                     if (explanation.readDom(vars[i]).max() == m) {
                         IntIterableRangeSet seti = explanation.universe();
@@ -144,19 +140,11 @@ public class PropMin extends Propagator<IntVar> {
             }
         } else {
             if (IntEventType.isInclow(mask)) {
-                IntIterableRangeSet setn = explanation.empty();
-                setn.addBetween(IntIterableRangeSet.MIN, m - 1);
-                vars[n].unionLit(setn, explanation);
-                IntIterableRangeSet seti = explanation.empty();
-                seti.addBetween(m, IntIterableRangeSet.MAX);
-                pivot.intersectLit(seti, explanation);
+                vars[n].unionLit(IntIterableRangeSet.MIN, m - 1, explanation);
+                pivot.intersectLit(m, IntIterableRangeSet.MAX, explanation);
             } else if (IntEventType.isDecupp(mask)) {
-                IntIterableRangeSet setn = explanation.empty();
-                setn.addBetween(m + 1, IntIterableRangeSet.MAX);
-                vars[n].unionLit(setn, explanation);
-                IntIterableRangeSet seti = explanation.empty();
-                seti.addBetween(IntIterableRangeSet.MIN, m);
-                pivot.intersectLit(seti, explanation);
+                vars[n].unionLit(m + 1, IntIterableRangeSet.MAX, explanation);
+                pivot.intersectLit(IntIterableRangeSet.MIN, m, explanation);
             }
         }
     }

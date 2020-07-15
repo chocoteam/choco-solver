@@ -231,9 +231,8 @@ public class PropCumulative extends Propagator<IntVar> {
             if(explanation.readDom(pivot).min() >= (val - explanation.readDom(pivotDuration(indD,pivot)).min())
                     && explanation.readDom(vars[i]).min() >= (val - explanation.readDom(vars[indD[i]]).min())
                     && explanation.readDom(vars[i]).max() < val){
-                IntIterableRangeSet set = explanation.universe();
-                set.removeBetween(val - explanation.readDom(vars[indD[i]]).min(),val-1);
-                vars[i].unionLit(set, explanation);
+                vars[i].unionLit(IntIterableRangeSet.MIN, val - explanation.readDom(vars[indD[i]]).min(), explanation);
+                vars[i].unionLit(val-1, IntIterableRangeSet.MAX, explanation);
                 flag = true;
             }
         }
