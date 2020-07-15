@@ -245,8 +245,8 @@ public abstract class RegParser implements IParser {
                 solver.setLearningSignedClauses();
                 // THEN PARAMETERS
                 XParameters.DEFAULT_X = dftexp;
-                XParameters.PROOF = XParameters.FINE_PROOF = false;
-                XParameters.PRINT_CLAUSE = false;
+                XParameters.PROOF = XParameters.FINE_PROOF = true;
+                XParameters.PRINT_CLAUSE = true;
                 XParameters.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
                 XParameters.ASSERT_NO_LEFT_BRANCH = false;
                 XParameters.INTERVAL_TREE = true;
@@ -292,6 +292,8 @@ public abstract class RegParser implements IParser {
                     solver.setSearch(Search.lastConflict(solver.getSearch(), lc));
                 }
                 restarts.declare(solver);
+                //solver.plugMonitor(new BackjumpRestart(solver));
+                //solver.showDecisions();
             }
         }
         for (int i = 0; i < nb_cores; i++) {
