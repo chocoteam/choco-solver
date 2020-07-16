@@ -9,11 +9,17 @@ NEXT MILESTONE
 
 ### Major features:
 - Change search strategies in ParallelPortfolio
+- Make "CT+" available to binary table contraint
+- Update [Dockerfile](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/docker/Dockerfile_Choco.dms), now automatically released in [hub.docker.com](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn)
+- Migrate to ANTLR 4.8-1
 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
 \#692
+
+#### Contributors to this release
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
 
 4.10.3 - 03 Jul 2020
 --------------------
