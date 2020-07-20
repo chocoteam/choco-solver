@@ -225,80 +225,72 @@ public class PropCumulative extends Propagator<IntVar> {
         if(ind==-1){throw new UnsupportedOperationException("Unfindable variable ");}
         return ind;
     }
-    private void explainInc(ExplanationForSignedClause explanation, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+    private void explainInc(ExplanationForSignedClause e, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
         boolean flag = false;
         for (int i : indS) {
-            if(explanation.readDom(pivot).min() >= (val - explanation.readDom(pivotDuration(indD,pivot)).min())
-                    && explanation.readDom(vars[i]).min() >= (val - explanation.readDom(vars[indD[i]]).min())
-                    && explanation.readDom(vars[i]).max() < val){
-                vars[i].unionLit(IntIterableRangeSet.MIN, val - explanation.readDom(vars[indD[i]]).min(), explanation);
-                vars[i].unionLit(val-1, IntIterableRangeSet.MAX, explanation);
+            if(e.readDom(pivot).min() >= (val - e.readDom(pivotDuration(indD,pivot)).min())
+                    && e.readDom(vars[i]).min() >= (val - e.readDom(vars[indD[i]]).min())
+                    && e.readDom(vars[i]).max() < val){
+                vars[i].unionLit(IntIterableRangeSet.MIN, val - e.readDom(vars[indD[i]]).min(), e);
+                vars[i].unionLit(val-1, IntIterableRangeSet.MAX, e);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = explanation.universe();
-            set.removeBetween(val - explanation.readDom(pivotDuration(indS,pivot)).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, explanation);
+            IntIterableRangeSet set = e.universe();
+            set.removeBetween(val - e.readDom(pivotDuration(indS,pivot)).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
+            pivot.intersectLit(set, e);
         }
     }
-    private void explainDec(ExplanationForSignedClause explanation, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+    private void explainDec(ExplanationForSignedClause e, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
         boolean flag = false;
         for (int i : indS) {
-            if(explanation.readDom(pivot).min() < (val + explanation.readDom(pivotDuration(indS,pivot)).min())
-                    && explanation.readDom(vars[i]).min() >= (val - explanation.readDom(vars[indD[i]]).min() + explanation.readDom(pivotDuration(indS,pivot)).min())
-                    && explanation.readDom(vars[i]).max() < (val + explanation.readDom(pivotDuration(indS,pivot)).min())){
-                IntIterableRangeSet set = explanation.universe();
-                set.removeBetween(val - explanation.readDom(vars[indD[i]]).min() + explanation.readDom(pivotDuration(indS,pivot)).min(),val + explanation.readDom(pivotDuration(indS,pivot)).min()-1);
-                vars[i].unionLit(set, explanation);
+            if(e.readDom(pivot).min() < (val + e.readDom(pivotDuration(indS,pivot)).min())
+                    && e.readDom(vars[i]).min() >= (val - e.readDom(vars[indD[i]]).min() + e.readDom(pivotDuration(indS,pivot)).min())
+                    && e.readDom(vars[i]).max() < (val + e.readDom(pivotDuration(indS,pivot)).min())){
+                IntIterableRangeSet set = e.universe();
+                set.removeBetween(val - e.readDom(vars[indD[i]]).min() + e.readDom(pivotDuration(indS,pivot)).min(),val + e.readDom(pivotDuration(indS,pivot)).min()-1);
+                vars[i].unionLit(set, e);
                 flag = true;
             }
         }
         if(flag){
-            IntIterableRangeSet set = explanation.universe();
-            set.removeBetween(val,val + explanation.readDom(pivotDuration(indS,pivot)).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, explanation);
+            IntIterableRangeSet set = e.universe();
+            set.removeBetween(val,val + e.readDom(pivotDuration(indS,pivot)).min()-1);//pivot apparais 2 fois, on fais l'union des sets
+            pivot.intersectLit(set, e);
         }
     }
     @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
+    public void explain(int p, ExplanationForSignedClause e) {
         int[] indS = IntStream.range(0, n).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
         int[] indE = IntStream.range(n * 2, n * 3).toArray();
         int[] indH = IntStream.range(n * 3, n * 4).toArray();
-        IntVar pivot = explanation.readVar(p);
+        IntVar pivot = e.readVar(p);
         int val;
-        switch (explanation.readMask(p)) {
+        switch (e.readMask(p)) {
             case 2://INCLOW
                 if(getInd(pivot)<n){
-                    if(explanation.readDom(p).cardinality()>0){
-                        val = explanation.readDom(p).min();
+                    if(e.readDom(p).cardinality()>0){
+                        val = e.readDom(p).min();
                     }else{
-                        val = explanation.readDom(pivot).max()+1;
-                        throw new UnsupportedOperationException("Unknown val");
+                        throw new UnsupportedOperationException("Unknown val");//val = e.readDom(pivot).max()+1;
                     }
-                    explainInc(explanation, pivot, indS, indD, indE, val);
-                    System.out.println("inc : "+explanation.toString());
-                }else{
-                    System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, p, explanation);
-                    System.out.println("inc default "+explanation.toString());
+                    explainInc(e, pivot, indS, indD, indE, val);//System.out.println("inc : "+e.toString());
+                }else{//System.out.println(n+"   "+getInd(pivot));
+                    Propagator.defaultExplain(this, p, e);//System.out.println("inc default "+e.toString());
                 }
                 break;
             case 4://DECUPP
                 if(getInd(pivot)<3*n&&getInd(pivot)>=2*n) {
-                    if (explanation.readDom(p).cardinality() > 0) {
-                        val = explanation.readDom(p).max() + 1 - explanation.readDom(pivotDuration(indS,pivot)).min();
+                    if (e.readDom(p).cardinality() > 0) {
+                        val = e.readDom(p).max() + 1 - e.readDom(pivotDuration(indS,pivot)).min();
                     } else {
-                        val = explanation.readDom(pivot).min() - explanation.readDom(pivotDuration(indS,pivot)).min();
-                        throw new UnsupportedOperationException("Unknown val");
+                        throw new UnsupportedOperationException("Unknown val");//val = e.readDom(pivot).min() - e.readDom(pivotDuration(indS,pivot)).min();
                     }
-                    explainDec(explanation, pivot, indS, indD, indE, val);
-                    System.out.println("dec : "+explanation.toString());
-                }else{
-                    System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, p, explanation);
-                    System.out.println("dec default " + explanation.toString());
+                    explainDec(e, pivot, indS, indD, indE, val);//System.out.println("dec : "+e.toString());
+                }else{//System.out.println(n+"   "+getInd(pivot));
+                    Propagator.defaultExplain(this, p, e);//System.out.println("dec default " + e.toString());
                 }
                 break;
             case 8://INSTANTIATE

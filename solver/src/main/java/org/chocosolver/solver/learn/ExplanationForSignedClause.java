@@ -458,7 +458,7 @@ public class ExplanationForSignedClause extends IExplanation {
      * @return the value at position {@code p} in {@link #mIG}
      */
     public int readValue(int p) {
-        return mIG.getEventMaskAt(p);
+        return mIG.getValueAt(p);
     }
 
 

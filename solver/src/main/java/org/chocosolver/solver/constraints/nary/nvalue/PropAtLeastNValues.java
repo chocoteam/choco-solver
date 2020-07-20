@@ -201,31 +201,49 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 });
         return flag[0];
     }
+    private void explainDiffForalliForallt(ExplanationForSignedClause e, int[] indexes) {
+        for (int i : indexes)  {
+            vars[i].unionLit(e.domain(vars[i]),e);
+        }
+    }
+    private void explainDiffForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
+        for (int i : indexes)  {
+            IntIterableRangeSet set = e.domain(vars[i]);
+            set.remove(t);
+            vars[i].unionLit(set,e);
+        }
+    }//TODO ca ressemble a de l'emnsembliste ca ???
+    private void explainEquaForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
+        for (int i : indexes)  {
+            IntIterableRangeSet set = e.complement(vars[i]);
+            set.add(t);
+            vars[i].unionLit(set,e);
+        }
+     }
+
+    private void explainEquaForalliForallt(ExplanationForSignedClause e, int[] indexes) {
+        for (int i : indexes)  {
+            vars[i].unionLit(e.complement(vars[i]),e);
+        }
+    }
 
     @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        if (false) {
-            Propagator.defaultExplain(this, p, explanation);
-            return;
-        }
-        IntStream X = IntStream.rangeClosed(0, vars.length - 2);
-        IntStream N = IntStream.rangeClosed(vars.length - 1, vars.length - 1);
-        IntVar pivot = explanation.readVar(p);
-        switch (explanation.readMask(p)) {
-            case 2://INCLOW
-                Propagator.defaultExplain(this, p, explanation);
-                break;
+    public void explain(int p, ExplanationForSignedClause e) {
+        IntVar pivot = e.readVar(p);
+        int[] X = IntStream.rangeClosed(0, vars.length - 2).filter(i->vars[i]!=pivot).toArray();
+
+        switch (e.readMask(p)) {
             case 4://DECUPP
-                if (explainForallDiffForall(explanation, pivot, X)) {
-                    IntIterableRangeSet set = explanation.domain(pivot);//ig.getDomainAt(p);
-                    pivot.intersectLit(set, explanation);
-                } else {
-                    Propagator.defaultExplain(this, p, explanation);
-                }
+                explainDiffForalliForallt(e, X);
+                pivot.intersectLit(e.domain(pivot), e);
                 break;
             case 8://INSTANTIATE
-                Propagator.defaultExplain(this, p, explanation);
+                int t = e.domain(pivot).min();
+                explainDiffForalliForalltDifft(e, X, t);
+                //explainEquaForalliForalltDifft(e, X, t);
+                pivot.intersectLit(e.domain(pivot), e);
                 break;
+            case 2://INCLOW
             case 1://REMOVE
             case 0://VOID
             case 6://BOUND inclow+decup

@@ -20,6 +20,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
+import java.util.stream.IntStream;
+
 /**
  * Propagator for AllDifferent that only reacts on instantiation
  *
@@ -134,8 +136,8 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * </p>
      *
      */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
+    //@Override
+    public void oldexplain(int p, ExplanationForSignedClause explanation) {
         IntVar pivot = explanation.readVar(p);
         IntIterableRangeSet dbef = explanation.domain(pivot);
         dbef.removeAll(explanation.readDom(p));
@@ -153,4 +155,35 @@ public class PropAllDiffInst extends Propagator<IntVar> {
         pivot.intersectLit(set, explanation);
     }
 
+    private void explainEqualExistit(ExplanationForSignedClause e, int[] indexes, int t){
+        for (int i : indexes)  {
+            if (vars[i].isInstantiatedTo(t)){
+                vars[i].unionLit(e.complement(vars[i]), e);
+                break;
+            }
+        }
+    }
+    @Override
+    public void explain(int p,ExplanationForSignedClause e) {
+        IntVar pivot = e.readVar(p);
+        int[] X = IntStream.rangeClosed(0, vars.length - 1).filter(i->vars[i]!=pivot).toArray();
+        switch (e.readMask(p)) {
+            case 1://REMOVE
+                IntIterableRangeSet dbef = e.domain(pivot);
+                dbef.removeAll(e.readDom(p));
+                int t = dbef.min();
+                explainEqualExistit(e, X, t);
+                IntIterableRangeSet set = e.universe();
+                set.remove(t);
+                pivot.intersectLit(set, e);
+                break;
+            case 2://INCLOW
+            case 4://DECUPP
+            case 8://INSTANTIATE
+            case 0://VOID
+            case 6://BOUND inclow+decup
+            default:
+                throw new UnsupportedOperationException("Unknown event type for explanation");
+        }
+    }
 }
