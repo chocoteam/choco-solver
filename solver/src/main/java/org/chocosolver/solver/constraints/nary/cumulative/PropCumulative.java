@@ -206,15 +206,6 @@ public class PropCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    private  IntVar pivotDuration(int[] ind, IntVar pivot){
-        IntVar duration = pivot;
-        for(int i : ind){
-            if(vars[i] == pivot){
-                duration = vars[i+n];
-            }
-        }
-        return duration;
-    }
     private  int getInd(IntVar pivot){
         int ind = -1;
         for(int i = 0; i<vars.length;i++){
@@ -222,75 +213,85 @@ public class PropCumulative extends Propagator<IntVar> {
                 ind = i;
             }
         }
-        if(ind==-1){throw new UnsupportedOperationException("Unfindable variable ");}
+        if(ind==-1)throw new UnsupportedOperationException("Unfindable pivot variable ");
         return ind;
     }
-    private void explainInc(ExplanationForSignedClause e, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
-        boolean flag = false;
-        for (int i : indS) {
-            if(e.readDom(pivot).min() >= (val - e.readDom(pivotDuration(indD,pivot)).min())
-                    && e.readDom(vars[i]).min() >= (val - e.readDom(vars[indD[i]]).min())
-                    && e.readDom(vars[i]).max() < val){
-                vars[i].unionLit(IntIterableRangeSet.MIN, val - e.readDom(vars[indD[i]]).min(), e);
-                vars[i].unionLit(val-1, IntIterableRangeSet.MAX, e);
-                flag = true;
+    private void explainSupit(ExplanationForSignedClause e, IntVar var, int t) {
+        var.unionLit(e.setInf(t-1),e);
+    }
+    private void explainInfit(ExplanationForSignedClause e, IntVar var, int t) {
+        var.unionLit(e.setSup(t),e);
+    }
+    private void explainSupForallit(ExplanationForSignedClause e, int[] indexes, int t) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).max()>=t){
+                vars[i].unionLit(e.setInf(t-1),e);
             }
-        }
-        if(flag){
-            IntIterableRangeSet set = e.universe();
-            set.removeBetween(val - e.readDom(pivotDuration(indS,pivot)).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, e);
         }
     }
-    private void explainDec(ExplanationForSignedClause e, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
-        boolean flag = false;
-        for (int i : indS) {
-            if(e.readDom(pivot).min() < (val + e.readDom(pivotDuration(indS,pivot)).min())
-                    && e.readDom(vars[i]).min() >= (val - e.readDom(vars[indD[i]]).min() + e.readDom(pivotDuration(indS,pivot)).min())
-                    && e.readDom(vars[i]).max() < (val + e.readDom(pivotDuration(indS,pivot)).min())){
-                IntIterableRangeSet set = e.universe();
-                set.removeBetween(val - e.readDom(vars[indD[i]]).min() + e.readDom(pivotDuration(indS,pivot)).min(),val + e.readDom(pivotDuration(indS,pivot)).min()-1);
-                vars[i].unionLit(set, e);
-                flag = true;
+    private void explainInfForallit(ExplanationForSignedClause e, int[] indexes, int t) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).max()<t){
+                vars[i].unionLit(e.setSup(t),e);
             }
         }
-        if(flag){
-            IntIterableRangeSet set = e.universe();
-            set.removeBetween(val,val + e.readDom(pivotDuration(indS,pivot)).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            pivot.intersectLit(set, e);
+    }
+    private void explainSupForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
+                vars[i].unionLit(e.setInf(t-1-e.domain(vars[indD[i]]).min()),e);
+            }
+        }
+    }
+    private void explainInfForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).max()<t-e.domain(vars[indD[i]]).min()){
+                vars[i].unionLit(e.setSup(t-e.domain(vars[indD[i]]).min()),e);
+            }
         }
     }
     @Override
     public void explain(int p, ExplanationForSignedClause e) {
-        int[] indS = IntStream.range(0, n).toArray();
+        IntVar pivot = e.readVar(p);
+        int[] X = IntStream.range(0, n).filter(i->vars[i]!=pivot).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
         int[] indE = IntStream.range(n * 2, n * 3).toArray();
         int[] indH = IntStream.range(n * 3, n * 4).toArray();
-        IntVar pivot = e.readVar(p);
-        int val;
+        int t = 0;
+        int dpivot = 0;
         switch (e.readMask(p)) {
             case 2://INCLOW
-                if(getInd(pivot)<n){
-                    if(e.readDom(p).cardinality()>0){
-                        val = e.readDom(p).min();
-                    }else{
-                        throw new UnsupportedOperationException("Unknown val");//val = e.readDom(pivot).max()+1;
-                    }
-                    explainInc(e, pivot, indS, indD, indE, val);//System.out.println("inc : "+e.toString());
-                }else{//System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, p, e);//System.out.println("inc default "+e.toString());
+                if (getInd(pivot) < n) {//start
+                    dpivot = e.domain(vars[getInd(pivot) + n]).min();
+                    t = e.readDom(p).min();
+                } else if (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n) {//end
+                    dpivot = e.domain(vars[getInd(pivot) - n]).min();
+                    t = e.readDom(p).min() - dpivot;
+                }
+                if ((getInd(pivot) < n)){// || (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n)){
+                    explainSupit(e, pivot, t - dpivot);
+                    explainSupForallitMinusci(e, X, t, indD);
+                    explainInfForallit(e, X, t);
+                    pivot.intersectLit(e.setSup(t), e);
+                } else {//capa ou autres
+                    defaultExplain(this, p, e);
                 }
                 break;
             case 4://DECUPP
-                if(getInd(pivot)<3*n&&getInd(pivot)>=2*n) {
-                    if (e.readDom(p).cardinality() > 0) {
-                        val = e.readDom(p).max() + 1 - e.readDom(pivotDuration(indS,pivot)).min();
-                    } else {
-                        throw new UnsupportedOperationException("Unknown val");//val = e.readDom(pivot).min() - e.readDom(pivotDuration(indS,pivot)).min();
-                    }
-                    explainDec(e, pivot, indS, indD, indE, val);//System.out.println("dec : "+e.toString());
-                }else{//System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, p, e);//System.out.println("dec default " + e.toString());
+                if (getInd(pivot) < n) {//start
+                    dpivot = e.domain(vars[getInd(pivot) + n]).min();
+                    t = e.readDom(p).min();
+                } else if (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n) {//end
+                    dpivot = e.domain(vars[getInd(pivot) - n]).min();
+                    t = e.readDom(p).min() - dpivot;
+                }
+                if ((getInd(pivot) < n)){// || (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n)){
+                    explainInfit(e, pivot, t + dpivot);
+                    explainSupForallitMinusci(e, X, t + dpivot, indD);
+                    explainInfForallit(e, X, t + dpivot);
+                    pivot.intersectLit(e.setInf(t), e);
+                }else {//capa ou autres
+                    defaultExplain(this, p, e);
                 }
                 break;
             case 8://INSTANTIATE
