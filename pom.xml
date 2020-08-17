@@ -11,7 +11,7 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
@@ -184,12 +184,23 @@
                         <encoding>UTF-8</encoding>
                         <showDeprecation>true</showDeprecation>
                         <showWarnings>true</showWarnings>
+                        <!-- see https://maven.apache.org/plugins/maven-compiler-plugin/examples/module-info.html -->
+                        <!-- jdkToolchain required when JAVA_HOME is JDK 9 or above -->
+                        <jdkToolchain>
+                            <version>[1.8,11)</version>
+                        </jdkToolchain>
+                        <source>1.8</source>
+                        <target>1.9</target>
                     </configuration>
                     <executions>
                         <execution>
                             <id>default-compile</id>
                             <configuration>
                                 <!-- compile everything to ensure module-info contains right entries -->
+                                <!-- required when JAVA_HOME is JDK 8 or below -->
+                                <jdkToolchain>
+                                    <version>11</version>
+                                </jdkToolchain>
                                 <release>11</release>
                             </configuration>
                         </execution>
@@ -206,6 +217,35 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M3</version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
+                    <executions>
+                        <execution>
+                            <id>enforce-bytecode-version</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <enforceBytecodeVersion>
+                                        <maxJdkVersion>1.8</maxJdkVersion>
+                                    </enforceBytecodeVersion>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>extra-enforcer-rules</artifactId>
+                            <version>1.2</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -235,7 +275,8 @@
                             NonEmptyAtclauseDescription,
                             SingleLineJavadoc,
                             SummaryJavadoc,
-                            WriteTag</violationIgnore>
+                            WriteTag
+                        </violationIgnore>
                     </configuration>
                     <dependencies>
                         <dependency>
@@ -473,7 +514,8 @@
                         NonEmptyAtclauseDescription,
                         SingleLineJavadoc,
                         SummaryJavadoc,
-                        WriteTag</violationIgnore>
+                        WriteTag
+                    </violationIgnore>
                 </configuration>
                 <reportSets>
                     <!-- reportSet executed in all modules -->
@@ -503,9 +545,9 @@
                 <configuration>
                     <doclint>none</doclint>
                     <source>8</source>
-<!--                    <sourceFileExcludes>-->
-<!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
-<!--                    </sourceFileExcludes>-->
+                    <!--                    <sourceFileExcludes>-->
+                    <!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
+                    <!--                    </sourceFileExcludes>-->
                 </configuration>
                 <reportSets>
                     <!-- reportSet executed in all modules -->
