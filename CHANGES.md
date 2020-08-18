@@ -17,7 +17,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-\#692, #703, #704, #705
+\#692, #700, #703, #704, #705
 
 #### Contributors to this release
 - [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
