@@ -390,7 +390,7 @@ public class RealTest {
         assertEquals(solver.getSolutionCount(), 10);
     }
 
-    @Test(groups = "1S")
+    @Test(groups = "1s")
     public void testJiiTee1a() throws Exception {
         Model model = new Model("model");
         RealVar dim_A = model.realVar("dim_A", 150.0, 470.0, 1.0E-5);
@@ -907,7 +907,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
-    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3(){
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -926,7 +926,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3a() {
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -952,7 +952,7 @@ public class RealTest {
     }
 
 
-    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha4(){
         double eps=1e-7;
         Ibex ibex = new Ibex(new double[]{eps,eps,eps,eps,eps,eps,eps,eps});
