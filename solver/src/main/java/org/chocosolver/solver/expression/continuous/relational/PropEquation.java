@@ -99,7 +99,9 @@ public class PropEquation extends Propagator<RealVar> {
         this.proj();
         // Box consistency
         for (int i = 0; i < nbBoxedVars; i++) {
-            bc(boxedVars[i], subExpsWX[i], subExpsWOX[i]);
+            if(!bc(boxedVars[i], subExpsWX[i], subExpsWOX[i])){
+                this.fails();
+            }
         }
     }
 

@@ -1120,4 +1120,19 @@ public class RealTest {
         y.sub(x).sub(1).eq(0).ibex(PRECISION).post();
         Assert.assertNotNull(model.getSolver().findSolution());
     }
+
+
+    @Test(groups = "1s")
+    public void testSchmitt(){
+        Model model = new Model();
+        // Variables
+        RealVar t = model.realVar("t", 0.0, 4.0, 0.01);
+        RealVar h = model.realVar("h", 0.0, 5.0, 0.01);
+        // h = -3/4*t^2 + 6*t - 9
+        h.eq(t.mul(t).mul(-0.75).add(t.mul(6)).sub(9)).equation().post();
+        model.setObjective(Model.MAXIMIZE, h);
+        model.getSolver().showSolutions();
+        model.getSolver().solve();
+        Assert.assertTrue(t.getLB()>2.);
+    }
 }
