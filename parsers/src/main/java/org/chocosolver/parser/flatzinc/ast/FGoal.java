@@ -45,6 +45,7 @@ import java.util.List;
 public class FGoal {
 
     private enum Search {
+        seq_search,
         int_search,
         bool_search,
         set_search
@@ -98,6 +99,14 @@ public class FGoal {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
         Search search = Search.valueOf(e.id.value);
+        if(search == Search.seq_search){
+            EArray eArray = (EArray)e.exps.get(0);
+            AbstractStrategy[] strats = new AbstractStrategy[eArray.what.size()];
+            for(int i = 0; i < strats.length; i++){
+                strats[i] = readSearchAnnotation((EAnnotation)eArray.getWhat_i(i), solver, description);
+            }
+            return org.chocosolver.solver.search.strategy.Search.sequencer(strats);
+        }
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
         description.append(vchoice.toString()).append(";");
         Assignment assignment = Assignment.valueOf(((EIdentifier) exps[2]).value);

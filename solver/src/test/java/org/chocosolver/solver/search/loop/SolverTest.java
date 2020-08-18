@@ -26,6 +26,9 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithOneAlldifferent;
@@ -37,37 +40,37 @@ import static org.testng.Assert.assertEquals;
  */
 public class SolverTest {
 
-    @Test(groups="1s", timeOut=60000)
-   	public void testReset() {
-   		Model m = new Model();
-   		IntVar x =m.intVar("X", 0, 9);
-   		IntVar y= m.intVar("Y", 0, 9);
+    @Test(groups = "1s", timeOut = 60000)
+    public void testReset() {
+        Model m = new Model();
+        IntVar x = m.intVar("X", 0, 9);
+        IntVar y = m.intVar("Y", 0, 9);
 
         Constraint x_lesser_y = m.arithm(y, ">", x);
         x_lesser_y.post();
-   		m.member(x, new int[]{1,2}).post();
+        m.member(x, new int[]{1, 2}).post();
 
         // computeOptimum
-        m.setObjective(Model.MAXIMIZE,x);
-        while (m.getSolver().solve());
-        assertEquals(m.getSolver().getSolutionCount(),1);
+        m.setObjective(Model.MAXIMIZE, x);
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 1);
 
         // enumerate optima does not work because of previous cut
         m.getSolver().reset();
         m.getSolver().getObjectiveManager().setCutComputer((Number number) -> number);
-        while (m.getSolver().solve());
-   		assertEquals(m.getSolver().getSolutionCount(),7);
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 7);
 
         // reset, remove constraint and enumerate solutions
         m.getSolver().reset();
         m.clearObjective();
-   		m.unpost(x_lesser_y);
+        m.unpost(x_lesser_y);
         m.getSolver().setSearch(Search.defaultSearch(m));
-        while (m.getSolver().solve());
-        assertEquals(m.getSolver().getSolutionCount(),20);
-   	}
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 20);
+    }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -79,7 +82,7 @@ public class SolverTest {
         assertEquals(r.getMeasures().getNodeCount(), 24);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -90,7 +93,7 @@ public class SolverTest {
         assertEquals(r.getMeasures().getNodeCount(), 144);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -101,18 +104,18 @@ public class SolverTest {
         assertEquals(r.getMeasures().getNodeCount(), 70);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1HBFS() {
         Model model = makeGolombRuler(8);
         Solver r = model.getSolver();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
         r.setHBFS(.05, .1, 32);
-        while(model.getSolver().solve());
+        while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
         assertEquals(model.getSolver().getNodeCount(), 5881);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2DFS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -123,7 +126,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getNodeCount(), 480);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2LDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -134,7 +137,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getNodeCount(), 205);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2DDS() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -145,7 +148,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getNodeCount(), 130);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2DDS2() {
         Model model = new Model();
         Solver r = model.getSolver();
@@ -156,7 +159,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test3() {
         Model model = makeGolombRuler(6);
         Solver r = model.getSolver();
@@ -168,7 +171,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getNodeCount(), 17);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test4() {
         Model model = makeNQueenWithOneAlldifferent(8);
         Solver r = model.getSolver();
@@ -180,7 +183,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getRestartCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test5() {
         Model model = makeGolombRuler(5);
         Solver r = model.getSolver();
@@ -193,7 +196,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getRestartCount(), 314);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test6() {
         Model model = makeGolombRuler(6);
         Solver r = model.getSolver();
@@ -207,7 +210,7 @@ public class SolverTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test7() {
         Model model = new Model();
         int n = 3;
@@ -222,7 +225,7 @@ public class SolverTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test8() {
         Model model = new Model();
         int n = 3;
@@ -239,7 +242,7 @@ public class SolverTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test9() {
         Model model = new Model();
         int n = 3;
@@ -265,12 +268,12 @@ public class SolverTest {
         Decision<IntVar> dec = null;
         int sol = 0;
         boolean search = true;
-        while(search) {
+        while (search) {
             if (solver.moveForward(dec)) {
                 dec = strategy.getDecision();
                 if (dec == null) {
                     sol++;
-                }else {
+                } else {
                     continue;
                 }
             }
@@ -292,7 +295,7 @@ public class SolverTest {
     }
 
     @Test(groups = "1s")
-        public void testMoves2() {
+    public void testMoves2() {
         Model model = new Model();
         IntVar x1 = model.intVar("x1", 0, 2);
         IntVar x2 = model.intVar("x2", 0, 2);
@@ -305,14 +308,25 @@ public class SolverTest {
 
 
     @Test(groups = "1s")
-            public void testMoves3() {
-            Model model = new Model();
-            IntVar x1 = model.intVar("x1", 0, 2);
-            IntVar x2 = model.intVar("x2", 4, 5);
-            x1.eq(x2).post();
-            Solver solver = model.getSolver();
-            IntStrategy strategy = inputOrderLBSearch(x1, x2);
-            Assert.assertEquals(0, countSolutions(solver, strategy));
-        }
+    public void testMoves3() {
+        Model model = new Model();
+        IntVar x1 = model.intVar("x1", 0, 2);
+        IntVar x2 = model.intVar("x2", 4, 5);
+        x1.eq(x2).post();
+        Solver solver = model.getSolver();
+        IntStrategy strategy = inputOrderLBSearch(x1, x2);
+        Assert.assertEquals(0, countSolutions(solver, strategy));
+    }
 
+
+    @Test(groups = "1s")
+    public void testMessage() {
+        Model choco = new Model();
+        Constraint expr = choco.arithm(choco.intVar(1, 2), "<", 2);
+        expr.getOpposite().post();
+        ByteArrayOutputStream errContent = new ByteArrayOutputStream();
+        choco.getSolver().setErr(new PrintStream(errContent));
+        choco.getSolver().solve();
+        Assert.assertEquals("", errContent.toString());
+    }
 }
