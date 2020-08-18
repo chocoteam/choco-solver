@@ -32,8 +32,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
-
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import org.chocosolver.solver.search.strategy.Search;
 
 public class MagicSequence extends AbstractProblem {
 
@@ -60,7 +59,7 @@ public class MagicSequence extends AbstractProblem {
 
     @Override
     public void configureSearch() {
-        model.getSolver().setSearch(inputOrderLBSearch(x));
+        model.getSolver().setSearch(Search.minDomLBSearch(x));
     }
 
     @Override
