@@ -804,7 +804,7 @@ public class EventRecorderTest {
     @DataProvider(name = "rcpspP")
     public Object[][] rcpspP(){
         return new Object[][]{
-                {0, 1_380_772, 0, true},
+                //{0, 1_380_772, 0, true},
                 {1, 148, 0, true}, // 254s
                 {1, 154, 0, false}, // 254s
                 {2, 148, 0, true},
@@ -814,7 +814,7 @@ public class EventRecorderTest {
 
     @DataProvider(name = "fuzzy")
     public Object[][] fuzzy() {
-        int n = 1000;
+        int n = 200;
         Object[][] params = new Object[2 * n][2];
         long seed = System.currentTimeMillis();
         for (int i = 0, k = 0; i < n; i++) {
