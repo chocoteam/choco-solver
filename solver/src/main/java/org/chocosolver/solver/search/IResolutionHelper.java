@@ -402,6 +402,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
             Stream<Solution> stream = streamSolutions(stop);
             ref().getModel().unpost(forceOptimal);
+            return stream;
         } else {
             ref().removeStopCriterion(stop);
             return Stream.empty();
