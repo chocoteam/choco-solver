@@ -39,6 +39,7 @@ import java.util.stream.StreamSupport;
  * @author Jean-Guillaum Fages
  * @author Charles Prud'homme
  * @author Guillaume Lelouet
+ * @author Dimitri Justeau-Allaire (dimitri.justeau@gmail.com)
  * @since 25/04/2016.
  */
 public interface IResolutionHelper extends ISelf<Solver> {
@@ -328,9 +329,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
             int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
             ref().reset();
             ref().getModel().clearObjective();
-            ref().getModel().arithm(objective, "=", opt).post();
-			if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
-            return findAllSolutions(stop);
+            Constraint forceOptimal = model.arithm(objective, "=", opt);
+            forceOptimal.post();
+            if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
+            List<Solution> solutions = solver.findAllSolutions(stop);
+            ref().getModel().unpost(forceOptimal);
+            return solutions;
         } else {
             ref().removeStopCriterion(stop);
             return Collections.emptyList();
@@ -393,9 +397,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
             int opt = ref().getObjectiveManager().getBestSolutionValue().intValue();
             ref().reset();
             ref().getModel().clearObjective();
-            ref().getModel().arithm(objective, "=", opt).post();
+            Constraint forceOptimal = model.arithm(objective, "=", opt);
+            forceOptimal.post();
             if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
-            return streamSolutions(stop);
+            Stream<Solution> stream = streamSolutions(stop);
+            ref().getModel().unpost(forceOptimal);
+            return stream;
         } else {
             ref().removeStopCriterion(stop);
             return Stream.empty();
