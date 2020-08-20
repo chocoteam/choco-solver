@@ -99,9 +99,7 @@ public class PropEquation extends Propagator<RealVar> {
         this.proj();
         // Box consistency
         for (int i = 0; i < nbBoxedVars; i++) {
-            if(!bc(boxedVars[i], subExpsWX[i], subExpsWOX[i])){
-                this.fails();
-            }
+            bc(boxedVars[i], subExpsWX[i], subExpsWOX[i]);
         }
     }
 
@@ -139,7 +137,7 @@ public class PropEquation extends Propagator<RealVar> {
             return (this.exp.getLB() <= this.cste.getUB() && this.exp.getUB() >= this.cste.getLB());
     }
 
-    protected boolean bc(RealVar var, CArExpression[] wx, CArExpression[] wox) throws ContradictionException {
+    protected void bc(RealVar var, CArExpression[] wx, CArExpression[] wox) throws ContradictionException {
         int[] depths = new int[this.boxConsistencyDepth * 2];
         int depth = 0;
         int idx = 0;
@@ -171,7 +169,7 @@ public class PropEquation extends Propagator<RealVar> {
                 var.silentlyAssign(unexplored[--idx]);
                 depth = depths[idx];
             } else {
-                return false;
+                this.fails();
             }
         }
 
@@ -222,7 +220,7 @@ public class PropEquation extends Propagator<RealVar> {
         // Propagation
         var.silentlyAssign(oldValue[0], oldValue[1]);
         var.intersect(leftB, rightB, this);
-        return true;
+
     }
 
     public void proj() throws ContradictionException {
