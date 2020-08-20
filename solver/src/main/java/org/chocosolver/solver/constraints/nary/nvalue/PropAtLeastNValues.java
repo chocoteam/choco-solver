@@ -181,27 +181,9 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         }
         return ESat.UNDEFINED;
     }
-    //Explanation section, Work in progress
-    private boolean explainForallDiffForall(ExplanationForSignedClause e, IntVar pivot, IntStream Indexes) {
-        final boolean[] flag = {false};
-        int[] indices = Indexes.toArray();
-        IntIterableRangeSet union = IntStream
-                .of(indices)
-                .mapToObj(i -> e.readDom(vars[i]))
-                .collect(IntIterableRangeSet::new,
-                        IntIterableRangeSet::addAll,
-                        IntIterableRangeSet::addAll);
-        IntStream
-                .of(indices)
-                .mapToObj(i -> vars[i])
-                .forEach(v -> {
-                    IntIterableRangeSet dom = e.universe();
-                    dom.removeAll(union);
-                    flag[0] |= !dom.isEmpty();
-                    v.unionLit(dom, e);
-                });
-        return flag[0];
-    }
+    /**
+     * Find in the implication graph and add to the explanation all the remove value events (the real events added are inverted because only disjunctions are allowed for explanation)
+     */
     private void explainDiffForalliForallt(ExplanationForSignedClause e, int[] indexes) {
         for (int i : indexes)  {
             for(int t : e.root(vars[i])){
@@ -211,6 +193,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }//vars[i].unionLit(e.complement(vars[i]),e);
         }
     }
+    /**
+     * Find in the implication graph and add to the explanation all the remove value events except those on value t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t exception value
+     */
     private void explainDiffForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
         for (int i : indexes)  {
             for(int tt : e.root(vars[i])){
@@ -220,6 +206,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }//vars[i].unionLit(e.complement(vars[i]),e);
         }
     }
+    /**
+     * Find in the implication graph and add in the explanation remove value t events (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t value
+     */
     private void explainDiffForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for (int i : indexes)  {
             if (!e.domain(vars[i]).contains(t)) {
@@ -227,6 +217,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
     }
+    /**
+     * Find in the implication graph and add to the explanation all the instantiate events except those on value t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t exception value
+     */
     private void explainEquaForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
         for (int i : indexes)  {
             for(int tt : e.root(vars[i])){
@@ -236,7 +230,9 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
      }
-
+    /**
+     * Find in the implication graph and add in the explanation all instantiation events (the real events added are inverted because only disjunctions are allowed for explanation)
+     */
     private void explainEquaForalliForallt(ExplanationForSignedClause e, int[] indexes) {
         for (int i : indexes) {
             for (int t : e.root(vars[i])) {
@@ -246,7 +242,10 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
     }
-
+    /**
+     * Detect and explain the event at pivot variable p
+     * @param p pivot variable
+     */
     @Override
     public void explain(int p, ExplanationForSignedClause e) {
         IntVar pivot = e.readVar(p);

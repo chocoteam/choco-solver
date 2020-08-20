@@ -206,6 +206,11 @@ public class PropCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
+    /**
+     * Return the index of an IntVar
+     *
+     * @param pivot
+     */
     private  int getInd(IntVar pivot){
         int ind = -1;
         for(int i = 0; i<vars.length;i++){
@@ -216,12 +221,26 @@ public class PropCumulative extends Propagator<IntVar> {
         if(ind==-1)throw new UnsupportedOperationException("Unfindable pivot variable ");
         return ind;
     }
+    /**
+     * Add to the explanation the lower bound event greater or equal than t (the real event added is inverted because only disjunctions are allowed for explanation)
+     * @param var variable to set the event on
+     * @param t value
+     */
     private void explainSupit(ExplanationForSignedClause e, IntVar var, int t) {
         var.unionLit(e.setInf(t-1),e);
     }
+    /**
+     * Add to the explanation the upper bound event strictly smaller than t (the real event added is inverted because only disjunctions are allowed for explanation)
+     * @param var variable to set the event on
+     * @param t value
+     */
     private void explainInfit(ExplanationForSignedClause e, IntVar var, int t) {
         var.unionLit(e.setSup(t),e);
     }
+    /**
+     * Find in the implication graph and add to the explanation all the lower bound event greater or equal than t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t value
+     */
     private void explainSupForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()>=t){
@@ -229,6 +248,10 @@ public class PropCumulative extends Propagator<IntVar> {
             }
         }
     }
+    /**
+     * Find in the implication graph and add to the explanation all the upper bound event strictly smaller than t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t value
+     */
     private void explainInfForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()<t){
@@ -236,6 +259,11 @@ public class PropCumulative extends Propagator<IntVar> {
             }
         }
     }
+    /**
+     * Find in the implication graph and add to the explanation all the lower bound event greater or equal than t-duration (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param indD index array to access durations
+     * @param t value
+     */
     private void explainSupForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         for(int i: indexes){
             if(e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
@@ -243,6 +271,11 @@ public class PropCumulative extends Propagator<IntVar> {
             }
         }
     }
+    /**
+     * Find in the implication graph and add to the explanation all the upper bound event strictly smaller than t-duration (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param indD index array to access durations
+     * @param t value
+     */
     private void explainInfForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()<t-e.domain(vars[indD[i]]).min()){
@@ -250,6 +283,10 @@ public class PropCumulative extends Propagator<IntVar> {
             }
         }
     }
+    /**
+     * Detect and explain the event at pivot variable p
+     * @param p pivot variable
+     */
     @Override
     public void explain(int p, ExplanationForSignedClause e) {
         IntVar pivot = e.readVar(p);

@@ -122,6 +122,18 @@ public class PropAllDiffInst extends Propagator<IntVar> {
     }
 
     /**
+     * Find in the implication graph and add in the explanation one instantiation event to the value t
+     * @param t value
+     */
+    private void explainEqualExistit(ExplanationForSignedClause e, int[] indexes, int t){
+        for (int i : indexes)  {
+            if (vars[i].isInstantiatedTo(t)){
+                vars[i].unionLit(e.complement(vars[i]), e);
+                break;
+            }
+        }
+    }
+    /**
      * @implSpec
      * This version of alldiff algo only reacts on instantiation.
      * So, the explaining algorithm should also be basic, and only infer on instantiation.
@@ -136,33 +148,6 @@ public class PropAllDiffInst extends Propagator<IntVar> {
      * </p>
      *
      */
-    //@Override
-    public void oldexplain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        IntIterableRangeSet dbef = explanation.domain(pivot);
-        dbef.removeAll(explanation.readDom(p));
-        assert dbef.size() == 1;
-        for(int i = 0; i < vars.length; i++){
-            if(vars[i].isInstantiatedTo(dbef.min()) && vars[i]!= pivot){
-                IntIterableRangeSet set = explanation.universe();
-                set.remove(dbef.min());
-                vars[i].unionLit(set, explanation);
-                break;
-            }
-        }
-        IntIterableRangeSet set = explanation.universe();
-        set.removeAll(dbef);
-        pivot.intersectLit(set, explanation);
-    }
-
-    private void explainEqualExistit(ExplanationForSignedClause e, int[] indexes, int t){
-        for (int i : indexes)  {
-            if (vars[i].isInstantiatedTo(t)){
-                vars[i].unionLit(e.complement(vars[i]), e);
-                break;
-            }
-        }
-    }
     @Override
     public void explain(int p,ExplanationForSignedClause e) {
         IntVar pivot = e.readVar(p);
