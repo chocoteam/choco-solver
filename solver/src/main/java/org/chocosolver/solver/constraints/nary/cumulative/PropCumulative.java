@@ -213,58 +213,70 @@ public class PropCumulative extends Propagator<IntVar> {
      *
      * @param pivot
      */
-    private  int getInd(IntVar pivot){
+    private int getInd(IntVar pivot) {
         int ind = -1;
-        for(int i = 0; i<vars.length;i++){
-            if(vars[i] == pivot){
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i] == pivot) {
                 ind = i;
             }
         }
-        if(ind==-1)throw new UnsupportedOperationException("Unfindable pivot variable ");
+        if (ind == -1) throw new UnsupportedOperationException("Unfindable pivot variable ");
         return ind;
     }
-    private void explainOverlap(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).max()<t && e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
-                vars[i].unionLit(t, e.root(vars[i]).max(),e);
-                vars[i].unionLit(e.root(vars[i]).min(),t-1-e.domain(vars[indD[i]]).min(),e);
+
+    private boolean explainOverlap(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
+        boolean flag = false;
+        for (int i : indexes) {
+            if (e.domain(vars[i]).max() < t && e.domain(vars[i]).min() >= t - e.domain(vars[indD[i]]).min()) {
+                vars[i].unionLit(t, e.root(vars[i]).max(), e);
+                vars[i].unionLit(e.root(vars[i]).min(), t - 1 - e.domain(vars[indD[i]]).min(), e);
+                flag = true;
             }
         }
+        return flag;
     }
 
     /**
      * Detect and explain the event at pivot variable p
+     *
      * @param p pivot variable
      */
     @Override
     public void explain(int p, ExplanationForSignedClause e) {
         IntVar pivot = e.readVar(p);
-        int[] X = IntStream.range(0, n).filter(i->vars[i]!=pivot).toArray();
+        int[] X = IntStream.range(0, n).filter(i -> vars[i] != pivot).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
         int[] indE = IntStream.range(n * 2, n * 3).toArray();
         int[] indH = IntStream.range(n * 3, n * 4).toArray();
         int t = e.readValue(p);
         int ipivot = getInd(pivot);
-        int dpivot = e.domain(vars[ipivot+n]).min();
+        int dpivot = e.domain(vars[ipivot + n]).min();
         switch (e.readMask(p)) {
             case 2://INCLOW
-                if (ipivot < n){
-                    explainOverlap(e, X, t, indD);
-                    IntIterableRangeSet set = e.empty();
-                    set.addBetween(t-dpivot,t-1);
-                    pivot.intersectLit(set.flip(), e);
+                if (ipivot < n) {
+                    if (explainOverlap(e, X, t, indD)) {
+                        IntIterableRangeSet set = e.empty();
+                        set.addBetween(t - dpivot, t - 1);
+                        pivot.intersectLit(set.flip(), e);
+                    }else{
+                        throw new UnsupportedOperationException("Unfindable overlapping");
+                    }
                 } else {//capa ou autres
                     throw new UnsupportedOperationException("Unknown event type explanation");
                     //defaultExplain(this, p, e);
                 }
                 break;
             case 4://DECUPP
-                if (ipivot < n){
-                    explainOverlap(e, X, t -1+ dpivot, indD);
-                    IntIterableRangeSet set = e.empty();
-                    set.addBetween(t,t-1+dpivot);
-                    pivot.intersectLit(set.flip(), e);
-                }else {//capa ou autres
+                if (ipivot < n) {
+                    t++;//mise a niveau de t pour la decomposition
+                    if (explainOverlap(e, X, t + dpivot, indD)) {
+                        IntIterableRangeSet set = e.empty();
+                        set.addBetween(t, t - 1 + dpivot);
+                        pivot.intersectLit(set.flip(), e);
+                    } else {
+                        throw new UnsupportedOperationException("Unfindable overlapping");
+                    }
+                } else {//capa ou autres
                     throw new UnsupportedOperationException("Unknown event type explanation");
                     //defaultExplain(this, p, e);
                 }
