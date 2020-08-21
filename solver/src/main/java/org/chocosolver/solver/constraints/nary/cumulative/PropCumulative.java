@@ -223,81 +223,11 @@ public class PropCumulative extends Propagator<IntVar> {
         if(ind==-1)throw new UnsupportedOperationException("Unfindable pivot variable ");
         return ind;
     }
-    /**
-     * Add to the explanation the lower bound event greater or equal than t (the real event added is inverted because only disjunctions are allowed for explanation)
-     * @param var variable to set the event on
-     * @param t value
-     */
-    private void explainSupit(ExplanationForSignedClause e, IntVar var, int t) {
-        var.unionLit(e.root(var).min(),t-1,e);
-    }
-    /**
-     * Add to the explanation the upper bound event strictly smaller than t (the real event added is inverted because only disjunctions are allowed for explanation)
-     * @param var variable to set the event on
-     * @param t value
-     */
-    private void explainInfit(ExplanationForSignedClause e, IntVar var, int t) {
-        var.unionLit(t,e.root(var).max(),e);
-    }
-    /**
-     * Find in the implication graph and add to the explanation all the lower bound event greater or equal than t (the real events added are inverted because only disjunctions are allowed for explanation)
-     * @param t value
-     */
-    private void explainSupForallit(ExplanationForSignedClause e, int[] indexes, int t) {
+    private void explainOverlap(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         for(int i: indexes){
-            if(e.domain(vars[i]).max()>=t){
-                explainSupit(e,vars[i],t);
-            }
-        }
-    }
-    /**
-     * Find in the implication graph and add to the explanation all the upper bound event strictly smaller than t (the real events added are inverted because only disjunctions are allowed for explanation)
-     * @param t value
-     */
-    private void explainInfForallit(ExplanationForSignedClause e, int[] indexes, int t) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).max()<t){
-                explainInfit(e,vars[i],t);
-            }
-        }
-    }
-    /**
-     * Find in the implication graph and add to the explanation all the lower bound event greater or equal than t-duration (the real events added are inverted because only disjunctions are allowed for explanation)
-     * @param indD index array to access durations
-     * @param t value
-     */
-    private void explainSupForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
-                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
-            }
-        }
-    }
-    /**
-     * Find in the implication graph and add to the explanation all the upper bound event strictly smaller than t-duration (the real events added are inverted because only disjunctions are allowed for explanation)
-     * @param indD index array to access durations
-     * @param t value
-     */
-    private void explainInfForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).max()<t-e.domain(vars[indD[i]]).min()){
-                explainInfit(e,vars[i],t-e.domain(vars[indD[i]]).min());
-            }
-        }
-    }
-    private void explainInf(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).max()<=t && e.domain(vars[i]).min()>t-e.domain(vars[indD[i]]).min()){
-                explainInfit(e,vars[i],t);
-                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
-            }
-        }
-    }
-    private void explainSup(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        for(int i: indexes){
-            if(e.domain(vars[i]).max()<=t && e.domain(vars[i]).min()>t-e.domain(vars[indD[i]]).min()){
-                explainInfit(e,vars[i],t);
-                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
+            if(e.domain(vars[i]).max()<t && e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
+                vars[i].unionLit(t, e.root(vars[i]).max(),e);
+                vars[i].unionLit(e.root(vars[i]).min(),t-1-e.domain(vars[indD[i]]).min(),e);
             }
         }
     }
@@ -319,14 +249,10 @@ public class PropCumulative extends Propagator<IntVar> {
         switch (e.readMask(p)) {
             case 2://INCLOW
                 if (ipivot < n){
-                    explainInf(e, X, t, indD);
-
-                    IntIterableRangeSet set = new IntIterableRangeSet(t,e.root(pivot).max());
-                    if(t - dpivot-1>=e.root(pivot).min()) {
-                        IntIterableRangeSet set2 = new IntIterableRangeSet(e.root(pivot).min(),t - dpivot-1);
-                        unionOf(set,set2);
-                    }
-                    pivot.intersectLit(set, e);
+                    explainOverlap(e, X, t, indD);
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t-dpivot,t-1);
+                    pivot.intersectLit(set.flip(), e);
                 } else {//capa ou autres
                     throw new UnsupportedOperationException("Unknown event type explanation");
                     //defaultExplain(this, p, e);
@@ -334,14 +260,10 @@ public class PropCumulative extends Propagator<IntVar> {
                 break;
             case 4://DECUPP
                 if (ipivot < n){
-                    explainSup(e, X, t + dpivot, indD);
-
-                    IntIterableRangeSet set = new IntIterableRangeSet(e.root(pivot).min(),t-1);
-                    if(t + dpivot<e.root(pivot).max()){
-                        IntIterableRangeSet set2 = new IntIterableRangeSet(t + dpivot,e.root(pivot).max());
-                        unionOf(set,set2);
-                    }
-                    pivot.intersectLit(set, e);
+                    explainOverlap(e, X, t -1+ dpivot, indD);
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t,t-1+dpivot);
+                    pivot.intersectLit(set.flip(), e);
                 }else {//capa ou autres
                     throw new UnsupportedOperationException("Unknown event type explanation");
                     //defaultExplain(this, p, e);
