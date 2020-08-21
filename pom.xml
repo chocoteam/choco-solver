@@ -14,10 +14,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
-    <artifactId>choco</artifactId>
+    <artifactId>Choco</artifactId>
     <version>4.10.4-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>choco</name>
+    <name>Choco</name>
     <url>http://choco-solver.org/</url>
     <description>
         A Free and Open-Source library dedicated to Constraint Programming.
@@ -569,4 +569,28 @@
         </plugins>
     </reporting>
 
+    <dependencyManagement>
+    	<dependencies>
+    		<dependency>
+    			<groupId>org.choco-solver.choco</groupId>
+    			<artifactId>Solver</artifactId>
+    			<version>${project.version}</version>
+    		</dependency>
+    		<dependency>
+    			<groupId>org.choco-solver.choco</groupId>
+    			<artifactId>Pf4cs</artifactId>
+    			<version>${project.version}</version>
+    		</dependency>
+    		<dependency>
+    			<groupId>org.choco-solver.choco</groupId>
+    			<artifactId>Sat</artifactId>
+    			<version>${project.version}</version>
+    		</dependency>
+    		<dependency>
+    			<groupId>org.choco-solver.choco</groupId>
+    			<artifactId>Cutoffseq</artifactId>
+    			<version>${project.version}</version>
+    		</dependency>
+    	</dependencies>
+    </dependencyManagement>
 </project>

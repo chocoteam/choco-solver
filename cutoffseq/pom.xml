@@ -16,18 +16,18 @@
 
     <parent>
         <groupId>org.choco-solver</groupId>
-        <artifactId>choco</artifactId>
+        <artifactId>Choco</artifactId>
         <version>4.10.4-SNAPSHOT</version>
     </parent>
-    <artifactId>cutoffseq</artifactId>
-    <version>1.0.5</version>
+    <artifactId>Cutoffseq</artifactId>
     <packaging>jar</packaging>
 
-    <name>cutoffseq</name>
+    <name>Cutoffseq</name>
     <description>Cutoff sequence generator.</description>
 
     <properties>
         <main_dir>.${file.separator}..</main_dir>
     </properties>
 
+    <groupId>org.choco-solver.choco</groupId>
 </project>
