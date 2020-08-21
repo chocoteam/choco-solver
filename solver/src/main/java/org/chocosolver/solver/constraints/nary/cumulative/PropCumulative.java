@@ -28,6 +28,8 @@ import org.chocosolver.util.tools.ArrayUtils;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
+
 /**
  * Cumulative propagator
  * Performs energy checking and mandatory part based filtering
@@ -227,7 +229,7 @@ public class PropCumulative extends Propagator<IntVar> {
      * @param t value
      */
     private void explainSupit(ExplanationForSignedClause e, IntVar var, int t) {
-        var.unionLit(e.setInf(t-1),e);
+        var.unionLit(e.root(var).min(),t-1,e);
     }
     /**
      * Add to the explanation the upper bound event strictly smaller than t (the real event added is inverted because only disjunctions are allowed for explanation)
@@ -235,7 +237,7 @@ public class PropCumulative extends Propagator<IntVar> {
      * @param t value
      */
     private void explainInfit(ExplanationForSignedClause e, IntVar var, int t) {
-        var.unionLit(e.setSup(t),e);
+        var.unionLit(t,e.root(var).max(),e);
     }
     /**
      * Find in the implication graph and add to the explanation all the lower bound event greater or equal than t (the real events added are inverted because only disjunctions are allowed for explanation)
@@ -244,7 +246,7 @@ public class PropCumulative extends Propagator<IntVar> {
     private void explainSupForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()>=t){
-                vars[i].unionLit(e.setInf(t-1),e);
+                explainSupit(e,vars[i],t);
             }
         }
     }
@@ -255,7 +257,7 @@ public class PropCumulative extends Propagator<IntVar> {
     private void explainInfForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()<t){
-                vars[i].unionLit(e.setSup(t),e);
+                explainInfit(e,vars[i],t);
             }
         }
     }
@@ -267,7 +269,7 @@ public class PropCumulative extends Propagator<IntVar> {
     private void explainSupForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         for(int i: indexes){
             if(e.domain(vars[i]).min()>=t-e.domain(vars[indD[i]]).min()){
-                vars[i].unionLit(e.setInf(t-1-e.domain(vars[indD[i]]).min()),e);
+                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
             }
         }
     }
@@ -279,10 +281,27 @@ public class PropCumulative extends Propagator<IntVar> {
     private void explainInfForallitMinusci(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         for(int i: indexes){
             if(e.domain(vars[i]).max()<t-e.domain(vars[indD[i]]).min()){
-                vars[i].unionLit(e.setSup(t-e.domain(vars[indD[i]]).min()),e);
+                explainInfit(e,vars[i],t-e.domain(vars[indD[i]]).min());
             }
         }
     }
+    private void explainInf(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).max()<=t && e.domain(vars[i]).min()>t-e.domain(vars[indD[i]]).min()){
+                explainInfit(e,vars[i],t);
+                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
+            }
+        }
+    }
+    private void explainSup(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
+        for(int i: indexes){
+            if(e.domain(vars[i]).max()<=t && e.domain(vars[i]).min()>t-e.domain(vars[indD[i]]).min()){
+                explainInfit(e,vars[i],t);
+                explainSupit(e,vars[i],t-e.domain(vars[indD[i]]).min());
+            }
+        }
+    }
+
     /**
      * Detect and explain the event at pivot variable p
      * @param p pivot variable
@@ -294,41 +313,38 @@ public class PropCumulative extends Propagator<IntVar> {
         int[] indD = IntStream.range(n, n * 2).toArray();
         int[] indE = IntStream.range(n * 2, n * 3).toArray();
         int[] indH = IntStream.range(n * 3, n * 4).toArray();
-        int t = 0;
-        int dpivot = 0;
+        int t = e.readValue(p);
+        int ipivot = getInd(pivot);
+        int dpivot = e.domain(vars[ipivot+n]).min();
         switch (e.readMask(p)) {
             case 2://INCLOW
-                if (getInd(pivot) < n) {//start
-                    dpivot = e.domain(vars[getInd(pivot) + n]).min();
-                    t = e.readDom(p).min();
-                } else if (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n) {//end
-                    dpivot = e.domain(vars[getInd(pivot) - n]).min();
-                    t = e.readDom(p).min() - dpivot;
-                }
-                if ((getInd(pivot) < n)){// || (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n)){
-                    explainSupit(e, pivot, t - dpivot);
-                    explainSupForallitMinusci(e, X, t, indD);
-                    explainInfForallit(e, X, t);
-                    pivot.intersectLit(e.setSup(t), e);
+                if (ipivot < n){
+                    explainInf(e, X, t, indD);
+
+                    IntIterableRangeSet set = new IntIterableRangeSet(t,e.root(pivot).max());
+                    if(t - dpivot-1>=e.root(pivot).min()) {
+                        IntIterableRangeSet set2 = new IntIterableRangeSet(e.root(pivot).min(),t - dpivot-1);
+                        unionOf(set,set2);
+                    }
+                    pivot.intersectLit(set, e);
                 } else {//capa ou autres
-                    defaultExplain(this, p, e);
+                    throw new UnsupportedOperationException("Unknown event type explanation");
+                    //defaultExplain(this, p, e);
                 }
                 break;
             case 4://DECUPP
-                if (getInd(pivot) < n) {//start
-                    dpivot = e.domain(vars[getInd(pivot) + n]).min();
-                    t = e.readDom(p).min();
-                } else if (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n) {//end
-                    dpivot = e.domain(vars[getInd(pivot) - n]).min();
-                    t = e.readDom(p).min() - dpivot;
-                }
-                if ((getInd(pivot) < n)){// || (getInd(pivot) >= 2 * n && getInd(pivot) < 3 * n)){
-                    explainInfit(e, pivot, t + dpivot);
-                    explainSupForallitMinusci(e, X, t + dpivot, indD);
-                    explainInfForallit(e, X, t + dpivot);
-                    pivot.intersectLit(e.setInf(t), e);
+                if (ipivot < n){
+                    explainSup(e, X, t + dpivot, indD);
+
+                    IntIterableRangeSet set = new IntIterableRangeSet(e.root(pivot).min(),t-1);
+                    if(t + dpivot<e.root(pivot).max()){
+                        IntIterableRangeSet set2 = new IntIterableRangeSet(t + dpivot,e.root(pivot).max());
+                        unionOf(set,set2);
+                    }
+                    pivot.intersectLit(set, e);
                 }else {//capa ou autres
-                    defaultExplain(this, p, e);
+                    throw new UnsupportedOperationException("Unknown event type explanation");
+                    //defaultExplain(this, p, e);
                 }
                 break;
             case 8://INSTANTIATE
