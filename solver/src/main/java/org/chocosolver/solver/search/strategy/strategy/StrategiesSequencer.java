@@ -28,100 +28,103 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Charles Prud'homme
  * @since 5 juil. 2010
  */
-@SuppressWarnings({"UnusedDeclaration"})
-public class StrategiesSequencer extends AbstractStrategy<Variable> {
+public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U> {
 
-    private AbstractStrategy[] strategies;
-    private IStateInt index;
+	private AbstractStrategy<U>[] strategies;
+	private IStateInt index;
 
-    private static Variable[] make(AbstractStrategy... strategies) {
-        Variable[] vars = new Variable[0];
-        for (int i = 0; i < strategies.length; i++) {
-            vars = ArrayUtils.append(vars, strategies[i].vars);
-        }
-        return vars;
-    }
+	@SuppressWarnings("unchecked")
+	@SafeVarargs
+	private static <V extends Variable> V[] mergeVars(AbstractStrategy<V>... strategies) {
+		V[] vars = strategies[0].vars;
+		for (int idx = 1; idx < strategies.length; idx++) {
+			vars = ArrayUtils.append(vars, strategies[idx].vars);
+		}
+		return vars;
+	}
 
-    public StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies) {
-        super(make(strategies));
-        index = environment.makeInt(0);
-        this.strategies = strategies;
-    }
+	@SafeVarargs
+	public StrategiesSequencer(IEnvironment environment, AbstractStrategy<U>... strategies) {
+		super(mergeVars(strategies));
+		index = environment.makeInt(0);
+		this.strategies = strategies;
+	}
 
-	public StrategiesSequencer(AbstractStrategy... strategies) {
-		super(make(strategies));
+	@SafeVarargs
+	public StrategiesSequencer(AbstractStrategy<U>... strategies) {
+		super(mergeVars(strategies));
 		index = null;
 		this.strategies = strategies;
 	}
 
-    @Override
-    public boolean init() {
-        boolean ok = true;
-        for (int i = 0; i < strategies.length; i++) {
-            ok &= strategies[i].init();
-        }
-        return ok;
-    }
+	@Override
+	public boolean init() {
+		boolean ok = true;
+		for (AbstractStrategy<? extends U> element : strategies) {
+			ok &= element.init();
+		}
+		return ok;
+	}
 
-    @Override
-    public void remove() {
-        for (int i = 0; i < strategies.length; i++) {
-            strategies[i].remove();
-        }
-    }
+	@Override
+	public void remove() {
+		for (AbstractStrategy<? extends U> element : strategies) {
+			element.remove();
+		}
+	}
 
-    @Override
-    public Decision<Variable> computeDecision(Variable variable) {
-        if (variable == null || variable.isInstantiated()) {
-            return null;
-        }
-        int idx = (index==null)?0:index.get();
-        Decision decision = null;
-        while (decision == null && idx < strategies.length) {
-            if (contains(strategies[idx].vars, variable)) {
-                decision = strategies[idx].computeDecision(variable);
-            }
-            idx++;
-        }
-        return decision;
-    }
+	@Override
+	public Decision<U> computeDecision(U variable) {
+		if (variable == null || variable.isInstantiated()) {
+			return null;
+		}
+		int idx = index==null?0:index.get();
+		Decision<U> decision = null;
+		while (decision == null && idx < strategies.length) {
+			if (contains(strategies[idx].vars, variable)) {
+				decision = strategies[idx].computeDecision(variable);
+			}
+			idx++;
+		}
+		return decision;
+	}
 
-    private static boolean contains(Variable[] vars, Variable variable) {
-        for (Variable v : vars) {
-            if (v.equals(variable)) {
-                return true;
-            }
-        }
-        return false;
-    }
+	private static boolean contains(Variable[] vars, Variable variable) {
+		for (Variable v : vars) {
+			if (v.equals(variable)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-    /**
-     * {@inheritDoc}
-     * Iterates over the declared sub-strategies and gets the overall current decision.
-     */
-    @Override
-    public Decision getDecision() {
-        int idx = (index==null)?0:index.get();
-        Decision decision = strategies[idx].getDecision();
-        while (decision == null && idx < strategies.length - 1) {
-            decision = strategies[++idx].getDecision();
-        }
+	/**
+	 * {@inheritDoc}
+	 * Iterates over the declared sub-strategies and gets the overall current decision.
+	 */
+	@Override
+	public Decision<U> getDecision() {
+		int idx = index==null?0:index.get();
+		Decision<U> decision = strategies[idx].getDecision();
+		while (decision == null && idx < strategies.length - 1) {
+			decision = strategies[++idx].getDecision();
+		}
 		if(index!=null){
 			index.set(idx);
 		}
-        return decision;
-    }
+		return decision;
+	}
 
-    /**
-     * {@inheritDoc}
-     * This is based on the <code>print()</code> method of every sub-strategies.
-     */
-    @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder("Sequence of:\n");
-        for (int i = 0; i < strategies.length; i++) {
-            st.append("\t").append(strategies[i].toString()).append("\n");
-        }
-        return st.toString();
-    }
+	/**
+	 * {@inheritDoc}
+	 * This is based on the <code>print()</code> method of every sub-strategies.
+	 */
+	@Override
+	public String toString() {
+		StringBuilder st = new StringBuilder("Sequence of:\n");
+		for (AbstractStrategy<? extends U> element : strategies) {
+			st.append("\t").append(element.toString()).append("\n");
+		}
+		return st.toString();
+	}
 }
