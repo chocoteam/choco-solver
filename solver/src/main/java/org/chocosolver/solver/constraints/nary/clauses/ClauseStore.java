@@ -194,7 +194,8 @@ public class ClauseStore extends Propagator<IntVar> {
                     throw new SolverException("Learn a weak clause (" + fsl + "/" + ng.cardinality() + ")");
                 }
             }
-            if (fsl == ng.cardinality()) {
+            if (XParameters.ASSERT_ASSERTING_LEVEL
+                    && fsl == ng.cardinality()) {
                 throw new SolverException("wrong clause asserting level");
             }
         }

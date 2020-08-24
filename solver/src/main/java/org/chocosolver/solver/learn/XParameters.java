@@ -64,6 +64,10 @@ public class XParameters {
      */
     public static boolean ASSERT_UNIT_PROP = true;
     /**
+     * When set to <i>true</i>, assert that the asserting level of the learnt clause is good
+     */
+    public static boolean ASSERT_ASSERTING_LEVEL = false;
+    /**
      * When set to <i>true</i>, print the learnt clause
      */
     public static boolean PRINT_CLAUSE = false;
