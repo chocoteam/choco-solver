@@ -209,7 +209,9 @@ public class IntIterableRangeSet implements IntIterableSet {
 
     @Override
     public int min() {
-        if (isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
+        if (isEmpty()) {
+            throw new IllegalStateException("cannot find minimum of an empty set");
+        }
         return ELEMENTS[0];
     }
 
@@ -620,6 +622,9 @@ public class IntIterableRangeSet implements IntIterableSet {
         }
         if (f > t) {
             throw new IllegalArgumentException("Cannot retain from empty range [" + f + "," + t + "]");
+        }
+        if (isEmpty() || f <= this.min() && t >= this.max()) {
+            return false;
         }
         int rf = rangeOf(f);
         if (rf < 0) {
@@ -1045,6 +1050,7 @@ public class IntIterableRangeSet implements IntIterableSet {
      */
     @SuppressWarnings("Duplicates")
     public boolean intersect(int lb, int ub) {
+        if(CARDINALITY > 100) return intersectDichot(lb, ub);
         int s1 = this.SIZE >> 1;
         int s2 = ub - lb + 1;
         if (s1 > 0 && s2 > 0) {
@@ -1052,18 +1058,34 @@ public class IntIterableRangeSet implements IntIterableSet {
             int lbi, ubi;
             lbi = this.ELEMENTS[0];
             ubi = this.ELEMENTS[1];
-            while (i < s1) {
+            while (true) {
                 if ((lbi <= lb && lb <= ubi) || (lb <= lbi && lbi <= ub)) {
                     return true;
                 } else if (ubi <= ub && ++i < s1) {
                     lbi = this.ELEMENTS[i << 1];
                     ubi = this.ELEMENTS[(i << 1) + 1];
-                }else{
+                } else {
                     break;
                 }
             }
         }
         return false;
+    }
+
+    @SuppressWarnings("Duplicates")
+    public boolean intersectDichot(int lb, int ub) {
+        int rlb = rangeOf(lb);
+        int rub;
+        if (rlb > 0) {
+            return true;
+        } else {
+            rub = rangeOf(ub, -rlb, SIZE);
+            if (rub > 0) {
+                return true;
+            } else {
+                return rlb != rub;
+            }
+        }
     }
 
     /**
