@@ -472,19 +472,19 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * since it applies a union operation on signed literal.
      */
     default void unionLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ %s\n", getName(), getLit(), set);
+        }
         this.getLit().addAll(set);
         if (this.getLit().isEmpty()) {
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s -- skip\n", getName(), set);
+                System.out.print("skip\n");
             }
         } else {
-            explanation.addLit(this);
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∪ %s", getName(), getLit(), set);
+                System.out.print("\n");
             }
-        }
-        if (XParameters.FINE_PROOF) {
-            System.out.print("\n");
+            explanation.addLit(this);
         }
         explanation.returnSet(set);
     }
@@ -501,19 +501,19 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * since it applies a union operation on signed literal.
      */
     default void unionLit(int l, int u, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
+        }
         this.getLit().addBetween(l, u);
         if (this.getLit().isEmpty()) {
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: [%d, %d] -- skip\n", getName(), l, u);
+                System.out.print("-- skip\n");
             }
         } else {
-            explanation.addLit(this);
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
+                System.out.print("\n");
             }
-        }
-        if (XParameters.FINE_PROOF) {
-            System.out.print("\n");
+            explanation.addLit(this);
         }
     }
 
@@ -528,19 +528,19 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * since it applies a union operation on signed literal.
      */
     default void unionLit(int v, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
+        }
         this.getLit().add(v);
         if (this.getLit().isEmpty()) {
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: {%d} -- skip\n", getName(), v);
+                System.out.print("skip\n");
             }
         } else {
-            explanation.addLit(this);
             if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
+                System.out.print("\n");
             }
-        }
-        if (XParameters.FINE_PROOF) {
-            System.out.print("\n");
+            explanation.addLit(this);
         }
     }
 
