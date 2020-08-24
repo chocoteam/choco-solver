@@ -28,8 +28,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
-
 /**
  * Cumulative propagator
  * Performs energy checking and mandatory part based filtering
@@ -228,8 +226,8 @@ public class PropCumulative extends Propagator<IntVar> {
         boolean flag = false;
         for (int i : indexes) {
             if (e.domain(vars[i]).max() < t && e.domain(vars[i]).min() >= t - e.domain(vars[indD[i]]).min()) {
-                vars[i].unionLit(t, e.root(vars[i]).max(), e);
-                vars[i].unionLit(e.root(vars[i]).min(), t - 1 - e.domain(vars[indD[i]]).min(), e);
+                vars[i].unionLit(t, IntIterableRangeSet.MAX, e);
+                vars[i].unionLit(IntIterableRangeSet.MIN, t - 1 - e.domain(vars[indD[i]]).min(), e);
                 flag = true;
             }
         }
@@ -246,39 +244,30 @@ public class PropCumulative extends Propagator<IntVar> {
         IntVar pivot = e.readVar(p);
         int[] X = IntStream.range(0, n).filter(i -> vars[i] != pivot).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
-        int[] indE = IntStream.range(n * 2, n * 3).toArray();
-        int[] indH = IntStream.range(n * 3, n * 4).toArray();
         int t = e.readValue(p);
         int ipivot = getInd(pivot);
         int dpivot = e.domain(vars[ipivot + n]).min();
+        if (ipivot >= n) {
+            throw new UnsupportedOperationException("Try to explain an event not on a start variable");
+        }
         switch (e.readMask(p)) {
             case 2://INCLOW
-                if (ipivot < n) {
-                    if (explainOverlap(e, X, t, indD)) {
-                        IntIterableRangeSet set = e.empty();
-                        set.addBetween(t - dpivot, t - 1);
-                        pivot.intersectLit(set.flip(), e);
-                    }else{
-                        throw new UnsupportedOperationException("Unfindable overlapping");
-                    }
-                } else {//capa ou autres
-                    throw new UnsupportedOperationException("Unknown event type explanation");
-                    //defaultExplain(this, p, e);
+                if (explainOverlap(e, X, t, indD)) {
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t - dpivot, t - 1);
+                    pivot.intersectLit(set.flip(), e);
+                }else{
+                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
                 }
                 break;
             case 4://DECUPP
-                if (ipivot < n) {
-                    t++;//mise a niveau de t pour la decomposition
-                    if (explainOverlap(e, X, t + dpivot, indD)) {
-                        IntIterableRangeSet set = e.empty();
-                        set.addBetween(t, t - 1 + dpivot);
-                        pivot.intersectLit(set.flip(), e);
-                    } else {
-                        throw new UnsupportedOperationException("Unfindable overlapping");
-                    }
-                } else {//capa ou autres
-                    throw new UnsupportedOperationException("Unknown event type explanation");
-                    //defaultExplain(this, p, e);
+                t++;// required due to decomposition
+                if (explainOverlap(e, X, t + dpivot, indD)) {
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t, t - 1 + dpivot);
+                    pivot.intersectLit(set.flip(), e);
+                } else {
+                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
                 }
                 break;
             case 8://INSTANTIATE
