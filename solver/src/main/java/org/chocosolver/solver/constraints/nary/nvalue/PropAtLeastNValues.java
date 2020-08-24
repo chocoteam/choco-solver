@@ -19,7 +19,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import java.util.stream.IntStream;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
@@ -188,7 +187,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         for (int i : indexes)  {
             for(int t : e.root(vars[i])){
                 if (!e.domain(vars[i]).contains(t)) {
-                    vars[i].unionLit(e.setVal(t),e);
+                    vars[i].unionLit(t,e);
                 }
             }//vars[i].unionLit(e.complement(vars[i]),e);
         }
@@ -201,7 +200,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         for (int i : indexes)  {
             for(int tt : e.root(vars[i])){
                 if (!e.domain(vars[i]).contains(tt)&&t!=tt) {
-                    vars[i].unionLit(e.setVal(tt),e);
+                    vars[i].unionLit(tt,e);
                 }
             }//vars[i].unionLit(e.complement(vars[i]),e);
         }
@@ -213,7 +212,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     private void explainDiffForallit(ExplanationForSignedClause e, int[] indexes, int t) {
         for (int i : indexes)  {
             if (!e.domain(vars[i]).contains(t)) {
-                vars[i].unionLit(e.setVal(t),e);
+                vars[i].unionLit(t,e);
             }
         }
     }
@@ -253,7 +252,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         switch (e.readMask(p)) {
             case 4://DECUPP
                 explainDiffForalliForallt(e, X);
-                pivot.intersectLit(e.setInf(e.domain(pivot).max()), e);
+                pivot.intersectLit(IntIterableRangeSet.MIN, e.domain(pivot).max(), e);
                 break;
             case 8://INSTANTIATE
                 assert e.readDom(p).size()==1;
@@ -263,7 +262,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 explainEquaForalliForalltDifft(e, X, t);
                 vars[vars.length - 1].unionLit(e.complement(vars[vars.length - 1]),e);
                 IntIterableRangeSet set = e.complement(pivot);
-                unionOf(set,e.setVal(t));
+                set.add(t);
                 pivot.intersectLit(set, e);
                 break;
             case 2://INCLOW

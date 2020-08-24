@@ -401,31 +401,7 @@ public class ExplanationForSignedClause extends IExplanation {
         set.removeAll(readDom(var));
         return set;
     }
-
-    /**
-     * @param val a value
-     * @return a set which contains all values before <i>val</i> and <i>val</i>
-     */
-    public IntIterableRangeSet setInf(int val) {
-        return new IntIterableRangeSet(IntIterableRangeSet.MIN, val);
-    }
-
-    /**
-     * @param val a value
-     * @return a set which contains all values after <i>val</i> and <i>val</i>
-     */
-    public IntIterableRangeSet setSup(int val) {
-        return new IntIterableRangeSet(val, IntIterableRangeSet.MAX);
-    }
-
-    /**
-     * @param val a value
-     * @return a set which contains all values after <i>val</i> and <i>val</i>
-     */
-    public IntIterableRangeSet setVal(int val) {
-        return new IntIterableRangeSet(val);
-    }
-
+    
     /**
      * @param val a value
      * @return a set which contains all values after <i>val</i> and <i>val</i>
