@@ -54,7 +54,7 @@ public final class EqView extends IntBoolView {
         boolean done = false;
         if (!this.contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            this.contradiction(this, MSG_EMPTY);
+            this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);

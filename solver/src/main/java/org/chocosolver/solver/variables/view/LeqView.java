@@ -54,7 +54,7 @@ public final class LeqView extends IntBoolView {
         boolean done = false;
         if (!this.contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            this.contradiction(this, MSG_EMPTY);
+            this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
@@ -199,24 +199,25 @@ public final class LeqView extends IntBoolView {
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
         IntVar pivot = explanation.readVar(p);
+        assert !explanation.readDom(p).isEmpty();
         int value = getValue();
         if (value == 1) { // b is true and X < c holds
             if (pivot == this) { // b is the pivot
+                assert explanation.readDom(this).cardinality() == 2;
                 this.intersectLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.complement(var);
-                dom0.retainBetween(cste + 1, IntIterableRangeSet.MAX);
-                var.unionLit(dom0, explanation);
+                var.unionLit(cste + 1, IntIterableRangeSet.MAX, explanation);
             } else /*if (pivot == var)*/ { // x is the pivot
+                assert explanation.readDom(this).cardinality() == 1;
                 this.unionLit(0, explanation);
                 var.intersectLit(IntIterableRangeSet.MIN, cste, explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
+                assert explanation.readDom(this).cardinality() == 2;
                 this.intersectLit(0, explanation);
-                IntIterableRangeSet dom0 = explanation.complement(var);
-                dom0.retainBetween(IntIterableRangeSet.MIN, cste);
-                var.unionLit(dom0, explanation);
+                var.unionLit(IntIterableRangeSet.MIN, cste, explanation);
             } else /*if (pivot == vars[0])*/ { // x is the pivot, case e. in javadoc
+                assert explanation.readDom(this).cardinality() == 1;
                 this.unionLit(1, explanation);
                 var.intersectLit(cste + 1, IntIterableRangeSet.MAX, explanation);
             }
