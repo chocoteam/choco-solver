@@ -4,7 +4,7 @@
   "id": "org.choco-solver.choco",
   "executable": "fzn-choco",
   "mznlib": "mzn-lib",
-  "tags": "cp",
+  "tags": ["cp"],
   "stdFlags": [
     "-a",
     "-n",

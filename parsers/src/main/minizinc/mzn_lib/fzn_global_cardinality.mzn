@@ -13,11 +13,11 @@ predicate fzn_global_cardinality(array[int] of var int: x,
 % cardinality constraint.  This version is deprecated and will be removed
 % in a future release.
 %
-predicate fzn_global_cardinality_old(array[int] of var int: x,
-                             array[int] of var int: c) =
-    forall(i in index_set(c)) ( fzn_count(x, i, c[i]) );
-
-include "fzn_count.mzn";
+%predicate fzn_global_cardinality_old(array[int] of var int: x,
+%                             array[int] of var int: c) =
+%    forall(i in index_set(c)) ( count_eqchoco(x, i, c[i]) );
+%
+%include "fzn_count_eq.mzn";
 
 %-----------------------------------------------------------------------------%
 
