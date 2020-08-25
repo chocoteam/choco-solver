@@ -1079,7 +1079,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         if (rlb > 0) {
             return true;
         } else {
-            rub = rangeOf(ub, -rlb, SIZE);
+            rub = rangeOf(ub, (-rlb - 1) << 1, SIZE);
             if (rub > 0) {
                 return true;
             } else {
