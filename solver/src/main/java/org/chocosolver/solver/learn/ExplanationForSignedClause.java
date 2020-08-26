@@ -234,12 +234,14 @@ public class ExplanationForSignedClause extends IExplanation {
             if (!literals.contains(mIG.getIntVarAt(l))) {
                 front.pollLastValue();
             } else {
+                IntVar var = mIG.getIntVarAt(l);
+                // cpru deal with : if(VariableUtils.isView(var))?
                 int p = mIG.getPredecessorOf(l);
                 // todo improve
                 // go left as long as the right-most variable in 'front' contradicts 'literals'
                 if (p < l /* to avoid going "before" root */
-                        && mIG.getIntVarAt(l).getLit().disjoint(mIG.getDomainAt(p))) {
-                    front.replace(mIG.getIntVarAt(l), p);
+                        && var.getLit().disjoint(mIG.getDomainAt(p))) {
+                    front.replace(var, p);
                 }
             }
             k = l;
