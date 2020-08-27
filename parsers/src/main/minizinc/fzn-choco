@@ -9,8 +9,8 @@ SEED=0
 NB_NODES=1
 TIME_LIMIT=-1
 DIR=`dirname "$0"`
-JAR_NAME=choco-parsers.jar
-CHOCO_JAR=${DIR}/${JAR_NAME}
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.4-SNAPSHOT/choco-parsers-4.10.4-SNAPSHOT-jar-with-dependencies.jar
+#${DIR}/${JAR_NAME}
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]

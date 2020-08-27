@@ -732,6 +732,25 @@ public enum FConstraint {
 
         }
     },
+    fzn_all_equal_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            if (vars.length > 1) {
+                model.allEqual(vars).post();
+            }
+        }
+    },
+    fzn_all_equal_int_reif{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            IntVar count = model.intVar(0, vars.length);
+            model.atMostNValues(vars, count, false).post();
+            model.reifyXeqC(count, 1, b);
+        }
+    },
     amongChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
