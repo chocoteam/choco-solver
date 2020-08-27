@@ -13,6 +13,7 @@ NEXT MILESTONE
 - Update [Dockerfile](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/docker/Dockerfile_Choco.dms), now automatically released in [hub.docker.com](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn)
 - Migrate to ANTLR 4.8-1
 - Support nested `seq_search` in FlatZinc file
+- Merge `cutoffseq` in `solver`
 
 ### Deprecated API (to be removed in next release):
 

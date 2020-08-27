@@ -22,6 +22,8 @@ module org.chocosolver.solver {
     exports org.chocosolver.memory.trailing.trail.chunck;
     exports org.chocosolver.memory.structure;
 
+    exports org.chocosolver.cutoffseq;
+
     exports org.chocosolver.solver;
     exports org.chocosolver.solver.learn;
     exports org.chocosolver.solver.constraints;
@@ -123,7 +125,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.tools;
 
     requires trove4j;
-    requires transitive org.chocosolver.cutoffseq;
     requires org.chocosolver.sat;
     requires org.jgrapht.core;
     requires cpprof.java;
