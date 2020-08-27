@@ -42,11 +42,6 @@
             <version>1.0.5</version>
         </dependency>
         <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco-geost</artifactId>
-            <version>4.0.5</version>
-        </dependency>
-        <dependency>
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
             <version>3.0.3</version>
