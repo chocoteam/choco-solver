@@ -10,7 +10,7 @@
 package org.chocosolver.mps;
 
 import org.chocosolver.parser.mps.MPS;
-import org.chocosolver.pf4cs.SetUpException;
+import org.chocosolver.parser.SetUpException;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;

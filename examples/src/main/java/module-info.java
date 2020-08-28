@@ -15,7 +15,7 @@
  */
 module org.chocosolver.examples {
     requires org.chocosolver.solver;
-    requires org.chocosolver.pf4cs;
+    requires org.chocosolver.parsers;
     requires args4j;
     requires java.desktop;
     requires trove4j;

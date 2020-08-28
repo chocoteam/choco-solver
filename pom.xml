@@ -26,7 +26,6 @@
     <modules>
         <module>sat</module>
         <module>solver</module>
-        <module>pf4cs</module>
         <module>parsers</module>
         <module>examples</module>
     </modules>

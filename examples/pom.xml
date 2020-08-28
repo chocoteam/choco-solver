@@ -38,8 +38,8 @@
     </dependency>
     <dependency>
       <groupId>org.choco-solver</groupId>
-      <artifactId>pf4cs</artifactId>
-      <version>1.0.5</version>
+      <artifactId>choco-parsers</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>

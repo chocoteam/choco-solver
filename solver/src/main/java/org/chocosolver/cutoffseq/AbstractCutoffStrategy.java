@@ -1,5 +1,5 @@
 /*
- * This file is part of org.chocosolver.org.chocosolver.cutoffseq, http://choco-solver.org/
+ * This file is part of choco-solver, http://choco-solver.org/
  *
  * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *

@@ -9,7 +9,6 @@
  */
 package org.chocosolver.parser;
 
-import org.chocosolver.pf4cs.IProblem;
 import org.chocosolver.solver.Model;
 
 /**
@@ -20,28 +19,44 @@ import org.chocosolver.solver.Model;
  * @version choco-parsers
  * @since 21/10/2014
  */
-public interface IParser extends IProblem{
+public interface IParser {
 
     boolean PRINT_LOG = true;
 
     /**
-     * Add a parser listener
-     *
-     * @param listener
+     * Set up the concrete class with the arguments defined by <i>args</i>.
+     * @param args arguments to set up the concrete class.
+     * @throws SetUpException if one or more argument is not valid.
+     * @return true if argument parsing goes right
      */
-    void addListener(ParserListener listener);
+    boolean setUp(String... args) throws SetUpException;
 
     /**
-     * Remove a parser listener
-     *
-     * @param listener
+     * Action to run on exit.
      */
-    void removeListener(ParserListener listener);
+    default void tearDown(){}
 
     /**
-     * Create the solver
+     * Call the model creation.
+     * <ul>
+     * <li>add variables</li>
+     * <li>post constraints</li>
+     * <li>(for optimization problems) define the objective(s) here or later in {@link #configureSearch()})</li>
+     * </ul>
      */
-    void createSolver();
+    void buildModel();
+    
+    /**
+     * Call search configuration.
+     * For optimization problems, define the objective if it has not been done in {@link #buildModel()}.
+     */
+    void configureSearch();
+
+    /**
+     * Call problem resolution.
+     * For optimization problems, the objective(s) must be defined before this call.
+     */
+    void solve();
 
     /**
      * @return a thread to execute on unexpected exit

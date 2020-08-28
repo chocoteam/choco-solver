@@ -10,8 +10,7 @@
 package org.chocosolver.examples.integer;
 
 import gnu.trove.list.array.TFloatArrayList;
-
-import org.chocosolver.pf4cs.SetUpException;
+import org.chocosolver.parser.SetUpException;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;

@@ -1,5 +1,5 @@
 /*
- * This file is part of pf4cs, http://choco-solver.org/
+ * This file is part of choco-parsers, http://choco-solver.org/
  *
  * Copyright (c) 2020, IMT Atlantique. All rights reserved.
  *
@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.pf4cs;
+package org.chocosolver.parser;
 
 /**
  * Defines an exception to catch invalid arguments.

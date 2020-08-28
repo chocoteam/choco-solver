@@ -10,7 +10,6 @@
 package org.chocosolver.parser;
 
 import gnu.trove.set.hash.THashSet;
-import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.solver.*;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
@@ -171,12 +170,15 @@ public abstract class RegParser implements IParser {
         return defaultSettings;
     }
 
-    @Override
+    /**
+     * Create the solver
+     */
+    public abstract void createSolver();
+
     public final void addListener(ParserListener listener) {
         listeners.add(listener);
     }
 
-    @Override
     public final void removeListener(ParserListener listener) {
         listeners.remove(listener);
     }
