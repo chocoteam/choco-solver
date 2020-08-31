@@ -175,6 +175,6 @@ public class ConstraintsName {
 
     public static final String SETCARD = "SETCARD";
 
-
+    public static final String CONDITION = "CONDITION";
 
 }

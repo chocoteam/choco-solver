@@ -864,7 +864,9 @@ public class Model implements IModel {
      * @throws SolverException if the constraint is posted twice, posted although reified or reified twice.
      */
     public void post(Constraint... cs) throws SolverException {
-        _post(true, cs);
+        if(cs != null) {
+            _post(true, cs);
+        }
     }
 
     /**
@@ -916,15 +918,18 @@ public class Model implements IModel {
      * @throws SolverException        if a constraint is posted twice, posted although reified or reified twice.
      */
     public void postTemp(Constraint... cs) throws ContradictionException {
-        for (Constraint c : cs) {
-            _post(false, c);
-            if (!getSolver().getEngine().isInitialized()) {
-                throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
-                        "A call to Model.post(Constraint) is more appropriate.");
-            }
-            if(getSolver().getEngine().isInitialized()){
-                for (Propagator p : c.getPropagators()) {
-                    getSolver().getEngine().execute(p);
+        if (cs != null) {
+            for (Constraint c : cs) {
+                this.getEnvironment().save(() -> unpost(c));
+                _post(false, c);
+                if (!getSolver().getEngine().isInitialized()) {
+                    throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
+                            "A call to Model.post(Constraint) is more appropriate.");
+                }
+                if (getSolver().getEngine().isInitialized()) {
+                    for (Propagator p : c.getPropagators()) {
+                        getSolver().getEngine().execute(p);
+                    }
                 }
             }
         }

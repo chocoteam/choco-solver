@@ -12,12 +12,11 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.constraints.reification.PropConditionnal;
+import org.chocosolver.solver.constraints.reification.PropConditional;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.ESat;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
@@ -25,9 +24,6 @@ import java.util.ArrayDeque;
 
 import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -38,8 +34,8 @@ import static org.testng.Assert.assertEquals;
  */
 public class DynamicPostTest {
 
-        @SuppressWarnings("UnusedDeclaration")
-    @Test(groups="1s", timeOut=60000)
+    @SuppressWarnings("UnusedDeclaration")
+    @Test(groups = "1s", timeOut = 60000)
     public void test0() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -50,37 +46,27 @@ public class DynamicPostTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
         final IntVar Y = model.intVar("Y", 1, 2, false);
         final IntVar Z = model.intVar("Z", 1, 2, false);
 
-        new Constraint("Conditionnal",
-                new PropConditionnal(new IntVar[]{X, Y, Z},
-                        new Constraint[]{model.arithm(X, "=", Y), model.arithm(Y, "=", Z)},
-                        new Constraint[]{}) {
-                    @Override
-                    public ESat checkCondition() {
-                        int nbNode = (int) this.model.getSolver().getNodeCount();
-                        switch (nbNode) {
-                            case 0:
-                            case 1:
-                                return UNDEFINED;
-                            case 2:
-                                return TRUE;
-                            default:
-                                return FALSE;
-                        }
-
-                    }
-                }).post();
+        model.conditional(
+                new IntVar[]{X, Y, Z},
+                vars -> vars[0]
+                        .getModel()
+                        .getSolver()
+                        .getNodeCount() > 1,
+                () -> model.getSolver().getNodeCount()==2?
+                        new Constraint[]{model.arithm(X, "=", Y), model.arithm(Y, "=", Z)}:
+                        null).post();
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -105,7 +91,7 @@ public class DynamicPostTest {
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test3() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -122,7 +108,7 @@ public class DynamicPostTest {
         assertEquals(model.getNbCstrs(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test4() {
         final Model model = new Model();
         final IntVar X = model.intVar("X", 1, 2, false);
@@ -136,7 +122,7 @@ public class DynamicPostTest {
         cs.add(c1);
         cs.add(c2);
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
-            while(cs.size()>0){
+            while (cs.size() > 0) {
                 model.unpost(cs.pop());
             }
         });
@@ -146,7 +132,7 @@ public class DynamicPostTest {
     }
 
     private static void popAll(ArrayDeque<Constraint> stack, Model model) {
-        while(stack.size()>0) {
+        while (stack.size() > 0) {
             model.unpost(stack.poll());
         }
     }
@@ -156,7 +142,7 @@ public class DynamicPostTest {
         constraint.post();
     }
 
-    private void pareto(boolean clauses){
+    private void pareto(boolean clauses) {
         // Objectives are to maximize "a" and maximize "b".
         Model model = new Model(new DefaultSettings().setSwapOnPassivate(false));
         IntVar a = model.intVar("a", 0, 2, false);
@@ -218,12 +204,12 @@ public class DynamicPostTest {
             model.getSolver().getEngine().flush();
             model.getSolver().reset();
 
-            if(clauses) {
+            if (clauses) {
                 model.addClausesBoolOrArrayEqualTrue(new BoolVar[]{
                         model.arithm(a, ">", bestA).reify(),
                         model.arithm(b, ">", bestB).reify()
                 });
-            }else{
+            } else {
                 model.or(
                         model.arithm(a, ">", bestA),
                         model.arithm(b, ">", bestB)).post();
@@ -233,13 +219,13 @@ public class DynamicPostTest {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJLpareto() {
         pareto(false);
         pareto(true);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testIssue214() {
         Model model = new Model();
         IntVar x = model.intVar("x", 1, 2, false);
@@ -253,7 +239,7 @@ public class DynamicPostTest {
         model.unpost(c);
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testCostas() {
         Model s1 = costasArray(7, false);
         Model s2 = costasArray(7, true);
@@ -274,5 +260,27 @@ public class DynamicPostTest {
             model.getSolver().plugMonitor((IMonitorSolution) () -> model.allDifferent(vectors, "BC").post());
         }
         return model;
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void test11() {
+        final Model model = new Model();
+        final IntVar X = model.intVar("X", 3, 5, false);
+        final IntVar Y = model.intVar("Y", 3, 5, false);
+        model.conditional(
+                new IntVar[]{X, Y},
+                PropConditional.ALL_INSTANTIATED,
+                () -> {
+                    if (X.isInstantiatedTo(3)) {
+                        return new Constraint[]{model.arithm(Y, "=", 4)};
+                    } else if (X.isInstantiatedTo(4)) {
+                        return new Constraint[]{model.arithm(Y, "=", 3)};
+                    } else {
+                        return null;
+                    }
+                }
+        ).post();
+        while (model.getSolver().solve());
+        assertEquals(model.getSolver().getSolutionCount(), 5);
     }
 }
