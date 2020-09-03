@@ -212,8 +212,8 @@ public class IbexTest {
         Model model = new Model();
         RealVar x = model.realVar("x", -2, 2, 0.1d);
         RealVar y = model.realVar("y", 4, 5, 0.1d);
-        // note: pow(2.0d) does not recognize that d is exactly an even integer
-        eval(model, x.pow(2.0d).eq(y), 1);
+        // See ISSUE #702, now pow(double) can recognize integer variables
+        eval(model, x.pow(2.0d).eq(y), 2);
     }
 
     @Test(groups = "ibex", timeOut = 60000)

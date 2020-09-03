@@ -108,7 +108,12 @@ public class BiCArExpression implements CArExpression {
                 case POW:
                     bounds = VariableUtils.boundsForPow(v1, v2);
                     me = model.realVar(bounds[0], bounds[1], p);
-                    model.realIbexGenericConstraint("{0}={1}^{2}", me, v1, v2).post();
+                    if (isIntegerConstant(v2)) {
+                        // See issue: #702
+                        model.realIbexGenericConstraint("{0}={1}^" + (int) v2.getLB(), me, v1).post();
+                    } else {
+                        model.realIbexGenericConstraint("{0}={1}^{2}", me, v1, v2).post();
+                    }
                     break;
                 case MIN:
                     bounds = VariableUtils.boundsForMinimum(v1, v2);
@@ -275,5 +280,9 @@ public class BiCArExpression implements CArExpression {
     @Override
     public String toString() {
         return op.name() + "(" + e1.toString() + "," + e2.toString() + ")";
+    }
+
+    private boolean isIntegerConstant(RealVar realVar) {
+        return realVar.isAConstant() && (realVar.getLB() % 1) == 0;
     }
 }
