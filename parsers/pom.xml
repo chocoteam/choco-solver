@@ -16,13 +16,13 @@
 
     <parent>
         <groupId>org.choco-solver</groupId>
-        <artifactId>choco</artifactId>
+        <artifactId>Choco</artifactId>
         <version>4.10.4-SNAPSHOT</version>
     </parent>
-    <artifactId>choco-parsers</artifactId>
+    <artifactId>Parsers</artifactId>
     <packaging>jar</packaging>
 
-    <name>choco-parsers</name>
+    <name>Parsers</name>
     <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
     </description>
 
@@ -31,21 +31,11 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco-solver</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>pf4cs</artifactId>
-            <version>1.0.5</version>
-        </dependency>
-        <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco-geost</artifactId>
-            <version>4.0.5</version>
-        </dependency>
+<!--         <dependency> -->
+<!--             <groupId>org.choco-solver</groupId> -->
+<!--             <artifactId>choco-geost</artifactId> -->
+<!--             <version>4.0.5</version> -->
+<!--         </dependency> -->
         <dependency>
             <groupId>net.sf.trove4j</groupId>
             <artifactId>trove4j</artifactId>
@@ -76,6 +66,14 @@
             <artifactId>poi</artifactId>
             <version>4.1.2</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.choco-solver.choco</groupId>
+        	<artifactId>Solver</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>org.choco-solver.choco</groupId>
+        	<artifactId>Pf4cs</artifactId>
         </dependency>
     </dependencies>
 
@@ -138,4 +136,5 @@
             </plugin>
         </plugins>
     </build>
+    <groupId>org.choco-solver.choco</groupId>
 </project>

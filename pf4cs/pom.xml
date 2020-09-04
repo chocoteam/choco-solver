@@ -16,18 +16,18 @@
 
     <parent>
         <groupId>org.choco-solver</groupId>
-        <artifactId>choco</artifactId>
+        <artifactId>Choco</artifactId>
         <version>4.10.4-SNAPSHOT</version>
     </parent>
-    <artifactId>pf4cs</artifactId>
-    <version>1.0.5</version>
+    <artifactId>Pf4cs</artifactId>
     <packaging>jar</packaging>
 
-    <name>pf4cs</name>
+    <name>Pf4cs</name>
     <description>Problem facade for constraint solvers.</description>
 
     <properties>
         <main_dir>.${file.separator}..</main_dir>
     </properties>
 
+    <groupId>org.choco-solver.choco</groupId>
 </project>

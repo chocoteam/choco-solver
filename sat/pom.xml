@@ -15,14 +15,13 @@
 
     <parent>
         <groupId>org.choco-solver</groupId>
-        <artifactId>choco</artifactId>
+        <artifactId>Choco</artifactId>
         <version>4.10.4-SNAPSHOT</version>
     </parent>
-    <artifactId>choco-sat</artifactId>
-    <version>1.0.2</version>
+    <artifactId>Sat</artifactId>
 
     <packaging>jar</packaging>
-    <name>choco-sat</name>
+    <name>Sat</name>
 
     <description>A SAT solver, used internally in choco-solver
     </description>
@@ -39,4 +38,5 @@
         </dependency>
     </dependencies>
 
+    <groupId>org.choco-solver.choco</groupId>
 </project>
