@@ -283,6 +283,6 @@ public class BiCArExpression implements CArExpression {
     }
 
     private boolean isIntegerConstant(RealVar realVar) {
-        return realVar.isAConstant() && (realVar.getLB() % 1) == 0;
+        return realVar.isAConstant() && Math.rint(realVar.getLB()) == realVar.getLB();
     }
 }
