@@ -16,9 +16,6 @@ import org.kohsuke.args4j.OptionDef;
 import org.kohsuke.args4j.spi.OneArgumentOptionHandler;
 import org.kohsuke.args4j.spi.Setter;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 /**
  * <br/>
  *
@@ -26,9 +23,6 @@ import java.util.regex.Pattern;
  * @since 15/06/2020
  */
 public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimConf> {
-
-    private static final Pattern Rp = Pattern.compile("(\\d+)runs");
-    private static final Pattern Sp = Pattern.compile("(\\d+)sols");
 
     public LimitHandler(CmdLineParser parser, OptionDef option, Setter<? super ParserParameters.LimConf> setter) {
         super(parser, option, setter);
@@ -54,14 +48,14 @@ public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimC
         int sols = -1;
         int runs = -1;
         for (String params : pars) {
-            Matcher matcher = Rp.matcher(params);
-            if (matcher.find() && matcher.groupCount() == 1) {
-                runs = Integer.parseInt(matcher.group(1));
+            if (params.endsWith("runs")) {
+                params = params.substring(0, params.length() - 4);
+                runs = Integer.parseInt(params);
                 continue;
             }
-            matcher = Sp.matcher(params);
-            if (matcher.find() && matcher.groupCount() == 1) {
-                sols = Integer.parseInt(matcher.group(1));
+            if (params.endsWith("sols")) {
+                params = params.substring(0, params.length() - 4);
+                sols = Integer.parseInt(params);
                 continue;
             }
             time = TimeUtils.convertInMilliseconds(params);
