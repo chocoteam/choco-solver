@@ -399,10 +399,38 @@ public interface IResolutionHelper extends ISelf<Solver> {
             ref().getModel().clearObjective();
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
+            ref().getModel().getEnvironment().save(() -> ref().getModel().unpost(forceOptimal));
             if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
-            Stream<Solution> stream = streamSolutions(stop);
-            ref().getModel().unpost(forceOptimal);
-            return stream;
+            Spliterator<Solution> it = new Spliterator<Solution>() {
+
+                @Override
+                public boolean tryAdvance(Consumer<? super Solution> action) {
+                    if (ref().solve()) {
+                        action.accept(new Solution(ref().getModel()).record());
+                        return true;
+                    }
+                    ref().getModel().unpost(forceOptimal);
+                    ref().removeStopCriterion(stop);
+                    return false;
+                }
+
+                @Override
+                public Spliterator<Solution> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return Long.MAX_VALUE;
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+                }
+
+            };
+            return StreamSupport.stream(it, false);
         } else {
             ref().removeStopCriterion(stop);
             return Stream.empty();

@@ -458,10 +458,12 @@ public class ModelTest {
         Assert.assertEquals(m.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 600000)
     public void testFindAllOptimalSolutions2() {
         Model m = ProblemMaker.makeGolombRuler(6);
+        int cstrs= m.getNbCstrs();
         Assert.assertEquals(m.getSolver().streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
+        Assert.assertEquals(cstrs,  m.getNbCstrs());
     }
 
     @Test(groups = "1s", timeOut = 60000)
