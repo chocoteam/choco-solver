@@ -23,7 +23,7 @@
     <packaging>jar</packaging>
 
     <name>choco-parsers</name>
-    <description>Provide parsers from FlatZinc and XCSP to Choco-solver.
+    <description>Provide parsers from FlatZinc, XCSP3 and MSP to Choco-solver.
     </description>
 
     <properties>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
@@ -90,6 +90,13 @@
                             <descriptorRefs>
                                 jar-with-dependencies
                             </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>
+                                        org.chocosolver.parser.Parser
+                                    </mainClass>
+                                </manifest>
+                            </archive>
                         </configuration>
                     </execution>
                 </executions>

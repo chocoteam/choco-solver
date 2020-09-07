@@ -77,6 +77,11 @@ public class Parser {
                 }
             }
             switch (pa) {
+                case 0:
+                    System.err.println("Unknown file type.");
+                    System.err.println("Expected file extensions: *.fzn, *.xml, *.mps");
+                    System.err.println();
+                    return;
                 case 1:
                     ChocoFZN.main(args);
                     break;

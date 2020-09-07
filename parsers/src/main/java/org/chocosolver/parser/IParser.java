@@ -21,8 +21,6 @@ import org.chocosolver.solver.Model;
  */
 public interface IParser {
 
-    boolean PRINT_LOG = true;
-
     /**
      * Set up the concrete class with the arguments defined by <i>args</i>.
      * @param args arguments to set up the concrete class.

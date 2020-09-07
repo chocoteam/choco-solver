@@ -35,7 +35,7 @@ import java.util.List;
  * Project: choco-parsers.
  */
 public abstract class RegParser implements IParser {
-
+    public static boolean PRINT_LOG = true;
     /**
      * Name of the parser
      */
@@ -186,7 +186,7 @@ public abstract class RegParser implements IParser {
     @Override
     public final boolean setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
-        System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
+        if(PRINT_LOG)System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
         try {
             cmdparser.parseArgument(args);
@@ -243,7 +243,7 @@ public abstract class RegParser implements IParser {
         Solver solver = portfolio.getModels().get(0).getSolver();
         if (nb_cores == 1) {
             if (exp) {
-                System.out.printf("%s exp is on\n", getCommentChar());
+                if(PRINT_LOG)System.out.printf("%s exp is on\n", getCommentChar());
                 solver.setLearningSignedClauses();
                 // THEN PARAMETERS
                 XParameters.DEFAULT_X = dftexp;
@@ -257,18 +257,18 @@ public abstract class RegParser implements IParser {
                 }
             }
             if (free) {
-                System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
+                if(PRINT_LOG)System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
                 if(lc > 0 || cos || last){
-                    System.out.printf("%s add techniques: ", getCommentChar());
+                    if(PRINT_LOG)System.out.printf("%s add techniques: ", getCommentChar());
                     if(cos){
-                        System.out.print("-cos ");
+                        if(PRINT_LOG)System.out.print("-cos ");
                     }else if(lc>0){
-                        System.out.printf("-lc %d ", lc);
+                        if(PRINT_LOG)System.out.printf("-lc %d ", lc);
                     }
                     if(last){
-                        System.out.print("-last");
+                        if(PRINT_LOG)System.out.print("-last");
                     }
-                    System.out.print("\n");
+                    if(PRINT_LOG)System.out.print("\n");
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
                 IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
