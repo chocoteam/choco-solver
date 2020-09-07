@@ -39,6 +39,26 @@
         </dependency>
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-sat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-solver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-parsers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco-solver</url>
@@ -71,7 +91,8 @@
             <name>Arthur Godet</name>
             <email>arth.godet@gmail.com</email>
             <organization>TASC, LS2N CNRS UMR 6241</organization>
-            <organizationUrl>https://www.imt-atlantique.fr/fr/recherche-et-innovation/laboratoires/ls2n</organizationUrl>
+            <organizationUrl>https://www.imt-atlantique.fr/fr/recherche-et-innovation/laboratoires/ls2n
+            </organizationUrl>
         </developer>
     </developers>
 
@@ -176,30 +197,12 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
-                    <!-- defaults for compile and testCompile -->
-                    <configuration>
-                        <release>8</release>
-                        <encoding>UTF-8</encoding>
-                        <showDeprecation>true</showDeprecation>
-                        <showWarnings>true</showWarnings>
-                        <!-- see https://maven.apache.org/plugins/maven-compiler-plugin/examples/module-info.html -->
-                        <!-- jdkToolchain required when JAVA_HOME is JDK 9 or above -->
-                        <jdkToolchain>
-                            <version>[1.8,11)</version>
-                        </jdkToolchain>
-                        <source>1.8</source>
-                        <target>1.9</target>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>default-compile</id>
                             <configuration>
                                 <!-- compile everything to ensure module-info contains right entries -->
-                                <!-- required when JAVA_HOME is JDK 8 or below -->
-                                <jdkToolchain>
-                                    <version>11</version>
-                                </jdkToolchain>
-                                <release>11</release>
+                                <release>9</release>
                             </configuration>
                         </execution>
                         <execution>
@@ -215,12 +218,24 @@
                             </configuration>
                         </execution>
                     </executions>
+                    <!-- defaults for compile and testCompile -->
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <!-- Only required when JAVA_HOME isn't at least Java 9 and when haven't configured the maven-toolchains-plugin -->
+                        <jdkToolchain>
+                            <version>9</version>
+                        </jdkToolchain>
+                        <release>8</release>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0-M3</version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
+                    <version>3.0.0-M3
+                    </version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
                     <executions>
                         <execution>
                             <id>enforce-bytecode-version</id>
