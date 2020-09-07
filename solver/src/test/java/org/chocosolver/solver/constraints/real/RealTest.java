@@ -1135,4 +1135,22 @@ public class RealTest {
         model.getSolver().solve();
         Assert.assertTrue(t.getLB()>2.);
     }
+
+    @Test(groups = "1s")
+    public void testSchmitt2() {
+        // See ISSUE #702
+        Model model = new Model();
+        RealVar x = model.realVar("x", -100.0, 100.0, 0.01);
+        RealVar y = model.realVar("y", -100.0, 100.0, 0.01);
+        y.eq(x.pow(2)).ibex(0.01).post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException cex) {
+            Assert.fail("Should thrown contradiction");
+        }
+        Assert.assertEquals(y.getLB(), 0.0, 0.01);
+        Assert.assertEquals(y.getUB(), 100.0, 0.01);
+        Assert.assertEquals(x.getLB(), -10.0, 0.01);
+        Assert.assertEquals(x.getUB(), 10.0, 0.01);
+    }
 }
