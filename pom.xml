@@ -39,26 +39,6 @@
         </dependency>
     </dependencies>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-sat</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-solver</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-parsers</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
         <url>scm:git:git://github.com/chocoteam/choco-solver</url>
