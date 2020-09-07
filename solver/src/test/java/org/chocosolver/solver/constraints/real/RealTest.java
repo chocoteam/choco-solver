@@ -1136,7 +1136,7 @@ public class RealTest {
         Assert.assertTrue(t.getLB()>2.);
     }
 
-    @Test(groups = "1s")
+    @Test(groups = "ibex")
     public void testSchmitt2() {
         // See ISSUE #702
         Model model = new Model();
