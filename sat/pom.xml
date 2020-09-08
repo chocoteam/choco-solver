@@ -19,7 +19,6 @@
         <version>4.10.4-SNAPSHOT</version>
     </parent>
     <artifactId>choco-sat</artifactId>
-    <version>1.0.2</version>
     <packaging>jar</packaging>
 
     <name>choco-sat</name>
