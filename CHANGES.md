@@ -12,8 +12,11 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
+\#699, #709 
 
 #### Contributors to this release:
+- [Guillaume Le Louët](https://github.com/glelouet) (glelouet)
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
 
 4.10.4 - 08 Sep 2020
 --------------------

@@ -26,29 +26,34 @@ import org.chocosolver.util.tools.ArrayUtils;
  * <br/>
  *
  * @author Charles Prud'homme
+ * @author Guillaume Le Louët
  * @since 5 juil. 2010
  */
-@SuppressWarnings({"UnusedDeclaration"})
-public class StrategiesSequencer extends AbstractStrategy<Variable> {
+@SuppressWarnings({"UnusedDeclaration", "ForLoopReplaceableByForEach"})
+public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U> {
 
-    private AbstractStrategy[] strategies;
-    private IStateInt index;
+    private final AbstractStrategy<U>[] strategies;
+    private final IStateInt index;
 
-    private static Variable[] make(AbstractStrategy... strategies) {
-        Variable[] vars = new Variable[0];
-        for (int i = 0; i < strategies.length; i++) {
+    @SuppressWarnings("unchecked")
+    @SafeVarargs
+    private static <V extends Variable> V[] make(AbstractStrategy<V>... strategies) {
+        V[] vars = strategies[0].vars.clone();
+        for (int i = 1; i < strategies.length; i++) {
             vars = ArrayUtils.append(vars, strategies[i].vars);
         }
         return vars;
     }
 
-    public StrategiesSequencer(IEnvironment environment, AbstractStrategy... strategies) {
+    @SafeVarargs
+    public StrategiesSequencer(IEnvironment environment, AbstractStrategy<U>... strategies) {
         super(make(strategies));
         index = environment.makeInt(0);
         this.strategies = strategies;
     }
 
-	public StrategiesSequencer(AbstractStrategy... strategies) {
+    @SafeVarargs
+	public StrategiesSequencer(AbstractStrategy<U>... strategies) {
 		super(make(strategies));
 		index = null;
 		this.strategies = strategies;
@@ -71,12 +76,12 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
     }
 
     @Override
-    public Decision<Variable> computeDecision(Variable variable) {
+    public Decision<U> computeDecision(U variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
         int idx = (index==null)?0:index.get();
-        Decision decision = null;
+        Decision<U> decision = null;
         while (decision == null && idx < strategies.length) {
             if (contains(strategies[idx].vars, variable)) {
                 decision = strategies[idx].computeDecision(variable);
@@ -100,9 +105,9 @@ public class StrategiesSequencer extends AbstractStrategy<Variable> {
      * Iterates over the declared sub-strategies and gets the overall current decision.
      */
     @Override
-    public Decision getDecision() {
+    public Decision<U> getDecision() {
         int idx = (index==null)?0:index.get();
-        Decision decision = strategies[idx].getDecision();
+        Decision<U> decision = strategies[idx].getDecision();
         while (decision == null && idx < strategies.length - 1) {
             decision = strategies[++idx].getDecision();
         }

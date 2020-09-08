@@ -25,8 +25,9 @@ public class FindAndProve<V extends Variable> extends AbstractStrategy<V>{
 	// VARIABLES
 	//***********************************************************************************
 
-	private AbstractStrategy<V> find, prove;
-	private Model model;
+	private final AbstractStrategy<V> find;
+	private final AbstractStrategy<V> prove;
+	private final Model model;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
