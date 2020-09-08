@@ -39,7 +39,7 @@ RUN apt-get update && \
 
 # Copy Choco's executable from the previous stage across
 COPY --from=builder /choco-solver/parsers/src/main/minizinc/fzn-choco /entry_data/fzn-exec
-COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.4-SNAPSHOT-jar-with-dependencies.jar /entry_data/choco-parsers.jar
+COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.4-jar-with-dependencies.jar /entry_data/choco-parsers.jar
 
 # Update execution script
 RUN sed -i 's&DIR=.*&DIR=/entry_data&g' /entry_data/fzn-exec
