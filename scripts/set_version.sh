@@ -64,5 +64,7 @@ else
     \
     ### Other closed issues and pull requests:\
     \
+    #### Contributors to this release:\
+    \
     ' CHANGES.md
 fi

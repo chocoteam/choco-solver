@@ -13,6 +13,7 @@ NEXT MILESTONE
 
 ### Other closed issues and pull requests:
 
+#### Contributors to this release:
 
 4.10.4 - 08 Sep 2020
 --------------------
@@ -34,7 +35,9 @@ NEXT MILESTONE
 ### Other closed issues and pull requests:
 \#692, #698, #700, #702, #703, #704, #705
 
-#### Contributors to this release
+#### Contributors to this release:
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro)
 - [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
 
 4.10.3 - 03 Jul 2020
