@@ -12,6 +12,8 @@ package org.chocosolver.util.tools;
 import org.chocosolver.solver.expression.continuous.arithmetic.RealIntervalConstant;
 import org.chocosolver.util.objects.RealInterval;
 
+import java.util.Locale;
+
 /**
  * Some tools for float computing.
  * Inspired from IAMath : interval.sourceforge.net
@@ -729,4 +731,24 @@ public class RealUtils {
         return new RealIntervalConstant(retInf, retSup);
     }
 
+    public static RealInterval updateBounds(RealInterval var, RealInterval newInterval) {
+        return updateBounds(var, newInterval.getLB(), newInterval.getUB());
+    }
+
+    public static RealInterval updateBounds(RealInterval var, double lb, double ub) {
+        return new RealIntervalConstant(
+                Math.max(var.getLB(), lb),
+                Math.min(var.getUB(), ub));
+    }
+
+    public static double roundValue(double value, double precision) {
+        int numDecPlaces = 0;
+        while (1 > Math.pow(10, numDecPlaces) * precision) {
+            numDecPlaces++;
+        }
+        double roundedValue = Double.valueOf(String.format(Locale.US, "%." + numDecPlaces + "f", value));
+        // See: https://stackoverflow.com/questions/61388914/
+        roundedValue = roundedValue + 0.0;
+        return roundedValue;
+    }
 }

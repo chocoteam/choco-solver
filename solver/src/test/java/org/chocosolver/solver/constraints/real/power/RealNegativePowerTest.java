@@ -1,6 +1,7 @@
 package org.chocosolver.solver.constraints.real.power;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 public class RealNegativePowerTest extends RealPowerBase {
@@ -10,6 +11,7 @@ public class RealNegativePowerTest extends RealPowerBase {
      */
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void powerEven1Test() throws ContradictionException {
         postExpression(y.eq(x.pow(-2)));
         model.getSolver().propagate();
@@ -18,6 +20,7 @@ public class RealNegativePowerTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void powerEven2Test() throws ContradictionException {
         postExpression(x.ge(-10));
         postExpression(x.le(10));
@@ -28,6 +31,7 @@ public class RealNegativePowerTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void powerEven3Test() throws ContradictionException {
         postExpression(x.ge(0));
         postExpression(x.le(2));
@@ -47,6 +51,7 @@ public class RealNegativePowerTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void powerEven5Test() throws ContradictionException {
         postExpression(x.ge(-2));
         postExpression(x.le(0));
@@ -67,6 +72,7 @@ public class RealNegativePowerTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void powerEven7Test() throws ContradictionException {
         postExpression(x.ge(-2));
         postExpression(x.le(2));

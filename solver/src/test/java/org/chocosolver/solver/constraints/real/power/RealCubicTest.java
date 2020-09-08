@@ -1,6 +1,9 @@
 package org.chocosolver.solver.constraints.real.power;
 
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.RealVar;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 public class RealCubicTest extends RealPowerBase {
@@ -44,6 +47,7 @@ public class RealCubicTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void imp1Test() throws ContradictionException {
         postExpression(x.ge(0));
         postExpression(y.eq(9.5));
@@ -94,6 +98,7 @@ public class RealCubicTest extends RealPowerBase {
     }
 
     @Test
+    @Ignore("Expecting IBEX release the contraction ratio parameter")
     public void imp8Test() throws ContradictionException {
         postExpression(x.le(0));
         postExpression(y.eq(-10.5));

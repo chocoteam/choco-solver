@@ -44,18 +44,6 @@ public abstract class RealPowerBase {
         Assert.assertEquals(var.getUB(), ub, PRECISION);
     }
 
-    protected void postGreaterEqual(RealVar var, double val) {
-        var.ge(val).ibex(PRECISION).post();
-    }
-
-    protected void postLessEqual(RealVar var, double val) {
-        var.le(val).ibex(PRECISION).post();
-    }
-
-    protected void postEqual(RealVar var, double val) {
-        var.eq(val).ibex(PRECISION).post();
-    }
-
     protected void postExpression(CReExpression expression) {
         expression.ibex(PRECISION).post();
     }
