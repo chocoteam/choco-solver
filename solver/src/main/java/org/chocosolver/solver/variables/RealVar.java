@@ -13,7 +13,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
 import org.chocosolver.util.objects.RealInterval;
-import org.chocosolver.util.tools.RealUtils;
 
 /**
  * An interface to declare variable for continuous constraints (solved using IBEX).
@@ -95,22 +94,4 @@ public interface RealVar extends Variable, CArExpression {
 
     void silentlyAssign(double lb, double ub);
 
-    /**
-     * Return lower bound rounded by variable's precision.
-     *
-     * @return roundedLowerBound
-     */
-    default double roundLB() {
-        return RealUtils.roundValue(getLB(), getPrecision());
-    }
-
-
-    /**
-     * Return upper bound rounded by variable's precision.
-     *
-     * @return roundedUpperBound
-     */
-    default double roundUB() {
-        return RealUtils.roundValue(getUB(), getPrecision());
-    }
 }

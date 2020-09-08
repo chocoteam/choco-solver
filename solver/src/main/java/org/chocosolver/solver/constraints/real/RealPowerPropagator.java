@@ -51,8 +51,8 @@ public class RealPowerPropagator extends Propagator<RealVar> {
     public ESat isEntailed() {
         ESat result = ESat.UNDEFINED;
         if (isCompletelyInstantiated()) {
-            double lb = yVar.roundLB() - Math.pow(xVar.roundLB(), k);
-            double ub = yVar.roundUB() - Math.pow(xVar.roundUB(), k);
+            double lb = yVar.getLB() - Math.pow(xVar.getLB(), k);
+            double ub = yVar.getUB() - Math.pow(xVar.getUB(), k);
             result = ESat.eval(lb <= 0 && 0 <= ub);
         }
         return result;
@@ -80,8 +80,8 @@ public class RealPowerPropagator extends Propagator<RealVar> {
     }
 
     private boolean kRoot() throws ContradictionException {
-        boolean isIntervalPositive = xVar.roundLB() >= 0;
-        boolean isIntervalNegative = xVar.roundUB() <= 0;
+        boolean isIntervalPositive = xVar.getLB() >= 0;
+        boolean isIntervalNegative = xVar.getUB() <= 0;
         RealInterval x = new RealIntervalConstant(xVar.getLB(), xVar.getUB());
         RealInterval y = new RealIntervalConstant(yVar.getLB(), yVar.getUB());
         RealInterval root = RealUtils.iRoot(y, k); // x = root(y, k)
