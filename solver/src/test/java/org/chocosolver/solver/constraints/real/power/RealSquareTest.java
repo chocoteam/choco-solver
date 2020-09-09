@@ -122,10 +122,10 @@ public class RealSquareTest extends RealPowerBase {
     public void sqr8Test() throws ContradictionException {
         postExpression(x.ge(0.0));
         postExpression(x.le(Math.toRadians(45)));
-        y.eq(x.cos()).post();
-        z.eq(y.pow(2.0)).post();
-        v.eq(z.sqrt()).post();
-        v.le(0.9).post();
+        postExpression(y.eq(x.cos()));
+        postExpression(z.eq(y.pow(2.0)));
+        postExpression(v.eq(z.sqrt()));
+        postExpression(v.le(0.9));
 
         model.getSolver().propagate();
         assertBound(x, 0.451027, 0.785398);

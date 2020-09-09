@@ -8,8 +8,6 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.objects.RealInterval;
 import org.chocosolver.util.tools.RealUtils;
 
-import java.util.Locale;
-
 /**
  * Unary continuous arithmetic expression with a constant
  *
@@ -73,37 +71,12 @@ public class CstCArExpression extends UnCArExpression {
 
     @Override
     public void tighten() {
-        RealInterval res;
-        switch (op) {
-            case POW:
-                if (isInteger(constant) && constant > 0) {
-                    res = RealUtils.iPower(e, (int) constant);
-                } else {
-                    throw new UnsupportedOperationException(String.format(Locale.US, ERROR_MSG_OPERATION_CSTE, op.name(), constant));
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format(ERROR_MSG_OPERATION, op.name()));
-        }
-        l.set(res.getLB());
-        u.set(res.getUB());
+        throw new UnsupportedOperationException(String.format(ERROR_MSG_OPERATION, op.name()));
     }
 
     @Override
     public void project(ICause cause) throws ContradictionException {
-        RealInterval res;
-        switch (op) {
-            case POW:
-                if (isInteger(constant) && constant > 0) {
-                    res = RealUtils.iRoot(this, (int) constant, e);
-                } else {
-                    throw new UnsupportedOperationException(String.format(Locale.US, ERROR_MSG_OPERATION_CSTE, op.name(), constant));
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException(String.format(ERROR_MSG_OPERATION, op.name()));
-        }
-        e.intersect(res, cause);
+        throw new UnsupportedOperationException(String.format(ERROR_MSG_OPERATION, op.name()));
     }
 
     private boolean isInteger(double value) {
