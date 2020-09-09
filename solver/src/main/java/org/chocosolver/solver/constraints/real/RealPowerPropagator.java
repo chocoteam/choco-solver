@@ -53,6 +53,8 @@ public class RealPowerPropagator extends Propagator<RealVar> {
         if (isCompletelyInstantiated()) {
             double lb = yVar.getLB() - Math.pow(xVar.getLB(), k);
             double ub = yVar.getUB() - Math.pow(xVar.getUB(), k);
+            lb = RealUtils.roundValue(lb, xVar.getPrecision());
+            ub = RealUtils.roundValue(ub, xVar.getPrecision());
             result = ESat.eval(lb <= 0 && 0 <= ub);
         }
         return result;
