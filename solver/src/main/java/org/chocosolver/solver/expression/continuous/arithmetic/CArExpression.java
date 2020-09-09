@@ -316,7 +316,7 @@ public interface CArExpression extends RealInterval {
      * @return return the expression "x^y" where this is "x"
      */
     default CArExpression pow(double y) {
-        return new BiCArExpression(CArExpression.Operator.POW, this, this.getModel().realVar(y));
+        return new CstCArExpression(CArExpression.Operator.POW, this, y);
     }
 
     /**

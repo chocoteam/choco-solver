@@ -93,4 +93,5 @@ public interface RealVar extends Variable, CArExpression {
     void silentlyAssign(RealInterval bounds);
 
     void silentlyAssign(double lb, double ub);
+
 }
