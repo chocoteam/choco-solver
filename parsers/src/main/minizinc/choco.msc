@@ -1,0 +1,22 @@
+{
+  "name": "Choco-solver",
+  "version": "4.10.4-SNAPSHOT",
+  "id": "org.choco-solver.choco",
+  "executable": "fzn-choco",
+  "mznlib": "mzn-lib",
+  "tags": ["cp"],
+  "stdFlags": [
+    "-a",
+    "-n",
+    "-p",
+    "-r",
+    "-f",
+    "-t"
+  ],
+  "supportsMzn": false,
+  "supportsFzn": true,
+  "needsSolns2Out": true,
+  "needsMznExecutable": false,
+  "needsStdlibDir": false,
+  "isGUIApplication": false
+}

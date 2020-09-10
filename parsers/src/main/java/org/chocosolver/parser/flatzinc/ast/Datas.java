@@ -29,7 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.chocosolver.parser.IParser.PRINT_LOG;
+import static org.chocosolver.parser.RegParser.PRINT_LOG;
 
 /**
  * An object to maintain a link between the model and the solver, during the parsing phase.

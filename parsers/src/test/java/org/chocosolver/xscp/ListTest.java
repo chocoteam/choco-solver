@@ -16,7 +16,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.chocosolver.parser.xcsp.BaseXCSPListener;
 import org.chocosolver.parser.xcsp.XCSP;
-import org.chocosolver.pf4cs.SetUpException;
+import org.chocosolver.parser.SetUpException;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

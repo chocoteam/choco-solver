@@ -9,8 +9,8 @@
  */
 package org.chocosolver.examples;
 
-import org.chocosolver.pf4cs.IProblem;
-import org.chocosolver.pf4cs.SetUpException;
+import org.chocosolver.parser.IParser;
+import org.chocosolver.parser.SetUpException;
 import org.chocosolver.solver.Model;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -24,7 +24,7 @@ import static java.lang.Runtime.getRuntime;
  * @author Charles Prud'homme
  * @since 31/03/11
  */
-public abstract class AbstractProblem implements IProblem<Model> {
+public abstract class AbstractProblem implements IParser {
 
     /**
      * A seed for random purpose
@@ -113,4 +113,9 @@ public abstract class AbstractProblem implements IProblem<Model> {
         getRuntime().removeShutdownHook(statOnKill);
     }
 
+    @Override
+    public Thread actionOnKill() {
+        return new Thread(() -> {
+        });
+    }
 }

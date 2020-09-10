@@ -15,7 +15,7 @@ import org.chocosolver.solver.constraints.Propagator;
 
 import java.util.ArrayList;
 
-import static org.chocosolver.parser.IParser.PRINT_LOG;
+import static org.chocosolver.parser.RegParser.PRINT_LOG;
 
 /**
  * A base listener for Flatzinc parser, dedicated to single thread resolution.

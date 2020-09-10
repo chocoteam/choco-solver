@@ -5,15 +5,43 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
 NEXT MILESTONE
---------------------
+-------------------
 
 ### Major features:
-- Change search strategies in ParallelPortfolio
 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-\#692
+\#699, #709 
+
+#### Contributors to this release:
+- [Guillaume Le Louët](https://github.com/glelouet) (glelouet)
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
+
+4.10.4 - 08 Sep 2020
+--------------------
+
+### Major features:
+- Change search strategies in ParallelPortfolio
+- Make "CT+" available to binary table constraint
+- Update [Dockerfile](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/docker/Dockerfile_Choco.dms), now automatically released in [hub.docker.com](https://hub.docker.com/repository/docker/chocoteam/choco-solver-mzn)
+- Migrate to ANTLR 4.8-1
+- Support nested `seq_search` in FlatZinc file
+- Add missing operations in `model.unpost(c)`
+- Add new constraint, named `conditional`, that posts constraints on condition
+- Merge `cutoffseq` in `solver`
+- Merge `pf4cs` in `parsers`
+- Remove `geost` from `parsers`
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+\#692, #698, #700, #702, #703, #704, #705
+
+#### Contributors to this release:
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro)
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
 
 4.10.3 - 03 Jul 2020
 --------------------

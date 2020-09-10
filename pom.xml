@@ -11,11 +11,11 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
-    <version>4.10.4-SNAPSHOT</version>
+    <version>4.10.5-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>choco</name>
     <url>http://choco-solver.org/</url>
@@ -24,15 +24,18 @@
     </description>
 
     <modules>
-        <module>cutoffseq</module>
         <module>sat</module>
         <module>solver</module>
-        <module>pf4cs</module>
         <module>parsers</module>
         <module>examples</module>
     </modules>
 
     <dependencies>
+        <dependency>
+            <groupId>net.sf.trove4j</groupId>
+            <artifactId>trove4j</artifactId>
+            <version>3.0.3</version>
+        </dependency>
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -40,6 +43,26 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-sat</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-solver</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.choco-solver</groupId>
+                <artifactId>choco-parsers</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <scm>
         <connection>scm:git:git@github.com:chocoteam/choco-solver.git</connection>
@@ -73,7 +96,8 @@
             <name>Arthur Godet</name>
             <email>arth.godet@gmail.com</email>
             <organization>TASC, LS2N CNRS UMR 6241</organization>
-            <organizationUrl>https://www.imt-atlantique.fr/fr/recherche-et-innovation/laboratoires/ls2n</organizationUrl>
+            <organizationUrl>https://www.imt-atlantique.fr/fr/recherche-et-innovation/laboratoires/ls2n
+            </organizationUrl>
         </developer>
     </developers>
 
@@ -178,19 +202,12 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
-                    <!-- defaults for compile and testCompile -->
-                    <configuration>
-                        <release>8</release>
-                        <encoding>UTF-8</encoding>
-                        <showDeprecation>true</showDeprecation>
-                        <showWarnings>true</showWarnings>
-                    </configuration>
                     <executions>
                         <execution>
                             <id>default-compile</id>
                             <configuration>
                                 <!-- compile everything to ensure module-info contains right entries -->
-                                <release>11</release>
+                                <release>9</release>
                             </configuration>
                         </execution>
                         <execution>
@@ -206,6 +223,47 @@
                             </configuration>
                         </execution>
                     </executions>
+                    <!-- defaults for compile and testCompile -->
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <showDeprecation>true</showDeprecation>
+                        <showWarnings>true</showWarnings>
+                        <!-- Only required when JAVA_HOME isn't at least Java 9 and when haven't configured the maven-toolchains-plugin -->
+                        <jdkToolchain>
+                            <version>9</version>
+                        </jdkToolchain>
+                        <release>8</release>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M3
+                    </version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
+                    <executions>
+                        <execution>
+                            <id>enforce-bytecode-version</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <enforceBytecodeVersion>
+                                        <maxJdkVersion>1.8</maxJdkVersion>
+                                    </enforceBytecodeVersion>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.codehaus.mojo</groupId>
+                            <artifactId>extra-enforcer-rules</artifactId>
+                            <version>1.2</version>
+                        </dependency>
+                    </dependencies>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -235,13 +293,14 @@
                             NonEmptyAtclauseDescription,
                             SingleLineJavadoc,
                             SummaryJavadoc,
-                            WriteTag</violationIgnore>
+                            WriteTag
+                        </violationIgnore>
                     </configuration>
                     <dependencies>
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.34</version>
+                            <version>8.36</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -347,7 +406,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.4</version>
+                <version>0.8.5</version>
                 <executions>
                     <execution>
                         <goals>
@@ -473,7 +532,8 @@
                         NonEmptyAtclauseDescription,
                         SingleLineJavadoc,
                         SummaryJavadoc,
-                        WriteTag</violationIgnore>
+                        WriteTag
+                    </violationIgnore>
                 </configuration>
                 <reportSets>
                     <!-- reportSet executed in all modules -->
@@ -503,9 +563,9 @@
                 <configuration>
                     <doclint>none</doclint>
                     <source>8</source>
-<!--                    <sourceFileExcludes>-->
-<!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
-<!--                    </sourceFileExcludes>-->
+                    <!--                    <sourceFileExcludes>-->
+                    <!--                        <sourceFileExclude>module-info.java</sourceFileExclude>-->
+                    <!--                    </sourceFileExcludes>-->
                 </configuration>
                 <reportSets>
                     <!-- reportSet executed in all modules -->

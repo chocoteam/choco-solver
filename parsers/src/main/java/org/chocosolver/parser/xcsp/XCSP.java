@@ -177,7 +177,7 @@ public class XCSP extends RegParser {
 
     private void onSolution(Solver solver, XCSPParser parser){
         if (solver.getObjectiveManager().isOptimization()){
-            solver.getOut().printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
+            if(PRINT_LOG)solver.getOut().printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
         }
         output.setLength(0);
         output.append(parser.printSolution());
@@ -206,12 +206,12 @@ public class XCSP extends RegParser {
         } else {
             output.insert(0, "s UNKNOWN\n");
         }
-        solver.getOut().printf("%s", output);
+        if(PRINT_LOG)solver.getOut().printf("%s", output);
         if (stat) {
             solver.getOut().printf("c %s \n", solver.getMeasures().toOneLineString());
         }
         if(csv){
-            solver.getOut().print("c ");
+            if(PRINT_LOG)solver.getOut().print("c ");
             solver.printCSVStatistics();
         }
         if(cs) {

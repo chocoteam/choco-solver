@@ -15,11 +15,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A Constraint is basically a set of <code>Propagator</code>.
@@ -308,9 +304,11 @@ public class Constraint {
 
     /**
      * @return the {@link Status} of this constraint
+     * @implNote
+     * The constraint's status takes into account the state of the opposite constraint if it exists
      */
     public final Status getStatus() {
-        return mStatus;
+        return (mStatus == Status.FREE && opposite != null) ? opposite.mStatus : mStatus;
     }
 
     /**

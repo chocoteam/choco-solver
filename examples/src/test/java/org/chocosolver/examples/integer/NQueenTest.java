@@ -9,8 +9,8 @@
  */
 package org.chocosolver.examples.integer;
 
-import org.chocosolver.pf4cs.SetUpException;
 import org.chocosolver.examples.nqueen.*;
+import org.chocosolver.parser.SetUpException;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;

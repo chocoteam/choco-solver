@@ -135,7 +135,7 @@ public class ExpressionTest {
         Model model = new Model();
         RealVar w = model.realVar("w", -2, 2, .1d);
         RealVar x = model.realVar("x", -2, 2, .1d);
-        eval(model, x.div(w).eq(.1d), 32);
+        eval(model, x.div(w).eq(.1d), 59);
     }
 
 

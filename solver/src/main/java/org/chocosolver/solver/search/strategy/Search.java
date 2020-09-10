@@ -665,7 +665,7 @@ public class Search {
         IBS {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return IBS.make(solver, vars, Search.ValH.DEFAULT, last);
+                return IMPACT.make(solver, vars, Search.ValH.DEFAULT, last);
             }
         },
         /**

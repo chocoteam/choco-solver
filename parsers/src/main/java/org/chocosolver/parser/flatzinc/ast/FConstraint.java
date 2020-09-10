@@ -21,16 +21,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
-import org.chocosolver.solver.constraints.nary.geost.Constants;
-import org.chocosolver.solver.constraints.nary.geost.GeostOptions;
-import org.chocosolver.solver.constraints.nary.geost.PropGeost;
-import org.chocosolver.solver.constraints.nary.geost.externalConstraints.ExternalConstraint;
-import org.chocosolver.solver.constraints.nary.geost.externalConstraints.NonOverlapping;
-import org.chocosolver.solver.constraints.nary.geost.geometricPrim.GeostObject;
-import org.chocosolver.solver.constraints.nary.geost.geometricPrim.ShiftedBox;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -732,6 +724,25 @@ public enum FConstraint {
 
         }
     },
+    fzn_all_equal_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            if (vars.length > 1) {
+                model.allEqual(vars).post();
+            }
+        }
+    },
+    fzn_all_equal_int_reif{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            IntVar count = model.intVar(0, vars.length);
+            model.atMostNValues(vars, count, false).post();
+            model.reifyXeqC(count, 1, b);
+        }
+    },
     amongChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1003,69 +1014,6 @@ public enum FConstraint {
             IntVar[] x = exps.get(1).toIntVarArray(model);
             int v = exps.get(2).intValue();
             model.among(model.intVar(n), x, new int[]{v}).post();
-
-        }
-    },
-    geostChoco {
-        @Override
-        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
-            int dim = exps.get(0).intValue();
-            int[] rect_size = exps.get(1).toIntArray();
-            int[] rect_offset = exps.get(2).toIntArray();
-            int[][] shape = exps.get(3).toIntMatrix();
-            IntVar[] x = exps.get(4).toIntVarArray(model);
-            IntVar[] kind = exps.get(5).toIntVarArray(model);
-
-
-            //Create Objects
-            int nbOfObj = x.length / dim;
-            int[] objIds = new int[nbOfObj];
-            List<GeostObject> objects = new ArrayList<>();
-            for (int i = 0; i < nbOfObj; i++) {
-                IntVar shapeId = kind[i];
-                IntVar[] coords = Arrays.copyOfRange(x, i * dim, (i + 1) * dim);
-                objects.add(new GeostObject(dim, i, shapeId, coords, model.intVar(1), model.intVar(1), model.intVar(1)));
-                objIds[i] = i;
-            }
-
-            //create shiftedboxes and add them to corresponding shapes
-            List<ShiftedBox> shapes = new ArrayList<>();
-            for (int i = 0; i < shape.length; i++) {
-                for (int j = 0; j < shape[i].length; j++) {
-                    int h = shape[i][j];
-                    int[] l = Arrays.copyOfRange(rect_size, (h - 1) * dim, h * dim);
-                    int[] t = Arrays.copyOfRange(rect_offset, (h - 1) * dim, h * dim);
-                    shapes.add(new ShiftedBox(i + 1, t, l));
-                }
-            }
-
-            //Create the external constraints vecotr
-            List<ExternalConstraint> extcstr = new ArrayList<>(1);
-            //add the external constraint of type non overlapping
-            extcstr.add(new NonOverlapping(Constants.NON_OVERLAPPING, ArrayUtils.array(1, dim), objIds));
-
-
-            int originOfObjects = objects.size() * dim; //Number of domain variables to represent the origin of all objects
-            int otherVariables = objects.size() * 4; //each object has 4 other variables: shapeId, start, duration; end
-
-            //vars will be stored as follows: object 1 coords(so k coordinates), sid, start, duration, end,
-            //                                object 2 coords(so k coordinates), sid, start, duration, end and so on ........
-            IntVar[] vars = new IntVar[originOfObjects + otherVariables];
-            for (int i = 0; i < objects.size(); i++) {
-                for (int j = 0; j < dim; j++) {
-                    vars[(i * (dim + 4)) + j] = objects.get(i).getCoordinates()[j];
-                }
-                vars[(i * (dim + 4)) + dim] = objects.get(i).getShapeId();
-                vars[(i * (dim + 4)) + dim + 1] = objects.get(i).getStart();
-                vars[(i * (dim + 4)) + dim + 2] = objects.get(i).getDuration();
-                vars[(i * (dim + 4)) + dim + 3] = objects.get(i).getEnd();
-            }
-            GeostOptions opt = new GeostOptions();
-            PropGeost propgeost = new PropGeost(vars, dim, objects, shapes, extcstr, false, opt.included, model.getSolver());
-
-            new Constraint("Geost", propgeost).post();
-            throw new UnsupportedOperationException("Geost is not robust");
 
         }
     },

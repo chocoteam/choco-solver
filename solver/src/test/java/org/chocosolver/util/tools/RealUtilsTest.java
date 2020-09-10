@@ -26,14 +26,16 @@ public class RealUtilsTest {
     @DataProvider
     public Object[][] forDiv() {
         return new Object[][]{
-                {1., 3., 1., 3., 1. / 3., 3.},
-                {-3., -1., 1., 3., -3, -1. / 3.},
-                {1., 3., -3., -1., -3., -1. / 3.},
-                {-3., -1., -3., -1., 1. / 3., 3.},
-                {-3., 2., 1., 3., -3., 2.},
-                {-3., 2., -3., -1., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},
-                {-3., 2., -1., 4., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},
-                {-2., 3., -4., 1., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},
+                {1., 3., 1., 3., 1. / 3., 3.}, // ++
+                {-3., -1., 1., 3., -3, -1. / 3.}, // -+
+                {1., 3., -3., -1., -3., -1. / 3.}, // +-
+                {-3., -1., -3., -1., 1. / 3., 3.}, // --
+                {-3., 2., 1., 3., -3., 2.}, // 0+
+                {-3., 2., -3., -1., -2., 3.}, // 0-
+                {-3., 2., -1., 4., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},  // 00
+                {-2., 3., -4., 1., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY}, // 00
+                {.0, .2, -2., 2., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY}, // +0
+                {-.2, 0., -2., 2., Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY},// -0
         };
     }
 

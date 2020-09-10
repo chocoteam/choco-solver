@@ -10,30 +10,12 @@
 package org.chocosolver.solver.search;
 
 
-import static java.lang.Math.floorDiv;
-import static java.lang.System.nanoTime;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
-import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-
-import java.io.IOException;
-import java.util.Random;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.reification.PropConditionnal;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.objective.OptimizationPolicy;
@@ -47,8 +29,16 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.util.ESat;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Random;
+
+import static java.lang.Math.floorDiv;
+import static java.lang.System.nanoTime;
+import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -155,25 +145,17 @@ public class ObjectiveTest {
         final IntVar iv = model.intVar("iv", 0, 10, false);
         model.arithm(iv, ">=", 2).post();
 
-        new Constraint("Conditionnal",
-                new PropConditionnal(new IntVar[]{iv},
-                        new Constraint[]{model.arithm(iv, ">=", 4)},
-                        new Constraint[]{model.trueConstraint()}) {
-                    @Override
-                    public ESat checkCondition() {
-                        int nbNode = (int) this.model.getSolver().getNodeCount();
-                        switch (nbNode) {
-                            case 0:
-                            case 1:
-                                return UNDEFINED;
-                            case 2:
-                                return TRUE;
-                            default:
-                                return FALSE;
-                        }
-
+        model.conditional(
+                new IntVar[]{iv},
+                vars -> vars[0].getModel().getSolver().getNodeCount() > 1,
+                () -> {
+                    if(model.getSolver().getNodeCount() == 2){
+                        return new Constraint[]{model.arithm(iv, ">=", 4)};
+                    }else{
+                        return null;
                     }
-                }).post();
+                }
+        ).post();
         model.getSolver().solve();
         assertEquals(iv.getValue(), 2);
 

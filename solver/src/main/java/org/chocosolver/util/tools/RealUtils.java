@@ -24,7 +24,7 @@ import org.chocosolver.util.objects.RealInterval;
 public class RealUtils {
 
     private static final double ZERO = 0.0;
-    
+
     private static final double NEG_ZER0 = 0.0 * -1.0;
 
     /**
@@ -148,32 +148,34 @@ public class RealUtils {
             double yl = y.getLB();
             double yh = y.getUB();
             double i, s;
+            i = Double.NEGATIVE_INFINITY;
+            s = Double.POSITIVE_INFINITY;
             if (yh == 0.0) yh = NEG_ZER0;
 
             if (x.getLB() >= 0.0) {
                 if (yl >= 0.0) {
                     i = Math.max(ZERO, prevFloat(x.getLB() / yh));
                     s = nextFloat(x.getUB() / yl);
-                } else { // yh <= 0
+                } else if (yh <= 0.0) { // yh <= 0
                     i = prevFloat(x.getUB() / yh);
                     s = Math.min(ZERO, nextFloat(x.getLB() / yl));
-                }
+                } // else skip : 0 in y
             } else if (x.getUB() <= 0.0) {
                 if (yl >= 0.0) {
                     i = prevFloat(x.getLB() / yl);
                     s = Math.min(ZERO, nextFloat(x.getUB() / yh));
-                } else {
+                } else if (yh <= 0.0) { // yh <= 0
                     i = Math.max(ZERO, prevFloat(x.getUB() / yl));
                     s = nextFloat(x.getLB() / yh);
-                }
+                } // else skip : 0 in y
             } else {
                 if (yl >= 0.0) {
                     i = prevFloat(x.getLB() / yl);
                     s = nextFloat(x.getUB() / yl);
-                } else {
-                    i = Double.NEGATIVE_INFINITY;
-                    s = Double.POSITIVE_INFINITY;
-                }
+                } else if (yh <= 0.0) { // yh <= 0
+                    i = prevFloat(x.getUB() / yh);
+                    s = nextFloat(x.getLB() / yh);
+                } // else skip : 0 in y
             }
             return new RealIntervalConstant(i, s);
         }

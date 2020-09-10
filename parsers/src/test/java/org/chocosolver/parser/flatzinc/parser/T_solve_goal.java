@@ -77,4 +77,36 @@ public class T_solve_goal extends GrammarTest {
         fp.solve_goal();
     }
 
+
+    /**
+     * var 1..10: x;
+     * var 1..10: y;
+     * <p>
+     * var bool: p;
+     * <p>
+     * constraint p <-> y < 5 /\ x > 5;
+     * <p>
+     * solve :: seq_search([
+     * seq_search([
+     * int_search([x], input_order, indomain_min, complete),
+     * bool_search([p], input_order, indomain_max, complete)
+     * ]),
+     * int_search([y], input_order, indomain_max, complete)
+     * ]) satisfy;
+     */
+    @Test(groups = "1s")
+    public void testNestedSeq() throws IOException {
+        datas.register("x", mSolver.intVar("x", 0, 10, true));
+        datas.register("y", mSolver.intVar("y", 0, 10, true));
+        Flatzinc4Parser fp = parser(
+                "solve :: seq_search([\n" +
+                        "    seq_search([\n" +
+                        "      int_search([x], input_order, indomain_min, complete),\n" +
+                        "      bool_search([p], input_order, indomain_max, complete)\n" +
+                        "    ]),\n" +
+                        "    int_search([y], input_order, indomain_max, complete)\n" +
+                        "]) satisfy;", mSolver, datas
+        );
+        fp.solve_goal();
+    }
 }

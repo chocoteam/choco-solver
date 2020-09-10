@@ -907,7 +907,7 @@ public class RealTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
-    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3(){
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -926,7 +926,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3a() {
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -952,7 +952,7 @@ public class RealTest {
     }
 
 
-    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10)
+    @Test(groups="ibex", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha4(){
         double eps=1e-7;
         Ibex ibex = new Ibex(new double[]{eps,eps,eps,eps,eps,eps,eps,eps});
@@ -1119,5 +1119,38 @@ public class RealTest {
         // y - x - 1 = 0
         y.sub(x).sub(1).eq(0).ibex(PRECISION).post();
         Assert.assertNotNull(model.getSolver().findSolution());
+    }
+
+
+    @Test(groups = "1s")
+    public void testSchmitt(){
+        Model model = new Model();
+        // Variables
+        RealVar t = model.realVar("t", 0.0, 4.0, 0.01);
+        RealVar h = model.realVar("h", 0.0, 5.0, 0.01);
+        // h = -3/4*t^2 + 6*t - 9
+        h.eq(t.mul(t).mul(-0.75).add(t.mul(6)).sub(9)).equation().post();
+        model.setObjective(Model.MAXIMIZE, h);
+        model.getSolver().showSolutions();
+        model.getSolver().solve();
+        Assert.assertTrue(t.getLB()>2.);
+    }
+
+    @Test(groups = "ibex")
+    public void testSchmitt2() {
+        // See ISSUE #702
+        Model model = new Model();
+        RealVar x = model.realVar("x", -100.0, 100.0, 0.01);
+        RealVar y = model.realVar("y", -100.0, 100.0, 0.01);
+        y.eq(x.pow(2)).ibex(0.01).post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException cex) {
+            Assert.fail("Should thrown contradiction");
+        }
+        Assert.assertEquals(y.getLB(), 0.0, 0.01);
+        Assert.assertEquals(y.getUB(), 100.0, 0.01);
+        Assert.assertEquals(x.getLB(), -10.0, 0.01);
+        Assert.assertEquals(x.getUB(), 10.0, 0.01);
     }
 }
