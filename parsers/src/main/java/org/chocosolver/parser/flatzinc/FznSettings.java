@@ -37,7 +37,6 @@ public class FznSettings extends DefaultSettings {
     private void loadProperties() {
         this.setCheckDeclaredConstraints(false);
         //        this.setModelChecker(solver -> true);
-        this.setHybridizationOfPropagationEngine((byte) 0b10);
         this.setLearntClausesDominancePerimeter(0);
         this.setNbMaxLearntClauses(Integer.MAX_VALUE);
         this.setRatioForClauseStoreReduction(.66f);

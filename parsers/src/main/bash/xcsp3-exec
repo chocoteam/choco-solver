@@ -2,7 +2,7 @@
 
 NB_NODES=1
 TIME_LIMIT=500
-MEM_LIMIT=500
+MEM_LIMIT=4000
 DIR=./
 TDIR=./
 SEED=0
@@ -134,7 +134,7 @@ done
 FILE="$1"
 ARGS=" -limit=[${TIME_LIMIT}s] -p $NB_NODES -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
 
-CMD="java -server -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
+CMD="java -XX:+UseSerialGC -server -Xss128M -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 
 echo "c $CMD"
 eval ${CMD}
