@@ -10,6 +10,7 @@
 package org.chocosolver.util.tools;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.expression.continuous.arithmetic.RealIntervalConstant;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
@@ -233,6 +234,26 @@ public class VariableUtils {
                 Math.pow(x.getUB(), y.getLB()),
                 Math.pow(x.getUB(), y.getUB())
         );
+    }
+
+    /**
+     * @param x a variable
+     * @param y a constant
+     * @return computes the bounds for "x ^ y"
+     */
+    public static double[] boundsForPow(RealVar x, double y) {
+        if (y >= 0) {
+            return bound(0,
+                    Math.pow(x.getLB(), y),
+                    Math.pow(x.getUB(), y));
+        } else {
+            // bounds for 1/x^y when x < 0
+            double bounds[] = bound(0,
+                    Math.pow(x.getLB(), Math.abs(y)),
+                    Math.pow(x.getUB(), Math.abs(y)));
+            RealInterval boundsDiv = RealUtils.odiv(new RealIntervalConstant(1.0, 1.0), new RealIntervalConstant(bounds[0], bounds[1]));
+            return new double[]{boundsDiv.getLB(), boundsDiv.getUB()};
+        }
     }
 
     /**

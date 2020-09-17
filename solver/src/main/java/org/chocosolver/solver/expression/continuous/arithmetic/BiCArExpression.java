@@ -106,12 +106,15 @@ public class BiCArExpression implements CArExpression {
                     model.realIbexGenericConstraint("{0}={1}/{2}", me, v1, v2).post();
                     break;
                 case POW:
-                    bounds = VariableUtils.boundsForPow(v1, v2);
-                    me = model.realVar(bounds[0], bounds[1], p);
                     if (isIntegerConstant(v2)) {
                         // See issue: #702
-                        model.realIbexGenericConstraint("{0}={1}^" + (int) v2.getLB(), me, v1).post();
+                        int exponent = (int) v2.getLB();
+                        bounds = VariableUtils.boundsForPow(v1, exponent);
+                        me = model.realVar(bounds[0], bounds[1], p);
+                        model.realIbexGenericConstraint("{0}={1}^" + exponent, me, v1).post();
                     } else {
+                        bounds = VariableUtils.boundsForPow(v1, v2);
+                        me = model.realVar(bounds[0], bounds[1], p);
                         model.realIbexGenericConstraint("{0}={1}^{2}", me, v1, v2).post();
                     }
                     break;
