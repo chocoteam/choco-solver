@@ -16,7 +16,7 @@ pull_request_rules:
       dismiss_reviews: {}
   - name: say hi on new contribution
     conditions:
-      - author!=@myorg/regularcontributors
+      - author!=@chocoteam/regularcontributors
     actions:
       comment:
         message: |
