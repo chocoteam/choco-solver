@@ -1121,6 +1121,32 @@ public class RealTest {
         Assert.assertNotNull(model.getSolver().findSolution());
     }
 
+    @Test(groups = "1s")
+    public void testJoao4() throws ContradictionException {
+        Model model = new Model();
+        //RealVar x = model.realVar("x", 0.0, 8.0, 1e-6); // With this domain, y returns [0,125 .. 100,000] (CORRECT)
+        RealVar x = model.realVar("x", -100.0, 8.0, 1e-6); // With this domain, y returns [0,000 .. 100,000] (INCORRECT)
+        RealVar y = model.realVar("y", -100.0, 100.0, 1e-6);
+        RealVar c = model.realVar("c", 1.0, 1.0, 1e-6);
+        x.ge(0.0).equation().post();
+        y.eq(c.div(x)).equation().post();
+        model.getSolver().propagate();
+        Assert.assertTrue(y.getLB() > 0.12);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao5() throws ContradictionException {
+        Model model = new Model();
+        //RealVar x = model.realVar("x", 0.0, 8.0, 1e-6); // With this domain, y returns [0,125 .. 100,000] (CORRECT)
+        RealVar x = model.realVar("x", -100.0, 8.0, 1e-6); // With this domain, y returns [0,000 .. 100,000] (INCORRECT)
+        RealVar y = model.realVar("y", -100.0, 100.0, 1e-6);
+        RealVar c = model.realVar("c", 1.0, 1.0, 1e-6);
+        x.le(0.0).equation().post();
+        y.eq(c.div(x)).equation().post();
+        model.getSolver().propagate();
+        Assert.assertTrue(y.getLB() < -0.12);
+    }
+
 
     @Test(groups = "1s")
     public void testSchmitt(){

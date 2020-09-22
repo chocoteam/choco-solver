@@ -12,7 +12,7 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-\#699, #709 
+\#699, #709, #725 
 
 #### Contributors to this release:
 - [Guillaume Le Louët](https://github.com/glelouet) (glelouet)

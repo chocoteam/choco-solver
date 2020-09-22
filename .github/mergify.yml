@@ -14,14 +14,6 @@ pull_request_rules:
       - base=master
     actions:
       dismiss_reviews: {}
-  - name: say hi on new contribution
-    conditions:
-      - author!=@chocoteam/regularcontributors
-    actions:
-      comment:
-        message: |
-          Welcome to our great project!
-          We're delight to have you onboard !
   - name: automatic merge for Dependabot pull requests
     conditions:
       - author~=^dependabot(|-preview)\[bot\]$
