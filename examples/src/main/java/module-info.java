@@ -19,4 +19,5 @@ module org.chocosolver.examples {
     requires args4j;
     requires java.desktop;
     requires trove4j;
+    opens org.chocosolver.examples.integer to args4j;
 }
