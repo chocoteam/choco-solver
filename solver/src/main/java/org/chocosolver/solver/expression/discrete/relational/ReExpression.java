@@ -95,7 +95,14 @@ public interface ReExpression extends ArExpression {
             boolean eval(int i1, int i2) {
                 return i1 == i2;
             }
-        };
+        },
+        IN {
+            @Override
+            boolean eval(int i1, int i2) {
+                return i1 == i2;
+            }
+        }
+        ;
 
         abstract boolean eval(int i1, int i2);
     }
@@ -189,7 +196,11 @@ public interface ReExpression extends ArExpression {
      * @return return the expression "x &oplus; y_1 &oplus; y_2 &oplus; ..." where this is "x"
      */
     default ReExpression xor(ReExpression... y) {
-        return new NaLoExpression(LoExpression.Operator.XOR, this, y);
+        if (y.length == 1) {
+            return new BiLoExpression(LoExpression.Operator.XOR, this, y[0]);
+        } else {
+            return new NaLoExpression(LoExpression.Operator.XOR, this, y);
+        }
     }
 
     /**
@@ -205,7 +216,11 @@ public interface ReExpression extends ArExpression {
      * @return return the expression "x &hArr; y_1 &hArr; y_2 &hArr; ..." where this is "x"
      */
     default ReExpression iff(ReExpression... y) {
-        return new NaLoExpression(LoExpression.Operator.IFF, this, y);
+        if(y.length == 1){
+            return new BiLoExpression(LoExpression.Operator.IFF, this, y[0]);
+        }else {
+            return new NaLoExpression(LoExpression.Operator.IFF, this, y);
+        }
     }
 
     /**

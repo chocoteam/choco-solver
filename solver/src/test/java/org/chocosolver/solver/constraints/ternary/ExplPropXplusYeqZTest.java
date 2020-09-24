@@ -38,7 +38,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->
@@ -66,7 +66,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->
@@ -94,7 +94,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->
@@ -122,7 +122,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->
@@ -150,7 +150,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->
@@ -178,7 +178,7 @@ public class ExplPropXplusYeqZTest {
         IntVar y = mo.intVar("y", -999, 999);
         IntVar z = mo.intVar("z", -999, 999);
 
-        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z, false);
+        PropXplusYeqZ prop = new PropXplusYeqZ(x, y, z);
         mo.post(new Constraint("test", prop));
         HashMap<IntVar, IntIterableRangeSet> lits =
                 execute(mo.getSolver(), i ->

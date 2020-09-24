@@ -1,0 +1,23 @@
+pull_request_rules:
+  - name: automatic merge for master when CI passes and 1 review
+    conditions:
+      - "#approved-reviews-by>=1"
+      - "#review-requested=0"
+      - "#changes-requested-reviews-by=0"
+      - "#commented-reviews-by=0"
+      - base=master
+    actions:
+      merge:
+        method: merge
+  - name: remove outdated reviews
+    conditions:
+      - base=master
+    actions:
+      dismiss_reviews: {}
+  - name: automatic merge for Dependabot pull requests
+    conditions:
+      - author~=^dependabot(|-preview)\[bot\]$
+      - status-success=Travis CI - Pull Request
+    actions:
+      merge:
+        method: merge

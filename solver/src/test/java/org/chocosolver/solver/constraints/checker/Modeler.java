@@ -841,7 +841,7 @@ public interface Modeler {
     Modeler modelplusac = new Modeler() {
         @Override
         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
-            Model s = new Model("plus" + n, new DefaultSettings().setEnableACOnTernarySum(true));
+            Model s = new Model("plus" + n);
             IntVar[] vars = new IntVar[n];
             for (int i = 0; i < vars.length; i++) {
                 vars[i] = s.intVar("X_" + i, domains[i]);

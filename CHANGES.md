@@ -8,11 +8,14 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
-
+- add `IN` arithmetic int expression.
+ 
 ### Deprecated API (to be removed in next release):
+- `Settings.enableACOnTernarySum()` removed
+- `Settings.setEnableACOnTernarySum(boolean)` removed
 
 ### Other closed issues and pull requests:
-\#699, #709 
+\#699, #709, #725, #737 
 
 #### Contributors to this release:
 - [Guillaume Le Louët](https://github.com/glelouet) (glelouet)

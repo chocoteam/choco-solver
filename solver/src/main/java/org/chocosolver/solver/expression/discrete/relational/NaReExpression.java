@@ -92,6 +92,12 @@ public class NaReExpression implements ReExpression {
                     model.atMostNValues(vs, count, false).post();
                     model.reifyXltC(count, 2, me);
                 }
+            }else if(op == Operator.IN){
+                BoolVar[] reifs = model.boolVarArray(vs.length - 1);
+                for(int i = 1; i < vs.length; i++) {
+                    model.reifyXeqY(vs[0], vs[i], reifs[i-1]);
+                }
+                model.addClausesSumBoolArrayGreaterEqVar(reifs,me);
             } else {
                 throw new UnsupportedOperationException(
                     "Binary arithmetic expressions does not support " + op.name());
@@ -115,15 +121,32 @@ public class NaReExpression implements ReExpression {
                 }else {
                     return model.allEqual(vs);
                 }
+            case IN:
+                return model.count(vs[0],
+                        Arrays.copyOfRange(vs, 1, vs.length),
+                        model.intVar(op+"_idx", 1, vs.length-1));
         }
         throw new SolverException("Unexpected case");
     }
 
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
-        boolean eval = true;
-        for(int i = 1; i < es.length; i++){
-            eval &= op.eval(es[0].ieval(values, map), es[i].ieval(values, map));
+        boolean eval;
+        switch (op) {
+            case EQ:
+                eval = true;
+                for (int i = 1; i < es.length && eval; i++) {
+                    eval = op.eval(es[0].ieval(values, map), es[i].ieval(values, map));
+                }
+                break;
+            case IN:
+                eval = false;
+                for (int i = 1; i < es.length; i++) {
+                    eval |= op.eval(es[0].ieval(values, map), es[i].ieval(values, map));
+                }
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + op);
         }
         return eval;
     }
