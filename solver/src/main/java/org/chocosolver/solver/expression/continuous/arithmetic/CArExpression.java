@@ -16,6 +16,7 @@ import org.chocosolver.solver.expression.continuous.relational.BiCReExpression;
 import org.chocosolver.solver.expression.continuous.relational.CReExpression;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.util.objects.RealInterval;
+import org.chocosolver.util.tools.RealUtils;
 
 import java.util.List;
 import java.util.TreeSet;
@@ -520,8 +521,13 @@ public interface CArExpression extends RealInterval {
     /**
      * @param y a double
      * @return return the expression "x <= y" where this is "x"
+     * @implNote if {@literal y} is equal to {@literal 0.}, then {@literal y} is updated to {@code RealUtils.prevFloat(0)}.
+     * Indeed, {@literal 0.} is a special case in continuous.
      */
     default CReExpression le(double y) {
+        if(y == 0.){
+            y = RealUtils.prevFloat(0);
+        }
         return new BiCReExpression(CReExpression.Operator.LE, this, this.getModel().realVar(y));
     }
 
@@ -552,8 +558,13 @@ public interface CArExpression extends RealInterval {
     /**
      * @param y a double
      * @return return the expression "x >= y" where this is "x"
+     * @implNote if {@literal y} is equal to {@literal 0.}, then {@literal y} is updated to {@code RealUtils.nextFloat(0)}.
+     * Indeed, {@literal 0.} is a special case in continuous.
      */
     default CReExpression ge(double y) {
+        if(y == 0.){
+            y = RealUtils.nextFloat(-0);
+        }
         return new BiCReExpression(CReExpression.Operator.GE, this, this.getModel().realVar(y));
     }
 

@@ -52,47 +52,45 @@ public interface Settings {
     default Settings load(Properties properties) {
         this.setWelcomeMessage((String) properties.getOrDefault(
                 "welcome.message", this.getWelcomeMessage()));
-        this.setEnableViews(Boolean.valueOf(properties.getOrDefault(
+        this.setEnableViews(Boolean.parseBoolean(properties.getOrDefault(
                 "views.activate", this.enableViews()).toString()));
-        this.setMaxDomSizeForEnumerated(Integer.valueOf(properties.getOrDefault(
+        this.setMaxDomSizeForEnumerated(Integer.parseInt(properties.getOrDefault(
                 "enumerated.threshold", this.getMaxDomSizeForEnumerated()).toString()));
-        this.setMinCardinalityForSumDecomposition(Integer.valueOf(properties.getOrDefault(
+        this.setMinCardinalityForSumDecomposition(Integer.parseInt(properties.getOrDefault(
                 "sum.decomposition.threshold", this.getMinCardForSumDecomposition()).toString()));
-        this.setEnableTableSubstitution(Boolean.valueOf(properties.getOrDefault(
+        this.setEnableTableSubstitution(Boolean.parseBoolean(properties.getOrDefault(
                 "table.substitution", enableTableSubstitution()).toString()));
-        this.setMCRDecimalPrecision(Double.valueOf(properties.getOrDefault(
+        this.setMCRDecimalPrecision(Double.parseDouble(properties.getOrDefault(
                 "MCR.precision", this.getMCRDecimalPrecision()).toString()));
-        this.setMaxTupleSizeForSubstitution(Integer.valueOf(properties.getOrDefault(
+        this.setMaxTupleSizeForSubstitution(Integer.parseInt(properties.getOrDefault(
                 "tuple.threshold", this.getMaxTupleSizeForSubstitution()).toString()));
-        this.setSortPropagatorActivationWRTPriority(Boolean.valueOf(properties.getOrDefault(
+        this.setSortPropagatorActivationWRTPriority(Boolean.parseBoolean(properties.getOrDefault(
                 "propagators.sort", this.sortPropagatorActivationWRTPriority()).toString()));
-        this.setWarnUser(Boolean.valueOf(properties.getOrDefault(
+        this.setWarnUser(Boolean.parseBoolean(properties.getOrDefault(
                 "user.warn", this.warnUser()).toString()));
-        this.setEnableDecompositionOfBooleanSum(Boolean.valueOf(properties.getOrDefault(
+        this.setEnableDecompositionOfBooleanSum(Boolean.parseBoolean(properties.getOrDefault(
                 "boolsum.decomposition", this.enableDecompositionOfBooleanSum()).toString()));
-        this.setCloneVariableArrayInPropagator(Boolean.valueOf(properties.getOrDefault(
+        this.setCloneVariableArrayInPropagator(Boolean.parseBoolean(properties.getOrDefault(
                 "propagators.clonevars", this.cloneVariableArrayInPropagator()).toString()));
-        this.setEnableACOnTernarySum(Boolean.valueOf(properties.getOrDefault(
-                "sum.AConTernary", this.enableACOnTernarySum()).toString()));
         this.setDefaultPrefix((String) properties.getOrDefault(
                 "variables.prefix", this.defaultPrefix()));
-        this.setEnableSAT(Boolean.valueOf(properties.getOrDefault(
+        this.setEnableSAT(Boolean.parseBoolean(properties.getOrDefault(
                 "satsolver.activate", this.enableSAT()).toString()));
-        this.setSwapOnPassivate(Boolean.valueOf(properties.getOrDefault(
+        this.setSwapOnPassivate(Boolean.parseBoolean(properties.getOrDefault(
                 "propagators.swap", this.swapOnPassivate()).toString()));
-        this.setCheckDeclaredConstraints(Boolean.valueOf(properties.getOrDefault(
+        this.setCheckDeclaredConstraints(Boolean.parseBoolean(properties.getOrDefault(
                 "constraints.check", this.checkDeclaredConstraints()).toString()));
-        this.setHybridizationOfPropagationEngine(Byte.valueOf(properties.getOrDefault(
+        this.setHybridizationOfPropagationEngine(Byte.parseByte(properties.getOrDefault(
                 "propagationEngine.hybridization", this.enableHybridizationOfPropagationEngine()).toString()));
-        this.setNbMaxLearntClauses(Integer.valueOf(properties.getOrDefault(
+        this.setNbMaxLearntClauses(Integer.parseInt(properties.getOrDefault(
                 "learnt.nbMax", this.getNbMaxLearntClauses()).toString()));
-        this.setRatioForClauseStoreReduction(Float.valueOf(properties.getOrDefault(
+        this.setRatioForClauseStoreReduction(Float.parseFloat(properties.getOrDefault(
                 "learnt.ratio", this.getRatioForClauseStoreReduction()).toString()));
-        this.setMaxLearntClauseCardinality(Integer.valueOf(properties.getOrDefault(
+        this.setMaxLearntClauseCardinality(Integer.parseInt(properties.getOrDefault(
                 "learnt.maxCard", this.getMaxLearntClauseCardinality()).toString()));
-        this.setLearntClausesDominancePerimeter(Integer.valueOf(properties.getOrDefault(
+        this.setLearntClausesDominancePerimeter(Integer.parseInt(properties.getOrDefault(
                 "learnt.dominance", this.getLearntClausesDominancePerimeter()).toString()));
-        this.explainGlobalFailureInSum(Boolean.valueOf(properties.getOrDefault(
+        this.explainGlobalFailureInSum(Boolean.parseBoolean(properties.getOrDefault(
                 "learnt.sum.global", this.explainGlobalFailureInSum()).toString()));
         return this;
     }
@@ -131,8 +129,6 @@ public interface Settings {
      *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
-     * @exception IOException if writing this property list to the specified
-     *             output stream throws an <tt>IOException</tt>.
      * @return the property file
      */
     default Properties store() {
@@ -148,7 +144,6 @@ public interface Settings {
         properties.setProperty("user.warn", Boolean.toString(this.warnUser()));
         properties.setProperty("boolsum.decomposition", Boolean.toString(this.enableDecompositionOfBooleanSum()));
         properties.setProperty("propagators.clonevars", Boolean.toString(this.cloneVariableArrayInPropagator()));
-        properties.setProperty("sum.AConTernary", Boolean.toString(this.enableACOnTernarySum()));
         properties.setProperty("variables.prefix", this.defaultPrefix());
         properties.setProperty("satsolver.activate", Boolean.toString(enableSAT()));
         properties.setProperty("propagators.swap", Boolean.toString(swapOnPassivate()));
@@ -397,17 +392,15 @@ public interface Settings {
     Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator);
 
     /**
-     * @return <tt>true<tt/> if AC is enabled to filter ternary sums by default.
+     * @deprecated
      */
+    @Deprecated
     boolean enableACOnTernarySum();
 
     /**
-     * If this is set to <tt>true<tt/> then AC algorithm is used to filter ternary sum by default,
-     * otherwise, BC is used.
-     * Note AC brings more filtering when there are holes in variable domains but this comes at a cost.
-     * @param enable {@code true} to enable AC by default
-     * @return the current instance
+     * @deprecated
      */
+    @Deprecated
     Settings setEnableACOnTernarySum(boolean enable);
 
     /**

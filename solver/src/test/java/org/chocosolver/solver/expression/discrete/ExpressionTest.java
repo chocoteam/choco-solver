@@ -10,6 +10,7 @@
 package org.chocosolver.solver.expression.discrete;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
@@ -31,7 +32,7 @@ public class ExpressionTest {
 
     @DataProvider(name = "post")
     public Object[][] provider() {
-        return new Object[][]{{0}, {1}};
+        return new Object[][]{{0}, {1}, {2}};
     }
 
     private void eval(Model model, ReExpression ex, int postAs, int nbsol){
@@ -41,6 +42,9 @@ public class ExpressionTest {
                 break;
             case 1:
                 ex.extension().post();
+                break;
+            case 2:
+                ex.boolVar().eq(1).post();
                 break;
         }
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
@@ -56,7 +60,7 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
-    public void test(int p) {
+    public void test2(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
         eval(model, x.ne(1), p, 5);
@@ -381,6 +385,14 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test40_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).iff(y.eq(2)), p, 5);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
     public void test41(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
@@ -389,11 +401,27 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test41_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).imp(y.eq(2)), p, 7);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
     public void test42(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
         IntVar y = model.intVar(0, 5);
         eval(model, x.eq(y.add(1)).xor(x.add(2).le(6)), p, 27);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test42_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).xor(y.eq(2)), p, 4);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
@@ -458,5 +486,123 @@ public class ExpressionTest {
         model.getSolver().showSolutions(()->String.format("%d = V[(%d - %d)^2 + (%d - %d)^2]",
             d.getValue(), x1.getValue(), x2.getValue(), y1.getValue(), y2.getValue()));
         eval(model, d.eq(((x1.sub(x2)).pow(2).add((y1.sub(y2)).pow(2))).sqr()), p, 81);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test50(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        eval(model, x.in(1, 2, 3), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test51(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 5);
+        IntVar y = model.intVar("y", -2, 2);
+        IntVar z = model.intVar("z", 1, 3);
+        model.getSolver().showSolutions();
+        eval(model, x.in(y, z), p, 22);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao1() throws ContradictionException {
+        Model model = new Model();
+                IntVar qtdActive = model.intVar("qtdActive", 0, 2, true);
+        BoolVar active = model.boolVar("active");
+        IntVar qtd = model.intVar("qtd", 0, 2, true);
+
+        qtdActive.ge(1).post();
+        active.eq(1).post();
+        active.eq(1).imp(qtd.eq(qtdActive)).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(active.isInstantiatedTo(1));
+        Assert.assertEquals(qtd.getLB(), 1);
+        Assert.assertEquals(qtdActive.getLB(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_1() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        x.eq(1).imp(y.eq(z)).post(); // wrong -> y = {0..2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_2() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        x.eq(1).imp(y.sub(z).eq(0)).post(); // wrong -> y = {0..2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_3() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        y.eq(z).post(); // right -> y = {0,2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_4() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        y.sub(z).eq(0).post(); // right -> y = {0,2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
     }
 }

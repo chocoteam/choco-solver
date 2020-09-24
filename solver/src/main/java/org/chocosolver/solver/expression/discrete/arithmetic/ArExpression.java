@@ -16,6 +16,7 @@ import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -647,5 +648,21 @@ public interface ArExpression {
      */
     default ReExpression eq(ArExpression... ys) {
         return new NaReExpression(ReExpression.Operator.EQ, this, ys);
+    }
+
+    /**
+     * @param ys some ints
+     * @return return the expression "(x = y_1) or (x = y_) or ..." where this is "x"
+     */
+    default ReExpression in(int... ys) {
+        return new NaReExpression(ReExpression.Operator.IN, this, Arrays.stream(ys).mapToObj(y -> getModel().intVar(y)).toArray(IntVar[]::new));
+    }
+
+    /**
+     * @param ys some expressions
+     * @return return the expression "(x = y_1) or (x = y_) or ..." where this is "x"
+     */
+    default ReExpression in(ArExpression... ys) {
+        return new NaReExpression(ReExpression.Operator.IN, this, ys);
     }
 }

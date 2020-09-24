@@ -9,23 +9,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.search.strategy.Search.intVarSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
-import static org.chocosolver.solver.search.strategy.Search.minDomUBSearch;
-import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.DefaultSettings;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.*;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sum.PropScalar;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -37,6 +21,14 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static org.chocosolver.solver.constraints.Operator.EQ;
+import static org.chocosolver.solver.search.strategy.Search.*;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -76,7 +68,7 @@ public class ViewsTest {
 //        int seed = 5;
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
+            Model model = new Model();
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -309,7 +301,7 @@ public class ViewsTest {
         // Z = X - Y
         for (int seed = 0; seed < 9999; seed++) {
             Model ref = new Model();
-            Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
+            Model model = new Model();
             {
                 IntVar x = ref.intVar("x", 0, 2, false);
                 IntVar y = ref.intVar("y", 0, 2, false);
@@ -337,7 +329,7 @@ public class ViewsTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testTernArithmBC() {
         // note did not pass because PropXplusYeqZ did not reach a fix point
-        Model model = new Model(new DefaultSettings().setEnableACOnTernarySum(true));
+        Model model = new Model();
         IntVar x = model.intVar("x", 0, 2, false);
         IntVar y = model.intVar("y", 0, 2, false);
         IntVar z = model.intVar("Z", -2, 2, false);
