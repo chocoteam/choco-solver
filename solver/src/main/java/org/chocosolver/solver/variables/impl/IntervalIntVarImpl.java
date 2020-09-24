@@ -22,12 +22,9 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.IntervalDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
+import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -76,10 +73,16 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     private IntVarValueIterator _javaIterator;
 
     /**
+     * Signed Literal
+     */
+    protected SignedLiteral.Set literal;
+
+    /**
      * Create a bounded domain IntVar : [min,max]
-     * @param name name of the variable
-     * @param min lower bound
-     * @param max upper bound
+     *
+     * @param name  name of the variable
+     * @param min   lower bound
+     * @param max   upper bound
      * @param model declaring model
      * @implNote Only bounds modifications are handled
      * (any value removals in the middle of the domain will be ignored).
@@ -116,10 +119,9 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (value == getLB()){
+        if (value == getLB()) {
             return updateLowerBound(value + 1, cause);
-        }
-        else if(value == getUB()) {
+        } else if (value == getUB()) {
             return updateUpperBound(value - 1, cause);
         }
         return false;
@@ -428,7 +430,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int ub = UB.get();
         if (LB.get() - 1 <= v && v <= ub) {
             return ub + 1;
-        }else{
+        } else {
             return v + 1;
         }
     }
@@ -450,7 +452,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         int lb = LB.get();
         if (lb <= v && v <= UB.get() + 1) {
             return lb - 1;
-        }else{
+        } else {
             return v - 1;
         }
     }
@@ -534,10 +536,26 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
 
     @Override
     public Iterator<Integer> iterator() {
-        if(_javaIterator == null){
+        if (_javaIterator == null) {
             _javaIterator = new IntVarValueIterator(this);
         }
         _javaIterator.reset();
         return _javaIterator;
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Set(rootDomain);
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

@@ -21,13 +21,10 @@ import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.util.iterators.*;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -80,8 +77,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     private boolean isNot = false;
 
     /**
+     * Signed Literal
+     */
+    private SignedLiteral.Boolean literal = null;
+
+    /**
      * Create a BoolVar {0,1} or {true, false}
-     * @param name name of the variable
+     *
+     * @param name  name of the variable
      * @param model declaring model
      */
     public BoolVarImpl(String name, Model model) {
@@ -178,10 +181,10 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
-        if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)){
+        if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        } else if (mValue == kUNDEF){
+        } else if (mValue == kUNDEF) {
             IntEventType e = IntEventType.INSTANTIATE;
             this.getModel().getEnvironment().save(status);
             if (reactOnRemoval) {
@@ -357,12 +360,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int nextValueOut(int v) {
         int lb = 0, ub = 1;
-        if(isInstantiated()){ // if this is instantiated
+        if (isInstantiated()) { // if this is instantiated
             lb = ub = mValue;
         }
         if (lb - 1 <= v && v <= ub) {
             return ub + 1;
-        }else{
+        } else {
             return v + 1;
         }
     }
@@ -377,12 +380,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public int previousValueOut(int v) {
         int lb = 0, ub = 1;
-        if(isInstantiated()){ // if this is instantiated
+        if (isInstantiated()) { // if this is instantiated
             lb = ub = mValue;
         }
         if (lb <= v && v <= ub + 1) {
             return lb - 1;
-        }else{
+        } else {
             return v - 1;
         }
     }
@@ -465,7 +468,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
 
     @Override
     public Iterator<Integer> iterator() {
-        if(_javaIterator == null){
+        if (_javaIterator == null) {
             _javaIterator = new IntVarValueIterator(this);
         }
         _javaIterator.reset();
@@ -504,5 +507,21 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public void setNot(boolean isNot) {
         this.isNot = isNot;
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Boolean();
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

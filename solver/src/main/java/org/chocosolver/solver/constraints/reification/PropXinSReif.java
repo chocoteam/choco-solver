@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -46,14 +44,14 @@ public class PropXinSReif extends Propagator<IntVar> {
             var.removeAllValuesBut(set, this);
             setPassive();
         } else if (r.getUB() == 0) {
-            if (var.removeValues(set, this) || !IntIterableSetUtils.intersect(var, set)) {
+            if (var.removeValues(set, this) || !set.intersect(var)) {
                 setPassive();
             }
         } else {
             if (IntIterableSetUtils.includedIn(var, set)) {
                 r.setToTrue(this);
                 setPassive();
-            } else if (!IntIterableSetUtils.intersect(var, set)) {
+            } else if (!set.intersect(var)) {
                 r.setToFalse(this);
                 setPassive();
             }
@@ -66,7 +64,7 @@ public class PropXinSReif extends Propagator<IntVar> {
             if(r.isInstantiatedTo(1)){
                 return ESat.eval(IntIterableSetUtils.includedIn(var, set));
             }else{
-                return ESat.eval(!IntIterableSetUtils.intersect(var, set));
+                return ESat.eval(!set.intersect(var));
             }
         }
         return ESat.UNDEFINED;
@@ -116,27 +114,27 @@ public class PropXinSReif extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X > c holds
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), true);
-                IntIterableRangeSet set0 = explanation.getRootSet(vars[0]);
+                vars[1].intersectLit(1, explanation);
+                IntIterableRangeSet set0 = explanation.universe();
                 set0.removeAll(this.set);
-                explanation.addLiteral(vars[0], set0, false);
+                vars[0].unionLit(set0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), false);
-                explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(set), true);
+                vars[1].unionLit(0, explanation);
+                vars[0].intersectLit(explanation.empty().copyFrom(set), explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), true);
-                explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(set), false);
+                vars[1].intersectLit(0, explanation);
+                vars[0].unionLit(explanation.empty().copyFrom(set), explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), false);
-                IntIterableRangeSet set0 = explanation.getRootSet(vars[0]);
+                vars[1].unionLit(1, explanation);
+                IntIterableRangeSet set0 = explanation.universe();
                 set0.removeAll(this.set);
-                explanation.addLiteral(vars[0], set0, true);
+                vars[0].intersectLit(set0, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

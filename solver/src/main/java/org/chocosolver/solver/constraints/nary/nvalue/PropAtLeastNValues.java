@@ -12,10 +12,8 @@ package org.chocosolver.solver.constraints.nary.nvalue;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.stream.IntStream;
@@ -182,52 +180,92 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
         }
         return ESat.UNDEFINED;
     }
-
-    private boolean explainForallDiffForall(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, IntStream Indexes) {
-        final boolean[] flag = {false};
-        int[] indices = Indexes.toArray();
-        IntIterableRangeSet union = IntStream
-                .of(indices)
-                .mapToObj(i -> ig.getDomainAt(front.getValue(vars[i])))
-                .collect(IntIterableRangeSet::new,
-                        IntIterableRangeSet::addAll,
-                        IntIterableRangeSet::addAll);
-        IntStream
-                .of(indices)
-                .mapToObj(i -> vars[i])
-                .forEach(v -> {
-                    IntIterableRangeSet dom = e.getRootSet(v);
-                    dom.removeAll(union);
-                    flag[0] |= !dom.isEmpty();
-                    e.addLiteral(v, dom, false);
-                });
-        return flag[0];
-    }
-
-    @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        if (false) {
-            Propagator.defaultExplain(this, explanation, front, ig, p);
-            return;
-        }
-        IntStream X = IntStream.rangeClosed(0, vars.length - 2);
-        IntStream N = IntStream.rangeClosed(vars.length - 1, vars.length - 1);
-        IntVar pivot = ig.getIntVarAt(p);
-        switch (ig.getEventMaskAt(p)) {
-            case 2://INCLOW
-                Propagator.defaultExplain(this, explanation, front, ig, p);
-                break;
-            case 4://DECUPP
-                if (explainForallDiffForall(explanation, front, ig, pivot, X)) {
-                    IntIterableRangeSet set = explanation.getSet(pivot);//ig.getDomainAt(p);
-                    explanation.addLiteral(pivot, set, true);
-                } else {
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
+    /**
+     * Find in the implication graph and add to the explanation all the remove value events (the real events added are inverted because only disjunctions are allowed for explanation)
+     */
+    private void explainDiffForalliForallt(ExplanationForSignedClause e, int[] indexes) {
+        for (int i : indexes)  {
+            for(int t : e.root(vars[i])){
+                if (!e.domain(vars[i]).contains(t)) {
+                    vars[i].unionLit(t,e);
                 }
+            }//vars[i].unionLit(e.complement(vars[i]),e);
+        }
+    }
+    /**
+     * Find in the implication graph and add to the explanation all the remove value events except those on value t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t exception value
+     */
+    private void explainDiffForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
+        for (int i : indexes)  {
+            for(int tt : e.root(vars[i])){
+                if (!e.domain(vars[i]).contains(tt)&&t!=tt) {
+                    vars[i].unionLit(tt,e);
+                }
+            }//vars[i].unionLit(e.complement(vars[i]),e);
+        }
+    }
+    /**
+     * Find in the implication graph and add in the explanation remove value t events (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t value
+     */
+    private void explainDiffForallit(ExplanationForSignedClause e, int[] indexes, int t) {
+        for (int i : indexes)  {
+            if (!e.domain(vars[i]).contains(t)) {
+                vars[i].unionLit(t,e);
+            }
+        }
+    }
+    /**
+     * Find in the implication graph and add to the explanation all the instantiate events except those on value t (the real events added are inverted because only disjunctions are allowed for explanation)
+     * @param t exception value
+     */
+    private void explainEquaForalliForalltDifft(ExplanationForSignedClause e, int[] indexes, int t) {
+        for (int i : indexes)  {
+            for(int tt : e.root(vars[i])){
+                if (e.domain(vars[i]).contains(tt)&&t!=tt) {
+                    vars[i].intersectLit(e.setDiffVal(tt),e);
+                }
+            }
+        }
+     }
+    /**
+     * Find in the implication graph and add in the explanation all instantiation events (the real events added are inverted because only disjunctions are allowed for explanation)
+     */
+    private void explainEquaForalliForallt(ExplanationForSignedClause e, int[] indexes) {
+        for (int i : indexes) {
+            for (int t : e.root(vars[i])) {
+                if (e.domain(vars[i]).contains(t)) {
+                    vars[i].intersectLit(e.setDiffVal(t), e);
+                }
+            }
+        }
+    }
+    /**
+     * Detect and explain the event at pivot variable p
+     * @param p pivot variable
+     */
+    @Override
+    public void explain(int p, ExplanationForSignedClause e) {
+        IntVar pivot = e.readVar(p);
+        int[] X = IntStream.rangeClosed(0, vars.length - 2).filter(i->vars[i]!=pivot).toArray();
+        switch (e.readMask(p)) {
+            case 4://DECUPP
+                explainDiffForalliForallt(e, X);
+                pivot.intersectLit(IntIterableRangeSet.MIN, e.domain(pivot).max(), e);
                 break;
             case 8://INSTANTIATE
-                Propagator.defaultExplain(this, explanation, front, ig, p);
+                assert e.readDom(p).size()==1;
+                int t = e.readDom(p).min();
+                explainDiffForallit(e, X, t);
+                explainDiffForalliForalltDifft(e, X, t);
+                explainEquaForalliForalltDifft(e, X, t);
+                vars[vars.length - 1].unionLit(e.complement(vars[vars.length - 1]),e);
+                IntIterableRangeSet set = e.complement(pivot);
+                set.add(t);
+                pivot.intersectLit(set, e);
                 break;
+            case 2://INCLOW
             case 1://REMOVE
             case 0://VOID
             case 6://BOUND inclow+decup
@@ -235,5 +273,4 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
                 throw new UnsupportedOperationException("Unknown event type explanation");
         }
     }
-
 }

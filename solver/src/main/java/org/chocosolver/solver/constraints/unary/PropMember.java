@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -35,7 +33,7 @@ public class PropMember extends Propagator<IntVar> {
     /**
      * List of possible values.
      */
-    private IntIterableRangeSet range;
+    private final IntIterableRangeSet range;
 
     /**
      * Maintain : <i>var</i>&isin;<i>range</i>
@@ -69,7 +67,7 @@ public class PropMember extends Propagator<IntVar> {
     public ESat isEntailed() {
         if(IntIterableSetUtils.includedIn(vars[0], range)){
             return ESat.TRUE;
-        }else if(IntIterableSetUtils.intersect(vars[0], range)){
+        }else if(range.intersect(vars[0])){
             return ESat.UNDEFINED;
         }
         return ESat.FALSE;
@@ -94,10 +92,8 @@ public class PropMember extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
-        explanation.addLiteral(vars[0], explanation.getFreeSet().copyFrom(range), true);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        vars[0].intersectLit(explanation.empty().copyFrom(range), explanation);
     }
 
     @Override

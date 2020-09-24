@@ -7,23 +7,14 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 04/02/13
- * Time: 15:48
- */
-
 package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.OffsetView;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
@@ -44,7 +35,9 @@ public class Task {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar start, duration, end;
+    private final IntVar start;
+    private final IntVar duration;
+    private final IntVar end;
     private IVariableMonitor<IntVar> update;
 
     //***********************************************************************************
@@ -178,31 +171,30 @@ public class Task {
     }
 
     private static void doExplain(IntVar S, IntVar D, IntVar E,
-        ExplanationForSignedClause clause,
-        ValueSortedMap<IntVar> front,
-        Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+                                  int p,
+                                  ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         IntIterableRangeSet dom;
-        dom = clause.getComplementSet(S);
+        dom = explanation.complement(S);
         if (S == pivot) {
-            unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(S, dom, true);
+            unionOf(dom, explanation.readDom(p));
+            S.intersectLit(dom, explanation);
         } else {
-            clause.addLiteral(S, dom, false);
+            S.unionLit(dom, explanation);
         }
-        dom = clause.getComplementSet(D);
+        dom = explanation.complement(D);
         if (D == pivot) {
-            unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(D, dom, true);
+            unionOf(dom, explanation.readDom(p));
+            D.intersectLit(dom, explanation);
         } else {
-            clause.addLiteral(D, dom, false);
+            D.unionLit(dom, explanation);
         }
-        dom = clause.getComplementSet(E);
+        dom = explanation.complement(E);
         if (E == pivot) {
-            unionOf(dom, ig.getDomainAt(p));
-            clause.addLiteral(E, dom, true);
+            unionOf(dom, explanation.readDom(p));
+            E.intersectLit(dom, explanation);
         } else {
-            clause.addLiteral(E, dom, false);
+            E.unionLit(dom, explanation);
         }
     }
 
@@ -243,10 +235,8 @@ public class Task {
         }
 
         @Override
-        public void explain(ExplanationForSignedClause clause,
-            ValueSortedMap<IntVar> front,
-            Implications ig, int p) {
-            doExplain(S, D, E, clause, front, ig, p);
+        public void explain(int p, ExplanationForSignedClause explanation) {
+            doExplain(S, D, E, p, explanation);
         }
 
         @Override

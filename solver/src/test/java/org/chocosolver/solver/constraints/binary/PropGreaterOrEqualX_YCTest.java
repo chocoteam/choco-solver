@@ -62,11 +62,11 @@ public class PropGreaterOrEqualX_YCTest {
         Implications ig = Mockito.mock(LazyImplications.class);
 
         Mockito.when(ig.getIntVarAt(0)).thenReturn(p);
-        Mockito.when(expl.getSet(o)).thenReturn(oD);
-        Mockito.when(expl.getRootSet(p)).thenReturn(pR);
+        Mockito.when(expl.domain(o)).thenReturn(oD);
+        Mockito.when(expl.root(p)).thenReturn(pR);
         IntIterableRangeSet comp = oR.duplicate();
         comp.removeAll(oD);
-        Mockito.when(expl.getComplementSet(o)).thenReturn(comp);
+        Mockito.when(expl.complement(o)).thenReturn(comp);
 
         ArgumentCaptor<IntIterableRangeSet> dom = ArgumentCaptor.forClass(IntIterableRangeSet.class);
         Mockito.doAnswer(
@@ -80,7 +80,7 @@ public class PropGreaterOrEqualX_YCTest {
                     return null;
                 }).when(expl).addLiteral(eq(p), dom.capture(), eq(true));
 
-        prop.explain(expl, front, ig, 0);
+        prop.explain(0, expl);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -112,11 +112,11 @@ public class PropGreaterOrEqualX_YCTest {
         Implications ig = Mockito.mock(LazyImplications.class);
 
         Mockito.when(ig.getIntVarAt(0)).thenReturn(p);
-        Mockito.when(expl.getSet(o)).thenReturn(oD);
-        Mockito.when(expl.getRootSet(p)).thenReturn(pR);
+        Mockito.when(expl.domain(o)).thenReturn(oD);
+        Mockito.when(expl.root(p)).thenReturn(pR);
         IntIterableRangeSet comp = oR.duplicate();
         comp.removeAll(oD);
-        Mockito.when(expl.getComplementSet(o)).thenReturn(comp);
+        Mockito.when(expl.complement(o)).thenReturn(comp);
 
         ArgumentCaptor<IntIterableRangeSet> dom = ArgumentCaptor.forClass(IntIterableRangeSet.class);
         Mockito.doAnswer(
@@ -130,7 +130,7 @@ public class PropGreaterOrEqualX_YCTest {
                     return null;
                 }).when(expl).addLiteral(eq(p), dom.capture(), eq(true));
 
-        prop.explain(expl, front, ig, 0);
+        prop.explain(0, expl);
     }
 
 }

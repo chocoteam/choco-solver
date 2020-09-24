@@ -13,10 +13,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
@@ -72,12 +70,10 @@ public class PropNotEqualXC extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
-        IntIterableRangeSet set = explanation.getRootSet(vars[0]);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntIterableRangeSet set = explanation.universe();
         set.remove(constant);
-        explanation.addLiteral(vars[0], set, true);
+        vars[0].intersectLit(set, explanation);
     }
 
     @Override

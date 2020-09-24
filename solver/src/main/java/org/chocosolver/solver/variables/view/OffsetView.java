@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -21,7 +20,6 @@ import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 
@@ -291,26 +289,21 @@ public final class OffsetView extends IntView<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntIterableRangeSet set0, set1, set2;
-        boolean isPivot;
-        if (isPivot = (ig.getIntVarAt(p) == this)) { // case a. (see javadoc)
-            set1 = explanation.getComplementSet(getVariable());
-            set0 = explanation.getRootSet(this);
-            set2 = explanation.getSet(getVariable());
-            set2.plus(cste);
-            set0.retainAll(set2);
-            explanation.returnSet(set2);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntIterableRangeSet set0, set1;
+        if (explanation.readVar(p) == this) { // case a. (see javadoc)
+            set1 = explanation.complement(getVariable());
+            set0 = explanation.domain(getVariable());
+            set0.plus(cste);
+            this.intersectLit(set0, explanation);
+            getVariable().unionLit(set1, explanation);
         } else { // case b. (see javadoc)
-            assert ig.getIntVarAt(p) == getVariable();
-            set0 = explanation.getComplementSet(this);
-            set1 = explanation.getRootSet(getVariable());
-            set2 = explanation.getSet(this);
-            set2.minus(cste);
-            set1.retainAll(set2);
-            explanation.returnSet(set2);
+            assert explanation.readVar(p) == getVariable();
+            set0 = explanation.complement(this);
+            set1 = explanation.domain(this);
+            set1.minus(cste);
+            this.unionLit(set0, explanation);
+            getVariable().intersectLit(set1, explanation);
         }
-        explanation.addLiteral(this, set0, isPivot);
-        explanation.addLiteral(getVariable(), set1, !isPivot);
     }
 }

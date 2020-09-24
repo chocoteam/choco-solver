@@ -27,7 +27,6 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.xcsp.common.Condition;
@@ -540,7 +539,7 @@ public class XCSPParser implements XCallbacks2 {
             model.allDifferentUnderCondition(vars(list), x -> !x.contains(except[0]), true).post();
         } else {
             IntIterableRangeSet set = new IntIterableRangeSet(except);
-            model.allDifferentUnderCondition(vars(list), x -> !IntIterableSetUtils.intersect(x, set), true).post();
+            model.allDifferentUnderCondition(vars(list), x -> !set.intersect(x), true).post();
         }
     }
 

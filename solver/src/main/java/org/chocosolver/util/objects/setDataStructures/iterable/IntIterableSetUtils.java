@@ -24,36 +24,6 @@ import java.util.Arrays;
 public class IntIterableSetUtils {
 
     /**
-     * Copy the domain of <i>var</i> into an {@link IntIterableRangeSet}.
-     * @param var an integer variable
-     * @return set to transfer values to
-     */
-    public static IntIterableRangeSet extract(IntVar var) {
-        IntIterableRangeSet set = new IntIterableRangeSet();
-        copyIn(var, set);
-        return set;
-    }
-
-    /**
-     * Copy the domain of <i>var</i> in <i>set</i>.
-     * First, it clears <i>set</i>, then it fills it with the value in <i>var</i>.
-     *
-     * @param var an integer variable
-     * @param set set to transfer values to
-     */
-    public static void copyIn(IntVar var, IntIterableRangeSet set) {
-        set.clear();
-        DisposableRangeIterator rit = var.getRangeIterator(true);
-        while (rit.hasNext()) {
-            int lb = rit.min();
-            int ub = rit.max();
-            set.pushRange(lb,ub);
-            rit.next();
-        }
-        rit.dispose();
-    }
-
-    /**
      * @param set on which the complement is based
      * @param lbu lower bound (inclusive) of the universe
      * @param ubu upper bound (inclusive) of the universe
@@ -602,20 +572,6 @@ public class IntIterableSetUtils {
     }
 
     /**
-     * Put all value of <i>var</i> into <i>set</i>.
-     * TODO: more efficient operation
-     *
-     * @param set a set of ints
-     * @param var a integer variable
-     */
-    public static void union(IntIterableRangeSet set, IntVar var) {
-        int ub = var.getUB();
-        for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
-            set.add(v);
-        }
-    }
-
-    /**
      * @param var a variable
      * @param set a set
      * @return <i>true</i> if <i>var</i> is included into <i>set</i>,
@@ -720,71 +676,4 @@ public class IntIterableSetUtils {
         }
         return false;
     }
-
-    /**
-     * @param var a variable
-     * @param set a set
-     * @return <i>true</i> if intersection of <i>var</i> and <i>set</i> is not empty,
-     * <i>false</i> otherwise.
-     */
-    @SuppressWarnings("Duplicates")
-    public static boolean intersect(IntVar var, IntIterableRangeSet set) {
-        int s1 = var.getDomainSize();
-        int s2 = set.SIZE >> 1;
-        if (s1 > 0 && s2 > 0) {
-            int j = 0;
-            int lbi, ubi, lbj, ubj;
-            lbi = var.getLB();
-            ubi = var.nextValueOut(lbi) - 1;
-            lbj = set.ELEMENTS[0];
-            ubj = set.ELEMENTS[1];
-            while (lbi < Integer.MAX_VALUE && j < s2) {
-                if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
-                    return true;
-                }
-                if (ubi <= ubj && (lbi = var.nextValue(ubi)) < Integer.MAX_VALUE) {
-                    ubi = var.nextValueOut(lbi) - 1;
-                }else if (ubj <= ubi && ++j < s2) {
-                    lbj = set.ELEMENTS[j << 1];
-                    ubj = set.ELEMENTS[(j << 1) + 1];
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * @param set1 a set
-     * @param set2 a set
-     * @return <i>true</i> if intersection of <i>set1</i> and <i>set2</i> is not empty,
-     * <i>false</i> otherwise.
-     */
-    @SuppressWarnings("Duplicates")
-    public static boolean intersect(IntIterableRangeSet set1, IntIterableRangeSet set2) {
-        int s1 = set1.SIZE >> 1;
-        int s2 = set2.SIZE >> 1;
-        if (s1 > 0 && s2 > 0) {
-            int i = 0, j = 0;
-            int lbi, ubi, lbj, ubj;
-            lbi = set1.ELEMENTS[0];
-            ubi = set1.ELEMENTS[1];
-            lbj = set2.ELEMENTS[0];
-            ubj = set2.ELEMENTS[1];
-            while (i < s1 && j < s2) {
-                if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
-                    return true;
-                }
-                if (ubi <= ubj && ++i < s1) {
-                    lbi = set1.ELEMENTS[i << 1];
-                    ubi = set1.ELEMENTS[(i << 1) + 1];
-                }else if (ubj <= ubi && ++j < s2) {
-                    lbj = set2.ELEMENTS[j << 1];
-                    ubj = set2.ELEMENTS[(j << 1) + 1];
-                }
-            }
-        }
-        return false;
-    }
-
-
 }

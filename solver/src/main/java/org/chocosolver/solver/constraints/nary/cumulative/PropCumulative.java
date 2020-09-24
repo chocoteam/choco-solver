@@ -14,12 +14,10 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
@@ -208,100 +206,68 @@ public class PropCumulative extends Propagator<IntVar> {
         return sb.toString();
     }
 
-    private  IntVar pivotDuration(int[] ind, IntVar pivot){
-        IntVar duration = pivot;
-        for(int i : ind){
-            if(vars[i] == pivot){
-                duration = vars[i+n];
-            }
-        }
-        return duration;
-    }
-    private  int getInd(IntVar pivot){
+    /**
+     * Return the index of an IntVar
+     *
+     * @param pivot
+     */
+    private int getInd(IntVar pivot) {
         int ind = -1;
-        for(int i = 0; i<vars.length;i++){
-            if(vars[i] == pivot){
+        for (int i = 0; i < vars.length; i++) {
+            if (vars[i] == pivot) {
                 ind = i;
             }
         }
-        if(ind==-1){throw new UnsupportedOperationException("Unfindable variable ");}
+        if (ind == -1) throw new UnsupportedOperationException("Unfindable pivot variable ");
         return ind;
     }
-    private void explainInc(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
+
+    private boolean explainOverlap(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
         boolean flag = false;
-        for (int i : indS) {
-            if(ig.getDomainAt(front.getValue(pivot)).min() >= (val - ig.getDomainAt(front.getValue(pivotDuration(indD,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).max() < val){
-                IntIterableRangeSet set = e.getRootSet(vars[i]);
-                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min(),val-1);
-                e.addLiteral(vars[i], set, false);
+        for (int i : indexes) {
+            if (e.domain(vars[i]).max() < t && e.domain(vars[i]).min() >= t - e.domain(vars[indD[i]]).min()) {
+                vars[i].unionLit(t, IntIterableRangeSet.MAX, e);
+                vars[i].unionLit(IntIterableRangeSet.MIN, t - 1 - e.domain(vars[indD[i]]).min(), e);
                 flag = true;
             }
         }
-        if(flag){
-            IntIterableRangeSet set = e.getRootSet(pivot);
-            set.removeBetween(val - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val-1);//pivot apparais 2 fois, on fais l'union des sets
-            e.addLiteral(pivot, set, true);
-        }
+        return flag;
     }
-    private void explainDec(ExplanationForSignedClause e, ValueSortedMap<IntVar> front, Implications ig, IntVar pivot, int[] indS, int[] indD, int[] indE, int val){
-        boolean flag = false;
-        for (int i : indS) {
-            if(ig.getDomainAt(front.getValue(pivot)).min() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).min() >= (val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())
-                    && ig.getDomainAt(front.getValue(vars[i])).max() < (val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min())){
-                IntIterableRangeSet set = e.getRootSet(vars[i]);
-                set.removeBetween(val - ig.getDomainAt(front.getValue(vars[indD[i]])).min() + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min(),val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);
-                e.addLiteral(vars[i], set, false);
-                flag = true;
-            }
-        }
-        if(flag){
-            IntIterableRangeSet set = e.getRootSet(pivot);
-            set.removeBetween(val,val + ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min()-1);//pivot apparais 2 fois, on fais l'union des sets
-            e.addLiteral(pivot, set, true);
-        }
-    }
+
+    /**
+     * Detect and explain the event at pivot variable p
+     *
+     * @param p pivot variable
+     */
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        int[] indS = IntStream.range(0, n).toArray();
+    public void explain(int p, ExplanationForSignedClause e) {
+        IntVar pivot = e.readVar(p);
+        int[] X = IntStream.range(0, n).filter(i -> vars[i] != pivot).toArray();
         int[] indD = IntStream.range(n, n * 2).toArray();
-        int[] indE = IntStream.range(n * 2, n * 3).toArray();
-        int[] indH = IntStream.range(n * 3, n * 4).toArray();
-        IntVar pivot = ig.getIntVarAt(p);
-        int val;
-        switch (ig.getEventMaskAt(p)) {
+        int t = e.readValue(p);
+        int ipivot = getInd(pivot);
+        int dpivot = e.domain(vars[ipivot + n]).min();
+        if (ipivot >= n) {
+            throw new UnsupportedOperationException("Try to explain an event not on a start variable");
+        }
+        switch (e.readMask(p)) {
             case 2://INCLOW
-                if(getInd(pivot)<n){
-                    if(ig.getDomainAt(p).cardinality()>0){
-                        val = ig.getDomainAt(p).min();
-                    }else{
-                        val = ig.getDomainAt(front.getValue(pivot)).max()+1;
-                        throw new UnsupportedOperationException("Unknown val");
-                    }
-                    explainInc(explanation, front, ig, pivot, indS, indD, indE, val);
-                    System.out.println("inc : "+explanation.toString());
+                if (explainOverlap(e, X, t, indD)) {
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t - dpivot, t - 1);
+                    pivot.intersectLit(set.flip(), e);
                 }else{
-                    System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
-                    System.out.println("inc default "+explanation.toString());
+                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
                 }
                 break;
             case 4://DECUPP
-                if(getInd(pivot)<3*n&&getInd(pivot)>=2*n) {
-                    if (ig.getDomainAt(p).cardinality() > 0) {
-                        val = ig.getDomainAt(p).max() + 1 - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
-                    } else {
-                        val = ig.getDomainAt(front.getValue(pivot)).min() - ig.getDomainAt(front.getValue(pivotDuration(indS,pivot))).min();
-                        throw new UnsupportedOperationException("Unknown val");
-                    }
-                    explainDec(explanation, front, ig, pivot, indS, indD, indE, val);
-                    System.out.println("dec : "+explanation.toString());
-                }else{
-                    System.out.println(n+"   "+getInd(pivot));
-                    Propagator.defaultExplain(this, explanation, front, ig, p);
-                    System.out.println("dec default " + explanation.toString());
+                t++;// required due to decomposition
+                if (explainOverlap(e, X, t + dpivot, indD)) {
+                    IntIterableRangeSet set = e.empty();
+                    set.addBetween(t, t - 1 + dpivot);
+                    pivot.intersectLit(set.flip(), e);
+                } else {
+                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
                 }
                 break;
             case 8://INSTANTIATE

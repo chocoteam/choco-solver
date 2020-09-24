@@ -19,11 +19,12 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.chocosolver.util.procedure.IntProcedure;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 /**
- *
  * <p>
  * Project: choco-solver.
+ *
  * @author Charles Prud'homme
  * @since 05/11/2018.
  */
@@ -40,7 +41,15 @@ public class Explainer {
         ContradictionException cex = new ContradictionException();
         cex.set(cause, v, "");
         expl.learnSignedClause(cex);
-        return expl.getLiterals();
+        return expl.getLiterals()
+                .stream()
+                .collect(Collectors.toMap(
+                        var -> var,
+                        var -> var.getLit().export(),
+                        (a, b) -> a,
+                        HashMap::new
+                )
+        );
     }
 
     public static HashMap<IntVar, IntIterableRangeSet> fail(Solver solver, IntProcedure proc) throws ContradictionException {
@@ -49,13 +58,21 @@ public class Explainer {
         try {
             proc.execute(0);
             solver.propagate();
-        }catch (ContradictionException cex0){
+        } catch (ContradictionException cex0) {
         }
         LearnSignedClauses<ExplanationForSignedClause> learner
                 = (LearnSignedClauses<ExplanationForSignedClause>) solver.getLearner();
         ExplanationForSignedClause expl = learner.getExplanation();
         expl.learnSignedClause(solver.getContradictionException());
-        return expl.getLiterals();
+        return expl.getLiterals()
+                .stream()
+                .collect(Collectors.toMap(
+                        var -> var,
+                        var -> var.getLit().export(),
+                        (a, b) -> a,
+                        HashMap::new
+                        )
+                );
     }
 
 }
