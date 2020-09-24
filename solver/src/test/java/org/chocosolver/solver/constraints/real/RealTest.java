@@ -73,6 +73,20 @@ public class RealTest {
     }
 
     @Test(groups = "ibex", timeOut = 60000)
+        public void test11() {
+            for (int i = 0; i < 1; i++) {
+                Ibex ibex = new Ibex(new double[]{0.1});
+                ibex.add_ctr("{0}=59.5");
+                ibex.build();
+                double domains[] = {59.5, 59.5};
+                // see: https://github.com/ibex-team/ibex-java/issues/2
+                Assert.assertEquals(ibex.contract(0, domains, 0), Ibex.NOTHING);
+                Assert.assertEquals(ibex.contract(0, domains, 1), Ibex.ENTAILED);
+                ibex.release();
+            }
+        }
+
+    @Test(groups = "ibex", timeOut = 60000)
     public void test2() {
         for (int i = 0; i < 10; i++) {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
@@ -1051,7 +1065,7 @@ public class RealTest {
         RealVar var3 = model.realVar("var3", -5, 5, precision);
 
         var1.add(var2).eq(var3).post();
-        
+
         Solver solver = model.getSolver();
 
 

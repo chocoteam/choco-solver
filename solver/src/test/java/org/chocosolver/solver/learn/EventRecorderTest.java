@@ -15,6 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_YC;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.learn.LearnSignedClauses;
 import org.chocosolver.solver.search.strategy.Search;
@@ -788,7 +789,7 @@ public class EventRecorderTest {
                 new Task(start1, dur1, end1),
                 new Task(start2, dur2, end2)
         };
-        model.cumulative(tasks, new IntVar[]{height1, height2}, model.intVar(3)).post();
+        model.cumulative(tasks, new IntVar[]{height1, height2}, model.intVar(3), false, Cumulative.Filter.NAIVETIME).post();
         model.arithm(start1, "=", start2).post();
         Solver solver = model.getSolver();
         solver.setLearningSignedClauses();
