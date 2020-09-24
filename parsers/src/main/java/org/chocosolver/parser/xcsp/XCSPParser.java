@@ -9,6 +9,7 @@
  */
 package org.chocosolver.parser.xcsp;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
@@ -64,7 +65,11 @@ public class XCSPParser implements XCallbacks2 {
     /**
      * Mapping between XCSP vars and Choco vars
      */
-    protected HashMap<XVariables.XVarInteger, IntVar> mvars;
+    protected HashMap<XVariables.XVar, IntVar> mvars;
+    protected HashSet<IntVar> symbolics;
+    protected TObjectIntHashMap<String> symbolToInt;
+    protected TIntObjectHashMap<String> intToSymbol;
+    protected int unusedSymbol = 0;
     private ArrayList<IntVar> ovars;
     /**
      * The model to feed
@@ -76,6 +81,9 @@ public class XCSPParser implements XCallbacks2 {
     public void model(Model model, String instance) throws Exception {
         this.model = model;
         this.mvars = new HashMap<>();
+        this.symbolics = new HashSet<>();
+        this.symbolToInt = new TObjectIntHashMap<>();
+        this.intToSymbol = new TIntObjectHashMap<>();
         this.implem = new Implem(this);
         File file = new File(instance);
         if(file.exists()){
@@ -100,6 +108,24 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildVarSymbolic(XVariables.XVarSymbolic x, String[] values) {
+        int[] domain = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            int value;
+            if (symbolToInt.contains(values[i])) {
+                value = symbolToInt.get(values[i]);
+            } else {
+                value = unusedSymbol++;
+                symbolToInt.put(values[i], value);
+                intToSymbol.put(value, values[i]);
+            }
+            domain[i] = value;
+        }
+        mvars.put(x, model.intVar(x.id, domain));
+        symbolics.add(var(x));
+    }
+
+    @Override
     public void buildCtrIntension(String id, XVariables.XVarInteger[] scope, XNodeParent<XVariables.XVarInteger> tree) {
         ReExpression exp = buildRe(tree);
         if(VariableUtils.domainCardinality(vars(scope)) < Integer.MAX_VALUE / 1000){
@@ -109,22 +135,22 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
-    private ArExpression[] extractAr(XNode<XVariables.XVarInteger>[] sons){
+    private <V extends XVariables.XVar> ArExpression[] extractAr(XNode<V>[] sons){
         return Arrays.stream(sons).map(this::buildAr).toArray(ArExpression[]::new);
     }
 
-    private ReExpression[] extractRe(XNode<XVariables.XVarInteger>[] sons){
+    private <V extends XVariables.XVar> ReExpression[] extractRe(XNode<V>[] sons){
         return Arrays.stream(sons).map(this::buildRe).toArray(ReExpression[]::new);
     }
 
-    private ReExpression buildRe(XNode<XVariables.XVarInteger> tree) {
+    private <V extends XVariables.XVar> ReExpression buildRe(XNode<V> tree) {
         Types.TypeExpr type = tree.type;
         if (type == Types.TypeExpr.VAR) {
             return (BoolVar)var(tree.var(0));
         } else if (type == Types.TypeExpr.LONG) {
             return (BoolVar)model.intVar(tree.val(0));
         }
-        XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)tree).sons;
+        XNode<V>[] sons = tree.sons;
         switch (type) {
             // relationnal
             case LT:
@@ -137,8 +163,13 @@ public class XCSPParser implements XCallbacks2 {
                 return buildAr(sons[0]).gt(buildAr(sons[1]));
             case NE:
                 return buildAr(sons[0]).ne(buildAr(sons[1]));
-            /*case IN:
-                return buildAr(sons[0]).in(buildAr(sons[1]));*/
+            case IN:
+                List<ArExpression> set = new ArrayList<>();
+                for(XNode<V> sonsons : sons[1].sons){
+                    set.add(buildAr(sonsons));
+                }
+                //noinspection ConstantForZeroLengthArrayAllocation
+                return buildAr(sons[0]).in(set.toArray(new ArExpression[0]));
             case EQ:
                 if(sons.length == 2){
                     return buildAr(sons[0]).eq(buildAr(sons[1]));
@@ -163,18 +194,16 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
-
-
-    private ArExpression buildAr(XNode<XVariables.XVarInteger> node) {
+    private <V extends XVariables.XVar> ArExpression buildAr(XNode<V> node) {
         Types.TypeExpr type = node.type;
         if (type == Types.TypeExpr.VAR) {
             return var(node.var(0));
+        } else if (type == Types.TypeExpr.SYMBOL) {
+            return model.intVar(symbolToInt.get(node.toString()));
         } else if (type == Types.TypeExpr.LONG) {
             return model.intVar(node.val(0));
-        } else if (type == Types.TypeExpr.SET){
-            return model.intVar(node.arrayOfVals());
         }
-        XNode<XVariables.XVarInteger>[] sons = ((XNodeParent< XVariables.XVarInteger>)node).sons;
+        XNode<V>[] sons = node.sons;
         if(type.isLogicalOperator()&& type.arityMax>1 || type.equals(Types.TypeExpr.NOT)){
             ReExpression[] res = extractRe(sons);
             switch (type) {
@@ -234,6 +263,8 @@ public class XCSPParser implements XCallbacks2 {
                     return aes[0].gt(aes[1]);
                 case NE:
                     return aes[0].ne(aes[1]);
+                case IN:
+                    return new NaReExpression(ReExpression.Operator.IN, aes);
                 case EQ:
                     if (aes.length == 2) {
                         return aes[0].eq(aes[1]);
@@ -250,32 +281,38 @@ public class XCSPParser implements XCallbacks2 {
     }
 
 
-    private IntVar var(XVariables.XVarInteger var) {
+
+    private <V extends XVariables.XVar> IntVar var(V var) {
         return mvars.get(var);
     }
 
-    private IntVar[] vars(XVariables.XVarInteger[] vars) {
+    private <V extends XVariables.XVar> IntVar[] vars(V[] vars) {
         return Arrays.stream(vars).map(this::var).toArray(IntVar[]::new);
     }
 
-    private IntVar[][] vars(XVariables.XVarInteger[][] vars) {
+    private <V extends XVariables.XVar> IntVar[][] vars(V[][] vars) {
         return Arrays.stream(vars).map(this::vars).toArray(IntVar[][]::new);
     }
 
-    private BoolVar bool(XVariables.XVarInteger var) {
+    private <V extends XVariables.XVar> BoolVar bool(V var) {
         return (BoolVar) mvars.get(var);
     }
 
-    private BoolVar[] bools(XVariables.XVarInteger[] vars) {
+    private <V extends XVariables.XVar> BoolVar[] bools(V[] vars) {
         return Arrays.stream(vars).map(this::bool).toArray(BoolVar[]::new);
     }
 
-    private BoolVar[][] bools(XVariables.XVarInteger[][] vars) {
+    private <V extends XVariables.XVar> BoolVar[][] bools(V[][] vars) {
         return Arrays.stream(vars).map(this::bools).toArray(BoolVar[][]::new);
     }
 
-    private IntVar[] vars(XNode<XVariables.XVarInteger>[] trees) {
-        return Arrays.stream(trees).map(t -> buildAr(t).intVar()).toArray(IntVar[]::new);
+    private <V extends XVariables.XVar> IntVar var(XNode<V> tree) {
+        //todo: use caching to avoid useless clones
+        return buildAr(tree).intVar();
+    }
+
+    private <V extends XVariables.XVar> IntVar[] vars(XNode<V>[] trees) {
+        return Arrays.stream(trees).map(this::var).toArray(IntVar[]::new);
     }
 
     public String printSolution() {
@@ -286,13 +323,15 @@ public class XCSPParser implements XCallbacks2 {
         }
         buffer.append(S_INST_IN).append(S_LIST_IN);
         // list variables
-        for (int i = 0; i < ovars.size(); i++) {
-            buffer.append(ovars.get(i).getName()).append(' ');
-        }
+        ovars.forEach(ovar -> buffer.append(ovar.getName()).append(' '));
         buffer.append(S_LIST_OUT).append(S_VALU_IN);
-        for (int i = 0; i < ovars.size(); i++) {
-            buffer.append(ovars.get(i).getValue()).append(' ');
-        }
+        ovars.forEach(ovar -> {
+            if (symbolics.contains(ovar)) {
+                buffer.append(intToSymbol.get(ovar.getValue())).append(' ');
+            } else {
+                buffer.append(ovar.getValue()).append(' ');
+            }
+        });
         buffer.append(S_VALU_OUT).append(S_INST_OUT);
         return buffer.toString();
     }
@@ -302,7 +341,54 @@ public class XCSPParser implements XCallbacks2 {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
+    public void buildCtrIntension(String id, XVariables.XVarSymbolic[] scope, XNodeParent<XVariables.XVarSymbolic> syntaxTreeRoot) {
+        ReExpression exp = buildRe(syntaxTreeRoot);
+        if (VariableUtils.domainCardinality(vars(scope)) < Integer.MAX_VALUE / 1000) {
+            exp.extension().post();
+        } else {
+            exp.decompose().post();
+        }
+    }
+
+    @Override
+    public void buildCtrExtension(String id, XVariables.XVarSymbolic x, String[] values, boolean positive, Set<Types.TypeFlag> flags) {
+        if (flags.contains(Types.TypeFlag.STARRED_TUPLES)) {
+            // can you manage tables with symbol * ?
+            throw new ParserException("Tables with symbol * are not supported");
+        }
+        //noinspection StatementWithEmptyBody
+        if (flags.contains(Types.TypeFlag.UNCLEAN_TUPLES)) {
+            // do you have to clean the tuples, so as to remove those that cannot be built from variable domains ?
+        }
+        if (positive) {
+            model.member(var(x), Arrays.stream(values).mapToInt(t -> symbolToInt.get(t)).toArray()).post();
+        } else {
+            model.notMember(var(x), Arrays.stream(values).mapToInt(t -> symbolToInt.get(t)).toArray()).post();
+        }
+    }
+
+    @Override
+    public void buildCtrExtension(String id, XVariables.XVarSymbolic[] list, String[][] tuples, boolean positive, Set<Types.TypeFlag> flags) {
+        //noinspection StatementWithEmptyBody
+        if (flags.contains(Types.TypeFlag.UNCLEAN_TUPLES)) {
+            // do you have to clean the tuples, so as to remove those that cannot be built from variable domains ?
+        }
+        Tuples mTuples = new Tuples(Arrays.stream(tuples)
+                .map(t -> Arrays.stream(t).mapToInt(e -> symbolToInt.get(e)).toArray())
+                .toArray(int[][]::new), positive);
+        if (flags.contains(Types.TypeFlag.STARRED_TUPLES)) {
+            if (!positive) {
+                // can you manage tables with symbol * ?
+                throw new ParserException("Negative tables with symbol * are not supported");
+            }
+            mTuples.setUniversalValue(STAR_INT);
+        }
+        model.table(vars(list), mTuples).post();
+    }
+
+    @Override
     public void buildCtrExtension(String id, XVariables.XVarInteger[] list, int[][] tuples, boolean positive, Set<Types.TypeFlag> flags) {
+        //noinspection StatementWithEmptyBody
         if (flags.contains(Types.TypeFlag.UNCLEAN_TUPLES)) {
             // do you have to clean the tuples, so as to remove those that cannot be built from variable domains ?
         }
@@ -323,6 +409,7 @@ public class XCSPParser implements XCallbacks2 {
             // can you manage tables with symbol * ?
             throw new ParserException("Tables with symbol * are not supported");
         }
+        //noinspection StatementWithEmptyBody
         if (flags.contains(Types.TypeFlag.UNCLEAN_TUPLES)) {
             // do you have to clean the tuples, so as to remove those that cannot be built from variable domains ?
         }
@@ -452,6 +539,11 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrLogic(String id, Types.TypeLogicalOperator op, XVariables.XVarInteger[] vars) {
+        repost(id);
+    }
+
+    @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeArithmeticOperator aop, int p, Types.TypeConditionOperatorRel op, int k) {
         rel(ari(var(x), aop, model.intVar(p)), op, model.intVar(k)).post();
     }
@@ -554,6 +646,15 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
+    @Override
+    public void buildCtrAllDifferent(String id, XNode<XVariables.XVarInteger>[] trees) {
+        model.allDifferent(vars(trees)).post();
+    }
+
+    @Override
+    public void buildCtrAllDifferent(String id, XVariables.XVarSymbolic[] list) {
+        model.allDifferent(vars(list)).post();
+    }
 
     private void buildDistinctVectors(IntVar[] t1, IntVar[] t2) {
         int k = t1.length;
@@ -691,6 +792,32 @@ public class XCSPParser implements XCallbacks2 {
         }
     }
 
+
+    @Override
+    public void buildCtrSum(String id, XNode<XVariables.XVarInteger>[] trees, Condition condition) {
+        int[] coeffs = new int[trees.length];
+        Arrays.fill(coeffs, 1);
+        buildSum(vars(trees), coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrSum(String id, XNode<XVariables.XVarInteger>[] trees, int[] coeffs, Condition condition) {
+        buildSum(vars(trees), coeffs, condition);
+    }
+
+    @Override
+    public void buildCtrSum(String id, XNode<XVariables.XVarInteger>[] trees, XVariables.XVarInteger[] coeffs, Condition condition) {
+        IntVar[] res = new IntVar[trees.length];
+        for (int i = 0; i < trees.length; i++) {
+            IntVar var = var(trees[i]);
+            int[] bounds = VariableUtils.boundsForMultiplication(var, var(coeffs[i]));
+            res[i] = model.intVar(bounds[0], bounds[1]);
+            model.times(var, var(coeffs[i]), res[i]).post();
+        }
+        int[] _coeffs = new int[trees.length];
+        Arrays.fill(_coeffs, 1);
+        buildSum(res, _coeffs, condition);
+    }
 
     @Override
     public void buildCtrSum(String id, XVariables.XVarInteger[] list, Condition condition) {
@@ -1157,6 +1284,19 @@ public class XCSPParser implements XCallbacks2 {
             vectors[k++] = new IntVar[]{vars[i].add(lengths[i]).intVar()};
         }
         vectors[k] = new IntVar[]{vars[vars.length-1]};
+        lexCtr(vectors, operator);
+    }
+
+    @Override
+    public void buildCtrOrdered(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] lengths, Types.TypeOperatorRel operator) {
+        IntVar[] vars = vars(list);
+        IntVar[][] vectors = new IntVar[vars.length * 2 - 1][1];
+        int k = 0;
+        for (int i = 0; i < vars.length - 1; i++) {
+            vectors[k++] = new IntVar[]{vars[i]};
+            vectors[k++] = new IntVar[]{vars[i].add(var(lengths[i])).intVar()};
+        }
+        vectors[k] = new IntVar[]{vars[vars.length - 1]};
         lexCtr(vectors, operator);
     }
 
