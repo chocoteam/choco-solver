@@ -31,7 +31,7 @@ public class ExpressionTest {
 
     @DataProvider(name = "post")
     public Object[][] provider() {
-        return new Object[][]{{0}, {1}};
+        return new Object[][]{{0}, {1}, {2}};
     }
 
     private void eval(Model model, ReExpression ex, int postAs, int nbsol){
@@ -41,6 +41,9 @@ public class ExpressionTest {
                 break;
             case 1:
                 ex.extension().post();
+                break;
+            case 2:
+                ex.boolVar().eq(1).post();
                 break;
         }
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
@@ -381,6 +384,14 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test40_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).iff(y.eq(2)), p, 5);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
     public void test41(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
@@ -389,11 +400,27 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test41_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).imp(y.eq(2)), p, 7);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
     public void test42(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
         IntVar y = model.intVar(0, 5);
         eval(model, x.eq(y.add(1)).xor(x.add(2).le(6)), p, 27);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test42_0(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 2);
+        IntVar y = model.intVar(0, 2);
+        eval(model, x.eq(1).xor(y.eq(2)), p, 4);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")

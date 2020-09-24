@@ -60,14 +60,14 @@ public class BiLoExpression extends LoExpression {
     public BoolVar boolVar() {
         if (me == null) {
             BoolVar b1 = e1.boolVar();
-            BoolVar b2 = e1.boolVar();
+            BoolVar b2 = e2.boolVar();
             me = model.boolVar(model.generateName(op + "_exp_"));
             switch (op) {
                 case XOR:
                     model.addClausesBoolXorEqVar(b1, b2, me);
                     break;
                 case IFF:
-                    model.addClausesBoolAndEqVar(b1, b2, me);
+                    model.addClausesBoolIsEqVar(b1, b2, me);
                     break;
                 case IMP:
                     model.addClausesBoolOrEqVar(b1.not(), b2, me);
