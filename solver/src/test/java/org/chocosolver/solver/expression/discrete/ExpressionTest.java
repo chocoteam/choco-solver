@@ -10,6 +10,7 @@
 package org.chocosolver.solver.expression.discrete;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
@@ -502,5 +503,106 @@ public class ExpressionTest {
         IntVar z = model.intVar("z", 1, 3);
         model.getSolver().showSolutions();
         eval(model, x.in(y, z), p, 22);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao1() throws ContradictionException {
+        Model model = new Model();
+                IntVar qtdActive = model.intVar("qtdActive", 0, 2, true);
+        BoolVar active = model.boolVar("active");
+        IntVar qtd = model.intVar("qtd", 0, 2, true);
+
+        qtdActive.ge(1).post();
+        active.eq(1).post();
+        active.eq(1).imp(qtd.eq(qtdActive)).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(active.isInstantiatedTo(1));
+        Assert.assertEquals(qtd.getLB(), 1);
+        Assert.assertEquals(qtdActive.getLB(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_1() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        x.eq(1).imp(y.eq(z)).post(); // wrong -> y = {0..2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_2() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        x.eq(1).imp(y.sub(z).eq(0)).post(); // wrong -> y = {0..2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_3() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        y.eq(z).post(); // right -> y = {0,2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao2_4() throws ContradictionException {
+        Model model = new Model();
+        BoolVar x = model.boolVar("x");
+        IntVar y = model.intVar("y", new int[]{0, 1, 2});
+        IntVar z = model.intVar("z", new int[]{0, 1, 2});
+
+        z.ne(1).post();
+        y.sub(z).eq(0).post(); // right -> y = {0,2}
+        x.eq(1).post();
+
+        model.getSolver().propagate();
+        Assert.assertTrue(x.isInstantiatedTo(1));
+        Assert.assertEquals(y.getLB(), 0);
+        Assert.assertEquals(y.getUB(), 2);
+        Assert.assertEquals(y.getDomainSize(), 2);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 2);
+        Assert.assertEquals(z.getDomainSize(), 2);
     }
 }

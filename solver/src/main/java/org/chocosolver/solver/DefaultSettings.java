@@ -68,8 +68,6 @@ public class DefaultSettings implements Settings {
 
     private boolean cloneVariableArrayInPropagator = true;
 
-    private boolean enableACOnTernarySum = false;
-
     private String defaultPrefix = DEFAULT_PREFIX;
 
     private boolean enableSAT = false;
@@ -283,13 +281,14 @@ public class DefaultSettings implements Settings {
     }
 
     @Override
+    @Deprecated
     public boolean enableACOnTernarySum() {
-        return enableACOnTernarySum;
+        return false;
     }
 
     @Override
+    @Deprecated
     public Settings setEnableACOnTernarySum(boolean enable) {
-        this.enableACOnTernarySum = enable;
         return this;
     }
 
