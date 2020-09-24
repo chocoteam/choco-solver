@@ -95,7 +95,14 @@ public interface ReExpression extends ArExpression {
             boolean eval(int i1, int i2) {
                 return i1 == i2;
             }
-        };
+        },
+        IN {
+            @Override
+            boolean eval(int i1, int i2) {
+                return i1 == i2;
+            }
+        }
+        ;
 
         abstract boolean eval(int i1, int i2);
     }

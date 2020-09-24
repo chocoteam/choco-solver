@@ -56,7 +56,7 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
-    public void test(int p) {
+    public void test2(int p) {
         Model model = new Model();
         IntVar x = model.intVar(0, 5);
         eval(model, x.ne(1), p, 5);
@@ -458,5 +458,22 @@ public class ExpressionTest {
         model.getSolver().showSolutions(()->String.format("%d = V[(%d - %d)^2 + (%d - %d)^2]",
             d.getValue(), x1.getValue(), x2.getValue(), y1.getValue(), y2.getValue()));
         eval(model, d.eq(((x1.sub(x2)).pow(2).add((y1.sub(y2)).pow(2))).sqr()), p, 81);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test50(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        eval(model, x.in(1, 2, 3), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test51(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 5);
+        IntVar y = model.intVar("y", -2, 2);
+        IntVar z = model.intVar("z", 1, 3);
+        model.getSolver().showSolutions();
+        eval(model, x.in(y, z), p, 22);
     }
 }
