@@ -19,7 +19,6 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -741,11 +740,11 @@ public class BitsetIntVarImplTest {
     public void testremoveAllValuesBut1() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("X", new int[]{-2, -1, 1, 2, 5, 6, 7});
-        IntIterableRangeSet check = IntIterableSetUtils.extract(x);
+        IntIterableRangeSet check = new IntIterableRangeSet(x);
         IntIterableRangeSet values = new IntIterableRangeSet(new int[]{-2,-1,0,2,3,7});
         check.retainAll(values);
         x.removeAllValuesBut(values, Cause.Null);
-        Assert.assertEquals(IntIterableSetUtils.extract(x), check);
+        Assert.assertEquals(new IntIterableRangeSet(x), check);
     }
 
     @Test(groups = "10s", timeOut = 120000)
@@ -764,7 +763,7 @@ public class BitsetIntVarImplTest {
                 IntVar[] X = m.intVarArray(5, 0, ub, false);
                 for (int i = 0; i < X.length; i++) {
                     X[i].removeAllValuesBut(values, Cause.Null);
-                    Assert.assertEquals(IntIterableSetUtils.extract(X[i]), check);
+                    Assert.assertEquals(new IntIterableRangeSet(X[i]), check);
                 }
             }
             System.out.println(size + " : " + (System.currentTimeMillis() - time) + "ms");

@@ -169,7 +169,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
                         rs = new IntIterableRangeSet();
                         domains.put(i, rs);
                     }
-                    IntIterableSetUtils.copyIn(vars[i], rs);
+                    rs.copyFrom(vars[i]);
                     toUnion.set(i);
                 }
             }
@@ -177,7 +177,7 @@ public class PropLocalConDis extends Propagator<IntVar> {
             for (int p = toUnion.nextSetBit(0); p >= 0; p = toUnion.nextSetBit(p + 1)) {
                 // check if domain has changed
                 if (cardinalities[p] > vars[p].getDomainSize()) {
-                    IntIterableSetUtils.union(domains.get(p), vars[p]);
+                    domains.get(p).addAll(vars[p]);
                     if (domains.get(p).size() == cardinalities[p]) {
                         toUnion.clear(p);
                     }

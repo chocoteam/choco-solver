@@ -73,6 +73,11 @@ public class EventRecorder extends AbstractEventObserver {
      */
     public void updateLowerBound(IntVar var, int value, int old, ICause cause) {
         mIG.pushEvent(var, cause, IntEventType.INCLOW, value, old, -1);
+        if (var.hasEnumeratedDomain() && !mIG.getDomainAt(mIG.size() - 1).isEmpty()) {
+            // this is required when there are holes in the domain
+            // the new lower bound may be largest that the one declared
+            value = mIG.getDomainAt(mIG.size() - 1).min();
+        }
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {
@@ -95,6 +100,13 @@ public class EventRecorder extends AbstractEventObserver {
      */
     public void updateUpperBound(IntVar var, int value, int old, ICause cause) {
         mIG.pushEvent(var, cause, IntEventType.DECUPP, value, old, -1);
+        if(var.hasEnumeratedDomain()){
+            // this is required when there are holes in the domain
+            // the new upper bound may be smallest that the one declared
+            if (var.hasEnumeratedDomain() && !mIG.getDomainAt(mIG.size() - 1).isEmpty()) {
+                value = mIG.getDomainAt(mIG.size() - 1).max();
+            }
+        }
         for (int i = 0; i < var.getNbViews(); i++) {
             IView view = var.getView(i);
             if (view != cause) {

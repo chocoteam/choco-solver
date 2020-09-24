@@ -12,11 +12,9 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 
@@ -56,7 +54,7 @@ public final class EqView extends IntBoolView {
         boolean done = false;
         if (!this.contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            this.contradiction(this, MSG_EMPTY);
+            this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             notifyPropagators(IntEventType.INSTANTIATE, cause);
@@ -203,28 +201,28 @@ public final class EqView extends IntBoolView {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         int value = getValue();
         if (value == 1) { // b is true and X = c holds
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(1), true);
-                IntIterableRangeSet dom0 = explanation.getRootSet(var);
+                this.intersectLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.universe();
                 dom0.remove(cste);
-                explanation.addLiteral(var, dom0, false);
+                var.unionLit(dom0, explanation);
             } else if (pivot == var) { // x is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), false);
-                explanation.addLiteral(var, explanation.getFreeSet(cste), true);
+                this.unionLit(0, explanation);
+                var.intersectLit(cste, explanation);
             }
         } else if (value == 0) {
             if (pivot == this) { // b is the pivot
-                explanation.addLiteral(this, explanation.getFreeSet(0), true);
-                explanation.addLiteral(var, explanation.getFreeSet(cste), false);
+                this.intersectLit(0, explanation);
+                var.unionLit(cste, explanation);
             } else if (pivot == var) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(this, explanation.getFreeSet(1), false);
-                IntIterableRangeSet dom0 = explanation.getRootSet(var);
+                this.unionLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.universe();
                 dom0.remove(cste);
-                explanation.addLiteral(var, dom0, true);
+                var.intersectLit(dom0, explanation);
             }
         }
     }

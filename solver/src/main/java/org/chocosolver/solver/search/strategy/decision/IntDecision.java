@@ -11,12 +11,10 @@ package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
@@ -207,12 +205,10 @@ public class IntDecision extends Decision<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
-        IntIterableRangeSet dom = explanation.getComplementSet(var);
-        IntIterableSetUtils.unionOf(dom, ig.getDomainAt(p));
-        explanation.addLiteral(var, dom, true);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntIterableRangeSet dom = explanation.complement(var);
+        IntIterableSetUtils.unionOf(dom, explanation.readDom(p));
+        var.intersectLit(dom, explanation);
     }
 
     @Override

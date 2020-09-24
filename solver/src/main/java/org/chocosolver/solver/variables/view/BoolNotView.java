@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -20,9 +19,10 @@ import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.ValueSortedMap;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
@@ -278,11 +278,31 @@ public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
-        boolean thisPivot = (this == pivot);
-        int value = thisPivot ? getValue() : 1 - getValue();
-        explanation.addLiteral(this, explanation.getFreeSet(value), thisPivot);
-        explanation.addLiteral(var, explanation.getFreeSet(value), !thisPivot);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
+        if(this == pivot){
+            this.intersectLit(getValue(), explanation);
+            var.unionLit(getValue(), explanation);
+        }else{
+            this.unionLit(1 - getValue(), explanation);
+            var.intersectLit(1 - getValue(), explanation);
+        }
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if(this.literal != null){
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Boolean();
+    }
+
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

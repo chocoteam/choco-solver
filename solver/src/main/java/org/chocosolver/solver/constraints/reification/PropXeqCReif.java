@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
@@ -114,27 +112,27 @@ public class PropXeqCReif extends Propagator<IntVar> {
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
         if (vars[1].isInstantiatedTo(1)) { // b is true and X = c holds
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), true);
-                IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
+                vars[1].intersectLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.universe();
                 dom0.remove(cste);
-                explanation.addLiteral(vars[0], dom0, false);
+                vars[0].unionLit(dom0, explanation);
             } else if (pivot == vars[0]) { // x is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), false);
-                explanation.addLiteral(vars[0], explanation.getFreeSet(cste), true);
+                vars[1].unionLit(0, explanation);
+                vars[0].intersectLit(cste, explanation);
             }
         } else if (vars[1].isInstantiatedTo(0)) {
             if (pivot == vars[1]) { // b is the pivot
-                explanation.addLiteral(vars[1], explanation.getFreeSet(0), true);
-                explanation.addLiteral(vars[0], explanation.getFreeSet(cste), false);
+                vars[1].intersectLit(0, explanation);
+                vars[0].unionLit(cste, explanation);
             } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                explanation.addLiteral(vars[1], explanation.getFreeSet(1), false);
-                IntIterableRangeSet dom0 = explanation.getRootSet(vars[0]);
+                vars[1].unionLit(1, explanation);
+                IntIterableRangeSet dom0 = explanation.universe();
                 dom0.remove(cste);
-                explanation.addLiteral(vars[0], dom0, true);
+                vars[0].intersectLit(dom0, explanation);
             }
         } else {
             throw new UnsupportedOperationException();

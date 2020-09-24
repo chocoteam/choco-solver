@@ -26,9 +26,8 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.PoolManager;
 import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
-import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * An implementation of {@link IExplanation} dedicated to learn signed clauses
@@ -45,13 +44,14 @@ public class ExplanationForSignedClause extends IExplanation {
     /**
      * Conflicting nodes
      */
-    private ValueSortedMap<IntVar> front;
+    private final ValueSortedMap<IntVar> front;
     /**
      * Literals that explains the conflict
      */
-    private HashMap<IntVar, IntIterableRangeSet> literals;
+    private final HashSet<IntVar> literals;
     /**
      * The decision to refute (ie, point to jump to wrt the current decision path).
+     *
      * @implSpec 0 represents the ROOT node,
      * any value greater than the decision path is ignored,
      * otherwise it represents the decision to refute in the decision path.
@@ -62,11 +62,11 @@ public class ExplanationForSignedClause extends IExplanation {
      */
     private final Implications mIG;
 
-    private PoolManager<IntIterableRangeSet> manager;
+    private final PoolManager<IntIterableRangeSet> manager;
 
     public ExplanationForSignedClause(Implications ig) {
         front = new ValueSortedMap<>();
-        literals = new HashMap<>();
+        literals = new HashSet<>();
         manager = new PoolManager<>();
         mIG = ig;
     }
@@ -77,14 +77,14 @@ public class ExplanationForSignedClause extends IExplanation {
     @Override
     public void extractConstraint(Model mModel, ClauseStore ngstore) {
         ClauseBuilder ngb = mModel.getClauseBuilder();
-        literals.forEach(ngb::put);
+        literals.forEach(v -> ngb.put(v, v.getLit().export())); // TODO : improve
         ngb.buildNogood(mModel);
     }
 
     @Override
     public void recycle() {
         front.clear();
-        literals.forEach((v, r) -> returnSet(r));
+        literals.forEach(IntVar::flushLit);
         literals.clear();
         assertLevel = Integer.MAX_VALUE;
     }
@@ -103,37 +103,38 @@ public class ExplanationForSignedClause extends IExplanation {
                 dec = (IntDecision) path.getDecision(i);
                 IntIterableRangeSet dom = null;
                 IntVar var = dec.getDecisionVariable();
-                literals.get(var);
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        dom = getRootSet(var);
+                        dom = universe();
                         dom.remove(dec.getDecisionValue());
                     } else {
-                        dom = getFreeSet(dec.getDecisionValue());
+                        dom = empty();
+                        dom.add(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        dom = getFreeSet(dec.getDecisionValue());
+                        dom = empty();
+                        dom.add(dec.getDecisionValue());
                     } else {
-                        dom = getRootSet(var);
+                        dom = universe();
                         dom.remove(dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
-                    dom = getRootSet(var);
+                    dom = universe();
                     if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(dec.getDecisionValue() + 1, IntIterableRangeSet.MAX);
                     } else {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue());
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntReverseSplit())) { // >=
-                    dom = getRootSet(var);
+                    dom = universe();
                     if (dec.hasNext() || dec.getArity() == 1) {
                         dom.retainBetween(IntIterableRangeSet.MIN, dec.getDecisionValue() - 1);
                     } else {
                         dom.retainBetween(dec.getDecisionValue(), IntIterableRangeSet.MAX);
                     }
                 }
-                addLiteral(var, dom, false);
+                var.unionLit(dom, this);
             }
         }
     }
@@ -142,6 +143,7 @@ public class ExplanationForSignedClause extends IExplanation {
      * From a given conflict, defined by <i>cex</i> and the current implication graph <i>mIG</i>,
      * this method will compute the signed clause inferred from the conflict.
      * A call to {@link #extractConstraint(Model, ClauseStore)} will return the computed result.
+     *
      * @param cex the conflict
      */
     public void learnSignedClause(ContradictionException cex) {
@@ -180,7 +182,11 @@ public class ExplanationForSignedClause extends IExplanation {
             }
             explain(mIG.getCauseAt(current), current);
             if (XParameters.PROOF) {
-                System.out.printf("Expl: %s\n-----", literals);
+                System.out.print("Expl: {");
+                literals.stream()
+                        //.sorted(Comparator.comparingInt(Identity::getId))
+                        .forEach(v -> System.out.printf("%s ∈ %s,", v, v.getLit()));
+                System.out.print("}\n-----");
             }
             // filter irrelevant nodes
             relax();
@@ -193,11 +199,11 @@ public class ExplanationForSignedClause extends IExplanation {
                         && Propagator.class.isAssignableFrom(cause.getClass())
                         && !PropSignedClause.class.isAssignableFrom(cause.getClass())
                         && !ClauseStore.SignedClause.class.isAssignableFrom(cause.getClass())
-                ) {
+        ) {
             Propagator<IntVar> propagator = (Propagator<IntVar>) cause;
-            Propagator.defaultExplain(propagator, this, front, mIG, p);
+            Propagator.defaultExplain(propagator, p, this);
         } else {
-            cause.explain(this, front, mIG, p);
+            cause.explain(p, this);
         }
         // check reification
         checkReification(cause, p);
@@ -211,10 +217,8 @@ public class ExplanationForSignedClause extends IExplanation {
                 assert !propagator.isReifiedAndSilent();
                 mIG.findPredecessor(front, b, p == -1 ? mIG.size() : p);
                 if (b.isInstantiated()) {
-                    IntIterableRangeSet set = getFreeSet();
-                    set.add(1 - b.getValue());
                     if (XParameters.FINE_PROOF) System.out.print("Reif: ");
-                    addLiteral(b, set, false);
+                    b.unionLit(1 - b.getValue(), this);
                 } else {
                     throw new UnsupportedOperationException("Oh nooo!");
                 }
@@ -227,16 +231,17 @@ public class ExplanationForSignedClause extends IExplanation {
         while (!front.isEmpty() && (l = front.getLastValue()) != k) {
             // remove variable in 'front' but not in literals
             // achieved lazily by only evaluating the right-most one
-            if (!literals.containsKey(mIG.getIntVarAt(l))) {
+            if (!literals.contains(mIG.getIntVarAt(l))) {
                 front.pollLastValue();
             } else {
+                IntVar var = mIG.getIntVarAt(l);
+                // cpru deal with : if(VariableUtils.isView(var))?
                 int p = mIG.getPredecessorOf(l);
                 // todo improve
                 // go left as long as the right-most variable in 'front' contradicts 'literals'
                 if (p < l /* to avoid going "before" root */
-                        && !IntIterableSetUtils.intersect(
-                        literals.get(mIG.getIntVarAt(l)), mIG.getDomainAt(p))) {
-                    front.replace(mIG.getIntVarAt(l), p);
+                        && var.getLit().disjoint(mIG.getDomainAt(p))) {
+                    front.replace(var, p);
                 }
             }
             k = l;
@@ -249,13 +254,14 @@ public class ExplanationForSignedClause extends IExplanation {
      * <li>the rightmost node in conflict is a decision</li>
      * <li>or it is above the first decision</li>
      * </ul>
+     *
      * @return <i>true</i> if the conflict analysis can stop
      */
     private boolean stop() {
         int max;
         if (front.isEmpty()
-            || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
-            || mIG.getDecisionLevelAt(max) == 1) {
+                || IntEventType.VOID.getMask() == mIG.getEventMaskAt(max = front.getLastValue())
+                || mIG.getDecisionLevelAt(max) == 1) {
             if (XParameters.PROOF) System.out.print("\nbacktrack to ROOT\n-----");
             assertLevel = mIG.getIntVarAt(0)
                     .getModel()
@@ -285,101 +291,61 @@ public class ExplanationForSignedClause extends IExplanation {
                 assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
             }
             /*/if (IntDecision.class.isAssignableFrom(mIG.getCauseAt(max).getClass())) {
-                if (XParameters.PROOF)
-                    System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
-                if (XParameters.ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
-                    throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
-                }
-                assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
-             //*/
+            if (XParameters.PROOF)
+                System.out.printf("\nbacktrack to %s\n-----", mIG.getCauseAt(max));
+            if (XParameters.ASSERT_NO_LEFT_BRANCH && !((IntDecision) mIG.getCauseAt(max)).hasNext()) {
+                throw new SolverException("Weak explanation found. Try to backjump to :" + mIG.getCauseAt(max) + "\n" + literals);
+            }
+            assertLevel = ((IntDecision) mIG.getCauseAt(max)).getPosition();
+            //*/
         }
         return assertLevel != Integer.MAX_VALUE;
     }
 
     /**
-     * Add a signed literal (<i>var</i> &isin; <i>dom</i>) to this explanation.
-     * This is achieved in three steps:
-     * <ol>
-     * <li>signed binary resolution (where 'v' is the pivot variable):
-     * <pre>
-     *         (v &isin; A &or; X), (v &isin; B &or; Y) : (v &isin; (A&cap;B) &or; X &or; Y)
-     *     </pre>
-     * <li>
-     * simplification:
-     * <pre>
-     *             (v &isin; &empty; &or; Z) : (Z)
-     *         </pre>
-     * </li>
-     * <li>
-     * join literals:
-     * <pre>
-     *             ((&forall;i v &isin; Ai) &or; Z) : (v &isin; (&cup;i Ai) &or; Z)
-     *         </pre>
-     * </li>
-     *
-     *
-     * </li>
-     * </ol>
-     * @param var   signed literal variable
-     * @param dom   signed literal domain
-     * @param pivot <i>true</i> if <i>var</i> is the pivot variable
+     * @see IntVar#unionLit(int, ExplanationForSignedClause)
+     * @see IntVar#unionLit(int, int, ExplanationForSignedClause)
+     * @see IntVar#unionLit(IntIterableRangeSet, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(int, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(int, int, ExplanationForSignedClause)
+     * @see IntVar#intersectLit(IntIterableRangeSet, ExplanationForSignedClause)
+     * @deprecated
      */
+    @Deprecated
     public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        assert literals.values().stream().noneMatch(d -> d.equals(dom)) : "try to add a dom already declare";
-        /*if(VariableUtils.isConstant(var) && !dom.contains(var.getValue())){
-            if(FINE_PROOF.getAsBoolean())System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-            returnSet(dom);
-            return;
-        }*/
-        if (var.isBool()) {
-            dom.retainBetween(0, 1);
-            if (!dom.contains(0) && !dom.contains(1)) {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-                if (pivot) {
-                    literals.remove(var);
-                    front.remove(var);
-                }
-                returnSet(dom);
-                return;
-            }
+        if (pivot) {
+            var.intersectLit(dom, this);
+        } else {
+            var.unionLit(dom, this);
         }
-        addLiteralInternal(var, dom, pivot);
     }
 
-    private void addLiteralInternal(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        IntIterableRangeSet rset = literals.get(var);
-        if (rset == null) {
-            if (dom.size() > 0) {
-                if (XParameters.FINE_PROOF) System.out.printf("%s: %s\n", var.getName(), dom);
-                literals.put(var, dom);
-            } else {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s -- skip\n", var.getName(), dom);
-                returnSet(dom);
-            }
-        } else {
-            if (pivot) {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s ∩ %s", var.getName(), rset, dom);
-                IntIterableSetUtils.intersectionOf(rset, dom);
-                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
-            } else {
-                if (XParameters.FINE_PROOF)
-                    System.out.printf("%s: %s ∪ %s", var.getName(), rset, dom);
-                IntIterableSetUtils.unionOf(rset, dom);
-                if (XParameters.FINE_PROOF) System.out.printf(" = %s", rset);
-            }
-            if (rset.size() == 0) {
-                assert !var.isBool() || rset.contains(0) || !rset.contains(1);
-                if (XParameters.FINE_PROOF) System.out.print(" -- remove");
-                literals.remove(var);
-                front.remove(var);
-                returnSet(rset);
-            }
-            if (XParameters.FINE_PROOF) System.out.print("\n");
-            returnSet(dom);
-        }
+    /**
+     * Remove {@code var} from {@link #literals} and {@link #front}
+     *
+     * @param var a variable
+     */
+    public void removeLit(IntVar var) {
+        literals.remove(var);
+        front.remove(var);
+    }
+
+    /**
+     * Add {@code var} to {@link #literals}
+     *
+     * @param var a variable
+     */
+    public void addLit(IntVar var) {
+        literals.add(var);
+    }
+
+    /**
+     * Check if {@code var} is in {@link #literals}
+     *
+     * @param var a variable
+     */
+    public boolean contains(IntVar var) {
+        return literals.contains(var);
     }
 
     /**
@@ -398,65 +364,33 @@ public class ExplanationForSignedClause extends IExplanation {
 
     /**
      * Return an empty set available (created and returned) or create a new one
+     *
      * @return a free set
      */
-    public IntIterableRangeSet getFreeSet() {
+    public IntIterableRangeSet empty() {
         IntIterableRangeSet set = manager.getE();
         if (set == null) {
             return new IntIterableRangeSet();
+        } else {
+            set.unlock();
         }
-        return set;
-    }
-
-    /**
-     * Return an available set (created and returned) or create a new one
-     * then add 'val' to it.
-     * @return a free set
-     */
-    public IntIterableRangeSet getFreeSet(int val) {
-        IntIterableRangeSet set = manager.getE();
-        if (set == null) {
-            set = new IntIterableRangeSet();
-        }
-        set.add(val);
-        return set;
-    }
-
-    /**
-     * Return an available set (created and returned) or create a new one
-     * then add range ['a','b'] to it.
-     * @return a free set
-     */
-    public IntIterableRangeSet getFreeSet(int a, int b) {
-        IntIterableRangeSet set = manager.getE();
-        if (set == null) {
-            set = new IntIterableRangeSet();
-        }
-        set.addBetween(a, b);
         return set;
     }
 
     public void returnSet(IntIterableRangeSet set) {
         set.clear();
+        set.lock();
         manager.returnE(set);
-    }
-
-    /**
-     * @param p position
-     * @return a set which contains a copy of the domain of the var at position <i>p</i>
-     */
-    public IntIterableRangeSet getSet(int p) {
-        IntIterableRangeSet set = getFreeSet();
-        set.copyFrom(mIG.getDomainAt(p));
-        return set;
     }
 
     /**
      * @param var a variable
      * @return a set which contains a copy of the domain of <i>var</i> at its front position
      */
-    public IntIterableRangeSet getSet(IntVar var) {
-        return getSet(front.getValue(var));
+    public IntIterableRangeSet domain(IntVar var) {
+        IntIterableRangeSet set = empty();
+        set.copyFrom(readDom(var));
+        return set;
     }
 
     /**
@@ -464,19 +398,39 @@ public class ExplanationForSignedClause extends IExplanation {
      * @return a set which contains a copy of the complement domain of <i>var</i> at its front position
      * wrt to its root domain
      */
-    public IntIterableRangeSet getComplementSet(IntVar var) {
-        IntIterableRangeSet set = getFreeSet();
-        set.copyFrom(mIG.getRootDomain(var));
-        set.removeAll(mIG.getDomainAt(front.getValue(var)));
+    public IntIterableRangeSet complement(IntVar var) {
+        IntIterableRangeSet set = root(var);
+        set.removeAll(readDom(var));
+        return set;
+    }
+    
+    /**
+     * @param val a value
+     * @return a set which contains all values after <i>val</i> and <i>val</i>
+     */
+    public IntIterableRangeSet setDiffVal(int val) {
+        IntIterableRangeSet set = universe();
+        set.remove(val);
+        return set;
+    }
+
+    /**
+     * Return (-&infin;,+&infin;) set (created and returned).
+     *
+     * @return a full set
+     */
+    public IntIterableRangeSet universe() {
+        IntIterableRangeSet set = empty();
+        set.addBetween(IntIterableRangeSet.MIN, IntIterableRangeSet.MAX);
         return set;
     }
 
     /**
      * @param var a variable
-     * @return a set which contains a copy of the root domain of <i>var</i>
+     * @return a <b>copy</b> of the root domain of <i>var</i>
      */
-    public IntIterableRangeSet getRootSet(IntVar var) {
-        IntIterableRangeSet set = getFreeSet();
+    public IntIterableRangeSet root(IntVar var) {
+        IntIterableRangeSet set = empty();
         set.copyFrom(mIG.getRootDomain(var));
         return set;
     }
@@ -485,7 +439,68 @@ public class ExplanationForSignedClause extends IExplanation {
         return front;
     }
 
-    public HashMap<IntVar, IntIterableRangeSet> getLiterals() {
+    public Implications getImplicationGraph() {
+        return mIG;
+    }
+
+    /**
+     * Return the variable stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the variable at position {@code p} in {@link #mIG}.
+     */
+    public IntVar readVar(int p) {
+        return mIG.getIntVarAt(p);
+    }
+
+    /**
+     * Return the event mask stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the event mask at position {@code p} in {@link #mIG}
+     */
+    public int readMask(int p) {
+        return mIG.getEventMaskAt(p);
+    }
+
+    /**
+     * Return the value stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the value at position {@code p} in {@link #mIG}
+     */
+    public int readValue(int p) {
+        return mIG.getValueAt(p);
+    }
+
+
+    /**
+     * Return the domain stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param p position of the node to read.
+     * @return the domain at position {@code p} in {@link #mIG}
+     * @implNote <b>read-only</b> method.
+     * Object returned by this method is not intended to be modified.
+     */
+    public IntIterableRangeSet readDom(int p) {
+        return mIG.getDomainAt(p);
+    }
+
+    /**
+     * Return the domain stored in {@link #mIG} at positon {@code p}.
+     *
+     * @param var variable to read
+     * @return the domain at position {@code p} in {@link #mIG}
+     * @implNote <b>read-only</b> method.
+     * Object returned by this method is not intended to be modified.
+     * @implSpec position of {@code var} in {@link #mIG} is retrieved
+     * through {@link #front}
+     */
+    public IntIterableRangeSet readDom(IntVar var) {
+        return mIG.getDomainAt(front.getValue(var));
+    }
+
+    public HashSet<IntVar> getLiterals() {
         return literals;
     }
 
@@ -493,9 +508,9 @@ public class ExplanationForSignedClause extends IExplanation {
     public String toString() {
         StringBuilder st = new StringBuilder();
         st.append('{');
-        for (IntVar v : literals.keySet()) {
-            st.append(v.getName()).append('\u2208').append(literals.get(v)).append(',');
-        }
+        literals.stream()
+                //.sorted(Comparator.comparingInt(Identity::getId))
+                .forEach(v -> st.append(v.getName()).append('\u2208').append(v.getLit()).append(','));
         st.append('}');
         return st.toString();
 

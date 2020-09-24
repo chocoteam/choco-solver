@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 
 /**
  * A propagator dedicated to express in a compact way: (x = y + c) &hArr; b
@@ -118,10 +116,8 @@ public class PropXeqYCReif extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
-        Propagator.defaultExplain(this, explanation, front, ig, p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        Propagator.defaultExplain(this, p, explanation);
     }
 
     @Override
