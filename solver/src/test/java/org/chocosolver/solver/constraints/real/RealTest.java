@@ -938,7 +938,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
+    @Test(enabled = false, groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3a() {
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
