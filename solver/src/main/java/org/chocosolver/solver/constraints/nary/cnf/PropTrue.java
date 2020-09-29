@@ -13,12 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 
 /**
  * <br/>
@@ -53,7 +50,7 @@ public class PropTrue extends Propagator<BoolVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         // nothing to do
     }
 

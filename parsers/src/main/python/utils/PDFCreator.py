@@ -13,7 +13,7 @@ class PDFCreator:
         super().__init__()
 
     def publish(self, filelist, options, timPerOpt, optPerSol, fnames, maxtime,
-                bestever={}, plot=True, details="fzn"):
+                bestever={}, plot=True, details=True, problems="fzn"):
         # Then start the document
         doc = Document(document_options="table")
         doc.packages.append(Package("xcolor", options="dvipsnames"))  # to deal with colors
@@ -34,10 +34,11 @@ class PDFCreator:
             self.__globals(doc, options, timPerOpt, maxtime)
 
         self.__sybil(doc, options, optPerSol, fnames, maxtime, bestever)
-        if details is "fzn":
-            self.__detailsFZN(doc, options, optPerSol, fnames, maxtime, bestever)
-        elif details is "xcsp":
-            self.__detailsXCSP(doc, options, optPerSol, fnames, maxtime, bestever)
+        if details:
+            if problems is "fzn":
+                self.__detailsFZN(doc, options, optPerSol, fnames, maxtime, bestever)
+            elif problems is "xcsp":
+                self.__detailsXCSP(doc, options, optPerSol, fnames, maxtime, bestever)
 
         name = os.path.basename(filelist)
         print(name)

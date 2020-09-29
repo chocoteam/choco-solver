@@ -10,22 +10,14 @@ pull_request_rules:
       merge:
         method: merge
   - name: remove outdated reviews
-      conditions:
-        - base=master
-      actions:
-        dismiss_reviews: {}
-  - name: say hi on new contribution
-      conditions:
-        - author!=@myorg/regularcontributors
-      actions:
-        comment:
-          message: |
-            Welcome to our great project!
-            We're delight to have you onboard !
+    conditions:
+      - base=master
+    actions:
+      dismiss_reviews: {}
   - name: automatic merge for Dependabot pull requests
-      conditions:
-        - author~=^dependabot(|-preview)\[bot\]$
-        - status-success=Travis CI - Pull Request
-      actions:
-        merge:
-          method: merge
+    conditions:
+      - author~=^dependabot(|-preview)\[bot\]$
+      - status-success=Travis CI - Pull Request
+    actions:
+      merge:
+        method: merge

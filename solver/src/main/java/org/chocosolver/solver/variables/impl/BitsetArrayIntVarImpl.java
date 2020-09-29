@@ -10,7 +10,6 @@
 package org.chocosolver.solver.variables.impl;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
@@ -25,10 +24,12 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.EnumDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
@@ -98,14 +99,20 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
      */
     private IntVarValueIterator _javaIterator;
 
+    /**
+     * Signed Literal
+     */
+    protected SignedLiteral.Set literal;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
      * Creates an {@link IntVar} based on an array of non-consecutive but ordered values.
      * Non-consecutive condition is the main reason which motivates this class.
-     * @param name name of the variable
+     *
+     * @param name         name of the variable
      * @param sortedValues domain values
-     * @param model the model to declare this variable in
+     * @param model        the model to declare this variable in
      */
     public BitsetArrayIntVarImpl(String name, int[] sortedValues, Model model) {
         super(name, model);
@@ -198,7 +205,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
             nlb = values.nextValue(olb - 1);
         }
-        if(nlb <= nub) {
+        if (nlb <= nub) {
             // look for the new ub
             while (nub == oub && oub > Integer.MIN_VALUE) {
                 i = INDICES.prevSetBit(V2I.get(oub) - 1);
@@ -248,7 +255,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
             nlb = values.nextValue(olb - 1);
         }
-        if(nlb <= nub) {
+        if (nlb <= nub) {
             // look for the new ub
             while (nub != oub && olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE) {
                 i = INDICES.prevSetBit(V2I.get(oub) - 1);
@@ -349,7 +356,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         if (!contains(value)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
-        } else if(!isInstantiated()){
+        } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             int index = V2I.get(value);
             assert index > -1 && this.INDICES.get(index);
@@ -539,7 +546,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(aLB); // if aValue is known
         if (index == -1 || !INDICES.get(index)) {
             //otherwise, a dichotomic search of the closest value greater than key
-            index = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aLB, true);
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, aLB, true);
             if (index < lb || index > ub) {
                 index = -1;
             } else {
@@ -553,7 +560,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         int index = V2I.get(value);// if aValue is known
         if (index == -1 || !INDICES.get(index)) {
             //otherwise, a dichotomic search of the closest value smaller than key
-            index = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, value, false);
+            index = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, value, false);
             if (index < lb || index > ub) {
                 index = -1;
             } else {
@@ -636,7 +643,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             i = INDICES.nextSetBit(i + 1);
         } else {
             //otherwise, a dichotomic search of the closest value greater than key
-            i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true);
+            i = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, aValue, true);
             if (i < lb || i > ub) {
                 i = -1;
             } else {
@@ -650,12 +657,12 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     public int nextValueOut(int aValue) {
         int lb = LB.get();
         int ub = UB.get();
-        if(VALUES[lb] - 1 <= aValue && aValue <= VALUES[ub]){
+        if (VALUES[lb] - 1 <= aValue && aValue <= VALUES[ub]) {
             int i = V2I.get(aValue); // if aValue is known
             if (i == -1) {
-                i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true);
+                i = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, aValue, true);
             }
-            while(i < VALUES.length && VALUES[i] == aValue + 1 && INDICES.get(i)){
+            while (i < VALUES.length && VALUES[i] == aValue + 1 && INDICES.get(i)) {
                 aValue = VALUES[i];
                 i++;
             }
@@ -674,7 +681,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             i = INDICES.prevSetBit(i - 1);
         } else {
             //otherwise, a dichotomic search of the closest value smaller than key
-            i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, false);
+            i = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, aValue, false);
             if (i < lb || i > ub) {
                 i = -1;
             } else {
@@ -688,12 +695,12 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     public int previousValueOut(int aValue) {
         int lb = LB.get();
         int ub = UB.get();
-        if(VALUES[lb]<= aValue && aValue <= VALUES[ub] + 1){
+        if (VALUES[lb] <= aValue && aValue <= VALUES[ub] + 1) {
             int i = V2I.get(aValue); // if aValue is known
             if (i == -1) {
-                i = ArrayUtils.binarySearchInc(VALUES, lb, ub+1, aValue, true) - 1;
+                i = ArrayUtils.binarySearchInc(VALUES, lb, ub + 1, aValue, true) - 1;
             }
-            while(i > -1 && VALUES[i] == aValue - 1 && INDICES.get(i)){
+            while (i > -1 && VALUES[i] == aValue - 1 && INDICES.get(i)) {
                 aValue = VALUES[i];
                 i--;
             }
@@ -907,10 +914,26 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public Iterator<Integer> iterator() {
-        if(_javaIterator == null){
-            _javaIterator =  new IntVarValueIterator(this);
+        if (_javaIterator == null) {
+            _javaIterator = new IntVarValueIterator(this);
         }
         _javaIterator.reset();
         return _javaIterator;
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Set(rootDomain);
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 }

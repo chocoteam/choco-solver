@@ -13,15 +13,11 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
-import static org.chocosolver.solver.constraints.Operator.EQ;
-import static org.chocosolver.solver.constraints.Operator.GE;
-import static org.chocosolver.solver.constraints.Operator.LE;
+import static org.chocosolver.solver.constraints.Operator.*;
 
 /**
  * A propagator for SUM(x_i*c_i) = b
@@ -283,16 +279,15 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    void doExplain(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig, int p) {
-        IntVar pivot = ig.getIntVarAt(p);
+    void doExplain(ExplanationForSignedClause explanation, int p) {
+        IntVar pivot = explanation.readVar(p);
         IntIterableRangeSet dom_before;
         // first, compute F and E
         int sumLB = 0;
         int sumUB = 0;
         int i = 0, lb, ub, la = 0, ua = 0, ca = 0, a = 0;
         for (; i < pos; i++) { // first the positive coefficients
-            int f = front.getValue(vars[i]);
-            dom_before = ig.getDomainAt(f);
+            dom_before = explanation.readDom(vars[i]);
             lb = dom_before.min() * c[i];
             ub = dom_before.max() * c[i];
             if (vars[i] == pivot) {
@@ -305,7 +300,7 @@ public class PropScalar extends PropSum {
             sumUB += ub;
         }
         for (; i < l; i++) { // then the negative ones
-            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            dom_before = explanation.readDom(vars[i]);
             lb = dom_before.max() * c[i];
             ub = dom_before.min() * c[i];
             if (vars[i] == pivot) {
@@ -319,8 +314,8 @@ public class PropScalar extends PropSum {
         }
         int F = b - sumLB;
         int E = sumUB - b;
-        if (ig.getDomainAt(p).isEmpty()) {
-            doExplainGlobalFailure(explanation, front, ig, F, E);
+        if (explanation.readDom(p).isEmpty()) {
+            doExplainGlobalFailure(explanation, F, E);
             return;
         }
         IntIterableRangeSet domain;
@@ -340,19 +335,17 @@ public class PropScalar extends PropSum {
                 ua2 = divFloor(-la * ca + E, -ca);
             }
         }
-        domain = explanation.getRootSet(vars[a]);
-        if(la2 > ua2){
-            domain.clear();
-        }else {
-            domain.retainBetween(la2, ua2);
+        domain = explanation.empty();
+        if(la2 <= ua2){
+            domain.addBetween(la2, ua2);
         }
-        explanation.addLiteral(vars[a], domain, true);
+        vars[a].intersectLit(domain, explanation);
         i = 0;
         for (; i < pos; i++) {
             int min = IntIterableRangeSet.MIN;
             int max = IntIterableRangeSet.MAX;
             if (vars[i] != pivot) {
-                dom_before = ig.getDomainAt(front.getValue(vars[i]));
+                dom_before = explanation.readDom(vars[i]);
                 if (!o.equals(GE)) { // ie, LE or EQ
                     max = divFloor(
                             F + c[i] * dom_before.min() - ca * (ca > 0 ? (ua2 + 1 - la) : (la2 - 1 - ua)),
@@ -361,21 +354,21 @@ public class PropScalar extends PropSum {
                 if (!o.equals(LE)) { // ie, GE or EQ
                     min = divCeil(-E + c[i] * dom_before.max() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la), c[i]);
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else{
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].unionLit(domain, explanation);
             }
         }
         for (; i < l; i++) {
             int min = IntIterableRangeSet.MIN;
             int max = IntIterableRangeSet.MAX;
             if (vars[i] != pivot) {
-                dom_before = ig.getDomainAt(front.getValue(vars[i]));
+                dom_before = explanation.readDom(vars[i]);
                 if (!o.equals(GE)) { // ie, LE or EQ
                     min = divCeil(
                             -(F + c[i] * dom_before.max() - ca * (ca > 0 ? ua2 + 1 - la : la2 - 1 - ua)), // done
@@ -386,21 +379,20 @@ public class PropScalar extends PropSum {
                             -(-E + c[i] * dom_before.min() - ca * (ca > 0 ? la2 - 1 - ua : ua2 + 1 - la)) // done
                             , -c[i]);
                 }
-                domain = explanation.getComplementSet(vars[i]);
+                domain = explanation.complement(vars[i]);
                 if(o.equals(EQ)) {
                     assert max+1 <= min-1 : "empty range";
                     domain.removeBetween(max + 1, min - 1);
                 }else {
                     domain.retainBetween(min, max);
                 }
-                explanation.addLiteral(vars[i], domain, false);
+                vars[i].unionLit(domain, explanation);
             }
         }
     }
 
     @Override
-    protected void explainGlobal(ExplanationForSignedClause explanation, ValueSortedMap<IntVar> front, Implications ig,
-                                 int F, int E) {
+    protected void explainGlobal(ExplanationForSignedClause explanation, int F, int E) {
         assert (F < 0)^(E < 0);
         IntIterableRangeSet dom_before;
         IntIterableRangeSet domain;
@@ -409,7 +401,7 @@ public class PropScalar extends PropSum {
         for (; i < l; i++) {
             int min = IntIterableRangeSet.MIN;
             int max = IntIterableRangeSet.MAX;
-            dom_before = ig.getDomainAt(front.getValue(vars[i]));
+            dom_before = explanation.readDom(vars[i]);
             if (F < 0) {
                 // BEWARE // second part of the equation differs from non-global-fail case
                 if(i < pos) {
@@ -425,8 +417,7 @@ public class PropScalar extends PropSum {
                     max = divFloor(-(-E + c[i] * dom_before.min()), -c[i]);
                 }
             }
-            domain = explanation.getRootSet(vars[i]);
-            domain = domain.duplicate();
+            domain = explanation.root(vars[i]);
             domain.retainBetween(min, max);
             ngb.put(vars[i], domain);
             int k = 0;
@@ -434,7 +425,7 @@ public class PropScalar extends PropSum {
                 if (k != i) {
                     min = IntIterableRangeSet.MIN;
                     max = IntIterableRangeSet.MAX;
-                    dom_before = ig.getDomainAt(front.getValue(vars[k]));
+                    dom_before = explanation.readDom(vars[k]);
                     if (F < 0) {
                         if(k < pos) {
                             min = dom_before.min();
@@ -448,10 +439,9 @@ public class PropScalar extends PropSum {
                             min = dom_before.min();
                         }
                     }
-                    domain = explanation.getRootSet(vars[k]);
-                    domain = domain.duplicate();
+                    domain = explanation.root(vars[k]);
                     domain.removeBetween(min, max);
-                    ngb.put(vars[k], domain.duplicate());
+                    ngb.put(vars[k], domain);
                 }
             }
             ngb.buildNogood(model);

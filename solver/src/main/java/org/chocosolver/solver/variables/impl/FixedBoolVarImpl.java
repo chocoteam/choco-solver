@@ -15,8 +15,10 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A constant view specific to boolean variable
@@ -98,6 +100,22 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public String toString() {
         return name + " = " + constante;
+    }
+
+    @Override
+    public void createLit(IntIterableRangeSet rootDomain) {
+        if (this.literal != null) {
+            throw new IllegalStateException("createLit(Implications) called twice");
+        }
+        this.literal = new SignedLiteral.Set(rootDomain);
+    }
+
+    @Override
+    public SignedLiteral getLit() {
+        if (this.literal == null) {
+            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
+        }
+        return this.literal;
     }
 
 }

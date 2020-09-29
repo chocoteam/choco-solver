@@ -73,6 +73,18 @@ public class RealTest {
     }
 
     @Test(groups = "ibex", timeOut = 60000)
+        public void test11() {
+            Ibex ibex = new Ibex(new double[]{0.1});
+            ibex.add_ctr("{0}=59.5");
+            ibex.build();
+            double domains[] = {59.5, 59.5};
+            // see: https://github.com/ibex-team/ibex-java/issues/2
+            Assert.assertEquals(ibex.contract(0, domains, 0), Ibex.NOTHING);
+            Assert.assertEquals(ibex.contract(0, domains, 1), Ibex.NOTHING);
+            ibex.release();
+        }
+
+    @Test(groups = "ibex", timeOut = 60000)
     public void test2() {
         for (int i = 0; i < 10; i++) {
             Ibex ibex = new Ibex(new double[]{0.001, 0.001});
@@ -926,7 +938,7 @@ public class RealTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
+    @Test(enabled = false, groups="1s", timeOut=60000, threadPoolSize = 4, invocationCount = 10, priority = 10)
     public void testJuha3a() {
         Model model = new Model("model" + Thread.currentThread().getId());
         IntVar dim_H = model.intVar("dim_h", new int[]{2000, 2100, 2200});
@@ -1051,7 +1063,7 @@ public class RealTest {
         RealVar var3 = model.realVar("var3", -5, 5, precision);
 
         var1.add(var2).eq(var3).post();
-        
+
         Solver solver = model.getSolver();
 
 
@@ -1119,6 +1131,32 @@ public class RealTest {
         // y - x - 1 = 0
         y.sub(x).sub(1).eq(0).ibex(PRECISION).post();
         Assert.assertNotNull(model.getSolver().findSolution());
+    }
+
+    @Test(groups = "1s")
+    public void testJoao4() throws ContradictionException {
+        Model model = new Model();
+        //RealVar x = model.realVar("x", 0.0, 8.0, 1e-6); // With this domain, y returns [0,125 .. 100,000] (CORRECT)
+        RealVar x = model.realVar("x", -100.0, 8.0, 1e-6); // With this domain, y returns [0,000 .. 100,000] (INCORRECT)
+        RealVar y = model.realVar("y", -100.0, 100.0, 1e-6);
+        RealVar c = model.realVar("c", 1.0, 1.0, 1e-6);
+        x.ge(0.0).equation().post();
+        y.eq(c.div(x)).equation().post();
+        model.getSolver().propagate();
+        Assert.assertTrue(y.getLB() > 0.12);
+    }
+
+    @Test(groups = "1s")
+    public void testJoao5() throws ContradictionException {
+        Model model = new Model();
+        //RealVar x = model.realVar("x", 0.0, 8.0, 1e-6); // With this domain, y returns [0,125 .. 100,000] (CORRECT)
+        RealVar x = model.realVar("x", -100.0, 8.0, 1e-6); // With this domain, y returns [0,000 .. 100,000] (INCORRECT)
+        RealVar y = model.realVar("y", -100.0, 100.0, 1e-6);
+        RealVar c = model.realVar("c", 1.0, 1.0, 1e-6);
+        x.le(0.0).equation().post();
+        y.eq(c.div(x)).equation().post();
+        model.getSolver().propagate();
+        Assert.assertTrue(y.getLB() < -0.12);
     }
 
 

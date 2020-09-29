@@ -13,11 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.ValueSortedMap;
 
 /**
  * A propagator dedicated to express in a compact way: (x = y + c) &hArr; b
@@ -43,6 +41,25 @@ public class PropXeqYCReif extends Propagator<IntVar> {
             } else if (vars[1].isInstantiated()) {
                 vars[0].instantiateTo(vars[1].getValue() + cste, this);
                 setPassive();
+            }else{
+                //noinspection StatementWithEmptyBody
+                while (vars[0].updateLowerBound(vars[1].getLB() + cste, this) | vars[1].updateLowerBound(vars[0].getLB() - cste, this)) ;
+                //noinspection StatementWithEmptyBody
+                while (vars[0].updateUpperBound(vars[1].getUB() + cste, this) | vars[1].updateUpperBound(vars[0].getUB() - cste, this)) ;
+                if(vars[0].hasEnumeratedDomain() && vars[1].hasEnumeratedDomain()){
+                    int ub = vars[0].getUB();
+                    for (int val = vars[0].getLB(); val <= ub; val = vars[0].nextValue(val)) {
+                        if (!vars[1].contains(val - cste)) {
+                            vars[0].removeValue(val, this);
+                        }
+                    }
+                    ub = vars[1].getUB();
+                    for (int val = vars[1].getLB(); val <= ub; val = vars[1].nextValue(val)) {
+                        if (!vars[0].contains(val + cste)) {
+                            vars[1].removeValue(val, this);
+                        }
+                    }
+                }
             }
         } else if (vars[2].getUB() == 0) {
             if (vars[0].isInstantiated()) {
@@ -53,6 +70,8 @@ public class PropXeqYCReif extends Propagator<IntVar> {
                 if (vars[0].removeValue(vars[1].getValue() + cste, this) || !vars[0].contains(vars[1].getValue() + cste)) {
                     setPassive();
                 }
+            } else if (vars[0].getUB() < (vars[1].getLB() + cste) || (vars[1].getUB() + cste) < vars[0].getLB()) {
+                setPassive();
             }
         } else {
             if (vars[0].isInstantiated()) {
@@ -97,10 +116,8 @@ public class PropXeqYCReif extends Propagator<IntVar> {
     }
 
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
-        Propagator.defaultExplain(this, explanation, front, ig, p);
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        Propagator.defaultExplain(this, p, explanation);
     }
 
     @Override

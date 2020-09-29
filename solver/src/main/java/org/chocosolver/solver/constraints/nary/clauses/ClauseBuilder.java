@@ -36,20 +36,20 @@ public class ClauseBuilder {
     /**
      * When the nogood is true (based on variables declared domain)
      */
-    private static short ALWAYSTRUE = 0b10;
+    private static final short ALWAYSTRUE = 0b10;
     /**
      * * When the nogood is unknown
      */
-    private static short UNKNOWN = 0b01;
+    private static final short UNKNOWN = 0b01;
     /**
      * When the nogood is false (based on variables declared domain)
      */
-    private static short FALSE = 0b00;
+    private static final short FALSE = 0b00;
 
     /**
      * Sets of variables
      */
-    private Set<IntVar> vars;
+    private final Set<IntVar> vars;
     /**
      * Sets of forbidden values
      */
@@ -73,7 +73,7 @@ public class ClauseBuilder {
         sets = new TIntObjectHashMap<>();
         initialDomains = new TIntObjectHashMap<>();
         Arrays.stream(mModel.retrieveIntVars(true))
-                .forEach(v -> initialDomains.put(v.getId(), IntIterableSetUtils.extract(v)));
+                .forEach(v -> initialDomains.put(v.getId(), new IntIterableRangeSet(v)));
     }
 
     /**
@@ -93,7 +93,7 @@ public class ClauseBuilder {
             } // else, always false and ignore
             return this;
         }
-        if (IntIterableSetUtils.intersect(set, initialDomains.get(var.getId()))) {
+        if (set.intersect(initialDomains.get(var.getId()))) {
             if (IntIterableSetUtils.includedIn(initialDomains.get(var.getId()), set)) {
                 status |= ALWAYSTRUE;
             }
@@ -103,14 +103,8 @@ public class ClauseBuilder {
         return this;
     }
 
-    public IntIterableRangeSet getInitialDomain(IntVar var) {
-        return initialDomains.get(var.getId());
-    }
-
     /**
-     * Build the nogood in memory and post it to <i>model</i>
-     *
-     * @return the contraint or null if always true
+     * Build the nogood in memory and post it to <i>model</i>.
      */
     public void buildNogood(Model model) {
         if ((status & ALWAYSTRUE) == 0) {
@@ -232,5 +226,9 @@ public class ClauseBuilder {
             }
         }
         set.clear();
+    }
+
+    public IntIterableRangeSet getInitialDomain(IntVar var) {
+        return initialDomains.get(var.getId());
     }
 }

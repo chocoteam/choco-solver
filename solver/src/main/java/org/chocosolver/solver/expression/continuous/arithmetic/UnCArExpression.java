@@ -118,11 +118,11 @@ public class UnCArExpression implements CArExpression {
                     model.realIbexGenericConstraint("{0}=cos({1})", me, v).post();
                     break;
                 case SIN:
-                    me = model.realVar(0.0, 1.0, p);
+                    me = model.realVar(-1.0, 1.0, p);
                     model.realIbexGenericConstraint("{0}=sin({1})", me, v).post();
                     break;
                 case TAN:
-                    me = model.realVar(0.0, Double.POSITIVE_INFINITY, p);
+                    me = model.realVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, p);
                     model.realIbexGenericConstraint("{0}=tan({1})", me, v).post();
                     break;
                 case ACOS:
@@ -142,11 +142,11 @@ public class UnCArExpression implements CArExpression {
                     model.realIbexGenericConstraint("{0}=cosh({1})", me, v).post();
                     break;
                 case SINH:
-                    me = model.realVar(0.0, Double.POSITIVE_INFINITY, p);
+                    me = model.realVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, p);
                     model.realIbexGenericConstraint("{0}=sinh({1})", me, v).post();
                     break;
                 case TANH:
-                    me = model.realVar(0.0, Double.POSITIVE_INFINITY, p);
+                    me = model.realVar(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, p);
                     model.realIbexGenericConstraint("{0}=tanh({1})", me, v).post();
                     break;
                 case ACOSH:

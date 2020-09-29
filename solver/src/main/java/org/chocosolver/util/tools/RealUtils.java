@@ -70,7 +70,7 @@ public class RealUtils {
 
     /**
      * Returns an interval that represents the result of a difference between interval 'x' and 'y'.
-     * <p>[l(x)-l(y), u(x)-u(y)]</p>
+     * <p>[l(x)-u(y), u(x)-l(y)]</p>
      * @param x an interval
      * @param y an interval
      * @return an interval that represents the result of the difference : 'x - y'

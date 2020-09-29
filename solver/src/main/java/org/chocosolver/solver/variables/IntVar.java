@@ -12,10 +12,14 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
+import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.function.Consumer;
@@ -249,6 +253,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
 
     /**
      * Returns the range of this domain, that is, the difference between the upper bound and the lower bound.
+     *
      * @return the range of this domain
      */
     int getRange();
@@ -324,8 +329,8 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *     // operate on value v here
      * }
      * vit.dispose();</pre>
-     *
-     *
+     * <p>
+     * <p>
      * To top-down iterate over the values in a <code>IntVar</code>,
      * use the following loop:
      *
@@ -362,7 +367,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *     rit.next();
      * }
      * rit.dispose();</pre>
-     *
+     * <p>
      * To top-down iterate over the values in a <code>IntVar</code>,
      * use the following loop:
      *
@@ -412,16 +417,16 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     }
 
     /**
-     * @param evt   original event
+     * @param evt original event
      * @return transforms the original event wrt this IntVar
      */
-    default IEventType transformEvent(IEventType evt){
+    default IEventType transformEvent(IEventType evt) {
         return evt;
     }
 
 
     @Override
-    default IntVar intVar(){
+    default IntVar intVar() {
         return this;
     }
 
@@ -433,5 +438,206 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     @Override
     default boolean isExpressionLeaf() {
         return true;
+    }
+
+    /**
+     * Create the signed literal.
+     * @param rootDomain the domain at root node
+     */
+    void createLit(IntIterableRangeSet rootDomain);
+
+    /**
+     * @return the current signed literal
+     * @implSpec a call to {@link #createLit(IntIterableRangeSet)} is required
+     */
+    SignedLiteral getLit();
+
+    /**
+     * Flush the current signed literal
+     */
+    default void flushLit() {
+        this.getLit().clear();
+    }
+
+    /**
+     * Perform the union of this internal signed literal and {@code set}:
+     * <p>{@code lit} = {@code set} ∪ {@code lit}
+     *
+     * @param set         set of ints to join this signed literal with
+     * @param explanation the explanation
+     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
+     * Before this methods ends, {@code set} is recycled and <b>must not be used</b>.
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void unionLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ %s\n", getName(), getLit(), set);
+        }
+        this.getLit().addAll(set);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("skip\n");
+            }
+        } else {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+            explanation.addLit(this);
+        }
+        explanation.returnSet(set);
+    }
+
+    /**
+     * Perform the union of this internal signed literal and the range [{@code l}, {@code u}]:
+     * <p>{@code lit} = [{@code l}, {@code u}] ∪ {@code lit}
+     *
+     * @param l           inclusive lower bound
+     * @param u           inclusive upper bound
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void unionLit(int l, int u, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
+        }
+        this.getLit().addBetween(l, u);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("-- skip\n");
+            }
+        } else {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+            explanation.addLit(this);
+        }
+    }
+
+    /**
+     * Perform the union of this internal signed literal and {{@code v}}:
+     * <p>{@code lit} = {{@code v}} ∪ {@code lit}
+     *
+     * @param v           int value
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
+     * It can be called many times on the same variable while explaning a cause
+     * since it applies a union operation on signed literal.
+     */
+    default void unionLit(int v, ExplanationForSignedClause explanation) {
+        if (XParameters.FINE_PROOF) {
+            System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
+        }
+        this.getLit().add(v);
+        if (this.getLit().isEmpty()) {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("skip\n");
+            }
+        } else {
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+            explanation.addLit(this);
+        }
+    }
+
+    /**
+     * Perform the intersection of this internal signed literal and {@code set}:
+     * <p>{@code lit} = {@code set} ∩ {@code lit}
+     *
+     * @param set         set of ints to cross this signed literal with.
+     * @param explanation the explanation
+     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
+     * Before this methods ends, {@code set} is recycled and <b>must no be used</b>.
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void intersectLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ %s", getName(), getLit(), set);
+            }
+            this.getLit().retainAll(set);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+            explanation.returnSet(set);
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(set, explanation);
+        }
+    }
+
+    /**
+     * Perform the intersection of this internal signed literal and the range [{@code l}, {@code u}]:
+     * <p>{@code lit} = [{@code l}, {@code u}] ∩ {@code lit}
+     *
+     * @param l           inclusive lower bound
+     * @param u           inclusive upper bound
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void intersectLit(int l, int u, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ [%d,%d]", getName(), getLit(), l, u);
+            }
+            this.getLit().retainBetween(l, u);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(l, u, explanation);
+        }
+    }
+
+    /**
+     * Perform the intersection of this internal signed literal and {{@code v}}:
+     * <p>{@code lit} = {{@code v}} ∩ {@code lit}
+     *
+     * @param v           int value
+     * @param explanation the explanation
+     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
+     * It can be called only once on the pivot variable while explaining a cause
+     * since it applies an intersection operation on signed literal.
+     */
+    default void intersectLit(int v, ExplanationForSignedClause explanation) {
+        if (explanation.contains(this)) {
+            if (XParameters.FINE_PROOF) {
+                System.out.printf("%s: %s ∩ {%d}", getName(), getLit(), v);
+            }
+            this.getLit().retain(v);
+            if (this.getLit().isEmpty()) {
+                if (XParameters.FINE_PROOF) {
+                    System.out.print(" -- remove");
+                }
+                explanation.removeLit(this);
+            }
+            if (XParameters.FINE_PROOF) {
+                System.out.print("\n");
+            }
+        } else {
+            // this is the first occurrence of the variable during explanation
+            this.unionLit(v, explanation);
+        }
     }
 }

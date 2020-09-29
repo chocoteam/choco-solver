@@ -17,7 +17,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.Implications;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -26,7 +25,6 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntCircularQueue;
-import org.chocosolver.util.objects.ValueSortedMap;
 import org.chocosolver.util.objects.queues.CircularQueue;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
@@ -816,21 +814,17 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * </p>
      */
     @Override
-    public void explain(ExplanationForSignedClause explanation,
-                        ValueSortedMap<IntVar> front,
-                        Implications ig, int p) {
+    public void explain(int p, ExplanationForSignedClause explanation) {
         if (DEFAULT_EXPL) {
             if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for %s \n",this.getClass().getSimpleName());
-            defaultExplain(this, explanation, front, ig, p);
+            defaultExplain(this, p, explanation);
         } else {
-            ICause.super.explain(explanation, front, ig, p);
+            ICause.super.explain(p, explanation);
         }
     }
 
-    public static void defaultExplain(Propagator prop, ExplanationForSignedClause explanation,
-                                      @SuppressWarnings("unused") ValueSortedMap<IntVar> front,
-                                      Implications ig, int p) {
-        IntVar pivot = p > -1 ? ig.getIntVarAt(p) : null;
+    public static void defaultExplain(Propagator<?> prop, int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = p > -1 ? explanation.readVar(p) : null;
         IntIterableRangeSet dom;
         IntVar var;
         boolean found = false;
@@ -838,14 +832,14 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             var = (IntVar) prop.vars[i];
             if (var == pivot) {
                 if (!found) {
-                    dom = explanation.getComplementSet(var);
+                    dom = explanation.complement(var);
                     // when a variable appears more than once AND is pivot : should be treated only once
-                    unionOf(dom, ig.getDomainAt(p));
+                    unionOf(dom, explanation.readDom(p));
                     found = true;
-                    explanation.addLiteral(var, dom, true);
+                    var.intersectLit(dom, explanation);
                 }
             }else{
-                explanation.addLiteral(var, explanation.getComplementSet(var), false);
+                var.unionLit(explanation.complement(var), explanation);
             }
         }
         assert found || p == -1 : pivot + " not declared in scope of " + prop;

@@ -25,7 +25,7 @@ import java.io.File;
  */
 public class FastTest {
 
-    @Test(groups = "2012,close<1m,xcsp", timeOut = 120000, dataProvider = "close<1m")
+    @Test(groups = {"2012","close<1m","xcsp"}, timeOut = 120000, dataProvider = "close<1m")
     public void testFast(String name, int nbsol, int bval, int nbnod, boolean complet) throws Exception {
         execute(name,nbsol,bval,nbnod,complet,false);
     }

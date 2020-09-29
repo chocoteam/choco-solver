@@ -26,7 +26,8 @@ parser.add_argument(
         # '/Users/cprudhom/Nextcloud/50-Choco/XCSP/Challenges/logs/xcps18/20200629'
         "/Users/kyzrsoze/Sources/XCSP3/logs/20200626",
         "/Users/kyzrsoze/Sources/XCSP3/logs/20200629",
-        "/Users/kyzrsoze/Sources/XCSP3/logs/20200630"
+        "/Users/kyzrsoze/Sources/XCSP3/logs/20200630",
+        "/Users/kyzrsoze/Sources/XCSP3/logs/20200715"
     ]
 )
 parser.add_argument(
@@ -34,16 +35,24 @@ parser.add_argument(
     help='Configurations to evaluate, \'name\'',
     nargs='+',
     default=[
-        'CUR',
-        'WDEG',
-        'CACD',
+        #'CUR',
+        #'WDEG',
+        'WDEGMIN',
+        #'CACD',
         'CACDMIN',
-        'CHS',
+        #'CHS',
         'CHSMIN',
-         #'BB1',
-         #'BB2',
+        # 'BB1',
+        # 'BB2',
         # 'ABS'
+        #'PRLL', 'PRLL2'
     ]
+)
+
+parser.add_argument(
+    "-int", "--intersection",
+    help="Consider intersection of problems",
+    default=True,
 )
 
 parser.add_argument(
@@ -54,7 +63,7 @@ parser.add_argument(
 parser.add_argument(
     "-det", "--details",
     help="Add all instances' detail",
-    default=True,
+    default=False,
 )
 
 maxtime = 899.  # 599.
@@ -95,24 +104,29 @@ with open(args.filelist, 'r') as f:
         fname = os.path.basename(fname)
         fnames.append(fname)
         optPerSol[fname] = []
-        m = 0.
+        unk = 0
         for o in range(len(options)):
             d = 0
             while (d < len(args.directory) - 1 and
                    os.path.isfile(os.path.join(args.directory[d], fname + '+' + options[o] + '.log')) is False):
                 d = d + 1
             solution = lex.read(args.directory[d], fname, options[o])
+            if solution[0] == -1:
+                solution[0] = 0
+                unk += 1
             optPerSol[fname].append(solution)
-            m = max(m, float(solution[1]))
-        if m < 2:
+
+        if (args.intersection and unk > 0) \
+                or (not args.intersection and unk == len(options)):
             print("clear " + fname)
             optPerSol[fname].clear()
+            optPerSol.pop(fname)
 
 timPerOpt = {}
 for opt in options:  # init
     timPerOpt[opt] = []
 timPerOpt['GOD'] = []
-for fname in fnames:
+for fname in optPerSol:
     solutions = optPerSol[fname]
     if len(solutions) == 0:
         continue
@@ -132,5 +146,5 @@ for fname in fnames:
     timPerOpt['GOD'].append(min(times))
 
 pdf = PDFCreator.PDFCreator()
-pdf.publish(filelist=args.filelist, options=options, timPerOpt=timPerOpt, optPerSol=optPerSol, fnames=fnames,
-            maxtime=maxtime, bestever={}, details="xcsp")
+pdf.publish(filelist=args.filelist, options=options, timPerOpt=timPerOpt, optPerSol=optPerSol, fnames=optPerSol.keys(),
+            maxtime=maxtime, bestever={}, plot=args.plot, details=args.details, problems="xcsp")
