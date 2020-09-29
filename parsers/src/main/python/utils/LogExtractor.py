@@ -45,7 +45,7 @@ class LogExtractor:
         try:
             logfile = open(os.path.join(dir, fname + '+' + opt + '.log'), 'r', encoding='utf8')
         except FileNotFoundError:
-            return [0, self.maxtime, self.maxobj, 'UNK', 0, 'unknown', opt, self.maxtime]
+            return [-1, self.maxtime, self.maxobj, 'UNK', 0, 'unknown', opt, self.maxtime]
         sndlast = ""
         last = ""
         rstat = ""
@@ -98,7 +98,7 @@ class LogExtractor:
             if solution[1] >= self.maxtime:
                 solution[1] = float(self.maxtime)
         else:
-            solution = [0, self.maxtime, self.maxobj, 'UNK', 0, 'unknown', opt, self.maxtime]
+            solution = [-1, self.maxtime, self.maxobj, 'UNK', 0, 'unknown', opt, self.maxtime]
         btime = mstat.replace('s', '').split()
         if len(btime) > 0:
             solution.append(float(btime[8][:-1].replace(',', '.')))
