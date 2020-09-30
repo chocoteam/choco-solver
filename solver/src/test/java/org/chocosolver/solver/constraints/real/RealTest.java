@@ -1223,7 +1223,7 @@ public class RealTest {
         Assert.assertEquals(Ibex.FALSE, ibex.contract(0, new double[] {0.0, 49.0, 50.0, 50.0}, Ibex.FALSE_OR_TRUE));
 
         Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.RATIO));
-        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 1.5, 1.5}, 0.001));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, 0.001));
 
         Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.TRUE, Ibex.RATIO));
         Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.TRUE, 0.001));
