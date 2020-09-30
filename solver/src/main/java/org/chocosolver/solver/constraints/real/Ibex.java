@@ -114,16 +114,22 @@ public class Ibex {
      *
      * We consider here the reified constraint R(b,c) : b<=>c(x_1,...,x_n).
      *
-     * @param i      - Number of the constraint (in the order of creation)
-     * @param bounds - The bounds of domains under the following form:
-     *                 (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
-     *                 lower (resp. upper) bound of the domain of x_i.
-     * @param reif   - Domain of the reification variable b with the following accepted values:
-     *                 FALSE, TRUE, FALSE_OR_TRUE.
+     * @param i       - Number of the constraint (in the order of creation)
+     * @param bounds  - The bounds of domains under the following form:
+     *                  (x1-,x1+,x2-,x2+,...,xn-,xn+), where xi- (resp. xi+) is the
+     *                  lower (resp. upper) bound of the domain of x_i.
+     * @param reif    - Domain of the reification variable b with the following accepted values:
+     *                  FALSE, TRUE, FALSE_OR_TRUE.
+     * @param rel_eps - Threshold under which a contraction is considered as unsufficient and
+     *                  therefore ignored.
+     *                  If we denote by w_i the width of the initial domain of the ith variable
+     *                  and by w_i' the width of the contracted domain, all contractions
+     *                  will be discarded (and the return status will be NOTHING) if for all i,
+     *                  (w_i - w_i') < rel_eps * w_i.
      *
-     * @return       The status of contraction or fail/entailment test. Note that the name of the
-     *               constant in return refers to the constraint c, not R. Hence "FAIL" means that
-     *               no tuple satisfies c (should  R be satisfiable or not).
+     * @return        The status of contraction or fail/entailment test. Note that the name of the
+     *                constant in return refers to the constraint c, not R. Hence "FAIL" means that
+     *                no tuple satisfies c (should  R be satisfiable or not).
      *
      *   FAIL            - No tuple satisfies c. If reif==FALSE, the bounds of x may have been
      *                     impacted (the part of the domain inside c has been removed and the
@@ -144,13 +150,28 @@ public class Ibex {
      *                     removed part of the domain is inside c. If reif==TRUE, the removed part
      *                     is outside.
      *
-     *   NOTHING         - No bound has been reduced and nothing could be proven.
+     *   NOTHING         - No bound has been significantly reduced and nothing could be proven.
      *
      *   BAD_DOMAIN      - The domain has not the expected number of dimensions.
      *
      *   NOT_BUILT       - Object not built (build() must be called before)
      */
-    public native int contract(int i, double bounds[], int reif);
+    public native int contract(int i, double bounds[], int reif, double rel_eps);
+
+    /**
+     * Same as contract(int, double bounds[], int reif) with reif=TRUE.
+     */
+    public native int contract(int i, double bounds[], double ratio);
+
+    /**
+     * Same as contract(int, double bounds[], int reif, double rel_eps) with rel_eps=RATIO.
+     */
+    public native int contract(int i, double bounds[], int reify);
+
+    /**
+     * Same as contract(int, double bounds[], int reif, double rel_eps) with reif=TRUE and rel_eps=RATIO.
+     */
+    public native int contract(int i, double bounds[]);
 
     /**
      * Inflate a point to a box with respect to a constraint or its negation.
@@ -201,11 +222,6 @@ public class Ibex {
      *   NOT_BUILT       - Object not built (build() must be called before)
      */
     public native int inflate(int i, double p[], double bounds[], boolean in);
-
-    /**
-     * Same as contract(int, double bounds[], int reif) with reif=TRUE.
-     */
-    public native int contract(int i, double bounds[]);
 
     /**
      * Let IBEX terminates the solving process for the CSP, once all the integer
