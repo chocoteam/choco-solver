@@ -141,7 +141,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
             layer[i] = new TIntHashSet();
         }
         layer[0].add(automaton.getInitialState());
-        states[0] = ref().intVar("Q_0", layer[0].toArray());
+        states[0] = ref().intVar("Q_"+ref().nextId(), layer[0].toArray());
         TIntHashSet nexts = new TIntHashSet();
         for (int i = 0; i < n; i++) {
             int ub = vars[i].getUB();
@@ -161,8 +161,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
                     }
                 }
             }
-            states[i + 1] = ref().intVar("Q_" + (i + 1), layer[i + 1].toArray());
-            ref().table(new IntVar[]{states[i], states[i + 1], vars[i]}, tuples).post();
+            states[i + 1] = ref().intVar("Q_" + +ref().nextId(), layer[i + 1].toArray());
+            ref().table(new IntVar[]{states[i], states[i + 1], vars[i]}, tuples, "CT+").post();
         }
         return states;
     }
