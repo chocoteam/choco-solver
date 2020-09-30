@@ -64,10 +64,15 @@ public class RealConstraint extends Constraint {
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
+     * @param contractionRatio defines the domain contraction significance
      * @param rvars     a list of real variables
      */
+    public RealConstraint(String functions, double contractionRatio, Variable... rvars) {
+        this(REALCONSTRAINT, createPropagator(functions, contractionRatio, rvars));
+    }
+
     public RealConstraint(String functions, Variable... rvars) {
-        this(REALCONSTRAINT, createPropagator(functions, rvars));
+        this(functions, Ibex.RATIO, rvars);
     }
 
     //***********************************************************************************
@@ -90,10 +95,11 @@ public class RealConstraint extends Constraint {
      * </blockquote>
      *
      * @param functions list of functions, separated by a semi-colon
+     * @param contractionRatio defines the domain contraction significance
      * @param rvars     a list of real variables
      * @return a RealPropagator to propagate the given functions over given variable domains
      */
-    private static RealPropagator[] createPropagator(String functions, Variable... rvars) {
+    private static RealPropagator[] createPropagator(String functions, double contractionRatio, Variable... rvars) {
         // split functions to correctly maintain indices of contractors
         String[] theFunctions = functions.split(";");
         RealPropagator[] props = new RealPropagator[theFunctions.length];
@@ -118,7 +124,9 @@ public class RealConstraint extends Constraint {
                         "{_" + sidx.get(k) + "}");
             }
             fct = p1.matcher(fct).replaceAll("{");
-            props[i] = new RealPropagator(fct, vars.toArray(new Variable[0]));
+            RealPropagator realPropagator = new RealPropagator(fct, vars.toArray(new Variable[0]));
+            realPropagator.setContractionRatio(contractionRatio);
+            props[i] = realPropagator;
             sidx.clear();
             vars.clear();
         }

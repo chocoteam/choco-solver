@@ -92,6 +92,8 @@ public interface Settings {
                 "learnt.dominance", this.getLearntClausesDominancePerimeter()).toString()));
         this.explainGlobalFailureInSum(Boolean.parseBoolean(properties.getOrDefault(
                 "learnt.sum.global", this.explainGlobalFailureInSum()).toString()));
+        this.setIbexContractionRatio(Double.parseDouble(properties.getOrDefault(
+                "constraints.ibex.contractionRation", this.getIbexContractionRatio()).toString()));
         return this;
     }
 
@@ -155,6 +157,7 @@ public interface Settings {
         properties.setProperty("learnt.maxCard", Integer.toString(this.getMaxLearntClauseCardinality()));
         properties.setProperty("learnt.dominance", Integer.toString(this.getLearntClausesDominancePerimeter()));
         properties.setProperty("learnt.sum.global", Boolean.toString(this.explainGlobalFailureInSum()));
+        properties.setProperty("constraints.ibex.contractionRation", Double.toString(this.getIbexContractionRatio()));
         return properties;
     }
 
@@ -596,4 +599,22 @@ public interface Settings {
      * Set to <i>true</i> to allow additional clauses to be learned from sum's global failure
      */
     Settings explainGlobalFailureInSum(boolean b);
+
+    /**
+     * Defines the ratio that real domains must be contracted by ibex
+     * to compute the constraint. A contraction is considered as significant
+     * when at least {@param ratio} of a domain has been reduced.
+     * If the contraction is not meet, then it is considered as insufficient
+     * and therefore ignored. A too small ratio can degrade the ibex performance.
+     *
+     * @param ibexContractionRatio defines the ratio that a domains must be
+     *                             contract to compute the constraint.
+     */
+    void setIbexContractionRatio(double ibexContractionRatio);
+
+    /**
+     * @return the ratio that a domains must be contracted by ibex to compute the constraint.
+     */
+    double getIbexContractionRatio();
+
 }

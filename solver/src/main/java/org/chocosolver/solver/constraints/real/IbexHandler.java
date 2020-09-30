@@ -82,6 +82,11 @@ public class IbexHandler {
     private byte startSolve = 0;
 
     /**
+     * Defines to Ibex a contraction ratio to consider that a domain has been reduced
+     */
+    private double contractionRatio = Ibex.RATIO;
+
+    /**
      * build Ibex instance.
      * Since Ibex' parser is not thread safe, this method is synchronized
      * @param ibex ibex instance to build.
@@ -125,7 +130,14 @@ public class IbexHandler {
             filter = false;
             extractDomains();
             reif = getReif(prop);
-            int result = mIbex.contract(ibexCtr.get(prop), domains, reif);
+            int result;
+            if (contractionRatio == Ibex.RATIO) {
+                // Compatibility with ibex version previous to 2.8.8
+                result = mIbex.contract(ibexCtr.get(prop), domains, reif);
+            } else {
+                // What's the best way to inform the user to update to ibex 2.8.8?
+                result = mIbex.contract(ibexCtr.get(prop), domains, reif, contractionRatio);
+            }
             switch (result) {
                 case Ibex.FAIL:
                     // "Ibex failed"
@@ -209,6 +221,23 @@ public class IbexHandler {
         injectDomains(Cause.Null);
     }
 
+    public double getContractionRatio() {
+        return contractionRatio;
+    }
+
+    /**
+     * Defines the ratio that real domains must be contract by ibex
+     * to compute the constraint. A contraction is considered as significant
+     * when at least {@param ratio} of a domain has been reduced.
+     * If the contraction is not meet, then it is considered as insufficient
+     * and therefore ignored.
+     *
+     * @param ratio defines the ratio that a domains must be contract to
+     *              compute the constraint.
+     */
+    public void setContractionRatio(double ratio) {
+        this.contractionRatio = ratio;
+    }
 
     private Ibex getIbexInstance() {
         if (hasChanged && ibex != null) {

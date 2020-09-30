@@ -1233,4 +1233,31 @@ public class RealTest {
 
         ibex.release();
     }
+
+    @Test(groups = "ibex")
+    public void modelIbexContractSignatures() throws ContradictionException {
+        double precision = 1e-3;
+        // Default ibex contraction ratio (0.1) ignores constraint
+        Model model = new Model();
+        RealVar x1 = model.realVar(0.5);
+        RealVar y1 = model.realVar(0.0, 100.0, precision);
+        y1.ge(x1).ibex(precision).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(y1.getLB(), 0.0, precision);
+        Assert.assertEquals(y1.getUB(), 100.0, precision);
+        Assert.assertEquals(x1.getLB(), 0.5, precision);
+        Assert.assertEquals(x1.getUB(), 0.5, precision);
+
+        // Default ibex contraction ratio (0.01) computes constraint
+        Model model2 = new Model();
+        model2.getSettings().setIbexContractionRatio(0.001);
+        RealVar x2 = model2.realVar(0.5);
+        RealVar y2 = model2.realVar(0.0, 100.0, precision);
+        y2.ge(x2).ibex(precision).post();
+        model2.getSolver().propagate();
+        Assert.assertEquals(y2.getLB(), 0.5, precision); // contraction computed
+        Assert.assertEquals(y2.getUB(), 100.0, precision);
+        Assert.assertEquals(x2.getLB(), 0.5, precision);
+        Assert.assertEquals(x2.getUB(), 0.5, precision);
+    }
 }

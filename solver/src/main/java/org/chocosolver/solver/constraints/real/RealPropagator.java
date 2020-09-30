@@ -90,7 +90,23 @@ public class RealPropagator extends Propagator<Variable> {
         return ESat.TRUE;
     }
 
+    /**
+     * Defines the ratio that real domains must be contract by ibex
+     * to compute the constraint. A contraction is considered as significant
+     * when at least {@param ratio} of a domain has been reduced.
+     * If the contraction is not meet, then it is considered as insufficient
+     * and therefore ignored.
+     *
+     * @param ratio defines the ratio that a domains must be contract to
+     *              compute the constraint.
+     */
+    public void setContractionRatio(double ratio) {
+        ibex.setContractionRatio(ratio);
+    }
 
+    public double getContractionRatio() {
+        return ibex.getContractionRatio();
+    }
 
     @Override
     public String toString() {

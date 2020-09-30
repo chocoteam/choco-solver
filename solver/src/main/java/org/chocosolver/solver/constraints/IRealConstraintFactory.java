@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.real.PropMixed;
 import org.chocosolver.solver.constraints.real.PropMixedElement;
 import org.chocosolver.solver.constraints.real.PropScalarMixed;
@@ -26,7 +28,7 @@ import org.chocosolver.solver.variables.Variable;
  * @author Jean-Guillaume FAGES
  * @since 4.0.0
  */
-public interface IRealConstraintFactory {
+public interface IRealConstraintFactory extends ISelf<Model> {
 
 	/**
 	 * Creates a RealConstraint to model one or more continuous functions, separated with semi-colon ";"
@@ -44,10 +46,15 @@ public interface IRealConstraintFactory {
 	 * <br/>realIbexGenericConstraint("({0}*{1})+sin({0})=1.0;ln({0}+[-0.1,0.1])>=2.6", x,y);
 	 *
 	 * @param functions	list of functions, separated by a semi-colon
+	 * @param contractionRatio defines the domain contraction significance
 	 * @param rvars     a list of real variables
 	 */
+	default RealConstraint realIbexGenericConstraint(String functions, double contractionRatio, Variable... rvars) {
+		return new RealConstraint(functions, contractionRatio, rvars);
+	}
+
 	default RealConstraint realIbexGenericConstraint(String functions, Variable... rvars) {
-		return new RealConstraint(functions, rvars);
+		return realIbexGenericConstraint(functions, ref().getSettings().getIbexContractionRatio(), rvars);
 	}
 
 	/**
