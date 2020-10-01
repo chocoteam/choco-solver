@@ -886,7 +886,7 @@ public enum FConstraint {
                                 starts[i].getLB() + durations[i].getLB(),
                                 starts[i].getUB() + durations[i].getUB(),
                                 true);
-                        assert durations[i].getUB() > 0 && resources[i].getUB() > 0;
+                        assert durations[i].getUB() >= 0 && resources[i].getUB() >= 0;
                         tasks[i] = new Task(starts[i], durations[i], ends[i]);
                     }
                     model.cumulative(tasks, resources, limit, true/*, Cumulative.Filter.NAIVETIME*/).post();
