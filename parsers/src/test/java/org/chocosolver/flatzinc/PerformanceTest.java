@@ -70,7 +70,7 @@ public class PerformanceTest {
         String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
                 file,
-                "-limit", "[40s]", // but, problems are expected to end within 30s max
+                "-limit", "[50s]", // but, problems are expected to end within 30s max
                 "-stat",
                 "-p", "1"
         };
