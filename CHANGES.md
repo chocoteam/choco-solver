@@ -4,6 +4,95 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.6-SNAPSHOT](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.6-SNAPSHOT](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.6-SNAPSHOT](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone ${VERSION}](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+
+#### Contributors to this release:
+
+
 4.10.5 - 02 Oct 2020
 -------------------
 
