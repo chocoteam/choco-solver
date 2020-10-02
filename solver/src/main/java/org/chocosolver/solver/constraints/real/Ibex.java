@@ -25,6 +25,10 @@ public class Ibex {
      * domain has been reduced */
     public static final double RATIO      = 0.01;
 
+    /* Default value for preserve rounding of java
+     * when switching back from ibex */
+    public static final boolean PRESERVE_ROUNDING = false;
+
     /* Constants for the status of a contraction. */
     public static final int FAIL             = 0;
     public static final int ENTAILED         = 1;
@@ -68,16 +72,30 @@ public class Ibex {
      * An IBEX (and only one) object has to be created for each different CSP.
      * The IBEX object gathers all the constraints.
      *
-     * @param prec - An array of n double (where n is the total number of variables of the CSP).
-     *               Each double indicates whether a variable is integral or not, and in the
-     *               case of a real variable, the precision required. More precisely:
+     * @param prec              - An array of n double (where n is the total number of variables of the CSP).
+     *                            Each double indicates whether a variable is integral or not, and in the
+     *                            case of a real variable, the precision required. More precisely:
+     *                                prec[i]==-1 => the ith variable is integral.
+     *                                prec[i]>=0  => the ith variable is real and the precision is prec[i].
      *
-     *                prec[i]==-1 => the ith variable is integral.
-     *                prec[i]>=0  => the ith variable is real and the precision is prec[i].
-     *
+     * @param preserve_rounding - Under Linux/MacOS, Ibex (if linked with Gaol) does not use the standard
+     *                            rounding mode of the FPU (round-to-nearest) but the upward rounding mode, in order
+     *                            to get better performances. If preserve_rounding is true, Ibex will activate the
+     *                            upward rounding mode at each function call (contract, etc.) and restore the default
+     *                            rounding mode in return, which is transparent from Java but which also mean a loss
+     *                            of efficiency. If set to false, the rounding mode is only activated once by the
+     *                            construtor. In this case, the rounding mode is also changed on Java side.
+     */
+    public Ibex(double[] prec, boolean preserve_rounding) {
+        init(prec, preserve_rounding);
+    }
+
+    /**
+     * Same as previous constructor with preserve_rounding=false.
+     * For backward compatibility.
      */
     public Ibex(double[] prec) {
-        init(prec);
+        init(prec, PRESERVE_ROUNDING);
     }
 
     /**
@@ -277,7 +295,7 @@ public class Ibex {
      *
      * This method is automatically called by the constructor.
      */
-    private native void init(double[] prec);
+    private native void init(double[] prec, boolean preserve_rounding);
 
     // Internal: do not modify!
     // This is a pointer to native c++ data

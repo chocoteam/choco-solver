@@ -86,6 +86,8 @@ public class IbexHandler {
      */
     private double contractionRatio = Ibex.RATIO;
 
+    private boolean preserveRounding = Ibex.PRESERVE_ROUNDING;
+
     /**
      * build Ibex instance.
      * Since Ibex' parser is not thread safe, this method is synchronized
@@ -239,6 +241,21 @@ public class IbexHandler {
         this.contractionRatio = ratio;
     }
 
+    public boolean isPreserveRounding() {
+        return preserveRounding;
+    }
+
+    /**
+     * If preserve_rounding is true, Ibex will restore the default
+     * Java rounding method when coming back from Ibex, which is
+     * transparent for Java but causes a little loss of efficiency.
+     *
+     * @param preserveRounding
+     */
+    public void setPreserveRounding(boolean preserveRounding) {
+        this.preserveRounding = preserveRounding;
+    }
+
     private Ibex getIbexInstance() {
         if (hasChanged && ibex != null) {
             ibex.release();
@@ -325,7 +342,12 @@ public class IbexHandler {
                 }
             }
         }
-        ibex = new Ibex(precisions.toArray());
+        if (preserveRounding == Ibex.PRESERVE_ROUNDING) {
+            // For backwards compatibility
+            ibex = new Ibex(precisions.toArray());
+        } else {
+            ibex = new Ibex(precisions.toArray(), preserveRounding);
+        }
         int k = 0;
         // first pass to modify functions wrt to variables
         for (int i = 0; i < props.length; i++) {

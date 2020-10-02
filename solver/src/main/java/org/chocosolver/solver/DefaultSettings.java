@@ -93,6 +93,8 @@ public class DefaultSettings implements Settings {
 
     private double ibexContractionRatio = Ibex.RATIO;
 
+    private boolean ibexRestoreRounding = Ibex.PRESERVE_ROUNDING;
+
     private Function<Model, Solver> initSolver = Solver::new;
 
 
@@ -436,5 +438,15 @@ public class DefaultSettings implements Settings {
     @Override
     public void setIbexContractionRatio(double ibexContractionRatio) {
         this.ibexContractionRatio = ibexContractionRatio;
+    }
+
+    @Override
+    public void setIbexRestoreRounding(boolean ibexRestoreRounding) {
+        this.ibexRestoreRounding = ibexRestoreRounding;
+    }
+
+    @Override
+    public boolean getIbexRestoreRounding() {
+        return ibexRestoreRounding;
     }
 }

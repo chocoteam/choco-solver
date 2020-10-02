@@ -638,6 +638,7 @@ public class Model implements IModel {
     public IbexHandler getIbexHandler() {
         if (getHook(IBEX_HOOK_NAME) == null) {
             IbexHandler ibexHnadler = new IbexHandler();
+            ibexHnadler.setPreserveRounding(settings.getIbexRestoreRounding());
             addHook(IBEX_HOOK_NAME, ibexHnadler);
         }
         return (IbexHandler) getHook(IBEX_HOOK_NAME);

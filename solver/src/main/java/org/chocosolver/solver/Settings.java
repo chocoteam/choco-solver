@@ -94,6 +94,8 @@ public interface Settings {
                 "learnt.sum.global", this.explainGlobalFailureInSum()).toString()));
         this.setIbexContractionRatio(Double.parseDouble(properties.getOrDefault(
                 "constraints.ibex.contractionRation", this.getIbexContractionRatio()).toString()));
+        this.setIbexRestoreRounding(Boolean.parseBoolean(properties.getOrDefault(
+                "constraints.ibex.restoreRounding", this.getIbexRestoreRounding()).toString()));
         return this;
     }
 
@@ -158,6 +160,7 @@ public interface Settings {
         properties.setProperty("learnt.dominance", Integer.toString(this.getLearntClausesDominancePerimeter()));
         properties.setProperty("learnt.sum.global", Boolean.toString(this.explainGlobalFailureInSum()));
         properties.setProperty("constraints.ibex.contractionRation", Double.toString(this.getIbexContractionRatio()));
+        properties.setProperty("constraints.ibex.restoreRounding", Boolean.toString(this.getIbexRestoreRounding()));
         return properties;
     }
 
@@ -616,5 +619,19 @@ public interface Settings {
      * @return the ratio that a domains must be contracted by ibex to compute the constraint.
      */
     double getIbexContractionRatio();
+
+    /**
+     * If preserve_rounding is true, Ibex will restore the default
+     * Java rounding method when coming back from Ibex, which is
+     * transparent for Java but causes a little loss of efficiency.
+     *
+     * @param ibexRestoreRounding
+     */
+    void setIbexRestoreRounding(boolean ibexRestoreRounding);
+
+    /**
+     * @return if ibex must restore java rounding mode when returning a call.
+     */
+    boolean getIbexRestoreRounding();
 
 }
