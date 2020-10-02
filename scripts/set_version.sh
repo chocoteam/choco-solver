@@ -63,6 +63,7 @@ else
     ### Deprecated API (to be removed in next release):\
     \
     ### Other closed issues and pull requests:\
+    See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solver/milestone/xx)\
     \
     #### Contributors to this release:\
     \

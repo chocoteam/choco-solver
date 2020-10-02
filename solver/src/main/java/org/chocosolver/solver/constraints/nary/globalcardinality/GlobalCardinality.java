@@ -29,7 +29,7 @@ import java.util.List;
 public class GlobalCardinality extends Constraint {
 
     public GlobalCardinality(IntVar[] vars, int[] values, IntVar[] cards) {
-        super(ConstraintsName.GCC, createProp(vars, values, cards));
+    	super(ConstraintsName.GCC, createProp(vars, values, cards));
     }
 
 	private static Propagator createProp(IntVar[] vars, int[] values, IntVar[] cards) {
@@ -50,10 +50,9 @@ public class GlobalCardinality extends Constraint {
     public static Constraint reformulate(IntVar[] vars, IntVar[] card, Model model) {
         List<Constraint> cstrs = new ArrayList<>();
         for (int i = 0; i < card.length; i++) {
-			IntVar cste = model.intVar(i);
 			BoolVar[] bs = model.boolVarArray("b_" + i, vars.length);
             for (int j = 0; j < vars.length; j++) {
-				model.ifThenElse(bs[j], model.arithm(vars[j], "=", cste), model.arithm(vars[j], "!=", cste));
+            	model.reifyXeqC(vars[j], i, bs[j]);
             }
             cstrs.add(model.sum(bs, "=", card[i]));
         }

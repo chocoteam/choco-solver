@@ -8,6 +8,18 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+4.10.5 - 02 Oct 2020
+-------------------
+
+### Major features:
 - add `IN` arithmetic int expression.
  
 ### Deprecated API (to be removed in next release):
@@ -15,11 +27,12 @@ NEXT MILESTONE
 - `Settings.setEnableACOnTernarySum(boolean)` removed
 
 ### Other closed issues and pull requests:
-\#699, #709, #725, #737 
+See [milestone 4.10.5](https://github.com/chocoteam/choco-solver/milestone/29) 
 
 #### Contributors to this release:
 - [Guillaume Le Louët](https://github.com/glelouet) (glelouet)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
 
 4.10.4 - 08 Sep 2020
 --------------------

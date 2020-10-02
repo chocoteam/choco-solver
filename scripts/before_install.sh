@@ -22,3 +22,17 @@ then
   export LD_LIBRARY_PATH=/usr/local/lib
   mvn validate -Dibex.path=${TRAVIS_BUILD_DIR}/ibex/plugins/java
 fi
+
+#if [ "${TEST_SUITE}" == "mzn" ]
+#then
+#  set -ex
+#  mznver=2.4.3
+#  curl https://codeload.github.com/MiniZinc/libminizinc/tar.gz/${mznver} > libminizinc-${mznver}.tar.gz
+#  tar -xzf libminizinc-${mznver}.tar.gz
+#  # prepare installation
+#  cd libminizinc-${mznver}
+#  mkdir build
+#  cd build
+#  cmake -DCMAKE_BUILD_TYPE=Release ..
+#  cmake --build .
+#fi

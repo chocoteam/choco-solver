@@ -59,7 +59,7 @@ public class PropReif extends Propagator<Variable> {
 
     private static PropagatorPriority computePrority(Constraint consIfBoolTrue, Constraint consIfBoolFalse) {
         int p = Math.min(consIfBoolTrue.computeMaxPriority().priority, consIfBoolFalse.computeMaxPriority().priority);
-        return PropagatorPriority.get(Math.min(p, PropagatorPriority.TERNARY.priority));
+        return PropagatorPriority.get(Math.max(p, PropagatorPriority.TERNARY.priority));
     }
 
     //***********************************************************************************
