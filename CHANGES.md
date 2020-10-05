@@ -9,6 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 
+- Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:

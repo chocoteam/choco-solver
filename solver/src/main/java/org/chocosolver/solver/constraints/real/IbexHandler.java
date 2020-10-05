@@ -82,10 +82,26 @@ public class IbexHandler {
     private byte startSolve = 0;
 
     /**
-     * Defines to Ibex a contraction ratio to consider that a domain has been reduced
+     * To optimize running time ibex only considers domain contractions greater than
+     * a given ratio during constraint propagation. The default value is 1% (0.01).
+     * See issue #653.
+     *
+     * Given: x = [0.0, 100.0], y = [0.5,0.5] and CSTR(x > y)
+     * - When the ratio is 1% (0.01) bounds of X are kept as [0.0, 100.0]
+     *   because it's contraction is less than 1%.
+     * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
+     *   because it's contraction is greater than 0.1%.
      */
     private double contractionRatio = Ibex.RATIO;
 
+    /**
+     * To improve the running time, ibex changes the rounding system for double values
+     * during contraction. In Linux/MACOS environments it leads to different results in
+     * calculations like `Math.pow(10, 6)`, see issue #740.
+     *
+     * When preserveRounding is defined as true, after calling ibex, the default Java
+     * rounding system is restored. At the price of a little loss of efficiency.
+     */
     private boolean preserveRounding = Ibex.PRESERVE_ROUNDING;
 
     /**

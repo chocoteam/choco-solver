@@ -609,6 +609,13 @@ public interface Settings {
      * when at least {@param ratio} of a domain has been reduced.
      * If the contraction is not meet, then it is considered as insufficient
      * and therefore ignored. A too small ratio can degrade the ibex performance.
+     * The default value is 1% (0.01). See issue #653.
+     *
+     * Example: given x = [0.0, 100.0], y = [0.5,0.5] and CSTR(x > y)
+     * - When the ratio is 1% (0.01) bounds of X are kept as [0.0, 100.0]
+     *   because it's contraction is less than 1%.
+     * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
+     *   because it's contraction is greater than 0.1%.
      *
      * @param ibexContractionRatio defines the ratio that a domains must be
      *                             contract to compute the constraint.
@@ -624,6 +631,10 @@ public interface Settings {
      * If preserve_rounding is true, Ibex will restore the default
      * Java rounding method when coming back from Ibex, which is
      * transparent for Java but causes a little loss of efficiency.
+     * To improve the running time, ibex changes the rounding system
+     * for double values during contraction. In Linux/MACOS environments
+     * it leads to different results in calculations like `Math.pow(10, 6)`.
+     * See issue #740.
      *
      * @param ibexRestoreRounding
      */
