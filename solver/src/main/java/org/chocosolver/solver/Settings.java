@@ -617,6 +617,8 @@ public interface Settings {
      * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
      *   because it's contraction is greater than 0.1%.
      *
+     * @implNote Supported since ibex-java version 1.2.0
+     *
      * @param ibexContractionRatio defines the ratio that a domains must be
      *                             contract to compute the constraint.
      */
@@ -635,6 +637,8 @@ public interface Settings {
      * for double values during contraction. In Linux/MACOS environments
      * it leads to different results in calculations like `Math.pow(10, 6)`.
      * See issue #740.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
      *
      * @param ibexRestoreRounding
      */

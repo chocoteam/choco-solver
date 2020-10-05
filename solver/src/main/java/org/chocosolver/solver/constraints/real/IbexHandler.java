@@ -91,6 +91,8 @@ public class IbexHandler {
      *   because it's contraction is less than 1%.
      * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
      *   because it's contraction is greater than 0.1%.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
      */
     private double contractionRatio = Ibex.RATIO;
 
@@ -101,6 +103,8 @@ public class IbexHandler {
      *
      * When preserveRounding is defined as true, after calling ibex, the default Java
      * rounding system is restored. At the price of a little loss of efficiency.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
      */
     private boolean preserveRounding = Ibex.PRESERVE_ROUNDING;
 
