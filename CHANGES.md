@@ -8,15 +8,17 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
 
 - Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 
 #### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
 
 4.10.5 - 02 Oct 2020
 -------------------

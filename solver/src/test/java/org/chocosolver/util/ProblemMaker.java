@@ -182,7 +182,7 @@ public class ProblemMaker {
         int l = 100;
         int d = l + 1;
         IntVar[] v = model.intVarArray("v", 5, 1, 50, true);
-        IntVar[] w = model.intVarArray("v", l, 1, d, true);
+        IntVar[] w = model.intVarArray("w", l, 1, d, true);
 
         model.allDifferent(v, "BC").post();
         model.allDifferent(w, "BC").post();
