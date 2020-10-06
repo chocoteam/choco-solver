@@ -92,6 +92,10 @@ public interface Settings {
                 "learnt.dominance", this.getLearntClausesDominancePerimeter()).toString()));
         this.explainGlobalFailureInSum(Boolean.parseBoolean(properties.getOrDefault(
                 "learnt.sum.global", this.explainGlobalFailureInSum()).toString()));
+        this.setIbexContractionRatio(Double.parseDouble(properties.getOrDefault(
+                "constraints.ibex.contractionRation", this.getIbexContractionRatio()).toString()));
+        this.setIbexRestoreRounding(Boolean.parseBoolean(properties.getOrDefault(
+                "constraints.ibex.restoreRounding", this.getIbexRestoreRounding()).toString()));
         return this;
     }
 
@@ -155,6 +159,8 @@ public interface Settings {
         properties.setProperty("learnt.maxCard", Integer.toString(this.getMaxLearntClauseCardinality()));
         properties.setProperty("learnt.dominance", Integer.toString(this.getLearntClausesDominancePerimeter()));
         properties.setProperty("learnt.sum.global", Boolean.toString(this.explainGlobalFailureInSum()));
+        properties.setProperty("constraints.ibex.contractionRation", Double.toString(this.getIbexContractionRatio()));
+        properties.setProperty("constraints.ibex.restoreRounding", Boolean.toString(this.getIbexRestoreRounding()));
         return properties;
     }
 
@@ -596,4 +602,51 @@ public interface Settings {
      * Set to <i>true</i> to allow additional clauses to be learned from sum's global failure
      */
     Settings explainGlobalFailureInSum(boolean b);
+
+    /**
+     * Defines the ratio that real domains must be contracted by ibex
+     * to compute the constraint. A contraction is considered as significant
+     * when at least {@param ratio} of a domain has been reduced.
+     * If the contraction is not meet, then it is considered as insufficient
+     * and therefore ignored. A too small ratio can degrade the ibex performance.
+     * The default value is 1% (0.01). See issue #653.
+     *
+     * Example: given x = [0.0, 100.0], y = [0.5,0.5] and CSTR(x > y)
+     * - When the ratio is 1% (0.01) bounds of X are kept as [0.0, 100.0]
+     *   because it's contraction is less than 1%.
+     * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
+     *   because it's contraction is greater than 0.1%.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
+     *
+     * @param ibexContractionRatio defines the ratio that a domains must be
+     *                             contract to compute the constraint.
+     */
+    void setIbexContractionRatio(double ibexContractionRatio);
+
+    /**
+     * @return the ratio that a domains must be contracted by ibex to compute the constraint.
+     */
+    double getIbexContractionRatio();
+
+    /**
+     * If preserve_rounding is true, Ibex will restore the default
+     * Java rounding method when coming back from Ibex, which is
+     * transparent for Java but causes a little loss of efficiency.
+     * To improve the running time, ibex changes the rounding system
+     * for double values during contraction. In Linux/MACOS environments
+     * it leads to different results in calculations like `Math.pow(10, 6)`.
+     * See issue #740.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
+     *
+     * @param ibexRestoreRounding
+     */
+    void setIbexRestoreRounding(boolean ibexRestoreRounding);
+
+    /**
+     * @return if ibex must restore java rounding mode when returning a call.
+     */
+    boolean getIbexRestoreRounding();
+
 }

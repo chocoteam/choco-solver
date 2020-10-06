@@ -11,6 +11,7 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
+import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.ESat;
@@ -89,6 +90,10 @@ public class DefaultSettings implements Settings {
     private int dominancePerimeter = 4;
 
     private boolean explainGlobalFailureInSum = true;
+
+    private double ibexContractionRatio = Ibex.RATIO;
+
+    private boolean ibexRestoreRounding = Ibex.PRESERVE_ROUNDING;
 
     private Function<Model, Solver> initSolver = Solver::new;
 
@@ -423,5 +428,25 @@ public class DefaultSettings implements Settings {
     public Settings explainGlobalFailureInSum(boolean b) {
         this.explainGlobalFailureInSum = b;
         return this;
+    }
+
+    @Override
+    public double getIbexContractionRatio() {
+        return ibexContractionRatio;
+    }
+
+    @Override
+    public void setIbexContractionRatio(double ibexContractionRatio) {
+        this.ibexContractionRatio = ibexContractionRatio;
+    }
+
+    @Override
+    public void setIbexRestoreRounding(boolean ibexRestoreRounding) {
+        this.ibexRestoreRounding = ibexRestoreRounding;
+    }
+
+    @Override
+    public boolean getIbexRestoreRounding() {
+        return ibexRestoreRounding;
     }
 }

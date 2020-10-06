@@ -1191,4 +1191,73 @@ public class RealTest {
         Assert.assertEquals(x.getLB(), -10.0, 0.01);
         Assert.assertEquals(x.getUB(), 10.0, 0.01);
     }
+
+    @Test(groups = "ibex")
+    public void testContractionRatio() {
+        Ibex ibex = new Ibex(new double[]{1e-6, 1e-6});
+        ibex.add_ctr("{0}>{1}");
+        ibex.build();
+        // When domain contraction is less than the contraction ratio of 1%
+        double domains1[] = {0.0, 100.0, 0.5, 0.5};
+        int result1 = ibex.contract(0, domains1, Ibex.TRUE, 0.01);
+        Assert.assertEquals(Ibex.NOTHING, result1);
+        Assert.assertEquals(domains1, new double[]{0.0, 100.0, 0.5, 0.5});
+        // When domain contraction is greater than the contraction of 0.1%
+        double domains2[] = {0.0, 100.0, 0.5, 0.5};
+        int result2 = ibex.contract(0, domains2, Ibex.TRUE, 0.001);
+        Assert.assertEquals(Ibex.CONTRACT, result2);
+        Assert.assertEquals(domains2, new double[]{0.5, 100.0, 0.5, 0.5});
+        ibex.release();
+    }
+
+    @Test(groups = "ibex")
+    public void testIbexContractSignatures() {
+        Ibex ibex = new Ibex(new double[]{1e-6, 1e-6});
+        ibex.add_ctr("{0}>{1}");
+        ibex.build();
+
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 1.5, 1.5}));
+
+        Assert.assertEquals(Ibex.TRUE, ibex.contract(0, new double[] {51.0, 100.0, 50.0, 50.0}, Ibex.FALSE_OR_TRUE));
+        Assert.assertEquals(Ibex.FALSE, ibex.contract(0, new double[] {0.0, 49.0, 50.0, 50.0}, Ibex.FALSE_OR_TRUE));
+
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.RATIO));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, 0.001));
+
+        Assert.assertEquals(Ibex.NOTHING, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.TRUE, Ibex.RATIO));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.TRUE, 0.001));
+
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.FALSE, Ibex.RATIO));
+        Assert.assertEquals(Ibex.CONTRACT, ibex.contract(0, new double[] {0.0, 100.0, 0.5, 0.5}, Ibex.FALSE, 0.001));
+
+        ibex.release();
+    }
+
+    @Test(groups = "ibex")
+    public void modelIbexContractSignatures() throws ContradictionException {
+        double precision = 1e-3;
+        // Default ibex contraction ratio (0.01) ignores constraint
+        Model model = new Model();
+        RealVar x1 = model.realVar(0.5);
+        RealVar y1 = model.realVar(0.0, 100.0, precision);
+        y1.ge(x1).ibex(precision).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(y1.getLB(), 0.0, precision);
+        Assert.assertEquals(y1.getUB(), 100.0, precision);
+        Assert.assertEquals(x1.getLB(), 0.5, precision);
+        Assert.assertEquals(x1.getUB(), 0.5, precision);
+
+        // Default ibex contraction ratio (0.001) computes constraint
+        Model model2 = new Model();
+        model2.getSettings().setIbexContractionRatio(0.001);
+        RealVar x2 = model2.realVar(0.5);
+        RealVar y2 = model2.realVar(0.0, 100.0, precision);
+        y2.ge(x2).ibex(precision).post();
+        model2.getSolver().propagate();
+        Assert.assertEquals(y2.getLB(), 0.5, precision); // contraction computed
+        Assert.assertEquals(y2.getUB(), 100.0, precision);
+        Assert.assertEquals(x2.getLB(), 0.5, precision);
+        Assert.assertEquals(x2.getUB(), 0.5, precision);
+    }
 }

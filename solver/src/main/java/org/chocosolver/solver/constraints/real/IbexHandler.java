@@ -82,6 +82,33 @@ public class IbexHandler {
     private byte startSolve = 0;
 
     /**
+     * To optimize running time ibex only considers domain contractions greater than
+     * a given ratio during constraint propagation. The default value is 1% (0.01).
+     * See issue #653.
+     *
+     * Given: x = [0.0, 100.0], y = [0.5,0.5] and CSTR(x > y)
+     * - When the ratio is 1% (0.01) bounds of X are kept as [0.0, 100.0]
+     *   because it's contraction is less than 1%.
+     * - When the ratio is 0.1% (0.001) bounds of X are update to [0.5, 100.0]
+     *   because it's contraction is greater than 0.1%.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
+     */
+    private double contractionRatio = Ibex.RATIO;
+
+    /**
+     * To improve the running time, ibex changes the rounding system for double values
+     * during contraction. In Linux/MACOS environments it leads to different results in
+     * calculations like `Math.pow(10, 6)`, see issue #740.
+     *
+     * When preserveRounding is defined as true, after calling ibex, the default Java
+     * rounding system is restored. At the price of a little loss of efficiency.
+     *
+     * @implNote Supported since ibex-java version 1.2.0
+     */
+    private boolean preserveRounding = Ibex.PRESERVE_ROUNDING;
+
+    /**
      * build Ibex instance.
      * Since Ibex' parser is not thread safe, this method is synchronized
      * @param ibex ibex instance to build.
@@ -125,7 +152,14 @@ public class IbexHandler {
             filter = false;
             extractDomains();
             reif = getReif(prop);
-            int result = mIbex.contract(ibexCtr.get(prop), domains, reif);
+            int result;
+            if (contractionRatio == Ibex.RATIO) {
+                // Compatibility with ibex version previous to 2.8.8
+                result = mIbex.contract(ibexCtr.get(prop), domains, reif);
+            } else {
+                // What's the best way to inform the user to update to ibex 2.8.8?
+                result = mIbex.contract(ibexCtr.get(prop), domains, reif, contractionRatio);
+            }
             switch (result) {
                 case Ibex.FAIL:
                     // "Ibex failed"
@@ -209,6 +243,38 @@ public class IbexHandler {
         injectDomains(Cause.Null);
     }
 
+    public double getContractionRatio() {
+        return contractionRatio;
+    }
+
+    /**
+     * Defines the ratio that real domains must be contract by ibex
+     * to compute the constraint. A contraction is considered as significant
+     * when at least {@param ratio} of a domain has been reduced.
+     * If the contraction is not meet, then it is considered as insufficient
+     * and therefore ignored.
+     *
+     * @param ratio defines the ratio that a domains must be contract to
+     *              compute the constraint.
+     */
+    public void setContractionRatio(double ratio) {
+        this.contractionRatio = ratio;
+    }
+
+    public boolean isPreserveRounding() {
+        return preserveRounding;
+    }
+
+    /**
+     * If preserve_rounding is true, Ibex will restore the default
+     * Java rounding method when coming back from Ibex, which is
+     * transparent for Java but causes a little loss of efficiency.
+     *
+     * @param preserveRounding
+     */
+    public void setPreserveRounding(boolean preserveRounding) {
+        this.preserveRounding = preserveRounding;
+    }
 
     private Ibex getIbexInstance() {
         if (hasChanged && ibex != null) {
@@ -296,7 +362,12 @@ public class IbexHandler {
                 }
             }
         }
-        ibex = new Ibex(precisions.toArray());
+        if (preserveRounding == Ibex.PRESERVE_ROUNDING) {
+            // For backwards compatibility
+            ibex = new Ibex(precisions.toArray());
+        } else {
+            ibex = new Ibex(precisions.toArray(), preserveRounding);
+        }
         int k = 0;
         // first pass to modify functions wrt to variables
         for (int i = 0; i < props.length; i++) {
