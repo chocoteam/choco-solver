@@ -29,8 +29,12 @@ public class IntDomainMedian implements IntValueSelector {
     @Override
     public int selectValue(IntVar var) {
 		int dz = var.getDomainSize();
+		if(dz % 2 == 0){ // even number of values
+			dz--;
+		}
+		dz  =  dz >> 1;
 		int median = var.getLB();
-		for (int i = 0; i < dz / 2; i++) {
+		for (int i = 0; i < dz; i++) {
 			median = var.nextValue(median);
 		}
 		return median;
