@@ -52,7 +52,10 @@ import org.chocosolver.solver.constraints.nary.min_max.PropBoolMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropBoolMin;
 import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.constraints.nary.min_max.PropMin;
-import org.chocosolver.solver.constraints.nary.nvalue.*;
+import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
+import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
+import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -1380,6 +1383,25 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param offset2 lowest value in vars2 (most often 0)
      */
     default Constraint inverseChanneling(IntVar[] vars1, IntVar[] vars2, int offset1, int offset2) {
+        return inverseChanneling(vars1, vars2, offset1, offset2, false);
+    }
+
+    /**
+     * Creates an inverse channeling between vars1 and vars2:
+     * vars1[i-offset2] = j <=> vars2[j-offset1] = i
+     * Performs AC if domains are enumerated.
+     * If not, then it works on bounds without guaranteeing BC
+     * (enumerated domains are strongly recommended)
+     * <p>
+     * Beware you should have |vars1| = |vars2|
+     *
+     * @param vars1   vector of variables which take their value in [offset1,offset1+|vars2|-1]
+     * @param vars2   vector of variables which take their value in [offset2,offset2+|vars1|-1]
+     * @param offset1 lowest value in vars1 (most often 0)
+     * @param offset2 lowest value in vars2 (most often 0)
+     * @param ac use AC level for embedded alldifferent, if false, domains are scanned
+     */
+    default Constraint inverseChanneling(IntVar[] vars1, IntVar[] vars2, int offset1, int offset2, boolean ac) {
         if (vars1.length != vars2.length)
             throw new SolverException(Arrays.toString(vars1) + " and " + Arrays.toString(vars2) + " should have same size");
         boolean allEnum = true;
@@ -1388,11 +1410,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 allEnum = false;
             }
         }
+        if(ac){
+            allEnum = true;
+        }
         Propagator ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
                 : new PropInverseChannelBC(vars1, vars2, offset1, offset2);
-        Constraint alldiff1 = allDifferent(vars1, "");
+        Constraint alldiff1 = allDifferent(vars1, ac?"AC":"");
         alldiff1.ignore();
-        Constraint alldiff2 = allDifferent(vars2, "");
+        Constraint alldiff2 = allDifferent(vars2, ac?"AC":"");
         alldiff2.ignore();
         return new Constraint(ConstraintsName.INVERSECHANNELING, ArrayUtils.append(
                 alldiff1.getPropagators(),

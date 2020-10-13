@@ -705,10 +705,10 @@ public enum FConstraint {
     alldifferentChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
+            boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
-                model.allDifferent(vars).post();
+                model.allDifferent(vars, AC?"AC":"").post();
             }
 
         }
@@ -1049,10 +1049,10 @@ public enum FConstraint {
     inverseChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
+            boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] x = exps.get(0).toIntVarArray(model);
             IntVar[] y = exps.get(1).toIntVarArray(model);
-            model.inverseChanneling(x, y, 1, 1).post();
+            model.inverseChanneling(x, y, 1, 1, AC).post();
 
         }
     },
