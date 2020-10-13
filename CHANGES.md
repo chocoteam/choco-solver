@@ -9,6 +9,9 @@ NEXT MILESTONE
 
 ### Major features:
 - Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
+- Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
+- Update XCSP3 parser
+- Fix `InDomainMedian` when domain size is even
 
 - Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
 

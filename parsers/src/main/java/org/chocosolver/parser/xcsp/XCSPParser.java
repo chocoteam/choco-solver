@@ -1046,7 +1046,15 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrMinimum(String id, XVariables.XVarInteger[] list, Condition condition) {
-        IntVar[] vars = vars(list);
+        buildMin(vars(list), condition);
+    }
+
+    @Override
+    public void buildCtrMinimum(String id, XNode<XVariables.XVarInteger>[] trees, Condition condition) {
+        buildMin(vars(trees), condition);
+    }
+
+    private void buildMin(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
         if (condition instanceof Condition.ConditionRel) {
@@ -1096,7 +1104,7 @@ public class XCSPParser implements XCallbacks2 {
                     } else {
                         res = condV(condition);
                     }
-                    model.min(res, vars(list)).post();
+                    model.min(res, vars).post();
                 }
                 break;
                 case NOTIN: {
@@ -1104,14 +1112,12 @@ public class XCSPParser implements XCallbacks2 {
                     model.min(res, vars).post();
                     res.ne(condV(condition)).post();
                     notin(res, condition);
-                    model.min(res, vars(list)).post();
+                    model.min(res, vars).post();
                 }
                 break;
             }
         }
     }
-
-
 
     @Override
     public void buildCtrElement(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger value) {
@@ -1166,7 +1172,15 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrMaximum(String id, XVariables.XVarInteger[] list, Condition condition) {
-        IntVar[] vars = vars(list);
+        buildMax(vars(list), condition);
+    }
+
+    @Override
+    public void buildCtrMaximum(String id, XNode<XVariables.XVarInteger>[] trees, Condition condition) {
+        buildMax(vars(trees), condition);
+    }
+
+    private void buildMax(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
         if (condition instanceof Condition.ConditionRel) {
@@ -1216,7 +1230,7 @@ public class XCSPParser implements XCallbacks2 {
                     } else {
                         res = condV(condition);
                     }
-                    model.max(res, vars(list)).post();
+                    model.max(res, vars).post();
                 }
                 break;
                 case NOTIN: {
@@ -1224,7 +1238,7 @@ public class XCSPParser implements XCallbacks2 {
                     model.max(res, vars).post();
                     res.ne(condV(condition)).post();
                     notin(res, condition);
-                    model.min(res, vars(list)).post();
+                    model.min(res, vars).post();
                 }
                 break;
             }
