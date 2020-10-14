@@ -70,7 +70,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                 case GT:
                     this.setPassive();
                     break;
-                default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+                default:
+                    this.fails();
+                    break;
             }
         }
         if (operator == Operator.EQ) {
