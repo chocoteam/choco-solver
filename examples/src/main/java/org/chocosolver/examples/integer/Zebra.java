@@ -11,6 +11,7 @@ package org.chocosolver.examples.integer;
 
 import org.chocosolver.examples.AbstractProblem;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -27,7 +28,7 @@ public class Zebra extends AbstractProblem {
     private final int NATIONALITY = 0, COLOR = 1, CIGARETTE = 2, PET = 3, DRINK = 4;
     private final String [] sAttrTitle = {"Nationality", "Color", "Cigarette", "Pet", "Drink"};
     private final String [][] sAttr = {
-      {"Ukranian", "Norwegian", "Englishman", "Spaniard", "Japanese"},
+      {"Ukranian", "Norwegian", "Englishman", "Spanish", "Japanese"},
       {"Red", "Blue", "Yellow", "Green", "Ivory"},
       {"Old Gold", "Parliament", "Kools", "Lucky Strike", "Chesterfield"},
       {"Zebra", "Dog", "Horse", "Fox", "Snails"},
@@ -73,14 +74,14 @@ public class Zebra extends AbstractProblem {
         IntVar milk   = attr[DRINK][3];
         IntVar oj     = attr[DRINK][4];
       
-        model.allDifferent(attr[COLOR]).post();
-        model.allDifferent(attr[CIGARETTE]).post();
-        model.allDifferent(attr[NATIONALITY]).post();
-        model.allDifferent(attr[PET]).post();
-        model.allDifferent(attr[DRINK]).post();
+        model.allDifferent(attr[COLOR], "AC").post();
+        model.allDifferent(attr[CIGARETTE], "AC").post();
+        model.allDifferent(attr[NATIONALITY], "AC").post();
+        model.allDifferent(attr[PET], "AC").post();
+        model.allDifferent(attr[DRINK], "AC").post();
       
         eng.eq(red).post(); // 2. the Englishman lives in the red house
-        spain.eq(dog).post(); // 3. the Spaniard owns a dog
+        spain.eq(dog).post(); // 3. the Spanish owns a dog
         coffee.eq(green).post(); // 4. coffee is drunk in the green house
         ukr.eq(tea).post(); // 5. the Ukr drinks tea    
         ivory.add(1).eq(green).post(); // 6. green house is to right of ivory house
@@ -101,21 +102,27 @@ public class Zebra extends AbstractProblem {
 
     @Override
     public void solve() {
-        while (model.getSolver().solve()) {
-            int z = zebra.getValue();
-            int n = -1;
-            for (int i = 0; i < SIZE; i++) {
-                if (z == attr[NATIONALITY][i].getValue()) {
-                    n = i;
-                }
-            }
-            if (n >= 0) {
-                System.out.printf("%n%-13s%s%s%s%n", "", 
-                    "============> The Zebra is owned by the ", sAttr[NATIONALITY][n], " <============");
-            }
-            print(attr);
+        try {
+            model.getSolver().propagate();
+            System.out.println(model);
+        } catch (ContradictionException e) {
+            model.getSolver().getEngine().flush(); //
         }
+
+        int z = zebra.getValue();
+        int n = -1;
+        for (int i = 0; i < SIZE; i++) {
+            if (z == attr[NATIONALITY][i].getValue()) {
+                n = i;
+            }
+        }
+        if (n >= 0) {
+            System.out.printf("%n%-13s%s%s%s%n", "",
+                "============> The Zebra is owned by the ", sAttr[NATIONALITY][n], " <============");
+        }
+        print(attr);
     }
+
     private void print(IntVar[][] pos) {
         System.out.printf("%-13s%-13s%-13s%-13s%-13s%-13s%n", "", 
             sHouse[0], sHouse[1], sHouse[2], sHouse[3], sHouse[4]);
