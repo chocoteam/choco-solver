@@ -301,6 +301,8 @@ public interface SignedLiteral {
         public void retainAll(IntIterableRangeSet set) {
             if (root.intersect(set)) {
                 lit.retainAll(set);
+            }else {
+                lit.clear();
             }
         }
 
