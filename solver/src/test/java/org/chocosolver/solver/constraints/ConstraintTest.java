@@ -464,8 +464,9 @@ public class ConstraintTest {
         assertEquals(x.getLB(), 0);
         assertEquals(x.getUB(), 10);
         solver.hardReset();
+        cstr1.setEnabled(true);
 
-        // hardReset restore all constraints enabled
+        // propagator with all constraints enabled
         solver.getEnvironment().worldPush();
         solver.propagate();
         assertEquals(a.getBooleanValue(), ESat.TRUE);
@@ -481,6 +482,7 @@ public class ConstraintTest {
         assertEquals(x.getLB(), 0);
         assertEquals(x.getUB(), 10);
         solver.hardReset();
+        cstr2.setEnabled(true);
 
         // search with all constraints
         solver.solve();
@@ -496,6 +498,7 @@ public class ConstraintTest {
         assertEquals(x.getLB(), 0);
         assertEquals(x.getUB(), 0);
         solver.hardReset();
+        cstr1.setEnabled(true);
 
         // search with all constraints
         solver.solve();
