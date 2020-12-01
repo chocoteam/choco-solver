@@ -84,6 +84,11 @@ public class Constraint {
      */
     private String name;
 
+    /**
+     * If a constraint is enabled to the propagation engine.
+     */
+    private boolean enabled = Boolean.TRUE;
+
     //***********************************************************************************
     // CONSTRUCTOR
     //***********************************************************************************
@@ -390,5 +395,32 @@ public class Constraint {
             Collections.addAll(props, c.getPropagators());
         }
         return new Constraint(name, props.toArray(new Propagator[0]));
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Disable a constraint from being propagated during search and from feasibility
+     * check ({@link org.chocosolver.solver.Solver#isSatisfied()}). A constraint
+     * shouldn't swap between enabled/disabled during solver execution (branching,
+     * filtering, etc...) because there is not control of the side effects it can
+     * cause (e.g.: when at node n, if a constraint becomes disabled, it doesn't
+     * undo filtering it has done at n-1).
+     * It means that, constraint should be disabled only before any interaction with
+     * the ({@link org.chocosolver.solver.Solver}) class to prevent side-effects.
+     *
+     * @param enabled
+     */
+    public void setEnabled(boolean enabled) {
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            for (Propagator p : propagators) {
+                if (p != null) {
+                    p.setEnabled(enabled);
+                }
+            }
+        }
     }
 }

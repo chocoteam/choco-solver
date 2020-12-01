@@ -12,11 +12,13 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -435,5 +437,72 @@ public class ConstraintTest {
         }
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void disableConstraintsTest() throws ContradictionException {
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        BoolVar a = model.boolVar("a");
+        IntVar x = model.intVar("x", 0, 10);
+        Constraint cstr1 = a.eq(1).imp(x.eq(5)).decompose();
+        cstr1.post();
+        Constraint cstr2 = a.eq(1).decompose();
+        cstr2.post();
+
+        // propagator with all constraints enabled
+        solver.getEnvironment().worldPush();
+        solver.propagate();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 5);
+        assertEquals(x.getUB(), 5);
+        solver.hardReset();
+
+        // propagator with cstr1 disabled
+        cstr1.setEnabled(false);
+        solver.getEnvironment().worldPush();
+        solver.propagate();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 0);
+        assertEquals(x.getUB(), 10);
+        solver.hardReset();
+
+        // hardReset restore all constraints enabled
+        solver.getEnvironment().worldPush();
+        solver.propagate();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 5);
+        assertEquals(x.getUB(), 5);
+        solver.hardReset();
+
+        // propagator with cstr2 disabled
+        cstr2.setEnabled(false);
+        solver.getEnvironment().worldPush();
+        solver.propagate();
+        assertEquals(a.getBooleanValue(), ESat.UNDEFINED);
+        assertEquals(x.getLB(), 0);
+        assertEquals(x.getUB(), 10);
+        solver.hardReset();
+
+        // search with all constraints
+        solver.solve();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 5);
+        assertEquals(x.getUB(), 5);
+        solver.hardReset();
+
+        // search with with cstr1 disabled
+        cstr1.setEnabled(false);
+        solver.solve();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 0);
+        assertEquals(x.getUB(), 0);
+        solver.hardReset();
+
+        // search with all constraints
+        solver.solve();
+        assertEquals(a.getBooleanValue(), ESat.TRUE);
+        assertEquals(x.getLB(), 5);
+        assertEquals(x.getUB(), 5);
+        solver.hardReset();
+    }
 }
 

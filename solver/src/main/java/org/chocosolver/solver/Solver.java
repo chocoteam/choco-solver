@@ -627,6 +627,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Return the minimum conflicting set from a conflicting set that is causing contradiction.
+     * @param conflictingSet
+     * @return minimumConflictingSet
+     */
+    public List<Constraint> findMinimumConflictingSet(List<Constraint> conflictingSet) {
+        return new QuickXPlain(getModel()).findMinimumConflictingSet(conflictingSet);
+    }
+
+    /**
      * Sets the following action in the search to be a restart instruction.
      * Note that the restart may not be immediate
      */
@@ -959,13 +968,17 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         if (feasible != FALSE) {
             int OK = 0;
             for (Constraint c : mModel.getCstrs()) {
-                ESat satC = c.isSatisfied();
-                if (FALSE == satC) {
-                    if (getModel().getSettings().warnUser()) {
-                        System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                if (c.isEnabled()) {
+                    ESat satC = c.isSatisfied();
+                    if (FALSE == satC) {
+                        if (getModel().getSettings().warnUser()) {
+                            System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                        }
+                        return FALSE;
+                    } else if (TRUE == satC) {
+                        OK++;
                     }
-                    return FALSE;
-                } else if (TRUE == satC) {
+                } else {
                     OK++;
                 }
             }
