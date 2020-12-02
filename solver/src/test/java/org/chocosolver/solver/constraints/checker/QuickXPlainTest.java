@@ -3,14 +3,16 @@ package org.chocosolver.solver.constraints.checker;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertThrows;
 
 public class QuickXPlainTest {
 
@@ -27,7 +29,7 @@ public class QuickXPlainTest {
     private static final Integer BANK_BOOK = 3;
 
     @Test(groups = "10s", timeOut = 60000)
-    public void testMinimumConflictingSet() throws ContradictionException {
+    public void testMinimumConflictingSet() {
         Model model = new Model("Financial Services Problem");
         Solver solver = model.getSolver();
 
@@ -69,9 +71,21 @@ public class QuickXPlainTest {
         }
 
         assertEquals(solver.solve(), false);
+        solver.reset();
         List<Constraint> minConflictSet = solver.findMinimumConflictingSet(userRequirements);
         assertEquals(minConflictSet.size(), 2);
         assertEquals(minConflictSet.get(0).toString(), "ARITHM ([rr = 3])");
         assertEquals(minConflictSet.get(1).toString(), "ARITHM ([wr = 1])");
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testErrorConditions() {
+        Model model = new Model("Financial Services Problem");
+        model.intVar(0, 10);
+        model.getSolver().solve();
+        // MCS can't be called during solving
+        assertEquals(model.getSolver().isSolving(), true);
+        assertThrows(SolverException.class, () -> model.getSolver().findMinimumConflictingSet(Collections.emptyList()));
+    }
+
 }

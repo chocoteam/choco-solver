@@ -89,7 +89,7 @@ public class Constraint {
     /**
      * If a constraint is enabled to the propagation engine.
      */
-    private boolean enabled = Boolean.TRUE;
+    private boolean enabled = true;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -399,6 +399,15 @@ public class Constraint {
         return new Constraint(name, props.toArray(new Propagator[0]));
     }
 
+    /**
+     * A constraint, when disabled, is prevented from execute propagation during search
+     * and from participate in the solution feasibility check. It's handy to disable
+     * constraints for algorithms like ({@link org.chocosolver.solver.QuickXPlain}, that
+     * execute massive search to find a minimum conflicting set of constraints, and to do
+     * this needs to alternate constraints execution by enabling and disabling it.
+     *
+     * @return enabled if the constraint is available to the solver
+     */
     public boolean isEnabled() {
         return enabled;
     }
@@ -416,10 +425,7 @@ public class Constraint {
      * @param enabled
      */
     public void setEnabled(boolean enabled) {
-        Solver solver = propagators[0].getModel().getSolver();
-        boolean isSolving = solver.getSearchState() == SearchState.RUNNING;
-        boolean isBranching = solver.getEnvironment().getWorldIndex() > 0;
-        if (isSolving || isBranching) {
+        if (propagators[0].getModel().getSolver().isSolving()) {
             throw new SolverException("A constraint enabling state can't be changed during search");
         }
         if (this.enabled != enabled) {

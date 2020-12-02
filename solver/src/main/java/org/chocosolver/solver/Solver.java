@@ -628,10 +628,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Return the minimum conflicting set from a conflicting set that is causing contradiction.
-     * @param conflictingSet
-     * @return minimumConflictingSet
+     *
+     * @param conflictingSet the super-set of constraints causing contradiction
+     * @return minimumConflictingSet of constraints (the root cause of contradiction)
+     * @throws SolverException when MCS is called during solving
      */
     public List<Constraint> findMinimumConflictingSet(List<Constraint> conflictingSet) {
+        if (isSolving()) {
+            throw new SolverException("Minimum Conflicting Set (MCS) can't be executed during solving");
+        }
         return new QuickXPlain(getModel()).findMinimumConflictingSet(conflictingSet);
     }
 
@@ -800,6 +805,20 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             head = dpath.getLastDecision();
         }
         return success;
+    }
+
+    /**
+     * Solving is executing if the search state is different from NEW, that is,
+     * if it has started to branch decisions.
+     * A double check for execution is done looking if the environment trailing
+     * has started as well.
+     *
+     * @return isSolving if the solver is executing searching or branching
+     */
+    public boolean isSolving() {
+        boolean isSearching = getSearchState() != SearchState.NEW;
+        boolean isTrailing = getEnvironment().getWorldIndex() > 0;
+        return isSearching || isTrailing;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

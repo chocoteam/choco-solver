@@ -103,7 +103,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Ignore propagation during execution.
      */
-    private boolean enabled = Boolean.TRUE;
+    private boolean enabled = true;
 
     /**
      * For debugging purpose only, set to true to use default explanation schema, false to fail
