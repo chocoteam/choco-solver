@@ -14,6 +14,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.SearchState;
+import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -25,10 +27,10 @@ import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -507,5 +509,67 @@ public class ConstraintTest {
         assertEquals(x.getUB(), 5);
         solver.hardReset();
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void constraintDisablingDuringSearchConsistenceTest() {
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        BoolVar a = model.boolVar("a");
+        IntVar x = model.intVar("x", 0, 10);
+        Constraint cstr = a.eq(1).decompose();
+        cstr.post();
+
+        // Check constraint disabling blocking during solution finding
+        while (solver.solve()) {
+            assertEquals(solver.getSearchState(), SearchState.TERMINATED);
+            assertThrows(SolverException.class, () -> cstr.setEnabled(false));
+        }
+
+        // Check constraint disabling blocking during branching
+        solver.hardReset();
+        AtomicReference<SolverException> exception = new AtomicReference<>();
+        AtomicReference<SearchState> state = new AtomicReference<>();
+        solver.plugMonitor(new IMonitorDownBranch() {
+            @Override
+            public void beforeDownBranch(boolean left) {
+                try {
+                    state.set(solver.getSearchState());
+                    cstr.setEnabled(false);
+                } catch (SolverException ex) {
+                    exception.set(ex);
+                }
+            }
+        });
+        solver.solve();
+        assertEquals(state.get(), SearchState.RUNNING);
+        assertEquals(exception.get().getMessage(), "A constraint enabling state can't be changed during search");
+
+        // Check constraint disabling allowing when the search is new
+        solver.hardReset();
+        assertEquals(solver.getSearchState(), SearchState.NEW);
+        cstr.setEnabled(false);
+        cstr.setEnabled(true);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void constraintDisablingEnvironmentConsistencyTest() {
+        Model model = new Model();
+        Solver solver = model.getSolver();
+        BoolVar a = model.boolVar("a");
+        Constraint cstr = a.eq(1).decompose();
+        cstr.post();
+
+        // Check constraint disabling blocking with environments created
+        solver.getEnvironment().worldPush();
+        assertEquals(solver.getEnvironment().getWorldIndex(), 1);
+        assertThrows(SolverException.class, () -> cstr.setEnabled(false));
+
+        // Check constraint disabling allowing when the environment is clean
+        solver.hardReset();
+        assertEquals(solver.getEnvironment().getWorldIndex(), 0);
+        cstr.setEnabled(false);
+        cstr.setEnabled(true);
+    }
+
 }
 

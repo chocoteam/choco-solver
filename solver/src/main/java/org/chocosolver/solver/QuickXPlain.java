@@ -38,7 +38,7 @@ public class QuickXPlain {
         else {
             minimumConflictSet = qx(background, background, conflictingSet);
         }
-
+        model.getSolver().reset();
         return minimumConflictSet;
     }
 
@@ -64,8 +64,9 @@ public class QuickXPlain {
         List<Constraint> d2 = qx(constraintsUnion(background, c1), c1, c2);
         List<Constraint> conflictSet = new ArrayList<>(d2);
         List<Constraint> d1 = qx(constraintsUnion(prevB, d2), d2, c1);
+        Set<Constraint> constraintSetHash = new HashSet<>(conflictSet);
         for (int i = 0; i < d1.size(); i++) {
-            if (!conflictSet.contains(d1.get(i))) {
+            if (!constraintSetHash.contains(d1.get(i))) {
                 conflictSet.add(d1.get(i));
             }
         }

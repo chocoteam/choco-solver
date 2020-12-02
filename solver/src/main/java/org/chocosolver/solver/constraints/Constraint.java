@@ -10,8 +10,10 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.Opposite;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
@@ -414,6 +416,12 @@ public class Constraint {
      * @param enabled
      */
     public void setEnabled(boolean enabled) {
+        Solver solver = propagators[0].getModel().getSolver();
+        boolean isSolving = solver.getSearchState() == SearchState.RUNNING;
+        boolean isBranching = solver.getEnvironment().getWorldIndex() > 0;
+        if (isSolving || isBranching) {
+            throw new SolverException("A constraint enabling state can't be changed during search");
+        }
         if (this.enabled != enabled) {
             this.enabled = enabled;
             for (Propagator p : propagators) {
