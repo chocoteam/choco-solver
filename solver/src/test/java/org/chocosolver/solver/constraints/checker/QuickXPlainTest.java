@@ -27,7 +27,7 @@ public class QuickXPlainTest {
     private static final Integer BANK_BOOK = 3;
 
     @Test(groups = "10s", timeOut = 60000)
-    public void minimumConflictingSetTest() throws ContradictionException {
+    public void testMinimumConflictingSet() throws ContradictionException {
         Model model = new Model("Financial Services Problem");
         Solver solver = model.getSolver();
 

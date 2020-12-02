@@ -440,7 +440,7 @@ public class ConstraintTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-    public void disableConstraintsTest() throws ContradictionException {
+    public void testDisableConstraints() throws ContradictionException {
         Model model = new Model();
         Solver solver = model.getSolver();
         BoolVar a = model.boolVar("a");
@@ -511,7 +511,7 @@ public class ConstraintTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-    public void constraintDisablingDuringSearchConsistenceTest() {
+    public void testConstraintDisablingDuringSearchConsistence() {
         Model model = new Model();
         Solver solver = model.getSolver();
         BoolVar a = model.boolVar("a");
@@ -552,7 +552,7 @@ public class ConstraintTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-    public void constraintDisablingEnvironmentConsistencyTest() {
+    public void testConstraintDisablingEnvironmentConsistency() {
         Model model = new Model();
         Solver solver = model.getSolver();
         BoolVar a = model.boolVar("a");
