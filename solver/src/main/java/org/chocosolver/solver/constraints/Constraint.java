@@ -423,6 +423,7 @@ public class Constraint {
      * the ({@link org.chocosolver.solver.Solver}) class to prevent side-effects.
      *
      * @param enabled
+     * @throws SolverException when setEnabled is called during solving
      */
     public void setEnabled(boolean enabled) {
         if (propagators[0].getModel().getSolver().isSolving()) {
