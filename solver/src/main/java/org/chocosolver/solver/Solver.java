@@ -817,7 +817,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public boolean isSolving() {
         boolean isSearching = getSearchState() != SearchState.NEW;
-        boolean isTrailing = getEnvironment().getWorldIndex() > 0;
+        boolean isTrailing = getEnvironment().getWorldIndex() > rootWorldIndex;
         return isSearching || isTrailing;
     }
 

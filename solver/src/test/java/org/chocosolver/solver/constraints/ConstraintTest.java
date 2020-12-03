@@ -521,6 +521,7 @@ public class ConstraintTest {
 
         // Check constraint disabling blocking during solution finding
         while (solver.solve()) {
+            assertEquals(solver.isSolving(), true);
             assertEquals(solver.getSearchState(), SearchState.TERMINATED);
             assertThrows(SolverException.class, () -> cstr.setEnabled(false));
         }
@@ -547,6 +548,7 @@ public class ConstraintTest {
         // Check constraint disabling allowing when the search is new
         solver.hardReset();
         assertEquals(solver.getSearchState(), SearchState.NEW);
+        assertEquals(solver.isSolving(), false);
         cstr.setEnabled(false);
         cstr.setEnabled(true);
     }

@@ -12,6 +12,9 @@ import java.util.*;
  * 1. Ulrich Junker. 2004. QUICKXPLAIN: preferred explanations and relaxations for over-constrained
  * problems. In <i>Proceedings of the 19th national conference on Artifical intelligence</i>
  * AAAI Press, 167–172.
+ *
+ * @author Joao Pedro Schmitt
+ * @since 03/12/2020
  */
 public class QuickXPlain {
 

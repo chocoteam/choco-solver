@@ -12,8 +12,8 @@ NEXT MILESTONE
 - Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
 - Update XCSP3 parser
 - Fix `InDomainMedian` when domain size is even
-
 - Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
+- Add QuickXPlain algorithm to find the Minimum Conflicting Set (see issue #509)
 
 ### Deprecated API (to be removed in next release):
 
