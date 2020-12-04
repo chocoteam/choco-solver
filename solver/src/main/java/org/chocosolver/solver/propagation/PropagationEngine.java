@@ -11,6 +11,7 @@ package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -61,7 +62,7 @@ public class PropagationEngine {
      * The main structure of this engine: seven circular queues,
      * each of them is dedicated to store propagator to execute wrt their priority.
      */
-    private final CircularQueue<Propagator>[] pro_queue;
+    private CircularQueue<Propagator>[] pro_queue;
 
     private final CircularQueue<Variable> var_queue;
 
@@ -121,6 +122,28 @@ public class PropagationEngine {
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
     }
 
+    public AddedPropagatorPriority addPropagationPriority() {
+        CircularQueue[] addedQueue = new CircularQueue[pro_queue.length + 1];
+        System.arraycopy(pro_queue, 0, addedQueue, 0, pro_queue.length);
+        addedQueue[addedQueue.length - 1] = new CircularQueue<>(16);
+        this.pro_queue = addedQueue;
+        return new AddedPropagatorPriority();
+    }
+
+    public static class AddedPropagatorPriority implements Priority {
+        private static int NEW_PRIORITY = 8;
+
+        private final int priority;
+
+        public AddedPropagatorPriority() {
+            priority = NEW_PRIORITY++;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+    }
+
     /**
      * Build up internal structure, if not yet done, in order to allow propagation.
      * If new constraints are added after having initializing the engine, dynamic addition is used.
@@ -140,10 +163,12 @@ public class PropagationEngine {
             if (model.getSettings().sortPropagatorActivationWRTPriority()) {
                 propagators.sort(
                         (p1, p2) -> {
-                            int p = p1.getPriority().priority - p2.getPriority().priority;
+                            int p = p1.getPriority().getPriority() - p2.getPriority().getPriority();
                             if (p == 0) {
                                 return p1.getNbVars() - p2.getNbVars();
-                            } else return p;
+                            } else {
+                                return p;
+                            }
                         });
             }
             for (int i = 0; i < propagators.size(); i++) {

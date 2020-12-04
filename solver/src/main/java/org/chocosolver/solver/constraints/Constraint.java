@@ -379,7 +379,7 @@ public class Constraint {
     public PropagatorPriority computeMaxPriority() {
         int priority = 1;
         for (Propagator p : propagators) {
-            priority = Math.max(priority, p.getPriority().priority);
+            priority = Math.max(priority, p.getPriority().getPriority());
         }
         return PropagatorPriority.get(priority);
     }

@@ -9,16 +9,17 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Priority;
+
 /**
  * <br/>
  *
  * @author Charles Prud'homme
  * @since 11 aug. 2010
  */
-public enum PropagatorPriority {
+public enum PropagatorPriority implements Priority {
 
     UNARY(1), BINARY(2), TERNARY(3), LINEAR(4), QUADRATIC(5), CUBIC(6), VERY_SLOW(7);// 8 = PROPAGATE;
-
 
     public final int priority;
 
@@ -45,6 +46,10 @@ public enum PropagatorPriority {
             default:
                 return VERY_SLOW;
         }
+    }
+
+    public int getPriority() {
+        return priority;
     }
 
 
