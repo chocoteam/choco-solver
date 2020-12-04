@@ -101,6 +101,11 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     private static final short PASSIVE = 3;
 
     /**
+     * Ignore propagation during execution.
+     */
+    private boolean enabled = true;
+
+    /**
      * For debugging purpose only, set to true to use default explanation schema, false to fail
      */
     @SuppressWarnings("WeakerAccess")
@@ -751,10 +756,13 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
+     * The propagator is active if the state is ACTIVE and the constraint related to it is enabled.
+     * The constraint is disabled to allow faster execution of algorithms like {@link org.chocosolver.solver.QuickXPlain}.
+     *
      * @return true iff this propagator is active (it should filter)
      */
     public boolean isActive() {
-        return state == ACTIVE;
+        return state == ACTIVE && enabled;
     }
 
     /**
@@ -936,5 +944,20 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             }
         }
         unschedule();
+    }
+
+    /**
+     * Disable a propagator from being propagated during search and from feasibility
+     * check ({@link org.chocosolver.solver.Solver#isSatisfied()}). A propagator
+     * shouldn't swap between enabled/disabled during solver execution (branching,
+     * filtering, etc...) because there is not control of the side effects it can
+     * cause (e.g.: when at node n, if a propagator becomes disabled, it doesn't
+     * undo filtering it has done at n-1).
+     * See {@link Constraint#setEnabled(boolean)}
+     *
+     * @param enabled
+     */
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }
