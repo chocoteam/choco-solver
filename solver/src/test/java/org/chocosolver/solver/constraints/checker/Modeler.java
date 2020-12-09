@@ -769,7 +769,7 @@ public interface Modeler {
 
         @Override
         public String name() {
-            return "modelmaxbc";
+            return "modelminbc";
         }
     };
 
