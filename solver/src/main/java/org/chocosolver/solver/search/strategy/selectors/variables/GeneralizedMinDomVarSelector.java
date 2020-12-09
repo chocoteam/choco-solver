@@ -21,7 +21,7 @@ import org.chocosolver.solver.variables.Variable;
  *
  * @author Jean-Guillaume Fages
  */
-public class GeneralizedMinDomVarSelector implements VariableSelector {
+public class GeneralizedMinDomVarSelector<V extends Variable> implements VariableSelector<V> {
 
     private boolean least;
 
@@ -43,10 +43,10 @@ public class GeneralizedMinDomVarSelector implements VariableSelector {
     }
 
     @Override
-    public Variable getVariable(Variable[] variables) {
+    public V getVariable(V[] variables) {
         int small_dsize = Integer.MAX_VALUE;
-        Variable nextVar = null;
-        for (Variable v:variables) {
+        V nextVar = null;
+        for (V v:variables) {
             if(!v.isInstantiated()) {
                 int kind = (v.getTypeAndKind() & Variable.KIND);
                 int dsize;
