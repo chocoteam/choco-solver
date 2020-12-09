@@ -177,7 +177,9 @@ public class XCSP extends RegParser {
 
     private void onSolution(Solver solver, XCSPParser parser){
         if (solver.getObjectiveManager().isOptimization()){
-            if(PRINT_LOG)solver.getOut().printf("o %d \n", solver.getObjectiveManager().getBestSolutionValue().intValue());
+            if(PRINT_LOG)solver.getOut().printf(java.util.Locale.US, "o %d %.1f\n",
+                    solver.getObjectiveManager().getBestSolutionValue().intValue(),
+                    solver.getTimeCount());
         }
         output.setLength(0);
         output.append(parser.printSolution());

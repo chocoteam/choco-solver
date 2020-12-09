@@ -247,8 +247,8 @@ public abstract class RegParser implements IParser {
                 solver.setLearningSignedClauses();
                 // THEN PARAMETERS
                 XParameters.DEFAULT_X = dftexp;
-                XParameters.PROOF = XParameters.FINE_PROOF = true;
-                XParameters.PRINT_CLAUSE = true;
+                XParameters.PROOF = XParameters.FINE_PROOF = false;
+                XParameters.PRINT_CLAUSE = false;
                 XParameters.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
                 XParameters.ASSERT_NO_LEFT_BRANCH = false;
                 XParameters.INTERVAL_TREE = true;
