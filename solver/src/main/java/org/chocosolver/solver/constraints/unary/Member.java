@@ -30,7 +30,7 @@ public class Member extends Constraint {
 
     // for JSON
     @SuppressWarnings("WeakerAccess")
-    protected Member(IntVar var, int lb, int ub, IntIterableRangeSet values, Propagator prop) {
+    protected Member(IntVar var, int lb, int ub, IntIterableRangeSet values, Propagator<IntVar> prop) {
         super(ConstraintsName.MEMBER, prop);
         this.var = var;
         this.values = values;

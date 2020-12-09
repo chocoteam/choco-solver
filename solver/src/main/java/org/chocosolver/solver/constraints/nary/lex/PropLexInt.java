@@ -13,6 +13,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.UpdatablePropagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -30,7 +31,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme
  * @since 03/05/2016
  */
-public class PropLexInt extends Propagator<IntVar> {
+public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagator<int[]> {
 
     private final int n;            // size of both vectors
     private final IStateInt alpha;  // size of both vectors
@@ -57,9 +58,15 @@ public class PropLexInt extends Propagator<IntVar> {
      * update this propagator with a new int vector <i>newY</i>
      * @param newY new int vector
      */
-    public void updateIntVector(int[] newY){
+    @Override
+    public void update(int[] newY, boolean thenForcePropagate) {
         System.arraycopy(newY, 0, y, 0, newY.length);
-        forcePropagationOnBacktrack();
+        if(thenForcePropagate)forcePropagationOnBacktrack();
+    }
+
+    @Override
+    public int[] getUpdatedValue() {
+        return y.clone();
     }
 
     @Override

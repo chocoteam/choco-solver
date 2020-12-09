@@ -29,7 +29,7 @@ public class NotMember extends Constraint {
 
     // for JSON
     @SuppressWarnings("WeakerAccess")
-    protected NotMember(IntVar var, int lb, int ub, IntIterableRangeSet values, Propagator prop) {
+    protected NotMember(IntVar var, int lb, int ub, IntIterableRangeSet values, Propagator<IntVar> prop) {
         super(ConstraintsName.NOTMEMBER, prop);
         this.var = var;
         this.values = values;

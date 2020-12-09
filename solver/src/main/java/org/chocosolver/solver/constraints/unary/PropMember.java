@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.unary;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
+import org.chocosolver.solver.constraints.UpdatablePropagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
@@ -28,7 +29,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUti
  * @author Charles Prud'homme
  * @since 12/10/2016.
  */
-public class PropMember extends Propagator<IntVar> {
+public class PropMember extends Propagator<IntVar> implements UpdatablePropagator<IntIterableRangeSet> {
 
     /**
      * List of possible values.
@@ -99,5 +100,17 @@ public class PropMember extends Propagator<IntVar> {
     @Override
     public String toString() {
         return vars[0].getName() + " \u2208 " + range;
+    }
+
+    @Override
+    public void update(IntIterableRangeSet values, boolean thenForcePropagate) {
+        this.range.clear();
+        this.range.addAll(values);
+        if(thenForcePropagate)forcePropagationOnBacktrack();
+    }
+
+    @Override
+    public IntIterableRangeSet getUpdatedValue() {
+        return this.range.duplicate();
     }
 }
