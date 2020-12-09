@@ -10,8 +10,10 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.Opposite;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
@@ -83,6 +85,11 @@ public class Constraint {
      * Name of this constraint
      */
     private String name;
+
+    /**
+     * If a constraint is enabled to the propagation engine.
+     */
+    private boolean enabled = true;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -390,5 +397,45 @@ public class Constraint {
             Collections.addAll(props, c.getPropagators());
         }
         return new Constraint(name, props.toArray(new Propagator[0]));
+    }
+
+    /**
+     * A constraint, when disabled, is prevented from execute propagation during search
+     * and from participate in the solution feasibility check. It's handy to disable
+     * constraints for algorithms like ({@link org.chocosolver.solver.QuickXPlain}, that
+     * execute massive search to find a minimum conflicting set of constraints, and to do
+     * this needs to alternate constraints execution by enabling and disabling it.
+     *
+     * @return enabled if the constraint is available to the solver
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Disable a constraint from being propagated during search and from feasibility
+     * check ({@link org.chocosolver.solver.Solver#isSatisfied()}). A constraint
+     * shouldn't swap between enabled/disabled during solver execution (branching,
+     * filtering, etc...) because there is not control of the side effects it can
+     * cause (e.g.: when at node n, if a constraint becomes disabled, it doesn't
+     * undo filtering it has done at n-1).
+     * It means that, constraint should be disabled only before any interaction with
+     * the ({@link org.chocosolver.solver.Solver}) class to prevent side-effects.
+     *
+     * @param enabled
+     * @throws SolverException when setEnabled is called during solving
+     */
+    public void setEnabled(boolean enabled) {
+        if (propagators[0].getModel().getSolver().isSolving()) {
+            throw new SolverException("A constraint enabling state can't be changed during search");
+        }
+        if (this.enabled != enabled) {
+            this.enabled = enabled;
+            for (Propagator p : propagators) {
+                if (p != null) {
+                    p.setEnabled(enabled);
+                }
+            }
+        }
     }
 }

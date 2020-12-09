@@ -671,6 +671,20 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Return the minimum conflicting set from a conflicting set that is causing contradiction.
+     *
+     * @param conflictingSet the super-set of constraints causing contradiction
+     * @return minimumConflictingSet of constraints (the root cause of contradiction)
+     * @throws SolverException when MCS is called during solving
+     */
+    public List<Constraint> findMinimumConflictingSet(List<Constraint> conflictingSet) {
+        if (isSolving()) {
+            throw new SolverException("Minimum Conflicting Set (MCS) can't be executed during solving");
+        }
+        return new QuickXPlain(getModel()).findMinimumConflictingSet(conflictingSet);
+    }
+
+    /**
      * Sets the following action in the search to be a restart instruction.
      * Note that the restart may not be immediate
      */
@@ -835,6 +849,20 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             head = dpath.getLastDecision();
         }
         return success;
+    }
+
+    /**
+     * Solving is executing if the search state is different from NEW, that is,
+     * if it has started to branch decisions.
+     * A double check for execution is done looking if the environment trailing
+     * has started as well.
+     *
+     * @return isSolving if the solver is executing searching or branching
+     */
+    public boolean isSolving() {
+        boolean isSearching = getSearchState() != SearchState.NEW;
+        boolean isTrailing = getEnvironment().getWorldIndex() > rootWorldIndex;
+        return isSearching || isTrailing;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1007,13 +1035,17 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public ESat isSatisfied() {
         int OK = 0;
         for (Constraint c : mModel.getCstrs()) {
-            ESat satC = c.isSatisfied();
-            if (FALSE == satC) {
-                if (getModel().getSettings().warnUser()) {
-                    System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+            if (c.isEnabled()) {
+                ESat satC = c.isSatisfied();
+                if (FALSE == satC) {
+                    if (getModel().getSettings().warnUser()) {
+                        System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                    }
+                    return FALSE;
+                } else if (TRUE == satC) {
+                    OK++;
                 }
-                return FALSE;
-            } else if (TRUE == satC) {
+            } else {
                 OK++;
             }
         }

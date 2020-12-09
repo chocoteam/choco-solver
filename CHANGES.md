@@ -5,20 +5,22 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
 NEXT MILESTONE
--------------------
+-------------------             A
 
 ### Major features:
-- Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
+- Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.
 - `ParallelPortfolio` now allows to add *unreliable* models, that is models whose resolution is deliberately made incomplete. 
 These models should not stop the parallel resolution process when they no longer find a solution. 
 Only complete models can inform the portfolio that they have proven the full exploration of the search space. 
+- Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
+- Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). 
+Fixes for issues #653 and #740. 
+- Add QuickXPlain algorithm to find the Minimum Conflicting Set (see issue #509)
 - Update XCSP3 parser.
-- Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.
 - Fix `InDomainMedian` when domain size is even
 - Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
 - Add `MultiArmedBandit` strategy sequencer
 
-- Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
 
 ### Deprecated API (to be removed in next release):
 
@@ -27,6 +29,7 @@ See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
 
 4.10.5 - 02 Oct 2020
 -------------------
