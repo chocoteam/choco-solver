@@ -149,7 +149,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers;
-    
+    exports org.chocosolver.util.bandit;
 
 
 }

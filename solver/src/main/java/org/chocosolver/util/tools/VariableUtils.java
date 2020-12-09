@@ -17,6 +17,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.RealInterval;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.stream;
@@ -350,6 +351,23 @@ public class VariableUtils {
         }
         return size;
     }
+
+    /**
+         * Compute the search space size
+         *
+         * @return search space size
+         */
+        public static double searchSpaceSize(Iterator<IntVar> vars) {
+            double size = 1;
+            while (vars.hasNext()) {
+                IntVar var = vars.next();
+                size *= var.getDomainSize();
+            }
+            if (size <= 0 || size == Double.POSITIVE_INFINITY) {
+                size = Double.MAX_VALUE;
+            }
+            return size;
+        }
 
     /**
      * @param x an int variable

@@ -17,6 +17,7 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
@@ -29,9 +30,14 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.bandit.MOSS;
+import org.chocosolver.util.bandit.Static;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
 public class Search {
 
@@ -710,7 +716,52 @@ public class Search {
                         vars);
             }
         },
-        ;
+        MAB_CHS_DWDEG_STATIC {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                //noinspection unchecked
+                return new MultiArmedBanditSequencer<IntVar>(
+                        new AbstractStrategy[]{
+                                CHS.make(solver, vars, valueSelector, last),
+                                DOMWDEG.make(solver, vars, valueSelector, last)
+                        },
+                        new Static(new double[]{.7, .3}, new java.util.Random(solver.getModel().getSeed())),
+                        (a, t) -> 0.d
+                );
+            }
+        },
+        MAB_CHS_DWDEG_MOSS {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                final long[] pat = {0, 0};
+                final HashSet<IntVar> selected = new HashSet<>();
+                ToDoubleBiFunction<Integer, Integer> reward = (a, t) -> {
+                    double r = Math.log(solver.getNodeCount() - pat[0]) /
+                            Math.log(VariableUtils.searchSpaceSize(selected.iterator()))
+                            //+ solver.getSolutionCount() - pat[1]
+                            ;
+                    pat[0] = solver.getNodeCount();
+                    pat[1] = solver.getSolutionCount();
+                    selected.clear();
+                    return r;
+                };
+                solver.plugMonitor(new IMonitorOpenNode() {
+                    @Override
+                    public void afterOpenNode() {
+                        selected.add((IntVar) solver.getDecisionPath().getLastDecision().getDecisionVariable());
+                    }
+                });
+                //noinspection unchecked
+                return new MultiArmedBanditSequencer<IntVar>(
+                        new AbstractStrategy[]{
+                                CHS.make(solver, vars, valueSelector, last),
+                                DOMWDEG.make(solver, vars, valueSelector, last)
+                        },
+                        new MOSS(2),
+                        reward
+                );
+            }
+        };
 
         /**
          * Declare the search strategy based on parameters
