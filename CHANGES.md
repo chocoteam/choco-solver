@@ -9,9 +9,14 @@ NEXT MILESTONE
 
 ### Major features:
 - Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
-- Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
-- Update XCSP3 parser
+- `ParallelPortfolio` now allows to add *unreliable* models, that is models whose resolution is deliberately made incomplete. 
+These models should not stop the parallel resolution process when they no longer find a solution. 
+Only complete models can inform the portfolio that they have proven the full exploration of the search space. 
+- Update XCSP3 parser.
+- Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.
 - Fix `InDomainMedian` when domain size is even
+- Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
+- Add `MultiArmedBandit` strategy sequencer
 
 - Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
 
