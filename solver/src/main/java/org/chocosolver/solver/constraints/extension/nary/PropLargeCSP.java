@@ -26,7 +26,11 @@ public abstract class PropLargeCSP<R extends LargeRelation> extends Propagator<I
     protected final R relation;
 
     protected PropLargeCSP(IntVar[] vars, R relation) {
-        super(vars, PropagatorPriority.QUADRATIC, true);
+        this(vars, relation, true);
+    }
+
+    protected PropLargeCSP(IntVar[] vars, R relation, boolean reactToFineEvent) {
+        super(vars, PropagatorPriority.QUADRATIC, reactToFineEvent);
         this.relation = relation;
     }
 
