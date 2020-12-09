@@ -18,6 +18,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.XParameters;
+import org.chocosolver.solver.search.strategy.selectors.variables.ClausesBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -27,16 +28,10 @@ import org.chocosolver.util.objects.tree.Interval;
 import org.chocosolver.util.objects.tree.IntervalTree;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Stream;
 
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * A class to manage life of sclauses during resolution. TODO
@@ -85,6 +80,8 @@ public class ClauseStore extends Propagator<IntVar> {
      */
     private double clauseInc = 1d;
 
+    private ClausesBased strat;
+
     /**
      * Create a Nogood store connected to a model.
      *
@@ -110,6 +107,10 @@ public class ClauseStore extends Propagator<IntVar> {
 
     public int getNbLearntClauses() {
         return learnts.size();
+    }
+
+    public void declareClausesBasedStrategy(ClausesBased strat) {
+        this.strat = strat;
     }
 
     /**
@@ -205,6 +206,9 @@ public class ClauseStore extends Propagator<IntVar> {
      * Try to delete signed clauses from this nogood store.
      */
     public void forget() {
+        if(strat != null){
+            strat.decayActivity();
+        }
         decayActivity();
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
@@ -213,6 +217,9 @@ public class ClauseStore extends Propagator<IntVar> {
                 check(last);
             }
             detectDominance();
+            if(strat != null){
+                Stream.of(last.getVars()).forEach(v -> strat.bump(v));
+            }
         }
         // 2. reduce database
         reduceDB();
