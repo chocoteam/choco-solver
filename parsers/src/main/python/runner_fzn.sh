@@ -9,7 +9,7 @@ FILE=$3
 
 # Configuration of the command
 JARGS="-XX:+UseSerialGC -server -Xmx8G -Xss64M"
-PARSER="org.chocosolver.parser.xcsp.ChocoXCSP"
+PARSER="org.chocosolver.parser.flatzinc.ChocoFZN"
 
 # Build the command
 CMD="java ${JARGS} -cp .:${JAR} ${PARSER} ${ARGS} \"${FILE}\""
