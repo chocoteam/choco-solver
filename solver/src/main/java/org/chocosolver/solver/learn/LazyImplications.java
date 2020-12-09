@@ -371,7 +371,7 @@ public class LazyImplications extends Implications {
         }
         Entry root = rootEntries.get(var);
         if (root == null) {
-            throw new Error("Unknown variable");
+            throw new Error("Unknown variable. This happens when a constraint is added after the call to `solver.setLearningClause();`");
         }
         int pidx = root.p;
         Entry prev = entries[pidx];
