@@ -1039,7 +1039,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 ESat satC = c.isSatisfied();
                 if (FALSE == satC) {
                     if (getModel().getSettings().warnUser()) {
-                        System.err.println(String.format("FAILURE >> %s (%s)", c.toString(), satC));
+                        System.err.printf("FAILURE >> %s (%s)%n", c.toString(), satC);
                     }
                     return FALSE;
                 } else if (TRUE == satC) {
