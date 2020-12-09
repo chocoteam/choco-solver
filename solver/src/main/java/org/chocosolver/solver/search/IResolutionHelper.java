@@ -13,7 +13,11 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.UpdatablePropagator;
 import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
+import org.chocosolver.solver.constraints.unary.Member;
+import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
@@ -21,13 +25,13 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Spliterator;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -79,16 +83,16 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *       }
      *     }
      * </pre>
-     *
+     * <p>
      * Note that all variables will be recorded
-	 *
-	 * Note that it clears the current objective function, if any
+     * <p>
+     * Note that it clears the current objective function, if any
      *
      * @param stop optional criterion to stop the search before finding a solution
      * @return a {@link Solution} if and only if a solution has been found, <tt>null</tt> otherwise.
      */
     default Solution findSolution(Criterion... stop) {
-    	ref().getModel().clearObjective();
+        ref().getModel().clearObjective();
         ref().addStopCriterion(stop);
         boolean found = ref().solve();
         ref().removeStopCriterion(stop);
@@ -128,16 +132,16 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *     return solutions;
      *     }
      * </pre>
-     *
+     * <p>
      * Note that all variables will be recorded
-	 *
-	 * Note that it clears the current objective function, if any
+     * <p>
+     * Note that it clears the current objective function, if any
      *
      * @param stop optional criterion to stop the search before finding all solutions
      * @return a list that contained the found solutions.
      */
     default List<Solution> findAllSolutions(Criterion... stop) {
-		ref().getModel().clearObjective();
+        ref().getModel().clearObjective();
         ref().addStopCriterion(stop);
         List<Solution> solutions = new ArrayList<>();
         while (ref().solve()) {
@@ -173,7 +177,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * 	return solutions;
      * }
      * </pre>
-     *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param stop optional criterion to stop the search before finding all/best solution
@@ -242,7 +246,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *     return model.getSolver().isFeasible() == ESat.TRUE ? s : null;
      *     }
      * </pre>
-     *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param objective integer variable to optimize
@@ -293,7 +297,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <li>or all optimal solutions have been found.</li>
      * </ul>
      * </ul>
-     *
+     * <p>
      * This method runs the following instructions:
      * <pre>
      *     {@code
@@ -310,7 +314,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *     }
      *     }
      * </pre>
-     *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param objective the variable to optimize
@@ -321,7 +325,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
-		boolean defaultS = ref().getSearch()==null;// best bound (in default) is only for optim
+        boolean defaultS = ref().getSearch() == null;// best bound (in default) is only for optim
         ref().findOptimalSolution(objective, maximize);
         if (!ref().isStopCriterionMet()
                 && ref().getSolutionCount() > 0) {
@@ -331,7 +335,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
             ref().getModel().clearObjective();
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
-            if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
+            if (defaultS)
+                ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
             List<Solution> solutions = findAllSolutions(stop);
             ref().getModel().unpost(forceOptimal);
             return solutions;
@@ -378,7 +383,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *     }
      *     }
      * </pre>
-	 *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param objective the variable to optimize
@@ -389,7 +394,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default Stream<Solution> streamOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
-        boolean defaultS = ref().getSearch()==null;// best bound (in default) is only for optim
+        boolean defaultS = ref().getSearch() == null;// best bound (in default) is only for optim
         ref().findOptimalSolution(objective, maximize);
         if (!ref().isStopCriterionMet()
                 && ref().getSolutionCount() > 0) {
@@ -400,7 +405,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
             ref().getModel().getEnvironment().save(() -> ref().getModel().unpost(forceOptimal));
-            if(defaultS) ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
+            if (defaultS)
+                ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
             Spliterator<Solution> it = new Spliterator<Solution>() {
 
                 @Override
@@ -459,11 +465,11 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
      * 	while (ref().solve()) {
      * 		pareto.onSolution();
-     * 	}
+     *    }
      * 	return pareto.getParetoFront();
      * }
      * </pre>
-	 *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param objectives the array of variables to optimize
@@ -489,21 +495,18 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * The first objective variable is more significant or equally significant to the second one,
      * which in turn is more significant or equally significant to the third one, etc.
      * On an optimal solution of a maximization problem, the first variable is maximized, then the second one is maximized, etc.
-     *
+     * <p>
      * Note that if a stop criteria stops the search eagerly, no optimal solution may have been found.
      * In that case, the best solution, if at least one has been found, is returned.
-	 *
+     * <p>
      * Note that all variables will be recorded
      *
-     * @param objectives
-     *          the list of objectives to find the optimal. A solution o1..on is optimal if lexicographically better than
-     *          any other correct solution s1..sn
-     * @param maximize
-     *          to maximize the objective, false to minimize.
-     *  @param stop
-     *          stop criterion are added before search and removed after search.
+     * @param objectives the list of objectives to find the optimal. A solution o1..on is optimal if lexicographically better than
+     *                   any other correct solution s1..sn
+     * @param maximize   to maximize the objective, false to minimize.
+     * @param stop       stop criterion are added before search and removed after search.
      * @return A solution with the optimal objectives value, null if no solution exists or search was stopped before a
-     *         solution could be found. If null, check if a criterion was met to find out was caused the null.
+     * solution could be found. If null, check if a criterion was met to find out was caused the null.
      */
     default Solution findLexOptimalSolution(IntVar[] objectives, boolean maximize, Criterion... stop) {
         if (objectives == null || objectives.length == 0) {
@@ -512,7 +515,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         ref().addStopCriterion(stop);
         Solution sol = null;
         Constraint clint = null;
-        PropLexInt plint = null;
+        UpdatablePropagator<int[]> plint = null;
         // 1. copy objective variables and transform it if necessary
         IntVar[] mobj = new IntVar[objectives.length];
         for (int i = 0; i < objectives.length; i++) {
@@ -531,10 +534,10 @@ public interface IResolutionHelper extends ISelf<Solver> {
             }
             // 4. either update the constraint, or declare it if first solution
             if (plint != null) {
-                plint.updateIntVector(bestFound);
+                plint.update(bestFound, true);
             } else {
                 plint = new PropLexInt(mobj, bestFound, true);
-                clint = new Constraint("lex objectives", plint);
+                clint = new Constraint("lex objectives", (Propagator<IntVar>) plint);
                 clint.post();
             }
         }
@@ -546,6 +549,122 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
+     * Calling this method attempts to solve an optimization problem with the following strategy:
+     * <ul>
+     *     <li><b>Phase 1</b>: As long as solutions are found,
+     *     it imposes that {@code bounded} is bounded is member of {@code bounder} </li>
+     *     <li><b>Phase 2</b>:When no solution can be found or {@code limitPerAttempt} is reached:
+     *     <ol>
+     *         <li>the objective best value is recorded</li>
+     *         <li>{@code bounded} is bounded out of last bounds provided by {@code bounder}</li>
+     *         <li>last bounds provided by {@code bounder} are then relaxed using {@code boundsRelaxer}</li>
+     *         <li>the search is then reset (calling {@link Solver#reset()}</li>
+     *         <li>if {@code stopCriterion} returns {@code false}, go back to Phase 1</li>
+     *     </ol>
+     *     <li>Reset the search (calling {@link Solver#reset()}</li>
+     *     <li>Update the objective variable with the best value found so far and quit.</li>
+     *     </li>
+     * </ul>
+     * <p>
+     * Note that it is required that {@code bounded} is the objective variable.
+     * </p>
+     * <p>The call to {@link Solver#reset()} removes any limits declared,
+     * that is why {@code limitPerAttempt} can be needed. It will be re-declared upon any attempt.
+     * </p>
+     * <p>
+     *     To make sure the solving loop ends, it is possible to declare a {@code stopCriterion} which gives as
+     *     parameter the current number of attempts done so far. 
+     * </p>
+     * <p>{@code onSolution} makes possible to do something on a solution, for instance recording it.</p>
+     *
+     * <p> Example of usage:
+     *
+     *     <pre> {@code
+     *     Solution solution = new Solution(model);
+     *     model.getSolver().findOptimalSolutionWithBounds(
+     *                 minLoad,
+     *                 () -> new int[]{minLoad.getValue() * 2, 1000},
+     *                 (i, b) -> i, // always restart from initial bounds
+     *                 () -> model.getSolver().getNodeCount() > 10_000, // 10_000 nodes per attempt
+     *                 r -> r > 1 && model.getSolver().getNodeCount() == 0, // run at least twice then stop on trivial unsatisfaction
+     *                 solution::record  // record solutions
+     *         )}</pre>
+     * </p>
+     * <p>
+     * This strategy should be used when it is easy to find a solution, but quite hard to the optimal solution.
+     * Using this strategy with a sharp but accurate bounder strategy is expected to reduce drastically the search space
+     * at the expense of the completeness of the exploration.
+     * Indeed, a too optimistic bound may result in a dead-end, that's why a relaxation is applied,
+     * to allow completeness back even if it is not required.
+     * </p>
+     * <p>
+     *     Since {@link Solver#reset()} is called, limits might not be respected, that's why a
+     *     function {@code stopCriterion} parametrized with the number of attempts is needed.
+     * </p>
+     *
+     * @param bounded       the variable to bound, may be different from the declared objective variable
+     * @param bounder       the value to bound the variable with
+     * @param boundsRelaxer    relaxation function, take init bounds and last bounds found as parameters and return relaxed bounds
+     * @param stopCriterion function that {@code true} when conditions are met to stop this strategy.
+     * @param onSolution    instruction to execute when a solution is found (for instance, solution recording)
+     * @return {@code true} if at least one solution has been found, {@code false} otherwise.
+     * @implNote If the given problem is a satisfaction problem, calling this method will do nothing and return false.
+     */
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
+    default boolean findOptimalSolutionWithBounds(IntVar bounded,
+                                                  Supplier<int[]> bounder,
+                                                  BiFunction<int[], int[], int[]> boundsRelaxer,
+                                                  Criterion limitPerAttempt,
+                                                  IntPredicate stopCriterion,
+                                                  Runnable onSolution) {
+        if (!ref().getObjectiveManager().isOptimization()) return false;
+        // Record initial bounds
+        int[] initBounds = new int[]{bounded.getLB(), bounded.getUB()};
+        // Prepare the cut
+        IntIterableRangeSet interval = new IntIterableRangeSet(initBounds[0], initBounds[1]);
+        Member cut = new Member(bounded, interval);
+        UpdatablePropagator<IntIterableRangeSet> prop =
+                (UpdatablePropagator<IntIterableRangeSet>) cut.getPropagator(0);
+        // Prepare opposite cut
+        IntIterableRangeSet oppinterval = interval.duplicate();
+        oppinterval.flip(initBounds[0] - 1, initBounds[1] + 1);
+        NotMember oppcut = new NotMember(bounded, oppinterval);
+        UpdatablePropagator<IntIterableRangeSet> oppprop =
+                (UpdatablePropagator<IntIterableRangeSet>) oppcut.getPropagator(0);
+        cut.post();
+        oppcut.post();
+        boolean found = false;
+        int objective;
+        int[] bounds = initBounds;
+        int run = 0;
+        do {
+            run++;
+            // set the limit, which will be deleted on reset()
+            ref().limitSearch(limitPerAttempt);
+            while (ref().solve()) {
+                bounds = bounder.get();
+                interval.retainBetween(bounds[0], bounds[1]);
+                prop.update(interval, true);
+                onSolution.run();
+                found = true;
+            }
+            objective = ref().getObjectiveManager().getBestSolutionValue().intValue();
+            oppinterval.addAll(interval);
+            oppprop.update(oppinterval, false);
+            ref().reset();
+            ref().getObjectiveManager().updateBestSolution(objective);
+            bounds = boundsRelaxer.apply(initBounds, bounds);
+            interval.clear();
+            interval.addBetween(bounds[0], bounds[1]);
+            prop.update(interval, false);
+        } while (!stopCriterion.test(run));
+        ref().reset();
+        ref().getModel().unpost(cut);
+        ref().getObjectiveManager().updateBestSolution(objective);
+        return found;
+    }
+
+    /**
      * Explore the model, calling a {@link BiConsumer} for each {@link Solution} with its corresponding {@link IMeasures}.
      * <p>
      * The {@link Solution} and the {@link IMeasures} provided by the Biconsumer are always the same reference, consider
@@ -554,7 +673,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * The consumer and the criterion should not be linked ; instead use {@link ACounter} sub-classes.
      * </p>
-	 *
+     * <p>
      * Note that all variables will be recorded
      *
      * @param cons the consumer of solution and measure couples
