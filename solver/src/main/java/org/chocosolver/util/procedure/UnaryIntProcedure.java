@@ -10,5 +10,5 @@
 package org.chocosolver.util.procedure;
 
 public interface UnaryIntProcedure<A> extends IntProcedure {
-    UnaryIntProcedure set(A a);
+    UnaryIntProcedure<A> set(A a);
 }

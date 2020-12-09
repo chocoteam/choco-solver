@@ -16,5 +16,5 @@ package org.chocosolver.util.procedure;
  * @since 29 sept. 2010
  */
 public interface TernaryIntProcedure<A, B, C> extends IntProcedure {
-    TernaryIntProcedure set(A a, B b, C c);
+    TernaryIntProcedure<A,B,C> set(A a, B b, C c);
 }

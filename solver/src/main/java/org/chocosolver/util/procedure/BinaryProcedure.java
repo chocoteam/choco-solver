@@ -16,5 +16,5 @@ package org.chocosolver.util.procedure;
  * @since 29 sept. 2010
  */
 public interface BinaryProcedure<E, A, B> extends Procedure<E> {
-    BinaryProcedure set(A a, B b);
+    BinaryProcedure<E,A,B> set(A a, B b);
 }
