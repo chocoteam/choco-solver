@@ -1,6 +1,7 @@
 #!/bin/bash
 dir="$(dirname "$0")"
-source ${dir}/commons.sh
+# shellcheck disable=SC1090
+source "${dir}"/commons.sh
 #Script to notify the website about a release
 
 function sedInPlace() {
@@ -53,6 +54,7 @@ then
   
 else
 
+    # shellcheck disable=SC2016
     sedInPlace '6 i\
     \
     NEXT MILESTONE\
