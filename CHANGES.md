@@ -18,6 +18,7 @@ Fixes for issues #653 and #740.
 - Add QuickXPlain algorithm to find the Minimum Conflicting Set (see issue #509)
 - Update XCSP3 parser.
 - Fix `InDomainMedian` when domain size is even
+- Add new way to watch solving: `solver.verboseSolving()`
 - Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
 - Add `MultiArmedBandit` strategy sequencer
 
