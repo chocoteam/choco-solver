@@ -833,6 +833,28 @@ public class Search {
             }
         },
         /**
+         * To select the middle value in the current domain of the selected variable with floor rounding.
+         *
+         * @see IntDomainMiddle
+         */
+        MIDFLOOR {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMiddle(true), last);
+            }
+        },
+        /**
+         * To select the middle value in the current domain of the selected variable with ceil rouding.
+         *
+         * @see IntDomainMiddle
+         */
+        MIDCEIL {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMiddle(false), last);
+            }
+        },
+        /**
          * To select the minimal value in the current domain of the selected variable.
          *
          * @see IntDomainMin
