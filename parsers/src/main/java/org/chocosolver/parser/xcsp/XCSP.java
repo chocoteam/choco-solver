@@ -9,6 +9,7 @@
  */
 package org.chocosolver.parser.xcsp;
 
+import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.parser.ParserListener;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
@@ -49,7 +50,7 @@ public class XCSP extends RegParser {
     public XCSP() {
         super("ChocoXCSP");
         this.defaultSettings = new XCSPSettings(); // todo: rename or create the right one
-        if (PRINT_LOG) System.out.printf("c Choco e747e1e\n");
+        if (PRINT_LOG) System.out.print("c Choco e747e1e\n");
     }
 
     @Override
@@ -118,7 +119,8 @@ public class XCSP extends RegParser {
             Arrays.sort(decVars, Comparator.comparingInt(IntVar::getId));
             Solver solver = target.getSolver();
             solver.setSearch(Search.defaultSearch(target));
-            // REQUIRED TO GET DECISION VARIABLES, if any
+            solver.setNoGoodRecordingFromRestarts();
+            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
         }
     }
 
