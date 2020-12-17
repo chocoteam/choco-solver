@@ -139,15 +139,11 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
         }
         filterDomains();
-        for (int i = 0; i < vars.length; i++) {
-            monitors[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int vIdx, int mask) throws ContradictionException {
         currTable.clearMask();
-        monitors[vIdx].freeze();
         if (vars[vIdx].getDomainSize() > monitors[vIdx].sizeApproximation()) {
             monitors[vIdx].forEachRemVal(onValRem.set(vIdx));
             currTable.reverseMask();
@@ -158,7 +154,6 @@ public class PropCompactTable extends Propagator<IntVar> {
             }
         }
         currTable.intersectWithMask();
-        monitors[vIdx].unfreeze();
         if (currTable.isEmpty()) { // fail as soon as possible
             fails();
         }

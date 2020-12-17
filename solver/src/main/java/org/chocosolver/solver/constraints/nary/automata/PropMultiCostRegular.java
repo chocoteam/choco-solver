@@ -14,11 +14,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.List;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -41,6 +36,8 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.jgrapht.graph.DirectedMultigraph;
+
+import java.util.*;
 
 
 /**
@@ -240,19 +237,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
-		// added by JG: the propagator should be idempotent so it should not iterate over its own removals
-		for (int i = 0; i < idms.length; i++) {
-			idms[i].unfreeze();
-		}
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < offset) {
             checkWorld();
-            idms[varIdx].freeze();
             idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-            idms[varIdx].unfreeze();
         } else {// if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(varIdx - offset);
             computed = false;

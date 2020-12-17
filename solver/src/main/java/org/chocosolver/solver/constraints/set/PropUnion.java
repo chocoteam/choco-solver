@@ -149,15 +149,11 @@ public class PropUnion extends Propagator<SetVar> {
                     if (mate == -1) union.remove(j, this);
                 }
             }
-            // ------------------
-			for (int i = 0; i <= k; i++)
-				sdm[i].unfreeze();
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
             sdm[idxVarInProp].forEach(setForced, SetEventType.ADD_TO_KER);
             sdm[idxVarInProp].forEach(setRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
@@ -165,7 +161,6 @@ public class PropUnion extends Propagator<SetVar> {
             sdm[idxVarInProp].forEach(unionForced, SetEventType.ADD_TO_KER);
             sdm[idxVarInProp].forEach(unionRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         }
-        sdm[idxVarInProp].unfreeze();
     }
 
     @Override

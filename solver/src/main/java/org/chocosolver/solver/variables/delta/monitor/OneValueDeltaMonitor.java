@@ -37,8 +37,7 @@ public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDelta
         this.propagator = propagator;
     }
 
-    @Override
-    public void freeze() {
+    private void freeze() {
         if (needReset()) {
             delta.lazyClear();
             used = false;
@@ -48,25 +47,25 @@ public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDelta
     }
 
     @Override
-    public void unfreeze() {
-        used = false;
-        delta.lazyClear(); // fix 27/07/12
-    }
-
-    @Override
     public void forEachRemVal(SafeIntProcedure proc) {
-		if (used && propagator != delta.getCause(0))
-			proc.execute(delta.get(0));
+        freeze();
+        if (used && propagator != delta.getCause(0)) {
+            proc.execute(delta.get(0));
+        }
+        used = false;
     }
 
     @Override
     public void forEachRemVal(IntProcedure proc) throws ContradictionException {
-		if (used && propagator != delta.getCause(0))
-			proc.execute(delta.get(0));
+        freeze();
+        if (used && propagator != delta.getCause(0)) {
+            proc.execute(delta.get(0));
+        }
+        used = false;
     }
 
     @Override
-   	public int sizeApproximation(){
-   		return used && propagator != delta.getCause(0)?1:0;
-   	}
+    public int sizeApproximation() {
+        return used && propagator != delta.getCause(0) ? 1 : 0;
+    }
 }

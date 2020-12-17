@@ -73,13 +73,10 @@ public class PropOffSet extends Propagator<SetVar> {
                 vars[1].remove(j, this);
             }
         }
-        sdm[0].unfreeze();
-        sdm[1].unfreeze();
     }
 
     @Override
     public void propagate(int v, int mask) throws ContradictionException {
-        sdm[v].freeze();
         if (v == 0) {
             tmp = offSet;
             tmpSet = vars[1];
@@ -89,7 +86,6 @@ public class PropOffSet extends Propagator<SetVar> {
         }
         sdm[v].forEach(forced, SetEventType.ADD_TO_KER);
         sdm[v].forEach(removed, SetEventType.REMOVE_FROM_ENVELOPE);
-        sdm[v].unfreeze();
     }
 
     @Override

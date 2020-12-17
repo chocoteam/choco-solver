@@ -27,73 +27,68 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
 public class IntervalDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
     private final IIntervalDelta delta;
-    private int first, frozenFirst, frozenLast;
+    private int first, last;
     private final ICause propagator;
 
     public IntervalDeltaMonitor(IIntervalDelta delta, ICause propagator) {
-		super(delta.getEnvironment());
+        super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
-        this.frozenFirst = 0;
-        this.frozenLast = 0;
+        this.last = 0;
         this.propagator = propagator;
     }
 
-    @Override
-    public void freeze() {
-		if (needReset()) {
+    private void freeze() {
+        if (needReset()) {
             delta.lazyClear();
-			this.first = 0;
-			resetStamp();
-		}
-        assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
-                        :"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
-                        "but no value has been removed since the last call.";
-        this.frozenFirst = first; // freeze indices
-        this.frozenLast = delta.size();
-    }
-
-    @Override
-    public void unfreeze() {
-        //propagator is idempotent
-        delta.lazyClear();    // fix 27/07/12
-        resetStamp();
-        this.first = delta.size();
+            this.first = 0;
+            this.last = 0;
+            resetStamp();
+        }
+        assert this.getTimeStamp() == ((TimeStampedObject) delta).getTimeStamp()
+                : "Delta and monitor desynchronized. deltamonitor.freeze() is called " +
+                "but no value has been removed since the last call.";
+        this.first = this.last;
+        this.last = delta.size();
     }
 
     @Override
     public void forEachRemVal(SafeIntProcedure proc) {
-		for (int i = frozenFirst; i < frozenLast; i++) {
-			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-				int lb = delta.getLB(i);
-				int ub = delta.getUB(i);
-				for (; lb <= ub; lb++) {
-					proc.execute(lb);
-				}
-			}
+        freeze();
+        while (first < last) {
+            if (propagator == Cause.Null || propagator != delta.getCause(first)) {
+                int lb = delta.getLB(first);
+                int ub = delta.getUB(first);
+                for (; lb <= ub; lb++) {
+                    proc.execute(lb);
+                }
+            }
+            first++;
         }
     }
 
     @Override
     public void forEachRemVal(IntProcedure proc) throws ContradictionException {
-		for (int i = frozenFirst; i < frozenLast; i++) {
-			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-				int lb = delta.getLB(i);
-				int ub = delta.getUB(i);
-				for (; lb <= ub; lb++) {
-					proc.execute(lb);
-				}
-			}
-		}
+        freeze();
+        while (first < last) {
+            if (propagator == Cause.Null || propagator != delta.getCause(first)) {
+                int lb = delta.getLB(first);
+                int ub = delta.getUB(first);
+                for (; lb <= ub; lb++) {
+                    proc.execute(lb);
+                }
+            }
+            first++;
+        }
     }
 
     @Override
     public String toString() {
-        return String.format("(%d,last) => (%d,%d) :: %d", first, frozenFirst, frozenLast, delta.size());
+        return String.format("(%d,%d) :: %d", first, last, delta.size());
     }
 
-	@Override
-	public int sizeApproximation(){
-		return frozenLast-frozenFirst;
-	}
+    @Override
+    public int sizeApproximation() {
+        return last - first;
+    }
 }

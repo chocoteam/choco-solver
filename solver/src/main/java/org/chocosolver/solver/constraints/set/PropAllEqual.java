@@ -107,17 +107,12 @@ public class PropAllEqual extends Propagator<SetVar> {
                 }
             }
         }
-        for (int i = 0; i < n; i++) {
-            sdm[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        sdm[idxVarInProp].freeze();
         sdm[idxVarInProp].forEach(elementForced, SetEventType.ADD_TO_KER);
         sdm[idxVarInProp].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-        sdm[idxVarInProp].unfreeze();
     }
 
     @Override

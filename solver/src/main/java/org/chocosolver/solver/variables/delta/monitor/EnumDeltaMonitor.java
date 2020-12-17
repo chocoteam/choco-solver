@@ -27,62 +27,57 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
 public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMonitor {
 
     private final IEnumDelta delta;
-    private int first, frozenFirst, frozenLast;
+    private int first, last;
     private final ICause propagator;
 
     public EnumDeltaMonitor(IEnumDelta delta, ICause propagator) {
-		super(delta.getEnvironment());
+        super(delta.getEnvironment());
         this.delta = delta;
         this.first = 0;
-        this.frozenFirst = 0;
-        this.frozenLast = 0;
+        this.last = 0;
         this.propagator = propagator;
     }
 
-    @Override
-    public void freeze() {
-		if (needReset()) {
+    private void freeze() {
+        if (needReset()) {
             delta.lazyClear();
-			this.first = 0;
-			resetStamp();
-		}
-        this.frozenFirst = first; // freeze indices
-        this.frozenLast = delta.size();
-    }
-
-    @Override
-    public void unfreeze() {
-        //propagator is idempotent
-        delta.lazyClear();    // fix 27/07/12
-        resetStamp();
-        this.first = delta.size();
+            this.first = 0;
+            this.last = 0;
+            resetStamp();
+        }
+        this.first = this.last;
+        this.last = delta.size();
     }
 
     @Override
     public void forEachRemVal(SafeIntProcedure proc) {
-		for (int i = frozenFirst; i < frozenLast; i++) {
-			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-				proc.execute(delta.get(i));
-			}
-		}
+        freeze();
+        while (first < last) {
+            if (propagator == Cause.Null || propagator != delta.getCause(first)) {
+                proc.execute(delta.get(first));
+            }
+            first++;
+        }
     }
 
     @Override
     public void forEachRemVal(IntProcedure proc) throws ContradictionException {
-		for (int i = frozenFirst; i < frozenLast; i++) {
-			if (propagator == Cause.Null || propagator != delta.getCause(i)) {
-				proc.execute(delta.get(i));
-			}
-		}
+        freeze();
+        while (first < last) {
+            if (propagator == Cause.Null || propagator != delta.getCause(first)) {
+                proc.execute(delta.get(first));
+            }
+            first++;
+        }
     }
 
     @Override
     public String toString() {
-        return String.format("(%d,last) => (%d,%d) :: %d", first, frozenFirst, frozenLast, delta.size());
+        return String.format("(%d,%d) :: %d", first, last, delta.size());
     }
 
-	@Override
-	public int sizeApproximation(){
-		return frozenLast-frozenFirst;
-	}
+    @Override
+    public int sizeApproximation() {
+        return last - first;
+    }
 }

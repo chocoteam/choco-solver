@@ -285,17 +285,12 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         if (vars[n].getLB() == card) {
             filter();
         }
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < n) {
-            idms[varIdx].freeze();
             idms[varIdx].forEachRemVal(remProc.set(varIdx));
-            idms[varIdx].unfreeze();
         }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }

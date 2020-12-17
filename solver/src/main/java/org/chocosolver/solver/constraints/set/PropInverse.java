@@ -105,9 +105,6 @@ public class PropInverse extends Propagator<SetVar> {
                 sets[iter.nextInt() - offSet1].force(i + offSet2, this);
             }
         }
-        for (int i = 0; i < n + n2; i++) {
-            sdm[i].unfreeze();
-        }
     }
 
     @Override
@@ -123,10 +120,8 @@ public class PropInverse extends Propagator<SetVar> {
             idx += offSet1;
             offSet = offSet2;
         }
-        sdm[idxVarInProp].freeze();
         sdm[idxVarInProp].forEach(elementForced, SetEventType.ADD_TO_KER);
         sdm[idxVarInProp].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-        sdm[idxVarInProp].unfreeze();
     }
 
     @Override

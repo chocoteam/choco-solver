@@ -43,16 +43,6 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-    public void freeze() {
-        this.deltamonitor.freeze();
-    }
-
-    @Override
-    public void unfreeze() {
-        this.deltamonitor.unfreeze();
-    }
-
-    @Override
     public void forEachRemVal(SafeIntProcedure proc) {
         values.clear();
         deltamonitor.forEachRemVal(filler);

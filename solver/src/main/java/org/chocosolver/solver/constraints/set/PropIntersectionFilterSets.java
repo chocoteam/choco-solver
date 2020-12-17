@@ -96,9 +96,6 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
                 }
             }
         }
-        for (int i = 0; i <= k; i++) {
-            sdm[i].unfreeze();
-        }
     }
 
     private SetVar findUniqueSetThatDoesNotContainJInLB(int j) {
@@ -116,13 +113,11 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
             sdm[idxVarInProp].forEach(onSetAddToKer, SetEventType.ADD_TO_KER);
         } else {
             sdm[idxVarInProp].forEach(onIntersectionRemoveFromEnv, SetEventType.REMOVE_FROM_ENVELOPE);
         }
-        sdm[idxVarInProp].unfreeze();
     }
 
     @Override

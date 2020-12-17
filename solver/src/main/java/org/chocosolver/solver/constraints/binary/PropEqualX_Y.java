@@ -82,8 +82,6 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
                     y.removeValue(val, this);
                 }
             }
-            idms[0].unfreeze();
-            idms[1].unfreeze();
         }
         if (x.isInstantiated()) {
             assert (y.isInstantiated());
@@ -102,9 +100,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             setPassive();
         } else if (bothEnumerated) {
             indexToFilter = 1 - varIdx;
-            idms[varIdx].freeze();
             idms[varIdx].forEachRemVal(rem_proc);
-            idms[varIdx].unfreeze();
         }
     }
 

@@ -8,6 +8,10 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Simplify the way deltamonitors work. There is no need to `freeze` and `unfreeze` 
+them before calling `forEach...` methods. But, a call to `forEach...` consumes all values stored.
+- Fix a bug related to incremental propagators, views and missing events.
+
 
 ### Deprecated API (to be removed in next release):
 
@@ -18,7 +22,7 @@ See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 
 4.10.6 - 11 Dec 2020
--------------------             A
+-------------------             
 
 ### Major features:
 - Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.

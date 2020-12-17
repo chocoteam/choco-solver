@@ -117,15 +117,11 @@ public class PropClauseChanneling extends Propagator<IntVar> {
 
         LB.set(lb);
         UB.set(ub);
-
-        // finally delta monitor
-        dm.unfreeze();
     }
 
     @Override
     public void propagate(int vidx, int mask) throws ContradictionException {
         if (vidx == 0) { //iv has been modified
-            dm.freeze();
             if (IntEventType.isInstantiate(mask)) {
                 _inst(iv.getValue() - OFFSET);
             } else {
@@ -145,7 +141,6 @@ public class PropClauseChanneling extends Propagator<IntVar> {
                     }
                 });
             }
-            dm.unfreeze();
         } else {
             vidx--; // idx in eqs or lqs
             int act = 0;

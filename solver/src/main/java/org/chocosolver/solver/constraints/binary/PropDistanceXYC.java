@@ -93,9 +93,6 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         } else {
             filterNeq();
         }
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
@@ -107,9 +104,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     filterOnInst(vars[idx2], vars[varIdx].getValue());
                 } else {
                     if (IntEventType.isRemove(mask) && vars[varIdx].hasEnumeratedDomain()) {
-                        idms[varIdx].freeze();
                         idms[varIdx].forEachRemVal(remproc.set(varIdx));
-                        idms[varIdx].unfreeze();
                     }
                     if (IntEventType.isInclow(mask)) {
                         filterOnInf(vars[varIdx], vars[idx2]);

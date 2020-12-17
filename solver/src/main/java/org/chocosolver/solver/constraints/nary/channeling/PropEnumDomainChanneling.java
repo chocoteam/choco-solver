@@ -67,15 +67,12 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
                 }
             }
         }
-        idm.unfreeze();
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == n) {
-            idm.freeze();
             idm.forEachRemVal(rem_proc);
-            idm.unfreeze();
         } else {
             if (vars[varIdx].getValue() == 1) {
                 vars[n].instantiateTo(varIdx + offSet, this);

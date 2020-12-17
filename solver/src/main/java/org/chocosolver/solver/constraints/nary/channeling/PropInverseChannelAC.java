@@ -68,16 +68,11 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
             enumeratedFilteringOfX(i);
             enumeratedFilteringOfY(i);
         }
-        for (int i = 0; i < vars.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
         idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-        idms[varIdx].unfreeze();
     }
 
     private void enumeratedFilteringOfX(int var) throws ContradictionException {

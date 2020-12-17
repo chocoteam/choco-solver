@@ -85,18 +85,14 @@ public class PropSubsetEq extends Propagator<SetVar> {
             if (!vars[1].getUB().contains(j))
                 vars[0].remove(j, this);
         }
-        sdm[0].unfreeze();
-        sdm[1].unfreeze();
     }
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
-        sdm[i].freeze();
         if (i == 0)
             sdm[i].forEach(elementForced, SetEventType.ADD_TO_KER);
         else
             sdm[i].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-        sdm[i].unfreeze();
     }
 
     @Override

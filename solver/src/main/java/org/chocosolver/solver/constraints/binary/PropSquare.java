@@ -54,9 +54,6 @@ public class PropSquare extends Propagator<IntVar> {
         updateLowerBoundofY();
         updateUpperBoundofY();
         updateHolesinY();
-        for (int i = 0; i < idms.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
@@ -67,9 +64,7 @@ public class PropSquare extends Propagator<IntVar> {
                 updateUpperBoundofY();
                 updateHolesinY();
             } else {
-                idms[varIdx].freeze();
                 idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-                idms[varIdx].unfreeze();
 //                updateHolesinY();
             }
         } else { // filter from Y to X
@@ -82,9 +77,7 @@ public class PropSquare extends Propagator<IntVar> {
                 updateUpperBoundofX();
                 updateHolesinX();
             } else {
-                idms[varIdx].freeze();
                 idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-                idms[varIdx].unfreeze();
 //                updateHolesinX();
             }
         }

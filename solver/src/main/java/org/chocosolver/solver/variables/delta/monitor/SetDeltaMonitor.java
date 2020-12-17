@@ -24,21 +24,19 @@ import org.chocosolver.util.procedure.IntProcedure;
 public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonitor {
 
     private final ISetDelta delta;
-    private final int[] first; // references, in variable delta value to propagate, to un propagated values
-    private final int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+    private final int[] first;
+    private final int[] last;
     private final ICause propagator;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
 		super(delta.getEnvironment());
         this.delta = delta;
         this.first = new int[2];
-        this.frozenFirst = new int[2];
-        this.frozenLast = new int[2];
+        this.last = new int[2];
         this.propagator = propagator;
     }
 
-    @Override
-    public void freeze() {
+    private void freeze() {
 		if (needReset()) {
             delta.lazyClear();
 			for (int i = 0; i < 2; i++) {
@@ -50,22 +48,13 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
                         :"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
                         "but no value has been removed since the last call.";
         for (int i = 0; i < 2; i++) {
-            this.frozenFirst[i] = first[i]; // freeze indices
-            this.first[i] = this.frozenLast[i] = delta.getSize(i);
-        }
-    }
-
-    @Override
-    public void unfreeze() {
-        delta.lazyClear();    // fix 27/07/12
-        resetStamp();
-        for (int i = 0; i < 2; i++) {
-            this.first[i] = delta.getSize(i);
+            this.last[i] = delta.getSize(i);
         }
     }
 
     @Override
     public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+        freeze();
         int x;
         if (evt == SetEventType.ADD_TO_KER) {
             x = ISetDelta.LB;
@@ -74,10 +63,11 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
         } else {
             throw new UnsupportedOperationException("The event in parameter should be ADD_TO_KER or REMOVE_FROM_ENVELOPE");
         }
-        for (int i = frozenFirst[x]; i < frozenLast[x]; i++) {
-            if (delta.getCause(i, x) != propagator) {
-                proc.execute(delta.get(i, x));
+        while (first[x] < last[x]) {
+            if (delta.getCause(first[x], x) != propagator) {
+                proc.execute(delta.get(first[x], x));
             }
+            first[x]++;
         }
     }
 }
