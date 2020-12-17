@@ -108,7 +108,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "STR2 table constraint with " + table[0].length + "vars and " + table.length + "tuples";
+        return "STR2 table constraint with " + vars.length + "vars and " + table.length + "tuples";
     }
 
     //***********************************************************************************
