@@ -87,7 +87,24 @@ public interface IMoveFactory extends ISelf<Solver> {
      * @param restartsLimit    number of allowed restarts
      */
     default void setRestarts(LongCriterion restartCriterion, ICutoffStrategy restartStrategy, int restartsLimit) {
-        ref().setMove(new MoveRestart(ref().getMove(), restartStrategy, restartCriterion, restartsLimit));
+        ref().setRestarts(restartCriterion, restartStrategy, restartsLimit, true);
+    }
+
+    /**
+     * Creates a Move object that encapsulates the current move within a restart move.
+     * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
+     * thanks to <code>restartStrategy</code>.
+     * There will be at most <code>restartsLimit</code> restarts.
+     *
+     * @param restartCriterion the restart criterion, that is, the condition which triggers a restart
+     * @param restartStrategy  the way restart limit (evaluated in <code>restartCriterion</code>) is updated, that is, computes the next limit
+     * @param restartsLimit    number of allowed restarts
+     * @param resetCutoffOnSolution reset cutoff sequence on solutions
+     */
+    default void setRestarts(LongCriterion restartCriterion, ICutoffStrategy restartStrategy, int restartsLimit,
+                             boolean resetCutoffOnSolution) {
+        ref().setMove(new MoveRestart(ref().getMove(), restartStrategy, restartCriterion,
+                restartsLimit, resetCutoffOnSolution));
     }
 
     /**
@@ -132,7 +149,7 @@ public interface IMoveFactory extends ISelf<Solver> {
         ref().setMove(new MoveRestart(ref().getMove(),
                 new MonotonicRestartStrategy(1),
                 new SolutionCounter(ref().getModel(), 1),
-                Integer.MAX_VALUE));
+                Integer.MAX_VALUE, true));
     }
 
     /**
