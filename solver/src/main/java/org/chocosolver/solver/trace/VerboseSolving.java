@@ -68,7 +68,8 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
     public void afterInitialize(boolean correct) {
         if (correct) {
             header();
-            printer.start();
+            if(!printer.isAlive())
+                printer.start();
         }
     }
 
