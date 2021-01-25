@@ -22,4 +22,9 @@ public interface ICutoffStrategy {
      * @return the next restart cutoff
      * */
     long getNextCutoff();
+
+    /**
+     * Reset the sequence
+     */
+    void reset();
 }

@@ -12,7 +12,7 @@ NEXT MILESTONE
 them before calling `forEach...` methods. But, a call to `forEach...` consumes all values stored.
 - Fix a bug related to incremental propagators, views and missing events.
 - STR2+ now deals with STAR tuples. Can be used when CT+ is not efficient (mainly due to very large domain size)
-
+- Resetting cutoff strategies now possible
 
 ### Deprecated API (to be removed in next release):
 
