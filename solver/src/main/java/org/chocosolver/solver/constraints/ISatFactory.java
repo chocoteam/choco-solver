@@ -11,14 +11,16 @@ package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
+import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.constraints.reification.LocalConstructiveDisjunction;
 import org.chocosolver.solver.variables.BoolVar;
+
+import java.util.Arrays;
 
 /**
  * A factory dedicated to SAT.
@@ -33,7 +35,7 @@ public interface ISatFactory extends ISelf<Model> {
     /**
      * Ensures that the clauses defined in the Boolean logic formula TREE are satisfied.
      *
-     * @param TREE   the syntactic tree
+     * @param TREE the syntactic tree
      * @return true if the clause has been added to the clause store
      */
     default boolean addClauses(LogOp TREE) {
@@ -69,7 +71,7 @@ public interface ISatFactory extends ISelf<Model> {
                         // TODO: pass by satsolver directly
                         ret &= sat.addClause(lits);
                         sat.afterAddingClauses();
-                    }else{
+                    } else {
                         ref().sum(bvars, ">", 0).post();
                     }
                 }
@@ -100,7 +102,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addClause(pos, neg);
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             int PL = POSLITS.length;
             int NL = NEGLITS.length;
             BoolVar[] LITS = new BoolVar[PL + NL];
@@ -126,7 +128,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addTrue(sat.makeVar(BOOLVAR));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(BOOLVAR, "=", 1).post();
             return true;
         }
@@ -139,13 +141,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClauseFalse(BoolVar BOOLVAR) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addFalse(sat.makeVar(BOOLVAR));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(BOOLVAR, "=", 0).post();
             return true;
         }
@@ -159,13 +161,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolEq(BoolVar LEFT, BoolVar RIGHT) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolEq(sat.makeVar(LEFT), sat.makeVar(RIGHT));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "=", RIGHT).post();
             return true;
         }
@@ -179,13 +181,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolLe(BoolVar LEFT, BoolVar RIGHT) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolLe(sat.makeVar(LEFT), sat.makeVar(RIGHT));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "<=", RIGHT).post();
             return true;
         }
@@ -199,13 +201,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolLt(BoolVar LEFT, BoolVar RIGHT) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolLt(sat.makeVar(LEFT), sat.makeVar(RIGHT));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "<", RIGHT).post();
             return true;
         }
@@ -219,13 +221,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolNot(BoolVar LEFT, BoolVar RIGHT) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolNot(sat.makeVar(LEFT), sat.makeVar(RIGHT));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "!=", RIGHT).post();
             return true;
         }
@@ -239,7 +241,7 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolOrArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -249,7 +251,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addBoolOrArrayEqVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().max(TARGET, BOOLVARS).post();
             return true;
         }
@@ -263,7 +265,7 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolAndArrayEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -273,7 +275,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addBoolAndArrayEqVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().min(TARGET, BOOLVARS).post();
             return true;
         }
@@ -288,13 +290,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolOrEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolOrEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "+", RIGHT, ">", 0).reifyWith(TARGET);
             return true;
         }
@@ -309,13 +311,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolAndEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolAndEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().arithm(LEFT, "+", RIGHT, "=", 2).reifyWith(TARGET);
             return true;
         }
@@ -342,13 +344,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolIsEqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolIsEqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().reifyXeqY(LEFT, RIGHT, TARGET);
             return true;
         }
@@ -363,13 +365,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolIsNeqVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolIsNeqVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().reifyXneY(LEFT, RIGHT, TARGET);
             return true;
         }
@@ -384,13 +386,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolIsLeVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolIsLeVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().reifyXleY(LEFT, RIGHT, TARGET);
             return true;
         }
@@ -405,13 +407,13 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolIsLtVar(BoolVar LEFT, BoolVar RIGHT, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = sat.getSatSolver().addBoolIsLtVar(sat.makeVar(LEFT), sat.makeVar(RIGHT), sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().reifyXltY(LEFT, RIGHT, TARGET);
             return true;
         }
@@ -424,7 +426,7 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesBoolOrArrayEqualTrue(BoolVar[] BOOLVARS) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -434,7 +436,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addBoolOrArrayEqualTrue(vars);
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().sum(BOOLVARS, ">", 0).post();
             return true;
         }
@@ -457,7 +459,7 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesAtMostOne(BoolVar[] BOOLVARS) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -467,7 +469,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addAtMostOne(vars);
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().sum(BOOLVARS, "<", 2).post();
             return true;
         }
@@ -480,7 +482,7 @@ public interface ISatFactory extends ISelf<Model> {
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesAtMostNMinusOne(BoolVar[] BOOLVARS) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -490,7 +492,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addAtMostNMinusOne(vars);
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().sum(BOOLVARS, "<", BOOLVARS.length).post();
             return true;
         }
@@ -500,11 +502,11 @@ public interface ISatFactory extends ISelf<Model> {
      * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &ge; TARGET
      *
      * @param BOOLVARS a list of boolean variables
-     * @param TARGET a boolean variable
+     * @param TARGET   a boolean variable
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesSumBoolArrayGreaterEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -514,7 +516,7 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addSumBoolArrayGreaterEqVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
+        } else {
             ref().sum(BOOLVARS, ">=", TARGET).post();
             return true;
         }
@@ -524,11 +526,11 @@ public interface ISatFactory extends ISelf<Model> {
      * Add a clause stating that: max(BOOLVARS<sub>i</sub>) &le; TARGET
      *
      * @param BOOLVARS a list of boolean variables
-     * @param TARGET a boolean variable
+     * @param TARGET   a boolean variable
      * @return true if the clause has been added to the clause store
      */
     default boolean addClausesMaxBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             int[] vars = new int[BOOLVARS.length];
@@ -538,8 +540,8 @@ public interface ISatFactory extends ISelf<Model> {
             boolean add = sat.getSatSolver().addMaxBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
-            BoolVar max  = ref().boolVar(ref().generateName("bool_max"));
+        } else {
+            BoolVar max = ref().boolVar(ref().generateName("bool_max"));
             ref().max(max, BOOLVARS).post();
             max.le(TARGET).post();
             return true;
@@ -547,14 +549,14 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET
+     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET * |BOOLVARS|
      *
      * @param BOOLVARS a list of boolean variables
-     * @param TARGET a boolean variable
+     * @param TARGET   a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    default boolean addClausesSumBoolArrayLessEqVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
-        if(ref().getSettings().enableSAT()) {
+    default boolean addClausesSumBoolArrayLessEqKVar(BoolVar[] BOOLVARS, BoolVar TARGET) {
+        if (ref().getSettings().enableSAT()) {
             PropSat sat = ref().getMinisat().getPropSat();
             sat.beforeAddingClauses();
             boolean add = false;
@@ -565,11 +567,17 @@ public interface ISatFactory extends ISelf<Model> {
             for (int i = 0; i < BOOLVARS.length; i++) {
                 vars[i] = sat.makeVar(BOOLVARS[i]);
             }
-            add |= sat.getSatSolver().addSumBoolArrayLessEqVar(vars, sat.makeVar(TARGET));
+            add |= sat.getSatSolver().addSumBoolArrayLessEqKVar(vars, sat.makeVar(TARGET));
             sat.afterAddingClauses();
             return add;
-        }else{
-            ref().sum(BOOLVARS, "<=", TARGET).post();
+        } else {
+            int[] coeffs = new int[BOOLVARS.length + 1];
+            Arrays.fill(coeffs, 1);
+            coeffs[BOOLVARS.length] = -BOOLVARS.length;
+            BoolVar[] nBOOLVARS = new BoolVar[BOOLVARS.length + 1];
+            System.arraycopy(BOOLVARS, 0, nBOOLVARS, 0, BOOLVARS.length);
+            nBOOLVARS[BOOLVARS.length] = TARGET;
+            ref().scalar(nBOOLVARS, coeffs, "<=", 0).post();
             return true;
         }
     }
