@@ -2098,8 +2098,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             if (tuples.nbTuples() > 512 &&
                     (IntStream.range(0, vars.length)
                             .map(i -> tuples.max(i) - tuples.min(i))
-                            .max().getAsInt()) < 256 || tuples.allowUniversalValue()) {
+                            .max().getAsInt()) < 512) {
                 algo = "CT+";
+            }else if(tuples.allowUniversalValue()){
+                // STR2+ or CT+, depending on dom size
+                algo = "STR2+";
             } else {
                 algo = "GACSTR+";
             }
@@ -2148,7 +2151,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (algo.contains("+") && !tuples.isFeasible()) {
             throw new SolverException(algo + " table algorithm cannot be used with forbidden tuples.");
         }
-        if (tuples.allowUniversalValue() && !algo.contains("CT+")) {
+        if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
             throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
         }
         Propagator p;

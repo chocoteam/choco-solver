@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
+import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
@@ -25,8 +26,6 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.Map.Entry;
-import java.util.TreeMap;
 
 /**
  * STR2 Propagator for table constraints (only positive tuples)
@@ -46,7 +45,8 @@ public class PropTableStr2 extends Propagator<IntVar> {
     private ArrayList<str2_var> Ssup;
     private ArrayList<str2_var> Sval;
     private boolean firstProp = true;
-	private Tuples tuplesObject;
+    private Tuples tuplesObject;
+    private final int star;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -55,16 +55,20 @@ public class PropTableStr2 extends Propagator<IntVar> {
     public PropTableStr2(IntVar[] vars_, Tuples tuplesObject) {
         super(vars_, PropagatorPriority.LINEAR, false);
         this.table = tuplesObject.toMatrix();
-		this.tuplesObject = tuplesObject;
+        this.tuplesObject = tuplesObject;
+
         int size = 0;
         if (table.length > 0) {
             size = table[0].length;
         }
         str2vars = new str2_var[size];
+        int max = 0;
         for (int i = 0; i < size; i++) {
             str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
+            max = Math.max(max, vars_[i].getUB());
         }
-        tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET,0,model);
+        this.star = tuplesObject.allowUniversalValue() ? tuplesObject.getStarValue() : max + 1;
+        tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
         Ssup = new ArrayList<>();
         Sval = new ArrayList<>();
     }
@@ -85,25 +89,25 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-		if(firstProp){ // data structure not ready
-			return tuplesObject.check(vars);
-		}else {
-			boolean hasSupport = false;
-			for (int tuple : tuples) {
-				if (is_tuple_supported(tuple)) {
-					hasSupport = true;
-				}
-			}
-			if (hasSupport) {
-				if (isCompletelyInstantiated()) {
-					return ESat.TRUE;
-				} else {
-					return ESat.UNDEFINED;
-				}
-			} else {
-				return ESat.FALSE;
-			}
-		}
+        if (firstProp) { // data structure not ready
+            return tuplesObject.check(vars);
+        } else {
+            boolean hasSupport = false;
+            for (int tuple : tuples) {
+                if (is_tuple_supported(tuple)) {
+                    hasSupport = true;
+                }
+            }
+            if (hasSupport) {
+                if (isCompletelyInstantiated()) {
+                    return ESat.TRUE;
+                } else {
+                    return ESat.UNDEFINED;
+                }
+            } else {
+                return ESat.FALSE;
+            }
+        }
     }
 
     @Override
@@ -117,7 +121,8 @@ public class PropTableStr2 extends Propagator<IntVar> {
 
     private boolean is_tuple_supported(int tuple_index) {
         for (str2_var v : Sval) {
-            if (!v.var.contains(table[tuple_index][v.indice])) {
+            if (table[tuple_index][v.indice] != star &&
+                    !v.var.contains(table[tuple_index][v.indice])) {
                 return false;
             }
         }
@@ -127,10 +132,12 @@ public class PropTableStr2 extends Propagator<IntVar> {
     private void initialPropagate() throws ContradictionException {
         for (str2_var vst : str2vars) {
             DisposableValueIterator vit = vst.var.getValueIterator(true);
-            while (vit.hasNext()) {
-                int value = vit.next();
-                if (!vst.index_map.containsKey(value)) {
-                    vst.var.removeValue(value, this);
+            if (!vst.index_map.containsKey(star)) {
+                while (vit.hasNext()) {
+                    int value = vit.next();
+                    if (!vst.index_map.containsKey(value)) {
+                        vst.var.removeValue(value, this);
+                    }
                 }
             }
             vit.dispose();
@@ -138,7 +145,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         for (int t = 0; t < table.length; t++) {
             tuples.add(t);
         }
-        if(tuples.isEmpty()){
+        if (tuples.isEmpty()) {
             this.fails();
         }
     }
@@ -158,7 +165,12 @@ public class PropTableStr2 extends Propagator<IntVar> {
             if (is_tuple_supported(tuple)) {
                 for (int var = 0; var < Ssup.size(); var++) {
                     str2_var v = Ssup.get(var);
-                    if (!v.isConsistant(table[tuple][v.indice])) {
+                    int a = table[tuple][v.indice];
+                    if (a == star) {
+                        Ssup.set(var, Ssup.get(Ssup.size() - 1));
+                        Ssup.remove(Ssup.size() - 1);
+                        var--;
+                    } else if (!v.isConsistant(a)) {
                         v.makeConsistant(table[tuple][v.indice]);
                         if (v.nb_consistant == v.var.getDomainSize()) {
                             Ssup.set(var, Ssup.get(Ssup.size() - 1));
@@ -201,7 +213,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         /**
          * count the number of consistant value
          */
-        private TreeMap<Integer, Integer> index_map;
+        private TIntIntHashMap index_map;
 
         /**
          * contains all the value of the variable
@@ -212,7 +224,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
             last_size = env.makeInt(0);
             indice = indice_;
             nb_consistant = 0;
-            index_map = new TreeMap<>();
+            index_map = new TIntIntHashMap(16, 1.5f, Integer.MIN_VALUE, Integer.MIN_VALUE);
             int key = 0;
             for (int[] t : table) {
                 if (!index_map.containsKey(t[indice])) {
@@ -237,9 +249,11 @@ public class PropTableStr2 extends Propagator<IntVar> {
         }
 
         private void remove_unsupported_value(ICause cause) throws ContradictionException {
-            for (Entry<Integer, Integer> e : index_map.entrySet()) {
-                if (var.contains(e.getKey()) && !GAC_Val.get(e.getValue())) {
-                    var.removeValue(e.getKey(), cause);
+            int ub = var.getUB();
+            for (int key = var.getLB(); key <= ub; key = var.nextValue(key)) {
+                int v = index_map.get(key);
+                if (v > Integer.MIN_VALUE && !GAC_Val.get(v)) {
+                    var.removeValue(key, cause);
                 }
             }
         }

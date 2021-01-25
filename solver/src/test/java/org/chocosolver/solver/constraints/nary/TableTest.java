@@ -55,6 +55,14 @@ public class TableTest {
         return params.toArray(new Object[0][0]);
     }
 
+    @DataProvider(name = "starred")
+    public Object[][] starred() {
+        List<Object[]> params = new ArrayList<>();
+        params.add(new Object[]{"CT+"});
+        params.add(new Object[]{"STR2+"});
+        return params.toArray(new Object[0][0]);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         for (String a : ALGOS) {
@@ -519,8 +527,8 @@ public class TableTest {
         Assert.assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testST1() {
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+    public void testST1(String staralgo) {
         Model model = new Model();
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
@@ -531,16 +539,17 @@ public class TableTest {
         ts.add(3, ST, 1);
         ts.add(1, 2, 3);
         ts.add(2, 3, 2);
-        model.table(new IntVar[]{x, y, z}, ts, "CT+").post();
+        model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
-
+        solver.showDecisions();
+        solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testST2() {
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+    public void testST2(String staralgo) {
         Model model = new Model();
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
@@ -549,7 +558,7 @@ public class TableTest {
         int ST = 99;
         ts.setUniversalValue(ST);
         ts.add(ST, ST, ST);
-        model.table(new IntVar[]{x, y, z}, ts, "CT+").post();
+        model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
 
