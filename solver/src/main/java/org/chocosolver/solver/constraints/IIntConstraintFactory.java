@@ -2142,6 +2142,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     return table(vars[0], vars[1], tuples, algo);
                 case "GAC2001":
                     return table(vars[0], vars[1], tuples, "AC2001");
+                case "CT+":
+                    return table(vars[0], vars[1], tuples, "CT+");
                 case "GAC3rm":
                     return table(vars[0], vars[1], tuples, "AC3rm");
                 default:

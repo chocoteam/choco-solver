@@ -998,6 +998,24 @@ public class Model implements IModel {
         return st.toString();
     }
 
+    /**
+     * Display for each propagator involved in the model, its number of occurrences.
+     */
+    public void displayPropagatorOccurrences() {
+        Map<String, Integer> l = new HashMap<>();
+        System.out.println("Involved propagators: ");
+        for (Constraint c : this.getCstrs()) {
+            for (Propagator p : c.getPropagators()) {
+                l.compute(p.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+            }
+        }
+        l.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(e ->
+                        System.out.printf("\t%s (%d)\n", e.getKey(), e.getValue())
+                );
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //////////////////////////////////////////// RELATED TO MODELING FACTORIES /////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
