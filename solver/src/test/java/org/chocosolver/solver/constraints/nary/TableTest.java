@@ -566,6 +566,27 @@ public class TableTest {
         Assert.assertEquals(solver.getSolutionCount(), 27);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+        public void testST3(String staralgo) {
+        Model model = new Model();
+        //IntVar w = model.intVar("w", 0, 1);
+        IntVar x = model.intVar("x",0, 1);
+        IntVar y = model.intVar("y",0, 1);
+        IntVar z = model.intVar("z",0, 1);
+        Tuples ts = new Tuples(true);
+        int ST = 99;
+        ts.setUniversalValue(ST);
+        ts.add(1, ST, ST);
+        ts.add(ST, 1, ST);
+        ts.add(ST, ST, 1);
+        model.table(new IntVar[]{/*w, */x, y, z}, ts, staralgo).post();
+
+        Solver solver = model.getSolver();
+
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 7);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void testJuha1() {
         for (String a : BIN_ALGOS) {
@@ -630,7 +651,7 @@ public class TableTest {
      * WITNESS   : x0={0}
      * ###########################
      */
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void str2PlusTableShouldBeAc() throws ContradictionException {
         Model cp = new Model();
 
@@ -640,7 +661,7 @@ public class TableTest {
         cp.getSolver().propagate(); // should trigger an inconsistency
     }
 
-    @Test(groups = "1s", dataProvider = "algos")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT1(String a) {
         if(a.equals("FC"))return;
         Model cp = new Model();
@@ -667,7 +688,7 @@ public class TableTest {
 
     }
 
-    @Test(groups = "1s", dataProvider = "algos")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT2(String a) {
         if(a.equals("FC"))return;
         Model cp = new Model();

@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
-import gnu.trove.map.hash.TIntIntHashMap;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
@@ -19,7 +18,6 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -39,13 +37,13 @@ public class PropTableStr2 extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int[][] table;
-    private str2_var str2vars[];
-    private ISet tuples;
-    private ArrayList<str2_var> Ssup;
-    private ArrayList<str2_var> Sval;
+    private final int[][] table;
+    private final str2_var[] str2vars;
+    private final ISet tuples;
+    private final ArrayList<str2_var> ssup;
+    private final ArrayList<str2_var> sval;
     private boolean firstProp = true;
-    private Tuples tuplesObject;
+    private final Tuples tuplesObject;
     private final int star;
 
     //***********************************************************************************
@@ -69,8 +67,8 @@ public class PropTableStr2 extends Propagator<IntVar> {
         }
         this.star = tuplesObject.allowUniversalValue() ? tuplesObject.getStarValue() : max + 1;
         tuples = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
-        Ssup = new ArrayList<>();
-        Sval = new ArrayList<>();
+        ssup = new ArrayList<>();
+        sval = new ArrayList<>();
     }
 
     //***********************************************************************************
@@ -120,7 +118,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
     //***********************************************************************************
 
     private boolean is_tuple_supported(int tuple_index) {
-        for (str2_var v : Sval) {
+        for (str2_var v : sval) {
             if (table[tuple_index][v.indice] != star &&
                     !v.var.contains(table[tuple_index][v.indice])) {
                 return false;
@@ -130,18 +128,6 @@ public class PropTableStr2 extends Propagator<IntVar> {
     }
 
     private void initialPropagate() throws ContradictionException {
-        for (str2_var vst : str2vars) {
-            DisposableValueIterator vit = vst.var.getValueIterator(true);
-            if (!vst.index_map.containsKey(star)) {
-                while (vit.hasNext()) {
-                    int value = vit.next();
-                    if (!vst.index_map.containsKey(value)) {
-                        vst.var.removeValue(value, this);
-                    }
-                }
-            }
-            vit.dispose();
-        }
         for (int t = 0; t < table.length; t++) {
             tuples.add(t);
         }
@@ -151,30 +137,31 @@ public class PropTableStr2 extends Propagator<IntVar> {
     }
 
     private void Filter() throws ContradictionException {
-        Ssup.clear();
-        Sval.clear();
+        ssup.clear();
+        sval.clear();
         for (str2_var tmp : str2vars) {
-            tmp.GAC_clear();
-            Ssup.add(tmp);
+            ssup.add(tmp);
+            tmp.reset();
             if (tmp.last_size.get() != tmp.var.getDomainSize()) {
-                Sval.add(tmp);
+                sval.add(tmp);
                 tmp.last_size.set(tmp.var.getDomainSize());
             }
         }
         for (int tuple : tuples) {
             if (is_tuple_supported(tuple)) {
-                for (int var = 0; var < Ssup.size(); var++) {
-                    str2_var v = Ssup.get(var);
+                for (int var = 0; var < ssup.size(); var++) {
+                    str2_var v = ssup.get(var);
                     int a = table[tuple][v.indice];
                     if (a == star) {
-                        Ssup.set(var, Ssup.get(Ssup.size() - 1));
-                        Ssup.remove(Ssup.size() - 1);
+                        v.cnt = 0;
+                        ssup.set(var, ssup.get(ssup.size() - 1));
+                        ssup.remove(ssup.size() - 1);
                         var--;
-                    } else if (!v.isConsistant(a)) {
-                        v.makeConsistant(table[tuple][v.indice]);
-                        if (v.nb_consistant == v.var.getDomainSize()) {
-                            Ssup.set(var, Ssup.get(Ssup.size() - 1));
-                            Ssup.remove(Ssup.size() - 1);
+                    } else if (!v.ac.get(a - v.offset)) {
+                        v.ac.set(a - v.offset);
+                        if (--v.cnt == 0) {
+                            ssup.set(var, ssup.get(ssup.size() - 1));
+                            ssup.remove(ssup.size() - 1);
                             var--;
                         }
                     }
@@ -183,7 +170,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
                 tuples.remove(tuple);
             }
         }
-        for (str2_var v : Ssup) {
+        for (str2_var v : ssup) {
             v.remove_unsupported_value(this);
         }
     }
@@ -192,28 +179,28 @@ public class PropTableStr2 extends Propagator<IntVar> {
      * var class which will save local var information
      */
     private class str2_var {
-
-        private IntVar var;
         /**
          * original var
          */
-        private int indice;
+        private final IntVar var;
         /**
          * index in the table
          */
-        private IStateInt last_size;
+        private final int indice;
+
+        private final IStateInt last_size;
         /**
-         * Numerical reversible of the last size
+         * Store consistant values
          */
-        private BitSet GAC_Val;
+        private final BitSet ac;
         /**
-         * at each step, it will say if the value is GAC
+         * Current offset
          */
-        private int nb_consistant;
+        private int offset;
         /**
-         * count the number of consistant value
+         * Count the number of value to remove
          */
-        private TIntIntHashMap index_map;
+        private int cnt;
 
         /**
          * contains all the value of the variable
@@ -223,37 +210,20 @@ public class PropTableStr2 extends Propagator<IntVar> {
             var = var_;
             last_size = env.makeInt(0);
             indice = indice_;
-            nb_consistant = 0;
-            index_map = new TIntIntHashMap(16, 1.5f, Integer.MIN_VALUE, Integer.MIN_VALUE);
-            int key = 0;
-            for (int[] t : table) {
-                if (!index_map.containsKey(t[indice])) {
-                    index_map.put(t[indice], key++);
-                }
-            }
-            GAC_Val = new BitSet(index_map.size());
+            ac = new BitSet();
         }
 
-        private void GAC_clear() {
-            GAC_Val.clear();
-            nb_consistant = 0;
-        }
-
-        private boolean isConsistant(int value) {
-            return GAC_Val.get(index_map.get(value));
-        }
-
-        private void makeConsistant(int value) {
-            GAC_Val.set(index_map.get(value));
-            nb_consistant++;
+        private void reset() {
+            ac.clear();
+            offset = var.getLB();
+            cnt = var.getDomainSize();
         }
 
         private void remove_unsupported_value(ICause cause) throws ContradictionException {
-            int ub = var.getUB();
-            for (int key = var.getLB(); key <= ub; key = var.nextValue(key)) {
-                int v = index_map.get(key);
-                if (v > Integer.MIN_VALUE && !GAC_Val.get(v)) {
-                    var.removeValue(key, cause);
+            for (int val = var.getLB(); cnt > 0 && val <= var.getUB(); val = var.nextValue(val)) {
+                if (!ac.get(val - offset)) {
+                    var.removeValue(val, cause);
+                    cnt--;
                 }
             }
         }
