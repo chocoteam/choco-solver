@@ -47,6 +47,8 @@ public class ExpressionTest {
                 ex.boolVar().eq(1).post();
                 break;
         }
+        model.displayVariableOccurrences();
+        model.displayPropagatorOccurrences();
         Assert.assertEquals(model.getSolver().streamSolutions().count(), nbsol);
 
     }
@@ -215,6 +217,14 @@ public class ExpressionTest {
         IntVar x = model.intVar(0, 5);
         IntVar[] y = model.intVarArray(2, 0, 5);
         eval(model, x.mul(y).eq(20), p, 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test19_1(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(-5, 5);
+        IntVar[] y = model.intVarArray(2, 0, 5);
+        eval(model, x.mul(y).eq(-2), p, 3);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")

@@ -147,6 +147,7 @@ public class XCSPParser implements XCallbacks2 {
         if (type == Types.TypeExpr.VAR) {
             return (BoolVar)var(tree.var(0));
         } else if (type == Types.TypeExpr.LONG) {
+            // TODO: deal with boolean primitive?
             return (BoolVar)model.intVar(tree.val(0));
         }
         XNode<V>[] sons = tree.sons;
@@ -200,7 +201,7 @@ public class XCSPParser implements XCallbacks2 {
         } else if (type == Types.TypeExpr.SYMBOL) {
             return model.intVar(symbolToInt.get(node.toString()));
         } else if (type == Types.TypeExpr.LONG) {
-            return model.intVar(node.val(0));
+            return new ArExpression.IntPrimitive(node.val(0));
         }
         XNode<V>[] sons = node.sons;
         if(type.isLogicalOperator()&& type.arityMax>1 || type.equals(Types.TypeExpr.NOT)){
