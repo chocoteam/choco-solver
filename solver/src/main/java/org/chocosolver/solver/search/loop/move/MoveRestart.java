@@ -98,8 +98,7 @@ public class MoveRestart implements Move {
     @Override
     public boolean repair(Solver solver) {
         if (resetCutoffOnSolution && solutions < solver.getSolutionCount()) {
-            assert solutions == solver.getSolutionCount() - 1;
-            solutions++;
+            solutions = solver.getSolutionCount() ;
             restartStrategy.reset();
         }
         boolean repair;
