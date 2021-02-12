@@ -232,6 +232,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private boolean canBeRepaired = true;
 
+    /**
+     * This object is accessible lazily
+     */
+    private Solution lastSol = null;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1280,6 +1285,20 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void setJumpTo(int jto) {
         this.jumpTo = jto;
+    }
+
+    /**
+     * The first call to this method will create a new solution based on all variables
+     * of the model and attach it to this.
+     * Next calls return the solution instance.
+     * @return a global solution.
+     */
+    public Solution defaultSolution(){
+        if(lastSol == null){
+            lastSol = new Solution(this.getModel());
+            this.attach(lastSol);
+        }
+        return lastSol;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
