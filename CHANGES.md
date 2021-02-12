@@ -14,6 +14,7 @@ them before calling `forEach...` methods. But, a call to `forEach...` consumes a
 - STR2+ now deals with STAR tuples. Can be used when CT+ is not efficient (mainly due to very large domain size)
 - Resetting cutoff strategies now possible
 - Change restart behavior to reset cutoff on solutions (can be disabled though, calling `solver.setRestarts(..)` API).
+- Display occurrences of variable types and occurrences of propagator types
 
 ### Deprecated API (to be removed in next release):
 
