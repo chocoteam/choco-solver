@@ -40,6 +40,7 @@ import org.xcsp.parser.entries.XVariables;
 
 import java.io.File;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -847,65 +848,9 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrCount(String id, XVariables.XVarInteger[] list, int[] values, Condition condition) {
-        if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    IntVar count = model.intVar(0, list.length);
-                    model.among(count, vars(list), values).post();
-                    IntVar limit = condV(condition);
-                    model.arithm(count, "<", limit).post();
-                }
-                return;
-                case LE: {
-                    IntVar count = model.intVar(0, list.length);
-                    model.among(count, vars(list), values).post();
-                    IntVar limit = condV(condition);
-                    model.arithm(count, "<=", limit).post();
-                }
-                return;
-                case GE: {
-                    IntVar count = model.intVar(0, list.length);
-                    model.among(count, vars(list), values).post();
-                    IntVar limit = condV(condition);
-                    model.arithm(count, ">=", limit).post();
-                }
-                return;
-                case GT: {
-                    IntVar count = model.intVar(0, list.length);
-                    model.among(count, vars(list), values).post();
-                    IntVar limit = condV(condition);
-                    model.arithm(count, ">", limit).post();
-                }
-                return;
-                case NE: {
-                    IntVar count = model.intVar(0, list.length);
-                    model.among(count, vars(list), values).post();
-                    IntVar limit = condV(condition);
-                    model.arithm(count, "!=", limit).post();
-                }
-                return;
-                case EQ:
-                    model.among(condV(condition), vars(list), values).post();
-                    return;
-            }
-        } else if (condition instanceof Condition.ConditionSet) {
-            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            switch (conditionSet.operator) {
-                case IN: {
-                    IntVar intvl;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        intvl = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        intvl = condV(condition);
-                    }
-                    model.among(intvl, vars(list), values).post();
-                    return;
-                }
-            }
-        }
-        // falling case
-        XCallbacks2.super.buildCtrCount(id, list, values, condition);
+        IntVar[] vars = vars(list);
+        dealWithCondition(condition, 0, list.length,
+                x -> model.among(x, vars(list), values).post());
     }
 
 
@@ -992,12 +937,8 @@ public class XCSPParser implements XCallbacks2 {
             if (!notWells.contains(tgt)){
                 possibleWells.add(tgt);
             }
-            if (possibleRoots.contains(tgt)){
-                possibleRoots.remove(tgt);
-            }
-            if (possibleWells.contains(src)){
-                possibleWells.remove(src);
-            }
+            possibleRoots.remove(tgt);
+            possibleWells.remove(src);
             List<Object[]> succs = layers.computeIfAbsent(src, k -> new ArrayList<>());
             succs.add(transitions[t]);
         }
@@ -1058,117 +999,63 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMin(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.lt(condV(condition)).post();
-                }
-                break;
-                case LE: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.le(condV(condition)).post();
-                }
-                break;
-                case GE: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.ge(condV(condition)).post();
-                }
-                break;
-                case GT: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.gt(condV(condition)).post();
-                }
-                break;
-                case NE: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.ne(condV(condition)).post();
-                }
-                break;
-                case EQ:
-                    model.min(condV(condition), vars).post();
-                    break;
-            }
-        } else if (condition instanceof Condition.ConditionSet) {
-            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            switch (conditionSet.operator) {
-                case IN: {
-                    IntVar res;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        res = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        res = condV(condition);
-                    }
-                    model.min(res, vars).post();
-                }
-                break;
-                case NOTIN: {
-                    IntVar res = model.intVar(min, max);
-                    model.min(res, vars).post();
-                    res.ne(condV(condition)).post();
-                    notin(res, condition);
-                    model.min(res, vars).post();
-                }
-                break;
-            }
-        }
+        dealWithCondition(condition, min, max, x -> model.min(x, vars).post());
+    }
+
+
+    @Override
+    public void buildCtrElement(String id, XVariables.XVarInteger[] list, Condition condition) {
+        IntVar[] vars = vars(list);
+        int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
+        int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
+        dealWithCondition(condition, min, max,
+                x -> model.element(x, vars(list), model.intVar(0, list.length), 0).post());
     }
 
     @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger value) {
-        model.element(var(value), vars(list), model.intVar(0, list.length), 0).post();
-    }
-
-    @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[] list, int value) {
-        model.element(model.intVar(value), vars(list), model.intVar(0, list.length), 0).post();
-    }
-
-    @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[] list, int startIndex, XVariables.XVarInteger index, Types.TypeRank rank, XVariables.XVarInteger value) {
+    public void buildCtrElement(String id, XVariables.XVarInteger[] list,
+                                int startIndex, XVariables.XVarInteger index,
+                                Types.TypeRank rank, Condition condition) {
         if (rank == Types.TypeRank.ANY) {
-            model.element(var(value), vars(list), var(index), startIndex).post();
-        } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, value);
+            IntVar[] vars = vars(list);
+            int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
+            int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
+            dealWithCondition(condition, min, max,
+                    x -> model.element(x, vars(list), var(index), startIndex).post());
+        } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, condition);
     }
 
     @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[] list, int startIndex, XVariables.XVarInteger index, Types.TypeRank rank, int value) {
+    public void buildCtrElement(String id, int[] list, int startIndex, XVariables.XVarInteger index,
+                                Types.TypeRank rank, Condition condition) {
         if (rank == Types.TypeRank.ANY) {
-            model.element(model.intVar(value), vars(list), var(index), startIndex).post();
-        } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, value);
+            int min = Arrays.stream(list).min().getAsInt();
+            int max = Arrays.stream(list).max().getAsInt();
+            dealWithCondition(condition, min, max,
+                    x -> model.element(x, list, var(index), startIndex).post());
+        } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, condition);
     }
 
     @Override
-    public void buildCtrElement(String id, int[] list, int startIndex, XVariables.XVarInteger index, Types.TypeRank rank, XVariables.XVarInteger value) {
-        if (rank == Types.TypeRank.ANY) {
-            model.element(var(value), list, var(index), startIndex).post();
-        } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, value);
+    public void buildCtrElement(String id, int[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex,
+                                int startColIndex, XVariables.XVarInteger colIndex, Condition condition) {
+        int min = Arrays.stream(matrix).mapToInt(r -> Arrays.stream(r).min().getAsInt()).min().getAsInt();
+        int max = Arrays.stream(matrix).mapToInt(r -> Arrays.stream(r).max().getAsInt()).max().getAsInt();
+        dealWithCondition(condition, min, max,
+                x -> model.element(x, matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex));
     }
 
     @Override
-    public void buildCtrElement(String id, int[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, int value) {
-        model.element(model.intVar(value), matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex);
-    }
-
-    @Override
-    public void buildCtrElement(String id, int[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, XVariables.XVarInteger value) {
-        model.element(var(value), matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex);
-    }
-
-    @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, int value) {
-        model.element(model.intVar(value), vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
-    }
-
-    @Override
-    public void buildCtrElement(String id, XVariables.XVarInteger[][] matrix, int startRowIndex, XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex, XVariables.XVarInteger value) {
-        model.element(var(value), vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
+    public void buildCtrElement(String id, XVariables.XVarInteger[][] matrix, int startRowIndex,
+                                XVariables.XVarInteger rowIndex, int startColIndex, XVariables.XVarInteger colIndex,
+                                Condition condition) {
+        IntVar[][] vars = vars(matrix);
+        int min = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getLB)
+                .min().getAsInt()).min().getAsInt();
+                int max = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getLB)
+                        .max().getAsInt()).max().getAsInt();
+                dealWithCondition(condition, min, max,
+        x -> model.element(x, vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex));
     }
 
     @Override
@@ -1184,66 +1071,8 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMax(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.lt(condV(condition)).post();
-                }
-                break;
-                case LE: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.le(condV(condition)).post();
-                }
-                break;
-                case GE: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.ge(condV(condition)).post();
-                }
-                break;
-                case GT: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.gt(condV(condition)).post();
-                }
-                break;
-                case NE: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.ne(condV(condition)).post();
-                }
-                break;
-                case EQ:
-                    model.max(condV(condition), vars).post();
-                    break;
-            }
-        } else if (condition instanceof Condition.ConditionSet) {
-            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            switch (conditionSet.operator) {
-                case IN: {
-                    IntVar res;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        res = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        res = condV(condition);
-                    }
-                    model.max(res, vars).post();
-                }
-                break;
-                case NOTIN: {
-                    IntVar res = model.intVar(min, max);
-                    model.max(res, vars).post();
-                    res.ne(condV(condition)).post();
-                    notin(res, condition);
-                    model.min(res, vars).post();
-                }
-                break;
-            }
-        }
+        dealWithCondition(condition, min, max,
+                x -> model.max(x, vars).post());
     }
 
     @Override
@@ -1552,6 +1381,67 @@ public class XCSPParser implements XCallbacks2 {
         model.table(vars(list), tuples).post();
     }
 
+    private void dealWithCondition(Condition condition, int min, int max, Consumer<IntVar> postCtr) {
+        if (condition instanceof Condition.ConditionRel) {
+            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
+            switch (conditionRel.operator) {
+                case LT: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.lt(condV(condition)).post();
+                }
+                break;
+                case LE: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.le(condV(condition)).post();
+                }
+                break;
+                case GE: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.ge(condV(condition)).post();
+                }
+                break;
+                case GT: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.gt(condV(condition)).post();
+                }
+                break;
+                case NE: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.ne(condV(condition)).post();
+                }
+                break;
+                case EQ:
+                    postCtr.accept(condV(condition));
+                    break;
+            }
+        } else if (condition instanceof Condition.ConditionSet) {
+            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
+            switch (conditionSet.operator) {
+                case IN: {
+                    IntVar res;
+                    if (condition instanceof Condition.ConditionIntvl) {
+                        res = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
+                    } else {
+                        res = condV(condition);
+                    }
+                    postCtr.accept(res);
+                }
+                break;
+                case NOTIN: {
+                    IntVar res = model.intVar(min, max);
+                    postCtr.accept(res);
+                    res.ne(condV(condition)).post();
+                    notin(res, condition);
+                }
+                break;
+            }
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// GROUP ///////////////////////////////////////////////////////////////////

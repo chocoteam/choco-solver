@@ -59,6 +59,7 @@ public class BaseXCSPListener implements ParserListener {
     @Override
     public void afterParsingFile() {
         if (((XCSPSettings) xcspparser.getModel().getSettings()).printConstraints()) {
+            xcspparser.getModel().displayVariableOccurrences();
             xcspparser.getModel().displayPropagatorOccurrences();
         }
     }
