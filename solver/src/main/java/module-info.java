@@ -129,7 +129,7 @@ module org.chocosolver.solver {
     requires org.jgrapht.core;
     requires cpprof.java;
     requires java.desktop;
-    requires xchart;
+    requires org.knowm.xchart;
     requires java.management;
     requires automaton;
 
