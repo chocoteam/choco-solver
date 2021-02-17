@@ -9,14 +9,14 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import static org.chocosolver.util.tools.MathUtils.safeMultiply;
-
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
+
+import static org.chocosolver.util.tools.MathUtils.safeMultiply;
 
 /**
  * V0 * V1 = V2
@@ -51,7 +51,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
             hasChanged |= div(v1, v2.getLB(), v2.getUB(), v0.getLB(), v0.getUB());
             hasChanged |= mul(v2, v0.getLB(), v0.getUB(), v1.getLB(), v1.getUB());
         }
-        if (v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(1))) {
+        if (v2.isInstantiatedTo(0) && (v0.isInstantiatedTo(0) || v1.isInstantiatedTo(0))) {
             setPassive();
         }
     }
