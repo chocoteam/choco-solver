@@ -15,6 +15,13 @@ them before calling `forEach...` methods. But, a call to `forEach...` consumes a
 - Resetting cutoff strategies now possible
 - Change restart behavior to reset cutoff on solutions (can be disabled though, calling `solver.setRestarts(..)` API).
 - Display occurrences of variable types and occurrences of propagator types
+- Now `IntDomainBest` offers API to break ties (see `Search.ValH.BLAST` for an example).
+- Add `solver.defaultSolution()` which creates lazily a solution recording everything, plugs it and returns it. 
+This is helpful when a Solution object is required in many places. 
+- Modification of the management of expressions in order to reduce the number of created variables (WIP).
+- Add `IntVar.stream()` that streams a variable's values (in increasing order)
+- Add `Search.ValH.BMIN` and `Search.ValH.BLAST`
+- Change some default settings 
 
 ### Deprecated API (to be removed in next release):
 
