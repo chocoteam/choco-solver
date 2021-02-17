@@ -10,12 +10,11 @@
 package org.chocosolver.examples.integer;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.loop.lns.neighbors.TwoOptNeighborhood;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.IntVar;
 
@@ -85,13 +84,13 @@ public class TSP {
 
         model.setObjective(Model.MINIMIZE, totDist);
         Solver solver = model.getSolver();
+        Solution lastSol = solver.defaultSolution();
         solver.setSearch(
                 Search.intVarSearch(
                         new InputOrder<>(model),
-                        new IntDomainMin(),
+                        new IntDomainBest((v,i) -> lastSol.exists() && lastSol.getIntVal(v) == i),
                         dist)
         );
-        solver.setLNS(new TwoOptNeighborhood(succ, 11), new FailCounter(model, 200));
         solver.showShortStatistics();
         while (solver.solve()) {
             int current = 0;
