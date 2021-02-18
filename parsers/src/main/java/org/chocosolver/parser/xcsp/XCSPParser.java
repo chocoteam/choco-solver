@@ -202,7 +202,7 @@ public class XCSPParser implements XCallbacks2 {
         } else if (type == Types.TypeExpr.SYMBOL) {
             return model.intVar(symbolToInt.get(node.toString()));
         } else if (type == Types.TypeExpr.LONG) {
-            return new ArExpression.IntPrimitive(node.val(0));
+            return new ArExpression.IntPrimitive(node.val(0), model);
         }
         XNode<V>[] sons = node.sons;
         if(type.isLogicalOperator()&& type.arityMax>1 || type.equals(Types.TypeExpr.NOT)){
