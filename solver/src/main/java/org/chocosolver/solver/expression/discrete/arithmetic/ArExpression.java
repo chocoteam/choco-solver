@@ -720,9 +720,11 @@ public interface ArExpression {
     class IntPrimitive implements ArExpression {
 
         final int v;
+        final Model m;
 
-        public IntPrimitive(int value) {
+        public IntPrimitive(int value, Model model) {
             this.v = value;
+            this.m = model;
         }
 
         @Override
@@ -732,12 +734,32 @@ public interface ArExpression {
 
         @Override
         public Model getModel() {
-            throw new NullPointerException();
+            return m;
         }
 
         @Override
         public IntVar intVar() {
-            throw new UnsupportedOperationException();
+            return m.intVar(v);
+        }
+
+        @Override
+        public boolean isExpressionLeaf() {
+            return true;
+        }
+
+        @Override
+        public void extractVar(HashSet<IntVar> variables) {
+            variables.add(this.intVar());
+        }
+
+        @Override
+        public int ieval(int[] values, Map<IntVar, Integer> map) {
+            return v;
+        }
+
+        @Override
+        public String toString() {
+            return Integer.toString(v);
         }
     }
 }

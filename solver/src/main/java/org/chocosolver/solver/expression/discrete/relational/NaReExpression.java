@@ -89,8 +89,8 @@ public class NaReExpression implements ReExpression {
                     model.reifyXeqY(vs[0], vs[1], me);
                 } else {
                     IntVar count = model.intVar(op + "_count_", 1, vs.length);
-                    model.atMostNValues(vs, count, false).post();
-                    model.reifyXltC(count, 2, me);
+                    model.nValues(vs, count).post();
+                    model.reifyXeqC(count, 1, me);
                 }
             }else if(op == Operator.IN){
                 BoolVar[] reifs = model.boolVarArray(vs.length - 1);
