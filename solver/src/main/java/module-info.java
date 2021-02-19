@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -129,7 +129,7 @@ module org.chocosolver.solver {
     requires org.jgrapht.core;
     requires cpprof.java;
     requires java.desktop;
-    requires xchart;
+    requires org.knowm.xchart;
     requires java.management;
     requires automaton;
 
