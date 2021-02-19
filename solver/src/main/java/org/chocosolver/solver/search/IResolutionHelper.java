@@ -23,6 +23,7 @@ import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
