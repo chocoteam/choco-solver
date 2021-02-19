@@ -62,7 +62,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         str2vars = new str2_var[size];
         int max = 0;
         for (int i = 0; i < size; i++) {
-            str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i, table);
+            str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i);
             max = Math.max(max, vars_[i].getUB());
         }
         this.star = tuplesObject.allowUniversalValue() ? tuplesObject.getStarValue() : max + 1;
@@ -139,12 +139,13 @@ public class PropTableStr2 extends Propagator<IntVar> {
     private void Filter() throws ContradictionException {
         ssup.clear();
         sval.clear();
-        for (str2_var tmp : str2vars) {
+        for (int i = 0; i < str2vars.length; i++) {
+            str2_var tmp = str2vars[i];
             ssup.add(tmp);
             tmp.reset();
-            if (tmp.last_size.get() != tmp.var.getDomainSize()) {
+            if (tmp.last_size.get() != tmp.cnt) {
                 sval.add(tmp);
-                tmp.last_size.set(tmp.var.getDomainSize());
+                tmp.last_size.set(tmp.cnt);
             }
         }
         for (int tuple : tuples) {
@@ -206,7 +207,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
          * contains all the value of the variable
          */
 
-        private str2_var(IEnvironment env, IntVar var_, int indice_, int[][] table) {
+        private str2_var(IEnvironment env, IntVar var_, int indice_) {
             var = var_;
             last_size = env.makeInt(0);
             indice = indice_;
