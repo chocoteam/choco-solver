@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -427,6 +428,16 @@ public class ModelTest {
     public void testFindAllSolutions2() {
         Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
         Assert.assertEquals(m.getSolver().streamSolutions().count(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindAllSolutionsVariablesStored() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 0, 4);
+        IntVar y = m.intVar("y", 0, 4);
+        x.eq(y).post();
+        List<Solution> solutions = m.getSolver().findAllSolutions(new IntVar[]{x});
+        Assert.assertEquals(solutions.get(0).retrieveIntVars(true).size(), 1);
     }
 
     @Test(groups = "1s", timeOut = 60000)
