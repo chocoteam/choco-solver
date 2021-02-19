@@ -44,6 +44,7 @@ import java.util.stream.StreamSupport;
  * @author Charles Prud'homme
  * @author Guillaume Lelouet
  * @author Dimitri Justeau-Allaire (dimitri.justeau@gmail.com)
+ * @author Mathieu Vavrille
  * @since 25/04/2016.
  */
 public interface IResolutionHelper extends ISelf<Solver> {
@@ -101,6 +102,54 @@ public interface IResolutionHelper extends ISelf<Solver> {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Attempts to find all solutions of the declared satisfaction problem, and stores only the variables present in varsToStore.
+     * <ul>
+     * <li>If the method returns an empty list: </li>
+     * <ul>
+     * <li>
+     * either a stop criterion (e.g., a time limit) stops the search before any solution has been found,
+     * </li>
+     * <li>
+     * or no solution exists for the problem (i.e., over-constrained).
+     * </li>
+     * </ul>
+     * <li>if the method returns a list with at least one element in it:</li>
+     * <ul>
+     * <li>either the resolution stops eagerly du to a stop criterion before finding all solutions,</li>
+     * <li>or all solutions have been found.</li>
+     * </ul>
+     * </ul>
+     * <p>
+     * This method run the following instructions:
+     * <pre>
+     *     {@code
+     *     List<Solution> solutions = new ArrayList<>();
+     *     while (model.getSolver().solve()){
+     *          solutions.add(new Solution(model, varsToStore).record());
+     *     }
+     *     return solutions;
+     *     }
+     * </pre>
+     * 
+     * <p>
+     * Note that it clears the current objective function, if any
+     *
+     * @param varsToStore list of variables to store in the solutions
+     * @param stop optional criterion to stop the search before finding all solutions
+     * @return a list that contained the found solutions, where only the variables in varsToStore were stored.
+     */
+    default List<Solution> findAllSolutions(Variable[] varsToStore, Criterion... stop) {
+        ref().getModel().clearObjective();
+        ref().addStopCriterion(stop);
+        List<Solution> solutions = new ArrayList<>();
+        while (ref().solve()) {
+            solutions.add(new Solution(ref().getModel(), varsToStore).record());
+        }
+        ref().removeStopCriterion(stop);
+        return solutions;
     }
 
     /**
