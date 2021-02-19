@@ -194,7 +194,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             rfMove = new MoveRestart(model.getSolver().getMove(),
                 new MonotonicRestartStrategy(1),
                 new FailCounter(model.getSolver().getModel(), 1),
-                MAX_VALUE);
+                MAX_VALUE, true);
             model.getSolver().setMove(rfMove);
         }
         return true;

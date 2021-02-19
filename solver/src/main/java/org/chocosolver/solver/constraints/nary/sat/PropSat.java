@@ -53,7 +53,7 @@ public class PropSat extends Propagator<BoolVar> {
     private IStateInt sat_trail_;
 
     /**
-     *  List of early deduction literals
+     * List of early deduction literals
      */
     private TIntList early_deductions_;
 
@@ -82,7 +82,7 @@ public class PropSat extends Propagator<BoolVar> {
         super(new BoolVar[]{model.boolVar(true)}, PropagatorPriority.VERY_SLOW, true);// adds solver.ONE to fit to the super constructor
         this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
 
-        this.indices_ = new TObjectIntHashMap<>(16,.5f, -1);
+        this.indices_ = new TObjectIntHashMap<>(16, .5f, -1);
         sat_ = new SatSolver();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();
@@ -120,12 +120,14 @@ public class PropSat extends Propagator<BoolVar> {
             int var, val;
             boolean sign;
             for (int k : sat_.implies_.keys()) {
+                if (k < 0) continue; // ignore secret variables
                 sign = sign(negated(k));
                 var = var(k);
                 val = vars[var].getValue();
                 if (val == (sign ? 0 : 1)) {
                     TIntList lits = sat_.implies_.get(k);
                     for (int l : lits.toArray()) {
+                        if (l < 0) continue; // ignore secret variables
                         sign = sign(l);
                         var = var(l);
                         val = vars[var].getValue();
@@ -144,6 +146,7 @@ public class PropSat extends Propagator<BoolVar> {
 
     /**
      * Checks if all clauses from <code>clauses</code> are satisfied
+     *
      * @param clauses list of clause
      * @return <tt>true</tt> if all clauses are satisfied, <tt>false</tt> otherwise
      */
@@ -154,6 +157,7 @@ public class PropSat extends Propagator<BoolVar> {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
+                if (lit < 0) continue; // ignore secret variables
                 sign = sign(lit);
                 var = var(lit);
                 val = vars[var].getValue();
@@ -204,9 +208,9 @@ public class PropSat extends Propagator<BoolVar> {
         if (var == -1) {
             var = sat_.newVariable();
             assert (vars.length + add_var.size() == var);
-            if(initialized) {
+            if (initialized) {
                 addVariable(expr);
-            }else {
+            } else {
                 add_var.add(expr);
             }
             indices_.put(expr, var);
@@ -250,6 +254,7 @@ public class PropSat extends Propagator<BoolVar> {
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
+                if (lit < 0) continue; // ignore secret variable
                 var = var(lit);
                 boolean assigned_bool = sign(lit);
                 vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
@@ -258,20 +263,20 @@ public class PropSat extends Propagator<BoolVar> {
 //            force failure by removing the last value
                 vars[index].instantiateTo(1 - vars[index].getValue(), this);
             }
-        }finally {
+        } finally {
             sat_.touched_variables_.resetQuick(); // issue#327
         }
     }
 
 
-    public void beforeAddingClauses(){
+    public void beforeAddingClauses() {
         if (sat_trail_.get() < sat_.trailMarker()) {
             sat_.cancelUntil(sat_trail_.get());
             assert (sat_trail_.get() == sat_.trailMarker());
         }
     }
 
-    public void afterAddingClauses(){
+    public void afterAddingClauses() {
         storeEarlyDeductions();
     }
 
@@ -310,6 +315,7 @@ public class PropSat extends Propagator<BoolVar> {
     private void applyEarlyDeductions() throws ContradictionException {
         for (int i = 0; i < early_deductions_.size(); ++i) {
             int lit = early_deductions_.get(i);
+            if (lit < 0) continue; // ignore secret variables
             int var = var(lit);
             boolean assigned_bool = sign(lit);
 //            demons_[var.value()].inhibit(solver());

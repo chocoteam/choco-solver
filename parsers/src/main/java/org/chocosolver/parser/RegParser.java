@@ -62,6 +62,10 @@ public abstract class RegParser implements IParser {
             "--print-statistics"}, usage = "Print statistics on each solution (default: false).")
     protected boolean stat = false;
 
+    @Option(name = "-verb", aliases = {
+            "--verbose-solving"}, usage = "Verbose solving (default: false).")
+    protected boolean verbose = false;
+
     @Option(name = "-csv", aliases = {
             "--print-csv"}, usage = "Print statistics on exit (default: false).")
     protected boolean csv = false;
@@ -186,7 +190,7 @@ public abstract class RegParser implements IParser {
     @Override
     public final boolean setUp(String... args) throws SetUpException {
         listeners.forEach(ParserListener::beforeParsingParameters);
-        if(PRINT_LOG)System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
+        if (PRINT_LOG) System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
         try {
             cmdparser.parseArgument(args);
@@ -241,9 +245,12 @@ public abstract class RegParser implements IParser {
     public final void configureSearch() {
         listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
+        if(verbose){
+            solver.verboseSolving(1000);
+        }
         if (nb_cores == 1) {
             if (exp) {
-                if(PRINT_LOG)System.out.printf("%s exp is on\n", getCommentChar());
+                if (PRINT_LOG) System.out.printf("%s exp is on\n", getCommentChar());
                 solver.setLearningSignedClauses();
                 // THEN PARAMETERS
                 XParameters.DEFAULT_X = dftexp;
@@ -257,18 +264,19 @@ public abstract class RegParser implements IParser {
                 }
             }
             if (free) {
-                if(PRINT_LOG)System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
-                if(lc > 0 || cos || last){
-                    if(PRINT_LOG)System.out.printf("%s add techniques: ", getCommentChar());
-                    if(cos){
-                        if(PRINT_LOG)System.out.print("-cos ");
-                    }else if(lc>0){
-                        if(PRINT_LOG)System.out.printf("-lc %d ", lc);
+                if (PRINT_LOG)
+                    System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
+                if (lc > 0 || cos || last) {
+                    if (PRINT_LOG) System.out.printf("%s add techniques: ", getCommentChar());
+                    if (cos) {
+                        if (PRINT_LOG) System.out.print("-cos ");
+                    } else if (lc > 0) {
+                        if (PRINT_LOG) System.out.printf("-lc %d ", lc);
                     }
-                    if(last){
-                        if(PRINT_LOG)System.out.print("-last");
+                    if (last) {
+                        if (PRINT_LOG) System.out.print("-last");
                     }
-                    if(PRINT_LOG)System.out.print("\n");
+                    if (PRINT_LOG) System.out.print("\n");
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
                 IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
@@ -288,9 +296,9 @@ public abstract class RegParser implements IParser {
                 } else {
                     solver.setSearch(strategy);
                 }
-                if(cos){
+                if (cos) {
                     solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
-                }else if(lc>0){
+                } else if (lc > 0) {
                     solver.setSearch(Search.lastConflict(solver.getSearch(), lc));
                 }
                 restarts.declare(solver);

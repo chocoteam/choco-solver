@@ -723,7 +723,7 @@ public class SatSolverTest {
 
     @Test(groups = "1s")
     public void testAddSumBoolArrayLessEqVar() throws Exception {
-        sat.addSumBoolArrayLessEqVar(new int[]{a, b, c}, d);
+        sat.addSumBoolArrayLessEqKVar(new int[]{a, b, c}, d);
         sat.uncheckedEnqueue(SatSolver.makeLiteral(a, false));
         sat.propagate();
         Assert.assertEquals(sat.valueVar(a), SatSolver.Boolean.kTrue);

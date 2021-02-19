@@ -60,7 +60,10 @@ public final class GeometricalCutoffStrategy extends AbstractCutoffStrategy {
         return cutoff;
     }
 
-
+    @Override
+    public void reset() {
+        this.geometricalFactorPower = 1;
+    }
 
     @Override
     public String toString() {

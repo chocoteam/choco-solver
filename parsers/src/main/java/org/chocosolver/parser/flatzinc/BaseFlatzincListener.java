@@ -10,10 +10,6 @@
 package org.chocosolver.parser.flatzinc;
 
 import org.chocosolver.parser.ParserListener;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-
-import java.util.ArrayList;
 
 import static org.chocosolver.parser.RegParser.PRINT_LOG;
 
@@ -63,17 +59,7 @@ public class BaseFlatzincListener implements ParserListener {
     public void afterParsingFile() {
 
         if (((FznSettings) fznparser.getModel().getSettings()).printConstraints()) {
-            ArrayList<String> l = new ArrayList<>();
-            System.out.println("% INVOLVED CONSTRAINTS (CHOCO) ");
-            for (Constraint c : fznparser.getModel().getCstrs()) {
-                if (!l.contains(c.getName())) {
-                    l.add(c.getName());
-                    System.out.printf("%% %s\n", c.getName());
-                    for(Propagator p: c.getPropagators()) {
-                        System.out.printf("%% \t%s\n", p.getClass().getName());
-                    }
-                }
-            }
+            fznparser.getModel().displayPropagatorOccurrences();
         }
     }
 

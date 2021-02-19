@@ -34,10 +34,10 @@ public interface SatFactory {
      */
     default boolean addClause(int[] POSVARS, int[] NEGVARS) {
         TIntList lits = new TIntArrayList(POSVARS.length + NEGVARS.length);
-        for(int p : POSVARS){
+        for (int p : POSVARS) {
             lits.add(makeLiteral(p, true));
         }
-        for(int n : NEGVARS){
+        for (int n : NEGVARS) {
             lits.add(makeLiteral(n, false));
         }
         return _me().addClause(lits);
@@ -281,7 +281,7 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add =_me().addClause(left_lit, right_lit, SatSolver.negated(target_lit));
+        boolean add = _me().addClause(left_lit, right_lit, SatSolver.negated(target_lit));
         add &= _me().addClause(SatSolver.negated(left_lit), right_lit, SatSolver.negated(target_lit));
         add &= _me().addClause(left_lit, SatSolver.negated(right_lit), target_lit);
         add &= _me().addClause(SatSolver.negated(left_lit), SatSolver.negated(right_lit), SatSolver.negated(target_lit));
@@ -379,17 +379,17 @@ public interface SatFactory {
     }
 
     /**
-     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET
+     * Add a clause stating that: sum(BOOLVARS<sub>i</sub>) &le; TARGET  * |BOOLVARS|
      *
      * @param BOOLVARS a list of boolean variables
      * @param TARGET   a boolean variable
      * @return true if the clause has been added to the clause store
      */
-    default boolean addSumBoolArrayLessEqVar(int[] BOOLVARS, int TARGET) {
+    default boolean addSumBoolArrayLessEqKVar(int[] BOOLVARS, int TARGET) {
         if (BOOLVARS.length == 1) {
             return addBoolLe(BOOLVARS[0], TARGET);
         }
-        int extra = _me().newVariable();
+        int extra = _me().newSecretVariable();
         int tlit = makeLiteral(TARGET, true);
         int elit = makeLiteral(extra, true);
         TIntList lits = new TIntArrayList(BOOLVARS.length + 1);

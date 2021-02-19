@@ -290,9 +290,8 @@ public class Search {
             valueSelector = new IntDomainMin();
         } else {
             valueSelector = new IntDomainBest();
-            Solution lastSolution = new Solution(model, vars);
-            model.getSolver().attach(lastSolution);
-            valueSelector = new IntDomainLast(lastSolution, valueSelector, null);
+            model.getSolver().attach(model.getSolver().defaultSolution());
+            valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
         }
         return new DomOverWDeg(vars, 0, valueSelector);
     }
@@ -802,6 +801,50 @@ public class Search {
             }
         },
         /**
+         * To select the best value according to the best objective bound when looking for
+         * the first solution, then return the lowest bound.
+         *
+         * @see IntDomainBest
+         * @see IntDomainMin
+         */
+        BMIN {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                if (solver.getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return MIN.make(solver, last);
+                }
+
+
+                return last(solver,
+                        new IntValueSelector() {
+                            IntValueSelector sel = new IntDomainBest();
+
+                            @Override
+                            public int selectValue(IntVar var) {
+                                if (var.getModel().getSolver().getSolutionCount() > 0) {
+                                    sel = new IntDomainMin();
+                                }
+                                return sel.selectValue(var);
+                            }
+                        }, last);
+            }
+        },
+        /**
+         * To select the best value according to the best objective bound.
+         *
+         * @see IntDomainBest
+         */
+        BLAST {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                if (solver.getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return MIN.make(solver, last);
+                }
+                Solution lastSol = solver.defaultSolution();
+                return last(solver,new IntDomainBest((v,i) -> lastSol.exists() && lastSol.getIntVal(v) == i), last);
+            }
+        },
+        /**
          * Return {@link #BEST}.
          */
         DEFAULT {
@@ -902,9 +945,8 @@ public class Search {
                     return selector;
                 }
                 final IntVar[] vars = model.retrieveIntVars(true);
-                Solution lastSolution = new Solution(model, vars);
-                model.getSolver().attach(lastSolution);
-                return new IntDomainLast(lastSolution, selector, null);
+                model.getSolver().attach(model.getSolver().defaultSolution());
+                return new IntDomainLast(model.getSolver().defaultSolution(), selector, null);
             } else {
                 return selector;
             }

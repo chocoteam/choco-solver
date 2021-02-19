@@ -10,10 +10,6 @@
 package org.chocosolver.parser.xcsp;
 
 import org.chocosolver.parser.ParserListener;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-
-import java.util.ArrayList;
 
 import static org.chocosolver.parser.RegParser.PRINT_LOG;
 
@@ -59,21 +55,12 @@ public class BaseXCSPListener implements ParserListener {
         System.out.println("c parse instance...");
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void afterParsingFile() {
-
         if (((XCSPSettings) xcspparser.getModel().getSettings()).printConstraints()) {
-            ArrayList<String> l = new ArrayList<>();
-            System.out.println("c INVOLVED CONSTRAINTS (CHOCO) ");
-            for (Constraint c : xcspparser.getModel().getCstrs()) {
-                if (!l.contains(c.getName())) {
-                    l.add(c.getName());
-                    System.out.printf("c %s\n", c.getName());
-                    for(Propagator p: c.getPropagators()) {
-                        System.out.printf("c \t%s\n", p.getClass().getName());
-                    }
-                }
-            }
+            xcspparser.getModel().displayVariableOccurrences();
+            xcspparser.getModel().displayPropagatorOccurrences();
         }
     }
 

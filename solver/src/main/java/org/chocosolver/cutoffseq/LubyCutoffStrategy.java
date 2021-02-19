@@ -11,14 +11,14 @@ package org.chocosolver.cutoffseq;
 
 /**
  * A Luby cutoff strategy.
- *
+ * <p>
  * Based on:
  * <br/>
  * "Optimal Speedup of Las Vegas Algorithms",
  * M. Luby, A. Sinclair, D. Zuckerman,
  * IPL: Information Processing Letters, 1993, 47, 173-180.
  * <br/>
- *
+ * <p>
  * Example, with <i>s</i>=1:
  * 1, 1, 2, 1, 1, 2, 4, 1, 1, 2, 1, 1, 2, 4, 8, 1, 1, 2, ...
  *
@@ -39,6 +39,7 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
 
     /**
      * A Luby cutoff strategy.
+     *
      * @param s scale factor
      */
     @SuppressWarnings("WeakerAccess")
@@ -47,9 +48,9 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
     }
 
     /**
-     * From SAT 2012: computing Luby values the way presented by Donald Knuth 
+     * From SAT 2012: computing Luby values the way presented by Donald Knuth
      * in his invited talk at the SAT 2012 conference.
-     * </br> 
+     * </br>
      * Credits: sat4j.
      */
     @Override
@@ -62,6 +63,11 @@ public final class LubyCutoffStrategy extends AbstractCutoffStrategy {
             this.vn = this.vn << 1;
         }
         return cutoff;
+    }
+
+    @Override
+    public void reset() {
+        un = vn = 1;
     }
 
     @Override

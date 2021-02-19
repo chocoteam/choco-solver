@@ -80,6 +80,8 @@ public class PerformanceTest {
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
         fzn.solve();
         Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");

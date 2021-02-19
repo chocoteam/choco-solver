@@ -710,6 +710,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         } while (!stopCriterion.test(run));
         ref().reset();
         ref().getModel().unpost(cut);
+        ref().getModel().unpost(oppcut);
         ref().getObjectiveManager().updateBestSolution(objective);
         return found;
     }

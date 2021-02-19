@@ -10,11 +10,13 @@
 package org.chocosolver.solver.constraints.nary;
 
 
+import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -30,9 +32,14 @@ import static org.testng.Assert.assertEquals;
  */
 public class SatTest {
 
-    @Test(groups="1s", timeOut=60000)
-    public void test1() {
-        Model model = new Model();
+    @DataProvider(name = "satornot")
+    public Object[][] provide() {
+        return new Object[][]{{true}, {false}};
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test1(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -41,9 +48,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test2() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test2(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -52,9 +59,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test3() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test3(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -64,9 +71,9 @@ public class SatTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void test4() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test4(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -76,9 +83,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test5() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test5(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -88,9 +95,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test6() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test6(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -100,9 +107,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test7() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test7(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -111,9 +118,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test8() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test8(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -124,9 +131,9 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test9() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test9(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -138,9 +145,9 @@ public class SatTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void test10() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test10(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1;
         b1 = model.boolVar("b1");
         model.addClauseTrue(b1);
@@ -150,9 +157,9 @@ public class SatTest {
         assertEquals(b1.getBooleanValue(), TRUE);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test11() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test11(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1;
         b1 = model.boolVar("b1");
         model.addClauseFalse(b1);
@@ -162,9 +169,9 @@ public class SatTest {
         assertEquals(b1.getBooleanValue(), FALSE);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test12() {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test12(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.addClausesBoolOrArrayEqualTrue(bs);
         model.addClauseFalse(bs[0]);
@@ -175,9 +182,20 @@ public class SatTest {
         assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testAlexLoboda() throws ContradictionException {
-        Model model = new Model();
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void test13(boolean sat) {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        BoolVar[] bs = model.boolVarArray("b", 3);
+        BoolVar d = model.boolVar("d");
+        model.addClausesSumBoolArrayLessEqKVar(bs, d);
+        
+        while (model.getSolver().solve()) ;
+        assertEquals(model.getSolver().getSolutionCount(), 9);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    public void testAlexLoboda(boolean sat) throws ContradictionException {
+        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         // VARS
         IntVar var = model.intVar("var", new int[]{0, 2});
         BoolVar eq2 = model.boolVar("eq2");
@@ -195,7 +213,7 @@ public class SatTest {
 
         model.setObjective(Model.MAXIMIZE, var);
         Solution solution = new Solution(model);
-        while(model.getSolver().solve()){
+        while (model.getSolver().solve()) {
             solution.record();
         }
         assertEquals(solution.getIntVal(var), 2);

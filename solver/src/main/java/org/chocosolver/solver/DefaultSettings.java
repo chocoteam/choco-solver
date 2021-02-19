@@ -45,9 +45,9 @@ public class DefaultSettings implements Settings {
 
     private boolean enableViews = true;
 
-    private int maxDomSizeForEnumerated = 32_768;
+    private int maxDomSizeForEnumerated = 1 << 16;
 
-    private int minCardForSumDecomposition = 1024;
+    private int minCardForSumDecomposition = 50;
 
     private boolean enableTableSubstitution = true;
 

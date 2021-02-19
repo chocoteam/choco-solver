@@ -37,11 +37,11 @@ public class MoveRestart implements Move {
     /**
      * How often the restart should occur
      */
-    private ICutoffStrategy restartStrategy;
+    private final ICutoffStrategy restartStrategy;
     /**
      * How to trigger a restart
      */
-    private LongCriterion criterion;
+    private final LongCriterion criterion;
     /**
      * Count the number of restarts
      */
@@ -49,23 +49,31 @@ public class MoveRestart implements Move {
     /**
      * restrict the total number of restart
      */
-    private int restartLimit;
+    private final int restartLimit;
     /**
      * When the next restart should be triggered
      */
     private long limit;
+    /**
+     * Number of solutions found so far
+     */
+    protected long solutions;
 
+    private final boolean resetCutoffOnSolution;
     /**
      * @param move            the default {@link Move} to execute when no restart has to be done
      * @param restartStrategy defines when restarts happen
      * @param criterion       defines how to trigger a restart
      * @param restartLimit    restrict the total number of restart
+     * @param resetCutoffOnSolution reset cutoff sequence on solutions
      */
-    public MoveRestart(Move move, ICutoffStrategy restartStrategy, LongCriterion criterion, int restartLimit) {
+    public MoveRestart(Move move, ICutoffStrategy restartStrategy, LongCriterion criterion, int restartLimit,
+                       boolean resetCutoffOnSolution) {
         this.move = move;
         this.restartStrategy = restartStrategy;
         this.criterion = criterion;
         this.restartLimit = restartLimit;
+        this.resetCutoffOnSolution = resetCutoffOnSolution;
     }
 
     @Override
@@ -89,6 +97,10 @@ public class MoveRestart implements Move {
 
     @Override
     public boolean repair(Solver solver) {
+        if (resetCutoffOnSolution && solutions < solver.getSolutionCount()) {
+            solutions = solver.getSolutionCount() ;
+            restartStrategy.reset();
+        }
         boolean repair;
         if (!criterion.isMet(limit)) {
             repair =  move.repair(solver);

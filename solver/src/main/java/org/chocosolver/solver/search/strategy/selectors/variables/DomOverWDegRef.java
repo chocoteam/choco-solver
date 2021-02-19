@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -58,7 +57,6 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
      */
     public DomOverWDegRef(IntVar[] variables, long seed, IntValueSelector valueSelector, String incWeight) {
         super(variables, seed, valueSelector);
-        Model model = variables[0].getModel();
         p2w = new HashMap<>(10);
         this.incWeight = IncWeight.valueOf(incWeight.toUpperCase());
     }

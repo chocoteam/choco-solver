@@ -55,6 +55,14 @@ public class TableTest {
         return params.toArray(new Object[0][0]);
     }
 
+    @DataProvider(name = "starred")
+    public Object[][] starred() {
+        List<Object[]> params = new ArrayList<>();
+        params.add(new Object[]{"CT+"});
+        params.add(new Object[]{"STR2+"});
+        return params.toArray(new Object[0][0]);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         for (String a : ALGOS) {
@@ -519,8 +527,8 @@ public class TableTest {
         Assert.assertEquals(s2.getSolver().getNodeCount(), s1.getSolver().getNodeCount());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testST1() {
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+    public void testST1(String staralgo) {
         Model model = new Model();
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
@@ -531,16 +539,17 @@ public class TableTest {
         ts.add(3, ST, 1);
         ts.add(1, 2, 3);
         ts.add(2, 3, 2);
-        model.table(new IntVar[]{x, y, z}, ts, "CT+").post();
+        model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
-
+        solver.showDecisions();
+        solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testST2() {
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+    public void testST2(String staralgo) {
         Model model = new Model();
         IntVar x = model.intVar(1, 3);
         IntVar y = model.intVar(1, 3);
@@ -549,12 +558,33 @@ public class TableTest {
         int ST = 99;
         ts.setUniversalValue(ST);
         ts.add(ST, ST, ST);
-        model.table(new IntVar[]{x, y, z}, ts, "CT+").post();
+        model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 27);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+        public void testST3(String staralgo) {
+        Model model = new Model();
+        //IntVar w = model.intVar("w", 0, 1);
+        IntVar x = model.intVar("x",0, 1);
+        IntVar y = model.intVar("y",0, 1);
+        IntVar z = model.intVar("z",0, 1);
+        Tuples ts = new Tuples(true);
+        int ST = 99;
+        ts.setUniversalValue(ST);
+        ts.add(1, ST, ST);
+        ts.add(ST, 1, ST);
+        ts.add(ST, ST, 1);
+        model.table(new IntVar[]{/*w, */x, y, z}, ts, staralgo).post();
+
+        Solver solver = model.getSolver();
+
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 7);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -621,7 +651,7 @@ public class TableTest {
      * WITNESS   : x0={0}
      * ###########################
      */
-    @Test(groups = "1s", expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void str2PlusTableShouldBeAc() throws ContradictionException {
         Model cp = new Model();
 
@@ -631,7 +661,7 @@ public class TableTest {
         cp.getSolver().propagate(); // should trigger an inconsistency
     }
 
-    @Test(groups = "1s", dataProvider = "algos")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT1(String a) {
         if(a.equals("FC"))return;
         Model cp = new Model();
@@ -658,7 +688,7 @@ public class TableTest {
 
     }
 
-    @Test(groups = "1s", dataProvider = "algos")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT2(String a) {
         if(a.equals("FC"))return;
         Model cp = new Model();

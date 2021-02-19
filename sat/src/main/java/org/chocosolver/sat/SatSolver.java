@@ -58,6 +58,9 @@ public class SatSolver implements SatFactory {
     // Number of variables
     int num_vars_;
 
+    // Number of variables
+    int sec_vars_ = -10;
+
     private TIntArrayList temporary_add_vector_;
     public TIntArrayList touched_variables_;
 
@@ -87,6 +90,14 @@ public class SatSolver implements SatFactory {
         int v = incrementVariableCounter();
 //            watches_.resize(2 * v + 2);
 //        implies_.resize(2 * v.value() + 2);
+        assignment_.put(v, Boolean.kUndefined);
+        return v;
+    }
+
+    // Add a secret variable
+    // That is a variable not known from CP solver
+    protected int newSecretVariable(){
+        int v = sec_vars_--;
         assignment_.put(v, Boolean.kUndefined);
         return v;
     }
