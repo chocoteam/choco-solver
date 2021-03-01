@@ -385,11 +385,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return var.hasEnumeratedDomain();
     }
 
-    @Override
-    public boolean isInstantiated() {
-        return var.isInstantiated();
-    }
-
 	@Override
     public IDelta getDelta() {
         return var.getDelta();
@@ -401,18 +396,8 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     }
 
     @Override
-    public int compareTo(Variable o) {
-        return this.getId() - o.getId();
-    }
-
-    @Override
     public void notify(IEventType event) throws ContradictionException {
         super.notifyPropagators(transformEvent(event), this);
-    }
-
-    @Override
-    public IEventType transformEvent(IEventType evt){
-        return evt;
     }
 
     @Override
