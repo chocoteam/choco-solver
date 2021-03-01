@@ -22,19 +22,19 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * GLB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
  * GUB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
  */
-public interface GraphVar extends Variable{
+public interface GraphVar<E extends IGraph> extends Variable {
 
     /**
      * Get GraphVar lower bound (or kernel): the graph which is a subgraph of any instantiation.
      * @return The lower bound (or kernel) graph of this GraphVar.
      */
-    IGraph getLB();
+    E getLB();
 
     /**
      * Get GraphVar upper bound (or envelope): any instantiation of this GraphVar is a subgraph of the upper bound.
      * @return The upper bound (or envelope) graph of this GraphVar.
      */
-    IGraph getUB();
+    E getUB();
 
     /**
      * Get the SetVar representing the nodes of the GraphVar.
@@ -162,14 +162,14 @@ public interface GraphVar extends Variable{
      * @param cause
      * @throws ContradictionException
      */
-    void instantiateTo(IGraph value, ICause cause) throws ContradictionException;
+    void instantiateTo(E value, ICause cause) throws ContradictionException;
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    default IGraph getValue(){
+    default E getValue(){
         assert isInstantiated() : getName() + " not instantiated";
         return getLB();
     }
