@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -27,6 +28,8 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
+
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
@@ -464,5 +467,16 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
             throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
         }
         return this.literal;
+    }
+
+    @Override
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
+        IntVar other = (this == pivot ? getVariable() : this);
+        IntIterableRangeSet dom = explanation.complement(other);
+        other.unionLit(dom, explanation);
+        dom = explanation.complement(pivot);
+        unionOf(dom, explanation.readDom(p));
+        pivot.intersectLit(dom, explanation);
     }
 }
