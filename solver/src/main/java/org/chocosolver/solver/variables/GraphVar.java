@@ -37,12 +37,6 @@ public interface GraphVar<E extends IGraph> extends Variable {
     E getUB();
 
     /**
-     * Get the SetVar representing the nodes of the GraphVar.
-     * @return A SetVar representing the nodes of the GraphVar?
-     */
-    SetVar getNodesSetVar();
-
-    /**
      * Adds a node to the lower bound graph
      *
      * @param node node's index

@@ -206,6 +206,46 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 	// SOLUTIONS : STORE AND RESTORE
 	//***********************************************************************************
 
+	@Override
+	public void instantiateTo(E value, ICause cause) throws ContradictionException {
+		ISet nodes = value.getNodes();
+		for (int i = 0; i < n; i++) {
+			if (nodes.contains(i)) {
+				enforceNode(i, cause);
+			} else {
+				removeNode(i, cause);
+			}
+		}
+		for (int i = 0; i < n; i++) {
+			for (int j = 0; j < n; i++) {
+				if (nodes.contains(i) && nodes.contains(j)) {
+					if (value.getSuccOrNeighOf(i).contains(j)) {
+						enforceArc(i, j, cause);
+					} else {
+						removeArc(i, j, cause);
+					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * @return the value of the graph variable represented through an adjacency matrix
+	 * plus a set of nodes (last row of the matrix).
+	 * This method is not supposed to be used except for restoring solutions.
+	 */
+	public boolean[][] getValueAsBoolMatrix() {
+		int n = getUB().getNbMaxNodes();
+		boolean[][] vals = new boolean[n + 1][n];
+		for (int i : getLB().getNodes()) {
+			for (int j : getLB().getSuccOrNeighOf(i)) {
+				vals[i][j] = true; // arc in
+			}
+			vals[n][i] = true; // node in
+		}
+		return vals;
+	}
+
 	/**
 	 * Instantiates <code>this</code> to value which represents an adjacency
 	 * matrix plus a set of nodes (last row of the matrix).
