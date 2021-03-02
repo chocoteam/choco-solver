@@ -72,4 +72,20 @@ public class UndirectedGraphVarImplTest {
             }
         }
     }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testGraphVarInstantiated() {
+        Model m = new Model();
+        int n = 3;
+        UndirectedGraph LB = GraphFactory.makeCompleteStoredGraph(m, n, SetType.BITSET, SetType.BITSET, true);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredGraph(m, n, SetType.BITSET, SetType.BITSET, true);
+        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        Assert.assertTrue(g.isInstantiated());
+        UndirectedGraph gval = (UndirectedGraph) g.getValue();
+        Assert.assertEquals(gval.getNodes().size(), 3);
+        UndirectedGraph LB2 = GraphFactory.makeEmptyStoredGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredGraph(m, n, SetType.BITSET, SetType.BITSET, true);
+        GraphVar g2 = new UndirectedGraphVarImpl("g2", m, LB2, UB2);
+        Assert.assertFalse(g2.isInstantiated());
+    }
 }
