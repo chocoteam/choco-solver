@@ -385,6 +385,11 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return var.hasEnumeratedDomain();
     }
 
+    @Override
+    public boolean isInstantiated() {
+        return getVariable().isInstantiated();
+    }
+
 	@Override
     public IDelta getDelta() {
         return var.getDelta();

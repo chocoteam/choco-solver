@@ -10,15 +10,19 @@
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
-import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.set.PropCardinality;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.SetDelta;
-import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -33,15 +37,17 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
     protected E graphVar;
     protected SetDelta delta;
     protected boolean reactOnModification;
+    protected IntVar cardinality = null;
 
     /**
-     * Create the shared data of any type of variable.
+     * Create a set view on a graph variable.
      *
      * @param name  name of the variable
-     * @param model model which declares this variable
+     * @param graphVar observed graph variable
      */
-    protected GraphSetView(String name, Model model) {
-        super(name, model);
+    protected GraphSetView(String name, E graphVar) {
+        super(name, graphVar.getModel());
+        this.graphVar = graphVar;
     }
 
     /**
@@ -62,11 +68,37 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
 
     @Override
     public boolean force(int element, ICause cause) throws ContradictionException {
+        assert cause != null;
+        if (!getUB().contains(element)) {
+            contradiction(cause, "" + element + " is not in UB(" + getName() + ")");
+            return false;
+        }
+        if (doForceSetElement(element)) {
+            if (reactOnModification) {
+                delta.add(element, SetDelta.LB, cause);
+            }
+            SetEventType e = SetEventType.ADD_TO_KER;
+            notifyPropagators(e, cause);
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean remove(int element, ICause cause) throws ContradictionException {
+        assert cause != null;
+        if (getLB().contains(element)) {
+            contradiction(cause, "" + element + " is in LB(" + getName() + ")");
+            return false;
+        }
+        if (doRemoveSetElement(element)) {
+            if (reactOnModification) {
+                delta.add(element, SetDelta.UB, cause);
+            }
+            SetEventType e = SetEventType.REMOVE_FROM_ENVELOPE;
+            notifyPropagators(e, cause);
+            return true;
+        }
         return false;
     }
 
@@ -76,6 +108,11 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
             reactOnModification = true;
             delta = new SetDelta(model.getEnvironment());
         }
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        return delta;
     }
 
     @Override
@@ -105,7 +142,31 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
     }
 
     @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public IntVar getCard() {
+        if(!hasCard()){
+            int ubc =  getLB().size();
+            int lbc = getLB().size();
+            if(ubc==lbc) cardinality = model.intVar(ubc);
+            else{
+                cardinality = model.intVar(name+".card", lbc, ubc);
+                new Constraint(ConstraintsName.SETCARD, new PropCardinality(this, cardinality)).post();
+            }
+        }
+        return cardinality;
+    }
 
+    @Override
+    public boolean hasCard() {
+        return cardinality != null;
+    }
+
+    @Override
+    public void setCard(IntVar card) {
+        if(!hasCard()){
+            cardinality=card;
+            new Constraint(ConstraintsName.SETCARD, new PropCardinality(this, card)).post();
+        } else {
+            model.arithm(cardinality, "=", card).post();
+        }
     }
 }

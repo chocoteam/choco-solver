@@ -52,8 +52,4 @@ public interface IView extends ICause, Variable {
      */
     void notify(IEventType event) throws ContradictionException;
 
-    @Override
-    default boolean isInstantiated() {
-        return getVariable().isInstantiated();
-    }
 }
