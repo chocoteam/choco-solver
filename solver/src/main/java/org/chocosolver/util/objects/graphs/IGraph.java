@@ -51,12 +51,18 @@ public interface IGraph  {
     int getNbMaxNodes();
 
     /**
-     * Get the type of data structures used in the graph
-	 *
-     * @return the type of data structures used in the graph
+     * Get the type of data structures used in the graph to represent nodes
+     *
+     * @return the type of data structures used in the graph to represent nodes
      */
-    SetType getType();
+    SetType getNodeSetType();
 
+    /**
+     * Get the type of data structures used in the graph to represent arcs
+	 *
+     * @return the type of data structures used in the graph to represent arcs
+     */
+    SetType getArcSetType();
 
     /**
      * Get either x's successors or neighbors.

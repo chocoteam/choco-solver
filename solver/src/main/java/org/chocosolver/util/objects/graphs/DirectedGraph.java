@@ -29,7 +29,8 @@ public class DirectedGraph implements IGraph {
     private ISet[] predecessors;
     private ISet nodes;
     private int n;
-    private SetType type;
+    private SetType nodeSetType;
+    private SetType arcSetType;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -41,25 +42,44 @@ public class DirectedGraph implements IGraph {
      * unless allNodes is true).
      *
      * @param n        maximum number of nodes
-     * @param type     data structure to use for representing node successors and predecessors
+     * @param nodeSetType     data structure to use for representing node
+     * @param arcSetType     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph.
 	 *                 i.e. The node set is fixed to [0,n-1] and will never change
      */
-    public DirectedGraph(int n, SetType type, boolean allNodes) {
-        this.type = type;
+    public DirectedGraph(int n, SetType nodeSetType, SetType arcSetType, boolean allNodes) {
+        this.nodeSetType = nodeSetType;
+        this.arcSetType = arcSetType;
         this.n = n;
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeSet(type, 0);
-            successors[i] = SetFactory.makeSet(type, 0);
+            predecessors[i] = SetFactory.makeSet(arcSetType, 0);
+            successors[i] = SetFactory.makeSet(arcSetType, 0);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeBitSet(0);
+            this.nodes = SetFactory.makeSet(nodeSetType, 0);
         }
     }
+
+    /**
+     * Creates an empty graph.
+     * Allocates memory for n nodes (but they should then be added explicitly,
+     * unless allNodes is true).
+     *
+     * Nodes are stored as BITSET
+     *
+     * @param n        maximum number of nodes
+     * @param arcSetType     data structure to use for representing node successors and predecessors
+     * @param allNodes true iff all nodes must always remain present in the graph.
+     *                 i.e. The node set is fixed to [0,n-1] and will never change
+     */
+    public DirectedGraph(int n, SetType arcSetType, boolean allNodes) {
+        this(n, SetType.BITSET, arcSetType, allNodes);
+    }
+
 
     /**
      * Creates an empty backtrable graph of n nodes
@@ -68,23 +88,41 @@ public class DirectedGraph implements IGraph {
      *
      * @param model   model providing the backtracking environment
      * @param n        maximum number of nodes
-     * @param type     data structure to use for representing node successors and predecessors
+     * @param nodeSetType     data structure to use for representing nodes
+     * @param arcSetType     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph
      */
-    public DirectedGraph(Model model, int n, SetType type, boolean allNodes) {
+    public DirectedGraph(Model model, int n, SetType nodeSetType, SetType arcSetType, boolean allNodes) {
         this.n = n;
-        this.type = type;
+        this.nodeSetType = nodeSetType;
+        this.arcSetType = arcSetType;
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeStoredSet(type, 0, model);
-            successors[i] = SetFactory.makeStoredSet(type, 0, model);
+            predecessors[i] = SetFactory.makeStoredSet(arcSetType, 0, model);
+            successors[i] = SetFactory.makeStoredSet(arcSetType, 0, model);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+            this.nodes = SetFactory.makeStoredSet(nodeSetType, 0, model);
         }
+    }
+
+    /**
+     * Creates an empty backtrable graph of n nodes
+     * Allocates memory for n nodes (but they should then be added explicitly,
+     * unless allNodes is true).
+     *
+     * Nodes are stored as BITSET
+     *
+     * @param model   model providing the backtracking environment
+     * @param n        maximum number of nodes
+     * @param arcSetType     data structure to use for representing node successors and predecessors
+     * @param allNodes true iff all nodes must always remain present in the graph
+     */
+    public DirectedGraph(Model model, int n, SetType arcSetType, boolean allNodes) {
+        this(model, n, SetType.BITSET, arcSetType, allNodes);
     }
 
     //***********************************************************************************
@@ -116,8 +154,13 @@ public class DirectedGraph implements IGraph {
     }
 
     @Override
-    public SetType getType() {
-        return type;
+    public SetType getArcSetType() {
+        return arcSetType;
+    }
+
+    @Override
+    public SetType getNodeSetType() {
+        return nodeSetType;
     }
 
     @Override
