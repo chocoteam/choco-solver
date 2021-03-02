@@ -19,6 +19,8 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+
 /**
  * Test suite for GraphNodeSetView class
  * @author Dimitri Justeau-Allaire
@@ -59,8 +61,10 @@ public class GraphNodeSetViewTest {
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
-            ISet nodes = g.getValue().getNodes();
-            ISet nodeSet = s.getValue();
+            int[] nodes = g.getValue().getNodes().toArray();
+            int[] nodeSet = s.getValue().toArray();
+            Arrays.sort(nodes);
+            Arrays.sort(nodeSet);
             Assert.assertEquals(nodes, nodeSet);
         }
     }

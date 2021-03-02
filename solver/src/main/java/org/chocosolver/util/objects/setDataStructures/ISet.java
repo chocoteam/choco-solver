@@ -119,17 +119,4 @@ public interface ISet extends Iterable<Integer>{
 		}
 		return a;
 	}
-
-	/**
-	 * Compare the values of two ISets.
-	 * @param other another ISets
-	 * @return true iff the sets contain exactly the same values
-	 */
-	default boolean equals(ISet other) {
-		int[] thisArray = this.toArray();
-		int[] otherArray = other.toArray();
-		Arrays.sort(thisArray);
-		Arrays.sort(otherArray);
-		return Arrays.equals(thisArray, otherArray);
-	}
 }
