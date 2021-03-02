@@ -18,7 +18,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test suite for UndirectedGraphVarImpl classe
+ * Test suite for UndirectedGraphVarImpl class
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
