@@ -29,7 +29,7 @@ public class GraphNodeSetView extends GraphSetView<GraphVar> {
     /**
      * Create a set view on the set of nodes of a graph variable.
      *
-     * @param name     name of the variable
+     * @param name name of the variable
      * @param graphVar observed graph variable
      */
     protected GraphNodeSetView(String name, GraphVar graphVar) {

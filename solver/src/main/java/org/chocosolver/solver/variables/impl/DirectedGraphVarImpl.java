@@ -9,17 +9,17 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.GraphEventType;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 
-public class UndirectedGraphVarImpl<E extends UndirectedGraph> extends AbstractGraphVar<E> implements UndirectedGraphVar<E> {
+public class DirectedGraphVarImpl<E extends DirectedGraph> extends AbstractGraphVar<E> implements DirectedGraphVar<E> {
 
-	//////////////////////////////// GRAPH PART /////////////////////////////////////////
+	////////////////////////////////// GRAPH PART ///////////////////////////////////////
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -33,7 +33,7 @@ public class UndirectedGraphVarImpl<E extends UndirectedGraph> extends AbstractG
 	 * @param LB
 	 * @param UB
 	 */
-	public UndirectedGraphVarImpl(String name, Model solver, E LB, E UB) {
+	public DirectedGraphVarImpl(String name, Model solver, E LB, E UB) {
 		super(name, solver, LB, UB);
 	}
 
@@ -44,11 +44,11 @@ public class UndirectedGraphVarImpl<E extends UndirectedGraph> extends AbstractG
 	@Override
 	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
 		assert cause != null;
-		if (LB.edgeExists(x, y)) {
-			this.contradiction(cause, "remove mandatory arc");
+		if (LB.arcExists(x, y)) {
+			this.contradiction(cause, "remove mandatory arc " + x + "->" + y);
 			return false;
 		}
-		if (UB.removeEdge(x, y)) {
+		if (UB.removeArc(x, y)) {
 			if (reactOnModification) {
 				delta.add(x, GraphDelta.AR_TAIL, cause);
 				delta.add(y, GraphDelta.AR_HEAD, cause);
@@ -65,8 +65,8 @@ public class UndirectedGraphVarImpl<E extends UndirectedGraph> extends AbstractG
 		assert cause != null;
 		enforceNode(x, cause);
 		enforceNode(y, cause);
-		if (UB.edgeExists(x, y)) {
-			if (LB.addEdge(x, y)) {
+		if (UB.arcExists(x, y)) {
+			if (LB.addArc(x, y)) {
 				if (reactOnModification) {
 					delta.add(x, GraphDelta.AE_TAIL, cause);
 					delta.add(y, GraphDelta.AE_HEAD, cause);

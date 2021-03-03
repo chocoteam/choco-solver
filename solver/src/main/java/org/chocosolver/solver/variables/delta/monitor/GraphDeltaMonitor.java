@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables.delta.monitor;
 
 import org.chocosolver.solver.variables.delta.GraphDelta;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -23,7 +24,7 @@ import org.chocosolver.util.procedure.PairProcedure;
  * @author Charles Prud'homme
  * @since 07/12/11
  */
-public class GraphDeltaMonitor extends TimeStampedObject {
+public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaMonitor {
 
 	private final GraphDelta delta;
 	private int[] first; // references, in variable delta value to propagate, to un propagated values

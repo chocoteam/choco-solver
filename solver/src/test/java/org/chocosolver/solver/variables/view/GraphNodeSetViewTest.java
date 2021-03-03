@@ -10,11 +10,13 @@
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.impl.DirectedGraphVarImpl;
 import org.chocosolver.solver.variables.impl.UndirectedGraphVarImpl;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -36,13 +38,36 @@ public class GraphNodeSetViewTest {
     public void testInstantiateAndGenerateUndirectedGraph() {
         Model m = new Model();
         int n = 5;
-        UndirectedGraph LB = GraphFactory.makeEmptyStoredGraph(m, n, SetType.BITSET, SetType.BITSET);
-        UndirectedGraph UB = GraphFactory.makeCompleteStoredGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         while (m.getSolver().solve()) {
-            ISet nodes = g.getValue().getNodes();
-            ISet nodeSet = s.getValue();
+            int[] nodes = g.getValue().getNodes().toArray();
+            int[] nodeSet = s.getValue().toArray();
+            Arrays.sort(nodes);
+            Arrays.sort(nodeSet);
+            Assert.assertEquals(nodes, nodeSet);
+        }
+    }
+
+    /**
+     * Test the instantiation of a graph node set view over an directed graph variable
+     * Generate all possible solutions and ensure that the view is properly updated.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testInstantiateAndGenerateDirectedGraph() {
+        Model m = new Model();
+        int n = 4;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g = new DirectedGraphVarImpl("g", m, LB, UB);
+        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        while (m.getSolver().solve()) {
+            int[] nodes = g.getValue().getNodes().toArray();
+            int[] nodeSet = s.getValue().toArray();
+            Arrays.sort(nodes);
+            Arrays.sort(nodeSet);
             Assert.assertEquals(nodes, nodeSet);
         }
     }
@@ -55,8 +80,8 @@ public class GraphNodeSetViewTest {
     public void testFixedViewUndirectedGraph() {
         Model m = new Model();
         int n = 5;
-        UndirectedGraph LB = GraphFactory.makeEmptyStoredGraph(m, n, SetType.BITSET, SetType.BITSET);
-        UndirectedGraph UB = GraphFactory.makeCompleteStoredGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
@@ -66,6 +91,52 @@ public class GraphNodeSetViewTest {
             Arrays.sort(nodes);
             Arrays.sort(nodeSet);
             Assert.assertEquals(nodes, nodeSet);
+            Assert.assertEquals(nodes, new int[] {0, 2, 4});
+        }
+    }
+
+    /**
+     * Post a constraint on the view to force it to a particular value and ensure that the observed
+     * graph is properly affected.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testInstantiateTo() throws ContradictionException {
+        Model m = new Model();
+        int n = 5;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        s.instantiateTo(new int[] {0, 2, 4}, s);
+        while (m.getSolver().solve()) {
+            int[] nodes = g.getValue().getNodes().toArray();
+            int[] nodeSet = s.getValue().toArray();
+            Arrays.sort(nodes);
+            Arrays.sort(nodeSet);
+            Assert.assertEquals(nodes, nodeSet);
+            Assert.assertEquals(nodes, new int[] {0, 2, 4});
+        }
+    }
+
+    /**
+     * Same as previous with a directed graph var.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testFixedViewDirectedGraph() {
+        Model m = new Model();
+        int n = 5;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g = new DirectedGraphVarImpl("g", m, LB, UB);
+        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
+        while (m.getSolver().solve()) {
+            int[] nodes = g.getValue().getNodes().toArray();
+            int[] nodeSet = s.getValue().toArray();
+            Arrays.sort(nodes);
+            Arrays.sort(nodeSet);
+            Assert.assertEquals(nodes, nodeSet);
+            Assert.assertEquals(nodes, new int[] {0, 2, 4});
         }
     }
 }
