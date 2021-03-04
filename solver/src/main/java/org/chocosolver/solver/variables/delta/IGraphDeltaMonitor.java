@@ -7,6 +7,7 @@ import org.chocosolver.util.procedure.PairProcedure;
 
 /**
  * Interface for Graph Delta Monitor.
+ * Adapted from choco-graph. Original authors: Jean-Guillaume Fages and Charles Prud'homme.
  */
 public interface IGraphDeltaMonitor {
 

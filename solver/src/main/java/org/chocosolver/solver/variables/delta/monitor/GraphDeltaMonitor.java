@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.variables.delta.monitor;
 
-import org.chocosolver.solver.variables.delta.GraphDelta;
+import org.chocosolver.solver.variables.delta.IGraphDelta;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.ICause;
@@ -26,42 +26,34 @@ import org.chocosolver.util.procedure.PairProcedure;
  */
 public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaMonitor {
 
-	private final GraphDelta delta;
-	private int[] first; // references, in variable delta value to propagate, to un propagated values
-	private int[] frozenFirst, frozenLast; // same as previous while the recorder is frozen, to allow "concurrent modifications"
+	private final IGraphDelta delta;
+	private int[] first;
+	private int[] last;
 	private ICause propagator;
 
-	public GraphDeltaMonitor(GraphDelta delta, ICause propagator) {
+	public GraphDeltaMonitor(IGraphDelta delta, ICause propagator) {
 		super(delta.getEnvironment());
 		this.delta = delta;
 		this.first = new int[4];
-		this.frozenFirst = new int[4];
-		this.frozenLast = new int[4];
+		this.last = new int[4];
 		this.propagator = propagator;
 	}
 
-	public void freeze() {
+	private void freeze() {
 		if (needReset()) {
+			delta.lazyClear();
 			for (int i = 0; i < 4; i++) {
 				first[i] = 0;
 			}
 			resetStamp();
 		}
+		assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
+				:"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
+				"but no value has been removed since the last call.";
 		for (int i = 0; i < 3; i++) {
-			frozenFirst[i] = first[i]; // freeze indices
-			first[i] = frozenLast[i] = delta.getSize(i);
+			this.last[i] = delta.getSize(i);
 		}
-		frozenFirst[3] = first[3]; // freeze indices
-		first[3] = frozenLast[3] = delta.getSize(GraphDelta.AE_TAIL);
-	}
-
-	public void unfreeze() {
-		delta.lazyClear();    // fix 27/07/12
-		resetStamp();
-		for (int i = 0; i < 3; i++) {
-			first[i] = delta.getSize(i);
-		}
-		first[3] = delta.getSize(GraphDelta.AE_TAIL);
+		this.last[3] = delta.getSize(IGraphDelta.AE_TAIL);
 	}
 
 	/**
@@ -71,23 +63,20 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 	 * @throws ContradictionException if a failure occurs
 	 */
 	public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+		freeze();
 		int type;
 		if (evt == GraphEventType.REMOVE_NODE) {
-			type = GraphDelta.NR;
-			for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-				if (delta.getCause(i, type) != propagator) {
-					proc.execute(delta.get(i, type));
-				}
-			}
+			type = IGraphDelta.NR;
 		} else if (evt == GraphEventType.ADD_NODE) {
-			type = GraphDelta.NE;
-			for (int i = frozenFirst[type]; i < frozenLast[type]; i++) {
-				if (delta.getCause(i, type) != propagator) {
-					proc.execute(delta.get(i, type));
-				}
-			}
+			type = IGraphDelta.NE;
 		} else {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("The event in parameter should be ADD_NODE or REMOVE_NODE");
+		}
+		while (first[type] < last[type]) {
+			if (delta.getCause(first[type], type) != propagator) {
+				proc.execute(delta.get(first[type], type));
+			}
+			first[type]++;
 		}
 	}
 
@@ -98,20 +87,26 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 	 * @throws ContradictionException if a failure occurs
 	 */
 	public void forEachArc(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+		freeze();
+		int idx;
+		int tailType;
+		int headType;
 		if (evt == GraphEventType.REMOVE_ARC) {
-			for (int i = frozenFirst[2]; i < frozenLast[2]; i++) {
-				if (delta.getCause(i, GraphDelta.AR_TAIL) != propagator) {
-					proc.execute(delta.get(i, GraphDelta.AR_TAIL), delta.get(i, GraphDelta.AR_HEAD));
-				}
-			}
+			idx = 2;
+			tailType = IGraphDelta.AR_TAIL;
+			headType = IGraphDelta.AR_HEAD;
 		} else if (evt == GraphEventType.ADD_ARC) {
-			for (int i = frozenFirst[3]; i < frozenLast[3]; i++) {
-				if (delta.getCause(i, GraphDelta.AE_TAIL) != propagator) {
-					proc.execute(delta.get(i, GraphDelta.AE_TAIL), delta.get(i, GraphDelta.AE_HEAD));
-				}
-			}
+			idx = 3;
+			tailType = IGraphDelta.AE_TAIL;
+			headType = IGraphDelta.AE_HEAD;
 		} else {
-			throw new UnsupportedOperationException();
+			throw new UnsupportedOperationException("The event in parameter should be ADD_ARC or REMOVE_ARC");
+		}
+		while (first[idx] < last[idx]) {
+			if (delta.getCause(first[idx], tailType) != propagator) {
+				proc.execute(delta.get(first[idx], tailType), delta.get(first[idx], headType));
+			}
+			first[idx]++;
 		}
 	}
 }
