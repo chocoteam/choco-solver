@@ -43,7 +43,7 @@ public class GraphNeighSetViewTest {
         Assert.assertEquals(s.getLB().size(), 0);
         Assert.assertEquals(s.getUB().size(), 4);
         while (m.getSolver().solve()) {
-            int[] neighsInGraph = g.getValue().getNeighOf(0).toArray();
+            int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
             int[] neighSet = s.getValue().toArray();
             Arrays.sort(neighsInGraph);
             Arrays.sort(neighSet);
@@ -65,7 +65,7 @@ public class GraphNeighSetViewTest {
         GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
         while (m.getSolver().solve()) {
-            int[] neighsInGraph = g.getValue().getNeighOf(0).toArray();
+            int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
             int[] neighSet = s.getValue().toArray();
             Arrays.sort(neighsInGraph);
             Arrays.sort(neighSet);
@@ -88,7 +88,7 @@ public class GraphNeighSetViewTest {
         GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
         s.instantiateTo(new int[] {2, 3}, s);
         while (m.getSolver().solve()) {
-            int[] neighsInGraph = g.getValue().getNeighOf(0).toArray();
+            int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
             int[] neighSet = s.getValue().toArray();
             Arrays.sort(neighsInGraph);
             Arrays.sort(neighSet);

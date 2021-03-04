@@ -42,6 +42,24 @@ public interface IGraph  {
     boolean removeNode(int x);
 
     /**
+     * Add edge (x,y) to the graph
+     *
+     * @param x a node index
+     * @param y a node index
+     * @return true iff (x,y) was not already in the graph
+     */
+    boolean addEdge(int x, int y);
+
+    /**
+     * Remove edge (x,y) from the graph
+     *
+     * @param x a node index
+     * @param y a node index
+     * @return true iff (x,y) was in the graph
+     */
+    boolean removeEdge(int x, int y);
+
+    /**
      * The maximum number of nodes in the graph
 	 * Vertices of the graph belong to [0,getNbMaxNodes()-1]
 	 * This quantity is fixed at the creation of the graph
@@ -58,11 +76,11 @@ public interface IGraph  {
     SetType getNodeSetType();
 
     /**
-     * Get the type of data structures used in the graph to represent arcs
+     * Get the type of data structures used in the graph to represent edges
 	 *
-     * @return the type of data structures used in the graph to represent arcs
+     * @return the type of data structures used in the graph to represent edges
      */
-    SetType getArcSetType();
+    SetType getEdgeSetType();
 
     /**
      * Get either x's successors or neighbors.
@@ -73,7 +91,7 @@ public interface IGraph  {
      * @return x's successors if <code>this</code> is directed
      *         x's neighbors otherwise
      */
-    ISet getSuccOrNeighOf(int x);
+    ISet getSuccessorsOf(int x);
 
     /**
      * Get either x's predecessors or neighbors.
@@ -84,11 +102,11 @@ public interface IGraph  {
      * @return x's predecessors if <code>this</code> is directed
      *         x's neighbors otherwise
      */
-    ISet getPredOrNeighOf(int x);
+    ISet getPredecessorsOf(int x);
 
     /**
      * If <code>this </code> is directed
-     * returns true if and only if arc (x,y) exists
+     * returns true if and only if directed edge (x,y) exists
      * Else, if <code>this</code> is undirected
      * returns true if and only if edge (x,y) exists
      * <p/>
@@ -97,7 +115,17 @@ public interface IGraph  {
      * @param x a node index
      * @param y a node index
      */
-    boolean isArcOrEdge(int x, int y);
+    default boolean containsEdge(int x, int y) {
+        return getSuccessorsOf(x).contains(y);
+    }
+
+    /**
+     * @param x a node index
+     * @return True iff the graph contains the node x
+     */
+    default boolean containsNode(int x) {
+        return getNodes().contains(x);
+    }
 
     /**
      * @return true if and only if <code>this</code> is a directed graph
@@ -121,7 +149,7 @@ public interface IGraph  {
         for (int i : getNodes()) sb.append(i + " ");
         sb.append(";\n");
         for (int i : getNodes()) {
-            for (int j : getSuccOrNeighOf(i)) {
+            for (int j : getSuccessorsOf(i)) {
                 if (directed || i < j) sb.append(i + arc + j + " ;\n");
             }
         }

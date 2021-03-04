@@ -15,12 +15,12 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Random;
 
-public class GraphRandomArc extends GraphArcSelector<GraphVar> {
+public class GraphRandomEdge extends GraphEdgeSelector<GraphVar> {
 
 	private Random rd;
 	private TIntArrayList pFrom, pTo;
 
-	public GraphRandomArc(GraphVar g, long seed) {
+	public GraphRandomEdge(GraphVar g, long seed) {
 		super(g);
 		rd = new Random(seed);
 		pFrom = new TIntArrayList();
@@ -28,13 +28,13 @@ public class GraphRandomArc extends GraphArcSelector<GraphVar> {
 	}
 
 	@Override
-	public boolean computeNextArc() {
+	public boolean computeNextEdge() {
 		pFrom.clear();
 		pTo.clear();
 		ISet envSuc, kerSuc;
 		for (int i : envNodes) {
-			envSuc = g.getPotSuccOrNeighOf(i);
-			kerSuc = g.getMandSuccOrNeighOf(i);
+			envSuc = g.getPotentialSuccessorsOf(i);
+			kerSuc = g.getMandatorySuccessorsOf(i);
 			if (envSuc.size() != kerSuc.size()) {
 				for (int j : envSuc) {
 					if (!kerSuc.contains(j)) {

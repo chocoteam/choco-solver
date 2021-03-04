@@ -61,8 +61,8 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 		}
 		ISet suc;
 		for (int i : getUB().getNodes()) {
-			suc = UB.getSuccOrNeighOf(i);
-			if (suc.size() != getLB().getSuccOrNeighOf(i).size()) {
+			suc = UB.getSuccessorsOf(i);
+			if (suc.size() != getLB().getSuccessorsOf(i).size()) {
 				return false;
 			}
 		}
@@ -86,17 +86,17 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 		} else if (!UB.getNodes().contains(x)) {
 			return false;
 		}
-		ISet nei = UB.getSuccOrNeighOf(x);
+		ISet nei = UB.getSuccessorsOf(x);
 		for (int i : nei) {
-			removeArc(x, i, cause);
+			removeEdge(x, i, cause);
 		}
-		nei = UB.getPredOrNeighOf(x);
+		nei = UB.getPredecessorsOf(x);
 		for (int i : nei) {
-			removeArc(i, x, cause);
+			removeEdge(i, x, cause);
 		}
 		if (UB.removeNode(x)) {
 			if (reactOnModification) {
-				delta.add(x, GraphDelta.NR, cause);
+				delta.add(x, GraphDelta.NODE_REMOVED, cause);
 			}
 			GraphEventType e = GraphEventType.REMOVE_NODE;
 			notifyPropagators(e, cause);
@@ -119,7 +119,7 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 		if (UB.getNodes().contains(x)) {
 			if (LB.addNode(x)) {
 				if (reactOnModification) {
-					delta.add(x, GraphDelta.NE, cause);
+					delta.add(x, GraphDelta.NODE_ENFORCED, cause);
 				}
 				GraphEventType e = GraphEventType.ADD_NODE;
 				notifyPropagators(e, cause);
@@ -136,14 +136,14 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 	//***********************************************************************************
 
 	/**
-	 * @return the lower bound graph (having mandatory nodes and arcs)
+	 * @return the lower bound graph (having mandatory nodes and edges)
 	 */
 	public E getLB() {
 		return LB;
 	}
 
 	/**
-	 * @return the upper bound graph (having possible nodes and arcs)
+	 * @return the upper bound graph (having possible nodes and edges)
 	 */
 	public E getUB() {
 		return UB;
@@ -217,12 +217,12 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 			}
 		}
 		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < n; i++) {
+			for (int j = 0; j < n; j++) {
 				if (nodes.contains(i) && nodes.contains(j)) {
-					if (value.getSuccOrNeighOf(i).contains(j)) {
-						enforceArc(i, j, cause);
+					if (value.getSuccessorsOf(i).contains(j)) {
+						enforceEdge(i, j, cause);
 					} else {
-						removeArc(i, j, cause);
+						removeEdge(i, j, cause);
 					}
 				}
 			}
@@ -238,8 +238,8 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 		int n = getUB().getNbMaxNodes();
 		boolean[][] vals = new boolean[n + 1][n];
 		for (int i : getLB().getNodes()) {
-			for (int j : getLB().getSuccOrNeighOf(i)) {
-				vals[i][j] = true; // arc in
+			for (int j : getLB().getSuccessorsOf(i)) {
+				vals[i][j] = true; // edge in
 			}
 			vals[n][i] = true; // node in
 		}
@@ -253,7 +253,7 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 	 *
 	 * @param value value of <code>this</code>
 	 * @param cause
-	 * @throws ContradictionException if the arc was mandatory
+	 * @throws ContradictionException if the edge was mandatory
 	 */
 	public void instantiateTo(boolean[][] value, ICause cause) throws ContradictionException {
 		int n = value.length - 1;
@@ -264,49 +264,12 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
 				removeNode(i, cause);
 			}
 			for (int j = 0; j < n; j++) {
-				if (value[i][j]) {//arcs
-					enforceArc(i, j, cause);
+				if (value[i][j]) {//edges
+					enforceEdge(i, j, cause);
 				} else {
-					removeArc(i, j, cause);
+					removeEdge(i, j, cause);
 				}
 			}
 		}
-	}
-
-	//***********************************************************************************
-	// GraphViz
-	//***********************************************************************************
-
-	/**
-	 * Export domain to graphviz format, see http://www.webgraphviz.com/
-	 * Mandatory elements are in red whereas potential elements are in black
-	 *
-	 * @return a String encoding the domain of the variable
-	 */
-	public String graphVizExport() {
-		boolean directed = isDirected();
-		String arc = directed ? " -> " : " -- ";
-		StringBuilder sb = new StringBuilder();
-		sb.append(directed ? "digraph " : "graph ").append(getName() + "{\n");
-		sb.append("node [color = red, fontcolor=red]; ");
-		for (int i : getMandatoryNodes()) sb.append(i + " ");
-		sb.append(";\n");
-		for (int i : getMandatoryNodes()) {
-			for (int j : getMandSuccOrNeighOf(i)) {
-				if (directed || i < j) sb.append(i + arc + j + " [color=red] ;\n");
-			}
-		}
-		if (getMandatoryNodes().size() < getPotentialNodes().size()) {
-			sb.append("node [color = black, fontcolor=black]; ");
-			for (int i : getPotentialNodes()) if (!getMandatoryNodes().contains(i)) sb.append(i + " ");
-			sb.append(";\n");
-		}
-		for (int i : getPotentialNodes()) {
-			for (int j : getPotSuccOrNeighOf(i)) {
-				if ((directed || i < j) && !getMandSuccOrNeighOf(i).contains(j)) sb.append(i + arc + j + " ;\n");
-			}
-		}
-		sb.append("}");
-		return sb.toString();
 	}
 }

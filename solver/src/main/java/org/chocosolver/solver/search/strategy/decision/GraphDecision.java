@@ -49,7 +49,7 @@ public class GraphDecision extends Decision<GraphVar> {
 		assignment = graph_ass;
 	}
 
-	public void setArc(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
+	public void setEdge(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
 		super.set(variable);
 		this.from = from;
 		this.to = to;
@@ -87,6 +87,6 @@ public class GraphDecision extends Decision<GraphVar> {
 		if (to == -1) {
 			return " node " + from + assignment.toString();
 		}
-		return " arc (" + from + "," + to + ")" + assignment.toString();
+		return " edge (" + from + "," + to + ")" + assignment.toString();
 	}
 }

@@ -12,7 +12,7 @@ package org.chocosolver.solver.search.strategy.selectors.values;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-public abstract class GraphArcSelector<G extends GraphVar> {
+public abstract class GraphEdgeSelector<G extends GraphVar> {
 
 	protected G g;
 	protected ISet envNodes;
@@ -20,12 +20,12 @@ public abstract class GraphArcSelector<G extends GraphVar> {
 	protected int from, to;
 
 
-	public GraphArcSelector(G g) {
+	public GraphEdgeSelector(G g) {
 		this.g = g;
 		this.envNodes = g.getPotentialNodes();
 	}
 
-	public abstract boolean computeNextArc();
+	public abstract boolean computeNextEdge();
 
 	public int getFrom() {
 		return from;

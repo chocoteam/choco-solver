@@ -156,7 +156,7 @@ public class Search {
 
     /**
      * Lexicographic graph branching strategy.
-     * Branch on nodes then arcs/edges.
+     * Branch on nodes then edges.
      * <br>
      * <br> node branching:
      * Let i be the first node such that
@@ -164,9 +164,9 @@ public class Search {
      * The decision adds i to the kernel of g.
      * It is fails, then i is removed from the envelope of g.
      * <br>
-     * arc/edge branching:
+     * edge branching:
      * <br> node branching:
-     * Let (i,j) be the first arc/edge such that
+     * Let (i,j) be the first edge such that
      * (i,j) in envelope(g) and (i,j) not in kernel(g).
      * The decision adds (i,j) to the kernel of g.
      * It is fails, then (i,j) is removed from the envelope of g

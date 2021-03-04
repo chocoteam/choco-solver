@@ -9,13 +9,19 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 /**
  * Test suite for UndirectedGraphVarImpl class
@@ -23,6 +29,41 @@ import org.testng.annotations.Test;
  * @since 02/03/2021
  */
 public class UndirectedGraphVarImplTest {
+
+    /**
+     * Instantiate an UndirectedGraphVar and test the basic methods.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void basicTest() {
+        Model m = new Model();
+        int n = 3;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
+        UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        int[] mandNeigZero = g.getMandatoryNeighborsOf(0).toArray();
+        int[] potNeigZero = g.getPotentialNeighborsOf(0).toArray();
+        int[] mandPredZero = g.getMandatoryPredecessorsOf(0).toArray();
+        int[] potPredZero = g.getPotentialPredecessorOf(0).toArray();
+        int[] mandSuccZero = g.getMandatorySuccessorsOf(0).toArray();
+        int[] potSuccZero = g.getPotentialSuccessorsOf(0).toArray();
+        Arrays.sort(mandNeigZero);
+        Arrays.sort(potNeigZero);
+        Arrays.sort(mandPredZero);
+        Arrays.sort(potPredZero);
+        Arrays.sort(mandSuccZero);
+        Arrays.sort(potSuccZero);
+        Assert.assertTrue(Arrays.equals(g.getMandatoryPredecessorsOf(0).toArray(), mandNeigZero));
+        Assert.assertTrue(Arrays.equals(g.getMandatorySuccessorsOf(0).toArray(), mandNeigZero));
+        Assert.assertTrue(Arrays.equals(g.getPotentialPredecessorOf(0).toArray(), potNeigZero));
+        Assert.assertTrue(Arrays.equals(g.getPotentialSuccessorsOf(0).toArray(), potNeigZero));
+        ICause fakeCause = new ICause() {};
+        try {
+            g.instantiateTo(UB, fakeCause);
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertTrue(g.isInstantiated());
+    }
 
     /**
      * Test the instantiation of a single undirected graph variable with all combinations of node and arc sets types.

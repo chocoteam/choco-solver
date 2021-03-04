@@ -42,18 +42,18 @@ public class DirectedGraphVarImpl<E extends DirectedGraph> extends AbstractGraph
 	//***********************************************************************************
 
 	@Override
-	public boolean removeArc(int x, int y, ICause cause) throws ContradictionException {
+	public boolean removeEdge(int x, int y, ICause cause) throws ContradictionException {
 		assert cause != null;
-		if (LB.arcExists(x, y)) {
-			this.contradiction(cause, "remove mandatory arc " + x + "->" + y);
+		if (LB.containsEdge(x, y)) {
+			this.contradiction(cause, "remove mandatory edge " + x + "->" + y);
 			return false;
 		}
-		if (UB.removeArc(x, y)) {
+		if (UB.removeEdge(x, y)) {
 			if (reactOnModification) {
-				delta.add(x, GraphDelta.AR_TAIL, cause);
-				delta.add(y, GraphDelta.AR_HEAD, cause);
+				delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
+				delta.add(y, GraphDelta.EDGE_REMOVED_HEAD, cause);
 			}
-			GraphEventType e = GraphEventType.REMOVE_ARC;
+			GraphEventType e = GraphEventType.REMOVE_EDGE;
 			notifyPropagators(e, cause);
 			return true;
 		}
@@ -61,23 +61,23 @@ public class DirectedGraphVarImpl<E extends DirectedGraph> extends AbstractGraph
 	}
 
 	@Override
-	public boolean enforceArc(int x, int y, ICause cause) throws ContradictionException {
+	public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
 		assert cause != null;
 		enforceNode(x, cause);
 		enforceNode(y, cause);
-		if (UB.arcExists(x, y)) {
-			if (LB.addArc(x, y)) {
+		if (UB.containsEdge(x, y)) {
+			if (LB.addEdge(x, y)) {
 				if (reactOnModification) {
-					delta.add(x, GraphDelta.AE_TAIL, cause);
-					delta.add(y, GraphDelta.AE_HEAD, cause);
+					delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
+					delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
 				}
-				GraphEventType e = GraphEventType.ADD_ARC;
+				GraphEventType e = GraphEventType.ADD_EDGE;
 				notifyPropagators(e, cause);
 				return true;
 			}
 			return false;
 		}
-		this.contradiction(cause, "enforce arc which is not in the domain");
+		this.contradiction(cause, "enforce edge which is not in the domain");
 		return false;
 	}
 }

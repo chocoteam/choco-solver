@@ -18,8 +18,8 @@ public enum GraphEventType implements IEventType {
 	VOID(0),
 	REMOVE_NODE(1),
 	ADD_NODE(2),
-	REMOVE_ARC(4),
-	ADD_ARC(8);
+	REMOVE_EDGE(4),
+	ADD_EDGE(8);
 
 	//***********************************************************************************
 	// VARIABLES
@@ -42,27 +42,5 @@ public enum GraphEventType implements IEventType {
 	public int getMask() {
 		return mask;
 	}
-
-	public int getStrengthenedMask() {
-		return getMask();
-	}
-
-	//******************************************************************************************************************
-	//******************************************************************************************************************
-
-	public static boolean isAddNode(int mask) {
-		return (mask & ADD_NODE.mask) != 0;
-	}
-
-	public static boolean isAddArc(int mask) {
-		return (mask & ADD_ARC.mask) != 0;
-	}
-
-	public static boolean isRemNode(int mask) {
-		return (mask & REMOVE_NODE.mask) != 0;
-	}
-
-	public static boolean isRemArc(int mask) {
-		return (mask & REMOVE_ARC.mask) != 0;
-	}
+	
 }

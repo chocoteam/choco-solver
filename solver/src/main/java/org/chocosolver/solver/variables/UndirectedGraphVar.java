@@ -24,8 +24,8 @@ public interface UndirectedGraphVar<E extends UndirectedGraph> extends GraphVar<
      * @param idx a vertex
      * @return The set of neighbors of 'idx' in LB
      */
-    default ISet getMandNeighOf(int idx) {
-        return getMandSuccOrNeighOf(idx);
+    default ISet getMandatoryNeighborsOf(int idx) {
+        return getLB().getNeighborsOf(idx);
     }
 
     /**
@@ -35,8 +35,44 @@ public interface UndirectedGraphVar<E extends UndirectedGraph> extends GraphVar<
      * @param idx a vertex
      * @return The set of neighbors of 'idx' in UB
      */
-    default ISet getPotNeighOf(int idx) {
-        return getPotSuccOrNeighOf(idx);
+    default ISet getPotentialNeighborsOf(int idx) {
+        return getUB().getNeighborsOf(idx);
+    }
+
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getMandatoryNeighborsOf.
+     */
+    @Deprecated
+    @Override
+    default ISet getMandatorySuccessorsOf(int node) {
+        return GraphVar.super.getMandatorySuccessorsOf(node);
+    }
+
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getPotentialNeighborsOf.
+     */
+    @Deprecated
+    @Override
+    default ISet getPotentialSuccessorsOf(int node) {
+        return GraphVar.super.getPotentialSuccessorsOf(node);
+    }
+
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getMandatoryNeighborsOf.
+     */
+    @Deprecated
+    @Override
+    default ISet getMandatoryPredecessorsOf(int node) {
+        return GraphVar.super.getMandatoryPredecessorsOf(node);
+    }
+
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getPotentialNeighborsOf.
+     */
+    @Deprecated
+    @Override
+    default ISet getPotentialPredecessorOf(int node) {
+        return GraphVar.super.getPotentialPredecessorOf(node);
     }
 
     /**

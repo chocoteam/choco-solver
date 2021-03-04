@@ -19,7 +19,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * A Graph Variable is defined by a domain which is a graph interval [GLB, GUB].
- * An instantiation of a graph variable is a graph composed of vertices (or nodes) and arcs (or edges, or links).
+ * An instantiation of a graph variable is a graph composed of nodes and edges (directed or not).
  * GLB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
  * GUB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
  */
@@ -56,69 +56,69 @@ public interface GraphVar<E extends IGraph> extends Variable {
     boolean removeNode(int node, ICause cause) throws ContradictionException;
 
     /**
-     * Adds arc (or edge in case of undirected graph variable) (x,y) in the lower bound
+     * Adds edge (directed directed graph variable) (x,y) in the lower bound
      *
      * @param x     node's index
      * @param y     node's index
-     * @param cause cause of arc addition
-     * @return true iff the arc has been add to the lower bound
+     * @param cause cause of edge addition
+     * @return true iff the edge has been add to the lower bound
      * @throws ContradictionException
      */
-    boolean enforceArc(int x, int y, ICause cause) throws ContradictionException;
+    boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException;
 
     /**
-     * Removes arc (or edge in case of undirected graph variable) (x,y) from the upper bound
+     * Removes edge (directed in case of directed graph variable) (x,y) from the upper bound
      *
      * @param x node's index
      * @param y node's index
-     * @param cause cause of arc removal
-     * @return true iff the arc has been removed from the upper bound
-     * @throws ContradictionException if the arc was mandatory
+     * @param cause cause of edge removal
+     * @return true iff the edge has been removed from the upper bound
+     * @throws ContradictionException if the edge was mandatory
      */
-    boolean removeArc(int x, int y, ICause cause) throws ContradictionException;
+    boolean removeEdge(int x, int y, ICause cause) throws ContradictionException;
 
     /**
      * Get the set of successors (if directed) or neighbors (if undirected) of vertex 'node'
-     * in the lower bound graph (mandatory outgoing arcs)
+     * in the lower bound graph (mandatory outgoing edges)
      *
      * @param node a vertex
      * @return The set of successors (if directed) or neighbors (if undirected) of 'node' in LB
      */
-    default ISet getMandSuccOrNeighOf(int node) {
-        return getLB().getSuccOrNeighOf(node);
+    default ISet getMandatorySuccessorsOf(int node) {
+        return getLB().getSuccessorsOf(node);
     }
 
     /**
      * Get the set of successors (if directed) or neighbors (if undirected) of vertex 'node'
-     * in the upper bound graph (potential outgoing arcs)
+     * in the upper bound graph (potential outgoing edges)
      *
      * @param node a vertex
      * @return The set of successors (if directed) or neighbors (if undirected) of 'node' in UB
      */
-    default ISet getPotSuccOrNeighOf(int node) {
-        return getUB().getSuccOrNeighOf(node);
+    default ISet getPotentialSuccessorsOf(int node) {
+        return getUB().getSuccessorsOf(node);
     }
 
     /**
      * Get the set of predecessors (if directed) or neighbors (if undirected) of vertex 'node'
-     * in the lower bound graph (mandatory ingoing arcs)
+     * in the lower bound graph (mandatory ingoing edges)
      *
      * @param node a vertex
      * @return The set of predecessors (if directed) or neighbors (if undirected) of 'node' in LB
      */
-    default ISet getMandPredOrNeighOf(int node) {
-        return getLB().getPredOrNeighOf(node);
+    default ISet getMandatoryPredecessorsOf(int node) {
+        return getLB().getPredecessorsOf(node);
     }
 
     /**
      * Get the set of predecessors (if directed) or neighbors (if undirected) of vertex 'node'
-     * in the upper bound graph (potential ingoing arcs)
+     * in the upper bound graph (potential ingoing edges)
      *
      * @param node a vertex
      * @return The set of predecessors (if directed) or neighbors (if undirected) of 'node' in UB
      */
-    default ISet getPotPredOrNeighOf(int node) {
-        return getUB().getPredOrNeighOf(node);
+    default ISet getPotentialPredecessorOf(int node) {
+        return getUB().getPredecessorsOf(node);
     }
 
     /**

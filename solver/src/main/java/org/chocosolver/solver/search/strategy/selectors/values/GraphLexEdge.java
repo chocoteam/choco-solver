@@ -12,18 +12,18 @@ package org.chocosolver.solver.search.strategy.selectors.values;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-public class GraphLexArc extends GraphArcSelector<GraphVar> {
+public class GraphLexEdge extends GraphEdgeSelector<GraphVar> {
 
-	public GraphLexArc(GraphVar g) {
+	public GraphLexEdge(GraphVar g) {
 		super(g);
 	}
 
 	@Override
-	public boolean computeNextArc() {
+	public boolean computeNextEdge() {
 		ISet envSuc, kerSuc;
 		for (int i : envNodes) {
-			envSuc = g.getPotSuccOrNeighOf(i);
-			kerSuc = g.getMandSuccOrNeighOf(i);
+			envSuc = g.getPotentialSuccessorsOf(i);
+			kerSuc = g.getMandatorySuccessorsOf(i);
 			if (envSuc.size() != kerSuc.size()) {
 				for (int j : envSuc) {
 					if (!kerSuc.contains(j)) {

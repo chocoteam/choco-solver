@@ -53,7 +53,7 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 		for (int i = 0; i < 3; i++) {
 			this.last[i] = delta.getSize(i);
 		}
-		this.last[3] = delta.getSize(IGraphDelta.AE_TAIL);
+		this.last[3] = delta.getSize(IGraphDelta.EDGE_ENFORCED_TAIL);
 	}
 
 	/**
@@ -66,9 +66,9 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 		freeze();
 		int type;
 		if (evt == GraphEventType.REMOVE_NODE) {
-			type = IGraphDelta.NR;
+			type = IGraphDelta.NODE_REMOVED;
 		} else if (evt == GraphEventType.ADD_NODE) {
-			type = IGraphDelta.NE;
+			type = IGraphDelta.NODE_ENFORCED;
 		} else {
 			throw new UnsupportedOperationException("The event in parameter should be ADD_NODE or REMOVE_NODE");
 		}
@@ -81,26 +81,26 @@ public class GraphDeltaMonitor extends TimeStampedObject implements IGraphDeltaM
 	}
 
 	/**
-	 * Applies proc to every arc which has just been removed or enforced, depending on evt.
-	 * @param proc    an incremental procedure over arcs
-	 * @param evt    either ENFORCEARC or REMOVEARC
+	 * Applies proc to every edge which has just been removed or enforced, depending on evt.
+	 * @param proc    an incremental procedure over edges
+	 * @param evt    either ENFORCE_EDGE or REMOVE_EDGE
 	 * @throws ContradictionException if a failure occurs
 	 */
-	public void forEachArc(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+	public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
 		freeze();
 		int idx;
 		int tailType;
 		int headType;
-		if (evt == GraphEventType.REMOVE_ARC) {
+		if (evt == GraphEventType.REMOVE_EDGE) {
 			idx = 2;
-			tailType = IGraphDelta.AR_TAIL;
-			headType = IGraphDelta.AR_HEAD;
-		} else if (evt == GraphEventType.ADD_ARC) {
+			tailType = IGraphDelta.EDGE_REMOVED_TAIL;
+			headType = IGraphDelta.EDGE_REMOVED_HEAD;
+		} else if (evt == GraphEventType.ADD_EDGE) {
 			idx = 3;
-			tailType = IGraphDelta.AE_TAIL;
-			headType = IGraphDelta.AE_HEAD;
+			tailType = IGraphDelta.EDGE_ENFORCED_TAIL;
+			headType = IGraphDelta.EDGE_ENFORCED_HEAD;
 		} else {
-			throw new UnsupportedOperationException("The event in parameter should be ADD_ARC or REMOVE_ARC");
+			throw new UnsupportedOperationException("The event in parameter should be ADD_EDGE or REMOVE_EDGE");
 		}
 		while (first[idx] < last[idx]) {
 			if (delta.getCause(first[idx], tailType) != propagator) {

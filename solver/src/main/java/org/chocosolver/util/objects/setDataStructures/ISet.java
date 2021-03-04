@@ -9,8 +9,6 @@
  */
 package org.chocosolver.util.objects.setDataStructures;
 
-import java.util.Arrays;
-
 /**
  * Class representing a set of integers
  * Created by IntelliJ IDEA.

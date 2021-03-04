@@ -29,7 +29,7 @@ public class UndirectedGraph implements IGraph {
     private ISet[] neighbors;
     private ISet nodes;
     private int n;
-    private SetType arcSetType;
+    private SetType edgeSetType;
     private SetType nodeSetType;
 
     //***********************************************************************************
@@ -44,16 +44,16 @@ public class UndirectedGraph implements IGraph {
      * @param model   model providing the backtracking environment
      * @param n        max number of nodes
      * @param nodeSetType     data structure storing for nodes
-     * @param arcSetType     data structure storing for node neighbors
+     * @param edgeSetType     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(Model model, int n, SetType nodeSetType, SetType arcSetType, boolean allNodes) {
-        this.arcSetType = arcSetType;
+    public UndirectedGraph(Model model, int n, SetType nodeSetType, SetType edgeSetType, boolean allNodes) {
+        this.edgeSetType = edgeSetType;
         this.nodeSetType = nodeSetType;
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeStoredSet(this.arcSetType, 0, model);
+            neighbors[i] = SetFactory.makeStoredSet(this.edgeSetType, 0, model);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
@@ -71,11 +71,11 @@ public class UndirectedGraph implements IGraph {
      *
      * @param model   model providing the backtracking environment
      * @param n        max number of nodes
-     * @param arcSetType     data structure storing for node neighbors
+     * @param edgeSetType     data structure storing for node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(Model model, int n, SetType arcSetType, boolean allNodes) {
-        this(model, n, SetType.BITSET, arcSetType, allNodes);
+    public UndirectedGraph(Model model, int n, SetType edgeSetType, boolean allNodes) {
+        this(model, n, SetType.BITSET, edgeSetType, allNodes);
     }
 
     /**
@@ -85,16 +85,16 @@ public class UndirectedGraph implements IGraph {
      *
      * @param n        max number of nodes
      * @param nodeSetType     data structure storing for nodes
-     * @param arcSetType     data structure used for storing node neighbors
+     * @param edgeSetType     data structure used for storing node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(int n, SetType nodeSetType, SetType arcSetType, boolean allNodes) {
-        this.arcSetType = arcSetType;
+    public UndirectedGraph(int n, SetType nodeSetType, SetType edgeSetType, boolean allNodes) {
+        this.edgeSetType = edgeSetType;
         this.nodeSetType = nodeSetType;
         this.n = n;
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = SetFactory.makeSet(arcSetType, 0);
+            neighbors[i] = SetFactory.makeSet(edgeSetType, 0);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
@@ -111,11 +111,11 @@ public class UndirectedGraph implements IGraph {
      * Nodes are stored as BITSET
      *
      * @param n        max number of nodes
-     * @param arcSetType     data structure used for storing node neighbors
+     * @param edgeSetType     data structure used for storing node neighbors
      * @param allNodes true iff all nodes will always remain in the graph
      */
-    public UndirectedGraph(int n, SetType arcSetType, boolean allNodes) {
-        this(n, SetType.BITSET, arcSetType, allNodes);
+    public UndirectedGraph(int n, SetType edgeSetType, boolean allNodes) {
+        this(n, SetType.BITSET, edgeSetType, allNodes);
     }
 
     //***********************************************************************************
@@ -156,8 +156,8 @@ public class UndirectedGraph implements IGraph {
     /**
      * @inheritedDoc
      */
-    public SetType getArcSetType() {
-        return arcSetType;
+    public SetType getEdgeSetType() {
+        return edgeSetType;
     }
 
     @Override
@@ -176,7 +176,7 @@ public class UndirectedGraph implements IGraph {
     @Override
     public boolean removeNode(int x) {
         if (nodes.remove(x)) {
-            ISetIterator nei = getNeighOf(x).iterator();
+            ISetIterator nei = getNeighborsOf(x).iterator();
             while (nei.hasNext()) {
                 neighbors[nei.nextInt()].remove(x);
             }
@@ -214,17 +214,12 @@ public class UndirectedGraph implements IGraph {
      * @param y a node index
      * @return true iff edge (x,y) is in the graph
      */
-    public boolean edgeExists(int x, int y) {
+    public boolean containsEdge(int x, int y) {
         if (neighbors[x].contains(y)) {
             assert (neighbors[y].contains(x)) : "asymmetric adjacency matrix in an undirected graph";
             return true;
         }
         return false;
-    }
-
-    @Override
-    public boolean isArcOrEdge(int x, int y) {
-        return edgeExists(x, y);
     }
 
     /**
@@ -254,17 +249,25 @@ public class UndirectedGraph implements IGraph {
      * @param x node index
      * @return neighbors of x (predecessors and/or successors)
      */
-    public ISet getNeighOf(int x) {
+    public ISet getNeighborsOf(int x) {
         return neighbors[x];
     }
 
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getNeighborsOf.
+     */
+    @Deprecated
     @Override
-    public ISet getPredOrNeighOf(int x) {
+    public ISet getPredecessorsOf(int x) {
         return neighbors[x];
     }
 
+    /**
+     * @deprecated For an undirected graph, this method is equivalent to getNeighborsOf.
+     */
+    @Deprecated
     @Override
-    public ISet getSuccOrNeighOf(int x) {
+    public ISet getSuccessorsOf(int x) {
         return neighbors[x];
     }
 

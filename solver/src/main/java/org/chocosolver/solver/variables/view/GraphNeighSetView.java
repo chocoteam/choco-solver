@@ -59,12 +59,12 @@ public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
 
     @Override
     public ISet getLB() {
-        return graphVar.getMandNeighOf(node);
+        return graphVar.getMandatoryNeighborsOf(node);
     }
 
     @Override
     public ISet getUB() {
-        return graphVar.getPotNeighOf(node);
+        return graphVar.getPotentialNeighborsOf(node);
     }
 
     @Override
@@ -93,21 +93,21 @@ public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        return graphVar.removeArc(node, element, this);
+        return graphVar.removeEdge(node, element, this);
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        return graphVar.enforceArc(node, element, this);
+        return graphVar.enforceEdge(node, element, this);
     }
 
     @Override
     public void notify(IEventType event) throws ContradictionException {
-        if (event == GraphEventType.REMOVE_ARC) {
-            gdm.forEachArc(arcRemoved, GraphEventType.REMOVE_ARC);
+        if (event == GraphEventType.REMOVE_EDGE) {
+            gdm.forEachEdge(arcRemoved, GraphEventType.REMOVE_EDGE);
         }
-        if (event == GraphEventType.ADD_ARC) {
-            gdm.forEachArc(arcEnforced, GraphEventType.ADD_ARC);
+        if (event == GraphEventType.ADD_EDGE) {
+            gdm.forEachEdge(arcEnforced, GraphEventType.ADD_EDGE);
         }
     }
 }

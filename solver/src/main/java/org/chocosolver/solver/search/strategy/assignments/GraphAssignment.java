@@ -58,7 +58,7 @@ public abstract class GraphAssignment implements Serializable {
 			if (from == -1 || to == -1) {
 				throw new UnsupportedOperationException();
 			}
-			var.enforceArc(from, to, cause);
+			var.enforceEdge(from, to, cause);
 		}
 
 		@Override
@@ -66,7 +66,7 @@ public abstract class GraphAssignment implements Serializable {
 			if (from == -1 || to == -1) {
 				throw new UnsupportedOperationException();
 			}
-			var.removeArc(from, to, cause);
+			var.removeEdge(from, to, cause);
 		}
 
 		@Override

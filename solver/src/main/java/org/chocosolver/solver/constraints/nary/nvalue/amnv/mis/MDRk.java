@@ -86,7 +86,7 @@ public class MDRk extends MD {
             }
             inMIS.set(idx);
             out.set(idx);
-            ISetIterator nei = graph.getNeighOf(idx).iterator();
+            ISetIterator nei = graph.getNeighborsOf(idx).iterator();
             while (nei.hasNext()){
                 out.set(nei.nextInt());
             }

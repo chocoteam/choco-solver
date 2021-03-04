@@ -17,14 +17,13 @@ import org.chocosolver.solver.ICause;
  */
 public interface IGraphDelta extends IDelta {
 
-    //NR NE AR AE : NodeRemoved NodeEnforced ArcRemoved ArcEnforced
-    public final static int NR = 0;
-    public final static int NE = 1;
-    public final static int AR_TAIL = 2;
-    public final static int AR_HEAD = 3;
-    public final static int AE_TAIL = 4;
-    public final static int AE_HEAD = 5;
-    public final static int NB = 6;
+    int NODE_REMOVED = 0;
+    int NODE_ENFORCED = 1;
+    int EDGE_REMOVED_TAIL = 2;
+    int EDGE_REMOVED_HEAD = 3;
+    int EDGE_ENFORCED_TAIL = 4;
+    int EDGE_ENFORCED_HEAD = 5;
+    int NB = 6;
 
     int getSize(int i);
 

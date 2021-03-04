@@ -118,8 +118,8 @@ public class GraphFactory {
         }
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
-                g.addArc(i, j);
-                g.addArc(j, i);
+                g.addEdge(i, j);
+                g.addEdge(j, i);
             }
         }
         return g;

@@ -1,3 +1,12 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.variables.delta;
 
 import org.chocosolver.solver.exception.ContradictionException;
@@ -21,11 +30,11 @@ public interface IGraphDeltaMonitor {
     void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException;
 
     /**
-     * Applies proc to every arc which has just been removed or enforced, depending on evt.
+     * Applies proc to every edge which has just been removed or enforced, depending on evt.
      *
-     * @param proc an incremental procedure over arcs
-     * @param evt  either ENFORCEARC or REMOVEARC
+     * @param proc an incremental procedure over edges
+     * @param evt  either ENFORCE_EDGE or REMOVE_EDGE
      * @throws ContradictionException if a failure occurs
      */
-    void forEachArc(PairProcedure proc, GraphEventType evt) throws ContradictionException;
+    void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException;
 }
