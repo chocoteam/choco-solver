@@ -13,10 +13,10 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.procedure.PairProcedure;
 
 import java.util.Arrays;
@@ -103,6 +103,11 @@ public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
 
     @Override
     public void notify(IEventType event) throws ContradictionException {
-//        gdm.freez
+        if (event == GraphEventType.REMOVE_ARC) {
+            gdm.forEachArc(arcRemoved, GraphEventType.REMOVE_ARC);
+        }
+        if (event == GraphEventType.ADD_ARC) {
+            gdm.forEachArc(arcEnforced, GraphEventType.ADD_ARC);
+        }
     }
 }

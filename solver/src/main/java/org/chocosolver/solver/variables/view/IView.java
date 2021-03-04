@@ -23,6 +23,10 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * This is intend to replace very specific propagator such as equality.
  * <br/>
  *
+ * This is an implementation of domain views, as described in:
+ * Van Hentenryck P., Michel L. (2014) Domain Views for Constraint Programming
+ * https://link.springer.com/chapter/10.1007/978-3-319-10428-7_51
+ *
  * @author Charles Prud'homme
  * @since 26/08/11
  */

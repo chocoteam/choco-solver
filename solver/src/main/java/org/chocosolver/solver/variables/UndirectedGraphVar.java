@@ -39,6 +39,16 @@ public interface UndirectedGraphVar<E extends UndirectedGraph> extends GraphVar<
         return getPotSuccOrNeighOf(idx);
     }
 
+    /**
+     * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
+     *
+     * @return the current value (or kernel if not yet instantiated).
+     */
+    default E getValue(){
+        assert isInstantiated() : getName() + " not instantiated";
+        return getLB();
+    }
+
     @Override
     default boolean isDirected() {
         return false;
