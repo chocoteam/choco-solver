@@ -27,13 +27,20 @@ import java.util.Arrays;
 public class GraphNodeSetView extends GraphSetView<GraphVar> {
 
     /**
-     * Create a set view on the set of nodes of a graph variable.
-     *
+     * Create a set view over the set of nodes of a graph variable.
      * @param name name of the variable
      * @param graphVar observed graph variable
      */
-    protected GraphNodeSetView(String name, GraphVar graphVar) {
+    public GraphNodeSetView(String name, GraphVar graphVar) {
         super(name, graphVar);
+    }
+
+    /**
+     * Creates a set view over the set of nodes of a graph variable.
+     * @param graphVar observed graph variable
+     */
+    public GraphNodeSetView(GraphVar graphVar) {
+        this("NODES(" + graphVar.getName() + ")", graphVar);
     }
 
     @Override

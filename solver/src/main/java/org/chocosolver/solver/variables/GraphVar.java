@@ -18,10 +18,10 @@ import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * A Graph Variable is defined by a domain which is a graph interval [GLB, GUB].
+ * A Graph Variable is defined by a domain which is a graph interval [LB, UB].
  * An instantiation of a graph variable is a graph composed of nodes and edges (directed or not).
- * GLB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
- * GUB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
+ * LB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
+ * UB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
  *
  * --- GRAPH API REFACTORING 04/03/2021 ---
  *

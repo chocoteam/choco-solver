@@ -15,8 +15,7 @@ import org.chocosolver.solver.constraints.graph.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.impl.DirectedGraphVarImpl;
-import org.chocosolver.solver.variables.impl.UndirectedGraphVarImpl;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -43,7 +42,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphVar g = m.undirectedGraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -64,7 +63,7 @@ public class GraphNodeSetViewTest {
         int n = 4;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new DirectedGraphVarImpl("g", m, LB, UB);
+        GraphVar g = m.directedGraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -84,7 +83,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphVar g = m.undirectedGraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
@@ -107,7 +106,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphVar g = m.undirectedGraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         s.instantiateTo(new int[] {0, 2, 4}, s);
         while (m.getSolver().solve()) {
@@ -129,7 +128,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new DirectedGraphVarImpl("g", m, LB, UB);
+        GraphVar g = m.directedGraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
@@ -151,8 +150,8 @@ public class GraphNodeSetViewTest {
         int n = 10;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        GraphVar g = m.undirectedGraphVar("g", LB, UB);
+        SetVar s = m.graphNodeSetView(g);
         Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.intVar(3, 7)));
         m.post(nbNodes);
         m.member(0, s).post();
