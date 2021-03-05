@@ -22,6 +22,29 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * An instantiation of a graph variable is a graph composed of nodes and edges (directed or not).
  * GLB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
  * GUB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
+ *
+ * --- GRAPH API REFACTORING 04/03/2021 ---
+ *
+ * In accordance with IGraph:
+ *
+ * - The semantic distinction between arcs and edges has been removed for more clarity. If the graph is undirected,
+ *      edges are undirected, if the graph is directed, the graph is directed. Methods related to edges are
+ *      `enforceEdge` and `removeEdge`.
+ *
+ * - The object model is such that the more abstract interface specifies directed graph variable accessors on edges,
+ *      `getMandatorySuccessorsOf`, `getPotentialSuccessorsOf`, `getMandatoryPredecessorsOf`, and
+ *      `getPotentialPredecessorsOf`. When the graph is undirected, the methods `getMandatoryNeighborsOf` and
+ *      `getPotentialNeighborsOf` are available. Note that an undirected graph is equivalent to a directed graph
+ *      with couples of opposite directed edges. Thus, the neighbors of a node in an undirected graph are both
+ *      successors and predecessors, and this is why these methods are equivalent to `getMandatoryNeighbors` and
+ *      `getPotentialSuccessorsOf` in the case of an undirected graph. To encourage unambiguous use and facilitate
+ *      code reading, the successors and predecessors related method have been defined as deprecated in explicit uses
+ *      of UndirectedGraphs.
+ *
+ *  - The possibility to chose (in constructors) and get the set data structure for nodes has also been added,
+ *      as it was only implemented for neighbors: `getNodeSetType` and `getEdgeSetType`. The previous default behaviour
+ *      has been conserved with default constructors.
+ *
  */
 public interface GraphVar<E extends IGraph> extends Variable {
 

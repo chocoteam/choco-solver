@@ -16,6 +16,25 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  * @author Jean-Guillaume Fages, Xavier Lorca
  *         <p/>
  *         Provide an interface for the graph manipulation
+ *
+ * --- GRAPH API REFACTORING 04/03/2021 ---
+ *
+ * - The semantic distinction between arcs and edges has been removed for more clarity. If the graph is undirected,
+ *      edges are undirected, if the graph is directed, the graph is directed. Methods related to edges are
+ *      `addEdge`, `removeEdge`, and `containsEdge`.
+ *
+ * - The object model is such that the more abstract interface specifies directed graph accessors on edges,
+ *      `getSuccessorsOf` and `getPredecessorsOf`. When the graph is undirected, the method `getNeighborsOf` is
+ *      available. Note that an undirected graph is equivalent to a directed graph with couples of opposite
+ *      directed edges. Thus, the neighbors of a node in an undirected graph are both successors and predecessors,
+ *      and this is why these methods are equivalent to getNeighbors in the case of an undirected graph. To encourage
+ *      unambiguous use and facilitate code reading, the successors and predecessors related method have been defined
+ *      as deprecated in explicit uses of UndirectedGraphs.
+ *
+ *  - The possibility to chose (in constructors) and get the set data structure for nodes has also been added,
+ *      as it was only implemented for neighbors: `getNodeSetType` and `getEdgeSetType`. The previous default behaviour
+ *      has been conserved with default constructors.
+ *
  */
 public interface IGraph  {
 
