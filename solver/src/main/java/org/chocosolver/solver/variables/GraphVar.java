@@ -37,7 +37,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  *      `getPotentialNeighborsOf` are available. Note that an undirected graph is equivalent to a directed graph
  *      with couples of opposite directed edges. Thus, the neighbors of a node in an undirected graph are both
  *      successors and predecessors, and this is why these methods are equivalent to `getMandatoryNeighbors` and
- *      `getPotentialSuccessorsOf` in the case of an undirected graph. To encourage unambiguous use and facilitate
+ *      `getPotentialNeighborssOf` in the case of an undirected graph. To encourage unambiguous use and facilitate
  *      code reading, the successors and predecessors related method have been defined as deprecated in explicit uses
  *      of UndirectedGraphs.
  *
