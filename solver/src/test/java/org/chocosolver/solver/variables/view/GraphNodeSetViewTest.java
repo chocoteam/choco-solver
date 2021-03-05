@@ -10,8 +10,11 @@
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.graph.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.impl.DirectedGraphVarImpl;
 import org.chocosolver.solver.variables.impl.UndirectedGraphVarImpl;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -73,11 +76,10 @@ public class GraphNodeSetViewTest {
     }
 
     /**
-     * Post a constraint on the view to force it to a particular value and ensure that the observed
-     * graph is properly affected.
+     * Post constraints on the view and ensure that the observed graph is properly affected.
      */
     @Test(groups="1s", timeOut=60000)
-    public void testFixedViewUndirectedGraph() {
+    public void testConstrainedViewUndirectedGraph() {
         Model m = new Model();
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
@@ -122,7 +124,7 @@ public class GraphNodeSetViewTest {
      * Same as previous with a directed graph var.
      */
     @Test(groups="1s", timeOut=60000)
-    public void testFixedViewDirectedGraph() {
+    public void testConstrainedViewDirectedGraph() {
         Model m = new Model();
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
@@ -137,6 +139,29 @@ public class GraphNodeSetViewTest {
             Arrays.sort(nodeSet);
             Assert.assertEquals(nodes, nodeSet);
             Assert.assertEquals(nodes, new int[] {0, 2, 4});
+        }
+    }
+
+    /**
+     * Post constraints on the graph and the view and ensure that the propagation is effective.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testConstrainedGraphAndView() {
+        Model m = new Model();
+        int n = 10;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.intVar(3, 7)));
+        m.post(nbNodes);
+        m.member(0, s).post();
+        IntVar card = s.getCard();
+        m.arithm(card, "<=", 4).post();
+        while (m.getSolver().solve()) {
+            Assert.assertTrue(g.getValue().getNodes().contains(0));
+            Assert.assertTrue(card.getValue() >= 3 && card.getValue() <= 4);
+            Assert.assertTrue(s.getValue().size() >= 3 && s.getValue().size() <= 4);
         }
     }
 }

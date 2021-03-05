@@ -11,7 +11,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -22,12 +22,13 @@ import org.chocosolver.util.procedure.PairProcedure;
 import java.util.Arrays;
 
 /**
- * A GraphSetView representing the set of neighbors of a node in an undirected graph variable.
+ * A GraphSetView representing the set of successors of a node in a graph variable.
+ * Note that if the graph variable is undirected, the set of successors is the set of neighbors.
  * If the node is removed from the graph envelope, the set is empty.
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
+public class GraphSuccessorsSetView extends GraphSetView<GraphVar> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -41,7 +42,7 @@ public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
      * @param graphVar observed graph variable
      * @param node index of the observed node
      */
-    protected GraphNeighSetView(String name, UndirectedGraphVar graphVar, int node) {
+    protected GraphSuccessorsSetView(String name, GraphVar graphVar, int node) {
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
@@ -59,12 +60,12 @@ public class GraphNeighSetView extends GraphSetView<UndirectedGraphVar> {
 
     @Override
     public ISet getLB() {
-        return graphVar.getMandatoryNeighborsOf(node);
+        return graphVar.getMandatorySuccessorsOf(node);
     }
 
     @Override
     public ISet getUB() {
-        return graphVar.getPotentialNeighborsOf(node);
+        return graphVar.getPotentialSuccessorsOf(node);
     }
 
     @Override

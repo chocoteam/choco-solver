@@ -48,6 +48,7 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
     protected GraphSetView(String name, E graphVar) {
         super(name, graphVar.getModel());
         this.graphVar = graphVar;
+        this.graphVar.subscribeView(this);
     }
 
     /**
@@ -144,7 +145,7 @@ public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable 
     @Override
     public IntVar getCard() {
         if(!hasCard()){
-            int ubc =  getLB().size();
+            int ubc =  getUB().size();
             int lbc = getLB().size();
             if(ubc==lbc) cardinality = model.intVar(ubc);
             else{

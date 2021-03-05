@@ -10,7 +10,12 @@
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.graph.PropNbEdges;
+import org.chocosolver.solver.constraints.graph.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.impl.UndirectedGraphVarImpl;
 import org.chocosolver.util.objects.graphs.GraphFactory;
@@ -26,7 +31,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphNeighSetViewTest {
+public class GraphSuccessorsSetViewTest {
 
     /**
      * Test the instantiation of a graph neigh set view over an undirected graph variable
@@ -39,7 +44,7 @@ public class GraphNeighSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
+        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         Assert.assertEquals(s.getLB().size(), 0);
         Assert.assertEquals(s.getUB().size(), 4);
         while (m.getSolver().solve()) {
@@ -62,7 +67,7 @@ public class GraphNeighSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
+        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
@@ -85,7 +90,7 @@ public class GraphNeighSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
+        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         s.instantiateTo(new int[] {2, 3}, s);
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
@@ -109,8 +114,38 @@ public class GraphNeighSetViewTest {
         UB.addEdge(0, 1);
         UB.addEdge(0, 2);
         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        GraphNeighSetView s = new GraphNeighSetView("s", g, 0);
+        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 3})).post();
         Assert.assertFalse(m.getSolver().solve());
+    }
+
+    /**
+     * Post constraints on the graph and the view and ensure that the propagation is effective.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testConstrainedGraphAndView() {
+        Model m = new Model();
+        int n = 10;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeStoredAllNodesUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        for (int i = 1; i < n; i ++) {
+            UB.addEdge(0, i);
+        }
+        GraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
+        Constraint nbEdges = new Constraint("NbEdges", new PropNbEdges(g, m.intVar(3, 7)));
+        m.post(nbEdges);
+        m.member(2, s).post();
+        IntVar card = s.getCard();
+        m.arithm(card, "<=", 4).post();
+        Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.intOffsetView(card, 1)));
+        m.post(nbNodes);
+        while (m.getSolver().solve()) {
+            Assert.assertTrue(g.getValue().getNodes().contains(0));
+            Assert.assertTrue(g.getValue().getNodes().contains(2));
+            Assert.assertTrue(g.getValue().getSuccessorsOf(0).contains(2));
+            Assert.assertTrue(card.getValue() >= 3 && card.getValue() <= 4);
+            Assert.assertTrue(s.getValue().size() >= 3 && s.getValue().size() <= 4);
+        }
     }
 }
