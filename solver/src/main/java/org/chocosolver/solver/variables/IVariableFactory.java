@@ -14,6 +14,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
@@ -819,6 +821,37 @@ public interface IVariableFactory extends ISelf<Model> {
         return vars;
     }
 
+    //*************************************************************************************
+    // GRAPH VARIABLES
+    //*************************************************************************************
+
+    /**
+     * Creates an undirected graph variable, taking its values in the graph domain [LB, UB].
+     * An instantiation of a graph variable is a graph composed of nodes and edges.
+     * LB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
+     * UB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return An undirected graph variable taking its values in the graph domain [LB, UB].
+     */
+    default UndirectedGraphVar undirectedGraphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
+        return new UndirectedGraphVarImpl(name, ref(), LB, UB);
+    }
+
+    /**
+     * Creates a directed graph variable, taking its values in the graph domain [LB, UB].
+     * An instantiation of a graph variable is a graph composed of nodes and edges.
+     * LB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
+     * UB is the envelope graph (or upper bound), such that any instantiation is a subgraph of it.
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return A directed graph variable taking its values in the graph domain [LB, UB].
+     */
+    default DirectedGraphVar directedGraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
+        return new DirectedGraphVarImpl(name, ref(), LB, UB);
+    }
 
     //*************************************************************************************
     // UTILS

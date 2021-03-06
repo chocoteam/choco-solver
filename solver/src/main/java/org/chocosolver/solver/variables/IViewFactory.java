@@ -451,7 +451,45 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     //*************************************************************************************
-    // SET VARIABLES
+    // SET VARIABLES OVER GRAPH VARIABLES
     //*************************************************************************************
 
+    /**
+     * Creates a set view over the set of nodes of a graph variable.
+     * @param g observed graph variable
+     * @return a set view over the set of nodes of a graph variable
+     */
+    default SetVar graphNodeSetView(GraphVar g) {
+        return new GraphNodeSetView(g);
+    }
+
+    /**
+     * Creates a set view over the set of successors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of successors of a node of a directed graph variable.
+     */
+    default SetVar graphSuccessorsSetView(DirectedGraphVar g, int node) {
+        return new GraphSuccessorsSetView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of predecessors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of predecessors of a node of a directed graph variable.
+     */
+    default SetVar graphPredecessorsSetView(DirectedGraphVar g, int node) {
+        return new GraphPredecessorsSetView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of neighbors of a node of an undirected graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of neighbors of a node of an udirected graph variable.
+     */
+    default SetVar graphNeighborsSetView(UndirectedGraphVar g, int node) {
+        return new GraphSuccessorsSetView(g, node);
+    }
 }

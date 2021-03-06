@@ -15,9 +15,10 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.OneValueDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
@@ -234,6 +235,11 @@ public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
             delta = new OneValueDelta(model.getEnvironment());
             reactOnRemoval = true;
         }
+    }
+
+    @Override
+    public IDelta getDelta() {
+        return delta;
     }
 
     @SuppressWarnings("unchecked")

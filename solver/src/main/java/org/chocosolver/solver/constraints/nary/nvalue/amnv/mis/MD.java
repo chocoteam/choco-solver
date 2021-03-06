@@ -60,7 +60,7 @@ public class MD implements F{
 		out.clear();
 		inMIS.clear();
 		for (int i = 0; i < n; i++) {
-			nbNeighbours[i] = graph.getNeighOf(i).size();
+			nbNeighbours[i] = graph.getNeighborsOf(i).size();
 		}
 		int idx = out.nextClearBit(0);
 		while (idx < n) {
@@ -78,7 +78,7 @@ public class MD implements F{
 		inMIS.set(node);
 		out.set(node);
 		int sizeFifo=0;
-		ISetIterator nei = graph.getNeighOf(node).iterator();
+		ISetIterator nei = graph.getNeighborsOf(node).iterator();
 		while (nei.hasNext()) {
 			int j = nei.nextInt();
 			if (!out.get(j)) {
@@ -87,7 +87,7 @@ public class MD implements F{
 			}
 		}
 		for (int i=0; i<sizeFifo; i++) {
-			nei = graph.getNeighOf(fifo[i]).iterator();
+			nei = graph.getNeighborsOf(fifo[i]).iterator();
 			while (nei.hasNext()) {
 				nbNeighbours[nei.nextInt()]--;
 			}

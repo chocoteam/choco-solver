@@ -68,7 +68,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
         ISetIterator predece;
         for (int i = free.nextSetBit(n); i >= n && i < n2; i = free.nextSetBit(i + 1)) {
             distinction.set(i);
-            predece = digraph.getPredOf(i).iterator();
+            predece = digraph.getPredecessorsOf(i).iterator();
             while (predece.hasNext()) {
                 int x = predece.nextInt();
                 if (!distinction.get(x)) {
@@ -80,7 +80,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
                 int y = fifo[indexFirst++];
                 int v = matching[y];
                 distinction.set(v);
-                predece = digraph.getPredOf(v).iterator();
+                predece = digraph.getPredecessorsOf(v).iterator();
                 while (predece.hasNext()) {
                     int x = predece.nextInt();
                     if (!distinction.get(x)) {
@@ -107,14 +107,14 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
                 if (!distinction.get(j)) {
                     if (distinction.get(i)) { // Remove type 1 redundant edges between Γ(A) and Dc-A.
                         filter |= v.removeValue(k, aCause);
-                        digraph.removeArc(i, j);
+                        digraph.removeEdge(i, j);
                     } else { // Remove type 2 redundant edges between Xc-Γ(A) and Dc-A.
                         if (nodeSCC[i] != nodeSCC[j]) {
                             if (matching[i] == j) {
                                 filter |= v.instantiateTo(k, aCause);
                             } else {
                                 filter |= v.removeValue(k, aCause);
-                                digraph.removeArc(i, j);
+                                digraph.removeEdge(i, j);
                             }
                         }
                     }

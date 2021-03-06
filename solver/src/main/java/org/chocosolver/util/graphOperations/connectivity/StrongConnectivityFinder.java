@@ -99,7 +99,7 @@ public class StrongConnectivityFinder  {
 	private void findSingletons(BitSet restriction) {
 		ISet nodes = graph.getNodes();
 		for (int i = restriction.nextSetBit(0); i >= 0; i = restriction.nextSetBit(i + 1)) {
-			if (nodes.contains(i) && graph.getPredOf(i).size() * graph.getSuccOf(i).size() == 0) {
+			if (nodes.contains(i) && graph.getPredecessorsOf(i).size() * graph.getSuccessorsOf(i).size() == 0) {
 				nodeSCC[i] = nbSCC;
 				sccFirstNode[nbSCC++] = i;
 				restriction.clear(i);
@@ -125,7 +125,7 @@ public class StrongConnectivityFinder  {
 		stack[stackIdx++] = i;
 		inStack.set(i);
 		p[k] = k;
-		iterator[k] = graph.getSuccOf(start).iterator();
+		iterator[k] = graph.getSuccessorsOf(start).iterator();
 		int j;
 		// algo
 		while (true) {
@@ -138,7 +138,7 @@ public class StrongConnectivityFinder  {
 						dfsNumOfNode[j] = k;
 						p[k] = i;
 						i = k;
-						iterator[i] = graph.getSuccOf(j).iterator();
+						iterator[i] = graph.getSuccessorsOf(j).iterator();
 						stack[stackIdx++] = i;
 						inStack.set(i);
 						inf[i] = i;

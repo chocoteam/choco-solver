@@ -105,13 +105,13 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int last = -1;
 		int n_R = SCCfinder.getNbSCC();
 		for (int i = 0; i < n_R; i++) {
-			if (G_R.getPredOf(i).isEmpty()) {
+			if (G_R.getPredecessorsOf(i).isEmpty()) {
 				if(first!=-1){
 					fails();
 				}
 				first = i;
 			}
-			if (G_R.getSuccOf(i).isEmpty()) {
+			if (G_R.getSuccessorsOf(i).isEmpty()) {
 				if(last!=-1){
 					fails();
 				}
@@ -136,10 +136,10 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	public void rebuild(int source) {
 		for(int i=0;i<n2;i++){
 			mates[i].clear();
-			support.getSuccOf(i).clear();
-			support.getPredOf(i).clear();
-			G_R.getPredOf(i).clear();
-			G_R.getSuccOf(i).clear();
+			support.getSuccessorsOf(i).clear();
+			support.getPredecessorsOf(i).clear();
+			G_R.getPredecessorsOf(i).clear();
+			G_R.getSuccessorsOf(i).clear();
 		}
 		G_R.getNodes().clear();
 		for(int i=0;i<n;i++){
@@ -148,9 +148,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			int ub = v.getUB();
 			for(int j=lb;j<=ub;j=v.nextValue(j)){
 				if(j-offSet==source){
-					support.addArc(i,n);
+					support.addEdge(i,n);
 				}else{
-					support.addArc(i,j-offSet);
+					support.addEdge(i,j-offSet);
 				}
 			}
 		}
@@ -164,11 +164,11 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 		int x;
 		for (int i = 0; i < n; i++) {
 			x = sccOf[i];
-			succs = support.getSuccOf(i).iterator();
+			succs = support.getSuccessorsOf(i).iterator();
 			while (succs.hasNext()) {
 				int j = succs.nextInt();
 				if (x != sccOf[j]) {
-					G_R.addArc(x, sccOf[j]);
+					G_R.addEdge(x, sccOf[j]);
 					mates[x].add((i + 1) * n2 + j);
 				}
 			}
@@ -183,16 +183,16 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			return 1;
 		}
 		int next = -1;
-		ISetIterator succs = G_R.getSuccOf(node).iterator();
+		ISetIterator succs = G_R.getSuccessorsOf(node).iterator();
 		while(succs.hasNext()){
 			int x = succs.nextInt();
-			if (G_R.getPredOf(x).size() == 1) {
+			if (G_R.getPredecessorsOf(x).size() == 1) {
 				if (next != -1) {
 					return 0;
 				}
 				next = x;
 			} else {
-				G_R.removeArc(node, x);
+				G_R.removeEdge(node, x);
 			}
 		}
 		succs = mates[node].iterator();
@@ -265,9 +265,9 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 			forceOutDoor(outDoor);
 			// If 1 in and 1 out and |scc| > 2 then forbid in->out
 			// Is only 1 in ?
-			if (G_R.getPredOf(sccFrom).iterator().hasNext()) {
+			if (G_R.getPredecessorsOf(sccFrom).iterator().hasNext()) {
 				int in = -1;
-				int p = G_R.getPredOf(sccFrom).iterator().next();
+				int p = G_R.getPredecessorsOf(sccFrom).iterator().next();
 				ISetIterator iterP = mates[p].iterator();
 				while (iterP.hasNext()) {
 					int i = iterP.nextInt();

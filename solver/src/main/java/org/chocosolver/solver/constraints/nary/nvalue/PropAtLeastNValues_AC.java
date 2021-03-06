@@ -110,8 +110,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
 
     private void buildDigraph() {
         for (int i = 0; i < n2; i++) {
-            digraph.getSuccOf(i).clear();
-            digraph.getPredOf(i).clear();
+            digraph.getSuccessorsOf(i).clear();
+            digraph.getPredecessorsOf(i).clear();
         }
         free.set(0, n2);
         int j, k, ub;
@@ -124,7 +124,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             ub = v.getUB();
             for (k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
-                digraph.addArc(i, j);
+                digraph.addEdge(i, j);
             }
         }
     }
@@ -139,7 +139,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
         int card = 0;
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredOf(i).size()>0) {
+            if (digraph.getPredecessorsOf(i).size()>0) {
                 card++;
             }
         }
@@ -153,8 +153,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             free.clear(i);
             int tmp = mate;
             while (tmp != i) {
-                digraph.removeArc(father[tmp], tmp);
-                digraph.addArc(tmp, father[tmp]);
+                digraph.removeEdge(father[tmp], tmp);
+                digraph.addEdge(tmp, father[tmp]);
                 tmp = father[tmp];
             }
         }
@@ -168,7 +168,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         ISetIterator succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
-            succs = digraph.getSuccOf(x).iterator();
+            succs = digraph.getSuccessorsOf(x).iterator();
             while (succs.hasNext()) {
                 int y = succs.nextInt();
                 if (!in.get(y)) {
@@ -196,16 +196,16 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         //TODO CHECK THIS PART
         for (int i = 0; i < n; i++) {
             if (free.get(i)) {
-                digraph.addArc(n2, i);
+                digraph.addEdge(n2, i);
             } else {
-                digraph.addArc(i, n2);
+                digraph.addEdge(i, n2);
             }
         }
         for (int i = n; i < n2; i++) {
             if (free.get(i)) {
-                digraph.addArc(i, n2 + 1);
+                digraph.addEdge(i, n2 + 1);
             } else {
-                digraph.addArc(n2 + 1, i);
+                digraph.addEdge(n2 + 1, i);
             }
         }
         SCCfinder.findAllSCC();
@@ -224,11 +224,11 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
             for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                 j = map.get(k);
                 if (nodeSCC[i] != nodeSCC[j]) {
-                    if (digraph.getPredOf(i).contains(j)) {
+                    if (digraph.getPredecessorsOf(i).contains(j)) {
                         v.instantiateTo(k, this);
                     } else {
                         v.removeValue(k, this);
-                        digraph.removeArc(i, j);
+                        digraph.removeEdge(i, j);
                     }
                 }
             }
@@ -236,7 +236,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                 ub = v.getUB();
                 for (int k = v.getLB(); k <= ub; k = v.nextValue(k)) {
                     j = map.get(k);
-                    if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
+                    if (digraph.containsEdge(i, j) || digraph.containsEdge(j, i)) {
                         break;
                     } else {
                         v.removeValue(k, this);
@@ -245,7 +245,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
                 int lb = v.getLB();
                 for (int k = ub; k >= lb; k = v.previousValue(k)) {
                     j = map.get(k);
-                    if (digraph.arcExists(i, j) || digraph.arcExists(j, i)) {
+                    if (digraph.containsEdge(i, j) || digraph.containsEdge(j, i)) {
                         break;
                     } else {
                         v.removeValue(k, this);
@@ -271,12 +271,12 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         digraph.removeNode(n2 + 1);
         free.clear();
         for (int i = 0; i < n; i++) {
-            if (digraph.getPredOf(i).size() == 0) {
+            if (digraph.getPredecessorsOf(i).size() == 0) {
                 free.set(i);
             }
         }
         for (int i = n; i < n2; i++) {
-            if (digraph.getSuccOf(i).size() == 0) {
+            if (digraph.getSuccessorsOf(i).size() == 0) {
                 free.set(i);
             }
         }
@@ -329,8 +329,8 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         private int idx;
 
         public void execute(int i) throws ContradictionException {
-            digraph.removeArc(idx, map.get(i));
-            digraph.removeArc(map.get(i), idx);
+            digraph.removeEdge(idx, map.get(i));
+            digraph.removeEdge(map.get(i), idx);
         }
 
         @Override

@@ -11,14 +11,9 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
  * An interface to define views.
@@ -27,6 +22,10 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * <p/>
  * This is intend to replace very specific propagator such as equality.
  * <br/>
+ *
+ * This is an implementation of domain views, as described in:
+ * Van Hentenryck P., Michel L. (2014) Domain Views for Constraint Programming
+ * https://link.springer.com/chapter/10.1007/978-3-319-10428-7_51
  *
  * @author Charles Prud'homme
  * @since 26/08/11
@@ -38,7 +37,7 @@ public interface IView extends ICause, Variable {
      *
      * @return variable observed
      */
-    IntVar getVariable();
+    Variable getVariable();
 
     /**
      * This methods is related to explanations, it binds an event occurring on the observed
@@ -57,13 +56,4 @@ public interface IView extends ICause, Variable {
      */
     void notify(IEventType event) throws ContradictionException;
 
-    default void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        IntVar other = (this == pivot ? getVariable() : (IntVar)this);
-        IntIterableRangeSet dom = explanation.complement(other);
-        other.unionLit(dom, explanation);
-        dom = explanation.complement(pivot);
-        unionOf(dom, explanation.readDom(p));
-        pivot.intersectLit(dom, explanation);
-    }
 }
