@@ -20,7 +20,6 @@ import org.chocosolver.solver.variables.delta.IntDelta;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -43,7 +42,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<I extends IntVar> extends AbstractVariable implements IView<I>, IntVar {
+public abstract class IntView<I extends IntVar> extends AbstractView<I> implements IntVar {
 
     /**
      * Observed variable
@@ -81,10 +80,9 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
      * @param var observed variable
      */
     IntView(String name, I var) {
-        super(name, var.getModel());
+        super(name, var);
         this.var = var;
         this.delta = NoDelta.singleton;
-        this.var.subscribeView(this);
     }
 
     /**
@@ -365,7 +363,6 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return Variable.VIEW | Variable.INT;
     }
 
-	@Override
     public I getVariable() {
         return var;
     }
@@ -401,7 +398,7 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     }
 
     @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
         super.notifyPropagators(transformEvent(event), this);
     }
 

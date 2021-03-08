@@ -82,11 +82,11 @@ public abstract class IntBoolView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final void notify(IEventType event) throws ContradictionException {
+    public final void notify(IEventType event, int variableIdx) throws ContradictionException {
         if(!fixed.get()) {
             if(isInstantiated()){
                 this.fixed.set(Boolean.TRUE);
-                super.notify(event);
+                super.notify(event, variableIdx);
             }
         }
     }

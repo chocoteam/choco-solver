@@ -166,8 +166,9 @@ public interface Variable extends Identity, Comparable<Variable> {
     /**
      * Attaches a view to this variable.
      * @param view a view to add to this variable.
+     * @param idx the index of this variable in the view's array of observed variables
      */
-    void subscribeView(IView view);
+    void subscribeView(IView view, int idx);
 
     /**
      * Return the delta domain of this

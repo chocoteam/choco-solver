@@ -109,6 +109,11 @@ public abstract class AbstractVariable implements Variable {
     private IView[] views;
 
     /**
+     * Indices of this variable in subscribed views
+     */
+    private int[] idxInViews;
+
+    /**
      * Index of the last not null view in <code>views</code>.
      */
     private int vIdx;
@@ -153,6 +158,7 @@ public abstract class AbstractVariable implements Variable {
         this.name = name;
         this.model = model;
         this.views = new IView[2];
+        this.idxInViews = new int[2];
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
@@ -342,12 +348,12 @@ public abstract class AbstractVariable implements Variable {
         assert cause != null;
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].notify(event);
+                views[i].notify(event, idxInViews[i]);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].notify(event);
+                    views[i].notify(event, idxInViews[i]);
                 }
             }
         }
@@ -381,13 +387,18 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public void subscribeView(IView view) {
+    public void subscribeView(IView view, int idx) {
         if (vIdx == views.length) {
             IView[] tmp = views;
+            int[] tmpIdx = idxInViews;
             views = new IView[tmp.length * 3 / 2 + 1];
+            idxInViews = new int[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
+            System.arraycopy(tmpIdx, 0, idxInViews, 0, vIdx);
         }
-        views[vIdx++] = view;
+        views[vIdx] = view;
+        idxInViews[vIdx] = idx;
+        vIdx++;
     }
 
     @Override

@@ -451,8 +451,45 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     //*************************************************************************************
-    // SET VARIABLES OVER GRAPH VARIABLES
+    // SET VARIABLES
     //*************************************************************************************
+
+    // OVER ARRAY OF INTEGER VARIABLES
+
+    /**
+     * Create a set view from an array of integer variables, such that:
+     * intVars[x - offset] = c <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v integer that "toggle" integer variables index inclusion in the set view
+     * @param offset offset such that if intVariables[x - offset] = v <=> x in set view.
+     * @return a set view such that intVars[x - offset] = c <=> x in setView.
+     */
+    default SetVar intArraySetView(IntVar[] intVars, int v, int offset) {
+        return new IntArraySetView(v, offset, intVars);
+    }
+
+    /**
+     * Instantiate an array of set views from an array of integer variables, such that:
+     * x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     *
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropIntChannel} constraint.
+     *
+     * @param intVars array of integer variables
+     * @param nbSets number of set views to create
+     * @param offset1 offset for setViews indices
+     * @param offset2 offset for intVars indices
+     * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     */
+    default SetVar[] intArraySetArrayView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
+        SetVar[] setVars = new SetVar[nbSets];
+        for (int i = 0; i < nbSets; i++) {
+            setVars[i] = intArraySetView(intVars, i + offset1, offset2);
+        }
+        return setVars;
+    }
+
+    //  OVER GRAPH VARIABLES
 
     /**
      * Creates a set view over the set of nodes of a graph variable.
