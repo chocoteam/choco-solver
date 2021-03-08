@@ -24,14 +24,14 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphNodeSetView extends GraphSetView<GraphVar> {
+public class GraphNodeSetView<E extends GraphVar> extends GraphSetView<E> {
 
     /**
      * Create a set view over the set of nodes of a graph variable.
      * @param name name of the variable
      * @param graphVar observed graph variable
      */
-    public GraphNodeSetView(String name, GraphVar graphVar) {
+    public GraphNodeSetView(String name, E graphVar) {
         super(name, graphVar);
     }
 
@@ -39,7 +39,7 @@ public class GraphNodeSetView extends GraphSetView<GraphVar> {
      * Creates a set view over the set of nodes of a graph variable.
      * @param graphVar observed graph variable
      */
-    public GraphNodeSetView(GraphVar graphVar) {
+    public GraphNodeSetView(E graphVar) {
         this("NODES(" + graphVar.getName() + ")", graphVar);
     }
 

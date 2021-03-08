@@ -37,14 +37,14 @@ import static org.chocosolver.solver.variables.events.IntEventType.INSTANTIATE;
  * @author Charles Prud'homme
  * @since 23/08/11
  */
-public class MinusView extends IntView<IntVar> {
+public class MinusView<I extends IntVar> extends IntView<I> {
 
 
     /**
      * Create a -<i>var<i/> view
      * @param var a integer variable
      */
-    public MinusView(final IntVar var) {
+    public MinusView(final I var) {
         super("-(" + var.getName() + ")", var);
     }
 

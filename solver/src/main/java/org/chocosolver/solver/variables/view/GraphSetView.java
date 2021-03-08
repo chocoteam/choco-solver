@@ -32,7 +32,7 @@ import org.chocosolver.util.iterators.EvtScheduler;
  * @author Dimitri Justeau-Allaire
  * @since 01/03/2021
  */
-public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable implements IView, SetVar {
+public abstract class GraphSetView<E extends GraphVar> extends AbstractVariable implements IView<E>, SetVar {
 
     protected E graphVar;
     protected SetDelta delta;

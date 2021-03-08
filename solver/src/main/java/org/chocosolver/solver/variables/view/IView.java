@@ -30,14 +30,14 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * @author Charles Prud'homme
  * @since 26/08/11
  */
-public interface IView extends ICause, Variable {
+public interface IView<V extends Variable> extends ICause, Variable {
 
     /**
      * Return the basis variable
      *
      * @return variable observed
      */
-    Variable getVariable();
+    V getVariable();
 
     /**
      * This methods is related to explanations, it binds an event occurring on the observed

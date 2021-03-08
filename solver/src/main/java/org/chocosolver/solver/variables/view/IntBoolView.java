@@ -41,7 +41,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  * @author Charles Prud'homme
  * @since 04/12/2018.
  */
-public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
+public abstract class IntBoolView<I extends IntVar> extends IntView<I> implements BoolVar {
 
     /**
      * indicate if the view is fixed
@@ -75,7 +75,7 @@ public abstract class IntBoolView extends IntView<IntVar> implements BoolVar{
      * @param var  an integer variable
      * @param cste an int
      */
-    IntBoolView(final IntVar var, String op, final int cste) {
+    IntBoolView(final I var, String op, final int cste) {
         super("(" + var.getName() + op + cste + ")", var);
         this.cste = cste;
         this.fixed = var.getModel().getEnvironment().makeBool(false);
