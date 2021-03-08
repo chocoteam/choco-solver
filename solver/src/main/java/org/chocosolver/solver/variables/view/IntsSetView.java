@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
  * Set view over an array of integer variables defined such that:
  * with v and offset two integers (constant) intVariables[x - offset] = c <=> x in set.
  */
-public class IntArraySetView<I extends IntVar> extends SetView<I> {
+public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     /**
      * Integer value such that intVariables[x - offset] = v <=> x in set
@@ -50,7 +50,7 @@ public class IntArraySetView<I extends IntVar> extends SetView<I> {
      * @param offset offset such that if intVariables[x - offset] = v <=> x in set view.
      * @param variables observed variables
      */
-    protected IntArraySetView(String name, int v, int offset, I... variables) {
+    protected IntsSetView(String name, int v, int offset, I... variables) {
         super(name, variables);
         this.v = v;
         this.offset = offset;
@@ -72,7 +72,7 @@ public class IntArraySetView<I extends IntVar> extends SetView<I> {
      * @param offset offset such that if intVariables[x - offset] = v <=> x in set view.
      * @param variables observed variables
      */
-    public IntArraySetView(int v, int offset, I... variables) {
+    public IntsSetView(int v, int offset, I... variables) {
         this("INT_ARRAY_SET_VIEW["
                     + String.join(",", Arrays.stream(variables)
                         .map(i -> i.getName())

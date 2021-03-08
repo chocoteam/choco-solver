@@ -23,13 +23,13 @@ import org.testng.annotations.Test;
  * @author Dimitri Justeau-Allaire
  * @since 08/03/2021
  */
-public class IntArraySetViewTest {
+public class IntsSetViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateAndGenerate() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntArraySetView(1, 0, intVars);
+        SetVar setView = new IntsSetView(1, 0, intVars);
         Assert.assertEquals(setView.getLB().size(), 0);
         Assert.assertEquals(setView.getUB().size(), 8);
         while (m.getSolver().solve()) {
@@ -49,7 +49,7 @@ public class IntArraySetViewTest {
     public void testInstantiateTo() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntArraySetView(1, 2, intVars);
+        SetVar setView = new IntsSetView(1, 2, intVars);
         try {
             setView.instantiateTo(new int[] {2, 3, 4}, (ICause) setView);
             Assert.assertTrue(setView.isInstantiated());
@@ -74,7 +74,7 @@ public class IntArraySetViewTest {
     public void testConstrained() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = m.intArraySetView(intVars, 1, 0);
+        SetVar setView = m.intsSetView(intVars, 1, 0);
         IntVar card = setView.getCard();
         m.arithm(card, "<=", 4).post();
         m.member(2, setView).post();
@@ -91,7 +91,7 @@ public class IntArraySetViewTest {
     public void testIntArraySetArrayView() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar[] setViews = m.intArraySetArrayView(intVars, 3, 0, 0);
+        SetVar[] setViews = m.intsSetView(intVars, 3, 0, 0);
         IntVar card = setViews[0].getCard();
         m.arithm(card, "=", 2).post();
         m.member(2, setViews[1]).post();
