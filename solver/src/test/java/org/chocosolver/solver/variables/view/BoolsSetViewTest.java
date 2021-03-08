@@ -13,43 +13,44 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
- * Test suite for IntsSetView class
+ * Test suite for BoolsSetView class
  * @author Dimitri Justeau-Allaire
  * @since 08/03/2021
  */
-public class IntsSetViewTest {
+public class BoolsSetViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateAndGenerate() {
         Model m = new Model();
-        IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntsSetView(1, 0, intVars);
+        BoolVar[] boolVars = m.boolVarArray(8);
+        SetVar setView = new BoolsSetView(0, boolVars);
         Assert.assertEquals(setView.getLB().size(), 0);
         Assert.assertEquals(setView.getUB().size(), 8);
         while (m.getSolver().solve()) {
             int i = 0;
-            for (IntVar v : intVars) {
-                if (v.isInstantiatedTo(1)) {
+            for (BoolVar v : boolVars) {
+                if (v.isInstantiatedTo(BoolVar.kTRUE)) {
                     i++;
                 }
             }
             Assert.assertEquals(setView.getValue().size(), i);
             Assert.assertTrue(setView.isInstantiated());
         }
-        Assert.assertEquals(m.getSolver().getSolutionCount(), Math.pow(3, 8));
+        Assert.assertEquals(m.getSolver().getSolutionCount(), Math.pow(2, 8));
     }
 
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateTo() {
         Model m = new Model();
-        IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntsSetView(1, 2, intVars);
+        BoolVar[] boolVars = m.boolVarArray(8);
+        SetVar setView = new BoolsSetView(2, boolVars);
         try {
             setView.instantiateTo(new int[] {2, 3, 4}, (ICause) setView);
             Assert.assertTrue(setView.isInstantiated());
@@ -58,11 +59,10 @@ public class IntsSetViewTest {
             Assert.assertTrue(setView.getValue().contains(3));
             Assert.assertTrue(setView.getValue().contains(4));
             for (int i = 0; i < 3; i++) {
-                Assert.assertTrue(intVars[i].isInstantiatedTo(1));
+                Assert.assertEquals(boolVars[i].getValue(), BoolVar.kTRUE);
             }
             for (int i = 3; i < 8; i++) {
-                Assert.assertFalse(intVars[i].isInstantiated());
-                Assert.assertFalse(intVars[i].contains(1));
+                Assert.assertEquals(boolVars[i].getValue(), BoolVar.kFALSE);
             }
         } catch (ContradictionException e) {
             e.printStackTrace();
@@ -73,8 +73,8 @@ public class IntsSetViewTest {
     @Test(groups="1s", timeOut=60000)
     public void testConstrained() {
         Model m = new Model();
-        IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = m.intsSetView(intVars, 1, 0);
+        BoolVar[] boolVars = m.boolVarArray(8);
+        SetVar setView = m.boolsSetView(boolVars, 0);
         IntVar card = setView.getCard();
         m.arithm(card, "<=", 4).post();
         m.member(2, setView).post();
@@ -84,26 +84,6 @@ public class IntsSetViewTest {
             Assert.assertEquals(card.getValue(), setView.getValue().size());
             Assert.assertTrue(setView.getValue().contains(2));
             Assert.assertTrue(setView.getValue().contains(7));
-        }
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testIntArraySetArrayView() {
-        Model m = new Model();
-        IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar[] setViews = m.intsSetView(intVars, 3, 0, 0);
-        IntVar card = setViews[0].getCard();
-        m.arithm(card, "=", 2).post();
-        m.member(2, setViews[1]).post();
-        m.member(7, setViews[2]).post();
-        while (m.getSolver().solve()) {
-            Assert.assertEquals(card.getValue(), 2);
-            Assert.assertTrue(setViews[1].getValue().contains(2));
-            Assert.assertTrue(setViews[2].getValue().contains(7));
-            for (int i = 0; i < intVars.length; i ++) {
-                int val = intVars[i].getValue();
-                Assert.assertTrue(setViews[val].getValue().contains(i));
-            }
         }
     }
 }

@@ -454,15 +454,29 @@ public interface IViewFactory extends ISelf<Model> {
     // SET VARIABLES
     //*************************************************************************************
 
+    // OVER ARRAY OF BOOLEAN VARIABLES
+
+    /**
+     * Create a set view over an array of boolean variables defined such that:
+     * boolVars[x - offset] = True <=> x in setView
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropBoolChannel} constraint.
+     * @param boolVars observed boolean variables
+     * @param offset Offset between boolVars array indices and set elements
+     * @return a set view such that boolVars[x - offset] = True <=> x in setView
+     */
+    default SetVar boolsSetView(BoolVar[] boolVars, int offset) {
+        return new BoolsSetView(offset, boolVars);
+    }
+
     // OVER ARRAY OF INTEGER VARIABLES
 
     /**
-     * Create a set view from an array of integer variables, such that:
+     * Create a set view over an array of integer variables, such that:
      * intVars[x - offset] = c <=> x in set view.
      *
      * @param intVars array of integer variables
      * @param v integer that "toggle" integer variables index inclusion in the set view
-     * @param offset offset such that if intVariables[x - offset] = v <=> x in set view.
+     * @param offset offset between intVars indices and setViews elements
      * @return a set view such that intVars[x - offset] = c <=> x in setView.
      */
     default SetVar intsSetView(IntVar[] intVars, int v, int offset) {
@@ -470,15 +484,15 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * Instantiate an array of set views from an array of integer variables, such that:
+     * Instantiate an array of set views over an array of integer variables, such that:
      * x in setViews[y - offset1] <=> intVars[x - offset2] = y.
      *
      * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropIntChannel} constraint.
      *
      * @param intVars array of integer variables
      * @param nbSets number of set views to create
-     * @param offset1 offset for setViews indices
-     * @param offset2 offset for intVars indices
+     * @param offset1 offset between setViews indices and intVars values
+     * @param offset2 offset between intVars indices and setViews elements
      * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
      */
     default SetVar[] intsSetView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
