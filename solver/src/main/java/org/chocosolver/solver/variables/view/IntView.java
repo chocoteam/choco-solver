@@ -43,7 +43,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<I extends IntVar> extends AbstractVariable implements IView, IntVar {
+public abstract class IntView<I extends IntVar> extends AbstractVariable implements IView<I>, IntVar {
 
     /**
      * Observed variable
@@ -366,7 +366,7 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     }
 
 	@Override
-    public IntVar getVariable() {
+    public I getVariable() {
         return var;
     }
 

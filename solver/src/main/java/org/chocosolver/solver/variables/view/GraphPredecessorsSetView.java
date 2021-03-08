@@ -28,7 +28,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class GraphPredecessorsSetView extends GraphSetView<GraphVar> {
+public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -41,7 +41,7 @@ public class GraphPredecessorsSetView extends GraphSetView<GraphVar> {
      * @param graphVar observed graph variable
      * @param node index of the observed node
      */
-    public GraphPredecessorsSetView(String name, GraphVar graphVar, int node) {
+    public GraphPredecessorsSetView(String name, E graphVar, int node) {
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
@@ -62,7 +62,7 @@ public class GraphPredecessorsSetView extends GraphSetView<GraphVar> {
      * @param graphVar observed graph variable
      * @param node index of the observed node
      */
-    public GraphPredecessorsSetView(GraphVar graphVar, int node) {
+    public GraphPredecessorsSetView(E graphVar, int node) {
         this("PREDECESSORS_OF(" + graphVar.getName() + ", " + node + ")", graphVar, node);
     }
 
