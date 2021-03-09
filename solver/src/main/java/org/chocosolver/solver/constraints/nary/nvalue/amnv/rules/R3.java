@@ -71,7 +71,7 @@ public class R3 implements R {
                 for (int k = lb; k <= ub; k = vars[i].nextValue(k)) {
                     valToRem[last++] = k;
                 }
-                ISetIterator nei = graph.getNeighOf(i).iterator();
+                ISetIterator nei = graph.getNeighborsOf(i).iterator();
                 while (nei.hasNext()) {
                     int j = nei.nextInt();
                     if (mis.get(j)) {

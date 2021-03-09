@@ -34,13 +34,13 @@ import java.util.TreeSet;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 20/07/12
  */
-public class RealView extends AbstractVariable implements IView, RealVar {
+public class RealView<I extends IntVar> extends AbstractVariable implements IView<I>, RealVar {
 
-    protected final IntVar var;
+    protected final I var;
 
     protected final double precision;
 
-    public RealView(IntVar var, double precision) {
+    public RealView(I var, double precision) {
         super("(real)" + var.getName(), var.getModel());
         this.var = var;
         this.precision = precision;
@@ -48,7 +48,7 @@ public class RealView extends AbstractVariable implements IView, RealVar {
     }
 
     @Override
-    public IntVar getVariable() {
+    public I getVariable() {
         return var;
     }
 

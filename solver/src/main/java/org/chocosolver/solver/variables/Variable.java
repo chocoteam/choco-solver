@@ -72,6 +72,11 @@ public interface Variable extends Identity, Comparable<Variable> {
     int REAL = 1 << 6;
 
     /**
+     * Kind of variable: graph.
+     */
+    int GRAPH = 1 << 7;
+
+    /**
      * Mask to get the kind of a variable.
      */
     int KIND = (1 << 10) - 1 - TYPE;

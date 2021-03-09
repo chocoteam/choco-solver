@@ -26,10 +26,7 @@ import org.chocosolver.solver.search.strategy.decision.IbexDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.bandit.MOSS;
 import org.chocosolver.util.bandit.Static;
 import org.chocosolver.util.tools.VariableUtils;
@@ -151,6 +148,33 @@ public class Search {
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
         return setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), true, sets);
+    }
+
+    // ************************************************************************************
+    // GRAPHVAR STRATEGIES
+    // ************************************************************************************
+
+    /**
+     * Lexicographic graph branching strategy.
+     * Branch on nodes then edges.
+     * <br>
+     * <br> node branching:
+     * Let i be the first node such that
+     * i in envelope(g) and i not in kernel(g).
+     * The decision adds i to the kernel of g.
+     * It is fails, then i is removed from the envelope of g.
+     * <br>
+     * edge branching:
+     * <br> node branching:
+     * Let (i,j) be the first edge such that
+     * (i,j) in envelope(g) and (i,j) not in kernel(g).
+     * The decision adds (i,j) to the kernel of g.
+     * It is fails, then (i,j) is removed from the envelope of g
+     *
+     * @param g a graph variable to branch on
+     */
+    public static GraphStrategy graphVarLexSearch(GraphVar g) {
+        return new GraphStrategy(g);
     }
 
     // ************************************************************************************
@@ -439,7 +463,7 @@ public class Search {
 
     /**
      * Creates a default search strategy for the given model. This heuristic is complete (handles
-     * IntVar, BoolVar, SetVar and RealVar)
+     * IntVar, BoolVar, SetVar, GraphVar, and RealVar)
      *
      * @param model a model requiring a default search strategy
      */
@@ -449,6 +473,7 @@ public class Search {
         // 1. retrieve variables, keeping the declaration order, and put them in four groups:
         List<IntVar> livars = new ArrayList<>(); // integer and boolean variables
         List<SetVar> lsvars = new ArrayList<>(); // set variables
+        List<GraphVar> lgvars = new ArrayList<>(); // graph variables
         List<RealVar> lrvars = new ArrayList<>();// real variables.
         Variable[] variables = model.getVars();
         Variable objective = null;
@@ -463,6 +488,9 @@ public class Search {
                         break;
                     case Variable.SET:
                         lsvars.add((SetVar) var);
+                        break;
+                    case Variable.GRAPH:
+                        lgvars.add((GraphVar) var);
                         break;
                     case Variable.REAL:
                         lrvars.add((RealVar) var);
@@ -493,6 +521,11 @@ public class Search {
         }
         if (lsvars.size() > 0) {
             strats.add(setVarSearch(lsvars.toArray(new SetVar[0])));
+        }
+        if (lgvars.size() > 0) {
+            for (GraphVar g : lgvars) {
+                strats.add(new GraphStrategy(g));
+            }
         }
         if (lrvars.size() > 0) {
             strats.add(realVarSearch(lrvars.toArray(new RealVar[0])));

@@ -31,7 +31,7 @@ import org.chocosolver.util.tools.MathUtils;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class ScaleView extends IntView<IntVar> {
+public final class ScaleView<I extends IntVar> extends IntView<I> {
 
     public final int cste;
 
@@ -40,7 +40,7 @@ public final class ScaleView extends IntView<IntVar> {
      * @param var a variable
      * @param cste a positive integer
      */
-    public ScaleView(final IntVar var, final int cste) {
+    public ScaleView(final I var, final int cste) {
         super("(" + var.getName() + "*" + cste + ")", var);
         assert (cste > 0) : "view cste must be >0";
         this.cste = cste;

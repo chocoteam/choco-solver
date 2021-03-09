@@ -47,7 +47,7 @@ public class Gi extends G {
     public void build() {
         int n = getNbMaxNodes();
         for (int i = 0; i < n; i++) {
-            getNeighOf(i).clear();
+            getNeighborsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             for (int i2 = i + 1; i2 < n; i2++) {
@@ -66,7 +66,7 @@ public class Gi extends G {
     }
 
     public void update(int i) {
-        ISetIterator nei = getNeighOf(i).iterator();
+        ISetIterator nei = getNeighborsOf(i).iterator();
         while (nei.hasNext()) {
             int j = nei.nextInt();
             if (!intersect(i, j)) {
