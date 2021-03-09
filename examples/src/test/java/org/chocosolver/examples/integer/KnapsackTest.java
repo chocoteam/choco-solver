@@ -12,11 +12,16 @@ package org.chocosolver.examples.integer;
 import gnu.trove.list.array.TFloatArrayList;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
 
 /**
  * <br/>
@@ -61,7 +66,7 @@ public class KnapsackTest {
         times.add(s.getSolver().getTimeCount());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testMain() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         ks.solveIt(ks.modelIt("k10", 10), true);
@@ -69,18 +74,33 @@ public class KnapsackTest {
     }
 
 
-	@Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testALL0() throws IOException, SetUpException {
         times.clear();
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
             Model s = ks.modelIt("k0", 10);
             ks.solveIt(s, true);
-            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 7513, "obj val");
+            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 7546, "obj val");
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 120_000)
+    public void testALL02() throws IOException, SetUpException {
+        times.clear();
+        KnapsackTest ks = new KnapsackTest();
+        for (int i = 0; i < 20; i++) {
+            Model s = ks.modelIt("k0", 8);
+            List<IntVar> scope = Arrays.asList(s.retrieveIntVars(true));
+            Collections.shuffle(scope, new Random(i));
+            s.getSolver().setSearch(Search.inputOrderUBSearch(scope.toArray(new IntVar[0])));
+            ks.solveIt(s, true);
+            Assert.assertEquals(s.getSolver().getBestSolutionValue().intValue(), 7546, "obj val");
+            s.getSolver().printShortStatistics();
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
     public void testALL5() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
@@ -92,7 +112,7 @@ public class KnapsackTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testALL10() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         for (int i = 0; i < 1; i++) {
@@ -104,7 +124,7 @@ public class KnapsackTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testOPT13() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 13);
@@ -114,7 +134,7 @@ public class KnapsackTest {
         Assert.assertEquals(s.getSolver().getNodeCount(), 15, "nb nod");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testOPT14() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 14);
@@ -124,7 +144,7 @@ public class KnapsackTest {
         Assert.assertEquals(s.getSolver().getNodeCount(), 16, "nb nod");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testOPT15() throws IOException, SetUpException {
         KnapsackTest ks = new KnapsackTest();
         Model s = ks.modelIt("k20", 15);
