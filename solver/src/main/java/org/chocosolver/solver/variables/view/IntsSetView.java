@@ -13,7 +13,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.objects.setDataStructures.*;
@@ -23,7 +22,7 @@ import java.util.Arrays;
 
 /**
  * Set view over an array of integer variables defined such that:
- * with v and offset two integers (constant) intVariables[x - offset] = c <=> x in set.
+ * with v and offset two integers (constant) intVariables[x - offset] = v <=> x in set.
  */
 public class IntsSetView<I extends IntVar> extends SetView<I> {
 
@@ -52,7 +51,7 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     /**
      * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = c <=> x in set
+     * intVariables[x - offset] = v <=> x in set
      *
      * @param name  name of the variable
      * @param v integer that "toggle" integer variables index inclusion in the set view
@@ -78,7 +77,7 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     /**
      * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = c <=> x in set
+     * intVariables[x - offset] = v <=> x in set
      *
      * @param v integer that "toggle" integer variables index inclusion in the set view
      * @param offset offset between integer variables indices and set elements.
