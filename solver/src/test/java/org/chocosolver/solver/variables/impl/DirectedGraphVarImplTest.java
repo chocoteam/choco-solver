@@ -87,9 +87,9 @@ public class DirectedGraphVarImplTest {
         Model m = new Model();
         int n = 3;
         for (SetType nodeSetType : SetType.values()) {
-            if(!nodeSetType.name().contains("FIXED")) {
+            if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
-                    if (!arcSetType.name().contains("FIXED")) {
+                    if (!arcSetType.name().contains("FIXED") && !arcSetType.name().contains("DYNAMIC")) {
                         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, nodeSetType, arcSetType);
                         DirectedGraph UB = GraphFactory.makeStoredAllNodesDirectedGraph(m, n, nodeSetType, arcSetType, false);
                         UB.addEdge(0, 1);
@@ -114,9 +114,9 @@ public class DirectedGraphVarImplTest {
         Model m = new Model();
         int n = 3;
         for (SetType nodeSetType : SetType.values()) {
-            if(!nodeSetType.name().contains("FIXED")) {
+            if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
-                    if (!arcSetType.name().contains("FIXED")) {
+                    if (!arcSetType.name().contains("FIXED") && !arcSetType.name().contains("DYNAMIC")) {
                         DirectedGraph LB1 = GraphFactory.makeStoredDirectedGraph(m, n, nodeSetType, arcSetType);
                         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(m, n, nodeSetType, arcSetType);
                         DirectedGraph UB1 = GraphFactory.makeStoredAllNodesDirectedGraph(m, n, nodeSetType, arcSetType, false);

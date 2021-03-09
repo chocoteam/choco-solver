@@ -79,11 +79,13 @@ public class IntsSetViewTest {
         m.arithm(card, "<=", 4).post();
         m.member(2, setView).post();
         m.member(7, setView).post();
+        m.notMember(3, setView).post();
         while (m.getSolver().solve()) {
             Assert.assertTrue(card.getValue() <= 4);
             Assert.assertEquals(card.getValue(), setView.getValue().size());
             Assert.assertTrue(setView.getValue().contains(2));
             Assert.assertTrue(setView.getValue().contains(7));
+            Assert.assertFalse(setView.getValue().contains(3));
         }
     }
 
@@ -96,6 +98,7 @@ public class IntsSetViewTest {
         m.arithm(card, "=", 2).post();
         m.member(2, setViews[1]).post();
         m.member(7, setViews[2]).post();
+        m.notMember(3, setViews[0]).post();
         while (m.getSolver().solve()) {
             Assert.assertEquals(card.getValue(), 2);
             Assert.assertTrue(setViews[1].getValue().contains(2));

@@ -74,9 +74,9 @@ public class UndirectedGraphVarImplTest {
         Model m = new Model();
         int n = 3;
         for (SetType nodeSetType : SetType.values()) {
-            if(!nodeSetType.name().contains("FIXED")) {
+            if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
-                    if (!arcSetType.name().contains("FIXED")) {
+                    if (!arcSetType.name().contains("FIXED") && !arcSetType.name().contains("DYNAMIC")) {
                         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, nodeSetType, arcSetType);
                         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, nodeSetType, arcSetType, false);
                         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
@@ -98,9 +98,9 @@ public class UndirectedGraphVarImplTest {
         Model m = new Model();
         int n = 3;
         for (SetType nodeSetType : SetType.values()) {
-            if(!nodeSetType.name().contains("FIXED")) {
+            if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
-                    if (!arcSetType.name().contains("FIXED")) {
+                    if (!arcSetType.name().contains("FIXED") && !arcSetType.name().contains("DYNAMIC")) {
                         UndirectedGraph LB1 = GraphFactory.makeStoredUndirectedGraph(m, n, nodeSetType, arcSetType);
                         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(m, n, nodeSetType, arcSetType);
                         UndirectedGraph UB1 = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, nodeSetType, arcSetType, false);

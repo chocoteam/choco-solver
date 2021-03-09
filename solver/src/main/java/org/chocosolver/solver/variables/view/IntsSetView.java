@@ -13,14 +13,13 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.*;
 import org.chocosolver.util.procedure.IntProcedure;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 /**
  * Set view over an array of integer variables defined such that:
@@ -41,6 +40,15 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
     private IIntDeltaMonitor[] idm;
 
     private IntProcedure valRemoved;
+
+    /**
+     * Dynamic sets observing the array of integer variables
+     * Such sets do not store data but behave like a regular (read-only) set.
+     * They avoid constructing objects at each bound retrieval on the view,
+     * and allow to take advantage of the view semantic to optimize bounds read operations.
+     */
+    private IntsSetViewLB lb;
+    private IntsSetViewUB ub;
 
     /**
      * Instantiate an set view over an array of integer variables such that:
@@ -64,6 +72,8 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
                 notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
             }
         };
+        lb = new IntsSetViewLB(this);
+        ub = new IntsSetViewUB(this);
     }
 
     /**
@@ -85,11 +95,17 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
+        if (!getVariables()[element - this.offset].contains(this.v)) {
+            return false;
+        }
         return getVariables()[element - this.offset].removeValue(this.v, this);
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
+        if (getVariables()[element - this.offset].isInstantiatedTo(this.v)) {
+            return false;
+        }
         return getVariables()[element - this.offset].instantiateTo(this.v, this);
     }
 
@@ -104,20 +120,12 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     @Override
     public ISet getLB() {
-        int[] lb = IntStream.range(0, getNbObservedVariables())
-                .filter(i -> getVariables()[i].isInstantiatedTo(this.v))
-                .map(i -> i + this.offset)
-                .toArray();
-        return SetFactory.makeConstantSet(lb);
+        return lb;
     }
 
     @Override
     public ISet getUB() {
-        int[] ub = IntStream.range(0, getNbObservedVariables())
-                .filter(i -> getVariables()[i].contains(this.v))
-                .map(i -> i + this.offset)
-                .toArray();
-        return SetFactory.makeConstantSet(ub);
+        return ub;
     }
 
     @Override
@@ -143,5 +151,97 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
             }
         }
         return true;
+    }
+
+    private class IntsSetViewLB extends IntsSetViewBound {
+
+        public IntsSetViewLB(IntsSetView ref) {
+            super(ref);
+        }
+
+        @Override
+        public boolean contains(int element) {
+            if (element < ref.offset || element >= vars.length + ref.offset) {
+                return false;
+            }
+            return vars[element - ref.offset].isInstantiatedTo(ref.v);
+        }
+    }
+
+    private class IntsSetViewUB extends IntsSetViewBound {
+
+        public IntsSetViewUB(IntsSetView ref) {
+            super(ref);
+        }
+
+        @Override
+        public boolean contains(int element) {
+            if (element < ref.offset || element >= vars.length + ref.offset) {
+                return false;
+            }
+            return vars[element - ref.offset].contains(ref.v);
+        }
+    }
+
+    private abstract class IntsSetViewBound extends SetDynamicFilter {
+
+        protected IntsSetView ref;
+        protected I[] vars;
+
+        public IntsSetViewBound(IntsSetView ref) {
+            this.ref = ref;
+            this.vars = (I[]) ref.getVariables();
+        }
+
+        @Override
+        public SetDynamicFilterIterator createIterator() {
+            return new SetDynamicFilterIterator() {
+
+                private int idx = 0;
+
+                @Override
+                protected void resetPointers() {
+                    idx = 0;
+                }
+
+                @Override
+                protected void findNext() {
+                    next = null;
+                    while (!hasNext()) {
+                        if (idx == vars.length) {
+                            return;
+                        }
+                        if (contains(idx + ref.offset)) {
+                            next = idx + ref.offset;
+                        }
+                        idx++;
+                    }
+                }
+            };
+        }
+
+        @Override
+        public int min() {
+            int i = 0;
+            while (!contains(i + ref.offset)) {
+                i++;
+                if (i >= vars.length) {
+                    throw new IllegalStateException("cannot find maximum of an empty set");
+                }
+            }
+            return i + ref.offset;
+        }
+
+        @Override
+        public int max() {
+            int i = vars.length - 1;
+            while (!contains(i + ref.offset)) {
+                i--;
+                if (i < 0) {
+                    throw new IllegalStateException("cannot find maximum of an empty set");
+                }
+            }
+            return i + ref.offset;
+        }
     }
 }

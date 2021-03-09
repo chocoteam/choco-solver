@@ -65,10 +65,6 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     @Override
     public boolean force(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (!getUB().contains(element)) {
-            contradiction(cause, "" + element + " is not in UB(" + getName() + ")");
-            return false;
-        }
         if (doForceSetElement(element)) {
             if (reactOnModification) {
                 delta.add(element, SetDelta.LB, cause);
@@ -83,10 +79,6 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     @Override
     public boolean remove(int element, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (getLB().contains(element)) {
-            contradiction(cause, "" + element + " is in LB(" + getName() + ")");
-            return false;
-        }
         if (doRemoveSetElement(element)) {
             if (reactOnModification) {
                 delta.add(element, SetDelta.UB, cause);
