@@ -22,23 +22,23 @@ import java.util.Arrays;
 
 /**
  * Set view over an array of integer variables defined such that:
- * with v and offset two integers (constant) intVariables[x - offset] = v <=> x in set.
+ * with v an array of integers and offset an integer (constants) intVariables[x - offset] = v[x - offset] <=> x in set.
  */
 public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     /**
-     * Integer value such that intVariables[x - offset] = v <=> x in set
+     * Integer value array such that intVariables[x - offset] = v[x - offset] <=> x in set
      */
-    private int v;
+    private int[] v;
 
     /**
-     * Integer value such that intVariables[x - offset] = v <=> x in set
+     * Integer value such that intVariables[x - offset] = v[x - offset] <=> x in set
      */
     private int offset;
 
     private IIntDeltaMonitor[] idm;
 
-    private IntProcedure valRemoved;
+    private IntProcedure[] valRemoved;
 
     /**
      * Dynamic sets observing the array of integer variables
@@ -51,39 +51,43 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     /**
      * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = v <=> x in set
+     * intVariables[x - offset] = v[x - offset] <=> x in set
      *
      * @param name  name of the variable
-     * @param v integer that "toggle" integer variables index inclusion in the set view
-     * @param offset offset such that if intVariables[x - offset] = v <=> x in set view.
+     * @param v integer array that "toggle" integer variables index inclusion in the set view.
+     *          Must have the same size as the observed variable array.
+     * @param offset offset such that if intVariables[x - offset] = v[x - offset] <=> x in set view.
      * @param variables observed variables
      */
-    protected IntsSetView(String name, int v, int offset, I... variables) {
+    protected IntsSetView(String name, int[] v, int offset, I... variables) {
         super(name, variables);
+        assert v.length == variables.length;
         this.v = v;
         this.offset = offset;
         this.idm = new IIntDeltaMonitor[getNbObservedVariables()];
+        this.valRemoved = new IntProcedure[getNbObservedVariables()];
         for (int i = 0; i < getNbObservedVariables(); i++) {
             this.idm[i] = getVariables()[i].monitorDelta(this);
+            int finalI = i;
+            this.valRemoved[i] = val -> {
+                if (val == this.v[finalI]) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
         }
-        this.valRemoved = i -> {
-            if (i == this.v) {
-                notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
-            }
-        };
         lb = new IntsSetViewLB(this);
         ub = new IntsSetViewUB(this);
     }
 
     /**
      * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = v <=> x in set
+     * intVariables[x - offset] = v[x - offset] <=> x in set
      *
-     * @param v integer that "toggle" integer variables index inclusion in the set view
+     * @param v integer array that "toggle" integer variables index inclusion in the set view
      * @param offset offset between integer variables indices and set elements.
      * @param variables observed variables
      */
-    public IntsSetView(int v, int offset, I... variables) {
+    public IntsSetView(int[] v, int offset, I... variables) {
         this("INTS_SET_VIEW["
                     + String.join(",", Arrays.stream(variables)
                         .map(i -> i.getName())
@@ -94,26 +98,26 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        if (!getVariables()[element - this.offset].contains(this.v)) {
+        if (!getVariables()[element - this.offset].contains(this.v[element - this.offset])) {
             return false;
         }
-        return getVariables()[element - this.offset].removeValue(this.v, this);
+        return getVariables()[element - this.offset].removeValue(this.v[element - this.offset], this);
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        if (getVariables()[element - this.offset].isInstantiatedTo(this.v)) {
+        if (getVariables()[element - this.offset].isInstantiatedTo(this.v[element - this.offset])) {
             return false;
         }
-        return getVariables()[element - this.offset].instantiateTo(this.v, this);
+        return getVariables()[element - this.offset].instantiateTo(this.v[element - this.offset], this);
     }
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
-        if (this.getVariables()[variableIdx].isInstantiatedTo(this.v)) {
+        if (this.getVariables()[variableIdx].isInstantiatedTo(this.v[variableIdx])) {
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else {
-            this.idm[variableIdx].forEachRemVal(this.valRemoved);
+            this.idm[variableIdx].forEachRemVal(this.valRemoved[variableIdx]);
         }
     }
 
@@ -134,9 +138,9 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
         for (int i = 0; i < getNbObservedVariables(); i++) {
             I var = getVariables()[i];
             if (s.contains(i)) {
-                var.instantiateTo(this.v, this);
+                var.instantiateTo(this.v[i], this);
             } else {
-                var.removeValue(this.v, this);
+                var.removeValue(this.v[i], this);
             }
         }
         return changed;
@@ -144,8 +148,8 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     @Override
     public boolean isInstantiated() {
-        for (I var : getVariables()) {
-            if (!var.isInstantiated() && var.contains(this.v)) {
+        for (int i = 0; i < getNbObservedVariables(); i++) {
+            if (!getVariables()[i].isInstantiated() && getVariables()[i].contains(this.v[i])) {
                 return false;
             }
         }
@@ -163,7 +167,7 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
             if (element < ref.offset || element >= vars.length + ref.offset) {
                 return false;
             }
-            return vars[element - ref.offset].isInstantiatedTo(ref.v);
+            return vars[element - ref.offset].isInstantiatedTo(ref.v[element - ref.offset]);
         }
     }
 
@@ -178,7 +182,7 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
             if (element < ref.offset || element >= vars.length + ref.offset) {
                 return false;
             }
-            return vars[element - ref.offset].contains(ref.v);
+            return vars[element - ref.offset].contains(ref.v[element - ref.offset]);
         }
     }
 

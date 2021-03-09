@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.variables.view;
 
-
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -17,6 +16,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 /**
  * Test suite for IntsSetView class
@@ -29,7 +30,9 @@ public class IntsSetViewTest {
     public void testInstantiateAndGenerate() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntsSetView(1, 0, intVars);
+        int[] vals = new int[intVars.length];
+        Arrays.fill(vals, 1);
+        SetVar setView = new IntsSetView(vals, 0, intVars);
         Assert.assertEquals(setView.getLB().size(), 0);
         Assert.assertEquals(setView.getUB().size(), 8);
         while (m.getSolver().solve()) {
@@ -46,10 +49,33 @@ public class IntsSetViewTest {
     }
 
     @Test(groups="1s", timeOut=60000)
+    public void testInstantiateAndGenerateDifferentValues() {
+        Model m = new Model();
+        IntVar[] intVars = m.intVarArray(8, 0, 2);
+        int[] vals = new int[] {0, 0, 0, 1, 1, 1, 2, 2};
+        SetVar setView = m.intsSetView(intVars, vals, 0);
+        Assert.assertEquals(setView.getLB().size(), 0);
+        Assert.assertEquals(setView.getUB().size(), 8);
+        while (m.getSolver().solve()) {
+            int n = 0;
+            for (int i = 0; i < intVars.length; i++) {
+                if (intVars[i].isInstantiatedTo(vals[i])) {
+                    n++;
+                }
+            }
+            Assert.assertEquals(setView.getValue().size(), n);
+            Assert.assertTrue(setView.isInstantiated());
+        }
+        Assert.assertEquals(m.getSolver().getSolutionCount(), Math.pow(3, 8));
+    }
+
+    @Test(groups="1s", timeOut=60000)
     public void testInstantiateTo() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar setView = new IntsSetView(1, 2, intVars);
+        int[] vals = new int[intVars.length];
+        Arrays.fill(vals, 1);
+        SetVar setView = new IntsSetView(vals, 2, intVars);
         try {
             setView.instantiateTo(new int[] {2, 3, 4}, (ICause) setView);
             Assert.assertTrue(setView.isInstantiated());

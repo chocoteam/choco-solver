@@ -13,6 +13,8 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.view.*;
 
+import java.util.Arrays;
+
 import static java.lang.Math.max;
 
 /**
@@ -472,15 +474,30 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Create a set view over an array of integer variables, such that:
-     * intVars[x - offset] = c <=> x in set view.
+     * intVars[x - offset] = v[x - offset] <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v array of integers that "toggle" integer variables index inclusion in the set view
+     * @param offset offset between intVars indices and setViews elements
+     * @return a set view such that intVars[x - offset] = v[x - offset] <=> x in setView.
+     */
+    default SetVar intsSetView(IntVar[] intVars, int[] v, int offset) {
+        return new IntsSetView(v, offset, intVars);
+    }
+
+    /**
+     * Create a set view over an array of integer variables, such that:
+     * intVars[x - offset] = v <=> x in set view.
      *
      * @param intVars array of integer variables
      * @param v integer that "toggle" integer variables index inclusion in the set view
      * @param offset offset between intVars indices and setViews elements
-     * @return a set view such that intVars[x - offset] = c <=> x in setView.
+     * @return a set view such that intVars[x - offset] = v <=> x in setView.
      */
     default SetVar intsSetView(IntVar[] intVars, int v, int offset) {
-        return new IntsSetView(v, offset, intVars);
+        int[] vals = new int[intVars.length];
+        Arrays.fill(vals, v);
+        return intsSetView(intVars, vals, offset);
     }
 
     /**
