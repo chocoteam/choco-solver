@@ -111,7 +111,7 @@ public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E
     }
 
     @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (event == GraphEventType.REMOVE_EDGE) {
             gdm.forEachEdge(arcRemoved, GraphEventType.REMOVE_EDGE);
         }

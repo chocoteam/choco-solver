@@ -83,7 +83,7 @@ public class GraphNodeSetView<E extends GraphVar> extends GraphSetView<E> {
     }
 
     @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (event == GraphEventType.REMOVE_NODE) {
             notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
         }

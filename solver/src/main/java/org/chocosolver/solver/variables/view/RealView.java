@@ -20,7 +20,6 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.RealEventType;
-import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.RealEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.RealInterval;
@@ -34,20 +33,18 @@ import java.util.TreeSet;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 20/07/12
  */
-public class RealView<I extends IntVar> extends AbstractVariable implements IView<I>, RealVar {
+public class RealView<I extends IntVar> extends AbstractView<I> implements RealVar {
 
     protected final I var;
 
     protected final double precision;
 
     public RealView(I var, double precision) {
-        super("(real)" + var.getName(), var.getModel());
+        super("(real)" + var.getName(), var);
         this.var = var;
         this.precision = precision;
-        this.var.subscribeView(this);
     }
 
-    @Override
     public I getVariable() {
         return var;
     }
@@ -161,7 +158,7 @@ public class RealView<I extends IntVar> extends AbstractVariable implements IVie
     }
 
     @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (event != IntEventType.REMOVE) { // there is no real event matching remove value
             super.notifyPropagators(transformEvent((IntEventType) event), this);
         }

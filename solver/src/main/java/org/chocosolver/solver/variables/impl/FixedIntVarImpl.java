@@ -257,7 +257,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void subscribeView(IView view) {
+    public void subscribeView(IView view, int idx) {
     }
 
 
