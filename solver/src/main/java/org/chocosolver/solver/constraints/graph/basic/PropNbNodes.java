@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.graph;
+package org.chocosolver.solver.constraints.graph.basic;
 
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.GraphVar;
@@ -21,24 +21,24 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Propagator that ensures that Nb arcs/edges belong to the final graph
+ * Propagator that ensures that k nodes belong to the final graph
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNbEdges extends Propagator<Variable> {
+public class PropNbNodes extends Propagator<Variable> {
 
 	//***********************************************************************************
 	// VARIABLES
 	//***********************************************************************************
 
-	protected GraphVar g;
-	protected IntVar k;
+	private GraphVar g;
+	private IntVar k;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNbEdges(GraphVar graph, IntVar k) {
+	public PropNbNodes(GraphVar graph, IntVar k) {
 		super(new Variable[]{graph, k}, PropagatorPriority.LINEAR, false);
 		this.g = graph;
 		this.k = k;
@@ -50,45 +50,28 @@ public class PropNbEdges extends Propagator<Variable> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int nbK = 0;
-		int nbE = 0;
-		ISet env = g.getPotentialNodes();
-		for (int i : env) {
-			nbE += g.getPotentialSuccessorsOf(i).size();
-			nbK += g.getMandatorySuccessorsOf(i).size();
-		}
-		if (!g.isDirected()) {
-			nbK /= 2;
-			nbE /= 2;
-		}
-		filter(nbK, nbE);
-	}
-
-	private void filter(int nbK, int nbE) throws ContradictionException {
-		k.updateLowerBound(nbK, this);
-		k.updateUpperBound(nbE, this);
-		if (nbK != nbE && k.isInstantiated()) {
-			ISet nei;
-			ISet env = g.getPotentialNodes();
-			if (k.getValue() == nbE) {
-				for (int i : env) {
-					nei = g.getUB().getSuccessorsOf(i);
-					for (int j : nei) {
-						g.enforceEdge(i, j, this);
+		int env = g.getPotentialNodes().size();
+		int ker = g.getMandatoryNodes().size();
+		k.updateLowerBound(ker, this);
+		k.updateUpperBound(env, this);
+		if (ker == env) {
+			setPassive();
+		} else if (k.isInstantiated()) {
+			int v = k.getValue();
+			ISet envNodes = g.getPotentialNodes();
+			if (v == env) {
+				for (int i : envNodes) {
+					g.enforceNode(i, this);
+				}
+				setPassive();
+			} else if (v == ker) {
+				ISet kerNodes = g.getMandatoryNodes();
+				for (int i : envNodes) {
+					if (!kerNodes.contains(i)) {
+						g.removeNode(i, this);
 					}
 				}
-			}
-			if (k.getValue() == nbK) {
-				ISet neiKer;
-				for (int i : env) {
-					nei = g.getUB().getSuccessorsOf(i);
-					neiKer = g.getLB().getSuccessorsOf(i);
-					for (int j : nei) {
-						if (!neiKer.contains(j)) {
-							g.removeEdge(i, j, this);
-						}
-					}
-				}
+				setPassive();
 			}
 		}
 	}
@@ -100,7 +83,7 @@ public class PropNbEdges extends Propagator<Variable> {
 	@Override
 	public int getPropagationConditions(int vIdx) {
 		if (vIdx == 0) {
-			return GraphEventType.REMOVE_EDGE.getMask() + GraphEventType.ADD_EDGE.getMask();
+			return GraphEventType.REMOVE_NODE.getMask() + GraphEventType.ADD_NODE.getMask();
 		} else {
 			return IntEventType.boundAndInst();
 		}
@@ -108,21 +91,12 @@ public class PropNbEdges extends Propagator<Variable> {
 
 	@Override
 	public ESat isEntailed() {
-		int nbK = 0;
-		int nbE = 0;
-		ISet env = g.getPotentialNodes();
-		for (int i : env) {
-			nbE += g.getUB().getSuccessorsOf(i).size();
-			nbK += g.getLB().getSuccessorsOf(i).size();
-		}
-		if (!g.isDirected()) {
-			nbK /= 2;
-			nbE /= 2;
-		}
-		if (nbK > k.getUB() || nbE < k.getLB()) {
+		int env = g.getPotentialNodes().size();
+		int ker = g.getMandatoryNodes().size();
+		if (env < k.getLB() || ker > k.getUB()) {
 			return ESat.FALSE;
 		}
-		if (k.isInstantiated() && g.isInstantiated()) {
+		if (env == ker) {
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;

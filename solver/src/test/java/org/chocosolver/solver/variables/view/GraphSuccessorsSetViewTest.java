@@ -11,8 +11,8 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.graph.PropNbEdges;
-import org.chocosolver.solver.constraints.graph.PropNbNodes;
+import org.chocosolver.solver.constraints.graph.basic.PropNbEdges;
+import org.chocosolver.solver.constraints.graph.basic.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.DirectedGraph;

@@ -7,25 +7,25 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.graph;
+package org.chocosolver.solver.constraints.graph.basic;
 
-import org.chocosolver.solver.variables.events.GraphEventType;
-import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Propagator that ensures that k nodes belong to the final graph
+ * Propagator that ensures that k loops belong to the final graph
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNbNodes extends Propagator<Variable> {
+public class PropNbLoops extends Propagator<Variable> {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -38,7 +38,7 @@ public class PropNbNodes extends Propagator<Variable> {
 	// CONSTRUCTORS
 	//***********************************************************************************
 
-	public PropNbNodes(GraphVar graph, IntVar k) {
+	public PropNbLoops(GraphVar graph, IntVar k) {
 		super(new Variable[]{graph, k}, PropagatorPriority.LINEAR, false);
 		this.g = graph;
 		this.k = k;
@@ -50,25 +50,33 @@ public class PropNbNodes extends Propagator<Variable> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int env = g.getPotentialNodes().size();
-		int ker = g.getMandatoryNodes().size();
-		k.updateLowerBound(ker, this);
-		k.updateUpperBound(env, this);
-		if (ker == env) {
+		int min = 0;
+		int max = 0;
+		ISet nodes = g.getPotentialNodes();
+		for (int i : nodes) {
+			if (g.getMandatorySuccessorsOf(i).contains(i)) {
+				min++;
+				max++;
+			} else if (g.getPotentialSuccessorsOf(i).contains(i)) {
+				max++;
+			}
+		}
+		k.updateLowerBound(min, this);
+		k.updateUpperBound(max, this);
+		if (min == max) {
 			setPassive();
 		} else if (k.isInstantiated()) {
-			int v = k.getValue();
-			ISet envNodes = g.getPotentialNodes();
-			if (v == env) {
-				for (int i : envNodes) {
-					g.enforceNode(i, this);
+			if (k.getValue() == max) {
+				for (int i : nodes) {
+					if (g.getPotentialSuccessorsOf(i).contains(i)) {
+						g.enforceEdge(i, i, this);
+					}
 				}
 				setPassive();
-			} else if (v == ker) {
-				ISet kerNodes = g.getMandatoryNodes();
-				for (int i : envNodes) {
-					if (!kerNodes.contains(i)) {
-						g.removeNode(i, this);
+			} else if (k.getValue() == min) {
+				for (int i : nodes) {
+					if (!g.getMandatorySuccessorsOf(i).contains(i)) {
+						g.removeEdge(i, i, this);
 					}
 				}
 				setPassive();
@@ -83,7 +91,7 @@ public class PropNbNodes extends Propagator<Variable> {
 	@Override
 	public int getPropagationConditions(int vIdx) {
 		if (vIdx == 0) {
-			return GraphEventType.REMOVE_NODE.getMask() + GraphEventType.ADD_NODE.getMask();
+			return GraphEventType.REMOVE_EDGE.getMask() + GraphEventType.ADD_EDGE.getMask();
 		} else {
 			return IntEventType.boundAndInst();
 		}
@@ -91,12 +99,21 @@ public class PropNbNodes extends Propagator<Variable> {
 
 	@Override
 	public ESat isEntailed() {
-		int env = g.getPotentialNodes().size();
-		int ker = g.getMandatoryNodes().size();
-		if (env < k.getLB() || ker > k.getUB()) {
+		int min = 0;
+		int max = 0;
+		ISet env = g.getPotentialNodes();
+		for (int i : env) {
+			if (g.getMandatorySuccessorsOf(i).contains(i)) {
+				min++;
+				max++;
+			} else if (g.getPotentialSuccessorsOf(i).contains(i)) {
+				max++;
+			}
+		}
+		if (k.getLB() > max || k.getUB() < min) {
 			return ESat.FALSE;
 		}
-		if (env == ker) {
+		if (min == max) {
 			return ESat.TRUE;
 		}
 		return ESat.UNDEFINED;
