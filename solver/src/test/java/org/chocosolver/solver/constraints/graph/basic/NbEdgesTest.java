@@ -67,7 +67,6 @@ public class NbEdgesTest {
         IntVar nbEdges = model.intVar(0, 20);
         model.nbEdges(g, nbEdges).post();
         while (model.getSolver().solve()) {
-            System.out.println(g.getValue().getNodes());
             Assert.assertEquals(nbEdges.getValue(), 3);
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);

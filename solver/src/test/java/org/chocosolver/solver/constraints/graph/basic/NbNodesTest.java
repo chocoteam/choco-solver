@@ -67,7 +67,6 @@ public class NbNodesTest {
         IntVar nbNodes = model.intVar(0, 20);
         model.nbNodes(g, nbNodes).post();
         while (model.getSolver().solve()) {
-            System.out.println(g.getValue().getNodes());
             Assert.assertEquals(nbNodes.getValue(), 4);
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
