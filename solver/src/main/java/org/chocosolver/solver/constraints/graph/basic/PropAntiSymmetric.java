@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.graph.basic;
 
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -33,17 +34,17 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
 
 	private DirectedGraphVar g;
 	private IGraphDeltaMonitor gdm;
-	private PairProcedure enf;
+	private PairProcedure remove;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
 	//***********************************************************************************
 
 	public PropAntiSymmetric(DirectedGraphVar graph) {
-		super(graph);
+		super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
 		g = graph;
 		gdm = g.monitorDelta(this);
-		enf = (from, to) -> {
+		remove = (from, to) -> {
 			if (from != to) {
 				g.removeEdge(to, from, PropAntiSymmetric.this);
 			}
@@ -61,14 +62,16 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
 		for (int i : ker) {
 			succ = g.getMandatorySuccessorsOf(i);
 			for (int j : succ) {
-				g.removeEdge(j, i, this);
+				if (i != j) {
+					g.removeEdge(j, i, this);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.forEachEdge(enf, GraphEventType.ADD_EDGE);
+		gdm.forEachEdge(remove, GraphEventType.ADD_EDGE);
 	}
 
 	@Override
@@ -83,8 +86,10 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
 		for (int i : ker) {
 			succ = g.getMandatorySuccessorsOf(i);
 			for (int j : succ) {
-				if (g.getMandatorySuccessorsOf(j).contains(i)) {
-					return ESat.FALSE;
+				if (j != i) {
+					if (g.getMandatorySuccessorsOf(j).contains(i)) {
+						return ESat.FALSE;
+					}
 				}
 			}
 		}
