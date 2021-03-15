@@ -124,4 +124,50 @@ public class GraphFactory {
         }
         return g;
     }
+
+
+
+    /**
+     * Return a stored undirected graph with a given set of nodes and edges.
+     * @param model The choco model
+     * @param n the maximum number of nodes
+     * @param nodeSetType set type for storing nodes
+     * @param arcSetType set type for storing arcs
+     * @param nodes list of nodes' indices to instantiate the graph with
+     * @param edges list of edges (in the form { {start, end}, ...} to instantiate the graph with
+     * @return a stored undirected graph with a nodes from `nodes` and edges from `edges`.
+     */
+    public static UndirectedGraph makeStoredUndirectedGraph(Model model, int n, SetType nodeSetType, SetType arcSetType, int[] nodes, int[][] edges) {
+        UndirectedGraph g = makeStoredUndirectedGraph(model, n, nodeSetType, arcSetType);
+        for (int i : nodes) {
+            g.addNode(i);
+        }
+        for (int[] e : edges) {
+            assert e.length == 2;
+            g.addEdge(e[0], e[1]);
+        }
+        return g;
+    }
+
+    /**
+     * Return a stored directed graph with a given set of nodes and edges.
+     * @param model The choco model
+     * @param n the maximum number of nodes
+     * @param nodeSetType set type for storing nodes
+     * @param arcSetType set type for storing arcs
+     * @param nodes list of nodes' indices to instantiate the graph with
+     * @param edges list of directed edges (in the form { {start, end}, ...} to instantiate the graph with
+     * @return a stored directed graph with a nodes from `nodes` and edges from `edges`.
+     */
+    public static DirectedGraph makeStoredDirectedGraph(Model model, int n, SetType nodeSetType, SetType arcSetType, int[] nodes, int[][] edges) {
+        DirectedGraph g = makeStoredDirectedGraph(model, n, nodeSetType, arcSetType);
+        for (int i : nodes) {
+            g.addNode(i);
+        }
+        for (int[] e : edges) {
+            assert e.length == 2;
+            g.addEdge(e[0], e[1]);
+        }
+        return g;
+    }
 }
