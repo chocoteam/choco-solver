@@ -99,7 +99,7 @@ public class PropDiameter extends Propagator<GraphVar> {
 			set = tmp;
 			nextSet.clear();
 		}
-		return depth;
+		return depth - 1;
 	}
 
 	//***********************************************************************************
@@ -108,6 +108,20 @@ public class PropDiameter extends Propagator<GraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		throw new UnsupportedOperationException("isEntail() not implemented yet");
+		int max = -1;
+		int min = -1;
+		for (int i : g.getPotentialNodes()) {
+			if (g.getMandatoryNodes().contains(i)) {
+				min = Math.max(min, depthBFS(i, true));
+			}
+			max = Math.max(max, depthBFS(i, false));
+		}
+		if (min > diameter.getUB() || max < diameter.getLB()) {
+			return ESat.FALSE;
+		}
+		if (isCompletelyInstantiated() && min == diameter.getValue()) {
+			return ESat.TRUE;
+		}
+		return ESat.UNDEFINED;
 	}
 }

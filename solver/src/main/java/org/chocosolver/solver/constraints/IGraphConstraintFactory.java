@@ -10,10 +10,9 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.constraints.graph.basic.*;
-import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.solver.variables.GraphVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.constraints.graph.connectivity.PropConnected;
+import org.chocosolver.solver.constraints.graph.connectivity.PropNbCC;
+import org.chocosolver.solver.variables.*;
 
 /**
  * Some usual graph constraints
@@ -668,28 +667,28 @@ public interface IGraphConstraintFactory {
 //	}
 //
 //
-//	//***********************************************************************************
-//	// CONNECTIVITY CONSTRAINTS
-//	//***********************************************************************************
-//
-//
-//	/**
-//	 * Creates a connectedness constraint which ensures that g is connected
-//	 *
-//	 * BEWARE : empty graphs or graph with 1 node are allowed (they are not disconnected...)
-//	 * if one wants a graph with >= 2 nodes he should use the node number constraint (nbNodes)
-//	 * connected only focuses on the graph structure to prevent two nodes not to be connected
-//	 * if there is 0 or only 1 node, the constraint is therefore not violated
-//	 *
-//	 * The purpose of CP is to compose existing constraints, and nbNodes already exists
-//	 *
-//	 * @param g an undirected graph variable
-//	 * @return A connectedness constraint which ensures that g is connected
-//	 */
-//	default Constraint connected(UndirectedGraphVar g) {
-//		return new Constraint("connected", new PropConnected(g));
-//	}
-//
+	//***********************************************************************************
+	// CONNECTIVITY CONSTRAINTS
+	//***********************************************************************************
+
+
+	/**
+	 * Creates a connectedness constraint which ensures that g is connected
+	 *
+	 * BEWARE : empty graphs or graph with 1 node are allowed (they are not disconnected...)
+	 * if one wants a graph with >= 2 nodes he should use the node number constraint (nbNodes)
+	 * connected only focuses on the graph structure to prevent two nodes not to be connected
+	 * if there is 0 or only 1 node, the constraint is therefore not violated
+	 *
+	 * The purpose of CP is to compose existing constraints, and nbNodes already exists
+	 *
+	 * @param g an undirected graph variable
+	 * @return A connectedness constraint which ensures that g is connected
+	 */
+	default Constraint connected(UndirectedGraphVar g) {
+		return new Constraint("connected", new PropConnected(g));
+	}
+
 //	/**
 //	 * Creates a connectedness constraint which ensures that g is biconnected
 //	 * Beware : should be used in addition to connected
@@ -700,18 +699,18 @@ public interface IGraphConstraintFactory {
 //	default Constraint biconnected(UndirectedGraphVar g) {
 //		return new Constraint("connected", new PropBiconnected(g));
 //	}
-//
-//	/**
-//	 * Creates a connectedness constraint which ensures that g has nb connected components
-//	 *
-//	 * @param g  an undirected graph variable
-//	 * @param nb an integer variable indicating the expected number of connected components in g
-//	 * @return A connectedness constraint which ensures that g has nb connected components
-//	 */
-//	default Constraint nbConnectedComponents(UndirectedGraphVar g, IntVar nb) {
-//		return new Constraint("NbCC", new PropNbCC(g, nb));
-//	}
-//
+
+	/**
+	 * Creates a connectedness constraint which ensures that g has nb connected components
+	 *
+	 * @param g  an undirected graph variable
+	 * @param nb an integer variable indicating the expected number of connected components in g
+	 * @return A connectedness constraint which ensures that g has nb connected components
+	 */
+	default Constraint nbConnectedComponents(UndirectedGraphVar g, IntVar nb) {
+		return new Constraint("NbCC", new PropNbCC(g, nb));
+	}
+
 //	/**
 //	 * Creates a constraint which ensures that every connected component of g has a number of nodes bounded by
 //	 * sizeMinCC and sizeMaxCC.
@@ -873,30 +872,30 @@ public interface IGraphConstraintFactory {
 //				new PropNbCliques(g, nb) // redundant propagator
 //		);
 //	}
-//
-//
-//	//***********************************************************************************
-//	// DIAMETER
-//	//***********************************************************************************
-//
-//
-//	/**
-//	 * Creates a constraint which states that d is the diameter of g
-//	 * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
-//	 * This constraint implies that g is connected
-//	 *
-//	 * @param g an undirected graph variable
-//	 * @param d an integer variable
-//	 * @return a constraint which states that d is the diameter of g
-//	 */
-//	default Constraint diameter(UndirectedGraphVar g, IntVar d) {
-//		return new Constraint("NbCliques",
-//				new PropConnected(g),
-//				new PropDiameter(g, d)
-//		);
-//	}
-//
-//
+
+
+	//***********************************************************************************
+	// DIAMETER
+	//***********************************************************************************
+
+
+	/**
+	 * Creates a constraint which states that d is the diameter of g
+	 * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
+	 * This constraint implies that g is connected
+	 *
+	 * @param g an undirected graph variable
+	 * @param d an integer variable
+	 * @return a constraint which states that d is the diameter of g
+	 */
+	default Constraint diameter(UndirectedGraphVar g, IntVar d) {
+		return new Constraint("diameter",
+				new PropConnected(g),
+				new PropDiameter(g, d)
+		);
+	}
+
+
 //	/**
 //	 * Creates a constraint which states that d is the diameter of g
 //	 * i.e. d is the length (number of arcs) of the largest shortest path among any pair of nodes
