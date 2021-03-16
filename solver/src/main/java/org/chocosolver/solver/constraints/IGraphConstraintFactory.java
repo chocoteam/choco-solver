@@ -125,8 +125,8 @@ public interface IGraphConstraintFactory {
 	//***********************************************************************************
 	// INCLUSION CONSTRAINTS
 	//***********************************************************************************
-//
-//
+
+
 //	/**
 //	 * Create an inclusion constraint between g1 and g2 such that
 //	 * g1 is a subGraph of g2
@@ -665,8 +665,8 @@ public interface IGraphConstraintFactory {
 //	default Constraint noCircuit(DirectedGraphVar g) {
 //		return new Constraint("noCircuit", new PropACyclic(g));
 //	}
-//
-//
+
+
 	//***********************************************************************************
 	// CONNECTIVITY CONSTRAINTS
 	//***********************************************************************************
@@ -851,27 +851,27 @@ public interface IGraphConstraintFactory {
 //	default Constraint reachability(DirectedGraphVar g, int root) {
 //		return new Constraint("reachability_from_" + root, new PropReachability(g, root));
 //	}
-//
-//
-//	//***********************************************************************************
-//	// CLIQUES
-//	//***********************************************************************************
-//
-//
-//	/**
-//	 * partition a graph variable into nb cliques
-//	 *
-//	 * @param g  a graph variable
-//	 * @param nb expected number of cliques in g
-//	 * @return a constraint which partitions g into nb cliques
-//	 */
-//	default Constraint nbCliques(UndirectedGraphVar g, IntVar nb) {
-//		return new Constraint("NbCliques",
-//				new PropTransitivity(g),
-//				new PropNbCC(g, nb),
-//				new PropNbCliques(g, nb) // redundant propagator
-//		);
-//	}
+
+
+	//***********************************************************************************
+	// CLIQUES
+	//***********************************************************************************
+
+
+	/**
+	 * partition a graph variable into nb cliques
+	 *
+	 * @param g  a graph variable
+	 * @param nb expected number of cliques in g
+	 * @return a constraint which partitions g into nb cliques
+	 */
+	default Constraint nbCliques(UndirectedGraphVar g, IntVar nb) {
+		return new Constraint("NbCliques",
+				new PropTransitivity(g),
+				new PropNbCC(g, nb),
+				new PropNbCliques(g, nb) // redundant propagator
+		);
+	}
 
 
 	//***********************************************************************************
