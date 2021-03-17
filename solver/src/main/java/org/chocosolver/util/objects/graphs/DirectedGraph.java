@@ -260,4 +260,30 @@ public class DirectedGraph implements IGraph {
         return predecessors[x];
     }
 
+    /**
+     * Structural equality test between two directed graph vars.
+     * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
+     * and different attributes such as nbMaxNodes and allNodes.
+     * @param other
+     * @return true iff `this` and `other` contains exactly the same nodes and same edges.
+     */
+    public boolean equals(DirectedGraph other) {
+        if (getNodes().size() != other.getNodes().size()) {
+            return false;
+        }
+        for (int i : getNodes()) {
+            if (!other.containsNode(i)) {
+                return false;
+            }
+            if (getSuccessorsOf(i).size() != other.getSuccessorsOf(i).size()) {
+                return false;
+            }
+            for (int j : getSuccessorsOf(i)) {
+                if (!containsEdge(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

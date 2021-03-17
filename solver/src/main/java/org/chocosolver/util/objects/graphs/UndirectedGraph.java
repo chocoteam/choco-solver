@@ -275,4 +275,31 @@ public class UndirectedGraph implements IGraph {
     public boolean isDirected() {
         return false;
     }
+
+    /**
+     * Structural equality test between two undirected graph vars.
+     * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
+     * and different attributes such as nbMaxNodes, allNodes, stored or not.
+     * @param other
+     * @return true iff `this` and `other` contains exactly the same nodes and same edges.
+     */
+    public boolean equals(UndirectedGraph other) {
+        if (getNodes().size() != other.getNodes().size()) {
+            return false;
+        }
+        for (int i : getNodes()) {
+            if (!other.containsNode(i)) {
+                return false;
+            }
+            if (getNeighborsOf(i).size() != other.getNeighborsOf(i).size()) {
+                return false;
+            }
+            for (int j : getNeighborsOf(i)) {
+                if (!containsEdge(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }
