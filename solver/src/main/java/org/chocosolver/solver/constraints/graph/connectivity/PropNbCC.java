@@ -100,15 +100,15 @@ public class PropNbCC extends Propagator<Variable> {
 					}
 
 					// 3 --- enforce isthma that link two mandatory nodes (current version is bugged)
-					TIntArrayList brI = helper.getBridgeFrom();
-					TIntArrayList brJ = helper.getBridgeTo();
-					for (int k = 0; k < brI.size(); k++) {
-						int i = brI.get(k);
-						int j = brJ.get(k);
-						if (mNodes.contains(i) && mNodes.contains(j)) {
-							g.enforceEdge(i, j, this);
-						}
-					}
+//					TIntArrayList brI = helper.getBridgeFrom();
+//					TIntArrayList brJ = helper.getBridgeTo();
+//					for (int k = 0; k < brI.size(); k++) {
+//						int i = brI.get(k);
+//						int j = brJ.get(k);
+//						if (mNodes.contains(i) && mNodes.contains(j)) {
+//							g.enforceEdge(i, j, this);
+//						}
+//					}
 				}
 			}
 			// a maximal number of CC is required : remaining nodes will be singleton

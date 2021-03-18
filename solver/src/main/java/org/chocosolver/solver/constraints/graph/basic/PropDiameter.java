@@ -15,8 +15,8 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -24,6 +24,10 @@ import java.util.BitSet;
  * Propagator for the diameter constraint
  *
  * @author Jean-Guillaume Fages
+ *
+ * UPDATED 16/03/2021 by Dimitri Justeau-Allaire: implementation of isEntailed() method an loose upper bound
+ * for diameter, as the previous implementation was incorrect and finding a tight bound implies finding the
+ * largest path in the upper bound graph, which is a NP-Complete problem.
  */
 public class PropDiameter extends Propagator<GraphVar> {
 
@@ -56,50 +60,65 @@ public class PropDiameter extends Propagator<GraphVar> {
 
 	@Override
 	public void propagate(int evtmask) throws ContradictionException {
-		int max = -1;
-		for (int i : g.getPotentialNodes()) {
-			if (g.getMandatoryNodes().contains(i)) {
-				diameter.updateLowerBound(depthBFS(i, true), this);
-			}
-			max = Math.max(max, depthBFS(i, false));
+		int minDiam = computeLB();
+		if (g.isInstantiated()) {
+			diameter.instantiateTo(minDiam, this);
 		}
-		diameter.updateUpperBound(max, this);
+		else {
+			int nbEdges = nbEdgesUB(); // trivial upper bound for diameter, getting a tight bound implies finding the
+									   // largest path in the upper bound graph in the general case, which is a
+									   // NP-Complete problem.
+			diameter.updateLowerBound(minDiam, this);
+			diameter.updateUpperBound(nbEdges, this);
+		}
 	}
 
-	private int depthBFS(int root, boolean min) {
-		nextSet.clear();
-		set.clear();
-		visited.clear();
-		int i = root;
-		set.add(i);
-		visited.set(i);
-		ISet nei;
-		int depth = 0;
-		int nbMand = g.getMandatoryNodes().size();
-		int count = 1;
-		while (!set.isEmpty()) {
-			for (i = set.size() - 1; i >= 0; i--) {
-				nei = g.getPotentialSuccessorsOf(set.get(i));
-				for (int j : nei) {
-					if (!visited.get(j)) {
-						visited.set(j);
-						nextSet.add(j);
-						if (min && g.getMandatoryNodes().contains(j)) {
-							count++;
-							if (count == nbMand) {
-								return depth + 1;
-							}
+	private int computeLB() {
+		if (g.getMandatoryNodes().size() <= 1) {
+			return 0;
+		}
+		return bfsLB();
+	}
+
+	private int bfsLB() {
+		int maxDepth = 0;
+		for (int source : g.getMandatoryNodes()) {
+			boolean[] visited = new boolean[g.getNbMaxNodes()];
+			int[] queue = new int[g.getNbMaxNodes()];
+			int front = 0;
+			int rear = 0;
+			int current;
+			int[] depth = new int[g.getNbMaxNodes()];
+			depth[source] = 0;
+			queue[front] = source;
+			rear++;
+			while (front != rear) {
+				current = queue[front++];
+				visited[current] = true;
+				for (int i : g.getPotentialSuccessorsOf(current)) {
+					if (!visited[i]) {
+						depth[i] = depth[current] + 1;
+						if (g.getMandatoryNodes().contains(i)) {
+							maxDepth = Math.max(maxDepth, depth[i]);
 						}
+						queue[rear++] = i;
+						visited[i] = true;
 					}
 				}
 			}
-			depth++;
-			TIntArrayList tmp = nextSet;
-			nextSet = set;
-			set = tmp;
-			nextSet.clear();
 		}
-		return depth - 1;
+		return maxDepth;
+	}
+
+	private int nbEdgesUB() {
+		int nbEdges = 0;
+		for (int i : g.getPotentialNodes()) {
+			nbEdges += g.getPotentialSuccessorsOf(i).size();
+		}
+		if (g instanceof UndirectedGraphVar) {
+			nbEdges /= 2;
+		}
+		return nbEdges;
 	}
 
 	//***********************************************************************************
@@ -108,19 +127,16 @@ public class PropDiameter extends Propagator<GraphVar> {
 
 	@Override
 	public ESat isEntailed() {
-		int max = -1;
-		int min = -1;
-		for (int i : g.getPotentialNodes()) {
-			if (g.getMandatoryNodes().contains(i)) {
-				min = Math.max(min, depthBFS(i, true));
-			}
-			max = Math.max(max, depthBFS(i, false));
-		}
-		if (min > diameter.getUB() || max < diameter.getLB()) {
+		int minDiam = computeLB();
+		int nbEdges = nbEdgesUB();
+		if (minDiam > diameter.getUB() || nbEdges < diameter.getLB()) {
 			return ESat.FALSE;
 		}
-		if (isCompletelyInstantiated() && min == diameter.getValue()) {
-			return ESat.TRUE;
+		if (isCompletelyInstantiated()) {
+			if (minDiam == diameter.getValue()) {
+				return ESat.TRUE;
+			}
+			return ESat.FALSE;
 		}
 		return ESat.UNDEFINED;
 	}

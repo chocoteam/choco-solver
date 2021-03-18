@@ -91,16 +91,16 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
 				}
 
 				// 3 --- enforce isthma that link two mandatory nodes (current version is bugged)
-				ISet mNodes = g.getMandatoryNodes();
-				TIntArrayList brI = helper.getBridgeFrom();
-				TIntArrayList brJ = helper.getBridgeTo();
-				for(int k=0; k<brI.size(); k++){
-					int i = brI.get(k);
-					int j = brJ.get(k);
-					if(mNodes.contains(i) && mNodes.contains(j)){
-						g.enforceEdge(i, j, this);
-					}
-				}
+//				ISet mNodes = g.getMandatoryNodes();
+//				TIntArrayList brI = helper.getBridgeFrom();
+//				TIntArrayList brJ = helper.getBridgeTo();
+//				for(int k=0; k<brI.size(); k++){
+//					int i = brI.get(k);
+//					int j = brJ.get(k);
+//					if(mNodes.contains(i) && mNodes.contains(j)){
+//						g.enforceEdge(i, j, this);
+//					}
+//				}
 			}
 		}
 	}

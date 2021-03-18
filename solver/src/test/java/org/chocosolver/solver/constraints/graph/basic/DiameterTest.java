@@ -20,6 +20,9 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Test class for diameter graph constraint
  */
@@ -148,6 +151,65 @@ public class DiameterTest {
         model.nbEdges(g, model.intVar(8, 10)).post();
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void generateTest() {
+        Model model = new Model();
+        int n = 5;
+        int lbDiam = 0;
+        int ubDiam = 4;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        IntVar diam = model.intVar("diam", lbDiam, ubDiam);
+        model.diameter(g, diam).post();
+        List<UndirectedGraph> l1 = new ArrayList<>();
+        int realCount = 0;
+        while (model.getSolver().solve()) {
+            boolean b = true;
+            for (UndirectedGraph gl1 : l1) {
+                if (gl1.equals(g.getValue())) {
+                    b = false;
+                }
+            }
+            if (b) {
+                realCount++;
+                UndirectedGraph a = GraphFactory.makeUndirectedGraph(n, SetType.BITSET, SetType.BITSET, g.getValue().getNodes().toArray(), new int[][]{});
+                for (int i : g.getValue().getNodes()) {
+                    for (int j : g.getValue().getNeighborsOf(i)) {
+                        a.addEdge(i, j);
+                    }
+                }
+                l1.add(a);
+            }
+        }
+        Assert.assertEquals(realCount, model.getSolver().getSolutionCount());
+        // Check that no solution was missed
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        Constraint cons = model.diameter(g2, model2.intVar(lbDiam, ubDiam));
+        int count = 0;
+        int realCount2 = 0;
+        List<UndirectedGraph> l2 = new ArrayList<>();
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+                boolean b = true;
+                for (UndirectedGraph gl2 : l2) {
+                    if (gl2.equals(g2.getValue())) {
+                        b = false;
+                    }
+                }
+                if (b) {
+                    realCount2++;
+                }
+            }
+        }
+        Assert.assertEquals(count, realCount2);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
 
     // Directed graph variable
