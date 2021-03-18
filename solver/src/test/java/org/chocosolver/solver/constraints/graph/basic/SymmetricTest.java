@@ -103,4 +103,29 @@ public class SymmetricTest {
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 5;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        model.symmetric(g).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g2 = model2.directedGraphVar("g2", LB2, UB2);
+        Constraint cons = model2.symmetric(g2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+    }
 }
