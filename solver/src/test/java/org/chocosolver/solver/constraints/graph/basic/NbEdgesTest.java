@@ -164,7 +164,7 @@ public class NbEdgesTest {
     }
 
     @Test(groups="10s", timeOut=60000)
-    public void generateTest() {
+    public void generateUndirectedTest() {
         // Generate solutions with filtering
         Model model = new Model();
         int n = 6;
@@ -181,6 +181,35 @@ public class NbEdgesTest {
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        IntVar nbEdges2 = model2.intVar("nbEdges2", nbEdgesLB, nbEdgesUB);
+        Constraint cons = model2.nbEdges(g2, nbEdges2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateDirectedTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 5;
+        int nbEdgesLB = 1;
+        int nbEdgesUB = 4;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        IntVar nbEdges = model.intVar("nbEdges", nbEdgesLB, nbEdgesUB);
+        model.nbEdges(g, nbEdges).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g2 = model2.directedGraphVar("g", LB2, UB2);
         IntVar nbEdges2 = model2.intVar("nbEdges2", nbEdgesLB, nbEdgesUB);
         Constraint cons = model2.nbEdges(g2, nbEdges2);
         int count = 0;
