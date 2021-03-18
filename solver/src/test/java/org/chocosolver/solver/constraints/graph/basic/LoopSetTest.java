@@ -152,5 +152,6 @@ public class LoopSetTest {
                 count++;
             }
         }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
 }

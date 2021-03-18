@@ -1,8 +1,12 @@
 package org.chocosolver.solver.constraints.graph.basic;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -137,16 +141,30 @@ public class NbCliquesTest {
 
     @Test(groups="10s", timeOut=60000)
     public void generateTest() {
+        // Generate solutions with filtering
         Model model = new Model();
-        int n = 9;
+        int n = 6;
+        int nbCliquesLB = 0;
+        int nbCliquesUB = 4;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
-        IntVar nbCliques = model.intVar("nbCliques", 0, n);
+        IntVar nbCliques = model.intVar("nbCliques", nbCliquesLB, nbCliquesUB);
         model.nbCliques(g, nbCliques).post();
-        model.arithm(nbCliques, "<=", 6).post();
-        while (model.getSolver().solve()) {
-            Assert.assertTrue(nbCliques.getValue() <= 6);
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        IntVar nbCliques2 = model2.intVar("nbCliques2", nbCliquesLB, nbCliquesUB);
+        Constraint cons = model2.nbCliques(g2, nbCliques2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
         }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
 }
