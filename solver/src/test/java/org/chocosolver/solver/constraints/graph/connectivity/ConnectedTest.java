@@ -11,11 +11,13 @@ package org.chocosolver.solver.constraints.graph.connectivity;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
@@ -459,4 +461,31 @@ public class ConnectedTest {
 
         Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.UNDEFINED);
     }
+
+	@Test(groups="10s", timeOut=60000)
+	public void generateTest() {
+		// Generate solutions with filtering
+		Model model = new Model();
+		int n = 7;
+		UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+		UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+		UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+		model.connected(g).post();
+		model.nbEdges(g, model.intVar(4)).post();
+		while (model.getSolver().solve()) {}
+		// Generate solutions with checker
+		Model model2 = new Model();
+		UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+		UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+		UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+		model2.nbEdges(g2, model2.intVar(4)).post();
+		Constraint cons = model2.connected(g2);
+		int count = 0;
+		while (model2.getSolver().solve()) {
+			if (cons.isSatisfied() == ESat.TRUE) {
+				count++;
+			}
+		}
+		Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+	}
 }
