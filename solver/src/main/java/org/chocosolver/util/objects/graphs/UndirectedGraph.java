@@ -295,7 +295,7 @@ public class UndirectedGraph implements IGraph {
                 return false;
             }
             for (int j : getNeighborsOf(i)) {
-                if (!containsEdge(i, j)) {
+                if (!other.containsEdge(i, j)) {
                     return false;
                 }
             }

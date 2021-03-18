@@ -279,7 +279,7 @@ public class DirectedGraph implements IGraph {
                 return false;
             }
             for (int j : getSuccessorsOf(i)) {
-                if (!containsEdge(i, j)) {
+                if (!other.containsEdge(i, j)) {
                     return false;
                 }
             }
