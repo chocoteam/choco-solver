@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.constraints.graph.basic.*;
 import org.chocosolver.solver.constraints.graph.connectivity.PropConnected;
 import org.chocosolver.solver.constraints.graph.connectivity.PropNbCC;
+import org.chocosolver.solver.constraints.graph.connectivity.PropNbSCC;
 import org.chocosolver.solver.variables.*;
 
 /**
@@ -750,29 +751,29 @@ public interface IGraphConstraintFactory {
 //	default Constraint sizeMaxConnectedComponents(UndirectedGraphVar g, IntVar sizeMaxCC) {
 //		return new Constraint("SizeMaxCC", new PropSizeMaxCC(g, sizeMaxCC));
 //	}
-//
-//	/**
-//	 * Creates a strong connectedness constraint which ensures that g has exactly one strongly connected component
-//	 *
-//	 * @param g a directed graph variable
-//	 * @return A strong connectedness constraint which ensures that g is strongly connected
-//	 */
-//	default Constraint stronglyConnected(DirectedGraphVar g) {
-//		return nbStronglyConnectedComponents(g, g.getModel().intVar(1));
-//	}
-//
-//	/**
-//	 * Creates a strong connectedness constraint which ensures that g has nb strongly connected components
-//	 *
-//	 * @param g  a directed graph variable
-//	 * @param nb an integer variable indicating the expected number of connected components in g
-//	 * @return A strong connectedness constraint which ensures that g has nb strongly connected components
-//	 */
-//	default Constraint nbStronglyConnectedComponents(DirectedGraphVar g, IntVar nb) {
-//		return new Constraint("NbSCC", new PropNbSCC(g, nb));
-//	}
-//
-//
+
+	/**
+	 * Creates a strong connectedness constraint which ensures that g has exactly one strongly connected component
+	 *
+	 * @param g a directed graph variable
+	 * @return A strong connectedness constraint which ensures that g is strongly connected
+	 */
+	default Constraint stronglyConnected(DirectedGraphVar g) {
+		return nbStronglyConnectedComponents(g, g.getModel().intVar(1));
+	}
+
+	/**
+	 * Creates a strong connectedness constraint which ensures that g has nb strongly connected components
+	 *
+	 * @param g  a directed graph variable
+	 * @param nb an integer variable indicating the expected number of connected components in g
+	 * @return A strong connectedness constraint which ensures that g has nb strongly connected components
+	 */
+	default Constraint nbStronglyConnectedComponents(DirectedGraphVar g, IntVar nb) {
+		return new Constraint("NbSCC", new PropNbSCC(g, nb));
+	}
+
+
 //	//***********************************************************************************
 //	// TREE CONSTRAINTS
 //	//***********************************************************************************

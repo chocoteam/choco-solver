@@ -17,7 +17,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 
-public class DirectedGraphVarImpl<E extends DirectedGraph> extends AbstractGraphVar<E> implements DirectedGraphVar<E> {
+public class DirectedGraphVarImpl extends AbstractGraphVar<DirectedGraph> implements DirectedGraphVar {
 
 	////////////////////////////////// GRAPH PART ///////////////////////////////////////
 
@@ -33,7 +33,7 @@ public class DirectedGraphVarImpl<E extends DirectedGraph> extends AbstractGraph
 	 * @param LB
 	 * @param UB
 	 */
-	public DirectedGraphVarImpl(String name, Model solver, E LB, E UB) {
+	public DirectedGraphVarImpl(String name, Model solver, DirectedGraph LB, DirectedGraph UB) {
 		super(name, solver, LB, UB);
 	}
 
