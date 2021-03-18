@@ -11,10 +11,7 @@ package org.chocosolver.solver.constraints.graph.basic;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.variables.GraphVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
@@ -127,5 +124,33 @@ public class LoopSetTest {
         model.arithm(card, ">=", 5).post();
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        int[] loopSetLB = new int[] {};
+        int[] loopSetUB = new int[] {0, 1, 2, 3, 4, 5};
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g = model.undirectedGraphVar("g", LB, UB);
+        SetVar loopSet = model.setVar("loopSet", loopSetLB, loopSetUB);
+        model.loopSet(g, loopSet).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        GraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        SetVar loopSet2 = model2.setVar("loopSet", loopSetLB, loopSetUB);
+        Constraint cons = model2.loopSet(g2, loopSet2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
     }
 }
