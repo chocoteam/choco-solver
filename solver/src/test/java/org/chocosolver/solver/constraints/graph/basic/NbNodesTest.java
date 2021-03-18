@@ -152,4 +152,33 @@ public class NbNodesTest {
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        int nbNodesLB = 1;
+        int nbNodesUB = 4;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        IntVar nbNodes = model.intVar("nbNodes", nbNodesLB, nbNodesUB);
+        model.nbNodes(g, nbNodes).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        IntVar nbNodes2 = model2.intVar("nbNodes2", nbNodesLB, nbNodesUB);
+        Constraint cons = model2.nbNodes(g2, nbNodes2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+    }
 }

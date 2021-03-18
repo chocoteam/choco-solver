@@ -11,8 +11,10 @@ package org.chocosolver.solver.constraints.graph.basic;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -117,5 +119,55 @@ public class TransitivityTest {
         model.nbEdges(g, model.intVar(3, 4)).post();
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateUndirectedTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 7;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        model.transitivity(g).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.undirectedGraphVar("g2", LB2, UB2);
+        Constraint cons = model2.transitivity(g2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateDirectedTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 5;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        model.transitivity(g).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g2 = model2.directedGraphVar("g2", LB2, UB2);
+        Constraint cons = model2.transitivity(g2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
 }

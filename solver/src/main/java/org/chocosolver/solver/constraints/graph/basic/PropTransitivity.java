@@ -148,7 +148,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
 	// --- Arc enforcings
 	private void enfArc(int from, int to) throws ContradictionException {
 		if (from != to) {
-			ISet ker = g.getMandatoryPredecessorsOf(to);
+			ISet ker = g.getMandatorySuccessorsOf(to);
 			ISet env = g.getPotentialSuccessorsOf(to);
 			for (int i : env) {
 				if (i != to && i != from) {
