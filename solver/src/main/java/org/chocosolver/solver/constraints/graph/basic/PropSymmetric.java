@@ -29,70 +29,70 @@ import org.chocosolver.util.procedure.PairProcedure;
  */
 public class PropSymmetric extends Propagator<DirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private DirectedGraphVar g;
-	private IGraphDeltaMonitor gdm;
-	private PairProcedure enf;
+    private DirectedGraphVar g;
+    private IGraphDeltaMonitor gdm;
+    private PairProcedure enf;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropSymmetric(DirectedGraphVar graph) {
-		super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
-		g = graph;
-		gdm = g.monitorDelta(this);
-		enf = (from, to) -> {
-			if (from != to) {
-				g.enforceEdge(to, from, PropSymmetric.this);
-			}
-		};
-	}
+    public PropSymmetric(DirectedGraphVar graph) {
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
+        g = graph;
+        gdm = g.monitorDelta(this);
+        enf = (from, to) -> {
+            if (from != to) {
+                g.enforceEdge(to, from, PropSymmetric.this);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet ker = g.getMandatoryNodes();
-		ISet succ;
-		for (int i : ker) {
-			succ = g.getMandatorySuccessorsOf(i);
-			for (int j : succ) {
-				g.enforceEdge(j, i, this);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet ker = g.getMandatoryNodes();
+        ISet succ;
+        for (int i : ker) {
+            succ = g.getMandatorySuccessorsOf(i);
+            for (int j : succ) {
+                g.enforceEdge(j, i, this);
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.forEachEdge(enf, GraphEventType.ADD_EDGE);
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.forEachEdge(enf, GraphEventType.ADD_EDGE);
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return GraphEventType.ADD_EDGE.getMask();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return GraphEventType.ADD_EDGE.getMask();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet ker = g.getMandatoryNodes();
-		ISet succ;
-		for (int i : ker) {
-			succ = g.getMandatorySuccessorsOf(i);
-			for (int j : succ) {
-				if (!g.getPotentialSuccessorsOf(j).contains(i)) {
-					return ESat.FALSE;
-				}
-			}
-		}
-		if (g.isInstantiated()) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        ISet ker = g.getMandatoryNodes();
+        ISet succ;
+        for (int i : ker) {
+            succ = g.getMandatorySuccessorsOf(i);
+            for (int j : succ) {
+                if (!g.getPotentialSuccessorsOf(j).contains(i)) {
+                    return ESat.FALSE;
+                }
+            }
+        }
+        if (g.isInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

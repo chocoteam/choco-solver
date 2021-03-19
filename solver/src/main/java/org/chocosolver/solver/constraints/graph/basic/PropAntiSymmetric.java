@@ -28,74 +28,74 @@ import org.chocosolver.util.procedure.PairProcedure;
  */
 public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private DirectedGraphVar g;
-	private IGraphDeltaMonitor gdm;
-	private PairProcedure remove;
+    private DirectedGraphVar g;
+    private IGraphDeltaMonitor gdm;
+    private PairProcedure remove;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropAntiSymmetric(DirectedGraphVar graph) {
-		super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
-		g = graph;
-		gdm = g.monitorDelta(this);
-		remove = (from, to) -> {
-			if (from != to) {
-				g.removeEdge(to, from, PropAntiSymmetric.this);
-			}
-		};
-	}
+    public PropAntiSymmetric(DirectedGraphVar graph) {
+        super(new DirectedGraphVar[]{graph}, PropagatorPriority.UNARY, true);
+        g = graph;
+        gdm = g.monitorDelta(this);
+        remove = (from, to) -> {
+            if (from != to) {
+                g.removeEdge(to, from, PropAntiSymmetric.this);
+            }
+        };
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet ker = g.getMandatoryNodes();
-		ISet succ;
-		for (int i : ker) {
-			succ = g.getMandatorySuccessorsOf(i);
-			for (int j : succ) {
-				if (i != j) {
-					g.removeEdge(j, i, this);
-				}
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet ker = g.getMandatoryNodes();
+        ISet succ;
+        for (int i : ker) {
+            succ = g.getMandatorySuccessorsOf(i);
+            for (int j : succ) {
+                if (i != j) {
+                    g.removeEdge(j, i, this);
+                }
+            }
+        }
+    }
 
-	@Override
-	public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-		gdm.forEachEdge(remove, GraphEventType.ADD_EDGE);
-	}
+    @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        gdm.forEachEdge(remove, GraphEventType.ADD_EDGE);
+    }
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		return GraphEventType.ADD_EDGE.getMask();
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        return GraphEventType.ADD_EDGE.getMask();
+    }
 
-	@Override
-	public ESat isEntailed() {
-		ISet ker = g.getMandatoryNodes();
-		ISet succ;
-		for (int i : ker) {
-			succ = g.getMandatorySuccessorsOf(i);
-			for (int j : succ) {
-				if (j != i) {
-					if (g.getMandatorySuccessorsOf(j).contains(i)) {
-						return ESat.FALSE;
-					}
-				}
-			}
-		}
-		if (g.isInstantiated()) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        ISet ker = g.getMandatoryNodes();
+        ISet succ;
+        for (int i : ker) {
+            succ = g.getMandatorySuccessorsOf(i);
+            for (int j : succ) {
+                if (j != i) {
+                    if (g.getMandatorySuccessorsOf(j).contains(i)) {
+                        return ESat.FALSE;
+                    }
+                }
+            }
+        }
+        if (g.isInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

@@ -14,24 +14,24 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 
 public abstract class GraphEdgeSelector<G extends GraphVar> {
 
-	protected G g;
-	protected ISet envNodes;
+    protected G g;
+    protected ISet envNodes;
 
-	protected int from, to;
+    protected int from, to;
 
 
-	public GraphEdgeSelector(G g) {
-		this.g = g;
-		this.envNodes = g.getPotentialNodes();
-	}
+    public GraphEdgeSelector(G g) {
+        this.g = g;
+        this.envNodes = g.getPotentialNodes();
+    }
 
-	public abstract boolean computeNextEdge();
+    public abstract boolean computeNextEdge();
 
-	public int getFrom() {
-		return from;
-	}
+    public int getFrom() {
+        return from;
+    }
 
-	public int getTo() {
-		return to;
-	}
+    public int getTo() {
+        return to;
+    }
 }

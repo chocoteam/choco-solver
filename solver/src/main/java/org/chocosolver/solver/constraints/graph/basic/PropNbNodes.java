@@ -27,78 +27,78 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  */
 public class PropNbNodes extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private GraphVar g;
-	private IntVar k;
+    private GraphVar g;
+    private IntVar k;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropNbNodes(GraphVar graph, IntVar k) {
-		super(new Variable[]{graph, k}, PropagatorPriority.LINEAR, false);
-		this.g = graph;
-		this.k = k;
-	}
+    public PropNbNodes(GraphVar graph, IntVar k) {
+        super(new Variable[]{graph, k}, PropagatorPriority.LINEAR, false);
+        this.g = graph;
+        this.k = k;
+    }
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		int env = g.getPotentialNodes().size();
-		int ker = g.getMandatoryNodes().size();
-		k.updateLowerBound(ker, this);
-		k.updateUpperBound(env, this);
-		if (ker == env) {
-			setPassive();
-		} else if (k.isInstantiated()) {
-			int v = k.getValue();
-			ISet envNodes = g.getPotentialNodes();
-			if (v == env) {
-				for (int i : envNodes) {
-					g.enforceNode(i, this);
-				}
-				setPassive();
-			} else if (v == ker) {
-				ISet kerNodes = g.getMandatoryNodes();
-				for (int i : envNodes) {
-					if (!kerNodes.contains(i)) {
-						g.removeNode(i, this);
-					}
-				}
-				setPassive();
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        int env = g.getPotentialNodes().size();
+        int ker = g.getMandatoryNodes().size();
+        k.updateLowerBound(ker, this);
+        k.updateUpperBound(env, this);
+        if (ker == env) {
+            setPassive();
+        } else if (k.isInstantiated()) {
+            int v = k.getValue();
+            ISet envNodes = g.getPotentialNodes();
+            if (v == env) {
+                for (int i : envNodes) {
+                    g.enforceNode(i, this);
+                }
+                setPassive();
+            } else if (v == ker) {
+                ISet kerNodes = g.getMandatoryNodes();
+                for (int i : envNodes) {
+                    if (!kerNodes.contains(i)) {
+                        g.removeNode(i, this);
+                    }
+                }
+                setPassive();
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public int getPropagationConditions(int vIdx) {
-		if (vIdx == 0) {
-			return GraphEventType.REMOVE_NODE.getMask() + GraphEventType.ADD_NODE.getMask();
-		} else {
-			return IntEventType.boundAndInst();
-		}
-	}
+    @Override
+    public int getPropagationConditions(int vIdx) {
+        if (vIdx == 0) {
+            return GraphEventType.REMOVE_NODE.getMask() + GraphEventType.ADD_NODE.getMask();
+        } else {
+            return IntEventType.boundAndInst();
+        }
+    }
 
-	@Override
-	public ESat isEntailed() {
-		int env = g.getPotentialNodes().size();
-		int ker = g.getMandatoryNodes().size();
-		if (env < k.getLB() || ker > k.getUB()) {
-			return ESat.FALSE;
-		}
-		if (env == ker) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        int env = g.getPotentialNodes().size();
+        int ker = g.getMandatoryNodes().size();
+        if (env < k.getLB() || ker > k.getUB()) {
+            return ESat.FALSE;
+        }
+        if (env == ker) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }

@@ -25,67 +25,67 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  */
 public class PropLoopSet extends Propagator<Variable> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private GraphVar g;
-	private SetVar loops;
+    private GraphVar g;
+    private SetVar loops;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public PropLoopSet(GraphVar graph, SetVar loops) {
-		super(new Variable[]{graph, loops}, PropagatorPriority.LINEAR, false);
-		this.g = graph;
-		this.loops = loops;
-	}
+    public PropLoopSet(GraphVar graph, SetVar loops) {
+        super(new Variable[]{graph, loops}, PropagatorPriority.LINEAR, false);
+        this.g = graph;
+        this.loops = loops;
+    }
 
-	//***********************************************************************************
-	// PROPAGATIONS
-	//***********************************************************************************
+    //***********************************************************************************
+    // PROPAGATIONS
+    //***********************************************************************************
 
-	@Override
-	public void propagate(int evtmask) throws ContradictionException {
-		ISet nodes = g.getPotentialNodes();
-		for (int i : nodes) {
-			if (g.getMandatorySuccessorsOf(i).contains(i)) { // mandatory loop detected
-				loops.force(i, this);
-			} else if (!g.getPotentialSuccessorsOf(i).contains(i)) { // no potential loop
-				loops.remove(i, this);
-			} else if (loops.getLB().contains(i)) {
-				g.enforceEdge(i, i, this);
-			} else if (!loops.getUB().contains(i)) {
-				g.removeEdge(i, i, this);
-			}
-		}
-		for (int i : loops.getUB()) {
-			if (!nodes.contains(i)) {
-				loops.remove(i, this);
-			}
-		}
-	}
+    @Override
+    public void propagate(int evtmask) throws ContradictionException {
+        ISet nodes = g.getPotentialNodes();
+        for (int i : nodes) {
+            if (g.getMandatorySuccessorsOf(i).contains(i)) { // mandatory loop detected
+                loops.force(i, this);
+            } else if (!g.getPotentialSuccessorsOf(i).contains(i)) { // no potential loop
+                loops.remove(i, this);
+            } else if (loops.getLB().contains(i)) {
+                g.enforceEdge(i, i, this);
+            } else if (!loops.getUB().contains(i)) {
+                g.removeEdge(i, i, this);
+            }
+        }
+        for (int i : loops.getUB()) {
+            if (!nodes.contains(i)) {
+                loops.remove(i, this);
+            }
+        }
+    }
 
-	//***********************************************************************************
-	// INFO
-	//***********************************************************************************
+    //***********************************************************************************
+    // INFO
+    //***********************************************************************************
 
-	@Override
-	public ESat isEntailed() {
-		for (int i : loops.getLB()) {
-			if (!g.getPotentialSuccessorsOf(i).contains(i)) {
-				return ESat.FALSE;
-			}
-		}
-		for (int i : g.getMandatoryNodes()) {
-			if (g.getMandatorySuccessorsOf(i).contains(i) && !loops.getUB().contains(i)) {
-				return ESat.FALSE;
-			}
-		}
-		if (isCompletelyInstantiated()) {
-			return ESat.TRUE;
-		}
-		return ESat.UNDEFINED;
-	}
+    @Override
+    public ESat isEntailed() {
+        for (int i : loops.getLB()) {
+            if (!g.getPotentialSuccessorsOf(i).contains(i)) {
+                return ESat.FALSE;
+            }
+        }
+        for (int i : g.getMandatoryNodes()) {
+            if (g.getMandatorySuccessorsOf(i).contains(i) && !loops.getUB().contains(i)) {
+                return ESat.FALSE;
+            }
+        }
+        if (isCompletelyInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
+    }
 }
