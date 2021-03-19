@@ -10,8 +10,12 @@
 package org.chocosolver.util.graphOperations.connectivity;
 
 
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+
+import java.util.Iterator;
 
 /**
  * Class containing algorithms to find all connected components by performing one dfs
@@ -31,6 +35,10 @@ public class ConnectivityFinder {
     private IGraph graph;
     private int[] CCFirstNode, CCNextNode, nodeCC, p, fifo, sizeCC;
     private int nbCC, sizeMinCC, sizeMaxCC;
+    // biconnection
+    private int[] numOfNode, nodeOfNum, inf;
+    private Iterator<Integer>[] iterators;
+    TIntArrayList articulations;
 
     /**
      * Create an object that can compute Connected Components (CC) of a graph g
@@ -43,6 +51,7 @@ public class ConnectivityFinder {
         n = g.getNbMaxNodes();
         p = new int[n];
         fifo = new int[n];
+        iterators = new Iterator[n];
     }
 
     /**
@@ -129,12 +138,6 @@ public class ConnectivityFinder {
         nbCC = cc;
     }
 
-    public void findArticulationPoints() {
-        for (int cc = 0; cc < getNBCC(); cc++) {
-
-        }
-    }
-
     private void findCC(int start, int cc) {
         int first = 0;
         int last = 0;
@@ -170,5 +173,135 @@ public class ConnectivityFinder {
         nodeCC[node] = cc;
         CCNextNode[node] = CCFirstNode[cc];
         CCFirstNode[cc] = node;
+    }
+
+
+    /**
+     * Test biconnectivity (i.e. connected with no articulation point and no bridge)
+     * only for undirected graphs
+     *
+     * @return true iff g is biconnected
+     */
+    public boolean isBiconnected() {
+        assert (!graph.isDirected());
+        if (graph.getNodes().size() <= 1) {
+            return false;
+        }
+        if (inf == null) {
+            nodeOfNum = new int[n];
+            numOfNode = new int[n];
+            inf = new int[n];
+        }
+        ISet act = graph.getNodes();
+        for (int i : act) {
+            inf[i] = Integer.MAX_VALUE;
+            p[i] = -1;
+            iterators[i] = graph.getSuccessorsOf(i).iterator();
+        }
+        //algo
+        int start = act.iterator().next();
+        int i = start;
+        int k = 0;
+        numOfNode[start] = k;
+        nodeOfNum[k] = start;
+        p[start] = start;
+        int j, q;
+        int nbRootChildren = 0;
+        while (true) {
+            if (iterators[i].hasNext()) {
+                j = iterators[i].next();
+                if (p[j] == -1) {
+                    p[j] = i;
+                    if (i == start) {
+                        nbRootChildren++;
+                        if (nbRootChildren > 1) {
+                            return false;// ARTICULATION POINT DETECTED
+                        }
+                    }
+                    i = j;
+                    k++;
+                    numOfNode[i] = k;
+                    nodeOfNum[k] = i;
+                    inf[i] = numOfNode[i];
+                } else if (p[i] != j) {
+                    inf[i] = Math.min(inf[i], numOfNode[j]);
+                }
+            } else {
+                if (i == start) {
+                    return k >= act.size() - 1;
+                }
+                q = inf[i];
+                i = p[i];
+                inf[i] = Math.min(q, inf[i]);
+                if (q >= numOfNode[i] && i != start) {
+                    return false;
+                } // ARTICULATION POINT DETECTED
+            }
+        }
+    }
+
+    /**
+     * Computes articulation points of the graph (must be connected)
+     * @return the list of articulation points
+     */
+    public TIntArrayList getArticulationPoints() {
+        if (articulations == null) articulations = new TIntArrayList();
+        if (inf == null) {
+            nodeOfNum = new int[n];
+            numOfNode = new int[n];
+            inf = new int[n];
+        }
+        articulations.clear();
+        ISet act = graph.getNodes();
+        ISetIterator iter = act.iterator();
+        while (iter.hasNext()) {
+            int i = iter.next();
+            inf[i] = Integer.MAX_VALUE;
+            p[i] = -1;
+            iterators[i] = graph.getSuccessorsOf(i).iterator();
+        }
+        //algo
+        int start = act.iterator().next();
+        int i = start;
+        int k = 0;
+        numOfNode[start] = k;
+        nodeOfNum[k] = start;
+        p[start] = start;
+        int j, q;
+        int nbRootChildren = 0;
+        while (true) {
+            if (iterators[i].hasNext()) {
+                j = iterators[i].next();
+                if (p[j] == -1) {
+                    p[j] = i;
+                    if (i == start) {
+                        nbRootChildren++;
+                        if (nbRootChildren > 1) {
+                            articulations.add(i); // ARTICULATION POINT DETECTED
+                        }
+                    }
+                    i = j;
+                    k++;
+                    numOfNode[i] = k;
+                    nodeOfNum[k] = i;
+                    inf[i] = numOfNode[i];
+                } else if (p[i] != j) {
+                    inf[i] = Math.min(inf[i], numOfNode[j]);
+                }
+            } else {
+                if (i == start) {
+                    if (k < act.size() - 1) {
+                        throw new UnsupportedOperationException("disconnected graph");
+                    }
+                    return articulations;
+                }
+                q = inf[i];
+                i = p[i];
+                inf[i] = Math.min(q, inf[i]);
+                if (q >= numOfNode[i] && i != start) {
+                    articulations.add(i); // ARTICULATION POINT DETECTED
+                }
+            }
+        }
     }
 }

@@ -156,8 +156,13 @@ public class UGVarConnectivityHelper {
         }
     }
 
+    /**
+     * @return True if the graph var is biconnected, the empty graph is not considered biconnected
+     */
     public boolean isBiconnected() {
-        // connected ?
+        if (g.getPotentialNodes().size() <= 1) {
+            return false;
+        }
         int root = g.getPotentialNodes().iterator().next();
         if(visited==null)visited = new BitSet(n);
         exploreFrom(root,visited);
@@ -166,6 +171,7 @@ public class UGVarConnectivityHelper {
         }
         // articulation point exist?
         findMandatoryArticulationPointsAndBridges();
+        System.out.println(articulationPoints);
         return articulationPoints.isEmpty();
     }
 }

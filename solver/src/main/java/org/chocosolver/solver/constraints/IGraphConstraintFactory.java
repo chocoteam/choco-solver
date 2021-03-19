@@ -689,16 +689,17 @@ public interface IGraphConstraintFactory {
         return new Constraint("connected", new PropConnected(g));
     }
 
-//    /**
-//     * Creates a connectedness constraint which ensures that g is biconnected
-//     * Beware : should be used in addition to connected
-//     *
-//     * @param g an undirected graph variable
-//     * @return A connectedness constraint which ensures that g is biconnected
-//     */
-//    default Constraint biconnected(UndirectedGraphVar g) {
-//        return new Constraint("connected", new PropBiconnected(g));
-//    }
+    /**
+     * Creates a connectedness constraint which ensures that g is biconnected
+     * Beware : should be used in addition to connected
+     * The empty graph is not considered biconnected.
+     *
+     * @param g an undirected graph variable
+     * @return A connectedness constraint which ensures that g is biconnected
+     */
+    default Constraint biconnected(UndirectedGraphVar g) {
+        return new Constraint("connected", new PropBiconnected(g));
+    }
 
     /**
      * Creates a connectedness constraint which ensures that g has nb connected components
