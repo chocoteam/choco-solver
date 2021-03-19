@@ -2,9 +2,11 @@ package org.chocosolver.solver.constraints.graph.connectivity;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.graphOperations.connectivity.ConnectivityFinder;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -311,5 +313,71 @@ public class SizeMinCCTest {
                 Assert.assertEquals(cFinder.getSizeMinCC(), test.sizeMinCC.getValue());
             }
         }
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void case8bTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        int[] nodesLB = new int[] {0, 1, 2, 3, 4, 5};
+        int[][] edgesLB = new int[][] {
+                {0, 1}, {1, 2}, {2, 3}, {3, 4},
+        };
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
+        UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
+        UB.addEdge(4, 5);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        IntVar sizeMinCC = model.intVar(0, 6);
+        model.sizeMinConnectedComponents(g, sizeMinCC).post();
+        while (model.getSolver().solve()) {}
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void case10Test() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        int[] nodesLB = new int[] {0, 1, 2, 3, 4};
+        int[][] edgesLB = new int[][] { {0, 1}, {1, 2}, {2, 3}, {3, 4} };
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
+        UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
+        UB.addNode(5);
+        UB.addEdge(4, 5);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        IntVar sizeMinCC = model.intVar(1);
+        model.sizeMinConnectedComponents(g, sizeMinCC).post();
+        while (model.getSolver().solve()) {}
+    }
+
+    @Test(groups="10s", timeOut=60000)
+    public void generateTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        IntVar sizeMinCC = model.intVar(0, 3);
+        IntVar nbEdges = model.intVar(3, 10);
+        model.nbEdges(g, nbEdges).post();
+        model.sizeMinConnectedComponents(g, sizeMinCC).post();
+        while (model.getSolver().solve()) {}
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        IntVar sizeMinCC2 = model2.intVar(0, 3);
+        Constraint cons = model2.sizeMinConnectedComponents(g2, sizeMinCC2);
+        IntVar nbEdges2 = model2.intVar(3, 10);
+        Constraint consNbEdges = model2.nbEdges(g2, nbEdges2);
+        int count = 0;
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE && consNbEdges.isSatisfied() == ESat.TRUE) {
+                count++;
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
 }

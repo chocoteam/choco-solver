@@ -206,47 +206,6 @@ public class PropSizeMinCC extends Propagator<Variable> {
                 }
             }
         }
-        // 11 and 12
-        int nbCandidates = 0;
-        int candidate1 = -1, candidate2 = -1;
-        int s1 = -1, s2 = -1;
-        for (int cc = 0; cc < GLBCCFinder.getNBCC(); cc++) {
-            int size = GLBCCFinder.getSizeCC()[cc];
-            if (size <= sizeMinCC.getUB() && size >= sizeMinCC.getLB()) {
-                if (nbCandidates == 0) {
-                    candidate1 = cc;
-                    s1 = size;
-                }
-                if (nbCandidates == 1) {
-                    candidate2 = cc;
-                    s2 = size;
-                }
-                nbCandidates++;
-            }
-            if (nbCandidates > 2) {
-                break;
-            }
-        }
-        // 11.
-        if (nbCandidates == 1 && nbNodesU == 0) {
-            Map<Integer, Set<Integer>> ccNeighbors = getGLBCCPotentialNeighbors(candidate1);
-            for (int i : ccNeighbors.keySet()) {
-                for (int j : ccNeighbors.get(i)) {
-                    g.removeEdge(i, j, this);
-                }
-            }
-        }
-        // 12.
-        if (nbCandidates == 2 && nbNodesU == 0 && (s1 + s2 > sizeMinCC.getUB())) {
-            Map<Integer, Set<Integer>> cc1Neighbors = getGLBCCPotentialNeighbors(candidate1);
-            for (int i : cc1Neighbors.keySet()) {
-                for (int j : cc1Neighbors.get(i)) {
-                    if (GLBCCFinder.getNodeCC()[j] == candidate2) {
-                        g.removeEdge(i, j, this);
-                    }
-                }
-            }
-        }
     }
 
     /**
@@ -323,7 +282,7 @@ public class PropSizeMinCC extends Propagator<Variable> {
         // Retrieve neighbors of the nodes of CC that are outside the CC
         for (int i : ccNodes) {
             Set<Integer> outNeighbors = new HashSet<>();
-            for (int j : g.getMandatoryNeighborsOf(i)) {
+            for (int j : g.getPotentialNeighborsOf(i)) {
                 if (!ccNodes.contains(j)) {
                     outNeighbors.add(j);
                 }
