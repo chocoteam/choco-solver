@@ -38,7 +38,7 @@ public class AntiSymmetricTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {1, 0}, {5, 2}, {2, 5} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         Constraint c =  model.antisymmetric(g);
         c.post();
         Assert.assertEquals(c.getPropagator(0).isEntailed(), ESat.FALSE);
@@ -59,7 +59,7 @@ public class AntiSymmetricTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {1, 3}, {5, 2} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.antisymmetric(g).post();
         model.getSolver().findAllSolutions();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -78,7 +78,7 @@ public class AntiSymmetricTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {1, 0}, {5, 2}, {2, 5} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.antisymmetric(g).post();
         model.nbEdges(g, model.intVar(4)).post();
         model.getSolver().findAllSolutions();
@@ -98,7 +98,7 @@ public class AntiSymmetricTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {5, 2}, {2, 5}, {1, 2}, {1, 3}, {4, 5}, {5, 5}, {0, 0}}
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         SetVar succOf5 = model.graphSuccessorsSetView(g, 5);
         model.member(2, succOf5).post();
         model.nbEdges(g, model.intVar(2)).post();
@@ -116,14 +116,14 @@ public class AntiSymmetricTest {
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.antisymmetric(g).post();
         while (model.getSolver().solve()) {}
         // Generate solutions with checker
         Model model2 = new Model();
         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        DirectedGraphVar g2 = model2.directedGraphVar("g2", LB2, UB2);
+        DirectedGraphVar g2 = model2.digraphVar("g2", LB2, UB2);
         Constraint cons = model2.antisymmetric(g2);
         int count = 0;
         while (model2.getSolver().solve()) {

@@ -41,7 +41,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {1, 3}, {5, 2} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(0, 20);
         model.nbNodes(g, nbNodes).post();
         while (model.getSolver().solve()) {
@@ -63,7 +63,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 4, 5},
                 new int[][]{ {0, 1}, {1, 4}, {5, 1} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(0, 20);
         model.nbNodes(g, nbNodes).post();
         while (model.getSolver().solve()) {
@@ -85,7 +85,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 1}, {1, 3}, {5, 2} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(10, 20);
         Constraint c = model.nbNodes(g, nbNodes);
         c.post();
@@ -107,7 +107,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 4, 5},
                 new int[][]{ {0, 1}, {1, 4}, {5, 3} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(0, 2);
         Constraint c = model.nbNodes(g, nbNodes);
         c.post();
@@ -125,7 +125,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 2},
                 new int[][]{}
         );
-        GraphVar g = model.undirectedGraphVar("g", LB, UB);
+        GraphVar g = model.graphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(0, 20);
         model.nbNodes(g, nbNodes).post();
         model.arithm(nbNodes, "<=", 3).post();
@@ -145,7 +145,7 @@ public class NbNodesTest {
                 new int[] {0, 1, 2},
                 new int[][]{}
         );
-        GraphVar g = model.undirectedGraphVar("g", LB, UB);
+        GraphVar g = model.graphVar("g", LB, UB);
         IntVar nbNodes = model.intVar(0, 20);
         model.nbNodes(g, nbNodes).post();
         model.arithm(nbNodes, ">", 3).post();
@@ -162,7 +162,7 @@ public class NbNodesTest {
         int nbNodesUB = 4;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbNodes = model.intVar("nbNodes", nbNodesLB, nbNodesUB);
         model.nbNodes(g, nbNodes).post();
         while (model.getSolver().solve()) {}
@@ -170,7 +170,7 @@ public class NbNodesTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         IntVar nbNodes2 = model2.intVar("nbNodes2", nbNodesLB, nbNodesUB);
         Constraint cons = model2.nbNodes(g2, nbNodes2);
         int count = 0;

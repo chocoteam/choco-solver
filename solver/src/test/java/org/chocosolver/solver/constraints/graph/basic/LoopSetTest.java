@@ -40,7 +40,7 @@ public class LoopSetTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {5, 2}, {3, 3} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         SetVar loopSet = model.setVar("loopSet", new int[] {}, IntStream.range(0, 10).toArray());
         model.loopSet(g, loopSet).post();
         while (model.getSolver().solve()) {
@@ -65,7 +65,7 @@ public class LoopSetTest {
                 new int[] {0, 1, 2, 3, 4, 5, 6},
                 new int[][]{ {0, 0}, {1, 1}, {5, 2}, {3, 3}, {6, 6} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         SetVar loopSet = model.setVar("loopSet", new int[] {0, 1}, IntStream.range(0, 5).toArray());
         Constraint c =  model.loopSet(g, loopSet);
         c.post();
@@ -87,7 +87,7 @@ public class LoopSetTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {3, 3}, {4, 4}, {1, 2} }
         );
-        GraphVar g = model.directedGraphVar("g", LB, UB);
+        GraphVar g = model.digraphVar("g", LB, UB);
         SetVar loopSet = model.setVar("loopSet", new int[] {}, IntStream.range(0, 10).toArray());
         model.loopSet(g, loopSet).post();
         IntVar card = loopSet.getCard();
@@ -115,7 +115,7 @@ public class LoopSetTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {3, 3}, {4, 4}, {1, 2} }
         );
-        GraphVar g = model.directedGraphVar("g", LB, UB);
+        GraphVar g = model.digraphVar("g", LB, UB);
         SetVar loopSet = model.setVar("loopSet", new int[] {2}, IntStream.range(0, 10).toArray());
         Constraint c =  model.loopSet(g, loopSet);
         c.post();
@@ -135,7 +135,7 @@ public class LoopSetTest {
         int[] loopSetUB = new int[] {0, 1, 2, 3, 4, 5};
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = model.undirectedGraphVar("g", LB, UB);
+        GraphVar g = model.graphVar("g", LB, UB);
         SetVar loopSet = model.setVar("loopSet", loopSetLB, loopSetUB);
         model.loopSet(g, loopSet).post();
         while (model.getSolver().solve()) {}
@@ -143,7 +143,7 @@ public class LoopSetTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        GraphVar g2 = model2.graphVar("g", LB2, UB2);
         SetVar loopSet2 = model2.setVar("loopSet", loopSetLB, loopSetUB);
         Constraint cons = model2.loopSet(g2, loopSet2);
         int count = 0;

@@ -61,7 +61,7 @@ public class SizeMaxCCTest {
                     model, N, SetType.BITSET, SetType.BITSET, GUB_Nodes, GUB_Edges
             );
             // Create the graph variable
-            this.g = model.undirectedGraphVar("g", GLB, GUB);
+            this.g = model.graphVar("g", GLB, GUB);
             // Post the constraint
             model.sizeMaxConnectedComponents(g, sizeMaxCC).post();
         }
@@ -72,7 +72,7 @@ public class SizeMaxCCTest {
             this.model = model;
             this.sizeMaxCC = this.model.intVar(maxNCC_LB, maxNCC_UB);
             // Create the graph variable
-            this.g = model.undirectedGraphVar("g",GLB, GUB);
+            this.g = model.graphVar("g",GLB, GUB);
             // Post the constraint
             model.sizeMaxConnectedComponents(g, sizeMaxCC).post();
         }
@@ -271,7 +271,7 @@ public class SizeMaxCCTest {
         int n = 6;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar sizeMaxCC = model.intVar(0, 3);
         model.sizeMaxConnectedComponents(g, sizeMaxCC).post();
         while (model.getSolver().solve()) {}
@@ -279,7 +279,7 @@ public class SizeMaxCCTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         IntVar sizeMaxCC2 = model2.intVar(0, 3);
         Constraint cons = model2.sizeMaxConnectedComponents(g2, sizeMaxCC2);
         int count = 0;

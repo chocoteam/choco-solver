@@ -44,7 +44,7 @@ public class NbConnectedComponentsTest {
         GUB.addEdge(1,3);
         GUB.addEdge(3,4);
         GUB.addEdge(4,5);
-        UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
         m.nbConnectedComponents(graph, m.intVar(1)).post();
         try {
@@ -77,7 +77,7 @@ public class NbConnectedComponentsTest {
         GUB.addEdge(4,5);
         GUB.addEdge(4,6);
         GUB.addEdge(5,6);
-        UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
         m.nbConnectedComponents(graph, m.intVar(1)).post();
         try {
@@ -105,7 +105,7 @@ public class NbConnectedComponentsTest {
         GUB.addEdge(1,2);
         GLB.addEdge(0,3);
         GUB.addEdge(0,3);
-        UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
         m.nbConnectedComponents(graph, m.intVar(1)).post();
         try {
@@ -132,7 +132,7 @@ public class NbConnectedComponentsTest {
         GUB.addEdge(1,2);
         GLB.addEdge(0,3);
         GUB.addEdge(0,3);
-        UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
         m.nbConnectedComponents(graph, m.intVar(1)).post();
 
@@ -158,7 +158,7 @@ public class NbConnectedComponentsTest {
         GUB.addNode(1);
         GUB.addEdge(0,1);
 
-        UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
         Assert.assertEquals(m.nbConnectedComponents(graph, m.intVar(1)).isSatisfied(), ESat.UNDEFINED);
 
@@ -179,7 +179,7 @@ public class NbConnectedComponentsTest {
 		// if one wants a graph with >= 2 nodes he should use the node number constraint
 		// connected only focuses on the graph structure to prevent two nodes not to be connected
 		// if there is 0 or only 1 node, the constraint is therefore not violated
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
 		Assert.assertEquals(m.nbConnectedComponents(graph, m.intVar(0)).isSatisfied(), ESat.TRUE);
 		IntVar nCC = m.intVar(0,1);
@@ -199,7 +199,7 @@ public class NbConnectedComponentsTest {
 		GUB.addNode(1);
 		GUB.addEdge(0,1);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
 		Assert.assertEquals(m.nbConnectedComponents(graph, m.intVar(1)).isSatisfied(), ESat.UNDEFINED);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
@@ -219,7 +219,7 @@ public class NbConnectedComponentsTest {
 		GUB.addNode(2);
 		GUB.addEdge(0,1);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
 		m.nbNodes(graph, m.intVar(3)).post();
 
@@ -242,7 +242,7 @@ public class NbConnectedComponentsTest {
 		UB.addNode(2);
 		UB.addEdge(0, 1);
 		UB.addEdge(1, 2);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
 
         m.nbConnectedComponents(g, m.intVar(1)).post();
 		Solver s = m.getSolver();
@@ -267,7 +267,7 @@ public class NbConnectedComponentsTest {
 		UB.addNode(2);
 		UB.addEdge(0, 1);
 		UB.addEdge(1, 2);
-		UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+		UndirectedGraphVar g = m.graphVar("g", LB, UB);
 		m.nbNodes(g, m.intVar(3)).post();
 
 		m.nbConnectedComponents(g, m.intVar(1)).post();
@@ -297,7 +297,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 0, 1,2);
 		add_neighbors(GUB, 1, 2);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		BoolVar isConnected = m.nbConnectedComponents(graph, m.intVar(1)).reify();
 		IntVar nbNodes = m.intVar(0, 20);
 		m.nbNodes(graph, nbNodes).post();
@@ -328,7 +328,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 31, 10, 12, 28, 29);
 		add_neighbors(GUB, 32, 12);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
@@ -358,7 +358,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 1, 2, 3);
 		add_neighbors(GUB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
 		m.getSolver().propagate();
@@ -385,7 +385,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 1, 2, 3);
 		add_neighbors(GUB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
 		m.getSolver().propagate();
@@ -410,7 +410,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 2, 3);
 		add_neighbors(GUB, 4, 5);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
 		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
@@ -441,7 +441,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 4, 5);
 		add_neighbors(GUB, 5, 6);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(2)).post();
 
 		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
@@ -471,7 +471,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GUB, 4, 5);
 		add_neighbors(GUB, 5, 6);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		IntVar nCC = m.intVar("nbCC", 7,10);
 		m.nbConnectedComponents(graph, nCC).post();
 
@@ -507,7 +507,7 @@ public class NbConnectedComponentsTest {
 		add_neighbors(GLB, 1, 2);
 		add_neighbors(GLB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		IntVar nCC = m.intVar("nbCC",5,10);
 		m.nbConnectedComponents(graph, nCC).post();
 
@@ -539,7 +539,7 @@ public class NbConnectedComponentsTest {
 		int nbCCUB = 3;
 		UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
 		UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-		UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+		UndirectedGraphVar g = model.graphVar("g", LB, UB);
 		model.nbConnectedComponents(g, model.intVar(nbCCLB, nbCCUB)).post();
 		model.nbEdges(g, model.intVar(4)).post();
 		while (model.getSolver().solve()) {}
@@ -547,7 +547,7 @@ public class NbConnectedComponentsTest {
 		Model model2 = new Model();
 		UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
 		UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-		UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+		UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
 		model2.nbEdges(g2, model2.intVar(4)).post();
 		Constraint cons = model2.nbConnectedComponents(g2, model2.intVar(nbCCLB, nbCCUB));
 		int count = 0;

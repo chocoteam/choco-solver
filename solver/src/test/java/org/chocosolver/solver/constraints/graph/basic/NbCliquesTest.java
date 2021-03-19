@@ -34,7 +34,7 @@ public class NbCliquesTest {
                         {6, 7}, {7, 8}, {8, 6}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbCliques = model.intVar("nbCliques", 0, 10);
         model.nbCliques(g, nbCliques).post();
         while (model.getSolver().solve()) {
@@ -64,7 +64,7 @@ public class NbCliquesTest {
                         {7, 8}, {8, 9}, {9, 7}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbCliques = model.intVar("nbCliques", 0, 10);
         model.nbCliques(g, nbCliques).post();
         model.getSolver().solve();
@@ -92,7 +92,7 @@ public class NbCliquesTest {
                         {6, 7}, {7, 8}, {8, 6}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbCliques = model.intVar("nbCliques", 0, 10);
         model.nbCliques(g, nbCliques).post();
         model.arithm(nbCliques, "<=", 4).post();
@@ -126,7 +126,7 @@ public class NbCliquesTest {
                         {6, 7}, {7, 8}, {8, 6}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbCliques = model.intVar("nbCliques", 0, 10);
         model.nbCliques(g, nbCliques).post();
         model.arithm(nbCliques, "<=", 4).post();
@@ -146,7 +146,7 @@ public class NbCliquesTest {
         int nbCliquesUB = 4;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbCliques = model.intVar("nbCliques", nbCliquesLB, nbCliquesUB);
         model.nbCliques(g, nbCliques).post();
         while (model.getSolver().solve()) {}
@@ -154,7 +154,7 @@ public class NbCliquesTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         IntVar nbCliques2 = model2.intVar("nbCliques2", nbCliquesLB, nbCliquesUB);
         Constraint cons = model2.nbCliques(g2, nbCliques2);
         int count = 0;

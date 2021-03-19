@@ -44,7 +44,7 @@ public class ConnectedTest {
         GUB.addEdge(1,3);
         GUB.addEdge(3,4);
         GUB.addEdge(4,5);
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         model.connected(graph).post();
         try {
@@ -77,7 +77,7 @@ public class ConnectedTest {
         GUB.addEdge(4,5);
         GUB.addEdge(4,6);
         GUB.addEdge(5,6);
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         model.connected(graph).post();
         try {
@@ -105,7 +105,7 @@ public class ConnectedTest {
         GUB.addEdge(1,2);
         GLB.addEdge(0,3);
         GUB.addEdge(0,3);
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         model.connected(graph).post();
         try {
@@ -132,7 +132,7 @@ public class ConnectedTest {
         GUB.addEdge(1,2);
         GLB.addEdge(0,3);
         GUB.addEdge(0,3);
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         model.connected(graph).post();
 
@@ -158,7 +158,7 @@ public class ConnectedTest {
         GUB.addNode(1);
         GUB.addEdge(0,1);
 
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.UNDEFINED);
 
@@ -179,7 +179,7 @@ public class ConnectedTest {
 		// if one wants a graph with >= 2 nodes he should use the node number constraint
 		// connected only focuses on the graph structure to prevent two nodes not to be connected
 		// if there is 0 or only 1 node, the constraint is therefore not violated
-		UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
 		Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.TRUE);
 		model.connected(graph).post();
@@ -197,7 +197,7 @@ public class ConnectedTest {
 		GUB.addNode(1);
 		GUB.addEdge(0,1);
 
-		UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
 		Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.UNDEFINED);
 		model.connected(graph).post();
@@ -217,7 +217,7 @@ public class ConnectedTest {
 		GUB.addNode(2);
 		GUB.addEdge(0,1);
 
-		UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
 		model.nbNodes(graph, model.intVar(3)).post();
 
@@ -240,7 +240,7 @@ public class ConnectedTest {
 		UB.addNode(2);
 		UB.addEdge(0, 1);
 		UB.addEdge(1, 2);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
 
         m.connected(g).post();
 		Solver s = m.getSolver();
@@ -265,7 +265,7 @@ public class ConnectedTest {
 		UB.addNode(2);
 		UB.addEdge(0, 1);
 		UB.addEdge(1, 2);
-		UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+		UndirectedGraphVar g = m.graphVar("g", LB, UB);
 		m.nbNodes(g, m.intVar(3)).post();
 
 		m.connected(g).post();
@@ -295,7 +295,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 0, 1,2);
 		add_neighbors(GUB, 1, 2);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		BoolVar isConnected = m.connected(graph).reify();
 		IntVar nbNodes = m.intVar(0, 20);
 		m.nbNodes(graph, nbNodes).post();
@@ -326,7 +326,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 31, 10, 12, 28, 29);
 		add_neighbors(GUB, 32, 12);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 
 		m.connected(graph).post();
 
@@ -352,7 +352,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 1, 2, 3);
 		add_neighbors(GUB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.connected(graph).post();
 
 		m.getSolver().propagate();
@@ -377,7 +377,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 1, 2, 3);
 		add_neighbors(GUB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.connected(graph).post();
 
 		m.getSolver().propagate();
@@ -401,7 +401,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 1, 2, 3);
 		add_neighbors(GUB, 2, 3);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.connected(graph).post();
 
 		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
@@ -429,7 +429,7 @@ public class ConnectedTest {
 		add_neighbors(GUB, 2, 3);
 		add_neighbors(GUB, 4, 5);
 
-		UndirectedGraphVar graph = m.undirectedGraphVar("G", GLB, GUB);
+		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.connected(graph).post();
 
 		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
@@ -457,7 +457,7 @@ public class ConnectedTest {
         GUB.addNode(0);
         GUB.addNode(1);
 
-        UndirectedGraphVar graph = model.undirectedGraphVar("G", GLB, GUB);
+        UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
 
         Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.UNDEFINED);
     }
@@ -469,7 +469,7 @@ public class ConnectedTest {
 		int n = 7;
 		UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
 		UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-		UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+		UndirectedGraphVar g = model.graphVar("g", LB, UB);
 		model.connected(g).post();
 		model.nbEdges(g, model.intVar(4)).post();
 		while (model.getSolver().solve()) {}
@@ -477,7 +477,7 @@ public class ConnectedTest {
 		Model model2 = new Model();
 		UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
 		UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-		UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+		UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
 		model2.nbEdges(g2, model2.intVar(4)).post();
 		Constraint cons = model2.connected(g2);
 		int count = 0;

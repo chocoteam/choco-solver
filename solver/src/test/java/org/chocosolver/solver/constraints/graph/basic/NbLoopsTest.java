@@ -22,8 +22,6 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.stream.IntStream;
-
 /**
  * Test class for nbLoops graph constraint
  */
@@ -42,7 +40,7 @@ public class NbLoopsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {5, 2}, {3, 3} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbLoops = model.intVar("nbLoops", 0, 10);
         model.nbLoops(g, nbLoops).post();
         while (model.getSolver().solve()) {
@@ -64,7 +62,7 @@ public class NbLoopsTest {
                 new int[] {0, 1, 2, 3, 4, 5, 6},
                 new int[][]{ {0, 0}, {1, 1}, {5, 2}, {3, 3}, {6, 6} }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbLoops = model.intVar("nbLoops", 2, 3);
         Constraint c =  model.nbLoops(g, nbLoops);
         c.post();
@@ -86,7 +84,7 @@ public class NbLoopsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {3, 3}, {4, 4}, {1, 2} }
         );
-        GraphVar g = model.directedGraphVar("g", LB, UB);
+        GraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbLoops = model.intVar("nbLoops", 0, 10);
         model.nbLoops(g, nbLoops).post();
         model.arithm(nbLoops, "<=", 3).post();
@@ -111,7 +109,7 @@ public class NbLoopsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][]{ {0, 0}, {1, 1}, {3, 3}, {4, 4}, {1, 2} }
         );
-        GraphVar g = model.directedGraphVar("g", LB, UB);
+        GraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbLoops = model.intVar("nbLoops", 1, 10);
         Constraint c =  model.nbLoops(g, nbLoops);
         c.post();
@@ -130,7 +128,7 @@ public class NbLoopsTest {
         int nbLoopsUB = 4;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar nbLoops = model.intVar("nbLoops", nbLoopsLB, nbLoopsUB);
         model.nbLoops(g, nbLoops).post();
         while (model.getSolver().solve()) {}
@@ -138,7 +136,7 @@ public class NbLoopsTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         IntVar nbLoops2 = model2.intVar("nbLoops2", nbLoopsLB, nbLoopsUB);
         Constraint cons = model2.nbLoops(g2, nbLoops2);
         int count = 0;

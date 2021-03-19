@@ -42,7 +42,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.undirectedGraphVar("g", LB, UB);
+        GraphVar g = m.graphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -63,7 +63,7 @@ public class GraphNodeSetViewTest {
         int n = 4;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.directedGraphVar("g", LB, UB);
+        GraphVar g = m.digraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -83,7 +83,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.undirectedGraphVar("g", LB, UB);
+        GraphVar g = m.graphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
@@ -106,7 +106,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.undirectedGraphVar("g", LB, UB);
+        GraphVar g = m.graphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         s.instantiateTo(new int[] {0, 2, 4}, s);
         while (m.getSolver().solve()) {
@@ -128,7 +128,7 @@ public class GraphNodeSetViewTest {
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.directedGraphVar("g", LB, UB);
+        GraphVar g = m.digraphVar("g", LB, UB);
         GraphNodeSetView s = new GraphNodeSetView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
@@ -150,7 +150,7 @@ public class GraphNodeSetViewTest {
         int n = 10;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        GraphVar g = m.undirectedGraphVar("g", LB, UB);
+        GraphVar g = m.graphVar("g", LB, UB);
         SetVar s = m.graphNodeSetView(g);
         Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.intVar(3, 7)));
         m.post(nbNodes);

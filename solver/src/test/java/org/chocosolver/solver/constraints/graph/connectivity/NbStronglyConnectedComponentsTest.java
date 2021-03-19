@@ -37,7 +37,7 @@ public class NbStronglyConnectedComponentsTest {
         Model model = new Model();
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, 10, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeStoredDirectedGraph(model, 10, SetType.BITSET, SetType.BITSET);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbSCC = model.intVar("nbSCC", 0, 10);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -50,7 +50,7 @@ public class NbStronglyConnectedComponentsTest {
         LB.addNode(0);
         UB = GraphFactory.makeStoredDirectedGraph(model, 10, SetType.BITSET, SetType.BITSET);
         UB.addNode(0);
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         nbSCC = model.intVar("nbSCC", 0, 10);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -69,7 +69,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 0}, {2, 5} }
         );
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         nbSCC = model.intVar("nbSCC", 0, 10);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -88,7 +88,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 2}, {2, 3}, {3, 0}, {3, 4}, {4, 5}, {5, 4} }
         );
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         nbSCC = model.intVar("nbSCC", 0, 10);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -107,7 +107,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 0}, {2, 3}, {3, 2}, {4, 5}, {5, 4} }
         );
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         nbSCC = model.intVar("nbSCC", 0, 10);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -130,7 +130,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 0}, {2, 5} }
         );
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbSCC = model.intVar("nbSCC", 3, 4);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {}
@@ -147,7 +147,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5} }
         );
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         model.stronglyConnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -163,7 +163,7 @@ public class NbStronglyConnectedComponentsTest {
                 new int[] {0, 1, 2, 3, 4, 5},
                 new int[][] { {0, 1}, {1, 0}, {2, 3}, {3, 2}, {4, 5}, {5, 4} }
         );
-        g = model.directedGraphVar("g", LB, UB);
+        g = model.digraphVar("g", LB, UB);
         model.stronglyConnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -176,7 +176,7 @@ public class NbStronglyConnectedComponentsTest {
         int n = 6;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbSCC = model.intVar("nbSCC", 0);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         while (model.getSolver().solve()) {
@@ -195,7 +195,7 @@ public class NbStronglyConnectedComponentsTest {
         UB.removeEdge(1, 2); UB.removeEdge(1, 4);
         UB.removeEdge(3, 4); UB.removeEdge(3, 5);
         UB.removeEdge(4, 5);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         IntVar nbSCC = model.intVar("nbSCC", 0, 4);
         model.nbStronglyConnectedComponents(g, nbSCC).post();
         IntVar nbEdges = model.intVar("nbEdges", 0, 8);
@@ -221,7 +221,7 @@ public class NbStronglyConnectedComponentsTest {
         UB.removeEdge(1, 2); UB.removeEdge(1, 4);
         UB.removeEdge(3, 4); UB.removeEdge(3, 5);
         UB.removeEdge(4, 5);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.stronglyConnected(g).post();
         IntVar nbEdges = model.intVar("nbEdges", 25, 36);
         model.nbEdges(g, nbEdges).post();
@@ -241,7 +241,7 @@ public class NbStronglyConnectedComponentsTest {
         int nbSCCUB = 3;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        DirectedGraphVar g = model.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.nbStronglyConnectedComponents(g, model.intVar(nbSCCLB, nbSCCUB)).post();
         model.nbEdges(g, model.intVar(4)).post();
         SetVar nodeSet = model.graphNodeSetView(g);
@@ -251,7 +251,7 @@ public class NbStronglyConnectedComponentsTest {
         Model model2 = new Model();
         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        DirectedGraphVar g2 = model2.directedGraphVar("g", LB2, UB2);
+        DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
         Constraint consNbEdges = model2.nbEdges(g2, model2.intVar(4));
         SetVar nodeSet2 = model2.graphNodeSetView(g2);
         Constraint consMember = model2.member(3, nodeSet2);

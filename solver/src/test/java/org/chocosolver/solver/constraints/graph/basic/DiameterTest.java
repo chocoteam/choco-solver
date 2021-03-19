@@ -47,7 +47,7 @@ public class DiameterTest {
                         {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar("diameter", 0, 20);
         model.diameter(g, diam).post();
         while (model.getSolver().solve()) {
@@ -73,7 +73,7 @@ public class DiameterTest {
                         {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar("diameter", 5);
         Constraint c = model.diameter(g, diam);
         c.post();
@@ -99,7 +99,7 @@ public class DiameterTest {
                         {0, 1}, {1, 2}, {2, 3}, {3, 4}, {4, 5}, {6, 7}, {7, 8}, {8, 9}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar("diameter", 5);
         Constraint c = model.diameter(g, diam);
         c.post();
@@ -123,7 +123,7 @@ public class DiameterTest {
                         {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar(7);
         model.diameter(g, diam).post();
         model.getSolver().findAllSolutions();
@@ -145,7 +145,7 @@ public class DiameterTest {
                         {1, 2}, {2, 3}, {3, 4}, {4, 5}, {5, 6}, {6, 7}, {7, 8}, {8, 9}
                 }
         );
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar(0, 7);
         model.diameter(g, diam).post();
         model.nbEdges(g, model.intVar(8, 10)).post();
@@ -161,7 +161,7 @@ public class DiameterTest {
         int ubDiam = 4;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar diam = model.intVar("diam", lbDiam, ubDiam);
         model.diameter(g, diam).post();
         List<UndirectedGraph> l1 = new ArrayList<>();
@@ -189,7 +189,7 @@ public class DiameterTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         Constraint cons = model.diameter(g2, model2.intVar(lbDiam, ubDiam));
         int count = 0;
         int realCount2 = 0;

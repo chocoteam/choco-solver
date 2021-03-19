@@ -41,7 +41,7 @@ public class GraphSuccessorsSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
         GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         Assert.assertEquals(s.getLB().size(), 0);
         Assert.assertEquals(s.getUB().size(), 4);
@@ -64,7 +64,7 @@ public class GraphSuccessorsSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
         GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
         while (m.getSolver().solve()) {
@@ -87,7 +87,7 @@ public class GraphSuccessorsSetViewTest {
         int n = 5;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
         GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
         s.instantiateTo(new int[] {2, 3}, s);
         while (m.getSolver().solve()) {
@@ -111,7 +111,7 @@ public class GraphSuccessorsSetViewTest {
         UndirectedGraph UB = GraphFactory.makeStoredAllNodesUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UB.addEdge(0, 1);
         UB.addEdge(0, 2);
-        UndirectedGraphVar g = m.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = m.graphVar("g", LB, UB);
         SetVar s = m.graphNeighborsSetView(g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 3})).post();
         Assert.assertFalse(m.getSolver().solve());
@@ -129,7 +129,7 @@ public class GraphSuccessorsSetViewTest {
         for (int i = 1; i < n; i ++) {
             UB.addEdge(0, i);
         }
-        DirectedGraphVar g = m.directedGraphVar("g", LB, UB);
+        DirectedGraphVar g = m.digraphVar("g", LB, UB);
         SetVar s = m.graphSuccessorsSetView(g, 0);
         Constraint nbEdges = new Constraint("NbEdges", new PropNbEdges(g, m.intVar(3, 7)));
         m.post(nbEdges);

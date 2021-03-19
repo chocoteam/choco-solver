@@ -44,7 +44,7 @@ public class SizeMinCCTest {
             this.model = model;
             this.sizeMinCC = this.model.intVar(minNCC_LB, minNCC_UB);
             // Create the graph variable
-            this.g = model.undirectedGraphVar("g",GLB, GUB);
+            this.g = model.graphVar("g",GLB, GUB);
             // Post the constraint
             model.sizeMinConnectedComponents(g, sizeMinCC).post();
         }
@@ -59,7 +59,7 @@ public class SizeMinCCTest {
             // Init GUB (graph envelope)
             this.GUB = GraphFactory.makeStoredUndirectedGraph(model, N, SetType.BITSET, SetType.BITSET, GUB_Nodes, GUB_Edges);
             // Create the graph variable
-            this.g = model.undirectedGraphVar("g", GLB, GUB);
+            this.g = model.graphVar("g", GLB, GUB);
             // Post the constraint
             model.sizeMinConnectedComponents(g, sizeMinCC).post();
         }
@@ -327,7 +327,7 @@ public class SizeMinCCTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
         UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
         UB.addEdge(4, 5);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar sizeMinCC = model.intVar(0, 6);
         model.sizeMinConnectedComponents(g, sizeMinCC).post();
         while (model.getSolver().solve()) {}
@@ -344,7 +344,7 @@ public class SizeMinCCTest {
         UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodesLB, edgesLB);
         UB.addNode(5);
         UB.addEdge(4, 5);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar sizeMinCC = model.intVar(1);
         model.sizeMinConnectedComponents(g, sizeMinCC).post();
         while (model.getSolver().solve()) {}
@@ -357,7 +357,7 @@ public class SizeMinCCTest {
         int n = 6;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         IntVar sizeMinCC = model.intVar(0, 3);
         IntVar nbEdges = model.intVar(3, 10);
         model.nbEdges(g, nbEdges).post();
@@ -367,7 +367,7 @@ public class SizeMinCCTest {
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         IntVar sizeMinCC2 = model2.intVar(0, 3);
         Constraint cons = model2.sizeMinConnectedComponents(g2, sizeMinCC2);
         IntVar nbEdges2 = model2.intVar(3, 10);

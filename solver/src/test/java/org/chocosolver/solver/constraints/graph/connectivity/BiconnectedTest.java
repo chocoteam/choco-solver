@@ -25,7 +25,7 @@ public class BiconnectedTest {
         int n = 10;
         UndirectedGraph LB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -39,7 +39,7 @@ public class BiconnectedTest {
         };
         LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
-        g = model.undirectedGraphVar("g", LB, UB);
+        g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -52,7 +52,7 @@ public class BiconnectedTest {
         };
         LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
-        g = model.undirectedGraphVar("g", LB, UB);
+        g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
@@ -65,7 +65,7 @@ public class BiconnectedTest {
         int n = 10;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -76,7 +76,7 @@ public class BiconnectedTest {
         int[][] edges = new int[][] {};
         LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
-        g = model.undirectedGraphVar("g", LB, UB);
+        g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -89,7 +89,7 @@ public class BiconnectedTest {
         };
         LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
-        g = model.undirectedGraphVar("g", LB, UB);
+        g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -108,7 +108,7 @@ public class BiconnectedTest {
                 }
         );
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, 10, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         model.nbEdges(g, model.intVar(4, 10)).post();
         SetVar nodeSet = model.graphNodeSetView(g);
@@ -138,7 +138,7 @@ public class BiconnectedTest {
             UB.removeEdge(2, i);
         }
         UB.addEdge(2, 3);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         model.nbEdges(g, model.intVar(4, 10)).post();
         SetVar nodeSet = model.graphNodeSetView(g);
@@ -155,14 +155,14 @@ public class BiconnectedTest {
         int n = 6;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g = model.undirectedGraphVar("g", LB, UB);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
         model.biconnected(g).post();
         while (model.getSolver().solve()) {}
         // Generate solutions with checker
         Model model2 = new Model();
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        UndirectedGraphVar g2 = model2.undirectedGraphVar("g", LB2, UB2);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
         Constraint cons = model2.biconnected(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
