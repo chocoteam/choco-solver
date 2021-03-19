@@ -12,6 +12,9 @@ package org.chocosolver.util.objects.graphs;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.IntStream;
+
 /**
  * Factory for creating graph data structures.
  * @author Dimitri Justeau-Allaire
@@ -129,8 +132,6 @@ public class GraphFactory {
         return g;
     }
 
-
-
     /**
      * Return a stored undirected graph with a given set of nodes and edges.
      * @param model The choco model
@@ -154,6 +155,32 @@ public class GraphFactory {
     }
 
     /**
+     * Return a stored undirected graph with a given set of nodes and edges.
+     * @param model The choco model
+     * @param n the maximum number of nodes
+     * @param nodeSetType set type for storing nodes
+     * @param edgeSetType set type for storing edges
+     * @param nodes list of nodes' indices to instantiate the graph with
+     * @param adjacencyMatrix adjacency (boolean) matrix of directed edges to instantiate the graph with
+     * @return a stored undirected graph with a nodes from `nodes` and edges from `edges`.
+     */
+    public static UndirectedGraph makeStoredUndirectedGraph(Model model, int n, SetType nodeSetType, SetType edgeSetType, int[] nodes, boolean[][] adjacencyMatrix) {
+        UndirectedGraph g = makeStoredUndirectedGraph(model, n, nodeSetType, edgeSetType);
+        for (int i : nodes) {
+            g.addNode(i);
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                if (adjacencyMatrix[i][j]) {
+                    g.addEdge(i, j);
+                }
+            }
+        }
+        return g;
+    }
+
+
+    /**
      * Return a stored directed graph with a given set of nodes and edges.
      * @param model The choco model
      * @param n the maximum number of nodes
@@ -173,6 +200,63 @@ public class GraphFactory {
             g.addEdge(e[0], e[1]);
         }
         return g;
+    }
+
+    /**
+     * Return a stored directed graph with a given set of nodes and edges, with edges represented by an adjacency matrix.
+     * @param model The choco model
+     * @param n the maximum number of nodes
+     * @param nodeSetType set type for storing nodes
+     * @param edgeSetType set type for storing edges
+     * @param nodes list of nodes' indices to instantiate the graph with
+     * @param adjacencyMatrix adjacency (boolean) matrix of directed edges to instantiate the graph with
+     * @return a stored directed graph with a nodes from `nodes` and edges from `edges`.
+     */
+    public static DirectedGraph makeStoredDirectedGraph(Model model, int n, SetType nodeSetType, SetType edgeSetType, int[] nodes, boolean[][] adjacencyMatrix) {
+        DirectedGraph g = makeStoredDirectedGraph(model, n, nodeSetType, edgeSetType);
+        for (int i : nodes) {
+            g.addNode(i);
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (adjacencyMatrix[i][j]) {
+                    g.addEdge(i, j);
+                }
+            }
+        }
+        return g;
+    }
+
+    /**
+     * Generate a random undirected graph (backtrackable) containing nbCC connected components.
+
+     * @param model The Choco model (providing the backtracking environment).
+     * @param n The max number of nodes.
+     * @param nodeSetType set type for storing nodes
+     * @param edgeSetType set type for storing edges
+     * @param nbCC The number of connected components.
+     * @param density The wanted density of the connected components
+     * @param maxSizeCC The maximum size of the CCs.
+     * @return A randomly generated undirected graph (backtrackable) containing nbCC connected components.
+     */
+    public static UndirectedGraph generateRandomUndirectedGraphFromNbCC(Model model, int n, SetType nodeSetType, SetType edgeSetType, int nbCC, double density, int maxSizeCC) {
+        assert (nbCC <= n);
+        int remaining = n;
+        int next_node = 0;
+        boolean[][] edges = new boolean[n][n];
+        for (int cc = 0; cc < nbCC; cc++) {
+            int size = ThreadLocalRandom.current().nextInt(1, Math.min(remaining - nbCC + cc + 1, maxSizeCC));
+            remaining -= size;
+            boolean[][] adj = generateRandomUndirectedAdjacencyMatrix(size, density);
+            for (int i = 0; i < size; i++) {
+                for (int j = i; j < size; j++) {
+                    edges[i + next_node][j + next_node] = adj[i][j];
+                }
+            }
+            next_node += size;
+        }
+        next_node = (next_node == 0) ? 1 : next_node;
+        return makeStoredUndirectedGraph(model, n, nodeSetType, edgeSetType, IntStream.range(0, next_node).toArray(), edges);
     }
 
     //***********************************************************************************
@@ -279,8 +363,6 @@ public class GraphFactory {
         return g;
     }
 
-
-
     /**
      * Return an undirected graph with a given set of nodes and edges.
      * @param n the maximum number of nodes
@@ -322,4 +404,31 @@ public class GraphFactory {
         }
         return g;
     }
+
+    //***********************************************************************************
+    // ADJACENCY MATRIX
+    //***********************************************************************************
+
+    /**
+     * Randomly generate an undirected graph adjacency matrix from a given density.
+     * @param n The number of nodes
+     * @param density The wanted density
+     * @return
+     */
+    public static boolean[][] generateRandomUndirectedAdjacencyMatrix(int n, double density) {
+        assert (density >= 0 && density <= 1);
+        int[] nodes = IntStream.range(0, n).toArray();
+        boolean[][] edges = new boolean[n][n];
+        for (int i : nodes) {
+            for (int j : nodes) {
+                double r = Math.random();
+                if (r < density) {
+                    edges[i][j] = true;
+                    edges[j][i] = true;
+                }
+            }
+        }
+        return edges;
+    }
+
 }

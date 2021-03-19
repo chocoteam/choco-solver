@@ -9,10 +9,9 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_Y;
 import org.chocosolver.solver.constraints.graph.basic.*;
-import org.chocosolver.solver.constraints.graph.connectivity.PropConnected;
-import org.chocosolver.solver.constraints.graph.connectivity.PropNbCC;
-import org.chocosolver.solver.constraints.graph.connectivity.PropNbSCC;
+import org.chocosolver.solver.constraints.graph.connectivity.*;
 import org.chocosolver.solver.variables.*;
 
 /**
@@ -23,109 +22,109 @@ import org.chocosolver.solver.variables.*;
 public interface IGraphConstraintFactory {
 
 
-	//***********************************************************************************
-	// BASIC CONSTRAINTS
-	//***********************************************************************************
+    //***********************************************************************************
+    // BASIC CONSTRAINTS
+    //***********************************************************************************
 
-	// counting
+    // counting
 
-	/**
-	 * Create a constraint to force the number of nodes in g to be equal to nb
-	 *
-	 * @param g  a graph variable
-	 * @param nb an integer variable indicating the expected number of nodes in g
-	 * @return A constraint to force the number of nodes in g to be equal to nb
-	 */
-	default Constraint nbNodes(GraphVar g, IntVar nb) {
-		return new Constraint("nbNodes", new PropNbNodes(g, nb));
-	}
+    /**
+     * Create a constraint to force the number of nodes in g to be equal to nb
+     *
+     * @param g  a graph variable
+     * @param nb an integer variable indicating the expected number of nodes in g
+     * @return A constraint to force the number of nodes in g to be equal to nb
+     */
+    default Constraint nbNodes(GraphVar g, IntVar nb) {
+        return new Constraint("nbNodes", new PropNbNodes(g, nb));
+    }
 
-	/**
-	 * Create a constraint to force the number of edges in g to be equal to nb
-	 *
-	 * @param g  a graph variable
-	 * @param nb an integer variable indicating the expected number of edges in g
-	 * @return A constraint to force the number of edges in g to be equal to nb
-	 */
-	default Constraint nbEdges(GraphVar g, IntVar nb) {
-		return new Constraint("nbEdges", new PropNbEdges(g, nb));
-	}
+    /**
+     * Create a constraint to force the number of edges in g to be equal to nb
+     *
+     * @param g  a graph variable
+     * @param nb an integer variable indicating the expected number of edges in g
+     * @return A constraint to force the number of edges in g to be equal to nb
+     */
+    default Constraint nbEdges(GraphVar g, IntVar nb) {
+        return new Constraint("nbEdges", new PropNbEdges(g, nb));
+    }
 
-	// loops
+    // loops
 
-	/**
-	 * Create a constraint which ensures that 'loops' denotes the set
-	 * of vertices in g which have a loop, i.e. an edge of the form f(i,i)
-	 * i.e. vertex i in g => edge (i,i) in g
-	 *
-	 * @param g a graph variable
-	 * @return A constraint which makes sure every node has a loop
-	 */
-	default Constraint loopSet(GraphVar g, SetVar loops) {
-		return new Constraint("loopSet", new PropLoopSet(g, loops));
-	}
+    /**
+     * Create a constraint which ensures that 'loops' denotes the set
+     * of vertices in g which have a loop, i.e. an edge of the form f(i,i)
+     * i.e. vertex i in g => edge (i,i) in g
+     *
+     * @param g a graph variable
+     * @return A constraint which makes sure every node has a loop
+     */
+    default Constraint loopSet(GraphVar g, SetVar loops) {
+        return new Constraint("loopSet", new PropLoopSet(g, loops));
+    }
 
-	/**
-	 * Create a constraint which ensures g has nb loops
-	 * |(i,i) in g| = nb
-	 *
-	 * @param g  a graph variable
-	 * @param nb an integer variable counting the number of loops in g
-	 * @return A constraint which ensures g has nb loops
-	 */
-	default Constraint nbLoops(GraphVar g, IntVar nb) {
-		return new Constraint("nbLoops", new PropNbLoops(g, nb));
-	}
-
-
-	//***********************************************************************************
-	// SIMPLE PROPERTY CONSTRAINTS
-	//***********************************************************************************
+    /**
+     * Create a constraint which ensures g has nb loops
+     * |(i,i) in g| = nb
+     *
+     * @param g  a graph variable
+     * @param nb an integer variable counting the number of loops in g
+     * @return A constraint which ensures g has nb loops
+     */
+    default Constraint nbLoops(GraphVar g, IntVar nb) {
+        return new Constraint("nbLoops", new PropNbLoops(g, nb));
+    }
 
 
-	// symmetry
+    //***********************************************************************************
+    // SIMPLE PROPERTY CONSTRAINTS
+    //***********************************************************************************
 
-	/**
-	 * Creates a constraint which ensures that g is a symmetric directed graph
-	 * This means (i,j) in g <=> (j,i) in g
-	 * Note that it may be preferable to use an undirected graph variable instead!
-	 *
-	 * @param g a directed graph variable
-	 * @return A constraint which ensures that g is a symmetric directed graph
-	 */
-	default Constraint symmetric(DirectedGraphVar g) {
-		return new Constraint("symmetric", new PropSymmetric(g));
-	}
 
-	/**
-	 * Creates a constraint which ensures that g is an antisymmetric directed graph
-	 * This means (i,j) in g => (j,i) notin g
-	 *
-	 * @param g a directed graph variable
-	 * @return A constraint which ensures that g is an antisymmetric directed graph
-	 */
-	default Constraint antisymmetric(DirectedGraphVar g) {
-		return new Constraint("antisymmetric", new PropAntiSymmetric(g));
-	}
+    // symmetry
 
-	// Transitivity
+    /**
+     * Creates a constraint which ensures that g is a symmetric directed graph
+     * This means (i,j) in g <=> (j,i) in g
+     * Note that it may be preferable to use an undirected graph variable instead!
+     *
+     * @param g a directed graph variable
+     * @return A constraint which ensures that g is a symmetric directed graph
+     */
+    default Constraint symmetric(DirectedGraphVar g) {
+        return new Constraint("symmetric", new PropSymmetric(g));
+    }
 
-	/**
-	 * Create a transitivity constraint
-	 * (i,j) in g and (j,k) in g => (i,k) in g
-	 * Does not consider loops
-	 * Enables to make cliques
-	 *
-	 * @param g A graph variable
-	 * @return A transitivity constraint
-	 */
-	default Constraint transitivity(GraphVar g) {
-		return new Constraint("transitivity", new PropTransitivity(g));
-	}
+    /**
+     * Creates a constraint which ensures that g is an antisymmetric directed graph
+     * This means (i,j) in g => (j,i) notin g
+     *
+     * @param g a directed graph variable
+     * @return A constraint which ensures that g is an antisymmetric directed graph
+     */
+    default Constraint antisymmetric(DirectedGraphVar g) {
+        return new Constraint("antisymmetric", new PropAntiSymmetric(g));
+    }
 
-	//***********************************************************************************
-	// INCLUSION CONSTRAINTS
-	//***********************************************************************************
+    // Transitivity
+
+    /**
+     * Create a transitivity constraint
+     * (i,j) in g and (j,k) in g => (i,k) in g
+     * Does not consider loops
+     * Enables to make cliques
+     *
+     * @param g A graph variable
+     * @return A transitivity constraint
+     */
+    default Constraint transitivity(GraphVar g) {
+        return new Constraint("transitivity", new PropTransitivity(g));
+    }
+
+    //***********************************************************************************
+    // INCLUSION CONSTRAINTS
+    //***********************************************************************************
 
 
 //	/**
@@ -668,27 +667,27 @@ public interface IGraphConstraintFactory {
 //	}
 
 
-	//***********************************************************************************
-	// CONNECTIVITY CONSTRAINTS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONNECTIVITY CONSTRAINTS
+    //***********************************************************************************
 
 
-	/**
-	 * Creates a connectedness constraint which ensures that g is connected
-	 *
-	 * BEWARE : empty graphs or graph with 1 node are allowed (they are not disconnected...)
-	 * if one wants a graph with >= 2 nodes he should use the node number constraint (nbNodes)
-	 * connected only focuses on the graph structure to prevent two nodes not to be connected
-	 * if there is 0 or only 1 node, the constraint is therefore not violated
-	 *
-	 * The purpose of CP is to compose existing constraints, and nbNodes already exists
-	 *
-	 * @param g an undirected graph variable
-	 * @return A connectedness constraint which ensures that g is connected
-	 */
-	default Constraint connected(UndirectedGraphVar g) {
-		return new Constraint("connected", new PropConnected(g));
-	}
+    /**
+     * Creates a connectedness constraint which ensures that g is connected
+     *
+     * BEWARE : empty graphs or graph with 1 node are allowed (they are not disconnected...)
+     * if one wants a graph with >= 2 nodes he should use the node number constraint (nbNodes)
+     * connected only focuses on the graph structure to prevent two nodes not to be connected
+     * if there is 0 or only 1 node, the constraint is therefore not violated
+     *
+     * The purpose of CP is to compose existing constraints, and nbNodes already exists
+     *
+     * @param g an undirected graph variable
+     * @return A connectedness constraint which ensures that g is connected
+     */
+    default Constraint connected(UndirectedGraphVar g) {
+        return new Constraint("connected", new PropConnected(g));
+    }
 
 //	/**
 //	 * Creates a connectedness constraint which ensures that g is biconnected
@@ -701,77 +700,77 @@ public interface IGraphConstraintFactory {
 //		return new Constraint("connected", new PropBiconnected(g));
 //	}
 
-	/**
-	 * Creates a connectedness constraint which ensures that g has nb connected components
-	 *
-	 * @param g  an undirected graph variable
-	 * @param nb an integer variable indicating the expected number of connected components in g
-	 * @return A connectedness constraint which ensures that g has nb connected components
-	 */
-	default Constraint nbConnectedComponents(UndirectedGraphVar g, IntVar nb) {
-		return new Constraint("NbCC", new PropNbCC(g, nb));
-	}
+    /**
+     * Creates a connectedness constraint which ensures that g has nb connected components
+     *
+     * @param g  an undirected graph variable
+     * @param nb an integer variable indicating the expected number of connected components in g
+     * @return A connectedness constraint which ensures that g has nb connected components
+     */
+    default Constraint nbConnectedComponents(UndirectedGraphVar g, IntVar nb) {
+        return new Constraint("NbCC", new PropNbCC(g, nb));
+    }
 
-//	/**
-//	 * Creates a constraint which ensures that every connected component of g has a number of nodes bounded by
-//	 * sizeMinCC and sizeMaxCC.
-//	 *
-//	 * @param g         an undirected graph variable.
-//	 * @param sizeMinCC An IntVar to be equal to the smallest connected component of g.
-//	 * @param sizeMaxCC An IntVar to be equal to the largest connected component of g.
-//	 * @return A SizeCC constraint.
-//	 */
-//	default Constraint sizeConnectedComponents(UndirectedGraphVar g, IntVar sizeMinCC, IntVar sizeMaxCC) {
-//		return new Constraint("SizeCC",
-//				new PropGreaterOrEqualX_Y(new IntVar[]{sizeMaxCC, sizeMinCC}),
-//				new PropSizeMinCC(g, sizeMinCC),
-//				new PropSizeMaxCC(g, sizeMaxCC));
-//	}
-//
-//	/**
-//	 * Creates a constraint which ensures that every connected component of g has a minimum number of
-//	 * nodes equal to sizeMinCC.
-//	 *
-//	 * @param g         an undirected graph variable.
-//	 * @param sizeMinCC An IntVar to be equal to the smallest connected component of g.
-//	 * @return A SizeMinCC constraint.
-//	 */
-//	default Constraint sizeMinConnectedComponents(UndirectedGraphVar g, IntVar sizeMinCC) {
-//		return new Constraint("SizeMinCC", new PropSizeMinCC(g, sizeMinCC));
-//	}
-//
-//	/**
-//	 * Creates a constraint which ensures that every connected component of g has a maximum number of
-//	 * nodes equal to sizeMaxCC.
-//	 *
-//	 * @param g         an undirected graph variable
-//	 * @param sizeMaxCC An IntVar to be equal to the largest connected component of g.
-//	 * @return A SizeMaxCC constraint.
-//	 */
-//	default Constraint sizeMaxConnectedComponents(UndirectedGraphVar g, IntVar sizeMaxCC) {
-//		return new Constraint("SizeMaxCC", new PropSizeMaxCC(g, sizeMaxCC));
-//	}
+    /**
+     * Creates a constraint which ensures that every connected component of g has a number of nodes bounded by
+     * sizeMinCC and sizeMaxCC.
+     *
+     * @param g         an undirected graph variable.
+     * @param sizeMinCC An IntVar to be equal to the smallest connected component of g.
+     * @param sizeMaxCC An IntVar to be equal to the largest connected component of g.
+     * @return A SizeCC constraint.
+     */
+    default Constraint sizeConnectedComponents(UndirectedGraphVar g, IntVar sizeMinCC, IntVar sizeMaxCC) {
+        return new Constraint("SizeCC",
+                new PropGreaterOrEqualX_Y(new IntVar[]{sizeMaxCC, sizeMinCC}),
+                new PropSizeMinCC(g, sizeMinCC),
+                new PropSizeMaxCC(g, sizeMaxCC));
+    }
 
-	/**
-	 * Creates a strong connectedness constraint which ensures that g has exactly one strongly connected component
-	 *
-	 * @param g a directed graph variable
-	 * @return A strong connectedness constraint which ensures that g is strongly connected
-	 */
-	default Constraint stronglyConnected(DirectedGraphVar g) {
-		return nbStronglyConnectedComponents(g, g.getModel().intVar(1));
-	}
+    /**
+     * Creates a constraint which ensures that every connected component of g has a minimum number of
+     * nodes equal to sizeMinCC.
+     *
+     * @param g         an undirected graph variable.
+     * @param sizeMinCC An IntVar to be equal to the smallest connected component of g.
+     * @return A SizeMinCC constraint.
+     */
+    default Constraint sizeMinConnectedComponents(UndirectedGraphVar g, IntVar sizeMinCC) {
+        return new Constraint("SizeMinCC", new PropSizeMinCC(g, sizeMinCC));
+    }
 
-	/**
-	 * Creates a strong connectedness constraint which ensures that g has nb strongly connected components
-	 *
-	 * @param g  a directed graph variable
-	 * @param nb an integer variable indicating the expected number of connected components in g
-	 * @return A strong connectedness constraint which ensures that g has nb strongly connected components
-	 */
-	default Constraint nbStronglyConnectedComponents(DirectedGraphVar g, IntVar nb) {
-		return new Constraint("NbSCC", new PropNbSCC(g, nb));
-	}
+    /**
+     * Creates a constraint which ensures that every connected component of g has a maximum number of
+     * nodes equal to sizeMaxCC.
+     *
+     * @param g         an undirected graph variable
+     * @param sizeMaxCC An IntVar to be equal to the largest connected component of g.
+     * @return A SizeMaxCC constraint.
+     */
+    default Constraint sizeMaxConnectedComponents(UndirectedGraphVar g, IntVar sizeMaxCC) {
+        return new Constraint("SizeMaxCC", new PropSizeMaxCC(g, sizeMaxCC));
+    }
+
+    /**
+     * Creates a strong connectedness constraint which ensures that g has exactly one strongly connected component
+     *
+     * @param g a directed graph variable
+     * @return A strong connectedness constraint which ensures that g is strongly connected
+     */
+    default Constraint stronglyConnected(DirectedGraphVar g) {
+        return nbStronglyConnectedComponents(g, g.getModel().intVar(1));
+    }
+
+    /**
+     * Creates a strong connectedness constraint which ensures that g has nb strongly connected components
+     *
+     * @param g  a directed graph variable
+     * @param nb an integer variable indicating the expected number of connected components in g
+     * @return A strong connectedness constraint which ensures that g has nb strongly connected components
+     */
+    default Constraint nbStronglyConnectedComponents(DirectedGraphVar g, IntVar nb) {
+        return new Constraint("NbSCC", new PropNbSCC(g, nb));
+    }
 
 
 //	//***********************************************************************************
@@ -854,47 +853,47 @@ public interface IGraphConstraintFactory {
 //	}
 
 
-	//***********************************************************************************
-	// CLIQUES
-	//***********************************************************************************
+    //***********************************************************************************
+    // CLIQUES
+    //***********************************************************************************
 
 
-	/**
-	 * partition a graph variable into nb cliques
-	 *
-	 * @param g  a graph variable
-	 * @param nb expected number of cliques in g
-	 * @return a constraint which partitions g into nb cliques
-	 */
-	default Constraint nbCliques(UndirectedGraphVar g, IntVar nb) {
-		return new Constraint("NbCliques",
-				new PropTransitivity(g),
-				new PropNbCC(g, nb),
-				new PropNbCliques(g, nb) // redundant propagator
-		);
-	}
+    /**
+     * partition a graph variable into nb cliques
+     *
+     * @param g  a graph variable
+     * @param nb expected number of cliques in g
+     * @return a constraint which partitions g into nb cliques
+     */
+    default Constraint nbCliques(UndirectedGraphVar g, IntVar nb) {
+        return new Constraint("NbCliques",
+                new PropTransitivity(g),
+                new PropNbCC(g, nb),
+                new PropNbCliques(g, nb) // redundant propagator
+        );
+    }
 
 
-	//***********************************************************************************
-	// DIAMETER
-	//***********************************************************************************
+    //***********************************************************************************
+    // DIAMETER
+    //***********************************************************************************
 
 
-	/**
-	 * Creates a constraint which states that d is the diameter of g
-	 * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
-	 * This constraint implies that g is connected
-	 *
-	 * @param g an undirected graph variable
-	 * @param d an integer variable
-	 * @return a constraint which states that d is the diameter of g
-	 */
-	default Constraint diameter(UndirectedGraphVar g, IntVar d) {
-		return new Constraint("diameter",
-				new PropConnected(g),
-				new PropDiameter(g, d)
-		);
-	}
+    /**
+     * Creates a constraint which states that d is the diameter of g
+     * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
+     * This constraint implies that g is connected
+     *
+     * @param g an undirected graph variable
+     * @param d an integer variable
+     * @return a constraint which states that d is the diameter of g
+     */
+    default Constraint diameter(UndirectedGraphVar g, IntVar d) {
+        return new Constraint("diameter",
+                new PropConnected(g),
+                new PropDiameter(g, d)
+        );
+    }
 
 
 //	/**
