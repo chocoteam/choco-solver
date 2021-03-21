@@ -12,7 +12,15 @@ package org.chocosolver.solver.constraints;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_Y;
 import org.chocosolver.solver.constraints.graph.basic.*;
 import org.chocosolver.solver.constraints.graph.connectivity.*;
+import org.chocosolver.solver.constraints.graph.cycles.PropAcyclic;
+import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr;
+import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostCoarse;
+import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
+import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
+import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
+import org.chocosolver.solver.constraints.graph.tree.PropReachability;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.objects.graphs.Orientation;
 
 /**
  * Some usual graph constraints
@@ -388,218 +396,218 @@ public interface IGraphConstraintFactory {
 //                new PropNeighBoolChannel(predecessorsOf, node, g, new IncidentSet.PredOrNeighSet()));
 //
 //    }
-//
-//
-//    //***********************************************************************************
-//    // DEGREE CONSTRAINTS
-//    //***********************************************************************************
-//
-//
-//    // degrees
-//
-//    /**
-//     * Minimum degree constraint
-//     * for any vertex i in g, |(i,j)| >= minDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         undirected graph var
-//     * @param minDegree integer minimum degree of every node
-//     * @return a minimum degree constraint
-//     */
-//    default Constraint minDegrees(UndirectedGraphVar g, int minDegree) {
-//        return new Constraint("minDegrees", new PropNodeDegreeAtLeastIncr(g, minDegree));
-//    }
-//
-//    /**
-//     * Minimum degree constraint
-//     * for any vertex i in g, |(i,j)| >= minDegree[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          undirected graph var
-//     * @param minDegrees integer array giving the minimum degree of each node
-//     * @return a minimum degree constraint
-//     */
-//    default Constraint minDegrees(UndirectedGraphVar g, int[] minDegrees) {
-//        return new Constraint("minDegrees", new PropNodeDegreeAtLeastIncr(g, minDegrees));
-//    }
-//
-//    /**
-//     * Maximum degree constraint
-//     * for any vertex i in g, |(i,j)| <= maxDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         undirected graph var
-//     * @param maxDegree integer maximum degree
-//     * @return a maximum degree constraint
-//     */
-//    default Constraint maxDegrees(UndirectedGraphVar g, int maxDegree) {
-//        return new Constraint("maxDegrees", new PropNodeDegreeAtMostCoarse(g, maxDegree));
-//    }
-//
-//    /**
-//     * Maximum degree constraint
-//     * for any vertex i in g, |(i,j)| <= maxDegrees[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          undirected graph var
-//     * @param maxDegrees integer array giving the maximum degree of each node
-//     * @return a maximum degree constraint
-//     */
-//    default Constraint maxDegrees(UndirectedGraphVar g, int[] maxDegrees) {
-//        return new Constraint("maxDegrees", new PropNodeDegreeAtMostCoarse(g, maxDegrees));
-//    }
-//
-//    /**
-//     * Degree constraint
-//     * for any vertex i in g, |(i,j)| = degrees[i]
-//     * A vertex which has been removed has a degree equal to 0
-//     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
-//     *
-//     * @param g       undirected graph var
-//     * @param degrees integer array giving the degree of each node
-//     * @return a degree constraint
-//     */
-//    default Constraint degrees(UndirectedGraphVar g, IntVar[] degrees) {
-//        return new Constraint("degrees", new PropNodeDegreeVar(g, degrees));
-//    }
-//
-//    // inDegrees
-//
-//    /**
-//     * Minimum inner degree constraint
-//     * for any vertex i in g, |(j,i)| >= minDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         directed graph var
-//     * @param minDegree integer minimum degree of every node
-//     * @return a minimum inner degree constraint
-//     */
-//    default Constraint minInDegrees(DirectedGraphVar g, int minDegree) {
-//        return new Constraint("minInDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, minDegree));
-//    }
-//
-//    /**
-//     * Minimum inner degree constraint
-//     * for any vertex i in g, |(j,i)| >= minDegree[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          directed graph var
-//     * @param minDegrees integer array giving the minimum degree of each node
-//     * @return a minimum inner degree constraint
-//     */
-//    default Constraint minInDegrees(DirectedGraphVar g, int[] minDegrees) {
-//        return new Constraint("minInDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, minDegrees));
-//    }
-//
-//    /**
-//     * Maximum inner degree constraint
-//     * for any vertex i in g, |(j,i)| <= maxDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         directed graph var
-//     * @param maxDegree integer maximum degree
-//     * @return a maximum inner degree constraint
-//     */
-//    default Constraint maxInDegrees(DirectedGraphVar g, int maxDegree) {
-//        return new Constraint("maxInDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegree));
-//    }
-//
-//    /**
-//     * Maximum inner degree constraint
-//     * for any vertex i in g, |(j,i)| <= maxDegrees[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          directed graph var
-//     * @param maxDegrees integer array giving the maximum degree of each node
-//     * @return a maximum inner degree constraint
-//     */
-//    default Constraint maxInDegrees(DirectedGraphVar g, int[] maxDegrees) {
-//        return new Constraint("maxInDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegrees));
-//    }
-//
-//    /**
-//     * Degree inner constraint
-//     * for any vertex i in g, |(j,i)| = degrees[i]
-//     * A vertex which has been removed has a degree equal to 0
-//     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
-//     *
-//     * @param g       directed graph var
-//     * @param degrees integer array giving the degree of each node
-//     * @return a degree inner constraint
-//     */
-//    default Constraint inDegrees(DirectedGraphVar g, IntVar[] degrees) {
-//        return new Constraint("inDegrees", new PropNodeDegreeVar(g, Orientation.PREDECESSORS, degrees));
-//    }
-//
-//    // out-degrees
-//
-//    /**
-//     * Minimum outer degree constraint
-//     * for any vertex i in g, |(i,j)| >= minDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         directed graph var
-//     * @param minDegree integer minimum degree of every node
-//     * @return a minimum outer degree constraint
-//     */
-//    default Constraint minOutDegrees(DirectedGraphVar g, int minDegree) {
-//        return new Constraint("minOutDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.SUCCESSORS, minDegree));
-//    }
-//
-//    /**
-//     * Minimum outer degree constraint
-//     * for any vertex i in g, |(i,j)| >= minDegree[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          directed graph var
-//     * @param minDegrees integer array giving the minimum degree of each node
-//     * @return a minimum outer degree constraint
-//     */
-//    default Constraint minOutDegrees(DirectedGraphVar g, int[] minDegrees) {
-//        return new Constraint("minOutDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.SUCCESSORS, minDegrees));
-//    }
-//
-//    /**
-//     * Maximum outer degree constraint
-//     * for any vertex i in g, |(i,j)| <= maxDegree
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g         directed graph var
-//     * @param maxDegree integer maximum degree
-//     * @return a maximum outer degree constraint
-//     */
-//    default Constraint maxOutDegrees(DirectedGraphVar g, int maxDegree) {
-//        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegree));
-//    }
-//
-//    /**
-//     * Maximum outer degree constraint
-//     * for any vertex i in g, |(i,j)| <= maxDegrees[i]
-//     * This constraint only holds on vertices that are mandatory
-//     *
-//     * @param g          directed graph var
-//     * @param maxDegrees integer array giving the maximum outer degree of each node
-//     * @return a outer maximum degree constraint
-//     */
-//    default Constraint maxOutDegrees(DirectedGraphVar g, int[] maxDegrees) {
-//        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegrees));
-//    }
-//
-//    /**
-//     * Outer degree constraint
-//     * for any vertex i in g, |(i,j)| = degrees[i]
-//     * A vertex which has been removed has a degree equal to 0
-//     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
-//     *
-//     * @param g       directed graph var
-//     * @param degrees integer array giving the degree of each node
-//     * @return an outer degree constraint
-//     */
-//    default Constraint outDegrees(DirectedGraphVar g, IntVar[] degrees) {
-//        return new Constraint("outDegrees", new PropNodeDegreeVar(g, Orientation.SUCCESSORS, degrees));
-//    }
-//
-//
+
+
+    //***********************************************************************************
+    // DEGREE CONSTRAINTS
+    //***********************************************************************************
+
+
+    // degrees
+
+    /**
+     * Minimum degree constraint
+     * for any vertex i in g, |(i,j)| >= minDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         undirected graph var
+     * @param minDegree integer minimum degree of every node
+     * @return a minimum degree constraint
+     */
+    default Constraint minDegree(UndirectedGraphVar g, int minDegree) {
+        return new Constraint("minDegree", new PropNodeDegreeAtLeastIncr(g, minDegree));
+    }
+
+    /**
+     * Minimum degree constraint
+     * for any vertex i in g, |(i,j)| >= minDegree[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          undirected graph var
+     * @param minDegrees integer array giving the minimum degree of each node
+     * @return a minimum degree constraint
+     */
+    default Constraint minDegrees(UndirectedGraphVar g, int[] minDegrees) {
+        return new Constraint("minDegrees", new PropNodeDegreeAtLeastIncr(g, minDegrees));
+    }
+
+    /**
+     * Maximum degree constraint
+     * for any vertex i in g, |(i,j)| <= maxDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         undirected graph var
+     * @param maxDegree integer maximum degree
+     * @return a maximum degree constraint
+     */
+    default Constraint maxDegree(UndirectedGraphVar g, int maxDegree) {
+        return new Constraint("maxDegree", new PropNodeDegreeAtMostCoarse(g, maxDegree));
+    }
+
+    /**
+     * Maximum degree constraint
+     * for any vertex i in g, |(i,j)| <= maxDegrees[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          undirected graph var
+     * @param maxDegrees integer array giving the maximum degree of each node
+     * @return a maximum degree constraint
+     */
+    default Constraint maxDegrees(UndirectedGraphVar g, int[] maxDegrees) {
+        return new Constraint("maxDegrees", new PropNodeDegreeAtMostCoarse(g, maxDegrees));
+    }
+
+    /**
+     * Degrees constraint
+     * for any vertex i in g, |(i,j)| = degrees[i]
+     * A vertex which has been removed has a degree equal to 0
+     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
+     *
+     * @param g       undirected graph var
+     * @param degrees integer array giving the degree of each node
+     * @return a degree constraint
+     */
+    default Constraint degrees(UndirectedGraphVar g, IntVar[] degrees) {
+        return new Constraint("degrees", new PropNodeDegreeVar(g, degrees));
+    }
+
+    // inDegrees
+
+    /**
+     * Minimum inner degree constraint
+     * for any vertex i in g, |(j,i)| >= minDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         directed graph var
+     * @param minDegree integer minimum degree of every node
+     * @return a minimum inner degree constraint
+     */
+    default Constraint minInDegree(DirectedGraphVar g, int minDegree) {
+        return new Constraint("minInDegree", new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, minDegree));
+    }
+
+    /**
+     * Minimum inner degree constraint
+     * for any vertex i in g, |(j,i)| >= minDegree[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          directed graph var
+     * @param minDegrees integer array giving the minimum degree of each node
+     * @return a minimum inner degree constraint
+     */
+    default Constraint minInDegrees(DirectedGraphVar g, int[] minDegrees) {
+        return new Constraint("minInDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, minDegrees));
+    }
+
+    /**
+     * Maximum inner degree constraint
+     * for any vertex i in g, |(j,i)| <= maxDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         directed graph var
+     * @param maxDegree integer maximum degree
+     * @return a maximum inner degree constraint
+     */
+    default Constraint maxInDegree(DirectedGraphVar g, int maxDegree) {
+        return new Constraint("maxInDegree", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegree));
+    }
+
+    /**
+     * Maximum inner degree constraint
+     * for any vertex i in g, |(j,i)| <= maxDegrees[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          directed graph var
+     * @param maxDegrees integer array giving the maximum degree of each node
+     * @return a maximum inner degree constraint
+     */
+    default Constraint maxInDegrees(DirectedGraphVar g, int[] maxDegrees) {
+        return new Constraint("maxInDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegrees));
+    }
+
+    /**
+     * Degree inner constraint
+     * for any vertex i in g, |(j,i)| = degrees[i]
+     * A vertex which has been removed has a degree equal to 0
+     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
+     *
+     * @param g       directed graph var
+     * @param degrees integer array giving the degree of each node
+     * @return a degree inner constraint
+     */
+    default Constraint inDegrees(DirectedGraphVar g, IntVar[] degrees) {
+        return new Constraint("inDegrees", new PropNodeDegreeVar(g, Orientation.PREDECESSORS, degrees));
+    }
+
+    // out-degrees
+
+    /**
+     * Minimum outer degree constraint
+     * for any vertex i in g, |(i,j)| >= minDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         directed graph var
+     * @param minDegree integer minimum degree of every node
+     * @return a minimum outer degree constraint
+     */
+    default Constraint minOutDegree(DirectedGraphVar g, int minDegree) {
+        return new Constraint("minOutDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.SUCCESSORS, minDegree));
+    }
+
+    /**
+     * Minimum outer degree constraint
+     * for any vertex i in g, |(i,j)| >= minDegree[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          directed graph var
+     * @param minDegrees integer array giving the minimum degree of each node
+     * @return a minimum outer degree constraint
+     */
+    default Constraint minOutDegrees(DirectedGraphVar g, int[] minDegrees) {
+        return new Constraint("minOutDegrees", new PropNodeDegreeAtLeastIncr(g, Orientation.SUCCESSORS, minDegrees));
+    }
+
+    /**
+     * Maximum outer degree constraint
+     * for any vertex i in g, |(i,j)| <= maxDegree
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g         directed graph var
+     * @param maxDegree integer maximum degree
+     * @return a maximum outer degree constraint
+     */
+    default Constraint maxOutDegree(DirectedGraphVar g, int maxDegree) {
+        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegree));
+    }
+
+    /**
+     * Maximum outer degree constraint
+     * for any vertex i in g, |(i,j)| <= maxDegrees[i]
+     * This constraint only holds on vertices that are mandatory
+     *
+     * @param g          directed graph var
+     * @param maxDegrees integer array giving the maximum outer degree of each node
+     * @return a outer maximum degree constraint
+     */
+    default Constraint maxOutDegrees(DirectedGraphVar g, int[] maxDegrees) {
+        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegrees));
+    }
+
+    /**
+     * Outer degree constraint
+     * for any vertex i in g, |(i,j)| = degrees[i]
+     * A vertex which has been removed has a degree equal to 0
+     * ENSURES EVERY VERTEX i FOR WHICH DEGREE[i]>0 IS MANDATORY
+     *
+     * @param g       directed graph var
+     * @param degrees integer array giving the degree of each node
+     * @return an outer degree constraint
+     */
+    default Constraint outDegrees(DirectedGraphVar g, IntVar[] degrees) {
+        return new Constraint("outDegrees", new PropNodeDegreeVar(g, Orientation.SUCCESSORS, degrees));
+    }
+
+
 //    //***********************************************************************************
 //    // CYCLE CONSTRAINTS
 //    //***********************************************************************************
@@ -774,84 +782,84 @@ public interface IGraphConstraintFactory {
     }
 
 
-//    //***********************************************************************************
-//    // TREE CONSTRAINTS
-//    //***********************************************************************************
-//
-//
-//    /**
-//     * Creates a tree constraint : g is connected and has no cycle
-//     *
-//     * @param g an undirected graph variable
-//     * @return a tree constraint
-//     */
-//    default Constraint tree(UndirectedGraphVar g) {
-//        return new Constraint("tree", new PropACyclic(g), new PropConnected(g));
-//    }
-//
-//    /**
-//     * Creates a forest constraint : g has no cycle but may have several connected components
-//     *
-//     * @param g an undirected graph variable
-//     * @return a forest constraint
-//     */
-//    default Constraint forest(UndirectedGraphVar g) {
-//        return new Constraint("forest", new PropACyclic(g));
-//    }
-//
-//    /**
-//     * Creates a directed tree constraint :
-//     * g forms an arborescence rooted in vertex 'root'
-//     * i.e. g has no circuit and a path exists from the root to every node
-//     *
-//     * @param g    a directed graph variable
-//     * @param root the (fixed) root of the tree
-//     * @return a directed tree constraint
-//     */
-//    default Constraint directedTree(DirectedGraphVar g, int root) {
-//        int n = g.getNbMaxNodes();
-//        int[] nbPreds = new int[n];
-//        for (int i = 0; i < n; i++) {
-//            nbPreds[i] = 1;
-//        }
-//        nbPreds[root] = 0;
-//        return new Constraint("directedTree"
-//                , new PropArborescence(g, root)
-//                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, nbPreds)
-//                , new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, nbPreds)
-//        );
-//    }
-//
-//    /**
-//     * Creates a directed forest constraint :
-//     * g form is composed of several disjoint (potentially singleton) arborescences
-//     *
-//     * @param g a directed graph variable
-//     * @return a directed forest constraint
-//     */
-//    default Constraint directedForest(DirectedGraphVar g) {
-//        return new Constraint("directedForest", new PropArborescences(g)
-//                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, 1)
-//        );
-//    }
-//
-//
-//    //***********************************************************************************
-//    // PATH and REACHABILITY
-//    //***********************************************************************************
-//
-//    // reachability
-//
-//    /**
-//     * Creates a constraint which ensures that every vertex in g is reachable by a simple path from the root.
-//     *
-//     * @param g    a directed graph variable
-//     * @param root a vertex reaching every node
-//     * @return A constraint which ensures that every vertex in g is reachable by a simple path from the root
-//     */
-//    default Constraint reachability(DirectedGraphVar g, int root) {
-//        return new Constraint("reachability_from_" + root, new PropReachability(g, root));
-//    }
+    //***********************************************************************************
+    // TREE CONSTRAINTS
+    //***********************************************************************************
+
+
+    /**
+     * Creates a tree constraint : g is connected and has no cycle
+     *
+     * @param g an undirected graph variable
+     * @return a tree constraint
+     */
+    default Constraint tree(UndirectedGraphVar g) {
+        return new Constraint("tree", new PropAcyclic(g), new PropConnected(g));
+    }
+
+    /**
+     * Creates a forest constraint : g has no cycle but may have several connected components
+     *
+     * @param g an undirected graph variable
+     * @return a forest constraint
+     */
+    default Constraint forest(UndirectedGraphVar g) {
+        return new Constraint("forest", new PropAcyclic(g));
+    }
+
+    /**
+     * Creates a directed tree constraint :
+     * g forms an arborescence rooted in vertex 'root'
+     * i.e. g has no circuit and a path exists from the root to every node
+     *
+     * @param g    a directed graph variable
+     * @param root the (fixed) root of the tree
+     * @return a directed tree constraint
+     */
+    default Constraint directedTree(DirectedGraphVar g, int root) {
+        int n = g.getNbMaxNodes();
+        int[] nbPreds = new int[n];
+        for (int i = 0; i < n; i++) {
+            nbPreds[i] = 1;
+        }
+        nbPreds[root] = 0;
+        return new Constraint("directedTree"
+                , new PropArborescence(g, root)
+                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, nbPreds)
+                , new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, nbPreds)
+        );
+    }
+
+    /**
+     * Creates a directed forest constraint :
+     * g form is composed of several disjoint (potentially singleton) arborescences
+     *
+     * @param g a directed graph variable
+     * @return a directed forest constraint
+     */
+    default Constraint directedForest(DirectedGraphVar g) {
+        return new Constraint("directedForest", new PropArborescences(g)
+                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, 1)
+        );
+    }
+
+
+    //***********************************************************************************
+    // PATH and REACHABILITY
+    //***********************************************************************************
+
+    // reachability
+
+    /**
+     * Creates a constraint which ensures that every vertex in g is reachable by a simple path from the root.
+     *
+     * @param g    a directed graph variable
+     * @param root a vertex reaching every node
+     * @return A constraint which ensures that every vertex in g is reachable by a simple path from the root
+     */
+    default Constraint reachability(DirectedGraphVar g, int root) {
+        return new Constraint("reachability_from_" + root, new PropReachability(g, root));
+    }
 
 
     //***********************************************************************************
