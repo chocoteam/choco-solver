@@ -810,7 +810,7 @@ public interface IGraphConstraintFactory {
         }
         nbPreds[root] = 0;
         return new Constraint("directedTree"
-                , new PropArborescence(g, root)
+//                , new PropArborescence(g, root)
                 , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, nbPreds)
                 , new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, nbPreds)
         );
@@ -824,8 +824,9 @@ public interface IGraphConstraintFactory {
      * @return a directed forest constraint
      */
     default Constraint directedForest(DirectedGraphVar g) {
-        return new Constraint("directedForest", new PropArborescences(g)
-                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, 1)
+        return new Constraint("directedForest",
+//                new PropArborescences(g),
+                new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, 1)
         );
     }
 
