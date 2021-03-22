@@ -13,12 +13,15 @@ import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_Y;
 import org.chocosolver.solver.constraints.graph.basic.*;
 import org.chocosolver.solver.constraints.graph.connectivity.*;
 import org.chocosolver.solver.constraints.graph.cycles.PropAcyclic;
+import org.chocosolver.solver.constraints.graph.cycles.PropCycle;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostCoarse;
+import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
+import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.Orientation;
 
@@ -402,7 +405,6 @@ public interface IGraphConstraintFactory {
     // DEGREE CONSTRAINTS
     //***********************************************************************************
 
-
     // degrees
 
     /**
@@ -608,77 +610,62 @@ public interface IGraphConstraintFactory {
     }
 
 
-//    //***********************************************************************************
-//    // CYCLE CONSTRAINTS
-//    //***********************************************************************************
-//
-//    @Deprecated
-//    default Constraint hamiltonianCycle(UndirectedGraphVar g) {
-//        throw new SolverException("Use a graph variable with all nodes mandatory and a cycle constraint instead");
-//    }
-//
-//    /**
-//     * g must form a cycle
-//     *
-//     * @param g an undirected graph variable
-//     * @return a cycle constraint
-//     */
-//    default Constraint cycle(UndirectedGraphVar g) {
-//        int m = 0;
-//        int n = g.getNbMaxNodes();
-//        for (int i = 0; i < n; i++) {
-//            m += g.getPotNeighOf(i).size();
-//        }
-//        m /= 2;
-//        Propagator pMaxDeg = (m < 20 * n) ? new PropNodeDegreeAtMostIncr(g, 2) : new PropNodeDegreeAtMostIncr(g, 2);
-//        return new Constraint("cycle",
-//                new PropNodeDegreeAtLeastIncr(g, 2),
-//                pMaxDeg,
-//                new PropConnected(g),
-//                new PropCycle(g)
-//        );
-//    }
-//
-//    @Deprecated
-//    default Constraint hamiltonianCircuit(DirectedGraphVar g) {
-//        throw new SolverException("Use circuit constraint over IntVar[] instead");
-//    }
-//
-//    @Deprecated
-//    default Constraint circuit(DirectedGraphVar g) {
-//        throw new SolverException("Use subcircuit constraint over IntVar[] instead");
-//    }
-//
-//    /**
-//     * Cycle elimination constraint
-//     * Prevent the graph from containing circuits
-//     * e.g. an edge set of the form {(i1,i2),(i2,i3),(i3,i1)}
-//     *
-//     * @param g an undirected graph variable
-//     * @return A cycle elimination constraint
-//     */
-//    default Constraint noCycle(UndirectedGraphVar g) {
-//        return new Constraint("noCycle", new PropACyclic(g));
-//    }
-//
-//    /**
-//     * Circuit elimination constraint
-//     * Prevent the graph from containing circuits
-//     * e.g. an arc set of the form {(i1,i2),(i2,i3),(i3,i1)}
-//     * However, it allows to have (i1,i2)(i2,i3)(i1,i3).
-//     *
-//     * @param g a directed graph variable
-//     * @return A circuit elimination constraint
-//     */
-//    default Constraint noCircuit(DirectedGraphVar g) {
-//        return new Constraint("noCircuit", new PropACyclic(g));
-//    }
+    //***********************************************************************************
+    // CYCLE CONSTRAINTS
+    //***********************************************************************************
 
+    /**
+     * g must form a cycle
+     * Empty graph is accepted
+     * @param g an undirected graph variable
+     * @return a cycle constraint
+     */
+    default Constraint cycle(UndirectedGraphVar g) {
+        int m = 0;
+        int n = g.getNbMaxNodes();
+        for (int i = 0; i < n; i++) {
+            m += g.getPotentialNeighborsOf(i).size();
+        }
+        m /= 2;
+        Propagator pMaxDeg = (m < 20 * n) ? new PropNodeDegreeAtMostIncr(g, 2) : new PropNodeDegreeAtMostIncr(g, 2);
+        if (g.getMandatoryNodes().size() <= 1) {
+            // Graphs with one node and a loop must be accepted
+            IntVar nbNodes = g.getModel().intVar(g.getMandatoryNodes().size(), g.getPotentialNodes().size());
+            g.getModel().ifThenElse(
+                    g.getModel().intGeView(nbNodes, 2),
+                    new Constraint("minDeg >= 2", new PropNodeDegreeAtLeastIncr(g, 2)),
+                    new Constraint("minDeg >= 1", new PropNodeDegreeAtLeastIncr(g, 1))
+            );
+            return new Constraint("cycle",
+                    new PropNbNodes(g, nbNodes),
+                    pMaxDeg,
+                    new PropConnected(g),
+                    new PropCycle(g)
+            );
+        }
+        return new Constraint("cycle",
+                new PropNodeDegreeAtLeastIncr(g, 2),
+                pMaxDeg,
+                new PropConnected(g),
+                new PropCycle(g)
+        );
+    }
+
+    /**
+     * Cycle elimination constraint
+     * Prevent the graph from containing circuits
+     * e.g. an edge set of the form {(i1,i2),(i2,i3),(i3,i1)}
+     *
+     * @param g a graph variable
+     * @return A cycle elimination constraint
+     */
+    default Constraint noCycle(GraphVar g) {
+        return new Constraint("noCycle", new PropAcyclic(g));
+    }
 
     //***********************************************************************************
     // CONNECTIVITY CONSTRAINTS
     //***********************************************************************************
-
 
     /**
      * Creates a connectedness constraint which ensures that g is connected
@@ -786,7 +773,6 @@ public interface IGraphConstraintFactory {
     // TREE CONSTRAINTS
     //***********************************************************************************
 
-
     /**
      * Creates a tree constraint : g is connected and has no cycle
      *
@@ -866,7 +852,6 @@ public interface IGraphConstraintFactory {
     // CLIQUES
     //***********************************************************************************
 
-
     /**
      * partition a graph variable into nb cliques
      *
@@ -887,7 +872,6 @@ public interface IGraphConstraintFactory {
     // DIAMETER
     //***********************************************************************************
 
-
     /**
      * Creates a constraint which states that d is the diameter of g
      * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
@@ -904,24 +888,23 @@ public interface IGraphConstraintFactory {
         );
     }
 
+    /**
+     * Creates a constraint which states that d is the diameter of g
+     * i.e. d is the length (number of arcs) of the largest shortest path among any pair of nodes
+     * This constraint implies that g is strongly connected
+     *
+     * @param g a directed graph variable
+     * @param d an integer variable
+     * @return a constraint which states that d is the diameter of g
+     */
+    default Constraint diameter(DirectedGraphVar g, IntVar d) {
+        return new Constraint("NbCliques",
+                new PropNbSCC(g, g.getModel().intVar(1)),
+                new PropDiameter(g, d)
+        );
+    }
 
-//    /**
-//     * Creates a constraint which states that d is the diameter of g
-//     * i.e. d is the length (number of arcs) of the largest shortest path among any pair of nodes
-//     * This constraint implies that g is strongly connected
-//     *
-//     * @param g a directed graph variable
-//     * @param d an integer variable
-//     * @return a constraint which states that d is the diameter of g
-//     */
-//    default Constraint diameter(DirectedGraphVar g, IntVar d) {
-//        return new Constraint("NbCliques",
-//                new PropNbSCC(g, g.getModel().intVar(1)),
-//                new PropDiameter(g, d)
-//        );
-//    }
-//
-//
+
 //    //***********************************************************************************
 //    // OPTIMIZATION CONSTRAINTS
 //    //***********************************************************************************

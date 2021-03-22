@@ -194,6 +194,8 @@ public class UndirectedGraph implements IGraph {
      * @return true iff (x,y) was not already in the graph
      */
     public boolean addEdge(int x, int y) {
+        addNode(x);
+        addNode(y);
         if (x == y && !neighbors[x].contains(y)) {
             neighbors[x].add(y);
             return true;
