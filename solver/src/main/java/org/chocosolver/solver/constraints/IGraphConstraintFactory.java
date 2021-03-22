@@ -18,6 +18,7 @@ import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostCoarse;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
+import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
@@ -136,36 +137,35 @@ public interface IGraphConstraintFactory {
     // INCLUSION CONSTRAINTS
     //***********************************************************************************
 
+    /**
+     * Create an inclusion constraint between g1 and g2 such that
+     * g1 is a subgraph of g2
+     * Note that node are labelled with their indexes :
+     * the vertex 0 in g1 corresponds to the vertex 0 in g2
+     *
+     * @param g1 An undirected graph variable
+     * @param g2 An undirected graph variable
+     * @return a constraint which ensures that g1 is a subgraph of g2
+     */
+    default Constraint subgraph(UndirectedGraphVar g1, UndirectedGraphVar g2) {
+        return new Constraint("subgraph", new PropInclusion(g1, g2));
+    }
 
-//    /**
-//     * Create an inclusion constraint between g1 and g2 such that
-//     * g1 is a subGraph of g2
-//     * Note that node are labelled with their indexes :
-//     * the vertex 0 in g1 corresponds to the vertex 0 in g2
-//     *
-//     * @param g1 An undirected graph variable
-//     * @param g2 An undirected graph variable
-//     * @return a constraint which ensures that g1 is a subGraph of g2
-//     */
-//    default Constraint subGraph(UndirectedGraphVar g1, UndirectedGraphVar g2) {
-//        return new Constraint("subGraph", new PropInclusion(g1, g2));
-//    }
-//
-//    /**
-//     * Create an inclusion constraint between g1 and g2 such that
-//     * g1 is a subGraph of g2
-//     * Note that node are labelled with their indexes :
-//     * the vertex 0 in g1 corresponds to the vertex 0 in g2
-//     *
-//     * @param g1 A directed graph variable
-//     * @param g2 A directed graph variable
-//     * @return a constraint which ensures that g1 is a subGraph of g2
-//     */
-//    default Constraint subGraph(DirectedGraphVar g1, DirectedGraphVar g2) {
-//        return new Constraint("subGraph", new PropInclusion(g1, g2));
-//    }
-//
-//
+    /**
+     * Create an inclusion constraint between g1 and g2 such that
+     * g1 is a subgraph of g2
+     * Note that node are labelled with their indexes :
+     * the vertex 0 in g1 corresponds to the vertex 0 in g2
+     *
+     * @param g1 A directed graph variable
+     * @param g2 A directed graph variable
+     * @return a constraint which ensures that g1 is a subGraph of g2
+     */
+    default Constraint subgraph(DirectedGraphVar g1, DirectedGraphVar g2) {
+        return new Constraint("subgraph", new PropInclusion(g1, g2));
+    }
+
+
 //    //***********************************************************************************
 //    // CHANNELING CONSTRAINTS
 //    //***********************************************************************************
