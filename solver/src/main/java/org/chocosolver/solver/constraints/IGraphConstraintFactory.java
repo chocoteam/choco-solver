@@ -21,7 +21,6 @@ import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
-import org.chocosolver.solver.constraints.nary.min_max.PropMax;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.Orientation;
 
