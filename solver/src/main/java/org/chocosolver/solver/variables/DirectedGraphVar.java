@@ -14,14 +14,14 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 /**
  * Interface defining a directed graph variable
  */
-public interface DirectedGraphVar<E extends DirectedGraph> extends GraphVar<E> {
+public interface DirectedGraphVar extends GraphVar<DirectedGraph> {
 
     /**
      * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    default E getValue(){
+    default DirectedGraph getValue(){
         assert isInstantiated() : getName() + " not instantiated";
         return getLB();
     }

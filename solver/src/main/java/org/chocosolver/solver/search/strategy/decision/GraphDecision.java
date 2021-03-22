@@ -16,77 +16,77 @@ import org.chocosolver.util.PoolManager;
 
 public class GraphDecision extends Decision<GraphVar> {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	protected GraphAssignment assignment;
-	protected int from, to;
-	protected final PoolManager<GraphDecision> poolManager;
+    protected GraphAssignment assignment;
+    protected int from, to;
+    protected final PoolManager<GraphDecision> poolManager;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public GraphDecision(PoolManager<GraphDecision> poolManager) {
-		super(2);
-		this.poolManager = poolManager;
-	}
+    public GraphDecision(PoolManager<GraphDecision> poolManager) {
+        super(2);
+        this.poolManager = poolManager;
+    }
 
-	@Override
-	public Object getDecisionValue() {
-		if (to == -1) {
-			return from;
-		} else {
-			return new int[]{from, to};
-		}
-	}
+    @Override
+    public Object getDecisionValue() {
+        if (to == -1) {
+            return from;
+        } else {
+            return new int[]{from, to};
+        }
+    }
 
-	public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
-		super.set(variable);
-		this.from = node;
-		this.to = -1;
-		assignment = graph_ass;
-	}
+    public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
+        super.set(variable);
+        this.from = node;
+        this.to = -1;
+        assignment = graph_ass;
+    }
 
-	public void setEdge(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
-		super.set(variable);
-		this.from = from;
-		this.to = to;
-		assignment = graph_ass;
-	}
+    public void setEdge(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
+        super.set(variable);
+        this.from = from;
+        this.to = to;
+        assignment = graph_ass;
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	@Override
-	public void apply() throws ContradictionException {
-		if (branch == 1) {
-			if (to == -1) {
-				assignment.apply(var, from, this);
-			} else {
-				assignment.apply(var, from, to, this);
-			}
-		} else if (branch == 2) {
-			if (to == -1) {
-				assignment.unapply(var, from, this);
-			} else {
-				assignment.unapply(var, from, to, this);
-			}
-		}
-	}
+    @Override
+    public void apply() throws ContradictionException {
+        if (branch == 1) {
+            if (to == -1) {
+                assignment.apply(var, from, this);
+            } else {
+                assignment.apply(var, from, to, this);
+            }
+        } else if (branch == 2) {
+            if (to == -1) {
+                assignment.unapply(var, from, this);
+            } else {
+                assignment.unapply(var, from, to, this);
+            }
+        }
+    }
 
-	@Override
-	public void free() {
-		poolManager.returnE(this);
-	}
+    @Override
+    public void free() {
+        poolManager.returnE(this);
+    }
 
-	@Override
-	public String toString() {
-		if (to == -1) {
-			return " node " + from + assignment.toString();
-		}
-		return " edge (" + from + "," + to + ")" + assignment.toString();
-	}
+    @Override
+    public String toString() {
+        if (to == -1) {
+            return " node " + from + assignment.toString();
+        }
+        return " edge (" + from + "," + to + ")" + assignment.toString();
+    }
 }
