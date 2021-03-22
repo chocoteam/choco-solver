@@ -14,32 +14,32 @@ import org.chocosolver.util.iterators.EvtScheduler;
 
 public class GraphEvtScheduler implements EvtScheduler<GraphEventType> {
 
-	private boolean done = true;
+    private boolean done = true;
 
-	@Override
-	public void init(int mask) {
-		done = false;
-	}
+    @Override
+    public void init(int mask) {
+        done = false;
+    }
 
-	@Override
-	public int select(int mask) {
-		return 0;
-	}
+    @Override
+    public int select(int mask) {
+        return 0;
+    }
 
-	@Override
-	public boolean hasNext() {
-		return !done;
-	}
+    @Override
+    public boolean hasNext() {
+        return !done;
+    }
 
-	@Override
-	public int next() {
-		if (done) return 1;
-		done = true;
-		return 0;
-	}
+    @Override
+    public int next() {
+        if (done) return 1;
+        done = true;
+        return 0;
+    }
 
-	@Override
-	public void remove() {
-		throw new UnsupportedOperationException();
-	}
+    @Override
+    public void remove() {
+        throw new UnsupportedOperationException();
+    }
 }

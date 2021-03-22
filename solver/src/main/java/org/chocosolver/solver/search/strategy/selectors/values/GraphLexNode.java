@@ -13,17 +13,17 @@ import org.chocosolver.solver.variables.GraphVar;
 
 public class GraphLexNode extends GraphNodeSelector<GraphVar> {
 
-	public GraphLexNode(GraphVar g) {
-		super(g);
-	}
+    public GraphLexNode(GraphVar g) {
+        super(g);
+    }
 
-	@Override
-	public int nextNode() {
-		for (int i : envNodes) {
-			if (!kerNodes.contains(i)) {
-				return i;
-			}
-		}
-		return -1;
-	}
+    @Override
+    public int nextNode() {
+        for (int i : envNodes) {
+            if (!kerNodes.contains(i)) {
+                return i;
+            }
+        }
+        return -1;
+    }
 }
