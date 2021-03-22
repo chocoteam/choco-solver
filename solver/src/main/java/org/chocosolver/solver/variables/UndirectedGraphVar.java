@@ -15,7 +15,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 /**
  * Interface defining an undirected graph variable
  */
-public interface UndirectedGraphVar<E extends UndirectedGraph> extends GraphVar<E> {
+public interface UndirectedGraphVar extends GraphVar<UndirectedGraph> {
 
     /**
      * Get the set of neighbors of vertex 'idx' in the lower bound graph
@@ -80,7 +80,7 @@ public interface UndirectedGraphVar<E extends UndirectedGraph> extends GraphVar<
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    default E getValue(){
+    default UndirectedGraph getValue(){
         assert isInstantiated() : getName() + " not instantiated";
         return getLB();
     }

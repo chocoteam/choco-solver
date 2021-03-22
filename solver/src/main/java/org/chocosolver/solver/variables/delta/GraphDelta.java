@@ -19,51 +19,51 @@ import org.chocosolver.solver.search.loop.TimeStampedObject;
  */
 public class GraphDelta extends TimeStampedObject implements IGraphDelta {
 
-	//***********************************************************************************
-	// VARIABLES
-	//***********************************************************************************
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-	private IEnumDelta[] deltaOfType;
+    private IEnumDelta[] deltaOfType;
 
-	//***********************************************************************************
-	// CONSTRUCTORS
-	//***********************************************************************************
+    //***********************************************************************************
+    // CONSTRUCTORS
+    //***********************************************************************************
 
-	public GraphDelta(IEnvironment environment) {
-		super(environment);
-		deltaOfType = new IEnumDelta[NB];
-		for (int i = 0; i < NB; i++) {
-			deltaOfType[i] = new EnumDelta(environment);
-		}
-	}
+    public GraphDelta(IEnvironment environment) {
+        super(environment);
+        deltaOfType = new IEnumDelta[NB];
+        for (int i = 0; i < NB; i++) {
+            deltaOfType[i] = new EnumDelta(environment);
+        }
+    }
 
-	//***********************************************************************************
-	// METHODS
-	//***********************************************************************************
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
-	public int getSize(int i) {
-		return deltaOfType[i].size();
-	}
+    public int getSize(int i) {
+        return deltaOfType[i].size();
+    }
 
-	public void add(int element, int type, ICause cause) {
-		lazyClear();
-		deltaOfType[type].add(element, cause);
-	}
+    public void add(int element, int type, ICause cause) {
+        lazyClear();
+        deltaOfType[type].add(element, cause);
+    }
 
-	public void lazyClear() {
-		if (needReset()) {
-			for (int i = 0; i < NB; i++) {
-				deltaOfType[i].lazyClear();
-			}
-			resetStamp();
-		}
-	}
+    public void lazyClear() {
+        if (needReset()) {
+            for (int i = 0; i < NB; i++) {
+                deltaOfType[i].lazyClear();
+            }
+            resetStamp();
+        }
+    }
 
-	public int get(int index, int type) {
-		return deltaOfType[type].get(index);
-	}
+    public int get(int index, int type) {
+        return deltaOfType[type].get(index);
+    }
 
-	public ICause getCause(int index, int type) {
-		return deltaOfType[type].getCause(index);
-	}
+    public ICause getCause(int index, int type) {
+        return deltaOfType[type].getCause(index);
+    }
 }
