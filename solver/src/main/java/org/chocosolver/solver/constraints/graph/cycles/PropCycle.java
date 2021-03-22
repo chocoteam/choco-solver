@@ -65,11 +65,13 @@ public class PropCycle extends Propagator<UndirectedGraphVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
-            for (int i = 0; i < n; i++) {
-                e1[i].set(i);
-                e2[i].set(i);
-                size[i].set(1);
-                g.removeEdge(i,i,this);
+            if (g.getMandatoryNodes().size() > 1) {
+                for (int i = 0; i < n; i++) {
+                    e1[i].set(i);
+                    e2[i].set(i);
+                    size[i].set(1);
+                    g.removeEdge(i, i, this);
+                }
             }
             ISet nei;
             for (int i = 0; i < n; i++) {
@@ -96,6 +98,10 @@ public class PropCycle extends Propagator<UndirectedGraphVar> {
     @Override
     public ESat isEntailed() {
         ISet nodes = g.getMandatoryNodes();
+        // Graph with one node and a loop case
+        if (g.isInstantiated() && nodes.size() == 1 && g.getMandatoryNeighborsOf(nodes.toArray()[0]).size() == 1) {
+            return ESat.TRUE;
+        }
         for (int i : nodes) {
             if (g.getMandatoryNeighborsOf(i).size() > 2 || g.getPotentialNeighborsOf(i).size() < 2) {
                 return ESat.FALSE;
