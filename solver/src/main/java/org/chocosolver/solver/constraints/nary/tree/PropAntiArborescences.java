@@ -85,16 +85,16 @@ public class PropAntiArborescences extends Propagator<IntVar> {
 
     private void structuralPruning() throws ContradictionException {
         for (int i = 0; i < n + 1; i++) {
-            connectedGraph.getSuccOf(i).clear();
-            connectedGraph.getPredOf(i).clear();
+            connectedGraph.getSuccessorsOf(i).clear();
+            connectedGraph.getPredecessorsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             int ub = vars[i].getUB();
             for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
                 if (i == y) { // can be a root node
-                    connectedGraph.addArc(i, n);
+                    connectedGraph.addEdge(i, n);
                 } else {
-                    connectedGraph.addArc(i, y - offSet);
+                    connectedGraph.addEdge(i, y - offSet);
                 }
             }
         }

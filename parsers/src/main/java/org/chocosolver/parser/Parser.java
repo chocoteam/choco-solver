@@ -9,6 +9,7 @@
  */
 package org.chocosolver.parser;
 
+import org.chocosolver.parser.dimacs.ChocoDIMACS;
 import org.chocosolver.parser.flatzinc.ChocoFZN;
 import org.chocosolver.parser.mps.ChocoMPS;
 import org.chocosolver.parser.xcsp.ChocoXCSP;
@@ -21,6 +22,7 @@ import org.kohsuke.args4j.Option;
  * A class that binds the parser wrt the input file
  *
  * <p> Project: choco-parsers.
+ *
  * @author Charles Prud'homme
  * @since 30/04/2018.
  */
@@ -33,7 +35,8 @@ public class Parser {
             "0: automatic -- based on file name extension (compression is allowed), " +
             "1: FlatZinc (.fzn)," +
             "2: XCSP3 (.xml)," +
-            "3: MPS (.mps)")
+            "3: DIMACS (.cnf)," +
+            "4: MPS (.mps)")
     private int pa = 0;
 
     public static void main(String[] args) throws Exception {
@@ -42,6 +45,7 @@ public class Parser {
 
     /**
      * Detect which parser to use
+     *
      * @param args arguments
      * @throws Exception when an argument is not correctly defined
      */
@@ -51,7 +55,7 @@ public class Parser {
             cmdparser.parseArgument(args);
         } catch (CmdLineException e) {
             // ignored exception here
-            if(instance == null) {
+            if (instance == null) {
                 System.err.println(e.getMessage());
                 System.err.println("Parser [options...] file");
                 cmdparser.printUsage(System.err);
@@ -71,15 +75,19 @@ public class Parser {
                     pa = 2;
                     break;
                 }
-                if (part.equals("mps")) {
+                if (part.equals("cnf")) {
                     pa = 3;
+                    break;
+                }
+                if (part.equals("mps")) {
+                    pa = 4;
                     break;
                 }
             }
             switch (pa) {
                 case 0:
                     System.err.println("Unknown file type.");
-                    System.err.println("Expected file extensions: *.fzn, *.xml, *.mps");
+                    System.err.println("Expected file extensions: *.fzn, *.xml, *.cnf, *.mps");
                     System.err.println();
                     return;
                 case 1:
@@ -89,6 +97,9 @@ public class Parser {
                     ChocoXCSP.main(args);
                     break;
                 case 3:
+                    ChocoDIMACS.main(args);
+                    break;
+                case 4:
                     ChocoMPS.main(args);
                     break;
             }

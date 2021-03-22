@@ -21,7 +21,7 @@ import java.util.Properties;
  */
 public class XCSPSettings extends DefaultSettings {
 
-    private final boolean DEBUG = false;
+    private final boolean DEBUG = true;
 
     private boolean print = false;
 

@@ -22,6 +22,7 @@ This is helpful when a Solution object is required in many places.
 - Add `IntVar.stream()` that streams a variable's values (in increasing order)
 - Add `Search.ValH.BMIN` and `Search.ValH.BLAST`
 - Change some default settings 
+- Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`) 
 
 ### Deprecated API (to be removed in next release):
 

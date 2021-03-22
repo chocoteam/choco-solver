@@ -33,7 +33,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView extends IntView<IntVar> {
+public final class OffsetView<I extends IntVar> extends IntView<I> {
 
     /**
      * A constant value
@@ -45,7 +45,7 @@ public final class OffsetView extends IntView<IntVar> {
      * @param var an integer variable
      * @param cste an int
      */
-    public OffsetView(final IntVar var, final int cste) {
+    public OffsetView(final I var, final int cste) {
         super("(" + var.getName() + "+" + cste + ")", var);
         this.cste = cste;
     }

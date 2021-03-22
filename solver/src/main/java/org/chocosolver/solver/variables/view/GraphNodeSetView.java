@@ -1,0 +1,99 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
+package org.chocosolver.solver.variables.view;
+
+import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+
+import java.util.Arrays;
+
+/**
+ * A GraphSetView representing the set of nodes of an observed graph variable.
+ * @author Dimitri Justeau-Allaire
+ * @since 02/03/2021
+ */
+public class GraphNodeSetView<E extends GraphVar> extends GraphSetView<E> {
+
+    /**
+     * Create a set view over the set of nodes of a graph variable.
+     * @param name name of the variable
+     * @param graphVar observed graph variable
+     */
+    public GraphNodeSetView(String name, E graphVar) {
+        super(name, graphVar);
+    }
+
+    /**
+     * Creates a set view over the set of nodes of a graph variable.
+     * @param graphVar observed graph variable
+     */
+    public GraphNodeSetView(E graphVar) {
+        this("NODES(" + graphVar.getName() + ")", graphVar);
+    }
+
+    @Override
+    public ISet getLB() {
+        return graphVar.getMandatoryNodes();
+    }
+
+    @Override
+    public ISet getUB() {
+        return graphVar.getPotentialNodes();
+    }
+
+    @Override
+    public boolean instantiateTo(int[] value, ICause cause) throws ContradictionException {
+        boolean changed = !isInstantiated();
+        for (int i : value) {
+            force(i, cause);
+        }
+        if (getLB().size() != value.length) {
+            contradiction(cause, this.getName() + " cannot be instantiated to " + Arrays.toString(value));
+        }
+        if (getUB().size() != value.length) {
+            for (int i : getUB()) {
+                if (!getLB().contains(i)) {
+                    remove(i, cause);
+                }
+            }
+        }
+        return changed;
+    }
+
+    @Override
+    protected boolean doRemoveSetElement(int element) throws ContradictionException {
+        return graphVar.removeNode(element, this);
+    }
+
+    @Override
+    protected boolean doForceSetElement(int element) throws ContradictionException {
+        return graphVar.enforceNode(element, this);
+    }
+
+    @Override
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        if (event == GraphEventType.REMOVE_NODE) {
+            notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+        }
+        if (event == GraphEventType.ADD_NODE) {
+            notifyPropagators(SetEventType.ADD_TO_KER, this);
+        }
+    }
+
+    @Override
+    public boolean isInstantiated() {
+        return getLB().size() == getUB().size();
+    }
+}

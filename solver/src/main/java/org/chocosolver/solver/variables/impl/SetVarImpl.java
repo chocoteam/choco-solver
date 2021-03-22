@@ -275,10 +275,4 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
             delta = new SetDelta(model.getEnvironment());
         }
     }
-
-    @Override
-    public SetDeltaMonitor monitorDelta(ICause propagator) {
-        createDelta();
-        return new SetDeltaMonitor(delta, propagator);
-    }
 }

@@ -127,7 +127,7 @@ public class PreProcessing {
                             IntVar[] ivars) {
         component.add(ivars[v]);
         visited.set(v);
-        for (int x : g.getNeighOf(v)) {
+        for (int x : g.getNeighborsOf(v)) {
             if (!visited.get(x)) {
                 scc(x, visited, g, component, ivars);
             }

@@ -13,6 +13,8 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.view.*;
 
+import java.util.Arrays;
+
 import static java.lang.Math.max;
 
 /**
@@ -454,4 +456,108 @@ public interface IViewFactory extends ISelf<Model> {
     // SET VARIABLES
     //*************************************************************************************
 
+    // OVER ARRAY OF BOOLEAN VARIABLES
+
+    /**
+     * Create a set view over an array of boolean variables defined such that:
+     * boolVars[x - offset] = True <=> x in setView
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropBoolChannel} constraint.
+     * @param boolVars observed boolean variables
+     * @param offset Offset between boolVars array indices and set elements
+     * @return a set view such that boolVars[x - offset] = True <=> x in setView
+     */
+    default SetVar boolsSetView(BoolVar[] boolVars, int offset) {
+        return new BoolsSetView(offset, boolVars);
+    }
+
+    // OVER ARRAY OF INTEGER VARIABLES
+
+    /**
+     * Create a set view over an array of integer variables, such that:
+     * intVars[x - offset] = v[x - offset] <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v array of integers that "toggle" integer variables index inclusion in the set view
+     * @param offset offset between intVars indices and setViews elements
+     * @return a set view such that intVars[x - offset] = v[x - offset] <=> x in setView.
+     */
+    default SetVar intsSetView(IntVar[] intVars, int[] v, int offset) {
+        return new IntsSetView(v, offset, intVars);
+    }
+
+    /**
+     * Create a set view over an array of integer variables, such that:
+     * intVars[x - offset] = v <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v integer that "toggle" integer variables index inclusion in the set view
+     * @param offset offset between intVars indices and setViews elements
+     * @return a set view such that intVars[x - offset] = v <=> x in setView.
+     */
+    default SetVar intsSetView(IntVar[] intVars, int v, int offset) {
+        int[] vals = new int[intVars.length];
+        Arrays.fill(vals, v);
+        return intsSetView(intVars, vals, offset);
+    }
+
+    /**
+     * Instantiate an array of set views over an array of integer variables, such that:
+     * x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     *
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropIntChannel} constraint.
+     *
+     * @param intVars array of integer variables
+     * @param nbSets number of set views to create
+     * @param offset1 offset between setViews indices and intVars values
+     * @param offset2 offset between intVars indices and setViews elements
+     * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     */
+    default SetVar[] intsSetView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
+        SetVar[] setVars = new SetVar[nbSets];
+        for (int i = 0; i < nbSets; i++) {
+            setVars[i] = intsSetView(intVars, i + offset1, offset2);
+        }
+        return setVars;
+    }
+
+    //  OVER GRAPH VARIABLES
+
+    /**
+     * Creates a set view over the set of nodes of a graph variable.
+     * @param g observed graph variable
+     * @return a set view over the set of nodes of a graph variable
+     */
+    default SetVar graphNodeSetView(GraphVar g) {
+        return new GraphNodeSetView(g);
+    }
+
+    /**
+     * Creates a set view over the set of successors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of successors of a node of a directed graph variable.
+     */
+    default SetVar graphSuccessorsSetView(DirectedGraphVar g, int node) {
+        return new GraphSuccessorsSetView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of predecessors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of predecessors of a node of a directed graph variable.
+     */
+    default SetVar graphPredecessorsSetView(DirectedGraphVar g, int node) {
+        return new GraphPredecessorsSetView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of neighbors of a node of an undirected graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of neighbors of a node of an udirected graph variable.
+     */
+    default SetVar graphNeighborsSetView(UndirectedGraphVar g, int node) {
+        return new GraphSuccessorsSetView(g, node);
+    }
 }
