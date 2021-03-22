@@ -34,6 +34,7 @@ env:
     - TEST_SUITE="checker"
     - TEST_SUITE="mzn"
     - TEST_SUITE="xcsp"
+    - TEST_SUITE="dimacs"
     - TEST_SUITE="mps"
 
 branches:

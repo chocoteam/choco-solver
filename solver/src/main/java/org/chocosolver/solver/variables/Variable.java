@@ -72,6 +72,11 @@ public interface Variable extends Identity, Comparable<Variable> {
     int REAL = 1 << 6;
 
     /**
+     * Kind of variable: graph.
+     */
+    int GRAPH = 1 << 7;
+
+    /**
      * Mask to get the kind of a variable.
      */
     int KIND = (1 << 10) - 1 - TYPE;
@@ -161,8 +166,9 @@ public interface Variable extends Identity, Comparable<Variable> {
     /**
      * Attaches a view to this variable.
      * @param view a view to add to this variable.
+     * @param idx the index of this variable in the view's array of observed variables
      */
-    void subscribeView(IView view);
+    void subscribeView(IView view, int idx);
 
     /**
      * Return the delta domain of this

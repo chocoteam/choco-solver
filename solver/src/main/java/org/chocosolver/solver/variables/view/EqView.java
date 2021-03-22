@@ -26,7 +26,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class EqView extends IntBoolView {
+public final class EqView<I extends IntVar> extends IntBoolView<I> {
 
     /**
      * A boolean view based on <i>var<i/> such that <i>var<i/> = <i>cste<i/>
@@ -34,7 +34,7 @@ public final class EqView extends IntBoolView {
      * @param var  an integer variable
      * @param cste an int
      */
-    public EqView(final IntVar var, final int cste) {
+    public EqView(final I var, final int cste) {
         super(var, "=", cste);
     }
 

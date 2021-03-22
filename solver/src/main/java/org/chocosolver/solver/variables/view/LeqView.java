@@ -26,7 +26,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class LeqView extends IntBoolView {
+public final class LeqView<I extends IntVar> extends IntBoolView {
 
     /**
      * A boolean view based on <i>var<i/> such that <i>var<i/> &le; <i>cste<i/>
@@ -34,7 +34,7 @@ public final class LeqView extends IntBoolView {
      * @param var  an integer variable
      * @param cste an int
      */
-    public LeqView(final IntVar var, final int cste) {
+    public LeqView(final I var, final int cste) {
         super(var, "≤", cste);
     }
 

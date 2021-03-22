@@ -16,7 +16,7 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
- * Directed graph implementation : arcs are indexed per endpoints
+ * Directed graph implementation : directed edges are indexed per endpoints
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
 public class DirectedGraph implements IGraph {
@@ -29,7 +29,8 @@ public class DirectedGraph implements IGraph {
     private ISet[] predecessors;
     private ISet nodes;
     private int n;
-    private SetType type;
+    private SetType nodeSetType;
+    private SetType edgeSetType;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -41,25 +42,44 @@ public class DirectedGraph implements IGraph {
      * unless allNodes is true).
      *
      * @param n        maximum number of nodes
-     * @param type     data structure to use for representing node successors and predecessors
+     * @param nodeSetType     data structure to use for representing node
+     * @param edgeSetType     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph.
 	 *                 i.e. The node set is fixed to [0,n-1] and will never change
      */
-    public DirectedGraph(int n, SetType type, boolean allNodes) {
-        this.type = type;
+    public DirectedGraph(int n, SetType nodeSetType, SetType edgeSetType, boolean allNodes) {
+        this.nodeSetType = nodeSetType;
+        this.edgeSetType = edgeSetType;
         this.n = n;
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeSet(type, 0);
-            successors[i] = SetFactory.makeSet(type, 0);
+            predecessors[i] = SetFactory.makeSet(edgeSetType, 0);
+            successors[i] = SetFactory.makeSet(edgeSetType, 0);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeBitSet(0);
+            this.nodes = SetFactory.makeSet(nodeSetType, 0);
         }
     }
+
+    /**
+     * Creates an empty graph.
+     * Allocates memory for n nodes (but they should then be added explicitly,
+     * unless allNodes is true).
+     *
+     * Nodes are stored as BITSET
+     *
+     * @param n        maximum number of nodes
+     * @param edgeSetType     data structure to use for representing node successors and predecessors
+     * @param allNodes true iff all nodes must always remain present in the graph.
+     *                 i.e. The node set is fixed to [0,n-1] and will never change
+     */
+    public DirectedGraph(int n, SetType edgeSetType, boolean allNodes) {
+        this(n, SetType.BITSET, edgeSetType, allNodes);
+    }
+
 
     /**
      * Creates an empty backtrable graph of n nodes
@@ -68,23 +88,41 @@ public class DirectedGraph implements IGraph {
      *
      * @param model   model providing the backtracking environment
      * @param n        maximum number of nodes
-     * @param type     data structure to use for representing node successors and predecessors
+     * @param nodeSetType     data structure to use for representing nodes
+     * @param edgeSetType     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph
      */
-    public DirectedGraph(Model model, int n, SetType type, boolean allNodes) {
+    public DirectedGraph(Model model, int n, SetType nodeSetType, SetType edgeSetType, boolean allNodes) {
         this.n = n;
-        this.type = type;
+        this.nodeSetType = nodeSetType;
+        this.edgeSetType = edgeSetType;
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = SetFactory.makeStoredSet(type, 0, model);
-            successors[i] = SetFactory.makeStoredSet(type, 0, model);
+            predecessors[i] = SetFactory.makeStoredSet(edgeSetType, 0, model);
+            successors[i] = SetFactory.makeStoredSet(edgeSetType, 0, model);
         }
         if (allNodes) {
             this.nodes = SetFactory.makeConstantSet(0,n-1);
         } else {
-            this.nodes = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+            this.nodes = SetFactory.makeStoredSet(nodeSetType, 0, model);
         }
+    }
+
+    /**
+     * Creates an empty backtrable graph of n nodes
+     * Allocates memory for n nodes (but they should then be added explicitly,
+     * unless allNodes is true).
+     *
+     * Nodes are stored as BITSET
+     *
+     * @param model   model providing the backtracking environment
+     * @param n        maximum number of nodes
+     * @param edgeSetType     data structure to use for representing node successors and predecessors
+     * @param allNodes true iff all nodes must always remain present in the graph
+     */
+    public DirectedGraph(Model model, int n, SetType edgeSetType, boolean allNodes) {
+        this(model, n, SetType.BITSET, edgeSetType, allNodes);
     }
 
     //***********************************************************************************
@@ -116,8 +154,13 @@ public class DirectedGraph implements IGraph {
     }
 
     @Override
-    public SetType getType() {
-        return type;
+    public SetType getEdgeSetType() {
+        return edgeSetType;
+    }
+
+    @Override
+    public SetType getNodeSetType() {
+        return nodeSetType;
     }
 
     @Override
@@ -146,13 +189,13 @@ public class DirectedGraph implements IGraph {
     }
 
     /**
-     * remove arc (from,to) from the graph
+     * remove directed edge (from,to) from the graph
      *
      * @param from a node index
      * @param to   a node index
-     * @return true iff arc (from,to) was in the graph
+     * @return true iff directed edge (from,to) was in the graph
      */
-    public boolean removeArc(int from, int to) {
+    public boolean removeEdge(int from, int to) {
         if (successors[from].contains(to)) {
             assert (predecessors[to].contains(from)) : "incoherent directed graph";
             return successors[from].remove(to) | predecessors[to].remove(from);
@@ -161,13 +204,13 @@ public class DirectedGraph implements IGraph {
     }
 
     /**
-     * Test whether arc (from,to) exists or not in the graph
+     * Test whether directed edge (from,to) exists or not in the graph
      *
      * @param from a node index
      * @param to   a node index
-     * @return true iff arc (from,to) exists in the graph
+     * @return true iff directed edge (from,to) exists in the graph
      */
-    public boolean arcExists(int from, int to) {
+    public boolean containsEdge(int from, int to) {
         if (successors[from].contains(to)) {
             assert (predecessors[to].contains(from)) : "incoherent directed graph";
             return true;
@@ -176,23 +219,18 @@ public class DirectedGraph implements IGraph {
     }
 
     @Override
-    public boolean isArcOrEdge(int from, int to) {
-        return arcExists(from, to);
-    }
-
-    @Override
     public boolean isDirected() {
         return true;
     }
 
     /**
-     * add arc (from,to) to the graph
+     * add directed edge (from,to) to the graph
      *
      * @param from a node index
      * @param to   a node index
-     * @return true iff arc (from,to) was not already in the graph
+     * @return true iff directed edge (from,to) was not already in the graph
      */
-    public boolean addArc(int from, int to) {
+    public boolean addEdge(int from, int to) {
         addNode(from);
         addNode(to);
         if (!successors[from].contains(to)) {
@@ -208,12 +246,7 @@ public class DirectedGraph implements IGraph {
      * @param x node index
      * @return successors of x
      */
-    public ISet getSuccOf(int x) {
-        return successors[x];
-    }
-
-    @Override
-    public ISet getSuccOrNeighOf(int x) {
+    public ISet getSuccessorsOf(int x) {
         return successors[x];
     }
 
@@ -223,12 +256,34 @@ public class DirectedGraph implements IGraph {
      * @param x node index
      * @return predecessors of x
      */
-    public ISet getPredOf(int x) {
+    public ISet getPredecessorsOf(int x) {
         return predecessors[x];
     }
 
-    @Override
-    public ISet getPredOrNeighOf(int x) {
-        return predecessors[x];
+    /**
+     * Structural equality test between two directed graph vars.
+     * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
+     * and different attributes such as nbMaxNodes and allNodes.
+     * @param other
+     * @return true iff `this` and `other` contains exactly the same nodes and same edges.
+     */
+    public boolean equals(DirectedGraph other) {
+        if (getNodes().size() != other.getNodes().size()) {
+            return false;
+        }
+        for (int i : getNodes()) {
+            if (!other.containsNode(i)) {
+                return false;
+            }
+            if (getSuccessorsOf(i).size() != other.getSuccessorsOf(i).size()) {
+                return false;
+            }
+            for (int j : getSuccessorsOf(i)) {
+                if (!other.containsEdge(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

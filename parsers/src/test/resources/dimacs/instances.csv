@@ -1,0 +1,9 @@
+#name,sat,nodes,fails
+hole6.cnf,false,5813,5762
+par8-1-c.cnf,true,41,39
+quinn.cnf,true,5,2
+zebra_v155_c1135.cnf,true,36531,36184
+ais6.cnf,true,24,17
+qg1-07.cnf,true,1117,1084
+bmc-ibm-2.cnf,true,64664,62511
+aim-50-1_6-yes1-4.cnf,true,4856,4774

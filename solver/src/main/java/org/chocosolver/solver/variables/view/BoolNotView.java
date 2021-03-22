@@ -31,13 +31,13 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
-public final class BoolNotView extends IntView<BoolVar> implements BoolVar {
+public final class BoolNotView<B extends BoolVar> extends IntView<B> implements BoolVar {
 
     /**
      * Create a not view based on <i>var<i/>
      * @param var a boolean variable
      */
-    public BoolNotView(BoolVar var) {
+    public BoolNotView(B var) {
         super("not(" + var.getName() + ")", var);
     }
 

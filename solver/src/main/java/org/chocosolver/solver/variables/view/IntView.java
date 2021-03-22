@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -19,7 +20,6 @@ import org.chocosolver.solver.variables.delta.IntDelta;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -27,6 +27,8 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
+
+import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
@@ -40,7 +42,7 @@ import java.util.function.Consumer;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
-public abstract class IntView<I extends IntVar> extends AbstractVariable implements IView, IntVar {
+public abstract class IntView<I extends IntVar> extends AbstractView<I> implements IntVar {
 
     /**
      * Observed variable
@@ -78,10 +80,9 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
      * @param var observed variable
      */
     IntView(String name, I var) {
-        super(name, var.getModel());
+        super(name, var);
         this.var = var;
         this.delta = NoDelta.singleton;
-        this.var.subscribeView(this);
     }
 
     /**
@@ -362,8 +363,7 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
         return Variable.VIEW | Variable.INT;
     }
 
-	@Override
-    public IntVar getVariable() {
+    public I getVariable() {
         return var;
     }
 
@@ -384,7 +384,7 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
 
     @Override
     public boolean isInstantiated() {
-        return var.isInstantiated();
+        return getVariable().isInstantiated();
     }
 
 	@Override
@@ -398,18 +398,8 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
     }
 
     @Override
-    public int compareTo(Variable o) {
-        return this.getId() - o.getId();
-    }
-
-    @Override
-    public void notify(IEventType event) throws ContradictionException {
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
         super.notifyPropagators(transformEvent(event), this);
-    }
-
-    @Override
-    public IEventType transformEvent(IEventType evt){
-        return evt;
     }
 
     @Override
@@ -464,5 +454,16 @@ public abstract class IntView<I extends IntVar> extends AbstractVariable impleme
             throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
         }
         return this.literal;
+    }
+
+    @Override
+    public void explain(int p, ExplanationForSignedClause explanation) {
+        IntVar pivot = explanation.readVar(p);
+        IntVar other = (this == pivot ? getVariable() : this);
+        IntIterableRangeSet dom = explanation.complement(other);
+        other.unionLit(dom, explanation);
+        dom = explanation.complement(pivot);
+        unionOf(dom, explanation.readDom(p));
+        pivot.intersectLit(dom, explanation);
     }
 }

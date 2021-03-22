@@ -78,8 +78,10 @@ public class GephiNetwork{
         // 1.b, write views
         for(IView view: views){
             nodeCount++;
-            nodes.append(String.format(NODETAG, view.getId(), view.getName(), "", ORANGE, DIAM));
-            edges.append(String.format(EDGETAG, edgeCount++, view.getId(), view.getVariable().getId()));
+            for (Variable observed : view.getVariables()) {
+                nodes.append(String.format(NODETAG, view.getId(), view.getName(), "", ORANGE, DIAM));
+                edges.append(String.format(EDGETAG, edgeCount++, view.getId(), observed.getId()));
+            }
         }
         // 1.c, write constraints
         nodeCount++;

@@ -87,9 +87,36 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
-        if(bst != null){
+        if (bst != null) {
             Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
         }
     }
 
+
+    @Test(groups = "mzn", timeOut = 120_000)
+    public void testCellda_y_10s() throws SetUpException {
+        // Specific to bnn+cellda_y_10s which take more time on Travis
+        // 2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
+        String file = this.getClass().getResource("/flatzinc/2020/bnn+cellda_y_10s.fzn").getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[100s]", // but, problems are expected to end within 30s max
+                "-stat",
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 1, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 16582, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 16581, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 6, "Unexpected best solution");
+    }
 }

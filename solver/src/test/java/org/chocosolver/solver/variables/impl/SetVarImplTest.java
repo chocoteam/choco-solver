@@ -27,7 +27,7 @@ public class SetVarImplTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testStructures(){
 		for(SetType type:SetType.values()) {
-			if(!type.name().contains("FIXED")) {
+			if(!type.name().contains("FIXED") && !type.name().contains("DYNAMIC")) {
 				for (boolean b : new boolean[]{true, false}) {
 					SetFactory.HARD_CODED = b;
 					Model m = new Model();
