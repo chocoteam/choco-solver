@@ -35,7 +35,7 @@ public class PropNeighBoolsChannel2 extends Propagator<BoolVar> {
     //***********************************************************************************
 
     public PropNeighBoolsChannel2(BoolVar[][] adjacencyMatrix, GraphVar gV) {
-        super(ArrayUtils.flatten(adjacencyMatrix), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.flatten(adjacencyMatrix), PropagatorPriority.LINEAR, true);
         this.matrix = adjacencyMatrix;
         n = adjacencyMatrix.length;
         assert n == adjacencyMatrix[0].length;
