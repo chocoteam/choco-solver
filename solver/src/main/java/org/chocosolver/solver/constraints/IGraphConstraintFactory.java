@@ -23,8 +23,6 @@ import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostCoars
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
-import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
-import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.Orientation;
@@ -213,20 +211,20 @@ public interface IGraphConstraintFactory {
                 new PropNodeBoolChannel(isIn, vertex, g));
     }
 
-    // Arc
+    // Directed edges
 
     /**
      * Channeling constraint :
-     * isArc = 1 <=> arc (from,to) in g
+     * isEdge = 1 <=> edge (from,to) in g
      *
      * @param g
-     * @param isArc
+     * @param isEdge
      * @param from
      * @param to
      */
-    default Constraint arcChanneling(DirectedGraphVar g, BoolVar isArc, int from, int to) {
-        return new Constraint("arcChanneling",
-                new PropArcBoolChannel(isArc, from, to, g));
+    default Constraint edgeChanneling(DirectedGraphVar g, BoolVar isEdge, int from, int to) {
+        return new Constraint("edgeChanneling",
+                new PropEdgeBoolChannel(isEdge, from, to, g));
     }
 
     // Edge
@@ -241,8 +239,8 @@ public interface IGraphConstraintFactory {
      * @param j
      */
     default Constraint edgeChanneling(UndirectedGraphVar g, BoolVar isEdge, int i, int j) {
-        return new Constraint("arcChanneling",
-                new PropArcBoolChannel(isEdge, i, j, g));
+        return new Constraint("edgeChanneling",
+                new PropEdgeBoolChannel(isEdge, i, j, g));
     }
 
     // Neighbors
@@ -315,7 +313,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * successors[i] = j <=> arc (i,j) in g
+     * successors[i] = j <=> edge (i,j) in g
      * TODO: Consider removing this constraint, as it is conceptually questionable:
      *      it implies that every node of the graph g has exactly one neighbor
      * @param g
@@ -328,7 +326,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * int j in successors[i] <=> arc (i,j) in g
+     * int j in successors[i] <=> edge (i,j) in g
      *
      * @param g
      * @param successors
@@ -340,7 +338,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * successors[i][j] <=> arc (i,j) in g
+     * successors[i][j] <=> edge (i,j) in g
      *
      * @param g
      * @param successors
@@ -352,7 +350,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * int j in successorsOf <=> arc (node,j) in g
+     * int j in successorsOf <=> edge (node,j) in g
      *
      * @param g
      * @param successorsOf
@@ -365,7 +363,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * successorsOf[j] = 1 <=> arc (node,j) in g
+     * successorsOf[j] = 1 <=> edge (node,j) in g
      *
      * @param g
      * @param successorsOf
@@ -380,7 +378,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * int j in predecessorsOf <=> arc (j,node) in g
+     * int j in predecessorsOf <=> edge (j,node) in g
      *
      * @param g
      * @param predecessorsOf
@@ -393,7 +391,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * predecessorsOf[j] = 1 <=> arc (j,node) in g
+     * predecessorsOf[j] = 1 <=> edge (j,node) in g
      *
      * @param g
      * @param predecessorsOf
@@ -896,7 +894,7 @@ public interface IGraphConstraintFactory {
 
     /**
      * Creates a constraint which states that d is the diameter of g
-     * i.e. d is the length (number of arcs) of the largest shortest path among any pair of nodes
+     * i.e. d is the length (number of edges) of the largest shortest path among any pair of nodes
      * This constraint implies that g is strongly connected
      *
      * @param g a directed graph variable
