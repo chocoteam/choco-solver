@@ -22,7 +22,7 @@ import org.chocosolver.util.ESat;
 /**
  * @author Jean-Guillaume Fages
  */
-public class PropArcBoolChannel extends Propagator<Variable> {
+public class PropEdgeBoolChannel extends Propagator<Variable> {
 
     //***********************************************************************************
     // VARIABLES
@@ -36,7 +36,7 @@ public class PropArcBoolChannel extends Propagator<Variable> {
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropArcBoolChannel(BoolVar isIn, int from, int to, GraphVar gV) {
+    public PropEdgeBoolChannel(BoolVar isIn, int from, int to, GraphVar gV) {
         super(new Variable[]{isIn, gV}, PropagatorPriority.UNARY, false);
         this.bool = isIn;
         this.from = from;
