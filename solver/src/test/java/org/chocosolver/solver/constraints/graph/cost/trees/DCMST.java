@@ -106,7 +106,7 @@ public class DCMST {
         }
         String output = instance+";"+s.getSolutionCount()+";"+s.getBestSolutionValue()+";"
                 +s.getNodeCount()+";"+s.getFailCount()+";"+s.getTimeCount()+";\n";
-        write(output,OUT_PUT_FILE,false);
+//        write(output,OUT_PUT_FILE,false);
     }
 
     private static void write(String text, String file, boolean clearFirst){

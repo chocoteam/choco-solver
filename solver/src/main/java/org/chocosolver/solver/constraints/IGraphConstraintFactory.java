@@ -24,7 +24,6 @@ import org.chocosolver.solver.constraints.graph.cost.tsp.lagrangian.PropLagrOneT
 import org.chocosolver.solver.constraints.graph.cycles.PropAcyclic;
 import org.chocosolver.solver.constraints.graph.cycles.PropCycle;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr;
-import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostCoarse;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
@@ -452,7 +451,7 @@ public interface IGraphConstraintFactory {
      * @return a maximum degree constraint
      */
     default Constraint maxDegree(UndirectedGraphVar g, int maxDegree) {
-        return new Constraint("maxDegree", new PropNodeDegreeAtMostCoarse(g, maxDegree));
+        return new Constraint("maxDegree", new PropNodeDegreeAtMostIncr(g, maxDegree));
     }
 
     /**
@@ -465,7 +464,7 @@ public interface IGraphConstraintFactory {
      * @return a maximum degree constraint
      */
     default Constraint maxDegrees(UndirectedGraphVar g, int[] maxDegrees) {
-        return new Constraint("maxDegrees", new PropNodeDegreeAtMostCoarse(g, maxDegrees));
+        return new Constraint("maxDegrees", new PropNodeDegreeAtMostIncr(g, maxDegrees));
     }
 
     /**
@@ -520,7 +519,7 @@ public interface IGraphConstraintFactory {
      * @return a maximum inner degree constraint
      */
     default Constraint maxInDegree(DirectedGraphVar g, int maxDegree) {
-        return new Constraint("maxInDegree", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegree));
+        return new Constraint("maxInDegree", new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, maxDegree));
     }
 
     /**
@@ -533,7 +532,7 @@ public interface IGraphConstraintFactory {
      * @return a maximum inner degree constraint
      */
     default Constraint maxInDegrees(DirectedGraphVar g, int[] maxDegrees) {
-        return new Constraint("maxInDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, maxDegrees));
+        return new Constraint("maxInDegrees", new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, maxDegrees));
     }
 
     /**
@@ -588,7 +587,7 @@ public interface IGraphConstraintFactory {
      * @return a maximum outer degree constraint
      */
     default Constraint maxOutDegree(DirectedGraphVar g, int maxDegree) {
-        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegree));
+        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostIncr(g, Orientation.SUCCESSORS, maxDegree));
     }
 
     /**
@@ -601,7 +600,7 @@ public interface IGraphConstraintFactory {
      * @return a outer maximum degree constraint
      */
     default Constraint maxOutDegrees(DirectedGraphVar g, int[] maxDegrees) {
-        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostCoarse(g, Orientation.SUCCESSORS, maxDegrees));
+        return new Constraint("maxOutDegrees", new PropNodeDegreeAtMostIncr(g, Orientation.SUCCESSORS, maxDegrees));
     }
 
     /**
@@ -820,7 +819,7 @@ public interface IGraphConstraintFactory {
         nbPreds[root] = 0;
         return new Constraint("directedTree"
 //                , new PropArborescence(g, root)
-                , new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, nbPreds)
+                , new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, nbPreds)
                 , new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, nbPreds)
         );
     }
@@ -835,7 +834,7 @@ public interface IGraphConstraintFactory {
     default Constraint directedForest(DirectedGraphVar g) {
         return new Constraint("directedForest",
 //                new PropArborescences(g),
-                new PropNodeDegreeAtMostCoarse(g, Orientation.PREDECESSORS, 1)
+                new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, 1)
         );
     }
 
