@@ -16,6 +16,11 @@ import org.chocosolver.solver.constraints.graph.channeling.nodes.PropNodeBoolCha
 import org.chocosolver.solver.constraints.graph.channeling.nodes.PropNodeBoolsChannel;
 import org.chocosolver.solver.constraints.graph.channeling.nodes.PropNodeSetChannel;
 import org.chocosolver.solver.constraints.graph.connectivity.*;
+import org.chocosolver.solver.constraints.graph.cost.trees.PropMaxDegVarTree;
+import org.chocosolver.solver.constraints.graph.cost.trees.PropTreeCostSimple;
+import org.chocosolver.solver.constraints.graph.cost.trees.lagrangian.PropGenericLagrDCMST;
+import org.chocosolver.solver.constraints.graph.cost.tsp.PropCycleCostSimple;
+import org.chocosolver.solver.constraints.graph.cost.tsp.lagrangian.PropLagrOneTree;
 import org.chocosolver.solver.constraints.graph.cycles.PropAcyclic;
 import org.chocosolver.solver.constraints.graph.cycles.PropCycle;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr;
@@ -26,6 +31,7 @@ import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.Orientation;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Some usual graph constraints
@@ -909,68 +915,68 @@ public interface IGraphConstraintFactory {
     }
 
 
-//    //***********************************************************************************
-//    // OPTIMIZATION CONSTRAINTS
-//    //***********************************************************************************
-//
-//
-//    /**
-//     * Constraint modeling the Traveling Salesman Problem
-//     *
-//     * @param graphVar   graph variable representing a Hamiltonian cycle
-//     * @param costVar    variable representing the cost of the cycle
-//     * @param edgeCosts cost matrix (should be symmetric)
-//     * @param lagrMode  use the Lagrangian relaxation of the tsp
-//     *                   described by Held and Karp
-//     *                   {0:no Lagrangian relaxation,
-//     *                   1:Lagrangian relaxation (since root node),
-//     *                   2:Lagrangian relaxation but wait a first solution before running it}
-//     * @return a tsp constraint
-//     */
-//    default Constraint tsp(UndirectedGraphVar graphVar, IntVar costVar, int[][] edgeCosts, int lagrMode) {
-//        Propagator[] props = ArrayUtils.append(cycle(graphVar).getPropagators(),
-//                new Propagator[]{new PropCycleCostSimple(graphVar, costVar, edgeCosts)});
-//        if (lagrMode > 0) {
-//            PropLagrOneTree hk = new PropLagrOneTree(graphVar, costVar, edgeCosts);
-//            hk.waitFirstSolution(lagrMode == 2);
-//            props = ArrayUtils.append(props, new Propagator[]{hk});
-//        }
-//        return new Constraint("TSP", props);
-//    }
-//
-//    /**
-//     * Creates a degree-constrained minimum spanning tree constraint :
-//     * GRAPH is a spanning tree of cost COSTVAR and each vertex degree is constrained
-//     * <p>
-//     * BEWARE : assumes the channeling between GRAPH and DEGREES is already done
-//     *
-//     * @param graphVar      an undirected graph variable
-//     * @param degrees    the degree of every vertex
-//     * @param costVar    variable representing the cost of the mst
-//     * @param edgeCosts cost matrix (should be symmetric)
-//     * @param lagrMode  use the Lagrangian relaxation of the dcmst
-//     *                   {0:no Lagrangian relaxation,
-//     *                   1:Lagrangian relaxation (since root node),
-//     *                   2:Lagrangian relaxation but wait a first solution before running it}
-//     * @return a degree-constrained minimum spanning tree constraint
-//     */
-//    default Constraint dcmst(UndirectedGraphVar graphVar, IntVar[] degrees,
-//                             IntVar costVar, int[][] edgeCosts,
-//                             int lagrMode) {
-//        Propagator[] props = ArrayUtils.append(
-//                tree(graphVar).getPropagators()
-//                , new Propagator[]{
-//                        new PropTreeCostSimple(graphVar, costVar, edgeCosts)
-//                        , new PropMaxDegVarTree(graphVar, degrees)
-//                }
-//        );
-//        if (lagrMode > 0) {
-//            PropGenericLagrDCMST hk = new PropGenericLagrDCMST(graphVar, costVar, degrees, edgeCosts, lagrMode == 2);
-//            props = ArrayUtils.append(props, new Propagator[]{hk});
-//        }
-//        return new Constraint("dcmst", props);
-//    }
-//
+    //***********************************************************************************
+    // OPTIMIZATION CONSTRAINTS
+    //***********************************************************************************
+
+
+    /**
+     * Constraint modeling the Traveling Salesman Problem
+     *
+     * @param graphVar   graph variable representing a Hamiltonian cycle
+     * @param costVar    variable representing the cost of the cycle
+     * @param edgeCosts cost matrix (should be symmetric)
+     * @param lagrMode  use the Lagrangian relaxation of the tsp
+     *                   described by Held and Karp
+     *                   {0:no Lagrangian relaxation,
+     *                   1:Lagrangian relaxation (since root node),
+     *                   2:Lagrangian relaxation but wait a first solution before running it}
+     * @return a tsp constraint
+     */
+    default Constraint tsp(UndirectedGraphVar graphVar, IntVar costVar, int[][] edgeCosts, int lagrMode) {
+        Propagator[] props = ArrayUtils.append(cycle(graphVar).getPropagators(),
+                new Propagator[]{new PropCycleCostSimple(graphVar, costVar, edgeCosts)});
+        if (lagrMode > 0) {
+            PropLagrOneTree hk = new PropLagrOneTree(graphVar, costVar, edgeCosts);
+            hk.waitFirstSolution(lagrMode == 2);
+            props = ArrayUtils.append(props, new Propagator[]{hk});
+        }
+        return new Constraint("TSP", props);
+    }
+
+    /**
+     * Creates a degree-constrained minimum spanning tree constraint :
+     * GRAPH is a spanning tree of cost COSTVAR and each vertex degree is constrained
+     * <p>
+     * BEWARE : assumes the channeling between GRAPH and DEGREES is already done
+     *
+     * @param graphVar      an undirected graph variable
+     * @param degrees    the degree of every vertex
+     * @param costVar    variable representing the cost of the mst
+     * @param edgeCosts cost matrix (should be symmetric)
+     * @param lagrMode  use the Lagrangian relaxation of the dcmst
+     *                   {0:no Lagrangian relaxation,
+     *                   1:Lagrangian relaxation (since root node),
+     *                   2:Lagrangian relaxation but wait a first solution before running it}
+     * @return a degree-constrained minimum spanning tree constraint
+     */
+    default Constraint dcmst(UndirectedGraphVar graphVar, IntVar[] degrees,
+                             IntVar costVar, int[][] edgeCosts,
+                             int lagrMode) {
+        Propagator[] props = ArrayUtils.append(
+                tree(graphVar).getPropagators()
+                , new Propagator[]{
+                        new PropTreeCostSimple(graphVar, costVar, edgeCosts)
+                        , new PropMaxDegVarTree(graphVar, degrees)
+                }
+        );
+        if (lagrMode > 0) {
+            PropGenericLagrDCMST hk = new PropGenericLagrDCMST(graphVar, costVar, degrees, edgeCosts, lagrMode == 2);
+            props = ArrayUtils.append(props, new Propagator[]{hk});
+        }
+        return new Constraint("dcmst", props);
+    }
+
 //    //***********************************************************************************
 //    // SYMMETRY BREAKING CONSTRAINTS
 //    //***********************************************************************************
