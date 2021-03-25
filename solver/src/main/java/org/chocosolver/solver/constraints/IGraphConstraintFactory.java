@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.binary.PropGreaterOrEqualX_Y;
 import org.chocosolver.solver.constraints.graph.basic.*;
 import org.chocosolver.solver.constraints.graph.channeling.edges.*;
@@ -27,6 +29,10 @@ import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
+import org.chocosolver.solver.constraints.graph.symmbreaking.PropIncrementalAdjacencyMatrix;
+import org.chocosolver.solver.constraints.graph.symmbreaking.PropIncrementalAdjacencyUndirectedMatrix;
+import org.chocosolver.solver.constraints.graph.symmbreaking.PropSymmetryBreaking;
+import org.chocosolver.solver.constraints.graph.symmbreaking.PropSymmetryBreakingEx;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
 import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
@@ -39,7 +45,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  *
  * @author Jean-Guillaume Fages
  */
-public interface IGraphConstraintFactory {
+public interface IGraphConstraintFactory extends ISelf<Model> {
 
 
     //***********************************************************************************
@@ -254,19 +260,6 @@ public interface IGraphConstraintFactory {
 
     /**
      * Channeling constraint:
-     * successors[i] = j OR successors[j] = i <=> edge (i,j) in g
-     * TODO: Consider removing this constraint, as it is conceptually questionable:
-     *      it implies that every node of the graph g has exactly one neighbor
-     * @param g
-     * @param successors
-     */
-    default Constraint neighborsChanneling(UndirectedGraphVar g, IntVar[] successors) {
-        return new Constraint("neighIntsChanneling",
-                new PropNeighIntsChannel1(successors, g), new PropNeighIntsChannel2(successors, g));
-    }
-
-    /**
-     * Channeling constraint:
      * int j in neighbors[i] <=> edge (i,j) in g
      *
      * @param g
@@ -317,19 +310,6 @@ public interface IGraphConstraintFactory {
     }
 
     // Successors
-
-    /**
-     * Channeling constraint:
-     * successors[i] = j <=> edge (i,j) in g
-     * TODO: Consider removing this constraint, as it is conceptually questionable:
-     *      it implies that every node of the graph g has exactly one neighbor
-     * @param g
-     * @param successors
-     */
-    default Constraint successorsChanneling(DirectedGraphVar g, IntVar[] successors) {
-        return new Constraint("succIntsChanneling",
-                new PropSuccIntsChannel1(successors, g), new PropNeighIntsChannel2(successors, g));
-    }
 
     /**
      * Channeling constraint:
@@ -978,150 +958,150 @@ public interface IGraphConstraintFactory {
         return new Constraint("dcmst", props);
     }
 
-//    //***********************************************************************************
-//    // SYMMETRY BREAKING CONSTRAINTS
-//    //***********************************************************************************
-//
-//    /**
-//     * Post a symmetry breaking constraint. This constraint is a symmetry breaking for
-//     * class of directed graphs which contain a directed tree with root in node 0.
-//     * (All nodes must be reachable from node 0)
-//     * Note, that this method post this constraint directly, so it cannot be reified.
-//     * <p>
-//     * This symmetry breaking method based on paper:
-//     * Ulyantsev V., Zakirzyanov I., Shalyto A.
-//     * BFS-Based Symmetry Breaking Predicates for DFA Identification
-//     * //Language and Automata Theory and Applications. – Springer International Publishing, 2015. – С. 611-622.
-//     *
-//     * @param graph graph to be constrainted
-//     */
-//    default void postSymmetryBreaking(DirectedGraphVar graph) {
-//        Model m = _me();
-//        // ---------------------- variables ------------------------
-//        int n = graph.getNbMaxNodes();
-//        // t[i, j]
-//        BoolVar[] t = m.boolVarArray("T[]", n * n);
-//        // p[i]
-//        IntVar[] p = new IntVar[n];
-//        p[0] = m.intVar("P[0]", 0);
-//        for (int i = 1; i < n; i++) {
-//            p[i] = m.intVar("P[" + i + "]", 0, i - 1);
-//        }
-//        // ---------------------- constraints -----------------------
-//        // t[i, j] <-> G
-//        new Constraint("AdjacencyMatrix", new PropIncrementalAdjacencyMatrix(graph, t)).post();
-//
-//        // (p[j] == i) ⇔ t[i, j] and AND(!t[k, j], 0 ≤ k < j)
-//        for (int i = 0; i < n - 1; i++) {
-//            IntVar I = m.intVar(i);
-//            for (int j = 1; j < n; j++) {
-//                BoolVar[] clause = new BoolVar[i + 1];
-//                clause[i] = t[i + j * n];
-//                for (int k = 0; k < i; k++) {
-//                    clause[k] = t[k + j * n].not();
-//                }
-//                Constraint c = m.and(clause);
-//                Constraint pij = m.arithm(p[j], "=", I);
-//                m.ifThen(pij, c);
-//                m.ifThen(c, pij);
-//            }
-//        }
-//
-//        // p[i] ≤ p[i + 1]
-//        for (int i = 1; i < n - 1; i++) {
-//            m.arithm(p[i], "<=", p[i + 1]).post();
-//        }
-//    }
-//
-//    /**
-//     * Post a symmetry breaking constraint. This constraint is a symmetry breaking for
-//     * class of undirected connected graphs.
-//     * Note, that this method post this constraint directly, so it cannot be reified.
-//     * <p>
-//     * This symmetry breaking method based on paper:
-//     * Ulyantsev V., Zakirzyanov I., Shalyto A.
-//     * BFS-Based Symmetry Breaking Predicates for DFA Identification
-//     * //Language and Automata Theory and Applications. – Springer International Publishing, 2015. – С. 611-622.
-//     *
-//     * @param graph graph to be constrainted
-//     */
-//    default void postSymmetryBreaking(UndirectedGraphVar graph) {
-//        Model m = _me();
-//        // ---------------------- variables ------------------------
-//        int n = graph.getNbMaxNodes();
-//
-//        // t[i, j]
-//        BoolVar[] t = m.boolVarArray("T[]", n * n);
-//
-//        // p[i]
-//        IntVar[] p = new IntVar[n];
-//        p[0] = m.intVar("P[0]", 0);
-//        for (int i = 1; i < n; i++) {
-//            p[i] = m.intVar("P[" + i + "]", 0, i - 1);
-//        }
-//        // ---------------------- constraints -----------------------
-//        // t[i, j] <-> G
-//        new Constraint("AdjacencyMatrix", new PropIncrementalAdjacencyUndirectedMatrix(graph, t)).post();
-//
-//        // (p[j] == i) ⇔ t[i, j] and AND(!t[k, j], 0 ≤ k < j)
-//        for (int i = 0; i < n - 1; i++) {
-//            IntVar I = m.intVar(i);
-//            for (int j = 1; j < n; j++) {
-//                BoolVar[] clause = new BoolVar[i + 1];
-//                clause[i] = t[i + j * n];
-//                for (int k = 0; k < i; k++) {
-//                    clause[k] = t[k + j * n].not();
-//                }
-//                Constraint c = m.and(clause);
-//                Constraint pij = m.arithm(p[j], "=", I);
-//                m.ifThen(pij, c);
-//                m.ifThen(c, pij);
-//            }
-//        }
-//
-//        // p[i] ≤ p[i + 1]
-//        for (int i = 1; i < n - 1; i++) {
-//            m.arithm(p[i], "<=", p[i + 1]).post();
-//        }
-//    }
-//
-//    /**
-//     * Creates a symmetry breaking constraint. This constraint is a symmetry breaking for
-//     * class of undirected connected graphs.
-//     * <p>
-//     * This symmetry breaking method based on paper:
-//     * Codish M. et al.
-//     * Breaking Symmetries in Graph Representation
-//     * //IJCAI. – 2013. – С. 3-9.
-//     *
-//     * @param graph graph to be constrainted
-//     */
-//    default Constraint symmetryBreaking2(UndirectedGraphVar graph) {
-//        int n = graph.getNbMaxNodes();
-//        BoolVar[] t = _me().boolVarArray("T[]", n * n);
-//        return new Constraint("symmBreak",
-//                new PropIncrementalAdjacencyUndirectedMatrix(graph, t),
-//                new PropSymmetryBreaking(t)
-//        );
-//    }
-//
-//    /**
-//     * Creates a symmetry breaking constraint. This constraint is a symmetry breaking for
-//     * class of undirected connected graphs.
-//     * <p>
-//     * This symmetry breaking method based on paper:
-//     * Codish M. et al.
-//     * Breaking Symmetries in Graph Representation
-//     * //IJCAI. – 2013. – С. 3-9.
-//     *
-//     * @param graph graph to be constrainted
-//     */
-//    default Constraint symmetryBreaking3(UndirectedGraphVar graph) {
-//        int n = graph.getNbMaxNodes();
-//        BoolVar[] t = _me().boolVarArray("T[]", n * n);
-//        return new Constraint("symmBreakEx",
-//                new PropIncrementalAdjacencyUndirectedMatrix(graph, t),
-//                new PropSymmetryBreakingEx(t)
-//        );
-//    }
+    //***********************************************************************************
+    // SYMMETRY BREAKING CONSTRAINTS
+    //***********************************************************************************
+
+    /**
+     * Post a symmetry breaking constraint. This constraint is a symmetry breaking for
+     * class of directed graphs which contain a directed tree with root in node 0.
+     * (All nodes must be reachable from node 0)
+     * Note, that this method post this constraint directly, so it cannot be reified.
+     * <p>
+     * This symmetry breaking method based on paper:
+     * Ulyantsev V., Zakirzyanov I., Shalyto A.
+     * BFS-Based Symmetry Breaking Predicates for DFA Identification
+     * //Language and Automata Theory and Applications. – Springer International Publishing, 2015. – С. 611-622.
+     *
+     * @param graph graph to be constrainted
+     */
+    default void postSymmetryBreaking(DirectedGraphVar graph) {
+        Model m = ref();
+        // ---------------------- variables ------------------------
+        int n = graph.getNbMaxNodes();
+        // t[i, j]
+        BoolVar[] t = m.boolVarArray("T[]", n * n);
+        // p[i]
+        IntVar[] p = new IntVar[n];
+        p[0] = m.intVar("P[0]", 0);
+        for (int i = 1; i < n; i++) {
+            p[i] = m.intVar("P[" + i + "]", 0, i - 1);
+        }
+        // ---------------------- constraints -----------------------
+        // t[i, j] <-> G
+        new Constraint("AdjacencyMatrix", new PropIncrementalAdjacencyMatrix(graph, t)).post();
+
+        // (p[j] == i) ⇔ t[i, j] and AND(!t[k, j], 0 ≤ k < j)
+        for (int i = 0; i < n - 1; i++) {
+            IntVar I = m.intVar(i);
+            for (int j = 1; j < n; j++) {
+                BoolVar[] clause = new BoolVar[i + 1];
+                clause[i] = t[i + j * n];
+                for (int k = 0; k < i; k++) {
+                    clause[k] = t[k + j * n].not();
+                }
+                Constraint c = m.and(clause);
+                Constraint pij = m.arithm(p[j], "=", I);
+                m.ifThen(pij, c);
+                m.ifThen(c, pij);
+            }
+        }
+
+        // p[i] ≤ p[i + 1]
+        for (int i = 1; i < n - 1; i++) {
+            m.arithm(p[i], "<=", p[i + 1]).post();
+        }
+    }
+
+    /**
+     * Post a symmetry breaking constraint. This constraint is a symmetry breaking for
+     * class of undirected connected graphs.
+     * Note, that this method post this constraint directly, so it cannot be reified.
+     * <p>
+     * This symmetry breaking method based on paper:
+     * Ulyantsev V., Zakirzyanov I., Shalyto A.
+     * BFS-Based Symmetry Breaking Predicates for DFA Identification
+     * //Language and Automata Theory and Applications. – Springer International Publishing, 2015. – С. 611-622.
+     *
+     * @param graph graph to be constrainted
+     */
+    default void postSymmetryBreaking(UndirectedGraphVar graph) {
+        Model m = ref();
+        // ---------------------- variables ------------------------
+        int n = graph.getNbMaxNodes();
+
+        // t[i, j]
+        BoolVar[] t = m.boolVarArray("T[]", n * n);
+
+        // p[i]
+        IntVar[] p = new IntVar[n];
+        p[0] = m.intVar("P[0]", 0);
+        for (int i = 1; i < n; i++) {
+            p[i] = m.intVar("P[" + i + "]", 0, i - 1);
+        }
+        // ---------------------- constraints -----------------------
+        // t[i, j] <-> G
+        new Constraint("AdjacencyMatrix", new PropIncrementalAdjacencyUndirectedMatrix(graph, t)).post();
+
+        // (p[j] == i) ⇔ t[i, j] and AND(!t[k, j], 0 ≤ k < j)
+        for (int i = 0; i < n - 1; i++) {
+            IntVar I = m.intVar(i);
+            for (int j = 1; j < n; j++) {
+                BoolVar[] clause = new BoolVar[i + 1];
+                clause[i] = t[i + j * n];
+                for (int k = 0; k < i; k++) {
+                    clause[k] = t[k + j * n].not();
+                }
+                Constraint c = m.and(clause);
+                Constraint pij = m.arithm(p[j], "=", I);
+                m.ifThen(pij, c);
+                m.ifThen(c, pij);
+            }
+        }
+
+        // p[i] ≤ p[i + 1]
+        for (int i = 1; i < n - 1; i++) {
+            m.arithm(p[i], "<=", p[i + 1]).post();
+        }
+    }
+
+    /**
+     * Creates a symmetry breaking constraint. This constraint is a symmetry breaking for
+     * class of undirected connected graphs.
+     * <p>
+     * This symmetry breaking method based on paper:
+     * Codish M. et al.
+     * Breaking Symmetries in Graph Representation
+     * //IJCAI. – 2013. – С. 3-9.
+     *
+     * @param graph graph to be constrainted
+     */
+    default Constraint symmetryBreaking2(UndirectedGraphVar graph) {
+        int n = graph.getNbMaxNodes();
+        BoolVar[] t = ref().boolVarArray("T[]", n * n);
+        return new Constraint("symmBreak",
+                new PropIncrementalAdjacencyUndirectedMatrix(graph, t),
+                new PropSymmetryBreaking(t)
+        );
+    }
+
+    /**
+     * Creates a symmetry breaking constraint. This constraint is a symmetry breaking for
+     * class of undirected connected graphs.
+     * <p>
+     * This symmetry breaking method based on paper:
+     * Codish M. et al.
+     * Breaking Symmetries in Graph Representation
+     * //IJCAI. – 2013. – С. 3-9.
+     *
+     * @param graph graph to be constrainted
+     */
+    default Constraint symmetryBreaking3(UndirectedGraphVar graph) {
+        int n = graph.getNbMaxNodes();
+        BoolVar[] t = ref().boolVarArray("T[]", n * n);
+        return new Constraint("symmBreakEx",
+                new PropIncrementalAdjacencyUndirectedMatrix(graph, t),
+                new PropSymmetryBreakingEx(t)
+        );
+    }
 }
