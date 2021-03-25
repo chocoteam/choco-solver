@@ -121,7 +121,7 @@ public class DirectedTreeForestTest {
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
         Constraint cons = model2.directedTree(g2, 0);
-        Constraint cons2 = model2.noCycle(g2);
+        Constraint cons2 = model2.noCircuit(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
             if (cons.isSatisfied() == ESat.TRUE && cons2.isSatisfied() == ESat.TRUE) {
@@ -156,7 +156,7 @@ public class DirectedTreeForestTest {
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
         Constraint cons = model2.directedForest(g2);
-        Constraint cons2 = model2.noCycle(g2);
+        Constraint cons2 = model2.noCircuit(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
             if (cons.isSatisfied() == ESat.TRUE && cons2.isSatisfied() == ESat.TRUE) {

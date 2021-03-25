@@ -204,7 +204,7 @@ public class AcyclicTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
         // Test acyclic non-empty graph
@@ -217,7 +217,7 @@ public class AcyclicTest {
         LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
@@ -234,7 +234,7 @@ public class AcyclicTest {
         LB.addEdge(0, 0);
         UB.addEdge(0, 0);
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
         // Test non-empty graph with cycles
@@ -248,7 +248,7 @@ public class AcyclicTest {
         LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         UB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, nodes, edges);
         g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
@@ -264,7 +264,7 @@ public class AcyclicTest {
         );
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         model.nbEdges(g, model.intVar(4, 10)).post();
         SetVar nodeSet = model.graphNodeSetView(g);
         model.member(2, nodeSet).post();
@@ -289,7 +289,7 @@ public class AcyclicTest {
         );
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         model.nbEdges(g, model.intVar(20, 30)).post();
         while (model.getSolver().solve()) {}
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
@@ -306,7 +306,7 @@ public class AcyclicTest {
             UB.removeEdge(0, i);
         }
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
-        model.noCycle(g).post();
+        model.noCircuit(g).post();
         while (model.getSolver().solve()) {}
         // Generate solutions with checker
         Model model2 = new Model();
@@ -316,7 +316,7 @@ public class AcyclicTest {
             UB2.removeEdge(0, i);
         }
         DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
-        Constraint cons = model2.noCycle(g2);
+        Constraint cons = model2.noCircuit(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
             if (cons.isSatisfied() == ESat.TRUE) {

@@ -643,15 +643,28 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
 
     /**
      * Cycle elimination constraint
+     * Prevent the graph from containing cycles
+     * e.g. an edge set of the form {(i1,i2),(i2,i3),(i3,i1)}
+     *
+     * @param g a graph variable
+     * @return A cycle elimination constraint
+     */
+    default Constraint noCycle(UndirectedGraphVar g) {
+        return new Constraint("noCycle", new PropAcyclic(g));
+    }
+
+    /**
+     * Cycle elimination constraint
      * Prevent the graph from containing circuits
      * e.g. an edge set of the form {(i1,i2),(i2,i3),(i3,i1)}
      *
      * @param g a graph variable
      * @return A cycle elimination constraint
      */
-    default Constraint noCycle(GraphVar g) {
+    default Constraint noCircuit(DirectedGraphVar g) {
         return new Constraint("noCycle", new PropAcyclic(g));
     }
+
 
     //***********************************************************************************
     // CONNECTIVITY CONSTRAINTS
