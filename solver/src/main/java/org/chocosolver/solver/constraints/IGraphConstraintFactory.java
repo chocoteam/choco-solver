@@ -27,6 +27,8 @@ import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtLeastIncr
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeAtMostIncr;
 import org.chocosolver.solver.constraints.graph.degree.PropNodeDegreeVar;
 import org.chocosolver.solver.constraints.graph.inclusion.PropInclusion;
+import org.chocosolver.solver.constraints.graph.tree.PropArborescence;
+import org.chocosolver.solver.constraints.graph.tree.PropArborescences;
 import org.chocosolver.solver.constraints.graph.tree.PropReachability;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.graphs.Orientation;
@@ -818,7 +820,7 @@ public interface IGraphConstraintFactory {
         }
         nbPreds[root] = 0;
         return new Constraint("directedTree"
-//                , new PropArborescence(g, root)
+                , new PropArborescence(g, root)
                 , new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, nbPreds)
                 , new PropNodeDegreeAtLeastIncr(g, Orientation.PREDECESSORS, nbPreds)
         );
@@ -833,7 +835,7 @@ public interface IGraphConstraintFactory {
      */
     default Constraint directedForest(DirectedGraphVar g) {
         return new Constraint("directedForest",
-//                new PropArborescences(g),
+                new PropArborescences(g),
                 new PropNodeDegreeAtMostIncr(g, Orientation.PREDECESSORS, 1)
         );
     }

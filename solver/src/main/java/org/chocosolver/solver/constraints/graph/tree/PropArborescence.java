@@ -11,6 +11,8 @@ package org.chocosolver.solver.constraints.graph.tree;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.util.ESat;
+import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
 
 import java.util.BitSet;
 
@@ -95,5 +97,35 @@ public class PropArborescence extends PropArborescences {
                 }
             }
         }
+    }
+
+    @Override
+    public ESat isEntailed() {
+        // Assert that the root is in UB
+        if (!g.getPotentialNodes().contains(root)) {
+            return ESat.FALSE;
+        }
+        // First assert that the graph is acyclic, which is equivalent to asserting that the number of strongly
+        // connected components is equal to the number of mandatory nodes
+        StrongConnectivityFinder scfinder = new StrongConnectivityFinder(g.getLB());
+        scfinder.findAllSCC();
+        if (g.getMandatoryNodes().size() - scfinder.getNbSCC() > 0) {
+            return ESat.FALSE;
+        }
+        // Assert that the root has no mandatory predecessor
+        if (g.getMandatoryPredecessorsOf(root).size() > 0) {
+            return ESat.FALSE;
+        }
+        // Then assert that mandatory nodes (except root) have no more that one mandatory predecessor
+        // and at least one potential predecessor.
+        for (int i : g.getMandatoryNodes()) {
+            if (i != root && g.getMandatoryPredecessorsOf(i).size() > 1 && g.getPotentialPredecessorOf(i).size() == 0) {
+                return ESat.FALSE;
+            }
+        }
+        if (g.isInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
     }
 }

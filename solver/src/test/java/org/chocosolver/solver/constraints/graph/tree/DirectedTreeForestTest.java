@@ -21,6 +21,9 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -106,24 +109,31 @@ public class DirectedTreeForestTest {
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        for (int i = 1; i < n; i++) {
-            UB.removeEdge(0, i);
-        }
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.directedTree(g, 0).post();
-        while (model.getSolver().solve()) {}
+        List<DirectedGraph> l1 = new ArrayList<>();
+        while (model.getSolver().solve()) {
+            l1.add(new DirectedGraph(g.getValue()));
+        }
         // Generate solutions with checker
         Model model2 = new Model();
         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        for (int i = 1; i < n; i++) {
-            UB2.removeEdge(0, i);
-        }
         DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
         Constraint cons = model2.directedTree(g2, 0);
+        Constraint cons2 = model2.noCycle(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
-            if (cons.isSatisfied() == ESat.TRUE) {
+            if (cons.isSatisfied() == ESat.TRUE && cons2.isSatisfied() == ESat.TRUE) {
+                boolean found = false;
+                for (DirectedGraph graph : l1) {
+                    if (g2.getValue().equals(graph)) {
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    System.out.println(g2.getValue());
+                }
                 count++;
             }
         }
@@ -137,9 +147,6 @@ public class DirectedTreeForestTest {
         int n = 5;
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
-        for (int i = 2; i < n; i++) {
-            UB.removeEdge(0, i);
-        }
         DirectedGraphVar g = model.digraphVar("g", LB, UB);
         model.directedForest(g).post();
         while (model.getSolver().solve()) {}
@@ -147,14 +154,12 @@ public class DirectedTreeForestTest {
         Model model2 = new Model();
         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
-        for (int i = 2; i < n; i++) {
-            UB2.removeEdge(0, i);
-        }
         DirectedGraphVar g2 = model2.digraphVar("g", LB2, UB2);
         Constraint cons = model2.directedForest(g2);
+        Constraint cons2 = model2.noCycle(g2);
         int count = 0;
         while (model2.getSolver().solve()) {
-            if (cons.isSatisfied() == ESat.TRUE) {
+            if (cons.isSatisfied() == ESat.TRUE && cons2.isSatisfied() == ESat.TRUE) {
                 count++;
             }
         }

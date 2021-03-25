@@ -189,4 +189,63 @@ public class TreeTest {
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), count);
     }
+
+    @Test(groups="10s", timeOut=60000)
+    public void undirectedGenerateAllNodesTest() {
+        // Generate solutions with filtering
+        Model model = new Model();
+        int n = 6;
+        UndirectedGraph LB = GraphFactory.makeStoredAllNodesUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, true);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(model, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = model.graphVar("g", LB, UB);
+        model.tree(g).post();
+        List<UndirectedGraph> l1 = new ArrayList<>();
+        int realCount = 0;
+        while (model.getSolver().solve()) {
+            boolean b = true;
+            for (UndirectedGraph gl1 : l1) {
+                if (gl1.equals(g.getValue())) {
+                    b = false;
+                }
+            }
+            if (b) {
+                realCount++;
+                UndirectedGraph a = GraphFactory.makeUndirectedGraph(n, SetType.BITSET, SetType.BITSET, g.getValue().getNodes().toArray(), new int[][]{});
+                for (int i : g.getValue().getNodes()) {
+                    for (int j : g.getValue().getNeighborsOf(i)) {
+                        a.addEdge(i, j);
+                    }
+                }
+                l1.add(a);
+            }
+        }
+        Assert.assertEquals(realCount, model.getSolver().getSolutionCount());
+        // Generate solutions with checker
+        Model model2 = new Model();
+        UndirectedGraph LB2 = GraphFactory.makeStoredAllNodesUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, true);
+        UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(model2, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g2 = model2.graphVar("g", LB2, UB2);
+        Constraint cons = model2.tree(g2);
+        int count = 0;
+        List<UndirectedGraph> l2 = new ArrayList<>();
+        while (model2.getSolver().solve()) {
+            if (cons.isSatisfied() == ESat.TRUE) {
+                count++;
+                boolean b = true;
+                for (UndirectedGraph gl : l1) {
+                    if (gl.equals(g2.getValue())) {
+                        b = false;
+                    }
+                }
+                if (b) {
+                    System.out.println(g2.getValue());
+                    l2.add(g2.getValue());
+                }
+            }
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), count);
+        // Assert that there ase exactly n^(n-2) solutions (Cayley's formula for counting the number of
+        // trees with exactly n nodes.
+        Assert.assertEquals(count, (int) (Math.pow(n, n - 2)));
+    }
 }
