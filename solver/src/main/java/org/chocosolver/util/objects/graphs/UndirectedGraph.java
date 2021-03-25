@@ -118,6 +118,21 @@ public class UndirectedGraph implements IGraph {
         this(n, SetType.BITSET, edgeSetType, allNodes);
     }
 
+    /**
+     * Construct a read-only copy of another graph
+     * @param g the graph to copy
+     */
+    public UndirectedGraph(UndirectedGraph g) {
+        this.nodeSetType = SetType.FIXED_ARRAY;
+        this.edgeSetType = SetType.FIXED_ARRAY;
+        this.n = g.getNbMaxNodes();
+        this.nodes = SetFactory.makeConstantSet(g.getNodes().toArray());
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            neighbors[i] = SetFactory.makeConstantSet(g.getNeighborsOf(i).toArray());
+        }
+    }
+
     //***********************************************************************************
     // METHODS
     //***********************************************************************************

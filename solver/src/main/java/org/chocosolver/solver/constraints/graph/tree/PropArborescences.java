@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.graphOperations.connectivity.StrongConnectivityFinder;
 import org.chocosolver.util.graphOperations.dominance.AbstractLengauerTarjanDominatorsFinder;
 import org.chocosolver.util.graphOperations.dominance.AlphaDominatorsFinder;
 import org.chocosolver.util.graphOperations.dominance.SimpleDominatorsFinder;
@@ -156,8 +157,22 @@ public class PropArborescences extends Propagator<DirectedGraphVar> {
 
     @Override
     public ESat isEntailed() {
-        System.out.println("[WARNING] " + this.getClass().getSimpleName() + ".isEntail() is not implemented yet " +
-                "and returns true by default. Please do not reify this constraint ");
-        return ESat.TRUE;
+        // First assert that the graph LB is acyclic, which is equivalent to asserting that the number of strongly
+        // connected components is equal to the number of mandatory nodes
+        StrongConnectivityFinder scfinder = new StrongConnectivityFinder(g.getLB());
+        scfinder.findAllSCC();
+        if (g.getMandatoryNodes().size() - scfinder.getNbSCC() > 0) {
+            return ESat.FALSE;
+        }
+        // Then assert that no mandatory node has more than one mandatory predecessor
+        for (int i : g.getMandatoryNodes()) {
+            if (g.getMandatoryPredecessorsOf(i).size() > 1) {
+                return ESat.FALSE;
+            }
+        }
+        if (g.isInstantiated()) {
+            return ESat.TRUE;
+        }
+        return ESat.UNDEFINED;
     }
 }

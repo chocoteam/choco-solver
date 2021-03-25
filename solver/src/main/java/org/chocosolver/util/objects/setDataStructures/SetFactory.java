@@ -37,132 +37,132 @@ import org.chocosolver.util.objects.setDataStructures.swapList.Set_Swap2;
  */
 public class SetFactory {
 
-	//***********************************************************************************
-	// FACTORY - STORED SET
-	//***********************************************************************************
+    //***********************************************************************************
+    // FACTORY - STORED SET
+    //***********************************************************************************
 
-	public static boolean HARD_CODED = true;
+    public static boolean HARD_CODED = true;
 
-	/**
-	 * Creates a stored set of integers greater or equal than <code>offSet</code>
-	 * Such a set is restored after a backtrack
-	 * @param type      of set data structure
-	 * @param offSet	smallest value allowed in the set (possibly < 0)
-	 * @param model		model providing the backtracking environment
-	 * @return a new set which can be restored upon backtrack
-	 */
-	public static ISet makeStoredSet(SetType type, int offSet, Model model) {
-		IEnvironment environment = model.getEnvironment();
-		if (HARD_CODED) {
-			if (type == SetType.SMALLBIPARTITESET) {
-				return new Set_Std_Swap2(environment);
-			}else if (type == SetType.BIPARTITESET) {
-				return new Set_Std_Swap(environment, offSet);
-			}else if (type == SetType.BITSET) {
-				return new Set_Std_BitSet(environment, offSet);
-			}
-		}
-		return new StdSet(model,makeSet(type,offSet));
-	}
+    /**
+     * Creates a stored set of integers greater or equal than <code>offSet</code>
+     * Such a set is restored after a backtrack
+     * @param type      of set data structure
+     * @param offSet	smallest value allowed in the set (possibly < 0)
+     * @param model		model providing the backtracking environment
+     * @return a new set which can be restored upon backtrack
+     */
+    public static ISet makeStoredSet(SetType type, int offSet, Model model) {
+        IEnvironment environment = model.getEnvironment();
+        if (HARD_CODED) {
+            if (type == SetType.SMALLBIPARTITESET) {
+                return new Set_Std_Swap2(environment);
+            }else if (type == SetType.BIPARTITESET) {
+                return new Set_Std_Swap(environment, offSet);
+            }else if (type == SetType.BITSET) {
+                return new Set_Std_BitSet(environment, offSet);
+            }
+        }
+        return new StdSet(model,makeSet(type,offSet));
+    }
 
 
-	//***********************************************************************************
-	// FACTORY - SET
-	//***********************************************************************************
+    //***********************************************************************************
+    // FACTORY - SET
+    //***********************************************************************************
 
-	/**
-	 * Creates an empty set of integers greater or equal than <code>offSet</code>
-	 * @param type      	implementation type
-	 * @param offSet		smallest value allowed in the set (possibly < 0)
-	 * @return a new set
-	 */
-	public static ISet makeSet(SetType type, int offSet) {
-		switch (type) {
-			case RANGESET:
-				return makeRangeSet();
-			case BIPARTITESET:
-				return makeBipartiteSet(offSet);
-			case SMALLBIPARTITESET:
-				return makeSmallBipartiteSet();
-			case LINKED_LIST:
-				return makeLinkedList();
-			case BITSET:
-				return makeBitSet(offSet);
-			case FIXED_ARRAY: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_ARRAY+" set");
-			case FIXED_INTERVAL: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_INTERVAL+" set");
-			default:throw new UnsupportedOperationException("Unsupported SetType "+type);
-		}
-	}
+    /**
+     * Creates an empty set of integers greater or equal than <code>offSet</code>
+     * @param type      	implementation type
+     * @param offSet		smallest value allowed in the set (possibly < 0)
+     * @return a new set
+     */
+    public static ISet makeSet(SetType type, int offSet) {
+        switch (type) {
+            case RANGESET:
+                return makeRangeSet();
+            case BIPARTITESET:
+                return makeBipartiteSet(offSet);
+            case SMALLBIPARTITESET:
+                return makeSmallBipartiteSet();
+            case LINKED_LIST:
+                return makeLinkedList();
+            case BITSET:
+                return makeBitSet(offSet);
+            case FIXED_ARRAY: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_ARRAY+" set");
+            case FIXED_INTERVAL: throw new UnsupportedOperationException("Please use makeConstantSet method to create a "+SetType.FIXED_INTERVAL+" set");
+            default:throw new UnsupportedOperationException("Unsupported SetType "+type);
+        }
+    }
 
-	/**
-	 * Creates a set based on an ordered list of ranges
-	 * @return a new set
-	 */
-	public static ISet makeRangeSet() {
-		return new IntIterableRangeSet();
-	}
+    /**
+     * Creates a set based on an ordered list of ranges
+     * @return a new set
+     */
+    public static ISet makeRangeSet() {
+        return new IntIterableRangeSet();
+    }
 
-	// --- List
+    // --- List
 
-	/**
-	 * Creates a set based on a linked list
-	 * appropriate when the set has only a few elements
-	 * @return a new set
-	 */
-	public static ISet makeLinkedList() {
-		return new Set_LinkedList();
-	}
+    /**
+     * Creates a set based on a linked list
+     * appropriate when the set has only a few elements
+     * @return a new set
+     */
+    public static ISet makeLinkedList() {
+        return new Set_LinkedList();
+    }
 
-	// --- Bit Set
+    // --- Bit Set
 
-	/**
-	 * Creates a set of integers, based on an offseted BitSet,
-	 * Supports integers greater or equal than <code>offSet</code>
-	 * @param offSet	smallest value allowed in the set (possibly < 0)
-	 * @return a new set
-	 */
-	public static ISet makeBitSet(int offSet) {
-		return new Set_BitSet(offSet);
-	}
+    /**
+     * Creates a set of integers, based on an offseted BitSet,
+     * Supports integers greater or equal than <code>offSet</code>
+     * @param offSet	smallest value allowed in the set (possibly < 0)
+     * @return a new set
+     */
+    public static ISet makeBitSet(int offSet) {
+        return new Set_BitSet(offSet);
+    }
 
-	// --- Bipartite Set
+    // --- Bipartite Set
 
-	/**
-	 * Creates a set of integers, based on an offseted bipartite set,
-	 * Supports integers greater or equal than <code>offSet</code>
-	 * Optimal complexity
-	 * @param offSet	smallest value allowed in the set (possibly < 0)
-	 * @return a new bipartite set
-	 */
-	public static ISet makeBipartiteSet(int offSet) {
-		return new Set_Swap(offSet);
-	}
+    /**
+     * Creates a set of integers, based on an offseted bipartite set,
+     * Supports integers greater or equal than <code>offSet</code>
+     * Optimal complexity
+     * @param offSet	smallest value allowed in the set (possibly < 0)
+     * @return a new bipartite set
+     */
+    public static ISet makeBipartiteSet(int offSet) {
+        return new Set_Swap(offSet);
+    }
 
-	/**
-	 * Creates a set of integers, based on an offseted bipartite set, for small sets
-	 * (arraylist inside to consume less memory)
-	 * @return a new bipartite set
-	 */
-	public static ISet makeSmallBipartiteSet() {
-		return new Set_Swap2();
-	}
+    /**
+     * Creates a set of integers, based on an offseted bipartite set, for small sets
+     * (arraylist inside to consume less memory)
+     * @return a new bipartite set
+     */
+    public static ISet makeSmallBipartiteSet() {
+        return new Set_Swap2();
+    }
 
-	// --- Constant Set
+    // --- Constant Set
 
-	/**
-	 * Creates a fixed set of integers, equal to <code>cst</code>
-	 * @param cst	set value
-	 * @return a fixed set
-	 */
-	public static ISet makeConstantSet(int[] cst) {
-		return new Set_FixedArray(cst);
-	}
+    /**
+     * Creates a fixed set of integers, equal to <code>cst</code>
+     * @param cst	set value
+     * @return a fixed set
+     */
+    public static ISet makeConstantSet(int[] cst) {
+        return new Set_FixedArray(cst);
+    }
 
-	/**
-	 * Creates a constant set of integers represented with an interval [lb, ub]
-	 * @return a new interval (constant)
-	 */
-	public static ISet makeConstantSet(int lb, int ub) {
-		return new Set_CstInterval(lb, ub);
-	}
+    /**
+     * Creates a constant set of integers represented with an interval [lb, ub]
+     * @return a new interval (constant)
+     */
+    public static ISet makeConstantSet(int lb, int ub) {
+        return new Set_CstInterval(lb, ub);
+    }
 }
