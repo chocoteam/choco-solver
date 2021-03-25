@@ -102,7 +102,7 @@ public class SymmetryBreakingDirectedTest {
 
         containsDirectedTree(graph).post();
         model.nbEdges(graph, model.intVar(m)).post();
-        model.noCycle(graph).post();
+        model.noCircuit(graph).post();
 
         // add symmetry breaking constraint if necessary
         if (addSymmetryBreaking) {
