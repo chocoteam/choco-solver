@@ -14,8 +14,9 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.sat.SatSolver;
-import org.chocosolver.sat.SatSolver.*;
+import org.chocosolver.sat.SatDecorator;
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.MiniSat.Clause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -26,10 +27,11 @@ import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
 
-import static org.chocosolver.sat.SatSolver.*;
+import static org.chocosolver.sat.MiniSat.sign;
+import static org.chocosolver.sat.MiniSat.var;
 
 /**
- * A propagator to deal with clauses and interface a {@link SatSolver}.
+ * A propagator to deal with clauses and interface a {@link MiniSat}.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -40,7 +42,7 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * The SAT solver
      */
-    private SatSolver sat_;
+    private SatDecorator sat_;
 
     /**
      * Map between BoolVar and its literal
@@ -83,7 +85,7 @@ public class PropSat extends Propagator<BoolVar> {
         this.vars = new BoolVar[0];    // erase model.ONE from the variable scope
 
         this.indices_ = new TObjectIntHashMap<>(16, .5f, -1);
-        sat_ = new SatSolver();
+        sat_ = new SatDecorator();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();
         add_var = new ArrayList<>(16);
@@ -119,26 +121,8 @@ public class PropSat extends Propagator<BoolVar> {
         if (isCompletelyInstantiated()) {
             int var, val;
             boolean sign;
-            for (int k : sat_.implies_.keys()) {
-                if (k < 0) continue; // ignore secret variables
-                sign = sign(negated(k));
-                var = var(k);
-                val = vars[var].getValue();
-                if (val == (sign ? 0 : 1)) {
-                    TIntList lits = sat_.implies_.get(k);
-                    for (int l : lits.toArray()) {
-                        if (l < 0) continue; // ignore secret variables
-                        sign = sign(l);
-                        var = var(l);
-                        val = vars[var].getValue();
-                        if (val == (sign ? 0 : 1)) {
-                            return ESat.FALSE;
-                        }
-                    }
-                }
-            }
             boolean OK = clauseEntailed(sat_.clauses);
-            OK &= clauseEntailed(sat_.learnts);
+            OK &= clauseEntailed(sat_.dynClauses);
             return ESat.eval(OK);
         }
         return ESat.UNDEFINED;
@@ -157,9 +141,9 @@ public class PropSat extends Propagator<BoolVar> {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
-                if (lit < 0) continue; // ignore secret variables
                 sign = sign(lit);
                 var = var(lit);
+                if (var >= vars.length) continue; // ignore secret variables
                 val = vars[var].getValue();
                 if (val == (sign ? 0 : 1)) cnt++; // if the lit is ok
                 else break;
@@ -172,7 +156,7 @@ public class PropSat extends Propagator<BoolVar> {
     /**
      * @return the underlying SAT solver
      */
-    public SatSolver getSatSolver() {
+    public MiniSat getSatSolver() {
         return sat_;
     }
 
@@ -231,7 +215,7 @@ public class PropSat extends Propagator<BoolVar> {
      * @return its literal
      */
     public int makeLiteral(BoolVar expr, boolean sign) {
-        return SatSolver.makeLiteral(makeVar(expr), sign);
+        return MiniSat.makeLiteral(makeVar(expr), sign);
     }
 
     /**
@@ -248,15 +232,15 @@ public class PropSat extends Propagator<BoolVar> {
             }
             int var = index;
             boolean sign = vars[index].getValue() != 0;
-            int lit = SatSolver.makeLiteral(var, sign);
+            int lit = MiniSat.makeLiteral(var, sign);
             boolean fail = !sat_.propagateOneLiteral(lit);
             // Remark: explanations require to instantiated variables even if fail is set to true
             sat_trail_.set(sat_.trailMarker());
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
-                if (lit < 0) continue; // ignore secret variable
                 var = var(lit);
                 boolean assigned_bool = sign(lit);
+                if (var >= vars.length) continue; // ignore secret variable
                 vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
             }
             if (fail) {

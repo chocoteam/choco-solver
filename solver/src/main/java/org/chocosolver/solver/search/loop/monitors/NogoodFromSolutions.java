@@ -12,7 +12,7 @@ package org.chocosolver.solver.search.loop.monitors;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
-import org.chocosolver.sat.SatSolver;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -54,7 +54,7 @@ public class NogoodFromSolutions implements IMonitorSolution {
         int n = decisionVars.length;
         ps.clear();
         for (int i = 0; i < n; i++) {
-            ps.add(SatSolver.negated(png.Literal(decisionVars[i], decisionVars[i].getValue(), true)));
+            ps.add(MiniSat.negated(png.Literal(decisionVars[i], decisionVars[i].getValue(), true)));
         }
         png.addLearnt(ps.toArray());
     }
