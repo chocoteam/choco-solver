@@ -1,5 +1,5 @@
 /*
- * This file is part of choco-sat, http://choco-solver.org/
+ * This file is part of choco-solver, http://choco-solver.org/
  *
  * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.sat;
+package org.chocosolver.util.objects;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
@@ -17,11 +17,16 @@ import gnu.trove.list.array.TIntArrayList;
  * Based on <a href="http://minisat.se/MiniSat.html">MiniSat</a> implementation.
  * <br/>
  *
+ * <p>
+ * It is a minimum-heap with respect the {@link Comp} a comparator to define.
+ * </p>
+ *
  * @author Charles Prud'homme
  * @since 19/03/2021
  */
-public class Heap {
+public class IntHeap {
 
+    @FunctionalInterface
     public interface Comp {
         boolean lt(int a, int b);
     }
@@ -33,40 +38,75 @@ public class Heap {
     // Each integers position (index) in the Heap
     TIntArrayList indices = new TIntArrayList();
 
-    public Heap(Comp comp) {
+    /**
+     * Create a minimum heap wrt to {@code comp} a specific comparator.
+     *
+     * @param comp a comparator that compare 2 elements in the heap (a,b) and returns true
+     *             iff {@code f(a) < f(b)} where {@code f} is designed on purpose.
+     */
+    public IntHeap(Comp comp) {
         this.comp = comp;
     }
 
+    /**
+     * @return number of element in this heap.
+     */
     public int size() {
         return heap.size();
     }
 
-    public boolean empty() {
+    /**
+     * @return {@code true} if this heap is empty.
+     */
+    public boolean isEmpty() {
         return heap.size() == 0;
     }
 
-    public boolean inHeap(int n) {
+    /**
+     * @param n an element
+     * @return {@code true} if this heap contains the element {@code n}.
+     */
+    public boolean contains(int n) {
         return n < indices.size() && indices.get(n) >= 0;
     }
 
+    /**
+     * @param pos a position
+     * @return the element at position {@code pos} in this.
+     * @throws ArrayIndexOutOfBoundsException if {@code pos} is not in the bounds of the heap.
+     */
     public int get(int pos) {
         return heap.get(pos);
     }
 
+    /**
+     * Move an element up in the heap considering its weight has decreased.
+     *
+     * @param n an element
+     */
     public void decrease(int n) {
-        assert (inHeap(n));
+        assert (contains(n));
         percolateUp(indices.get(n));
     }
 
-    void increase(int n) {
-        assert (inHeap(n));
+    /**
+     * Move an element up in the heap considering its weight has increased.
+     *
+     * @param n an element
+     */
+    public void increase(int n) {
+        assert (contains(n));
         percolateDown(indices.get(n));
     }
 
 
-    // Safe variant of insert/decrease/increase:
-    void update(int n) {
-        if (!inHeap(n))
+    /**
+     * Move an element in the heap considering its weight has changed.
+     *
+     * @param n an element
+     */
+    public void update(int n) {
+        if (!contains(n))
             insert(n);
         else {
             percolateUp(indices.get(n));
@@ -74,20 +114,29 @@ public class Heap {
         }
     }
 
+    /**
+     * Insert an element in this heap
+     *
+     * @param n element to insert
+     */
     public void insert(int n) {
         int k = indices.size();
         //indices.ensureCapacity(n + 1);
-        if(k <= n){
+        if (k <= n) {
             indices.fill(k, n + 1, -1);
         }
-        assert (!inHeap(n));
+        assert (!contains(n));
 
         indices.set(n, heap.size());
         heap.add(n);
         percolateUp(indices.get(n));
     }
 
-
+    /**
+     * Remove the element at root node, ie, the one with the minimum weight.
+     *
+     * @return the smallest element and update this.
+     */
     public int removeMin() {
         int x = heap.get(0);
         heap.set(0, heap.get(heap.size() - 1));
@@ -99,19 +148,26 @@ public class Heap {
     }
 
 
-    // Rebuild the heap from scratch, using the elements in 'ns':
-    public void build(TIntList ns) {
+    /**
+     * Empty this and add elements from {@code elements}.
+     *
+     * @param elements new list of element to store in the heap (the comparator has not changed though).
+     */
+    public void build(TIntList elements) {
         clear();
-        for (int i = 0; i < ns.size(); i++) {
-            indices.set(ns.get(i), i);
-            heap.add(ns.get(i));
+        for (int i = 0; i < elements.size(); i++) {
+            indices.set(elements.get(i), i);
+            heap.add(elements.get(i));
         }
 
         for (int i = heap.size() / 2 - 1; i >= 0; i--)
             percolateDown(i);
     }
 
-    void clear() {
+    /**
+     * Remove all elements from this.
+     */
+    public void clear() {
         for (int i = 0; i < heap.size(); i++)
             indices.set(heap.get(i), -1);
         heap.clear();
@@ -121,19 +177,19 @@ public class Heap {
     //////////////////////////////
     // Index "traversal" functions
     //////////////////////////////
-    static int left(int i) {
-        return i * 2 + 1;
+    private static int left(int i) {
+        return (i << 1) + 1;
     }
 
-    static int right(int i) {
-        return (i + 1) * 2;
+    private static int right(int i) {
+        return (i + 1) << 1;
     }
 
-    static int parent(int i) {
+    private static int parent(int i) {
         return (i - 1) >> 1;
     }
 
-    void percolateUp(int i) {
+    private void percolateUp(int i) {
         int x = heap.get(i);
         int p = parent(i);
 
@@ -148,7 +204,7 @@ public class Heap {
     }
 
 
-    void percolateDown(int i) {
+    private void percolateDown(int i) {
         int x = heap.get(i);
         while (left(i) < heap.size()) {
             int child = right(i) < heap.size() && comp.lt(heap.get(right(i)), heap.get(left(i))) ? right(i) : left(i);

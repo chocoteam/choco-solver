@@ -1,5 +1,5 @@
 /*
- * This file is part of choco-sat, http://choco-solver.org/
+ * This file is part of choco-solver, http://choco-solver.org/
  *
  * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
@@ -13,6 +13,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.util.objects.IntHeap;
 
 import java.util.*;
 
@@ -107,7 +108,7 @@ public class MiniSat implements SatFactory, Dimacs {
     BitSet polarity = new BitSet();
     TIntArrayList analyze_toclear = new TIntArrayList();
     TDoubleArrayList activity = new TDoubleArrayList();
-    Heap order_heap = new Heap((a, b) -> activity.get(a) > activity.get(b));
+    IntHeap order_heap = new IntHeap((a, b) -> activity.get(a) > activity.get(b));
     Random rand;
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
     public TIntArrayList touched_variables_ = new TIntArrayList();
@@ -147,7 +148,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     private void insertVarOrder(int v) {
-        if (!order_heap.inHeap(v) && decision.get(v)) {
+        if (!order_heap.contains(v) && decision.get(v)) {
             order_heap.insert(v);
         }
     }
@@ -528,7 +529,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 cancelUntil(backtrack_level);
 
                 for (int v = 0; v < nVars(); v++) {
-                    assert valueVar(v) != Boolean.lUndef || order_heap.inHeap(v) : v + " not heaped";
+                    assert valueVar(v) != Boolean.lUndef || order_heap.contains(v) : v + " not heaped";
                 }
 
                 if (learnt_clause.size() == 1) {
@@ -593,7 +594,7 @@ public class MiniSat implements SatFactory, Dimacs {
         int next = varUndef;
 
         // Random decision:
-        if (rand.nextDouble() < random_var_freq && !order_heap.empty()) {
+        if (rand.nextDouble() < random_var_freq && !order_heap.isEmpty()) {
             next = order_heap.get(rand.nextInt(order_heap.size()));
             if (valueVar(next) == Boolean.lUndef && decision.get(next))
                 rnd_decisions++;
@@ -601,7 +602,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
         // Activity based decision:
         while (next == varUndef || valueVar(next) != Boolean.lUndef || !decision.get(next))
-            if (order_heap.empty()) {
+            if (order_heap.isEmpty()) {
                 next = varUndef;
                 break;
             } else {
@@ -828,7 +829,7 @@ public class MiniSat implements SatFactory, Dimacs {
             var_inc *= 1e-100;
         }
         // Update order_heap with respect to new activity:
-        if (order_heap.inHeap(v))
+        if (order_heap.contains(v))
             order_heap.decrease(v);
     }
 

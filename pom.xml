@@ -24,7 +24,6 @@
     </description>
 
     <modules>
-        <module>sat</module>
         <module>solver</module>
         <module>parsers</module>
         <module>examples</module>
@@ -46,11 +45,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-sat</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.choco-solver</groupId>
                 <artifactId>choco-solver</artifactId>
