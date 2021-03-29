@@ -24,6 +24,8 @@ import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
+import org.chocosolver.solver.variables.view.bool.BoolEqView;
+import org.chocosolver.solver.variables.view.bool.BoolLeqView;
 import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueBoundIterator;
@@ -34,14 +36,14 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 /**
  * An abstract class for boolean views over {@link org.chocosolver.solver.variables.IntVar}.
  *
- * @see EqView
- * @see LeqView
+ * @see BoolEqView
+ * @see BoolLeqView
  * <p>
  * Project: choco-solver.
  * @author Charles Prud'homme
  * @since 04/12/2018.
  */
-public abstract class IntBoolView<I extends IntVar> extends IntView<I> implements BoolVar {
+public abstract class BoolIntView<I extends IntVar> extends IntView<I> implements BoolVar {
 
     /**
      * indicate if the view is fixed
@@ -62,12 +64,12 @@ public abstract class IntBoolView<I extends IntVar> extends IntView<I> implement
     /**
      * To iterate over removed values
      */
-    IEnumDelta delta = NoDelta.singleton;
+    protected IEnumDelta delta = NoDelta.singleton;
     /**
      * Set to <tt>true</tt> if this variable reacts is associated with at least one propagator which
      * reacts on value removal
      */
-    boolean reactOnRemoval = false;
+    protected boolean reactOnRemoval = false;
 
     /**
      * A view based on <i>var<i/> and a constant
@@ -75,7 +77,7 @@ public abstract class IntBoolView<I extends IntVar> extends IntView<I> implement
      * @param var  an integer variable
      * @param cste an int
      */
-    IntBoolView(final I var, String op, final int cste) {
+    protected BoolIntView(final I var, String op, final int cste) {
         super("(" + var.getName() + op + cste + ")", var);
         this.cste = cste;
         this.fixed = var.getModel().getEnvironment().makeBool(false);

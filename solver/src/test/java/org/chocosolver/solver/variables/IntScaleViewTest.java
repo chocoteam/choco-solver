@@ -29,7 +29,7 @@ import static org.testng.Assert.assertEquals;
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public class ScaleViewTest {
+public class IntScaleViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void test1() {

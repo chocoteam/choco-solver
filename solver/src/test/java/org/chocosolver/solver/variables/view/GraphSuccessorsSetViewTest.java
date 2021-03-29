@@ -15,6 +15,7 @@ import org.chocosolver.solver.constraints.graph.basic.PropNbEdges;
 import org.chocosolver.solver.constraints.graph.basic.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.view.set.SetSuccessorsGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -42,7 +43,7 @@ public class GraphSuccessorsSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = m.graphVar("g", LB, UB);
-        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
+        SetSuccessorsGraphView s = new SetSuccessorsGraphView("s", g, 0);
         Assert.assertEquals(s.getLB().size(), 0);
         Assert.assertEquals(s.getUB().size(), 4);
         while (m.getSolver().solve()) {
@@ -65,7 +66,7 @@ public class GraphSuccessorsSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = m.graphVar("g", LB, UB);
-        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
+        SetSuccessorsGraphView s = new SetSuccessorsGraphView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();
@@ -88,7 +89,7 @@ public class GraphSuccessorsSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         UndirectedGraphVar g = m.graphVar("g", LB, UB);
-        GraphSuccessorsSetView s = new GraphSuccessorsSetView("s", g, 0);
+        SetSuccessorsGraphView s = new SetSuccessorsGraphView("s", g, 0);
         s.instantiateTo(new int[] {2, 3}, s);
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getNeighborsOf(0).toArray();

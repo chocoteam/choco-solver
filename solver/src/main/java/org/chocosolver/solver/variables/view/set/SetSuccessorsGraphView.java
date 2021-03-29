@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -22,13 +22,14 @@ import org.chocosolver.util.procedure.PairProcedure;
 import java.util.Arrays;
 
 /**
- * A GraphSetView representing the set of predecessors of a node in a graph variable.
- * Note that if the graph variable is undirected, the set of predecessors is the set of neighbors.
+ * A GraphSetView representing the set of successors of a node in a graph variable.
+ * Note that if the graph variable is undirected, the set of successors is the set of neighbors.
  * If the node is removed from the graph envelope, the set is empty.
+ *
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E> {
+public class SetSuccessorsGraphView<E extends GraphVar> extends SetGraphView<E> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -36,12 +37,12 @@ public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E
     protected PairProcedure arcEnforced;
 
     /**
-     * Create a set view over the predecessors of a graph variable node.
+     * Create a set view over the successors of a graph variable node.
      * @param name name of the variable
      * @param graphVar observed graph variable
      * @param node index of the observed node
      */
-    public GraphPredecessorsSetView(String name, E graphVar, int node) {
+    public SetSuccessorsGraphView(String name, E graphVar, int node) {
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
@@ -58,22 +59,22 @@ public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E
     }
 
     /**
-     * Create a set view over the predecessors of a graph variable node.
+     * Create a set view over the successors of a graph variable node.
      * @param graphVar observed graph variable
      * @param node index of the observed node
      */
-    public GraphPredecessorsSetView(E graphVar, int node) {
-        this("PREDECESSORS_OF(" + graphVar.getName() + ", " + node + ")", graphVar, node);
+    public SetSuccessorsGraphView(E graphVar, int node) {
+        this("SUCCESSORS_OF(" + graphVar.getName() + ", " + node + ")", graphVar, node);
     }
 
     @Override
     public ISet getLB() {
-        return graphVar.getMandatoryPredecessorsOf(node);
+        return graphVar.getMandatorySuccessorsOf(node);
     }
 
     @Override
     public ISet getUB() {
-        return graphVar.getPotentialPredecessorOf(node);
+        return graphVar.getPotentialSuccessorsOf(node);
     }
 
     @Override
@@ -102,12 +103,12 @@ public class GraphPredecessorsSetView<E extends GraphVar> extends GraphSetView<E
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        return graphVar.removeEdge(element, node, this);
+        return graphVar.removeEdge(node, element, this);
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        return graphVar.enforceEdge(element, node, this);
+        return graphVar.enforceEdge(node, element, this);
     }
 
     @Override

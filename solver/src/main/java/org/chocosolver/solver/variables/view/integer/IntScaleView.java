@@ -7,25 +7,25 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.integer;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
+import org.chocosolver.solver.variables.view.IntView;
+import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-
+import org.chocosolver.util.tools.MathUtils;
 
 /**
- * declare an IntVar based on X and C, such as X + C
- * <br/>
+ * declare an IntVar based on X and C, such as X * C
+ * <p>
  * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
  * C. Shulte and G. Tack.<br/>
  * Eleventh International Conference on Principles and Practice of Constraint Programming
@@ -33,20 +33,18 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class OffsetView<I extends IntVar> extends IntView<I> {
+public final class IntScaleView<I extends IntVar> extends IntView<I> {
 
-    /**
-     * A constant value
-     */
     public final int cste;
 
     /**
-     * A view based on <i>var<i/> such that <i>var<i/> + <i>cste<i/>
-     * @param var an integer variable
-     * @param cste an int
+     * Create a <i>cste<i/> &times; <i>var<i/> view
+     * @param var a variable
+     * @param cste a positive integer
      */
-    public OffsetView(final I var, final int cste) {
-        super("(" + var.getName() + "+" + cste + ")", var);
+    public IntScaleView(final I var, final int cste) {
+        super("(" + var.getName() + "*" + cste + ")", var);
+        assert (cste > 0) : "view cste must be >0";
         this.cste = cste;
     }
 
@@ -55,91 +53,96 @@ public final class OffsetView<I extends IntVar> extends IntView<I> {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
+//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator)) {
             @Override
             protected int transform(int value) {
-                return value + cste;
+                return cste * value;
             }
         };
     }
 
     @Override
     protected boolean doInstantiateVar(int value) throws ContradictionException {
-        return var.instantiateTo(value - cste, this);
+        if (value % cste != 0) {
+            model.getSolver().getEventObserver().instantiateTo(this, value, this, getLB(), getUB());
+            this.contradiction(this, MSG_INST);
+        }
+        return var.instantiateTo(value / cste, this);
     }
 
     @Override
     protected boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
-        return var.updateLowerBound(value - cste, this);
+        return var.updateLowerBound(MathUtils.divCeil(value, cste), this);
     }
 
     @Override
     protected boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
-        return var.updateUpperBound(value - cste, this);
+        return var.updateUpperBound(MathUtils.divFloor(value, cste), this);
     }
 
     @Override
     protected boolean doRemoveValueFromVar(int value) throws ContradictionException {
-        return var.removeValue(value - cste, this);
+        return value % cste == 0 && var.removeValue(value / cste, this);
     }
 
     @Override
     protected boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
-        return var.removeInterval(from - cste, to - cste, this);
+        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), this);
     }
 
     @Override
     public boolean contains(int value) {
-        return var.contains(value - cste);
+        return value % cste == 0 && var.contains(value / cste);
     }
 
     @Override
     public boolean isInstantiatedTo(int value) {
-        return var.isInstantiatedTo(value - cste);
+        return value % cste == 0 && var.isInstantiatedTo(value / cste);
     }
 
     @Override
     public int getValue() {
-        return var.getValue() + cste;
+        return var.getValue() * cste;
     }
 
     @Override
     public int getLB() {
-        return var.getLB() + cste;
+        return var.getLB() * cste;
     }
 
     @Override
     public int getUB() {
-        return var.getUB() + cste;
+        return var.getUB() * cste;
     }
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(v - cste);
+        int value = var.nextValue(MathUtils.divFloor(v, cste));
         if (value == Integer.MAX_VALUE) {
             return value;
         }
-        return value + cste;
+        return value * cste;
     }
 
     @Override
     public int nextValueOut(int v) {
-        return var.nextValueOut(v - cste) + cste;
+        return var.nextValueOut(MathUtils.divFloor(v, cste)) * cste;
     }
 
     @Override
     public int previousValue(int v) {
-        int value = var.previousValue(v - cste);
+        int value = var.previousValue(MathUtils.divCeil(v, cste));
         if (value == Integer.MIN_VALUE) {
             return Integer.MIN_VALUE;
         }
-        return value + cste;
+        return value * cste;
     }
 
     @Override
     public int previousValueOut(int v) {
-        return var.previousValueOut(v - cste) + cste;
+        return var.previousValueOut(MathUtils.divCeil(v, cste)) * cste;
     }
 
     @Override
@@ -149,7 +152,7 @@ public final class OffsetView<I extends IntVar> extends IntView<I> {
 
     @Override
     public String toString() {
-        return "(" + var.toString() + (cste >= 0 ? " + " : " - ") + Math.abs(cste) + ") = [" + getLB() + "," + getUB() + "]";
+        return "(" + this.var.toString() + " * " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
@@ -183,12 +186,12 @@ public final class OffsetView<I extends IntVar> extends IntView<I> {
 
                 @Override
                 public int next() {
-                    return vit.next() + cste;
+                    return vit.next() * cste;
                 }
 
                 @Override
                 public int previous() {
-                    return vit.previous() + cste;
+                    return vit.previous() * cste;
                 }
 
                 @Override
@@ -208,57 +211,71 @@ public final class OffsetView<I extends IntVar> extends IntView<I> {
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
+        if (cste == 1) return var.getRangeIterator(bottomUp);
+        // cste > 2, so no range anymore!
         if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeIterator() {
 
-                DisposableRangeIterator vir;
+
+                DisposableValueIterator vit;
+                int min,
+                        max;
 
                 @Override
                 public void bottomUpInit() {
-                    super.bottomUpInit();
-                    vir = var.getRangeIterator(true);
+                    vit = getValueIterator(true);
+                    if (vit.hasNext()) {
+                        min = vit.next();
+                    }
+                    max = min;
                 }
 
                 @Override
                 public void topDownInit() {
-                    super.topDownInit();
-                    vir = var.getRangeIterator(false);
+                    vit = getValueIterator(false);
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
+                    }
+                    min = max;
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return vir.hasNext();
+                    return min != Integer.MAX_VALUE;
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return vir.hasPrevious();
+                    return max != -Integer.MAX_VALUE;
                 }
 
                 @Override
                 public void next() {
-                    vir.next();
+                    if (vit.hasNext()) {
+                        min = max = vit.next();
+                    } else {
+                        min = Integer.MAX_VALUE;
+                    }
                 }
 
                 @Override
                 public void previous() {
-                    vir.previous();
+                    if (vit.hasPrevious()) {
+                        max = vit.previous();
+                        min = max;
+                    } else {
+                        max = -Integer.MAX_VALUE;
+                    }
                 }
 
                 @Override
                 public int min() {
-                    return vir.min() + cste;
+                    return min;
                 }
 
                 @Override
                 public int max() {
-                    return vir.max() + cste;
-                }
-
-                @Override
-                public void dispose() {
-                    super.dispose();
-                    vir.dispose();
+                    return max;
                 }
             };
         }
@@ -274,36 +291,17 @@ public final class OffsetView<I extends IntVar> extends IntView<I> {
     public void justifyEvent(IntEventType mask, int one, int two, int three) {
         switch (mask) {
             case DECUPP:
-                model.getSolver().getEventObserver().updateUpperBound(this, one + cste, two + cste, this);
+                model.getSolver().getEventObserver().updateUpperBound(this, one * cste, two * cste, this);
                 break;
             case INCLOW:
-                model.getSolver().getEventObserver().updateLowerBound(this, one + cste, two + cste, this);
+                model.getSolver().getEventObserver().updateLowerBound(this, one * cste, two * cste, this);
                 break;
             case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, one + cste, this);
+                model.getSolver().getEventObserver().removeValue(this, one * cste, this);
                 break;
             case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, one + cste, this, two + cste, three + cste);
+                model.getSolver().getEventObserver().instantiateTo(this, one * cste, this, two * cste, three * cste);
                 break;
-        }
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set0, set1;
-        if (explanation.readVar(p) == this) { // case a. (see javadoc)
-            set1 = explanation.complement(getVariable());
-            set0 = explanation.domain(getVariable());
-            set0.plus(cste);
-            this.intersectLit(set0, explanation);
-            getVariable().unionLit(set1, explanation);
-        } else { // case b. (see javadoc)
-            assert explanation.readVar(p) == getVariable();
-            set0 = explanation.complement(this);
-            set1 = explanation.domain(this);
-            set1.minus(cste);
-            this.unionLit(set0, explanation);
-            getVariable().intersectLit(set1, explanation);
         }
     }
 }

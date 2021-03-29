@@ -7,17 +7,19 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.view.SetView;
 
 /**
  * An abstract class for set views over graph variables.
+ *
  * @author Dimitri Justeau-Allaire
  * @since 01/03/2021
  */
-public abstract class GraphSetView<E extends GraphVar> extends SetView<E> {
+public abstract class SetGraphView<E extends GraphVar> extends SetView<E> {
 
     protected E graphVar;
 
@@ -27,7 +29,7 @@ public abstract class GraphSetView<E extends GraphVar> extends SetView<E> {
      * @param name  name of the variable
      * @param graphVar observed graph variable
      */
-    protected GraphSetView(String name, E graphVar) {
+    protected SetGraphView(String name, E graphVar) {
         super(name, graphVar);
         this.graphVar = graphVar;
     }
