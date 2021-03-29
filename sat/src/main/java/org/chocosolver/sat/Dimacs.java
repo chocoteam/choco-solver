@@ -66,7 +66,7 @@ public interface Dimacs {
                     }
                     lits.add(i > 0 ?
                             MiniSat.makeLiteral(var) :
-                            MiniSat.negated(MiniSat.makeLiteral(var)));
+                            MiniSat.neg(MiniSat.makeLiteral(var)));
                     j++;
                 }
                 if (i == 0 && lits.size() > 0) {

@@ -52,15 +52,15 @@ public class PropNogoodsTest {
         lits[5] = PNG.Literal(vars[2], 0, false);
         PNG.initialize();
         TIntList list = new TIntArrayList();
-        list.add(MiniSat.negated(lits[0]));
+        list.add(MiniSat.neg(lits[0]));
         list.add(lits[1]);
         PNG.addNogood(list);
         list.clear();
-        list.add(MiniSat.negated(lits[2]));
+        list.add(MiniSat.neg(lits[2]));
         list.add(lits[3]);
         PNG.addNogood(list);
         list.clear();
-        list.add(MiniSat.negated(lits[4]));
+        list.add(MiniSat.neg(lits[4]));
         list.add(lits[5]);
         PNG.addNogood(list);
         PNG.propagate(2);
@@ -83,11 +83,11 @@ public class PropNogoodsTest {
         Assert.assertEquals(vars[2].getDomainSize(), 3);
 
         TIntList list = new TIntArrayList();
-        list.add(MiniSat.negated(lits[0]));
+        list.add(MiniSat.neg(lits[0]));
         list.add(lits[2]);
         PNG.addNogood(list);
         list.clear();
-        list.add(MiniSat.negated(lits[2]));
+        list.add(MiniSat.neg(lits[2]));
         list.add(lits[4]);
         PNG.addNogood(list);
         vars[0].instantiateTo(0, Cause.Null);
@@ -105,11 +105,11 @@ public class PropNogoodsTest {
     public void testPropagate1() throws Exception {
         PNG.propagate(2);
         TIntList list = new TIntArrayList();
-        list.add(MiniSat.negated(lits[0]));
+        list.add(MiniSat.neg(lits[0]));
         list.add(lits[2]);
         PNG.addNogood(list);
         list.clear();
-        list.add(MiniSat.negated(lits[2]));
+        list.add(MiniSat.neg(lits[2]));
         list.add(lits[4]);
         PNG.addNogood(list);
         vars[0].instantiateTo(0, Cause.Null);

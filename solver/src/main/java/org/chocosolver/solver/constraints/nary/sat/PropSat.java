@@ -27,7 +27,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.ArrayList;
 
-import static org.chocosolver.sat.MiniSat.sign;
+import static org.chocosolver.sat.MiniSat.sgn;
 import static org.chocosolver.sat.MiniSat.var;
 
 /**
@@ -141,7 +141,7 @@ public class PropSat extends Propagator<BoolVar> {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
-                sign = sign(lit);
+                sign = sgn(lit);
                 var = var(lit);
                 if (var >= vars.length) continue; // ignore secret variables
                 val = vars[var].getValue();
@@ -239,7 +239,7 @@ public class PropSat extends Propagator<BoolVar> {
             for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
                 lit = sat_.touched_variables_.get(i);
                 var = var(lit);
-                boolean assigned_bool = sign(lit);
+                boolean assigned_bool = sgn(lit);
                 if (var >= vars.length) continue; // ignore secret variable
                 vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
             }
@@ -301,7 +301,7 @@ public class PropSat extends Propagator<BoolVar> {
             int lit = early_deductions_.get(i);
             if (lit < 0) continue; // ignore secret variables
             int var = var(lit);
-            boolean assigned_bool = sign(lit);
+            boolean assigned_bool = sgn(lit);
 //            demons_[var.value()].inhibit(solver());
             vars[var].instantiateTo(assigned_bool ? 1 : 0, this);
         }
