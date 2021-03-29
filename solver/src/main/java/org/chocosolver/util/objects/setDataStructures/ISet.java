@@ -17,32 +17,32 @@ package org.chocosolver.util.objects.setDataStructures;
  */
 public interface ISet extends Iterable<Integer>{
 
-	/**
-	 * Use the following loop to iterate over this set without autoboxing.
-	 * <code>
-	 *
-	 *     // more readable but with autoboxing
-	 *     for(int value:set){
-	 *         ...
-	 *     }
-	 *
-	 *     // more verbose but without autoboxing
-	 *     ISetIterator iter = set.primitiveIterator();
-	 *     while(iter.hasNext()){
-	 *         int k = iter.next();
-	 *         ...
-	 *     }
-	 * </code>
-	 * Do not use this iterator to make nested loops over {@link ISet} (prefer {@link ISet#newIterator()})
-	 * @return the default iterator (singleton) of this set
-	 */
-	ISetIterator iterator();
+    /**
+     * Use the following loop to iterate over this set without autoboxing.
+     * <code>
+     *
+     *     // more readable but with autoboxing
+     *     for(int value:set){
+     *         ...
+     *     }
+     *
+     *     // more verbose but without autoboxing
+     *     ISetIterator iter = set.primitiveIterator();
+     *     while(iter.hasNext()){
+     *         int k = iter.next();
+     *         ...
+     *     }
+     * </code>
+     * Do not use this iterator to make nested loops over {@link ISet} (prefer {@link ISet#newIterator()})
+     * @return the default iterator (singleton) of this set
+     */
+    ISetIterator iterator();
 
-	/**
-	 * Creates a new iterator object, for nested loops only.
-	 * @return a new iterator for this set
-	 */
-	ISetIterator newIterator();
+    /**
+     * Creates a new iterator object, for nested loops only.
+     * @return a new iterator for this set
+     */
+    ISetIterator newIterator();
 
     /**
      * Add element to the set
@@ -69,11 +69,46 @@ public interface ISet extends Iterable<Integer>{
     boolean contains(int element);
 
     /**
+     * @param elements
+     * @return true iff the set contains all elements in `elements`
+     */
+    default boolean containsAll(int... elements) {
+        for (int i : elements) {
+            if (!contains(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * @param set the set to compare this with
+     * @return true iff this is a subset of set.
+     */
+    default boolean isSubset(ISet set) {
+        for (int i : this) {
+            if (!set.contains(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     *
+     * @param set the set to compare this with
+     * @return true iff this is a superset of set.
+     */
+    default boolean isSuperset(ISet set) {
+        return set.isSubset(this);
+    }
+
+    /**
      * @return true iff the set is empty
      */
     default boolean isEmpty(){
-		return size()==0;
-	}
+        return size()==0;
+    }
 
     /**
      * @return the number of elements in the set
@@ -85,36 +120,36 @@ public interface ISet extends Iterable<Integer>{
      */
     void clear();
 
-	/**
-	 * @return the smallest element in the set
-	 * throws an exception if the set is empty
-	 * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
-	 */
-	int min();
+    /**
+     * @return the smallest element in the set
+     * throws an exception if the set is empty
+     * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
+     */
+    int min();
 
-	/**
-	 * @return the largest element in the set
-	 * throws an exception if the set is empty
-	 * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
-	 */
-	int max();
+    /**
+     * @return the largest element in the set
+     * throws an exception if the set is empty
+     * Time complexity is linear for BIPARTITESET and LINKED_LIST (constant time otherwise)
+     */
+    int max();
 
-	/**
-	 * @return the implementation type of this set
-	 */
-	SetType getSetType();
+    /**
+     * @return the implementation type of this set
+     */
+    SetType getSetType();
 
-	/**
-	 * Copies the set in an array if integers
-	 * @return an array containing every integer of the set
-	 */
-	default int[] toArray(){
-		int[] a = new int[size()];
-		int idx = 0;
-		ISetIterator iter = iterator();
-		while(iter.hasNext()){
-			a[idx++] = iter.nextInt();
-		}
-		return a;
-	}
+    /**
+     * Copies the set in an array if integers
+     * @return an array containing every integer of the set
+     */
+    default int[] toArray(){
+        int[] a = new int[size()];
+        int idx = 0;
+        ISetIterator iter = iterator();
+        while(iter.hasNext()){
+            a[idx++] = iter.nextInt();
+        }
+        return a;
+    }
 }

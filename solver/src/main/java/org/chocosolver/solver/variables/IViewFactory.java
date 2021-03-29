@@ -19,6 +19,7 @@ import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static java.lang.Math.max;
 
@@ -523,6 +524,12 @@ public interface IViewFactory extends ISelf<Model> {
             setVars[i] = intsSetView(intVars, i + offset1, offset2);
         }
         return setVars;
+    }
+
+    //  OVER SET VARIABLES
+
+    default SetVar setUnionView(SetVar... sets) {
+        return new SetUnionView("setUnion", sets);
     }
 
     //  OVER GRAPH VARIABLES
