@@ -12,6 +12,7 @@ package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.Set_ReadOnly;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -285,6 +286,39 @@ public abstract class SetTest {
 		assertFalse(set.contains(1));
 		assertFalse(set.remove(1));
 	}
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testContainsAll() {
+        ISet set = create();
+        set.add(1);
+        set.add(2);
+        set.add(3);
+        set.add(4);
+        set.add(5);
+        Assert.assertFalse(set.containsAll(0, 1, 2));
+        Assert.assertTrue(set.containsAll(1, 2, 3, 5));
+    }
+
+    @Test(groups = "1s", timeOut=60000)
+    public void testIsSubset() {
+        ISet set1 = create();
+        set1.add(1);
+        set1.add(2);
+        set1.add(3);
+        set1.add(4);
+        set1.add(5);
+        ISet set2 = create();
+        set2.add(0);
+        set2.add(1);
+        set2.add(2);
+        ISet set3 = create();
+        set3.add(1);
+        set3.add(2);
+        set3.add(3);
+        set3.add(5);
+        Assert.assertFalse(set2.isSubset(set1));
+        Assert.assertTrue(set3.isSubset(set3));
+    }
 
     public abstract ISet create(int offset);
 

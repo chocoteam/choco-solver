@@ -107,7 +107,7 @@ public abstract class SetDynamicFilter implements ISet {
 
     @Override
     public SetType getSetType() {
-        return SetType.DYNAMIC_FILTER;
+        return SetType.DYNAMIC;
     }
 
     @Override
