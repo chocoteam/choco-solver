@@ -368,18 +368,18 @@ public class SatSolverTest {
 
     @Test(groups = "1s")
     public void testSign() throws Exception {
-        Assert.assertTrue(MiniSat.sign(3));
-        Assert.assertTrue(MiniSat.sign(1));
-        Assert.assertFalse(MiniSat.sign(0));
-        Assert.assertFalse(MiniSat.sign(2));
+        Assert.assertTrue(MiniSat.sgn(3));
+        Assert.assertTrue(MiniSat.sgn(1));
+        Assert.assertFalse(MiniSat.sgn(0));
+        Assert.assertFalse(MiniSat.sgn(2));
 
         int ta = MiniSat.makeLiteral(a, true);
         Assert.assertEquals(ta, 1);
-        Assert.assertTrue(MiniSat.sign(ta));
+        Assert.assertTrue(MiniSat.sgn(ta));
 
         int fa = MiniSat.makeLiteral(a, false);
         Assert.assertEquals(fa, 0);
-        Assert.assertFalse(MiniSat.sign(fa));
+        Assert.assertFalse(MiniSat.sgn(fa));
     }
 
     @Test(groups = "1s")

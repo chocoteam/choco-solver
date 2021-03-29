@@ -137,11 +137,11 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(IntVar var, DecisionOperator<IntVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeIntEq().equals(op)) {
-            l = MiniSat.negated(png.Literal(var, val, true));
+            l = MiniSat.neg(png.Literal(var, val, true));
         } else if (DecisionOperatorFactory.makeIntNeq().equals(op)) {
             l = png.Literal(var, val, true);
         } else if (DecisionOperatorFactory.makeIntSplit().equals(op)) {
-            l = MiniSat.negated(png.Literal(var, val, false));
+            l = MiniSat.neg(png.Literal(var, val, false));
         } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)) {
             l = png.Literal(var, val, false);
         } else {
@@ -153,7 +153,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(SetVar var, DecisionOperator<SetVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeSetForce().equals(op)) {
-            l = MiniSat.negated(png.Literal(var, val, true));
+            l = MiniSat.neg(png.Literal(var, val, true));
         } else if (DecisionOperatorFactory.makeSetRemove().equals(op)) {
             l = png.Literal(var, val, true);
         } else {

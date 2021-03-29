@@ -74,8 +74,8 @@ public class NogoodTest {
 
 
         TIntList ng = new TIntArrayList();
-        ng.add(MiniSat.negated(ngstore.Literal(x, 1, true)));
-        ng.add(MiniSat.negated(ngstore.Literal(y, 1, true)));
+        ng.add(MiniSat.neg(ngstore.Literal(x, 1, true)));
+        ng.add(MiniSat.neg(ngstore.Literal(y, 1, true)));
         ng.add(ngstore.Literal(z, 3, false));
         ngstore.addNogood(ng);
         Solver solver = model.getSolver();

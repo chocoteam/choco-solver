@@ -238,7 +238,7 @@ public class PropNogoods extends Propagator<Variable> {
         boolean sign;
         Variable avar;
         for (int l : lits.toArray()) {
-            sign = sign(l);
+            sign = sgn(l);
             var = var(l);
             avar = vars[lit2pos[var]];
             value = lit2val[var];
@@ -280,7 +280,7 @@ public class PropNogoods extends Propagator<Variable> {
             int cnt = 0;
             for (int i = 0; i < c.size(); i++) {
                 lit = c._g(i);
-                sign = sign(lit);
+                sign = sgn(lit);
                 var = var(lit);
                 avar = vars[lit2pos[var]];
                 value = lit2val[var];
@@ -511,7 +511,7 @@ public class PropNogoods extends Propagator<Variable> {
             if (!sat_.propagateOneLiteral(lit)) {
                 // force failure by removing the last value: flip the sign
                 // explanations require doing the failure
-                doReduce(negated(lit));
+                doReduce(neg(lit));
             } else {
                 sat_trail_.set(sat_.trailMarker());
                 for (int i = 0; i < sat_.touched_variables_.size(); ++i) {
@@ -535,9 +535,9 @@ public class PropNogoods extends Propagator<Variable> {
         long value = lit2val[var];
         Variable avar = vars[lit2pos[var]];
         if (VariableUtils.isInt(avar)) {
-            doReduce((IntVar) avar, sign(lit), value);
+            doReduce((IntVar) avar, sgn(lit), value);
         } else if (VariableUtils.isSet(avar)) {
-            doReduce((SetVar) avar, sign(lit), value);
+            doReduce((SetVar) avar, sgn(lit), value);
         }
     }
 
@@ -619,7 +619,7 @@ public class PropNogoods extends Propagator<Variable> {
         // 2. add clauses
         // 2a.  [ x <= d ] => [ x <= d +1 ]
         for (int j = size; j < 2 * size - 1; j++) {
-            clauses.add(negated(lits[j]));
+            clauses.add(neg(lits[j]));
             clauses.add(lits[j + 1]);
             add |= sat_.addClause(clauses);
             clauses.clear();
@@ -628,18 +628,18 @@ public class PropNogoods extends Propagator<Variable> {
         for (int k = 0; k < size - 1; k++) {
             // [ x = d ] or not[ x <= d ] or [ x <= d +1 ]
             clauses.add(lits[k]);
-            clauses.add(negated(lits[size + k]));
+            clauses.add(neg(lits[size + k]));
             clauses.add(lits[size + k + 1]);
             add |= sat_.addClause(clauses);
             clauses.clear();
             // not [ x = d ] or [ x <= d ]
-            clauses.add(negated(lits[k]));
+            clauses.add(neg(lits[k]));
             clauses.add(lits[size + k]);
             add |= sat_.addClause(clauses);
             clauses.clear();
             // not [ x = d ] or not[ x <= d +1 ]
-            clauses.add(negated(lits[k]));
-            clauses.add(negated(lits[size + k + 1]));
+            clauses.add(neg(lits[k]));
+            clauses.add(neg(lits[size + k + 1]));
             add |= sat_.addClause(clauses);
             clauses.clear();
         }

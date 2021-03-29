@@ -19,17 +19,18 @@ import java.util.*;
 /**
  * <p>A MiniSat solver.</p>
  * <p>This is a transposition in Java of <a href="http://minisat.se/">MiniSat</a>.</p>
- * <blockquote cite="http://minisat.se">MiniSat is a minimalistic, open-source SAT solver,
+ * <p><blockquote cite="http://minisat.se">MiniSat is a minimalistic, open-source SAT solver,
  * developed to help researchers and developers alike to get started on SAT.
- * It is released under the MIT licence</blockquote>
- * <pre>
+ * It is released under the MIT licence.</blockquote></p>
+ * <p></p>
+ * <p><pre>
  * <code>MiniSat sat = new MiniSat();
  * int a = sat.newVariable();
  * int b = sat.newVariable();
  * sat.addClause(a, b);
  * sat.solve();
  * </code>
- * </pre>
+ * </pre></p>
  *
  * @author Charles Prud'homme
  * @since 12/07/13
@@ -162,7 +163,7 @@ public class MiniSat implements SatFactory, Dimacs {
         int lit = litUndef;
         int j = 0;
         for (int i = 0; i < ps.size(); i++) {
-            if (valueLit(ps.get(i)) == Boolean.lTrue || ps.get(i) == negated(lit)) {
+            if (valueLit(ps.get(i)) == Boolean.lTrue || ps.get(i) == neg(lit)) {
                 return true;
             } else if (valueLit(ps.get(i)) != Boolean.lFalse && ps.get(i) != lit) {
                 lit = ps.get(i);
@@ -234,7 +235,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 int x = var(trail_.get(c));
                 assignment_.put(x, Boolean.lUndef);
                 if (phase_saving > 1 || (phase_saving == 1) && c > trail_markers_.get(trail_markers_.size() - 1))
-                    polarity.set(x, sign(trail_.get(c)));
+                    polarity.set(x, sgn(trail_.get(c)));
                 insertVarOrder(x);
             }
             qhead_ = trail_markers_.get(level);
@@ -256,7 +257,7 @@ public class MiniSat implements SatFactory, Dimacs {
     // The current value of a literal.
     Boolean valueLit(int l) {
         Boolean b = assignment_.get(var(l));
-        return b == Boolean.lUndef ? Boolean.lUndef : xor(b, sign(l));
+        return b == Boolean.lUndef ? Boolean.lUndef : xor(b, sgn(l));
     }
 
     // The current number of original clauses.
@@ -287,7 +288,7 @@ public class MiniSat implements SatFactory, Dimacs {
         pushTrailMarker();
         // Unchecked enqueue
         assert valueLit(lit) == Boolean.lUndef;
-        assignment_.put(var(lit), makeBoolean(!sign(lit)));
+        assignment_.put(var(lit), makeBoolean(!sgn(lit)));
         trail_.add(lit);
         return propagate() == CR_Undef;
     }
@@ -312,9 +313,9 @@ public class MiniSat implements SatFactory, Dimacs {
         if (assignment_.get(var(l)) == Boolean.lUndef) {
             touched_variables_.add(l);
         }
-        assignment_.put(var(l), sign(l) ? Boolean.lFalse : Boolean.lTrue);
+        assignment_.put(var(l), sgn(l) ? Boolean.lFalse : Boolean.lTrue);
         //vardata.ensureCapacity(var(l));
-        while(vardata.size() < var(l)){
+        while (vardata.size() < var(l)) {
             vardata.add(VD_Undef);
         }
         vardata.set(var(l), new VarData(from, trailMarker()));
@@ -328,15 +329,15 @@ public class MiniSat implements SatFactory, Dimacs {
     // Attach a clause to watcher lists.
     void attachClause(Clause cr) {
         assert cr.size() > 1;
-        ArrayList<Watcher> l0 = watches_.get(negated(cr._g(0)));
+        ArrayList<Watcher> l0 = watches_.get(neg(cr._g(0)));
         if (l0 == null) {
             l0 = new ArrayList<>();
-            watches_.put(negated(cr._g(0)), l0);
+            watches_.put(neg(cr._g(0)), l0);
         }
-        ArrayList<Watcher> l1 = watches_.get(negated(cr._g(1)));
+        ArrayList<Watcher> l1 = watches_.get(neg(cr._g(1)));
         if (l1 == null) {
             l1 = new ArrayList<>();
-            watches_.put(negated(cr._g(1)), l1);
+            watches_.put(neg(cr._g(1)), l1);
         }
         l0.add(new Watcher(cr, cr._g(1)));
         l1.add(new Watcher(cr, cr._g(0)));
@@ -345,14 +346,14 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     void detachClause(Clause cr) {
-        ArrayList<Watcher> ws = watches_.get(negated(cr._g(0)));
+        ArrayList<Watcher> ws = watches_.get(neg(cr._g(0)));
         int i = ws.size() - 1;
         while (i >= 0 && ws.get(i).clause != cr) {
             i--;
         }
         assert i > -1;
         ws.remove(i);
-        ws = watches_.get(negated(cr._g(1)));
+        ws = watches_.get(neg(cr._g(1)));
         i = ws.size() - 1;
         while (i >= 0 && ws.get(i).clause != cr) {
             i--;
@@ -383,7 +384,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
                 // Make sure the false literal is data[1]:
                 Clause cr = ws.get(i).clause;
-                final int false_lit = negated(p);
+                final int false_lit = neg(p);
                 if (cr._g(0) == false_lit) {
                     cr._s(0, cr._g(1));
                     cr._s(1, false_lit);
@@ -405,10 +406,10 @@ public class MiniSat implements SatFactory, Dimacs {
                     if (valueLit(cr._g(k)) != Boolean.lFalse) {
                         cr._s(1, cr._g(k));
                         cr._s(k, false_lit);
-                        ArrayList<Watcher> lw = watches_.get(negated(cr._g(1)));
+                        ArrayList<Watcher> lw = watches_.get(neg(cr._g(1)));
                         if (lw == null) {
                             lw = new ArrayList<>();
-                            watches_.put(negated(cr._g(1)), lw);
+                            watches_.put(neg(cr._g(1)), lw);
                         }
                         lw.add(w);
                         cont = true;
@@ -650,7 +651,7 @@ public class MiniSat implements SatFactory, Dimacs {
             pathC--;
 
         } while (pathC > 0);
-        out_learnt.set(0, negated(p));
+        out_learnt.set(0, neg(p));
 
         // Simplify conflict clause:
         //
@@ -859,55 +860,60 @@ public class MiniSat implements SatFactory, Dimacs {
     ///////
 
     /**
-     * inline Literal MakeLiteral(Variable var, bool sign) {
-     * return Literal(2 * var.value() + static_cast<int>(sign));
-     * int(true) is always 1. And int(false) is always 0
-     * }
+     * Make a literal from a variable and a sign
+     * @param var a variable
+     * @param sign the required sign of the literal
+     * @return a literal
      */
     public static int makeLiteral(int var, boolean sign) {
         return (2 * var + (sign ? 1 : 0));
     }
 
+    /**
+     * Make a positive literal from a variable
+     * @param var a variable
+     * @return a positive literal
+     * @implNote Equivalent to call {@code makeLiteral(var, true)}.
+     */
     public static int makeLiteral(int var) {
         return makeLiteral(var, false);
     }
 
+
     /**
-     * inline Literal Negated(Literal p) { return Literal(p.value() ^ 1); }
+     * Negate the literal given as a parameter
+     *
+     * @param l a literal
+     * @return its negation
      */
-    public static int negated(int l) {
+    public static int neg(int l) {
         return (l ^ 1);
     }
 
 
     /**
+     * Returns the sign of a given literal
      * @param l a literal
      * @return <tt>true</tt> if <i>l</i> is odd (<tt>false</tt> literal),
      * <tt>false</tt> if <i>l</i> is even (<tt>true<tt/> literal)
      */
-    public static boolean sign(int l) {
+    public static boolean sgn(int l) {
         return (l & 1) != 0;
     }
 
     /**
-     * inline Variable Var(Literal p) { return Variable(p.value() >> 1); }
+     * Returns the variable of a given literal
+     * @param l a literal
+     * @return its variable
      */
     public static int var(int l) {
         return (l >> 1);
     }
 
-    /**
-     * inline Boolean MakeBoolean(bool x) { return Boolean(!x); }
-     */
     private static Boolean makeBoolean(boolean b) {
         return (b ? Boolean.lTrue : Boolean.lFalse);
     }
 
-    /**
-     * inline Boolean Xor(Boolean a, bool b) {
-     * return Boolean((uint8)(a.value() ^ (uint8) b));
-     * }
-     */
     private static Boolean xor(Boolean a, boolean b) {
         return Boolean.make((byte) (a.value() ^ (b ? 1 : 0)));
     }

@@ -13,7 +13,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 
 import static org.chocosolver.sat.MiniSat.makeLiteral;
-import static org.chocosolver.sat.MiniSat.negated;
+import static org.chocosolver.sat.MiniSat.neg;
 
 /**
  * <p>
@@ -75,8 +75,8 @@ public interface SatFactory {
     default boolean addBoolEq(int LEFT, int RIGHT) {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
-        boolean add = _me().addClause(MiniSat.negated(left_lit), right_lit);
-        add &= _me().addClause(left_lit, MiniSat.negated(right_lit));
+        boolean add = _me().addClause(MiniSat.neg(left_lit), right_lit);
+        add &= _me().addClause(left_lit, MiniSat.neg(right_lit));
         return add;
     }
 
@@ -104,7 +104,7 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, false);
         int right_lit = makeLiteral(RIGHT, true);
         return _me().addClause(right_lit)
-                & _me().addClause(left_lit, MiniSat.negated(right_lit));
+                & _me().addClause(left_lit, MiniSat.neg(right_lit));
     }
 
     /**
@@ -117,7 +117,7 @@ public interface SatFactory {
     default boolean addBoolNot(int LEFT, int RIGHT) {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
-        return _me().addClause(MiniSat.negated(left_lit), MiniSat.negated(right_lit))
+        return _me().addClause(MiniSat.neg(left_lit), MiniSat.neg(right_lit))
                 & _me().addClause(left_lit, right_lit);
     }
 
@@ -134,7 +134,7 @@ public interface SatFactory {
         for (int i = 0; i < BOOLVARS.length; i++) {
             lits.add(makeLiteral(BOOLVARS[i], true));
         }
-        lits.add(MiniSat.negated(target_lit));
+        lits.add(MiniSat.neg(target_lit));
 
         boolean add = _me().addClause(lits);
         for (int i = 0; i < BOOLVARS.length; i++) {
@@ -159,7 +159,7 @@ public interface SatFactory {
         lits.add(target_lit);
         boolean add = _me().addClause(lits);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            add &= _me().addClause(negated(target_lit), makeLiteral(BOOLVARS[i], true));
+            add &= _me().addClause(neg(target_lit), makeLiteral(BOOLVARS[i], true));
         }
         return add;
     }
@@ -176,9 +176,9 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(left_lit, right_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(MiniSat.negated(left_lit), target_lit);
-        add &= _me().addClause(MiniSat.negated(right_lit), target_lit);
+        boolean add = _me().addClause(left_lit, right_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(MiniSat.neg(left_lit), target_lit);
+        add &= _me().addClause(MiniSat.neg(right_lit), target_lit);
         return add;
     }
 
@@ -194,9 +194,9 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(MiniSat.negated(left_lit), MiniSat.negated(right_lit), target_lit);
-        add &= _me().addClause(left_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(right_lit, MiniSat.negated(target_lit));
+        boolean add = _me().addClause(MiniSat.neg(left_lit), MiniSat.neg(right_lit), target_lit);
+        add &= _me().addClause(left_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(right_lit, MiniSat.neg(target_lit));
         return add;
     }
 
@@ -224,10 +224,10 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(MiniSat.negated(left_lit), right_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(left_lit, MiniSat.negated(right_lit), MiniSat.negated(target_lit));
+        boolean add = _me().addClause(MiniSat.neg(left_lit), right_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(left_lit, MiniSat.neg(right_lit), MiniSat.neg(target_lit));
         add &= _me().addClause(left_lit, right_lit, target_lit);
-        add &= _me().addClause(MiniSat.negated(left_lit), MiniSat.negated(right_lit), target_lit);
+        add &= _me().addClause(MiniSat.neg(left_lit), MiniSat.neg(right_lit), target_lit);
         return add;
     }
 
@@ -243,10 +243,10 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(MiniSat.negated(left_lit), right_lit, target_lit);
-        add &= _me().addClause(left_lit, MiniSat.negated(right_lit), target_lit);
-        add &= _me().addClause(left_lit, right_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(MiniSat.negated(left_lit), MiniSat.negated(right_lit), MiniSat.negated(target_lit));
+        boolean add = _me().addClause(MiniSat.neg(left_lit), right_lit, target_lit);
+        add &= _me().addClause(left_lit, MiniSat.neg(right_lit), target_lit);
+        add &= _me().addClause(left_lit, right_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(MiniSat.neg(left_lit), MiniSat.neg(right_lit), MiniSat.neg(target_lit));
         return add;
     }
 
@@ -262,9 +262,9 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(MiniSat.negated(left_lit), right_lit, MiniSat.negated(target_lit));
+        boolean add = _me().addClause(MiniSat.neg(left_lit), right_lit, MiniSat.neg(target_lit));
         add &= _me().addClause(left_lit, target_lit);
-        add &= _me().addClause(MiniSat.negated(right_lit), target_lit);
+        add &= _me().addClause(MiniSat.neg(right_lit), target_lit);
         return add;
     }
 
@@ -281,10 +281,10 @@ public interface SatFactory {
         int left_lit = makeLiteral(LEFT, true);
         int right_lit = makeLiteral(RIGHT, true);
         int target_lit = makeLiteral(TARGET, true);
-        boolean add = _me().addClause(left_lit, right_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(MiniSat.negated(left_lit), right_lit, MiniSat.negated(target_lit));
-        add &= _me().addClause(left_lit, MiniSat.negated(right_lit), target_lit);
-        add &= _me().addClause(MiniSat.negated(left_lit), MiniSat.negated(right_lit), MiniSat.negated(target_lit));
+        boolean add = _me().addClause(left_lit, right_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(MiniSat.neg(left_lit), right_lit, MiniSat.neg(target_lit));
+        add &= _me().addClause(left_lit, MiniSat.neg(right_lit), target_lit);
+        add &= _me().addClause(MiniSat.neg(left_lit), MiniSat.neg(right_lit), MiniSat.neg(target_lit));
         return add;
     }
 
@@ -321,7 +321,7 @@ public interface SatFactory {
     default boolean addAtMostOne(int... BOOLVARS) {
         TIntList lits = new TIntArrayList(BOOLVARS.length);
         for (int i = 0; i < BOOLVARS.length; i++) {
-            lits.add(MiniSat.negated(makeLiteral(BOOLVARS[i], true)));
+            lits.add(MiniSat.neg(makeLiteral(BOOLVARS[i], true)));
         }
         boolean add = true;
         for (int i = 0; i < lits.size() - 1; i++) {
@@ -397,12 +397,12 @@ public interface SatFactory {
         for (int i = 0; i < BOOLVARS.length; ++i) {
             lits.add(makeLiteral(BOOLVARS[i], true));
         }
-        lits.add(MiniSat.negated(elit));
+        lits.add(MiniSat.neg(elit));
         boolean add = _me().addClause(lits);
         for (int i = 0; i < BOOLVARS.length; ++i) {
             add &= _me().addClause(elit, makeLiteral(BOOLVARS[i], false));
         }
-        add &= _me().addClause(MiniSat.negated(elit), tlit);
+        add &= _me().addClause(MiniSat.neg(elit), tlit);
         return add;
     }
 }

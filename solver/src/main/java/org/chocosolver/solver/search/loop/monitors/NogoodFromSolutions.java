@@ -54,7 +54,7 @@ public class NogoodFromSolutions implements IMonitorSolution {
         int n = decisionVars.length;
         ps.clear();
         for (int i = 0; i < n; i++) {
-            ps.add(MiniSat.negated(png.Literal(decisionVars[i], decisionVars[i].getValue(), true)));
+            ps.add(MiniSat.neg(png.Literal(decisionVars[i], decisionVars[i].getValue(), true)));
         }
         png.addLearnt(ps.toArray());
     }
