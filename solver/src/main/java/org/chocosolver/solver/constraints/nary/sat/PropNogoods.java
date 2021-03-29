@@ -9,23 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.sat;
 
-import static org.chocosolver.sat.SatSolver.makeLiteral;
-import static org.chocosolver.sat.SatSolver.negated;
-import static org.chocosolver.sat.SatSolver.sign;
-import static org.chocosolver.sat.SatSolver.var;
-
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongIntHashMap;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Deque;
 import org.chocosolver.memory.IStateInt;
-import org.chocosolver.sat.SatSolver;
-import org.chocosolver.sat.SatSolver.Clause;
+import org.chocosolver.sat.SatDecorator;
+import org.chocosolver.sat.MiniSat.*;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -35,6 +25,10 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.VariableUtils;
+
+import java.util.*;
+
+import static org.chocosolver.sat.MiniSat.*;
 
 
 /**
@@ -64,7 +58,7 @@ public class PropNogoods extends Propagator<Variable> {
     /**
      * The underlying SAT solver
      */
-    private SatSolver sat_;
+    private SatDecorator sat_;
 
     /**
      * Binds couple (variable-value) to a unique literal
@@ -142,7 +136,7 @@ public class PropNogoods extends Propagator<Variable> {
         this.var2pos = new int[k];//new TIntIntHashMap(16, .5f, NO_ENTRY, NO_ENTRY);
         Arrays.fill(var2pos, NO_ENTRY);
         //TODO: one satsolver per model...
-        sat_ = new SatSolver();
+        sat_ = new SatDecorator();
         early_deductions_ = new TIntArrayList();
         sat_trail_ = model.getEnvironment().makeInt();
         test_eq = new BitSet();
@@ -231,30 +225,8 @@ public class PropNogoods extends Propagator<Variable> {
             int var, val;
             long value;
             boolean sign, eq;
-            for (int k : sat_.implies_.keys()) {
-                sign = sign(negated(k));
-                var = var(k);
-                Variable avar = vars[lit2pos[var]];
-                value = lit2val[var];
-                eq = iseq(value);
-                val = ivalue(value);
-                if (VariableUtils.isInt(avar)) {
-                    IntVar ivar = (IntVar) avar;
-                    if ((eq && sign != ivar.contains(val))
-                            || (!eq && sign != ivar.getUB() <= val)) {
-                        OK &= impliesEntailed(sat_.implies_.get(k));
-                    }
-                } else if (VariableUtils.isSet(avar)) {
-                    SetVar svar = (SetVar) avar;
-                    if (eq && sign != svar.getLB().contains(val)) {
-                        OK &= impliesEntailed(sat_.implies_.get(k));
-                    }
-                } else {
-                    throw new UnsupportedOperationException("Unknown case");
-                }
-            }
             OK &= clauseEntailed(sat_.clauses);
-            OK &= clauseEntailed(sat_.learnts);
+            OK &= clauseEntailed(sat_.dynClauses);
             return ESat.eval(OK);
         }
         return ESat.UNDEFINED;
@@ -714,14 +686,14 @@ public class PropNogoods extends Propagator<Variable> {
         // compare the current clauses with the previous stored one,
         // just in case the current one dominates the previous none
         if (sat_.nLearnt() > 1) {
-            Clause last = sat_.learnts.get(sat_.learnts.size() - 1);
+            Clause last = sat_.dynClauses.get(sat_.dynClauses.size() - 1);
             test_eq.clear();
             for (int i = last.size() - 1; i >= 0; i--) {
                 test_eq.set(last._g(i));
             }
-            for (int c = sat_.learnts.size() - 2; c >= 0; c--) {
+            for (int c = sat_.dynClauses.size() - 2; c >= 0; c--) {
                 int s = test_eq.cardinality();
-                Clause prev = sat_.learnts.get(c);
+                Clause prev = sat_.dynClauses.get(c);
                 if (last.size() > 1 && last.size() < prev.size()) {
                     for (int i = prev.size() - 1; i >= 0; i--) {
                         s -= test_eq.get(prev._g(i)) ? 1 : 0;

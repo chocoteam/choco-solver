@@ -9,9 +9,7 @@
  */
 package org.chocosolver.solver.search.loop.monitors;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import org.chocosolver.sat.SatSolver;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
 import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
@@ -24,6 +22,9 @@ import org.chocosolver.solver.search.strategy.decision.SetDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.ArrayDeque;
+import java.util.Arrays;
 
 /**
  * A constraint for the specific Nogood store designed to store ONLY positive decisions.
@@ -136,11 +137,11 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(IntVar var, DecisionOperator<IntVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeIntEq().equals(op)) {
-            l = SatSolver.negated(png.Literal(var, val, true));
+            l = MiniSat.negated(png.Literal(var, val, true));
         } else if (DecisionOperatorFactory.makeIntNeq().equals(op)) {
             l = png.Literal(var, val, true);
         } else if (DecisionOperatorFactory.makeIntSplit().equals(op)) {
-            l = SatSolver.negated(png.Literal(var, val, false));
+            l = MiniSat.negated(png.Literal(var, val, false));
         } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)) {
             l = png.Literal(var, val, false);
         } else {
@@ -152,7 +153,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(SetVar var, DecisionOperator<SetVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeSetForce().equals(op)) {
-            l = SatSolver.negated(png.Literal(var, val, true));
+            l = MiniSat.negated(png.Literal(var, val, true));
         } else if (DecisionOperatorFactory.makeSetRemove().equals(op)) {
             l = png.Literal(var, val, true);
         } else {
