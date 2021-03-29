@@ -14,27 +14,27 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 
 public class GraphLexEdge extends GraphEdgeSelector<GraphVar> {
 
-	public GraphLexEdge(GraphVar g) {
-		super(g);
-	}
+    public GraphLexEdge(GraphVar g) {
+        super(g);
+    }
 
-	@Override
-	public boolean computeNextEdge() {
-		ISet envSuc, kerSuc;
-		for (int i : envNodes) {
-			envSuc = g.getPotentialSuccessorsOf(i);
-			kerSuc = g.getMandatorySuccessorsOf(i);
-			if (envSuc.size() != kerSuc.size()) {
-				for (int j : envSuc) {
-					if (!kerSuc.contains(j)) {
-						this.from = i;
-						this.to = j;
-						return true;
-					}
-				}
-			}
-		}
-		this.from = this.to = -1;
-		return false;
-	}
+    @Override
+    public boolean computeNextEdge() {
+        ISet envSuc, kerSuc;
+        for (int i : envNodes) {
+            envSuc = g.getPotentialSuccessorsOf(i);
+            kerSuc = g.getMandatorySuccessorsOf(i);
+            if (envSuc.size() != kerSuc.size()) {
+                for (int j : envSuc) {
+                    if (!kerSuc.contains(j)) {
+                        this.from = i;
+                        this.to = j;
+                        return true;
+                    }
+                }
+            }
+        }
+        this.from = this.to = -1;
+        return false;
+    }
 }

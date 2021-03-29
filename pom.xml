@@ -38,7 +38,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.3.0</version>
+            <version>7.4.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -294,7 +294,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.40</version>
+                            <version>8.41</version>
                         </dependency>
                     </dependencies>
                     <executions>

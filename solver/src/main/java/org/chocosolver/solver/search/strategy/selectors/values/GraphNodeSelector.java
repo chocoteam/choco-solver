@@ -14,14 +14,14 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 
 public abstract class GraphNodeSelector<G extends GraphVar> {
 
-	protected G g;
-	protected ISet envNodes, kerNodes;
+    protected G g;
+    protected ISet envNodes, kerNodes;
 
-	public GraphNodeSelector(G g) {
-		this.g = g;
-		this.envNodes = g.getPotentialNodes();
-		this.kerNodes = g.getMandatoryNodes();
-	}
+    public GraphNodeSelector(G g) {
+        this.g = g;
+        this.envNodes = g.getPotentialNodes();
+        this.kerNodes = g.getMandatoryNodes();
+    }
 
-	public abstract int nextNode();
+    public abstract int nextNode();
 }

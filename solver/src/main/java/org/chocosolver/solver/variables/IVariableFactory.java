@@ -835,7 +835,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param UB The upper bound graph (or envelope)
      * @return An undirected graph variable taking its values in the graph domain [LB, UB].
      */
-    default UndirectedGraphVar undirectedGraphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
+    default UndirectedGraphVar graphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
         return new UndirectedGraphVarImpl(name, ref(), LB, UB);
     }
 
@@ -849,7 +849,7 @@ public interface IVariableFactory extends ISelf<Model> {
      * @param UB The upper bound graph (or envelope)
      * @return A directed graph variable taking its values in the graph domain [LB, UB].
      */
-    default DirectedGraphVar directedGraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
+    default DirectedGraphVar digraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
         return new DirectedGraphVarImpl(name, ref(), LB, UB);
     }
 

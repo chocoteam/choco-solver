@@ -45,7 +45,7 @@ public class DirectedGraph implements IGraph {
      * @param nodeSetType     data structure to use for representing node
      * @param edgeSetType     data structure to use for representing node successors and predecessors
      * @param allNodes true iff all nodes must always remain present in the graph.
-	 *                 i.e. The node set is fixed to [0,n-1] and will never change
+     *                 i.e. The node set is fixed to [0,n-1] and will never change
      */
     public DirectedGraph(int n, SetType nodeSetType, SetType edgeSetType, boolean allNodes) {
         this.nodeSetType = nodeSetType;
@@ -123,6 +123,23 @@ public class DirectedGraph implements IGraph {
      */
     public DirectedGraph(Model model, int n, SetType edgeSetType, boolean allNodes) {
         this(model, n, SetType.BITSET, edgeSetType, allNodes);
+    }
+
+    /**
+     * Construct a read-only copy of another graph
+     * @param g the graph to copy
+     */
+    public DirectedGraph(DirectedGraph g) {
+        this.nodeSetType = SetType.FIXED_ARRAY;
+        this.edgeSetType = SetType.FIXED_ARRAY;
+        this.n = g.getNbMaxNodes();
+        this.nodes = SetFactory.makeConstantSet(g.getNodes().toArray());
+        predecessors = new ISet[n];
+        successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            predecessors[i] = SetFactory.makeConstantSet(g.getPredecessorsOf(i).toArray());
+            successors[i] = SetFactory.makeConstantSet(g.getSuccessorsOf(i).toArray());
+        }
     }
 
     //***********************************************************************************
@@ -260,4 +277,30 @@ public class DirectedGraph implements IGraph {
         return predecessors[x];
     }
 
+    /**
+     * Structural equality test between two directed graph vars.
+     * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
+     * and different attributes such as nbMaxNodes and allNodes.
+     * @param other
+     * @return true iff `this` and `other` contains exactly the same nodes and same edges.
+     */
+    public boolean equals(DirectedGraph other) {
+        if (getNodes().size() != other.getNodes().size()) {
+            return false;
+        }
+        for (int i : getNodes()) {
+            if (!other.containsNode(i)) {
+                return false;
+            }
+            if (getSuccessorsOf(i).size() != other.getSuccessorsOf(i).size()) {
+                return false;
+            }
+            for (int j : getSuccessorsOf(i)) {
+                if (!other.containsEdge(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 }

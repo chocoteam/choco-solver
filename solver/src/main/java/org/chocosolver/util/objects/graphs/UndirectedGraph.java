@@ -118,6 +118,21 @@ public class UndirectedGraph implements IGraph {
         this(n, SetType.BITSET, edgeSetType, allNodes);
     }
 
+    /**
+     * Construct a read-only copy of another graph
+     * @param g the graph to copy
+     */
+    public UndirectedGraph(UndirectedGraph g) {
+        this.nodeSetType = SetType.FIXED_ARRAY;
+        this.edgeSetType = SetType.FIXED_ARRAY;
+        this.n = g.getNbMaxNodes();
+        this.nodes = SetFactory.makeConstantSet(g.getNodes().toArray());
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            neighbors[i] = SetFactory.makeConstantSet(g.getNeighborsOf(i).toArray());
+        }
+    }
+
     //***********************************************************************************
     // METHODS
     //***********************************************************************************
@@ -194,6 +209,8 @@ public class UndirectedGraph implements IGraph {
      * @return true iff (x,y) was not already in the graph
      */
     public boolean addEdge(int x, int y) {
+        addNode(x);
+        addNode(y);
         if (x == y && !neighbors[x].contains(y)) {
             neighbors[x].add(y);
             return true;
@@ -274,5 +291,32 @@ public class UndirectedGraph implements IGraph {
     @Override
     public boolean isDirected() {
         return false;
+    }
+
+    /**
+     * Structural equality test between two undirected graph vars.
+     * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
+     * and different attributes such as nbMaxNodes, allNodes, stored or not.
+     * @param other
+     * @return true iff `this` and `other` contains exactly the same nodes and same edges.
+     */
+    public boolean equals(UndirectedGraph other) {
+        if (getNodes().size() != other.getNodes().size()) {
+            return false;
+        }
+        for (int i : getNodes()) {
+            if (!other.containsNode(i)) {
+                return false;
+            }
+            if (getNeighborsOf(i).size() != other.getNeighborsOf(i).size()) {
+                return false;
+            }
+            for (int j : getNeighborsOf(i)) {
+                if (!other.containsEdge(i, j)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
