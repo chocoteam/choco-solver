@@ -21,7 +21,7 @@ public class TspTest {
     public final static String INSTANCE = "bier127.tsp";
     public final static int MAX_SIZE = 300;
 
-    @Test(groups = "5m", timeOut = 300000)
+    @Test(groups = "10s", timeOut = 300000)
     public void testTSP() {
         String path = getClass().getResource(INSTANCE).getPath();
         int[][] data = TSP_Utils.parseInstance(path, MAX_SIZE);

@@ -13,7 +13,7 @@ import org.testng.annotations.Test;
 
 public class DcmtsTest {
 
-    @Test(groups = "5m", timeOut = 300000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testDcmts() {
         String inst = getClass().getResource("r123_300_1").getPath();
         new DCMST(inst).solve();
