@@ -1,5 +1,5 @@
 /*
- * This file is part of choco-sat, http://choco-solver.org/
+ * This file is part of choco-solver, http://choco-solver.org/
  *
  * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 
 /**
  * <p>
- * Project: choco-sat.
+ * Project: choco-solver.
  *
  * @author Charles Prud'homme
  * @since 07/03/2016.

@@ -1,5 +1,5 @@
 /*
- * This file is part of choco-sat, http://choco-solver.org/
+ * This file is part of choco-solver, http://choco-solver.org/
  *
  * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
@@ -16,8 +16,9 @@ import static org.chocosolver.sat.MiniSat.makeLiteral;
 import static org.chocosolver.sat.MiniSat.neg;
 
 /**
+ * This interface defines modelling API for {@link MiniSat}.
  * <p>
- * Project: choco-sat.
+ * Project: choco-solver.
  *
  * @author Charles Prud'homme
  * @since 07/03/2016.

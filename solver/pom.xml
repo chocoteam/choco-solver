@@ -33,11 +33,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.choco-solver</groupId>
-            <artifactId>choco-sat</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>dk.brics.automaton</groupId>
             <artifactId>automaton</artifactId>
             <version>1.11-8</version>
