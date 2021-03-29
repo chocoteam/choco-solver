@@ -126,7 +126,7 @@ public class SymmetryBreakingDirectedTest {
         );
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testAll() {
         for (int n = 0; n < 5; n++) {
             System.out.println(n);
