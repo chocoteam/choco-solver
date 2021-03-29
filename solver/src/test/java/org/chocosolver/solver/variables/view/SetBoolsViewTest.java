@@ -16,6 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.view.set.SetBoolsView;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -24,13 +25,13 @@ import org.testng.annotations.Test;
  * @author Dimitri Justeau-Allaire
  * @since 08/03/2021
  */
-public class BoolsSetViewTest {
+public class SetBoolsViewTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateAndGenerate() {
         Model m = new Model();
         BoolVar[] boolVars = m.boolVarArray(8);
-        SetVar setView = new BoolsSetView(0, boolVars);
+        SetVar setView = new SetBoolsView(0, boolVars);
         Assert.assertEquals(setView.getLB().size(), 0);
         Assert.assertEquals(setView.getUB().size(), 8);
         while (m.getSolver().solve()) {
@@ -50,7 +51,7 @@ public class BoolsSetViewTest {
     public void testInstantiateTo() {
         Model m = new Model();
         BoolVar[] boolVars = m.boolVarArray(8);
-        SetVar setView = new BoolsSetView(2, boolVars);
+        SetVar setView = new SetBoolsView(2, boolVars);
         try {
             setView.instantiateTo(new int[] {2, 3, 4}, (ICause) setView);
             Assert.assertTrue(setView.isInstantiated());

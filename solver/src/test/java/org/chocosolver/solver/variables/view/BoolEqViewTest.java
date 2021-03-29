@@ -15,6 +15,7 @@ import org.chocosolver.solver.constraints.Explainer;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -33,7 +34,7 @@ import java.util.HashMap;
  * @author Charles Prud'homme
  * @since 26/11/2018.
  */
-public class EqViewTest {
+public class BoolEqViewTest {
 
     Model model;
     IntVar x;
@@ -43,7 +44,7 @@ public class EqViewTest {
     public void before(){
         model = new Model();
         x = model.intVar("x", 0,5);
-        b = new EqView(x, 3);
+        b = new BoolEqView(x, 3);
     }
 
     @Test(groups = "1s")

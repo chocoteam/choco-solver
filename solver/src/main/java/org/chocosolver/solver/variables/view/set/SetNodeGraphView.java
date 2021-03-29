@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -21,17 +21,18 @@ import java.util.Arrays;
 
 /**
  * A GraphSetView representing the set of nodes of an observed graph variable.
+ *
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphNodeSetView<E extends GraphVar> extends GraphSetView<E> {
+public class SetNodeGraphView<E extends GraphVar> extends SetGraphView<E> {
 
     /**
      * Create a set view over the set of nodes of a graph variable.
      * @param name name of the variable
      * @param graphVar observed graph variable
      */
-    public GraphNodeSetView(String name, E graphVar) {
+    public SetNodeGraphView(String name, E graphVar) {
         super(name, graphVar);
     }
 
@@ -39,7 +40,7 @@ public class GraphNodeSetView<E extends GraphVar> extends GraphSetView<E> {
      * Creates a set view over the set of nodes of a graph variable.
      * @param graphVar observed graph variable
      */
-    public GraphNodeSetView(E graphVar) {
+    public SetNodeGraphView(E graphVar) {
         this("NODES(" + graphVar.getName() + ")", graphVar);
     }
 

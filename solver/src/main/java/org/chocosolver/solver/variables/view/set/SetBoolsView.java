@@ -7,117 +7,91 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
-import org.chocosolver.util.objects.setDataStructures.*;
-import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.solver.variables.view.SetView;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetDynamicFilter;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
 
 import java.util.Arrays;
 
 /**
- * Set view over an array of integer variables defined such that:
- * with v an array of integers and offset an integer (constants) intVariables[x - offset] = v[x - offset] <=> x in set.
+ * Set view over an array of boolean variables defined such that:
+ * boolVars[x - offset] = True <=> x in setView
+ * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropBoolChannel} constraint.
+ *
+ * @author Dimitri Justeau-Allaire
+ * @since 03/2021
  */
-public class IntsSetView<I extends IntVar> extends SetView<I> {
+public class SetBoolsView<B extends BoolVar> extends SetView<B> {
 
     /**
-     * Integer value array such that intVariables[x - offset] = v[x - offset] <=> x in set
-     */
-    private int[] v;
-
-    /**
-     * Integer value such that intVariables[x - offset] = v[x - offset] <=> x in set
+     * Offset between boolVars array indices and set elements
      */
     private int offset;
 
-    private IIntDeltaMonitor[] idm;
-
-    private IntProcedure[] valRemoved;
-
     /**
-     * Dynamic sets observing the array of integer variables
+     * Dynamic sets observing the array of boolean variables
      * Such sets do not store data but behave like a regular (read-only) set.
      * They avoid constructing objects at each bound retrieval on the view,
      * and allow to take advantage of the view semantic to optimize bounds read operations.
      */
-    private IntsSetViewLB lb;
-    private IntsSetViewUB ub;
+    private BoolsSetViewLB lb;
+    private BoolsSetViewUB ub;
 
     /**
-     * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = v[x - offset] <=> x in set
+     * Instantiate an set view over an array of boolean variables such that:
+     * boolVars[x - offset] = True <=> x in setView
      *
      * @param name  name of the variable
-     * @param v integer array that "toggle" integer variables index inclusion in the set view.
-     *          Must have the same size as the observed variable array.
-     * @param offset offset such that if intVariables[x - offset] = v[x - offset] <=> x in set view.
+     * @param offset Offset between boolVars array indices and set elements
      * @param variables observed variables
      */
-    protected IntsSetView(String name, int[] v, int offset, I... variables) {
+    protected SetBoolsView(String name, int offset, B... variables) {
         super(name, variables);
-        assert v.length == variables.length;
-        this.v = v;
         this.offset = offset;
-        this.idm = new IIntDeltaMonitor[getNbObservedVariables()];
-        this.valRemoved = new IntProcedure[getNbObservedVariables()];
-        for (int i = 0; i < getNbObservedVariables(); i++) {
-            this.idm[i] = getVariables()[i].monitorDelta(this);
-            int finalI = i;
-            this.valRemoved[i] = val -> {
-                if (val == this.v[finalI]) {
-                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
-                }
-            };
-        }
-        lb = new IntsSetViewLB(this);
-        ub = new IntsSetViewUB(this);
+        this.lb = new BoolsSetViewLB(this);
+        this.ub = new BoolsSetViewUB(this);
     }
 
     /**
-     * Instantiate an set view over an array of integer variables such that:
-     * intVariables[x - offset] = v[x - offset] <=> x in set
+     * Instantiate an set view over an array of boolean variables such that:
+     * boolVars[x - offset] = True <=> x in setView
      *
-     * @param v integer array that "toggle" integer variables index inclusion in the set view
-     * @param offset offset between integer variables indices and set elements.
+     * @param offset Offset between boolVars array indices and set elements
      * @param variables observed variables
      */
-    public IntsSetView(int[] v, int offset, I... variables) {
-        this("INTS_SET_VIEW["
+    public SetBoolsView(int offset, B... variables) {
+        this("BOOLS_SET_VIEW["
                     + String.join(",", Arrays.stream(variables)
                         .map(i -> i.getName())
                         .toArray(String[]::new))
                     + "]",
-                v, offset, variables);
+                offset, variables);
     }
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        if (!getVariables()[element - this.offset].contains(this.v[element - this.offset])) {
-            return false;
-        }
-        return getVariables()[element - this.offset].removeValue(this.v[element - this.offset], this);
+        return getVariables()[element - this.offset].instantiateTo(BoolVar.kFALSE, this);
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        if (getVariables()[element - this.offset].isInstantiatedTo(this.v[element - this.offset])) {
-            return false;
-        }
-        return getVariables()[element - this.offset].instantiateTo(this.v[element - this.offset], this);
+        return getVariables()[element - this.offset].instantiateTo(BoolVar.kTRUE, this);
     }
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
-        if (this.getVariables()[variableIdx].isInstantiatedTo(this.v[variableIdx])) {
+        if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kTRUE)) {
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else {
-            this.idm[variableIdx].forEachRemVal(this.valRemoved[variableIdx]);
+            notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
         }
     }
 
@@ -136,11 +110,11 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
         boolean changed = !isInstantiated();
         ISet s = SetFactory.makeConstantSet(Arrays.stream(value).map(i -> i - offset).toArray());
         for (int i = 0; i < getNbObservedVariables(); i++) {
-            I var = getVariables()[i];
+            B var = getVariables()[i];
             if (s.contains(i)) {
-                var.instantiateTo(this.v[i], this);
+                var.instantiateTo(BoolVar.kTRUE, this);
             } else {
-                var.removeValue(this.v[i], this);
+                var.instantiateTo(BoolVar.kFALSE, this);
             }
         }
         return changed;
@@ -148,17 +122,17 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
 
     @Override
     public boolean isInstantiated() {
-        for (int i = 0; i < getNbObservedVariables(); i++) {
-            if (!getVariables()[i].isInstantiated() && getVariables()[i].contains(this.v[i])) {
+        for (B var : getVariables()) {
+            if (!var.isInstantiated()) {
                 return false;
             }
         }
         return true;
     }
 
-    private class IntsSetViewLB extends IntsSetViewBound {
+    private class BoolsSetViewLB extends BoolsSetViewBound {
 
-        public IntsSetViewLB(IntsSetView ref) {
+        public BoolsSetViewLB(SetBoolsView ref) {
             super(ref);
         }
 
@@ -167,13 +141,12 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
             if (element < ref.offset || element >= vars.length + ref.offset) {
                 return false;
             }
-            return vars[element - ref.offset].isInstantiatedTo(ref.v[element - ref.offset]);
-        }
+            return vars[element - ref.offset].isInstantiatedTo(BoolVar.kTRUE);        }
     }
 
-    private class IntsSetViewUB extends IntsSetViewBound {
+    private class BoolsSetViewUB extends BoolsSetViewBound {
 
-        public IntsSetViewUB(IntsSetView ref) {
+        public BoolsSetViewUB(SetBoolsView ref) {
             super(ref);
         }
 
@@ -182,22 +155,21 @@ public class IntsSetView<I extends IntVar> extends SetView<I> {
             if (element < ref.offset || element >= vars.length + ref.offset) {
                 return false;
             }
-            return vars[element - ref.offset].contains(ref.v[element - ref.offset]);
-        }
+            return vars[element - ref.offset].contains(BoolVar.kTRUE);          }
     }
 
-    private abstract class IntsSetViewBound extends SetDynamicFilter {
+    private abstract class BoolsSetViewBound extends SetDynamicFilter {
 
-        protected IntsSetView ref;
-        protected I[] vars;
+        protected SetBoolsView ref;
+        protected B[] vars;
 
-        public IntsSetViewBound(IntsSetView ref) {
+        public BoolsSetViewBound(SetBoolsView ref) {
             this.ref = ref;
-            this.vars = (I[]) ref.getVariables();
+            this.vars = (B[]) ref.getVariables();
         }
 
         @Override
-        public SetDynamicFilterIterator createIterator() {
+        protected SetDynamicFilterIterator createIterator() {
             return new SetDynamicFilterIterator() {
 
                 private int idx = 0;

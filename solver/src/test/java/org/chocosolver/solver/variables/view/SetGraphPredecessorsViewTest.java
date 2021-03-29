@@ -18,6 +18,7 @@ import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.view.set.SetPredecessorsGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -32,7 +33,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphPredecessorsSetViewTest {
+public class SetGraphPredecessorsViewTest {
 
     /**
      * Test the instantiation of a graph neigh set view over an undirected graph variable
@@ -45,7 +46,7 @@ public class GraphPredecessorsSetViewTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
-        GraphPredecessorsSetView s = new GraphPredecessorsSetView("s", g, 0);
+        SetPredecessorsGraphView s = new SetPredecessorsGraphView("s", g, 0);
         Assert.assertEquals(s.getLB().size(), 0);
         Assert.assertEquals(s.getUB().size(), 4);
         while (m.getSolver().solve()) {
@@ -68,7 +69,7 @@ public class GraphPredecessorsSetViewTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
-        GraphPredecessorsSetView s = new GraphPredecessorsSetView("s", g, 0);
+        SetPredecessorsGraphView s = new SetPredecessorsGraphView("s", g, 0);
         m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getPredecessorsOf(0).toArray();
@@ -91,7 +92,7 @@ public class GraphPredecessorsSetViewTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
-        GraphPredecessorsSetView s = new GraphPredecessorsSetView("s", g, 0);
+        SetPredecessorsGraphView s = new SetPredecessorsGraphView("s", g, 0);
         s.instantiateTo(new int[] {2, 3}, s);
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getPredecessorsOf(0).toArray();

@@ -7,13 +7,14 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.bool;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.view.BoolIntView;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
@@ -26,7 +27,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 04/02/11
  */
-public final class EqView<I extends IntVar> extends IntBoolView<I> {
+public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
 
     /**
      * A boolean view based on <i>var<i/> such that <i>var<i/> = <i>cste<i/>
@@ -34,7 +35,7 @@ public final class EqView<I extends IntVar> extends IntBoolView<I> {
      * @param var  an integer variable
      * @param cste an int
      */
-    public EqView(final I var, final int cste) {
+    public BoolEqView(final I var, final int cste) {
         super(var, "=", cste);
     }
 

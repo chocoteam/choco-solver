@@ -7,43 +7,47 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.integer;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
+import org.chocosolver.solver.variables.view.IntView;
+import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.tools.MathUtils;
+
+import static org.chocosolver.solver.variables.events.IntEventType.BOUND;
+import static org.chocosolver.solver.variables.events.IntEventType.DECUPP;
+import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
+import static org.chocosolver.solver.variables.events.IntEventType.INSTANTIATE;
 
 /**
- * declare an IntVar based on X and C, such as X * C
+ * View for -V, where V is a IntVar or view
+ * <p>
  * <p>
  * Based on "Views and Iterators for Generic Constraint Implementations" <br/>
  * C. Shulte and G. Tack.<br/>
  * Eleventh International Conference on Principles and Practice of Constraint Programming
  *
  * @author Charles Prud'homme
- * @since 04/02/11
+ * @since 23/08/11
  */
-public final class ScaleView<I extends IntVar> extends IntView<I> {
+public class IntMinusView<I extends IntVar> extends IntView<I> {
 
-    public final int cste;
 
     /**
-     * Create a <i>cste<i/> &times; <i>var<i/> view
-     * @param var a variable
-     * @param cste a positive integer
+     * Create a -<i>var<i/> view
+     * @param var a integer variable
      */
-    public ScaleView(final I var, final int cste) {
-        super("(" + var.getName() + "*" + cste + ")", var);
-        assert (cste > 0) : "view cste must be >0";
-        this.cste = cste;
+    public IntMinusView(final I var) {
+        super("-(" + var.getName() + ")", var);
     }
 
     @Override
@@ -51,96 +55,124 @@ public final class ScaleView<I extends IntVar> extends IntView<I> {
         var.createDelta();
         if (var.getDelta() == NoDelta.singleton) {
             return IIntDeltaMonitor.Default.NONE;
-//            throw new UnsupportedOperationException();
         }
         return new ViewDeltaMonitor(var.monitorDelta(propagator)) {
             @Override
             protected int transform(int value) {
-                return cste * value;
+                return -value;
             }
         };
     }
 
     @Override
-    protected boolean doInstantiateVar(int value) throws ContradictionException {
-        if (value % cste != 0) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, this, getLB(), getUB());
-            this.contradiction(this, MSG_INST);
+    public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        assert cause != null;
+        int olb = this.getLB();
+        int oub = this.getUB();
+        boolean hasChanged = false;
+        if (olb < lb || oub > ub) {
+            IntEventType e = null;
+
+            if (olb < lb) {
+                model.getSolver().getEventObserver().updateLowerBound(this, lb, getLB(), cause);
+                e = INCLOW;
+                if (var.updateUpperBound(-lb, this)) {
+                    hasChanged = true;
+                } else {
+                    model.getSolver().getEventObserver().undo();
+                }
+            }
+            if (oub > ub) {
+                e = e == null ? DECUPP : BOUND;
+                model.getSolver().getEventObserver().updateUpperBound(this, ub, getUB(), cause);
+                if (var.updateLowerBound(-ub, this)) {
+                    hasChanged = true;
+                } else {
+                    model.getSolver().getEventObserver().undo();
+                }
+            }
+            if (isInstantiated()) {
+                e = INSTANTIATE;
+            }
+            if (hasChanged) {
+                this.notifyPropagators(e, cause);
+            }
         }
-        return var.instantiateTo(value / cste, this);
+        return hasChanged;
+    }
+
+    @Override
+    protected boolean doInstantiateVar(int value) throws ContradictionException {
+        return var.instantiateTo(-value, this);
     }
 
     @Override
     protected boolean doUpdateLowerBoundOfVar(int value) throws ContradictionException {
-        return var.updateLowerBound(MathUtils.divCeil(value, cste), this);
+        return var.updateUpperBound(-value, this);
     }
 
     @Override
     protected boolean doUpdateUpperBoundOfVar(int value) throws ContradictionException {
-        return var.updateUpperBound(MathUtils.divFloor(value, cste), this);
+        return var.updateLowerBound(-value, this);
     }
 
     @Override
     protected boolean doRemoveValueFromVar(int value) throws ContradictionException {
-        return value % cste == 0 && var.removeValue(value / cste, this);
+        return var.removeValue(-value, this);
     }
 
     @Override
     protected boolean doRemoveIntervalFromVar(int from, int to) throws ContradictionException {
-        return var.removeInterval(MathUtils.divCeil(from, cste), MathUtils.divFloor(to, cste), this);
+        return var.removeInterval(-to, -from, this);
     }
 
     @Override
     public boolean contains(int value) {
-        return value % cste == 0 && var.contains(value / cste);
+        return var.contains(-value);
     }
 
     @Override
     public boolean isInstantiatedTo(int value) {
-        return value % cste == 0 && var.isInstantiatedTo(value / cste);
+        return var.isInstantiatedTo(-value);
     }
 
     @Override
     public int getValue() {
-        return var.getValue() * cste;
+        return -var.getValue();
     }
 
     @Override
     public int getLB() {
-        return var.getLB() * cste;
+        return -var.getUB();
     }
 
     @Override
     public int getUB() {
-        return var.getUB() * cste;
+        return -var.getLB();
     }
 
     @Override
     public int nextValue(int v) {
-        int value = var.nextValue(MathUtils.divFloor(v, cste));
-        if (value == Integer.MAX_VALUE) {
-            return value;
-        }
-        return value * cste;
+        int value = var.previousValue(-v);
+        if (value == Integer.MIN_VALUE) return Integer.MAX_VALUE;
+        return -value;
     }
 
     @Override
     public int nextValueOut(int v) {
-        return var.nextValueOut(MathUtils.divFloor(v, cste)) * cste;
+        return -var.previousValueOut(-v);
     }
 
     @Override
     public int previousValue(int v) {
-        int value = var.previousValue(MathUtils.divCeil(v, cste));
-        if (value == Integer.MIN_VALUE) {
-            return Integer.MIN_VALUE;
-        }
-        return value * cste;
+        int value = var.nextValue(-v);
+        if (value == Integer.MAX_VALUE) return Integer.MIN_VALUE;
+        return -value;
     }
 
     @Override
     public int previousValueOut(int v) {
-        return var.previousValueOut(MathUtils.divCeil(v, cste)) * cste;
+        return -var.nextValueOut(-v);
     }
 
     @Override
@@ -150,7 +182,7 @@ public final class ScaleView<I extends IntVar> extends IntView<I> {
 
     @Override
     public String toString() {
-        return "(" + this.var.toString() + " * " + this.cste + ") = [" + getLB() + "," + getUB() + "]";
+        return "-(" + this.var.toString() + ") = [" + getLB() + "," + getUB() + "]";
     }
 
     @Override
@@ -163,33 +195,33 @@ public final class ScaleView<I extends IntVar> extends IntView<I> {
                 @Override
                 public void bottomUpInit() {
                     super.bottomUpInit();
-                    vit = var.getValueIterator(true);
+                    vit = var.getValueIterator(false);
                 }
 
                 @Override
                 public void topDownInit() {
                     super.topDownInit();
-                    vit = var.getValueIterator(false);
+                    vit = var.getValueIterator(true);
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return vit.hasNext();
-                }
-
-                @Override
-                public boolean hasPrevious() {
                     return vit.hasPrevious();
                 }
 
                 @Override
+                public boolean hasPrevious() {
+                    return vit.hasNext();
+                }
+
+                @Override
                 public int next() {
-                    return vit.next() * cste;
+                    return -vit.previous();
                 }
 
                 @Override
                 public int previous() {
-                    return vit.previous() * cste;
+                    return -vit.next();
                 }
 
                 @Override
@@ -209,71 +241,57 @@ public final class ScaleView<I extends IntVar> extends IntView<I> {
 
     @Override
     public DisposableRangeIterator getRangeIterator(boolean bottomUp) {
-        if (cste == 1) return var.getRangeIterator(bottomUp);
-        // cste > 2, so no range anymore!
         if (_riterator == null || _riterator.isNotReusable()) {
             _riterator = new DisposableRangeIterator() {
 
-
-                DisposableValueIterator vit;
-                int min,
-                        max;
+                DisposableRangeIterator vir;
 
                 @Override
                 public void bottomUpInit() {
-                    vit = getValueIterator(true);
-                    if (vit.hasNext()) {
-                        min = vit.next();
-                    }
-                    max = min;
+                    super.bottomUpInit();
+                    vir = var.getRangeIterator(false);
                 }
 
                 @Override
                 public void topDownInit() {
-                    vit = getValueIterator(false);
-                    if (vit.hasPrevious()) {
-                        max = vit.previous();
-                    }
-                    min = max;
+                    super.topDownInit();
+                    vir = var.getRangeIterator(true);
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return min != Integer.MAX_VALUE;
+                    return vir.hasPrevious();
                 }
 
                 @Override
                 public boolean hasPrevious() {
-                    return max != -Integer.MAX_VALUE;
+                    return vir.hasNext();
                 }
 
                 @Override
                 public void next() {
-                    if (vit.hasNext()) {
-                        min = max = vit.next();
-                    } else {
-                        min = Integer.MAX_VALUE;
-                    }
+                    vir.previous();
                 }
 
                 @Override
                 public void previous() {
-                    if (vit.hasPrevious()) {
-                        max = vit.previous();
-                        min = max;
-                    } else {
-                        max = -Integer.MAX_VALUE;
-                    }
+                    vir.next();
                 }
 
                 @Override
                 public int min() {
-                    return min;
+                    return -vir.max();
                 }
 
                 @Override
                 public int max() {
-                    return max;
+                    return -vir.min();
+                }
+
+                @Override
+                public void dispose() {
+                    super.dispose();
+                    vir.dispose();
                 }
             };
         }
@@ -286,19 +304,29 @@ public final class ScaleView<I extends IntVar> extends IntView<I> {
     }
 
     @Override
+    public IEventType transformEvent(IEventType evt) {
+        if (evt == INCLOW) {
+            return DECUPP;
+        } else if (evt == DECUPP) {
+            return INCLOW;
+        }
+        return evt;
+    }
+
+    @Override
     public void justifyEvent(IntEventType mask, int one, int two, int three) {
         switch (mask) {
             case DECUPP:
-                model.getSolver().getEventObserver().updateUpperBound(this, one * cste, two * cste, this);
+                model.getSolver().getEventObserver().updateLowerBound(this, -one, -two, this);
                 break;
             case INCLOW:
-                model.getSolver().getEventObserver().updateLowerBound(this, one * cste, two * cste, this);
+                model.getSolver().getEventObserver().updateUpperBound(this, -one, -two, this);
                 break;
             case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, one * cste, this);
+                model.getSolver().getEventObserver().removeValue(this, -one, this);
                 break;
             case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, one * cste, this, two * cste, three * cste);
+                model.getSolver().getEventObserver().instantiateTo(this, -one, this, -three, -two);
                 break;
         }
     }

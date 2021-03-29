@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.bool;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -20,6 +20,8 @@ import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
+import org.chocosolver.solver.variables.view.IntView;
+import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;

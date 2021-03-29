@@ -18,7 +18,7 @@ import static org.testng.Assert.assertEquals;
 /**
  * @author Alexandre LEBRUN
  */
-public class IntVarMinusViewTest extends IntVarTest {
+public class IntVarIntMinusViewTest extends IntVarTest {
 
 
     private IntVar original;

@@ -16,6 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.view.set.SetNodeGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -30,7 +31,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphNodeSetViewTest {
+public class SetGraphNodeViewTest {
 
     /**
      * Test the instantiation of a graph node set view over an undirected graph variable
@@ -43,7 +44,7 @@ public class GraphNodeSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = m.graphVar("g", LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        SetNodeGraphView s = new SetNodeGraphView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
             int[] nodeSet = s.getValue().toArray();
@@ -64,7 +65,7 @@ public class GraphNodeSetViewTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = m.digraphVar("g", LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        SetNodeGraphView s = new SetNodeGraphView("s", g);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
             int[] nodeSet = s.getValue().toArray();
@@ -84,7 +85,7 @@ public class GraphNodeSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = m.graphVar("g", LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        SetNodeGraphView s = new SetNodeGraphView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -107,7 +108,7 @@ public class GraphNodeSetViewTest {
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = m.graphVar("g", LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        SetNodeGraphView s = new SetNodeGraphView("s", g);
         s.instantiateTo(new int[] {0, 2, 4}, s);
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
@@ -129,7 +130,7 @@ public class GraphNodeSetViewTest {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         GraphVar g = m.digraphVar("g", LB, UB);
-        GraphNodeSetView s = new GraphNodeSetView("s", g);
+        SetNodeGraphView s = new SetNodeGraphView("s", g);
         m.allEqual(s, m.setVar(new int[] {0, 2, 4})).post();
         while (m.getSolver().solve()) {
             int[] nodes = g.getValue().getNodes().toArray();
