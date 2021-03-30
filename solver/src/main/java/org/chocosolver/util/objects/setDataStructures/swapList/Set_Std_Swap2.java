@@ -12,6 +12,7 @@ package org.chocosolver.util.objects.setDataStructures.swapList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.util.objects.setDataStructures.AbstractSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -22,7 +23,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  *
  * @author : Charles Prud'homme, Jean-Guillaume FAGES (fix remove)
  */
-public class Set_Std_Swap2 implements ISet {
+public class Set_Std_Swap2 extends AbstractSet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -55,6 +56,7 @@ public class Set_Std_Swap2 implements ISet {
         if(!contains(element)){
             int pos = size.add(1);
             values.insert(pos - 1, element);
+            notifyObservingElementAdded(element);
             return true;
         }
         return false;
@@ -71,6 +73,7 @@ public class Set_Std_Swap2 implements ISet {
             values.set(pos, t);
             values.set(s, element);
             size.add(-1);
+            notifyObservingElementRemoved(element);
             return true;
         }else return false;
     }
@@ -89,6 +92,7 @@ public class Set_Std_Swap2 implements ISet {
     @Override
     public void clear() {
         size.set(0);
+        notifyObservingCleared();
     }
 
     @Override

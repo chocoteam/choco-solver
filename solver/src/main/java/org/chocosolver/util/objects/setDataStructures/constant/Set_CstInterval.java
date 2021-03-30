@@ -91,7 +91,12 @@ public class Set_CstInterval implements ISet {
 		return SetType.FIXED_INTERVAL;
 	}
 
-	@Override
+    @Override
+    public void registerObserver(ISet set, int idx) {
+        // Set is fixed, no need to register.
+    }
+
+    @Override
 	public int min() {
 		return lb;
 	}

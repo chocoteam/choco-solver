@@ -19,7 +19,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * Project: choco.
  * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface IntIterableSet extends ISet{
+public interface IntIterableSet extends ISet {
 
     /**
      * Adds all of the elements in the array to this set.

@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.iterable;
 
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 
 /**
@@ -193,5 +194,10 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
     @Override
     public void minus(int x) {
         this.offset -= x;
+    }
+
+    @Override
+    public void registerObserver(ISet set, int idx) {
+        throw new UnsupportedOperationException("IntIterableBitset is not (yet) observable");
     }
 }

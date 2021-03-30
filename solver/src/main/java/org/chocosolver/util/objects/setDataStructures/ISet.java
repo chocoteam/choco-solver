@@ -69,41 +69,6 @@ public interface ISet extends Iterable<Integer>{
     boolean contains(int element);
 
     /**
-     * @param elements
-     * @return true iff the set contains all elements in `elements`
-     */
-    default boolean containsAll(int... elements) {
-        for (int i : elements) {
-            if (!contains(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @param set the set to compare this with
-     * @return true iff this is a subset of set.
-     */
-    default boolean isSubset(ISet set) {
-        for (int i : this) {
-            if (!set.contains(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     *
-     * @param set the set to compare this with
-     * @return true iff this is a superset of set.
-     */
-    default boolean isSuperset(ISet set) {
-        return set.isSubset(this);
-    }
-
-    /**
      * @return true iff the set is empty
      */
     default boolean isEmpty(){
@@ -138,6 +103,20 @@ public interface ISet extends Iterable<Integer>{
      * @return the implementation type of this set
      */
     SetType getSetType();
+
+    void registerObserver(ISet set, int idx);
+
+    default void notifyElementAdded(int element, int idx) {
+        throw new UnsupportedOperationException();
+    }
+
+    default void notifyElementRemoved(int element, int idx) {
+        throw new UnsupportedOperationException();
+    }
+
+    default void notifyCleared(int idx) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Copies the set in an array if integers
