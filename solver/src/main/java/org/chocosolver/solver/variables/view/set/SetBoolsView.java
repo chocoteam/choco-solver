@@ -16,8 +16,8 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.SetDynamicFilter;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
 
@@ -37,13 +37,10 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     private int offset;
 
     /**
-     * Dynamic sets observing the array of boolean variables
-     * Such sets do not store data but behave like a regular (read-only) set.
-     * They avoid constructing objects at each bound retrieval on the view,
-     * and allow to take advantage of the view semantic to optimize bounds read operations.
+     * Internal bounds only updated by the view.
      */
-    private BoolsSetViewLB lb;
-    private BoolsSetViewUB ub;
+    private ISet llb;
+    private ISet uub;
 
     /**
      * Instantiate an set view over an array of boolean variables such that:
@@ -56,8 +53,17 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     protected SetBoolsView(String name, int offset, B... variables) {
         super(name, variables);
         this.offset = offset;
-        this.lb = new BoolsSetViewLB(this);
-        this.ub = new BoolsSetViewUB(this);
+        this.llb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        this.uub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        // init
+        for (int i = 0; i < variables.length; i++) {
+            if (variables[i].isInstantiatedTo(BoolVar.kTRUE)) {
+                llb.add(i + offset);
+            }
+            if (variables[i].contains(BoolVar.kTRUE)) {
+                uub.add(i + offset);
+            }
+        }
     }
 
     /**
@@ -78,31 +84,41 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        return getVariables()[element - this.offset].instantiateTo(BoolVar.kFALSE, this);
+        if (getVariables()[element - this.offset].instantiateTo(BoolVar.kFALSE, this)) {
+            uub.remove(element);
+            return true;
+        }
+        return false;
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        return getVariables()[element - this.offset].instantiateTo(BoolVar.kTRUE, this);
+        if (getVariables()[element - this.offset].instantiateTo(BoolVar.kTRUE, this)) {
+            llb.add(element);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kTRUE)) {
+            llb.add(variableIdx + offset);
             notifyPropagators(SetEventType.ADD_TO_KER, this);
-        } else {
+        } else if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kFALSE)) {
+            uub.remove(variableIdx + offset);
             notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
         }
     }
 
     @Override
     public ISet getLB() {
-        return lb;
+        return llb;
     }
 
     @Override
     public ISet getUB() {
-        return ub;
+        return uub;
     }
 
     @Override
@@ -112,8 +128,10 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
         for (int i = 0; i < getNbObservedVariables(); i++) {
             B var = getVariables()[i];
             if (s.contains(i)) {
+                llb.add(i + offset);
                 var.instantiateTo(BoolVar.kTRUE, this);
             } else {
+                uub.remove(i + offset);
                 var.instantiateTo(BoolVar.kFALSE, this);
             }
         }
@@ -128,95 +146,5 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
             }
         }
         return true;
-    }
-
-    private class BoolsSetViewLB extends BoolsSetViewBound {
-
-        public BoolsSetViewLB(SetBoolsView ref) {
-            super(ref);
-        }
-
-        @Override
-        public boolean contains(int element) {
-            if (element < ref.offset || element >= vars.length + ref.offset) {
-                return false;
-            }
-            return vars[element - ref.offset].isInstantiatedTo(BoolVar.kTRUE);        }
-    }
-
-    private class BoolsSetViewUB extends BoolsSetViewBound {
-
-        public BoolsSetViewUB(SetBoolsView ref) {
-            super(ref);
-        }
-
-        @Override
-        public boolean contains(int element) {
-            if (element < ref.offset || element >= vars.length + ref.offset) {
-                return false;
-            }
-            return vars[element - ref.offset].contains(BoolVar.kTRUE);          }
-    }
-
-    private abstract class BoolsSetViewBound extends SetDynamicFilter {
-
-        protected SetBoolsView ref;
-        protected B[] vars;
-
-        public BoolsSetViewBound(SetBoolsView ref) {
-            this.ref = ref;
-            this.vars = (B[]) ref.getVariables();
-        }
-
-        @Override
-        protected SetDynamicFilterIterator createIterator() {
-            return new SetDynamicFilterIterator() {
-
-                private int idx = 0;
-
-                @Override
-                protected void resetPointers() {
-                    idx = 0;
-                }
-
-                @Override
-                protected void findNext() {
-                    next = null;
-                    while (!hasNext()) {
-                        if (idx == vars.length) {
-                            return;
-                        }
-                        if (contains(idx + ref.offset)) {
-                            next = idx + ref.offset;
-                        }
-                        idx++;
-                    }
-                }
-            };
-        }
-
-        @Override
-        public int min() {
-            int i = 0;
-            while (!contains(i + ref.offset)) {
-                i++;
-                if (i >= vars.length) {
-                    throw new IllegalStateException("cannot find maximum of an empty set");
-                }
-            }
-            return i + ref.offset;
-        }
-
-        @Override
-        public int max() {
-            int i = vars.length - 1;
-            while (!contains(i + ref.offset)) {
-                i--;
-                if (i < 0) {
-                    throw new IllegalStateException("cannot find maximum of an empty set");
-                }
-            }
-            return i + ref.offset;
-        }
     }
 }

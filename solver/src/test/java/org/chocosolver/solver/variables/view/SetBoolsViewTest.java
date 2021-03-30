@@ -74,7 +74,7 @@ public class SetBoolsViewTest {
     @Test(groups="1s", timeOut=60000)
     public void testConstrained() {
         Model m = new Model();
-        BoolVar[] boolVars = m.boolVarArray(8);
+        BoolVar[] boolVars = m.boolVarArray(100);
         SetVar setView = m.boolsSetView(boolVars, 0);
         IntVar card = setView.getCard();
         m.arithm(card, "<=", 4).post();
