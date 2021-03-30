@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.util.objects.setDataStructures.AbstractSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -24,7 +25,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  *
  * @author : Jean-Guillaume Fages
  */
-public class Set_Swap implements ISet {
+public class Set_Swap extends AbstractSet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -92,6 +93,7 @@ public class Set_Swap implements ISet {
 		values[size] = element;
 		map[element-mapOffset] = size;
 		addSize(1);
+		notifyObservingElementAdded(element);
 		return true;
 	}
 
@@ -111,6 +113,7 @@ public class Set_Swap implements ISet {
 			values[size - 1] = element;
 		}
 		addSize(-1);
+		notifyObservingElementRemoved(element);
 		return true;
 	}
 
@@ -138,6 +141,7 @@ public class Set_Swap implements ISet {
 	@Override
 	public void clear() {
 		setSize(0);
+        notifyObservingCleared();
 	}
 
 	@Override

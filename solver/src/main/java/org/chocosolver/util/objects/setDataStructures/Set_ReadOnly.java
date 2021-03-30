@@ -15,7 +15,7 @@ package org.chocosolver.util.objects.setDataStructures;
  * @author Jean-Guillaume Fages
  * @since 2016
  */
-public class Set_ReadOnly implements ISet {
+public class Set_ReadOnly extends AbstractSet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -30,6 +30,7 @@ public class Set_ReadOnly implements ISet {
     public Set_ReadOnly(ISet set) {
         super();
         this.set = set;
+        this.set.registerObserver(this, 0);
     }
 
 	//***********************************************************************************
@@ -90,4 +91,14 @@ public class Set_ReadOnly implements ISet {
 	public int max() {
 		return set.max();
 	}
+
+    @Override
+    public void notifyElementAdded(int element, int idx) {
+        notifyObservingElementAdded(element);
+    }
+
+    @Override
+    public void notifyElementRemoved(int element, int idx) {
+        notifyObservingElementRemoved(element);
+    }
 }

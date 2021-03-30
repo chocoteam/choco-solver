@@ -20,7 +20,7 @@ import org.chocosolver.util.PoolManager;
  * @author Jean-Guillaume Fages
  * @since Nov 2012
  */
-public class StdSet implements ISet {
+public class StdSet extends AbstractSet {
 
     private static final String HK_LIST_OP_PM = "HK_LIST_OP_PM";
     //***********************************************************************************
@@ -73,6 +73,7 @@ public class StdSet implements ISet {
                 op = new ListOP();
             }
             op.set(set, element, REMOVE);
+            notifyObservingElementAdded(element);
             return true;
         }
         return false;
@@ -86,6 +87,7 @@ public class StdSet implements ISet {
                 op = new ListOP();
             }
             op.set(set, element, ADD);
+            notifyObservingElementRemoved(element);
             return true;
         }
         return false;

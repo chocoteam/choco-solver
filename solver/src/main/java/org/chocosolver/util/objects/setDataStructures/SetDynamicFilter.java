@@ -111,6 +111,11 @@ public abstract class SetDynamicFilter implements ISet {
     }
 
     @Override
+    public void registerObserver(ISet set, int idx) {
+        throw new UnsupportedOperationException("SetDynamicFilter is not (yet) observable");
+    }
+
+    @Override
     public String toString() {
         StringBuilder st = new StringBuilder("{");
         ISetIterator iter = newIterator();

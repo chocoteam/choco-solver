@@ -1,36 +1,61 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.util.objects.setDataStructures;
 
-import java.util.BitSet;
+import org.chocosolver.solver.Model;
 
 /**
- * Set representing the union of a set of sets. This class relies on a dynamic iterator and does not
- * create new data structures. This set is read-only.
+ * Set representing the union of a set of sets.
+ * Constructed incrementally when observed sets are modified.
+ * This set is read-only.
  *
  * @author Dimitri Justeau-Allaire
  * @since 29/03/2021
  */
-public class SetUnion implements ISet {
+public class SetUnion extends AbstractSet {
 
     public ISet[] sets;
-    protected SetUnionIterator iterator;
+    protected ISet values;
 
     public SetUnion(ISet... sets) {
         this.sets = sets;
-        this.iterator = new SetUnionIterator(sets);
+        this.values = SetFactory.makeRangeSet();
+        // init the union
+        for (int i = 0; i < sets.length; i++) {
+            this.sets[i].registerObserver(this, i);
+            for (int v : this.sets[i]) {
+                values.add(v);
+            }
+        }
+    }
+
+    public SetUnion(Model model, ISet... sets) {
+        this.sets = sets;
+        this.values = SetFactory.makeStoredSet(SetType.RANGESET, 0, model);
+        // init the union
+        for (int i = 0; i < sets.length; i++) {
+            this.sets[i].registerObserver(this, i);
+            for (int v : this.sets[i]) {
+                values.add(v);
+            }
+        }
     }
 
     @Override
     public ISetIterator iterator() {
-        iterator.reset();
-        return iterator;
+        return values.iterator();
     }
 
     @Override
-    public SetUnionIterator newIterator() {
-        SetUnionIterator iter = new SetUnionIterator(sets);
-        iter.reset();
-        return iter;
-
+    public ISetIterator newIterator() {
+        return values.newIterator();
     }
 
     @Override
@@ -46,23 +71,12 @@ public class SetUnion implements ISet {
 
     @Override
     public boolean contains(int element) {
-        for (ISet set : sets) {
-            if (set.contains(element)) {
-                return true;
-            }
-        }
-        return false;
+        return values.contains(element);
     }
 
     @Override
     public int size() {
-        int size = 0;
-        SetUnionIterator iter = newIterator();
-        while (iter.hasNext()) {
-            size++;
-            iter.findNext();
-        }
-        return size;
+        return values.size();
     }
 
     @Override
@@ -72,26 +86,12 @@ public class SetUnion implements ISet {
 
     @Override
     public int min() {
-        int minVal = Integer.MAX_VALUE;
-        for (ISet set : sets) {
-            int currMin = set.min();
-            if (currMin < minVal) {
-                minVal = currMin;
-            }
-        }
-        return minVal;
+        return values.min();
     }
 
     @Override
     public int max() {
-        int maxVal = Integer.MIN_VALUE;
-        for (ISet set : sets) {
-            int currMax = set.max();
-            if (currMax > maxVal) {
-                maxVal = currMax;
-            }
-        }
-        return maxVal;
+        return values.max();
     }
 
     @Override
@@ -99,61 +99,43 @@ public class SetUnion implements ISet {
         return SetType.DYNAMIC;
     }
 
-    private class SetUnionIterator implements ISetIterator {
-
-        ISet[] sets;
-        ISetIterator[] iterators;
-        ISet checked;
-        int currentSet;
-        Integer next = null;
-
-        SetUnionIterator(ISet... sets) {
-            this.sets = sets;
-            this.iterators = new ISetIterator[sets.length];
-            for (int i = 0; i < sets.length; i++) {
-                this.iterators[i] = sets[i].newIterator();
+    @Override
+    public void notifyElementRemoved(int element, int idx) {
+        boolean remove = true;
+        for (int i = 0; i < sets.length; i++) {
+            if (i != idx && sets[i].contains(element)) {
+                remove = false;
+                break;
             }
-            this.checked = SetFactory.makeRangeSet();
-            this.currentSet = 0;
         }
-
-        @Override
-        public void reset() {
-            this.checked.clear();
-            this.currentSet = 0;
-            for (ISetIterator iterator : iterators) {
-                iterator.reset();
-            }
-            findNext();
+        if (remove) {
+            values.remove(element);
+            notifyObservingElementRemoved(element);
         }
+    }
 
-        protected void findNext() {
-            next = null;
-            while (!hasNext()) {
-                while (!iterators[currentSet].hasNext()) {
-                    currentSet++;
-                    if (currentSet == sets.length) {
-                        return;
-                    }
-                }
-                int v = iterators[currentSet].next();
-                if (!this.checked.contains(v)) {
-                    this.checked.add(v);
-                    next = v;
+    @Override
+    public void notifyElementAdded(int element, int idx) {
+        if (!values.contains(element)) {
+            values.add(element);
+            notifyObservingElementAdded(element);
+        }
+    }
+
+    @Override
+    public void notifyCleared(int idx) {
+        for (int element : values) {
+            boolean remove = true;
+            for (ISet set : sets) {
+                if (set.contains(element)) {
+                    remove = false;
+                    break;
                 }
             }
-        }
-
-        @Override
-        public int nextInt() {
-            int value = next;
-            findNext();
-            return value;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return next != null;
+            if (remove) {
+                values.remove(element);
+                notifyObservingElementRemoved(element);
+            }
         }
     }
 }

@@ -14,6 +14,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -1194,5 +1195,10 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
         }
         return a;
+    }
+
+    @Override
+    public void registerObserver(ISet set, int idx) {
+        throw new UnsupportedOperationException("IntIterableRangeSet is not (yet) observable");
     }
 }
