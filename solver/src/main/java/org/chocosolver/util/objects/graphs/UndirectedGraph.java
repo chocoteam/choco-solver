@@ -130,14 +130,23 @@ public class UndirectedGraph implements IGraph {
         }
     }
 
-    public UndirectedGraph(Model m, UndirectedGraph g, ISet excludedNodes) {
+    /**
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *      V' = E \ excludedNodes;
+     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * with excludedNodes a fixed set of nodes.
+     * @param model the model
+     * @param g the graph to con
+     * @param excludedNodes
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, ISet excludedNodes) {
         this.nodeSetType = SetType.DYNAMIC;
         this.edgeSetType = SetType.DYNAMIC;
         this.n = g.getNbMaxNodes();
-        this.nodes = new SetDifference(m, g.getNodes(), excludedNodes);
+        this.nodes = new SetDifference(model, g.getNodes(), excludedNodes);
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = new SetDifference(m, g.getNeighborsOf(i), excludedNodes);
+            neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), excludedNodes);
         }
     }
 

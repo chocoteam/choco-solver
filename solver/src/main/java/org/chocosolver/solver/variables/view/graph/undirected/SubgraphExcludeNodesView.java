@@ -1,3 +1,12 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.variables.view.graph.undirected;
 
 import org.chocosolver.solver.ICause;
@@ -10,13 +19,15 @@ import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Undirected graph view G'(V', E') over an undirected graph variable G(V, E) such that:
- * V' = V \ S, with S a fixed set of nodes.
+ * Undirected graph view G' = (V', E') over an undirected graph variable G = (V, E) such that:
+ *      V' = E \ excludedNodes;
+ *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+ * with excludedNodes a fixed set of nodes.
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
  */
-public class SubgraphExcludedNodesView extends UndirectedGraphView<UndirectedGraphVar> {
+public class SubgraphExcludeNodesView extends UndirectedGraphView<UndirectedGraphVar> {
 
     protected UndirectedGraph lb;
     protected UndirectedGraph ub;
@@ -30,7 +41,7 @@ public class SubgraphExcludedNodesView extends UndirectedGraphView<UndirectedGra
      * @param name      name of the view
      * @param graphVar observed variable
      */
-    public SubgraphExcludedNodesView(String name, UndirectedGraphVar graphVar, ISet excludedNodes) {
+    public SubgraphExcludeNodesView(String name, UndirectedGraphVar graphVar, ISet excludedNodes) {
         super(name, new UndirectedGraphVar[] {graphVar});
         this.excludedNodes = excludedNodes;
         this.graphVar = graphVar;
@@ -56,11 +67,6 @@ public class SubgraphExcludedNodesView extends UndirectedGraphView<UndirectedGra
     @Override
     public boolean isDirected() {
         return graphVar.isDirected();
-    }
-
-    @Override
-    public void instantiateTo(UndirectedGraph value, ICause cause) throws ContradictionException {
-        // TODO
     }
 
     @Override

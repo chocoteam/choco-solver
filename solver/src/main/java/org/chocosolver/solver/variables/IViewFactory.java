@@ -15,13 +15,12 @@ import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
-import org.chocosolver.solver.variables.view.graph.undirected.SubgraphExcludedNodesView;
+import org.chocosolver.solver.variables.view.graph.undirected.SubgraphExcludeNodesView;
 import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
-import java.util.Set;
 
 import static java.lang.Math.max;
 
@@ -581,9 +580,11 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates an undirected graph view G'(V', E') over an undirected graph variable G(V, E) such that:
-     * V' = V \ excludedNodes, with `excludedNodes` a fixed set of nodes.
+     *      V' = E \ excludedNodes;
+     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * with excludedNodes a fixed set of nodes.
      */
-    default UndirectedGraphVar subgraphExcludedNodesView(UndirectedGraphVar g, ISet excludedNodes) {
-        return new SubgraphExcludedNodesView("subgraphExcludedNodes", g, excludedNodes);
+    default UndirectedGraphVar subgraphExcludeNodesView(UndirectedGraphVar g, ISet excludedNodes) {
+        return new SubgraphExcludeNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes);
     }
 }
