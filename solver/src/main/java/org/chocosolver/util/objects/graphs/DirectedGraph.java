@@ -10,10 +10,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.*;
 
 /**
  * Directed graph implementation : directed edges are indexed per endpoints
@@ -139,6 +136,19 @@ public class DirectedGraph implements IGraph {
         for (int i = 0; i < n; i++) {
             predecessors[i] = SetFactory.makeConstantSet(g.getPredecessorsOf(i).toArray());
             successors[i] = SetFactory.makeConstantSet(g.getSuccessorsOf(i).toArray());
+        }
+    }
+
+    public DirectedGraph(Model m, DirectedGraph g, ISet excludedNodes) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        this.nodes = new SetDifference(m, g.getNodes(), excludedNodes);
+        predecessors = new ISet[n];
+        successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            predecessors[i] = new SetDifference(m, g.getPredecessorsOf(i), excludedNodes);
+            successors[i] = new SetDifference(m, g.getSuccessorsOf(i), excludedNodes);
         }
     }
 

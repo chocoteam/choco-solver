@@ -10,10 +10,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.*;
 
 /**
  * Specific implementation of an undirected graph
@@ -130,6 +127,17 @@ public class UndirectedGraph implements IGraph {
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
             neighbors[i] = SetFactory.makeConstantSet(g.getNeighborsOf(i).toArray());
+        }
+    }
+
+    public UndirectedGraph(Model m, UndirectedGraph g, ISet excludedNodes) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        this.nodes = new SetDifference(m, g.getNodes(), excludedNodes);
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            neighbors[i] = new SetDifference(m, g.getNeighborsOf(i), excludedNodes);
         }
     }
 
