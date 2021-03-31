@@ -39,8 +39,8 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     /**
      * Internal bounds only updated by the view.
      */
-    private ISet llb;
-    private ISet uub;
+    private ISet lb;
+    private ISet ub;
 
     /**
      * Instantiate an set view over an array of boolean variables such that:
@@ -53,15 +53,15 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     protected SetBoolsView(String name, int offset, B... variables) {
         super(name, variables);
         this.offset = offset;
-        this.llb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
-        this.uub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
-        // init
+        this.lb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        this.ub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        // init bounds
         for (int i = 0; i < variables.length; i++) {
             if (variables[i].isInstantiatedTo(BoolVar.kTRUE)) {
-                llb.add(i + offset);
+                lb.add(i + offset);
             }
             if (variables[i].contains(BoolVar.kTRUE)) {
-                uub.add(i + offset);
+                ub.add(i + offset);
             }
         }
     }
@@ -85,7 +85,7 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].instantiateTo(BoolVar.kFALSE, this)) {
-            uub.remove(element);
+            ub.remove(element);
             return true;
         }
         return false;
@@ -94,7 +94,7 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].instantiateTo(BoolVar.kTRUE, this)) {
-            llb.add(element);
+            lb.add(element);
             return true;
         }
         return false;
@@ -103,22 +103,22 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kTRUE)) {
-            llb.add(variableIdx + offset);
+            lb.add(variableIdx + offset);
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kFALSE)) {
-            uub.remove(variableIdx + offset);
+            ub.remove(variableIdx + offset);
             notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
         }
     }
 
     @Override
     public ISet getLB() {
-        return llb;
+        return lb;
     }
 
     @Override
     public ISet getUB() {
-        return uub;
+        return ub;
     }
 
     @Override
@@ -128,10 +128,10 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
         for (int i = 0; i < getNbObservedVariables(); i++) {
             B var = getVariables()[i];
             if (s.contains(i)) {
-                llb.add(i + offset);
+                lb.add(i + offset);
                 var.instantiateTo(BoolVar.kTRUE, this);
             } else {
-                uub.remove(i + offset);
+                ub.remove(i + offset);
                 var.instantiateTo(BoolVar.kFALSE, this);
             }
         }

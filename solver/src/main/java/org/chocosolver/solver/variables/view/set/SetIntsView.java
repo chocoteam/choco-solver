@@ -45,13 +45,10 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     private IntProcedure[] valRemoved;
 
     /**
-     * Dynamic sets observing the array of integer variables
-     * Such sets do not store data but behave like a regular (read-only) set.
-     * They avoid constructing objects at each bound retrieval on the view,
-     * and allow to take advantage of the view semantic to optimize bounds read operations.
+     * Internal bounds only updated by the view.
      */
-    private IntsSetViewLB lb;
-    private IntsSetViewUB ub;
+    private ISet lb;
+    private ISet ub;
 
     /**
      * Instantiate an set view over an array of integer variables such that:
@@ -75,12 +72,22 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
             int finalI = i;
             this.valRemoved[i] = val -> {
                 if (val == this.v[finalI]) {
+                    this.ub.remove(finalI + offset);
                     notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
                 }
             };
         }
-        lb = new IntsSetViewLB(this);
-        ub = new IntsSetViewUB(this);
+        this.lb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        this.ub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        // init
+        for (int i = 0; i < variables.length; i++) {
+            if (variables[i].isInstantiatedTo(v[i])) {
+                lb.add(i + offset);
+            }
+            if (variables[i].contains(v[i])) {
+                ub.add(i + offset);
+            }
+        }
     }
 
     /**
@@ -102,23 +109,26 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        if (!getVariables()[element - this.offset].contains(this.v[element - this.offset])) {
-            return false;
+        if (getVariables()[element - this.offset].removeValue(this.v[element - this.offset], this)) {
+            ub.remove(element);
+            return true;
         }
-        return getVariables()[element - this.offset].removeValue(this.v[element - this.offset], this);
+        return false;
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        if (getVariables()[element - this.offset].isInstantiatedTo(this.v[element - this.offset])) {
-            return false;
+        if (getVariables()[element - this.offset].instantiateTo(this.v[element - this.offset], this)) {
+            lb.add(element);
+            return true;
         }
-        return getVariables()[element - this.offset].instantiateTo(this.v[element - this.offset], this);
+        return false;
     }
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (this.getVariables()[variableIdx].isInstantiatedTo(this.v[variableIdx])) {
+            lb.add(variableIdx + offset);
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else {
             this.idm[variableIdx].forEachRemVal(this.valRemoved[variableIdx]);
@@ -142,8 +152,10 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
         for (int i = 0; i < getNbObservedVariables(); i++) {
             I var = getVariables()[i];
             if (s.contains(i)) {
+                lb.add(i + offset);
                 var.instantiateTo(this.v[i], this);
             } else {
+                ub.remove(i + offset);
                 var.removeValue(this.v[i], this);
             }
         }
@@ -158,97 +170,5 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
             }
         }
         return true;
-    }
-
-    private class IntsSetViewLB extends IntsSetViewBound {
-
-        public IntsSetViewLB(SetIntsView ref) {
-            super(ref);
-        }
-
-        @Override
-        public boolean contains(int element) {
-            if (element < ref.offset || element >= vars.length + ref.offset) {
-                return false;
-            }
-            return vars[element - ref.offset].isInstantiatedTo(ref.v[element - ref.offset]);
-        }
-    }
-
-    private class IntsSetViewUB extends IntsSetViewBound {
-
-        public IntsSetViewUB(SetIntsView ref) {
-            super(ref);
-        }
-
-        @Override
-        public boolean contains(int element) {
-            if (element < ref.offset || element >= vars.length + ref.offset) {
-                return false;
-            }
-            return vars[element - ref.offset].contains(ref.v[element - ref.offset]);
-        }
-    }
-
-    private abstract class IntsSetViewBound extends SetDynamicFilter {
-
-        protected SetIntsView ref;
-        protected I[] vars;
-
-        public IntsSetViewBound(SetIntsView ref) {
-            this.ref = ref;
-            this.vars = (I[]) ref.getVariables();
-        }
-
-        @Override
-        public SetDynamicFilterIterator createIterator() {
-            return new SetDynamicFilterIterator() {
-
-                private int idx = 0;
-
-                @Override
-                protected void resetPointers() {
-                    idx = 0;
-                }
-
-                @Override
-                protected void findNext() {
-                    next = null;
-                    while (!hasNext()) {
-                        if (idx == vars.length) {
-                            return;
-                        }
-                        if (contains(idx + ref.offset)) {
-                            next = idx + ref.offset;
-                        }
-                        idx++;
-                    }
-                }
-            };
-        }
-
-        @Override
-        public int min() {
-            int i = 0;
-            while (!contains(i + ref.offset)) {
-                i++;
-                if (i >= vars.length) {
-                    throw new IllegalStateException("cannot find maximum of an empty set");
-                }
-            }
-            return i + ref.offset;
-        }
-
-        @Override
-        public int max() {
-            int i = vars.length - 1;
-            while (!contains(i + ref.offset)) {
-                i--;
-                if (i < 0) {
-                    throw new IllegalStateException("cannot find maximum of an empty set");
-                }
-            }
-            return i + ref.offset;
-        }
     }
 }

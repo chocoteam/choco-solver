@@ -120,7 +120,7 @@ public class SetIntsViewTest {
     public void testIntArraySetArrayView() {
         Model m = new Model();
         IntVar[] intVars = m.intVarArray(8, 0, 2);
-        SetVar[] setViews = m.intsSetView(intVars, 3, 0, 0);
+        SetVar[] setViews = m.intsSetsView(intVars, 3, 0, 0);
         IntVar card = setViews[0].getCard();
         m.arithm(card, "=", 2).post();
         m.member(2, setViews[1]).post();

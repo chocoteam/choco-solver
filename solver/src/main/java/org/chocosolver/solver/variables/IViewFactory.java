@@ -518,7 +518,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param offset2 offset between intVars indices and setViews elements
      * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
      */
-    default SetVar[] intsSetView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
+    default SetVar[] intsSetsView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
         SetVar[] setVars = new SetVar[nbSets];
         for (int i = 0; i < nbSets; i++) {
             setVars[i] = intsSetView(intVars, i + offset1, offset2);
