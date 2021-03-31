@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -404,6 +405,19 @@ public class GraphFactory {
         }
         return g;
     }
+
+    //***********************************************************************************
+    // SUBGRAPHS
+    //***********************************************************************************
+
+    public static UndirectedGraph makeSubgraphExcludedNodes(Model model, UndirectedGraph graph, ISet excludedNodes) {
+        return new UndirectedGraph(model, graph, excludedNodes);
+    }
+
+    public static DirectedGraph makeSubgraphExcludedNodes(Model model, DirectedGraph graph, ISet excludedNodes) {
+        return new DirectedGraph(model, graph, excludedNodes);
+    }
+
 
     //***********************************************************************************
     // ADJACENCY MATRIX
