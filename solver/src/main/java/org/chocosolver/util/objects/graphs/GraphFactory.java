@@ -410,10 +410,28 @@ public class GraphFactory {
     // SUBGRAPHS
     //***********************************************************************************
 
+    /**
+     * Construct a backtrackable undirected graph G' = (V', E') from another undirected graph G = (V, E) such that:
+     *      V' = E \ excludedNodes;
+     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * with excludedNodes a fixed set of nodes.
+     * @param model the model
+     * @param graph the graph to con
+     * @param excludedNodes
+     */
     public static UndirectedGraph makeSubgraphExcludedNodes(Model model, UndirectedGraph graph, ISet excludedNodes) {
         return new UndirectedGraph(model, graph, excludedNodes);
     }
 
+    /**
+     * Construct a backtrackable directed graph G' = (V', E') from another directed graph G = (V, E) such that:
+     *      V' = E \ excludedNodes;
+     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * with excludedNodes a fixed set of nodes.
+     * @param model the model
+     * @param graph the graph to con
+     * @param excludedNodes
+     */
     public static DirectedGraph makeSubgraphExcludedNodes(Model model, DirectedGraph graph, ISet excludedNodes) {
         return new DirectedGraph(model, graph, excludedNodes);
     }

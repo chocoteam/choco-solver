@@ -1,3 +1,12 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.variables.view.graph;
 
 import org.chocosolver.solver.ICause;
@@ -11,7 +20,7 @@ import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * An abstract class for graph views over other variables
+ * An abstract class for undirected graph views over other variables
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
@@ -37,6 +46,12 @@ public abstract class UndirectedGraphView<V extends Variable> extends GraphView<
     public boolean removeNode(int node, ICause cause) throws ContradictionException {
         assert cause != null;
         assert (node >= 0 && node < getNbMaxNodes());
+        if (getMandatoryNodes().contains(node)) {
+            this.contradiction(cause, "remove mandatory node");
+            return false;
+        } else if (!getPotentialNodes().contains(node)) {
+            return false;
+        }
         ISet nei = getPotentialNeighborsOf(node);
         for (int i : nei) {
             removeEdge(node, i, cause);

@@ -1,14 +1,21 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.solver.variables.view.graph;
 
 import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.view.GraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
 
 /**
- * An abstract class for graph views over other variables
+ * An abstract class for directed graph views over other variables
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
