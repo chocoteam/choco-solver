@@ -81,11 +81,6 @@ public class PropSumOfElements extends Propagator<Variable> {
 	}
 
 	@Override
-	public void propagate(int idXVar, int mask) throws ContradictionException {
-
-	}
-
-	@Override
 	public void propagate(int evtmask) throws ContradictionException {
 		int lbSum = 0;
 		int ubPosSum = 0;
