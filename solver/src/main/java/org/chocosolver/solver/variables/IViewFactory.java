@@ -15,6 +15,7 @@ import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedSubgraphExcludeNodesView;
 import org.chocosolver.solver.variables.view.graph.undirected.SubgraphExcludeNodesView;
 import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
@@ -586,5 +587,15 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default UndirectedGraphVar subgraphExcludeNodesView(UndirectedGraphVar g, ISet excludedNodes) {
         return new SubgraphExcludeNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes);
+    }
+
+    /**
+     * Creates an directed graph view G'(V', E') over an directed graph variable G(V, E) such that:
+     *      V' = E \ excludedNodes;
+     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * with excludedNodes a fixed set of nodes.
+     */
+    default DirectedGraphVar subgraphExcludeNodesView(DirectedGraphVar g, ISet excludedNodes) {
+        return new DirectedSubgraphExcludeNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes);
     }
 }
