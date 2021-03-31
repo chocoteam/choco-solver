@@ -23,7 +23,7 @@ import java.util.stream.IntStream;
 /**
  * Tests for SetUnion class
  * @author Dimitri Justeau-Allaire
- * @since 09/03/2021
+ * @since 30/03/2021
  */
 public class SetUnionTest {
 
