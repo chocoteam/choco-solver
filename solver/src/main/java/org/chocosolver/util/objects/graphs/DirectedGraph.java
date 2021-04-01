@@ -139,16 +139,50 @@ public class DirectedGraph implements IGraph {
         }
     }
 
-    public DirectedGraph(Model m, DirectedGraph g, ISet excludedNodes) {
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE SUBGRAPHS:
+     *
+     *  - EXCLUDE_NODES:
+     *      Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     *  - INDUCED_BY_NODES:
+     *      Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *          V' = V \cap nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with excludedNodes a fixed set of nodes.
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param nodes
+     * @param subgraphType the type of subgraph to construct
+     */
+    public DirectedGraph(Model model, DirectedGraph g, ISet nodes, SubgraphType subgraphType) {
         this.nodeSetType = SetType.DYNAMIC;
         this.edgeSetType = SetType.DYNAMIC;
         this.n = g.getNbMaxNodes();
-        this.nodes = new SetDifference(m, g.getNodes(), excludedNodes);
+        switch (subgraphType) {
+            case EXCLUDE_NODES:
+                this.nodes = new SetDifference(model, g.getNodes(), nodes);
+                break;
+            case INDUCED_BY_NODES:
+                this.nodes = new SetIntersection(model, g.getNodes(), nodes);
+                break;
+        }
         predecessors = new ISet[n];
         successors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            predecessors[i] = new SetDifference(m, g.getPredecessorsOf(i), excludedNodes);
-            successors[i] = new SetDifference(m, g.getSuccessorsOf(i), excludedNodes);
+            switch (subgraphType) {
+                case EXCLUDE_NODES:
+                    predecessors[i] = new SetDifference(model, g.getPredecessorsOf(i), nodes);
+                    successors[i] = new SetDifference(model, g.getSuccessorsOf(i), nodes);
+                    break;
+                case INDUCED_BY_NODES:
+                    predecessors[i] = new SetIntersection(model, g.getPredecessorsOf(i), nodes);
+                    successors[i] = new SetIntersection(model, g.getSuccessorsOf(i), nodes);
+                    break;
+            }
         }
     }
 

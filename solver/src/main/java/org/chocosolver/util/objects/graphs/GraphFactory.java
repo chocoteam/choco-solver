@@ -411,31 +411,50 @@ public class GraphFactory {
     //***********************************************************************************
 
     /**
-     * Construct a backtrackable undirected graph G' = (V', E') from another undirected graph G = (V, E) such that:
-     *      V' = E \ excludedNodes;
-     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE UNDIRECTED SUBGRAPHS INDUCED BY NODES:
+     *
+     *  - EXCLUDE_NODES:
+     *      Construct a backtrackable undirected graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     *  - INDUCED_BY_NODES:
+     *      Construct a backtrackable undirected graph G = (V', E') from G = (V, E) such that:
+     *          V' = V \cap nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
      * with excludedNodes a fixed set of nodes.
      * @param model the model
-     * @param graph the graph to con
-     * @param excludedNodes
+     * @param graph the graph to construct a subgraph from
+     * @param nodes
+     * @param subgraphType the type of subgraph to construct
      */
-    public static UndirectedGraph makeSubgraphExcludedNodes(Model model, UndirectedGraph graph, ISet excludedNodes) {
-        return new UndirectedGraph(model, graph, excludedNodes);
+    public static UndirectedGraph makeSubgraphInducedByNodes(Model model, UndirectedGraph graph, ISet nodes, SubgraphType subgraphType) {
+        return new UndirectedGraph(model, graph, nodes, subgraphType);
     }
 
     /**
-     * Construct a backtrackable directed graph G' = (V', E') from another directed graph G = (V, E) such that:
-     *      V' = E \ excludedNodes;
-     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE DIRECTED SUBGRAPHS INDUCED BY NODES:
+     *
+     *  - EXCLUDE_NODES:
+     *      Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     *  - INDUCED_BY_NODES:
+     *      Construct a backtrackable directed graph G = (V', E') from G = (V, E) such that:
+     *          V' = V \cap nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
      * with excludedNodes a fixed set of nodes.
      * @param model the model
-     * @param graph the graph to con
-     * @param excludedNodes
+     * @param graph the graph to construct a subgraph from
+     * @param nodes
+     * @param subgraphType the type of subgraph to construct
      */
-    public static DirectedGraph makeSubgraphExcludedNodes(Model model, DirectedGraph graph, ISet excludedNodes) {
-        return new DirectedGraph(model, graph, excludedNodes);
+    public static DirectedGraph makeSubgraphInducedByNodes(Model model, DirectedGraph graph, ISet nodes, SubgraphType subgraphType) {
+        return new DirectedGraph(model, graph, nodes, subgraphType);
     }
-
 
     //***********************************************************************************
     // ADJACENCY MATRIX

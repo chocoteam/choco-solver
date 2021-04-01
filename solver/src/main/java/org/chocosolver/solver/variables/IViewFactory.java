@@ -15,10 +15,11 @@ import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
-import org.chocosolver.solver.variables.view.graph.directed.DirectedSubgraphExcludeNodesView;
-import org.chocosolver.solver.variables.view.graph.undirected.SubgraphExcludeNodesView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedSubgraphInducedByNodesView;
+import org.chocosolver.solver.variables.view.graph.undirected.SubgraphInducedByNodesView;
 import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
+import org.chocosolver.util.objects.graphs.SubgraphType;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
@@ -586,7 +587,17 @@ public interface IViewFactory extends ISelf<Model> {
      * with excludedNodes a fixed set of nodes.
      */
     default UndirectedGraphVar subgraphExcludeNodesView(UndirectedGraphVar g, ISet excludedNodes) {
-        return new SubgraphExcludeNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes);
+        return new SubgraphInducedByNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes, SubgraphType.EXCLUDE_NODES);
+    }
+
+    /**
+     * Creates an undirected graph view G'(V', E') over an undirected graph variable G(V, E) such that:
+     *      V' = V \cap nodes;
+     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * with nodes a fixed set of nodes.
+     */
+    default UndirectedGraphVar subgraphInducedByNodesView(UndirectedGraphVar g, ISet nodes) {
+        return new SubgraphInducedByNodesView(g.getName() + "[" + nodes.toString() + "]", g, nodes, SubgraphType.INDUCED_BY_NODES);
     }
 
     /**
@@ -596,6 +607,17 @@ public interface IViewFactory extends ISelf<Model> {
      * with excludedNodes a fixed set of nodes.
      */
     default DirectedGraphVar subgraphExcludeNodesView(DirectedGraphVar g, ISet excludedNodes) {
-        return new DirectedSubgraphExcludeNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes);
+        return new DirectedSubgraphInducedByNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes, SubgraphType.EXCLUDE_NODES);
     }
+
+    /**
+     * Creates a directed graph view G'(V', E') over an undirected graph variable G(V, E) such that:
+     *      V' = V \cap nodes;
+     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * with nodes a fixed set of nodes.
+     */
+    default DirectedGraphVar subgraphInducedByNodesView(DirectedGraphVar g, ISet nodes) {
+        return new DirectedSubgraphInducedByNodesView(g.getName() + "[" + nodes.toString() + "]", g, nodes, SubgraphType.INDUCED_BY_NODES);
+    }
+
 }
