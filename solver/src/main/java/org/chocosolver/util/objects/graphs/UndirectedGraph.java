@@ -130,23 +130,48 @@ public class UndirectedGraph implements IGraph {
         }
     }
 
+    // Subgraph constructors
+
     /**
-     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
-     *      V' = E \ excludedNodes;
-     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE SUBGRAPHS:
+     *
+     *  - EXCLUDE_NODES:
+     *      Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     *  - INDUCED_BY_NODES:
+     *      Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *          V' = V \cap nodes;
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
      * with excludedNodes a fixed set of nodes.
      * @param model the model
-     * @param g the graph to con
-     * @param excludedNodes
+     * @param g the graph to construct a subgraph from
+     * @param nodes
+     * @param subgraphType the type of subgraph to construct
      */
-    public UndirectedGraph(Model model, UndirectedGraph g, ISet excludedNodes) {
+    public UndirectedGraph(Model model, UndirectedGraph g, ISet nodes, SubgraphType subgraphType) {
         this.nodeSetType = SetType.DYNAMIC;
         this.edgeSetType = SetType.DYNAMIC;
         this.n = g.getNbMaxNodes();
-        this.nodes = new SetDifference(model, g.getNodes(), excludedNodes);
+        switch (subgraphType) {
+            case EXCLUDE_NODES:
+                this.nodes = new SetDifference(model, g.getNodes(), nodes);
+                break;
+            case INDUCED_BY_NODES:
+                this.nodes = new SetIntersection(model, g.getNodes(), nodes);
+                break;
+        }
         neighbors = new ISet[n];
         for (int i = 0; i < n; i++) {
-            neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), excludedNodes);
+            switch (subgraphType) {
+                case EXCLUDE_NODES:
+                    neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), nodes);
+                    break;
+                case INDUCED_BY_NODES:
+                    neighbors[i] = new SetIntersection(model, g.getNeighborsOf(i), nodes);
+            }
         }
     }
 

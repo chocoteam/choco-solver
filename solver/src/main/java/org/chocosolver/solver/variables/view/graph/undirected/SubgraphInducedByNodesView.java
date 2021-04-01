@@ -9,31 +9,39 @@
  */
 package org.chocosolver.solver.variables.view.graph.undirected;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
 import org.chocosolver.util.objects.graphs.GraphFactory;
+import org.chocosolver.util.objects.graphs.SubgraphType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Undirected graph view G' = (V', E') over an undirected graph variable G = (V, E) such that:
- *      V' = E \ excludedNodes;
- *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
- * with excludedNodes a fixed set of nodes.
+ * GENERIC CLASS FOR BACKTRACKABLE UNDIRECTED SUBGRAPHS VIEWS:
+ *
+ *  - EXCLUDE_NODES:
+ *      Construct an undirected graph view G' = (V', E') from another graph G = (V, E) such that:
+ *          V' = E \ nodes;
+ *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+ *
+ *  - INDUCED_BY_NODES:
+ *      Construct an undirected graph view G = (V', E') from G = (V, E) such that:
+ *          V' = V \cap nodes;
+ *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
  */
-public class SubgraphExcludeNodesView extends UndirectedGraphView<UndirectedGraphVar> {
+public class SubgraphInducedByNodesView extends UndirectedGraphView<UndirectedGraphVar> {
 
     protected UndirectedGraph lb;
     protected UndirectedGraph ub;
 
     protected UndirectedGraphVar graphVar;
-    protected ISet excludedNodes;
+    protected SubgraphType type;
+    protected ISet nodes;
 
     /**
      * Creates a graph view.
@@ -41,12 +49,13 @@ public class SubgraphExcludeNodesView extends UndirectedGraphView<UndirectedGrap
      * @param name      name of the view
      * @param graphVar observed variable
      */
-    public SubgraphExcludeNodesView(String name, UndirectedGraphVar graphVar, ISet excludedNodes) {
+    public SubgraphInducedByNodesView(String name, UndirectedGraphVar graphVar, ISet nodes, SubgraphType type) {
         super(name, new UndirectedGraphVar[] {graphVar});
-        this.excludedNodes = excludedNodes;
+        this.nodes = nodes;
+        this.type = type;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeSubgraphExcludedNodes(getModel(), graphVar.getLB(), excludedNodes);
-        this.ub = GraphFactory.makeSubgraphExcludedNodes(getModel(), graphVar.getUB(), excludedNodes);
+        this.lb = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getLB(), nodes, type);
+        this.ub = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getUB(), nodes, type);
     }
 
     @Override

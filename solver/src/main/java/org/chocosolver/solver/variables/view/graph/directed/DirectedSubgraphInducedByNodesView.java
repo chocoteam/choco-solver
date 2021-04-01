@@ -15,24 +15,33 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
+import org.chocosolver.util.objects.graphs.SubgraphType;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Directed graph view G' = (V', E') over an directed graph variable G = (V, E) such that:
- *      V' = E \ excludedNodes;
- *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
- * with excludedNodes a fixed set of nodes.
+ * GENERIC CLASS FOR BACKTRACKABLE DIRECTED SUBGRAPHS VIEWS:
+ *
+ *  - EXCLUDE_NODES:
+ *      Construct a directed graph view G' = (V', E') from another graph G = (V, E) such that:
+ *          V' = E \ nodes;
+ *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+ *
+ *  - INDUCED_BY_NODES:
+ *      Construct a directed graph view G = (V', E') from G = (V, E) such that:
+ *          V' = V \cap nodes;
+ *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
  */
-public class DirectedSubgraphExcludeNodesView extends DirectedGraphView<DirectedGraphVar> {
+public class DirectedSubgraphInducedByNodesView extends DirectedGraphView<DirectedGraphVar> {
 
     protected DirectedGraph lb;
     protected DirectedGraph ub;
 
     protected DirectedGraphVar graphVar;
-    protected ISet excludedNodes;
+    protected SubgraphType type;
+    protected ISet nodes;
 
     /**
      * Creates a graph view.
@@ -40,12 +49,13 @@ public class DirectedSubgraphExcludeNodesView extends DirectedGraphView<Directed
      * @param name      name of the view
      * @param graphVar observed variable
      */
-    public DirectedSubgraphExcludeNodesView(String name, DirectedGraphVar graphVar, ISet excludedNodes) {
+    public DirectedSubgraphInducedByNodesView(String name, DirectedGraphVar graphVar, ISet nodes, SubgraphType type) {
         super(name, new DirectedGraphVar[] {graphVar});
-        this.excludedNodes = excludedNodes;
+        this.nodes = nodes;
+        this.type = type;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeSubgraphExcludedNodes(getModel(), graphVar.getLB(), excludedNodes);
-        this.ub = GraphFactory.makeSubgraphExcludedNodes(getModel(), graphVar.getUB(), excludedNodes);
+        this.lb = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getLB(), nodes, type);
+        this.ub = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getUB(), nodes, type);
     }
 
     @Override
