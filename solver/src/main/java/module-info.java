@@ -55,7 +55,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.nary.globalcardinality;
     exports org.chocosolver.solver.constraints.nary.lex;
     exports org.chocosolver.solver.constraints.nary.min_max;
-    exports org.chocosolver.solver.constraints.nary.nogood;
     exports org.chocosolver.solver.constraints.nary.nvalue;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.rules;

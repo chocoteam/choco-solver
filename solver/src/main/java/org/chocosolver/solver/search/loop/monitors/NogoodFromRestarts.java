@@ -12,7 +12,7 @@ package org.chocosolver.solver.search.loop.monitors;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
-import org.chocosolver.solver.constraints.nary.sat.PropNogoods;
+import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -50,7 +50,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     /**
      * The (unique) no-good store
      */
-    private final PropNogoods png;
+    private final PropSat png;
 
     /**
      * {@link NogoodStealer} that helps sharing no-goods among models.
@@ -71,7 +71,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
      * @param stealer when nogoods can be shared among (equivalent) models
      */
     public NogoodFromRestarts(Model model, NogoodStealer stealer) {
-        this.png = model.getNogoodStore().getPropNogoods();
+        this.png = model.getMinisat().getPropSat();
         this.decisions = new ArrayDeque<>(16);
         this.nogoodStealer = stealer;
         this.nogoodStealer.add(model);
@@ -109,7 +109,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
     }
 
     /**
-     * Transform this decision into a literal to be used in {@link PropNogoods}.
+     * Transform this decision into a literal to be used in {@link PropSat}.
      *
      * @param decision a decision
      * @return the literal corresponding to this decision
@@ -137,13 +137,13 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(IntVar var, DecisionOperator<IntVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeIntEq().equals(op)) {
-            l = MiniSat.neg(png.Literal(var, val, true));
+            l = MiniSat.makeLiteral(png.makeIntEq(var, val), false);
         } else if (DecisionOperatorFactory.makeIntNeq().equals(op)) {
-            l = png.Literal(var, val, true);
+            l = MiniSat.makeLiteral(png.makeIntEq(var, val), true);
         } else if (DecisionOperatorFactory.makeIntSplit().equals(op)) {
-            l = MiniSat.neg(png.Literal(var, val, false));
+            l = MiniSat.makeLiteral(png.makeIntLe(var, val), false);
         } else if (DecisionOperatorFactory.makeIntReverseSplit().equals(op)) {
-            l = png.Literal(var, val, false);
+            l = MiniSat.makeLiteral(png.makeIntLe(var, val), true);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
         }
@@ -153,9 +153,9 @@ public class NogoodFromRestarts implements IMonitorRestart {
     private int asLit(SetVar var, DecisionOperator<SetVar> op, int val) {
         int l;
         if (DecisionOperatorFactory.makeSetForce().equals(op)) {
-            l = MiniSat.neg(png.Literal(var, val, true));
+            l = MiniSat.makeLiteral(png.makeSetIn(var, val), false);
         } else if (DecisionOperatorFactory.makeSetRemove().equals(op)) {
-            l = png.Literal(var, val, true);
+            l = MiniSat.makeLiteral(png.makeSetIn(var, val), true);
         } else {
             throw new UnsupportedOperationException("Cannot deal with such operator: " + op);
         }

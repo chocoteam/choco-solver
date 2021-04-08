@@ -29,9 +29,16 @@ public interface Dimacs {
 
     MiniSat _me();
 
-    default void parse(String instance) throws FileNotFoundException {
+    /**
+     * A call to this method parses {@code pathToFile}, a CNF file, and populates this {@code MiniSat} pathToFile
+     * with variables and clauses defined in the file.
+     * Then, a call to {@link MiniSat#solve()} is required.
+     * @param pathToFile path to the CNF file to parse
+     * @throws FileNotFoundException if no file is found at
+     */
+    default void parse(String pathToFile) throws FileNotFoundException {
 
-        Reader reader = new FileReader(instance);
+        Reader reader = new FileReader(pathToFile);
         try (BufferedReader br = new BufferedReader(reader)) {
             String line;
             int nvars, nclauses = 0;

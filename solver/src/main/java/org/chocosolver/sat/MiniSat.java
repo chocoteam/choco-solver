@@ -13,6 +13,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntHeap;
 
 import java.util.*;
@@ -42,7 +43,7 @@ public class MiniSat implements SatFactory, Dimacs {
     private static final int varUndef = -1;
     // value of an undefined literal
     private static final int litUndef = -2;
-    // undefiend clause
+    // undefined clause
     static final Clause CR_Undef = new Clause(new int[0]);
     static final VarData VD_Undef = new VarData(CR_Undef, -1);
 
@@ -68,7 +69,6 @@ public class MiniSat implements SatFactory, Dimacs {
     // Number of variables
     int num_vars_;
 
-    int verbosity = 2;
     int ccmin_mode = 1; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
     int phase_saving = 2; // Controls the level of phase saving (0=none, 1=limited, 2=full)
     double cla_inc = 1;
@@ -154,7 +154,12 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
 
-    // Add a clause to the solver.
+    /**
+     * Add a clause to the solver.
+     *
+     * @param ps a list of literals
+     * @return {@code false} if the Boolean formula is unsatisfiable.
+     */
     public boolean addClause(TIntList ps) {
         assert 0 == trailMarker();
         if (!ok_) return false;
@@ -193,29 +198,40 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
 
-    // Add the empty clause, making the solver contradictory.
-    boolean addEmptyClause() {
-        temporary_add_vector_.resetQuick();
-        return addClause(temporary_add_vector_);
-    }
-
-    // Add a unit clause to the solver.
+    /**
+     * Add a unit clause to the solver.
+     *
+     * @param l a literal
+     * @return {@code false} if the Boolean formula is unsatisfiable.
+     */
     public boolean addClause(int l) {
         temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(l);
         return addClause(temporary_add_vector_);
     }
 
-    // Add a binary clause to the solver.
-    boolean addClause(int p, int q) {
+    /**
+     * Add a binary clause to the solver.
+     *
+     * @param p a literal
+     * @param q a literal
+     * @return {@code false} if the Boolean formula is unsatisfiable.
+     */
+    public boolean addClause(int p, int q) {
         temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
         return addClause(temporary_add_vector_);
     }
 
-    // Add a ternary clause to the solver.
-    boolean addClause(int p, int q, int r) {
+    /**
+     * Add a ternary clause to the solver.
+     *
+     * @param p a literal
+     * @param q a literal
+     * @return {@code false} if the Boolean formula is unsatisfiable.
+     */
+    public boolean addClause(int p, int q, int r) {
         temporary_add_vector_.resetQuick();
         temporary_add_vector_.add(p);
         temporary_add_vector_.add(q);
@@ -230,7 +246,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // Backtrack until a certain level.
-    public void cancelUntil(int level) {
+    void cancelUntil(int level) {
         if (trailMarker() > level) {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
@@ -246,7 +262,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // Gives the current decisionlevel.
-    public int trailMarker() {
+    int trailMarker() {
         return trail_markers_.size();
     }
 
@@ -266,34 +282,6 @@ public class MiniSat implements SatFactory, Dimacs {
         return clauses.size();
     }
 
-    // The current number of original clauses.
-    public int nLearnts() {
-        return learnts.size();
-    }
-
-    // Propagates one literal, returns true if successful, false in case
-    // of failure.
-    public boolean propagateOneLiteral(int lit) {
-        assert ok_;
-        touched_variables_.resetQuick();
-        if (propagate() != CR_Undef) {
-            return false;
-        }
-        if (valueLit(lit) == Boolean.lTrue) {
-            // Dummy decision level:
-            pushTrailMarker();
-            return true;
-        } else if (valueLit(lit) == Boolean.lFalse) {
-            return false;
-        }
-        pushTrailMarker();
-        // Unchecked enqueue
-        assert valueLit(lit) == Boolean.lUndef;
-        assignment_.put(var(lit), makeBoolean(!sgn(lit)));
-        trail_.add(lit);
-        return propagate() == CR_Undef;
-    }
-
 
     private int incrementVariableCounter() {
         return num_vars_++;
@@ -304,7 +292,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // Begins a new decision level.
-    private void pushTrailMarker() {
+    void pushTrailMarker() {
         trail_markers_.add(trail_.size());
     }
 
@@ -314,7 +302,7 @@ public class MiniSat implements SatFactory, Dimacs {
         if (assignment_.get(var(l)) == Boolean.lUndef) {
             touched_variables_.add(l);
         }
-        assignment_.put(var(l), sgn(l) ? Boolean.lFalse : Boolean.lTrue);
+        assignment_.put(var(l), makeBoolean(sgn(l)));
         //vardata.ensureCapacity(var(l));
         while (vardata.size() < var(l)) {
             vardata.add(VD_Undef);
@@ -445,59 +433,51 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
 
-    ///////
-
-    public Boolean solve() {
-        if (verbosity > 0) {
-            System.out.printf("|  Number of variables:  %12d                                         |\n", nVars());
-            System.out.printf("|  Number of clauses:    %12d                                         |\n", nClauses());
-        }
+    /**
+     * A call to this method will attempt to find
+     * an interpretation that satisfies the Boolean formula declared in this.
+     *
+     * @return {@code ESat.TRUE} if such an interpretation is found,
+     * {@code ESat.FALSE} if no interpretation exists,
+     * {@code ESat.UNDEFINED} if a limit was reached.
+     */
+    public ESat solve() {
         model.clear();
         conflict.clear();
-        if (!ok_) return Boolean.lFalse;
+        if (!ok_) return ESat.FALSE;
         max_learnts = nClauses() * learntsize_factor;
         learntsize_adjust_confl = 100;
         learntsize_adjust_cnt = (int) learntsize_adjust_confl;
-        Boolean status = Boolean.lUndef;
-        if (verbosity >= 1) {
-            System.out.print("============================[ Search Statistics ]==============================\n");
-            System.out.print("| Conflicts |          ORIGINAL         |          LEARNT          | Progress |\n");
-            System.out.print("|           |    Vars  Clauses Literals |    Limit  Clauses Lit/Cl |          |\n");
-            System.out.print("===============================================================================\n");
-        }
+        ESat status = ESat.UNDEFINED;
 
         // Search:
         int curr_restarts = 0;
-        while (status == Boolean.lUndef) {
+        while (status == ESat.UNDEFINED) {
             double rest_base = luby_restart ? luby(restart_inc, curr_restarts) : Math.pow(restart_inc, curr_restarts);
             status = search((int) (rest_base * restart_first));
             if (!withinBudget()) break;
             curr_restarts++;
         }
 
-        if (verbosity >= 1)
-            System.out.print("===============================================================================\n");
-
-
-        if (status == Boolean.lTrue) {
+        if (status == ESat.TRUE) {
             // Extend & copy model:
             model.ensureCapacity(nVars());
             for (int i = 0; i < nVars(); i++) {
                 model.add(valueLit(i));
             }
 
-        } else if (status == Boolean.lFalse && conflict.size() == 0)
+        } else if (status == ESat.FALSE && conflict.size() == 0)
             ok_ = false;
 
         cancelUntil(0);
-        if (status == Boolean.lTrue) {
+        if (status == ESat.TRUE) {
             System.out.print("SAT\n");
             for (int i = 0; i < nVars(); i++)
                 if (model.get(i) != Boolean.lUndef)
                     System.out.printf("%s%s%d", (i == 0) ? "" : " ",
                             (model.get(i) == Boolean.lTrue) ? "" : "-", i + 1);
             System.out.print(" 0\n");
-        } else if (status == Boolean.lFalse)
+        } else if (status == ESat.FALSE)
             System.out.print("UNSAT\n");
         else
             System.out.print("INDET\n");
@@ -510,7 +490,7 @@ public class MiniSat implements SatFactory, Dimacs {
      * @param nof_conflicts limit over the number of conflicts
      * @implNote Use negative value for 'nof_conflicts' indicate infinity.
      */
-    Boolean search(int nof_conflicts) {
+    ESat search(int nof_conflicts) {
         assert ok_;
         int backtrack_level;
         int conflictC = 0;
@@ -522,7 +502,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 // CONFLICT
                 conflicts++;
                 conflictC++;
-                if (trailMarker() == 0) return Boolean.lFalse;
+                if (trailMarker() == 0) return ESat.FALSE;
 
                 learnt_clause.clear();
                 backtrack_level = analyze(confl, learnt_clause);
@@ -550,12 +530,6 @@ public class MiniSat implements SatFactory, Dimacs {
                     learntsize_adjust_confl *= learntsize_adjust_inc;
                     learntsize_adjust_cnt = (int) learntsize_adjust_confl;
                     max_learnts *= learntsize_inc;
-
-                    if (verbosity >= 1)
-                        System.out.printf("| %9d | %7d %8d %8d | %8d %8d %6.0f | %6.3f %% |\n",
-                                conflicts,
-                                dec_vars - (trail_markers_.size() == 0 ? trail_.size() : trail_markers_.get(0)), nClauses(), clauses_literals,
-                                (int) max_learnts, nLearnts(), (double) learnts_literals / nLearnts(), progressEstimate() * 100);
                 }
 
             } else {
@@ -563,12 +537,12 @@ public class MiniSat implements SatFactory, Dimacs {
                 if (nof_conflicts >= 0 && conflictC >= nof_conflicts || !withinBudget()) {
                     // Reached bound on number of conflicts:
                     cancelUntil(0);
-                    return Boolean.lUndef;
+                    return ESat.UNDEFINED;
                 }
 
                 // Simplify the set of problem clauses:
                 if (trailMarker() == 0 && !simplify())
-                    return Boolean.lFalse;
+                    return ESat.FALSE;
 
                 if (learnts.size() - trail_.size() >= max_learnts)
                     // Reduce the set of learnt clauses:
@@ -580,7 +554,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
                 if (next == litUndef)
                     // Model found:
-                    return Boolean.lTrue;
+                    return ESat.TRUE;
 
                 // Increase decision level and enqueue 'next'
                 pushTrailMarker();
@@ -762,18 +736,6 @@ public class MiniSat implements SatFactory, Dimacs {
         learnts.subList(j, learnts.size()).clear();
     }
 
-    double progressEstimate() {
-        double progress = 0;
-        double F = 1.0 / nVars();
-
-        for (int i = 0; i <= trailMarker(); i++) {
-            int beg = i == 0 ? 0 : trail_markers_.get(i - 1);
-            int end = i == trailMarker() ? trail_.size() : trail_markers_.get(i);
-            progress += Math.pow(F, i) * (end - beg);
-        }
-
-        return progress / nVars();
-    }
 
     boolean withinBudget() {
         return !asynch_interrupt &&
@@ -862,7 +824,8 @@ public class MiniSat implements SatFactory, Dimacs {
 
     /**
      * Make a literal from a variable and a sign
-     * @param var a variable
+     *
+     * @param var  a variable
      * @param sign the required sign of the literal
      * @return a literal
      */
@@ -872,12 +835,13 @@ public class MiniSat implements SatFactory, Dimacs {
 
     /**
      * Make a positive literal from a variable
+     *
      * @param var a variable
      * @return a positive literal
      * @implNote Equivalent to call {@code makeLiteral(var, true)}.
      */
     public static int makeLiteral(int var) {
-        return makeLiteral(var, false);
+        return makeLiteral(var, true);
     }
 
 
@@ -894,16 +858,19 @@ public class MiniSat implements SatFactory, Dimacs {
 
     /**
      * Returns the sign of a given literal
+     *
      * @param l a literal
      * @return <tt>true</tt> if <i>l</i> is odd (<tt>false</tt> literal),
      * <tt>false</tt> if <i>l</i> is even (<tt>true<tt/> literal)
      */
     public static boolean sgn(int l) {
+        // 1 is true, 0 is false
         return (l & 1) != 0;
     }
 
     /**
      * Returns the variable of a given literal
+     *
      * @param l a literal
      * @return its variable
      */
@@ -911,7 +878,7 @@ public class MiniSat implements SatFactory, Dimacs {
         return (l >> 1);
     }
 
-    private static Boolean makeBoolean(boolean b) {
+    static Boolean makeBoolean(boolean b) {
         return (b ? Boolean.lTrue : Boolean.lFalse);
     }
 
@@ -1008,8 +975,8 @@ public class MiniSat implements SatFactory, Dimacs {
         }
 
         public static Boolean make(byte b) {
-            if (b == 0) return lTrue;
-            else if (b == 1) return lFalse;
+            if (b == 1) return lTrue;
+            else if (b == 0) return lFalse;
             else return lUndef;
         }
 
