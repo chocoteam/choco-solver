@@ -602,7 +602,7 @@ public interface ArExpression {
      * @param y an int
      * @return return the expression "x <= y" where this is "x"
      */
-    default ReExpression le(int y) {
+    default UnCReExpression le(int y) {
         return new UnCReExpression(ReExpression.Operator.LE, this, y);
     }
 
@@ -678,7 +678,7 @@ public interface ArExpression {
      * @param y an int
      * @return return the expression "x = y" where this is "x"
      */
-    default ReExpression eq(int y) {
+    default UnCReExpression eq(int y) {
         return new UnCReExpression(ReExpression.Operator.EQ, this, y);
     }
 

@@ -9,6 +9,7 @@
  */
 package org.chocosolver.sat;
 
+import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -34,8 +35,8 @@ public class SatTest {
         MiniSat sat = new MiniSat();
         int a = sat.newVariable();
         int b = sat.newVariable();
-        sat.addClause(a, b);
-        Assert.assertEquals(sat.solve(), MiniSat.Boolean.lTrue);
+        sat.addClause(MiniSat.makeLiteral(a), MiniSat.neg(MiniSat.makeLiteral(b)));
+        Assert.assertEquals(sat.solve(), ESat.TRUE);
     }
 
     private static final String ROOT = "/dimacs/";
@@ -76,9 +77,10 @@ public class SatTest {
     private void run(String path, boolean sat) throws FileNotFoundException {
         String file = this.getClass().getResource(path).getFile();
         MiniSat solver = new MiniSat();
+        solver.solve();
         solver.parse(file);
-        MiniSat.Boolean ret = solver.solve();
-        Assert.assertEquals(ret, sat ? MiniSat.Boolean.lTrue : MiniSat.Boolean.lFalse, "Unexpected search state");
+        ESat ret = solver.solve();
+        Assert.assertEquals(ret, sat ? ESat.TRUE : ESat.FALSE, "Unexpected search state");
     }
 
 }

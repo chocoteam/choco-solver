@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.expression.discrete.relational;
 
+import org.chocosolver.sat.Literalizer;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
@@ -116,21 +117,21 @@ public class UnCReExpression implements ReExpression {
         variables.add(model.intVar(e2));
     }
 
-    private static ArExpression.Operator detectOperator(ArExpression e){
+    private static ArExpression.Operator detectOperator(ArExpression e) {
         int nochild = e.getNoChild();
-        if(nochild == 1){
+        if (nochild == 1) {
             return NOP;
         }
         ArExpression.Operator o = null;
         ArExpression[] child = e.getExpressionChild();
         boolean madeOfLeaves = true;
-        for(int i = 0 ; madeOfLeaves && i < nochild; i++){
+        for (int i = 0; madeOfLeaves && i < nochild; i++) {
             madeOfLeaves = child[i].isExpressionLeaf();
         }
-        if(madeOfLeaves) {
-            if (nochild == 2 && e instanceof BiArExpression){
+        if (madeOfLeaves) {
+            if (nochild == 2 && e instanceof BiArExpression) {
                 o = ((BiArExpression) e).getOp();
-            } else if(e instanceof NaArExpression) {
+            } else if (e instanceof NaArExpression) {
                 o = ((NaArExpression) e).getOp();
             }// todo: deal with NaLoExpression
         }
@@ -140,7 +141,7 @@ public class UnCReExpression implements ReExpression {
     @Override
     public Constraint decompose() {
         ArExpression.Operator o1 = detectOperator(e1);
-        if(ALLOWED.contains(o1)) {
+        if (ALLOWED.contains(o1)) {
             IntVar[] vars = new IntVar[e1.getNoChild()];
             int[] coefs = new int[e1.getNoChild()];
             fill(vars, coefs, e1, o1, 0, 1);
@@ -169,7 +170,7 @@ public class UnCReExpression implements ReExpression {
                     throw new SolverException("Unknown operator: " + op);
             }
             return model.scalar(vars, coefs, ope.toString(), e2);
-        }else {
+        } else {
             IntVar v1 = e1.intVar();
             Model model = v1.getModel();
             switch (op) {
@@ -193,16 +194,16 @@ public class UnCReExpression implements ReExpression {
     private static void fill(IntVar[] vars, int[] coefs,
                              ArExpression e, ArExpression.Operator o1, int o, int m) {
         ArExpression[] child = e.getExpressionChild();
-        if(e.isExpressionLeaf() || child.length == 1){
+        if (e.isExpressionLeaf() || child.length == 1) {
             vars[o] = e.intVar();
-        }else {
+        } else {
             vars[o] = child[0].intVar();
         }
-        coefs[o] =  m;
-        for(int i = 1; i < child.length; i++){
+        coefs[o] = m;
+        for (int i = 1; i < child.length; i++) {
             vars[o + i] = child[i].intVar();
             assert ALLOWED.contains(o1);
-            coefs[o + i] =  (o1 == ADD ? 1 : -1) * m;
+            coefs[o + i] = (o1 == ADD ? 1 : -1) * m;
         }
     }
 
@@ -214,5 +215,24 @@ public class UnCReExpression implements ReExpression {
     @Override
     public String toString() {
         return op.name() + "(" + e1.toString() + "," + e2 + ")";
+    }
+
+    /**
+     * Creates, or returns if already existing, the SAT variable corresponding
+     * to the relationship.
+     * @return the SAT variable of this relation
+     */
+    public int satVar() {
+        IntVar v1 = e1.intVar();
+        switch (op) {
+            case LT:
+                return model.satVar(v1, new Literalizer.IntLeLit(v1, e2 - 1));
+            case LE:
+                return model.satVar(v1, new Literalizer.IntLeLit(v1, e2));
+            case EQ:
+                return model.satVar(v1, new Literalizer.IntEqLit(v1, e2));
+            default:
+                throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
+        }
     }
 }
