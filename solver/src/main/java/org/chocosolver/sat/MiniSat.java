@@ -770,9 +770,9 @@ public class MiniSat implements SatFactory, Dimacs {
         if ((c.activity += cla_inc) > 1e20) {
             // Rescale:
             for (int i = 0; i < learnts.size(); i++) {
-                learnts.get(i).activity *= 1e-20;
+                learnts.get(i).activity *= 1e-20d;
             }
-            cla_inc *= 1e-20;
+            cla_inc *= 1e-20d;
         }
     }
 
