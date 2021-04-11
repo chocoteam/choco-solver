@@ -23,6 +23,7 @@ import org.chocosolver.util.objects.graphs.SubgraphType;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
+import java.util.Set;
 
 import static java.lang.Math.max;
 
@@ -531,8 +532,22 @@ public interface IViewFactory extends ISelf<Model> {
 
     //  OVER SET VARIABLES
 
+    /**
+     * Creates a set view representing the union of a list of set variables.
+     * @param sets The set variables to observe.
+     * @return A set union view.
+     */
     default SetVar setUnionView(SetVar... sets) {
         return new SetUnionView("setUnion", sets);
+    }
+
+    /**
+     * Creates a set view representing the intersection of a list of set variables.
+     * @param sets The set variables to observe.
+     * @return A set intersection view.
+     */
+    default SetVar setIntersectionView(SetVar... sets) {
+        return new SetIntersectionView("setIntersection", sets);
     }
 
     //  OVER GRAPH VARIABLES

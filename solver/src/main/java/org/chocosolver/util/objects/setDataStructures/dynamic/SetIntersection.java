@@ -7,43 +7,53 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.dynamic;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.*;
 
 /**
- * Set representing the union of a set of sets.
+ * Set representing the intersection of a set of sets.
  * Constructed incrementally when observed sets are modified.
  * This set is read-only.
  *
  * @author Dimitri Justeau-Allaire
- * @since 29/03/2021
+ * @since 31/03/2021
  */
-public class SetUnion extends AbstractSet {
+public class SetIntersection extends AbstractSet {
 
     public ISet[] sets;
     protected ISet values;
 
-    public SetUnion(ISet... sets) {
+    public SetIntersection(ISet... sets) {
         this.sets = sets;
         this.values = SetFactory.makeRangeSet();
-        // init the union
-        for (int i = 0; i < sets.length; i++) {
-            this.sets[i].registerObserver(this, i);
-            for (int v : this.sets[i]) {
-                values.add(v);
-            }
-        }
+        init();
     }
 
-    public SetUnion(Model model, ISet... sets) {
+    public SetIntersection(Model model, ISet... sets) {
         this.sets = sets;
         this.values = SetFactory.makeStoredSet(SetType.RANGESET, 0, model);
-        // init the union
+        init();
+    }
+
+    private void init() {
+        // init the intersection
         for (int i = 0; i < sets.length; i++) {
             this.sets[i].registerObserver(this, i);
             for (int v : this.sets[i]) {
-                values.add(v);
+                if (!values.contains(v)) {
+                    boolean add = true;
+                    for (ISet s : sets) {
+                        if (!s.contains(v)) {
+                            add = false;
+                            break;
+                        }
+                    }
+                    if (add) {
+                        values.add(v);
+                    }
+                }
             }
         }
     }
@@ -101,22 +111,20 @@ public class SetUnion extends AbstractSet {
 
     @Override
     public void notifyElementRemoved(int element, int idx) {
-        boolean remove = true;
-        for (int i = 0; i < sets.length; i++) {
-            if (i != idx && sets[i].contains(element)) {
-                remove = false;
-                break;
-            }
-        }
-        if (remove) {
-            values.remove(element);
-            notifyObservingElementRemoved(element);
-        }
+        values.remove(element);
+        notifyObservingElementRemoved(element);
     }
 
     @Override
     public void notifyElementAdded(int element, int idx) {
-        if (!values.contains(element)) {
+        boolean add = true;
+        for (ISet s : sets) {
+            if (!s.contains(element)) {
+                add = false;
+                break;
+            }
+        }
+        if (add) {
             values.add(element);
             notifyObservingElementAdded(element);
         }
@@ -124,18 +132,9 @@ public class SetUnion extends AbstractSet {
 
     @Override
     public void notifyCleared(int idx) {
-        for (int element : values) {
-            boolean remove = true;
-            for (ISet set : sets) {
-                if (set.contains(element)) {
-                    remove = false;
-                    break;
-                }
-            }
-            if (remove) {
-                values.remove(element);
-                notifyObservingElementRemoved(element);
-            }
+        for (int v : sets[idx]) {
+            values.remove(v);
+            notifyObservingElementRemoved(v);
         }
     }
 }

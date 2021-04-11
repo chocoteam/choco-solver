@@ -15,26 +15,26 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 
 /**
- * Set view over set variables representing the union of these variables.
+ * Set view over set variables representing the intersection of these variables.
  *
  * @author Dimitri Justeau-Allaire
  * @since 29/03/2021
  */
-public class SetUnionView extends SetView<SetVar> {
+public class SetIntersectionView extends SetView<SetVar> {
 
-    public SetUnion lb;
-    public SetUnion ub;
+    public SetIntersection lb;
+    public SetIntersection ub;
 
     /**
-     * Create a set union view.
+     * Create a set intersection view.
      *
      * @param name      name of the variable
      * @param variables observed variables
      */
-    public SetUnionView(String name, SetVar... variables) {
+    public SetIntersectionView(String name, SetVar... variables) {
         super(name, variables);
         ISet[] LBs = new ISet[variables.length];
         ISet[] UBs = new ISet[variables.length];
@@ -42,8 +42,8 @@ public class SetUnionView extends SetView<SetVar> {
             LBs[i] = variables[i].getLB();
             UBs[i] = variables[i].getUB();
         }
-        this.lb = new SetUnion(variables[0].getModel(), LBs);
-        this.ub = new SetUnion(variables[0].getModel(), UBs);
+        this.lb = new SetIntersection(variables[0].getModel(), LBs);
+        this.ub = new SetIntersection(variables[0].getModel(), UBs);
     }
 
     @Override
@@ -73,15 +73,7 @@ public class SetUnionView extends SetView<SetVar> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        boolean b = true;
-        for (SetVar set : variables) {
-            b = b && set.remove(element, this);
-        }
-        return b;
-    }
-
-    @Override
-    protected boolean doForceSetElement(int element) throws ContradictionException {
+        // If there is only one observed set var containing the element, remove the element from this variable.
         int nb = 0;
         int idx = -1;
         for (int i = 0; i < variables.length; i++) {
@@ -94,9 +86,19 @@ public class SetUnionView extends SetView<SetVar> {
             }
         }
         if (nb == 1) {
-            variables[idx].force(element, this);
+            variables[idx].remove(element, this);
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected boolean doForceSetElement(int element) throws ContradictionException {
+        // Force the element in every set
+        boolean b = true;
+        for (SetVar set : variables) {
+            b = b && set.force(element, this);
+        }
+        return b;
     }
 }

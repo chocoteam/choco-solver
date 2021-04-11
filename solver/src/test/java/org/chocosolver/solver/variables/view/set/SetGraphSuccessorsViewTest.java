@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view;
+package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -30,7 +30,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class GraphSuccessorsSetViewTest {
+public class SetGraphSuccessorsViewTest {
 
     /**
      * Test the instantiation of a graph neigh set view over an undirected graph variable

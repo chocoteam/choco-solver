@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
 import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDynamicFilterOnSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
