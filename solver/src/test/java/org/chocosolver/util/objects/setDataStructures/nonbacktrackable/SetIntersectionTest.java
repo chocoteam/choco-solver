@@ -13,12 +13,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.objects.setDataStructures.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 /**
  * Tests for SetIntersection class

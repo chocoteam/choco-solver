@@ -7,7 +7,11 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.dynamic;
+
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * Abstract class for defining dynamic sets with predicate-based filtering.

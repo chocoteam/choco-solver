@@ -13,7 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.objects.setDataStructures.SetUnion;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

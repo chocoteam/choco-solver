@@ -7,9 +7,10 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.util.objects.setDataStructures;
+package org.chocosolver.util.objects.setDataStructures.dynamic;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.*;
 
 /**
  * Set representing the difference between two sets (setA \ setB).

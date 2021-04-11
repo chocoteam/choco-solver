@@ -11,6 +11,8 @@ package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 
 /**
  * Directed graph implementation : directed edges are indexed per endpoints
