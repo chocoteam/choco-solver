@@ -550,6 +550,16 @@ public interface IViewFactory extends ISelf<Model> {
         return new SetIntersectionView("setIntersection", sets);
     }
 
+    /**
+     * Creates a set view z representing the set difference between x and y: z = x \ y.
+     * @param x A set variable.
+     * @param y A set variable.
+     * @return A set difference z view such that z = x \ y.
+     */
+    default SetVar setDifferenceView(SetVar x, SetVar y) {
+        return new SetDifferenceView("setDifference", x, y);
+    }
+
     //  OVER GRAPH VARIABLES
 
     /**

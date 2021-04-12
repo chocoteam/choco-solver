@@ -75,7 +75,7 @@ public class SetIntersectionViewTest {
             Arrays.sort(inter);
             int[] interValue = intersection.getValue().toArray();
             Arrays.sort(interValue);
-            Assert.assertTrue(Arrays.equals(all, interValue));
+            Assert.assertTrue(Arrays.equals(inter, interValue));
         }
     }
 
