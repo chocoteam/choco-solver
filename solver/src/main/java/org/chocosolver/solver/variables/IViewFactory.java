@@ -15,15 +15,16 @@ import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
-import org.chocosolver.solver.variables.view.graph.directed.DirectedSubgraphInducedByNodesView;
-import org.chocosolver.solver.variables.view.graph.undirected.SubgraphInducedByNodesView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.EdgeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.NodeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
-import org.chocosolver.util.objects.graphs.SubgraphType;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
-import java.util.Set;
 
 import static java.lang.Math.max;
 
@@ -606,43 +607,54 @@ public interface IViewFactory extends ISelf<Model> {
     //*************************************************************************************
 
     /**
-     * Creates an undirected graph view G'(V', E') over an undirected graph variable G(V, E) such that:
-     *      V' = E \ excludedNodes;
-     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
-     * with excludedNodes a fixed set of nodes.
-     */
-    default UndirectedGraphVar subgraphExcludeNodesView(UndirectedGraphVar g, ISet excludedNodes) {
-        return new SubgraphInducedByNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes, SubgraphType.EXCLUDE_NODES);
-    }
-
-    /**
-     * Creates an undirected graph view G'(V', E') over an undirected graph variable G(V, E) such that:
-     *      V' = V \cap nodes;
+     * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
+     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
      *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
-     * with nodes a fixed set of nodes.
+     *
+     * @param g The graph variable to observe
+     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
-    default UndirectedGraphVar subgraphInducedByNodesView(UndirectedGraphVar g, ISet nodes) {
-        return new SubgraphInducedByNodesView(g.getName() + "[" + nodes.toString() + "]", g, nodes, SubgraphType.INDUCED_BY_NODES);
+    default UndirectedGraphVar nodeInducedSubgraphView(UndirectedGraphVar g, ISet nodes, boolean exclude) {
+        return new NodeInducedSubgraphView(g.getName() + "[" + nodes.toString() + "]", g, nodes, exclude);
     }
 
     /**
-     * Creates an directed graph view G'(V', E') over an directed graph variable G(V, E) such that:
-     *      V' = E \ excludedNodes;
-     *      E' = { (x, y) \in E | x \notIn excludedNodes \land y \notIn excludedNodes };
-     * with excludedNodes a fixed set of nodes.
-     */
-    default DirectedGraphVar subgraphExcludeNodesView(DirectedGraphVar g, ISet excludedNodes) {
-        return new DirectedSubgraphInducedByNodesView(g.getName() + " \\ nodes" + excludedNodes.toString(), g, excludedNodes, SubgraphType.EXCLUDE_NODES);
-    }
-
-    /**
-     * Creates a directed graph view G'(V', E') over an undirected graph variable G(V, E) such that:
-     *      V' = V \cap nodes;
+     * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
+     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
      *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
-     * with nodes a fixed set of nodes.
+     *
+     * @param g The graph variable to observe
+     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
-    default DirectedGraphVar subgraphInducedByNodesView(DirectedGraphVar g, ISet nodes) {
-        return new DirectedSubgraphInducedByNodesView(g.getName() + "[" + nodes.toString() + "]", g, nodes, SubgraphType.INDUCED_BY_NODES);
+    default DirectedGraphVar nodeInducedSubgraphView(DirectedGraphVar g, ISet nodes, boolean exclude) {
+        return new DirectedNodeInducedSubgraphView(g.getName() + "[" + nodes.toString() + "]", g, nodes, exclude);
     }
 
+    /**
+     * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * @param g observed variable
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    default UndirectedGraphVar edgeInducedSubgraphView(UndirectedGraphVar g, int[][] edges, boolean exclude) {
+        return new EdgeInducedSubgraphView(g.getName() + "{" + Arrays.deepToString(edges) + "}", g, edges, exclude);
+    }
+
+    /**
+     * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * @param g observed variable
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    default DirectedGraphVar edgeInducedSubgraphView(DirectedGraphVar g, int[][] edges, boolean exclude) {
+        return new DirectedEdgeInducedSubgraphView(g.getName() + "{" + Arrays.deepToString(edges) + "}", g, edges, exclude);
+    }
 }

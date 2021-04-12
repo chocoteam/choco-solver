@@ -411,49 +411,67 @@ public class GraphFactory {
     //***********************************************************************************
 
     /**
-     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE UNDIRECTED SUBGRAPHS INDUCED BY NODES:
-     *
-     *  - EXCLUDE_NODES:
-     *      Construct a backtrackable undirected graph G' = (V', E') from another graph G = (V, E) such that:
-     *          V' = E \ nodes;
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
      *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
      *
-     *  - INDUCED_BY_NODES:
-     *      Construct a backtrackable undirected graph G = (V', E') from G = (V, E) such that:
-     *          V' = V \cap nodes;
-     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * with nodes a fixed set of nodes.
      *
-     * with excludedNodes a fixed set of nodes.
      * @param model the model
      * @param graph the graph to construct a subgraph from
      * @param nodes
-     * @param subgraphType the type of subgraph to construct
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
-    public static UndirectedGraph makeSubgraphInducedByNodes(Model model, UndirectedGraph graph, ISet nodes, SubgraphType subgraphType) {
-        return new UndirectedGraph(model, graph, nodes, subgraphType);
+    public static UndirectedGraph makeNodeInducedSubgraph(Model model, UndirectedGraph graph, ISet nodes, boolean exclude) {
+        return new UndirectedGraph(model, graph, nodes, exclude);
     }
 
     /**
-     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE DIRECTED SUBGRAPHS INDUCED BY NODES:
-     *
-     *  - EXCLUDE_NODES:
-     *      Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
-     *          V' = E \ nodes;
+     * Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
      *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
      *
-     *  - INDUCED_BY_NODES:
-     *      Construct a backtrackable directed graph G = (V', E') from G = (V, E) such that:
-     *          V' = V \cap nodes;
-     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * with nodes a fixed set of nodes.
      *
-     * with excludedNodes a fixed set of nodes.
      * @param model the model
      * @param graph the graph to construct a subgraph from
      * @param nodes
-     * @param subgraphType the type of subgraph to construct
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
-    public static DirectedGraph makeSubgraphInducedByNodes(Model model, DirectedGraph graph, ISet nodes, SubgraphType subgraphType) {
-        return new DirectedGraph(model, graph, nodes, subgraphType);
+    public static DirectedGraph makeNodeInducedSubgraph(Model model, DirectedGraph graph, ISet nodes, boolean exclude) {
+        return new DirectedGraph(model, graph, nodes, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude the type of subgraph to construct
+     */
+    public static UndirectedGraph makeEdgeInducedSubgraph(Model model, UndirectedGraph graph, int[][] edges, boolean exclude) {
+        return new UndirectedGraph(model, graph, edges, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public static DirectedGraph makeEdgeInducedSubgraph(Model model, DirectedGraph graph, int[][] edges, boolean exclude) {
+        return new DirectedGraph(model, graph, edges, exclude);
     }
 
     //***********************************************************************************
