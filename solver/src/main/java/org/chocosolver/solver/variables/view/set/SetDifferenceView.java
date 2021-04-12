@@ -15,35 +15,34 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 
 /**
- * Set view over set variables representing the union of these variables.
+ * Set view representing the set difference of two set variables: z = x \ y.
  *
  * @author Dimitri Justeau-Allaire
  * @since 29/03/2021
  */
-public class SetUnionView extends SetView<SetVar> {
+public class SetDifferenceView extends SetView<SetVar> {
 
-    protected SetUnion lb;
-    protected SetUnion ub;
+    protected SetDifference lb;
+    protected SetDifference ub;
+
+    protected SetVar x, y;
 
     /**
-     * Create a set union view.
+     * Create a set difference view z = x \ y
      *
      * @param name      name of the variable
-     * @param variables observed variables
+     * @param x A set variable.
+     * @param y A set variable.
      */
-    public SetUnionView(String name, SetVar... variables) {
-        super(name, variables);
-        ISet[] LBs = new ISet[variables.length];
-        ISet[] UBs = new ISet[variables.length];
-        for (int i = 0; i < variables.length; i++) {
-            LBs[i] = variables[i].getLB();
-            UBs[i] = variables[i].getUB();
-        }
-        this.lb = new SetUnion(getModel(), LBs);
-        this.ub = new SetUnion(getModel(), UBs);
+    public SetDifferenceView(String name, SetVar x, SetVar y) {
+        super(name, x, y);
+        this.x = x;
+        this.y = y;
+        this.lb = new SetDifference(getModel(), x.getLB(), y.getLB());
+        this.ub = new SetDifference(getModel(), x.getUB(), y.getUB());
     }
 
     @Override
@@ -73,30 +72,23 @@ public class SetUnionView extends SetView<SetVar> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        boolean b = true;
-        for (SetVar set : variables) {
-            b = b && set.remove(element, this);
+        // Remove element from x iff:
+        //      element in x.getUB() && element not in y.getUB()
+        if (x.getUB().contains(element) && !y.getUB().contains(element)) {
+            return x.remove(element, this);
         }
-        return b;
+        // Force element to y iff:
+        //      element in x.getLB() && element in y.getUB()
+        if (x.getLB().contains(element) && y.getUB().contains(element)) {
+            return y.force(element, this);
+        }
+        return false;
     }
 
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
-        int nb = 0;
-        int idx = -1;
-        for (int i = 0; i < variables.length; i++) {
-            if (variables[i].getUB().contains(element)) {
-                nb++;
-                idx = i;
-                if (nb > 1) {
-                    break;
-                }
-            }
-        }
-        if (nb == 1) {
-            variables[idx].force(element, this);
-            return true;
-        }
-        return false;
+        // Force element to x and remove it from y
+        boolean b = x.force(element, this) || y.remove(element, this);
+        return b;
     }
 }

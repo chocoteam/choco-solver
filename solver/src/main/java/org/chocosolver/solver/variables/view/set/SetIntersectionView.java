@@ -25,8 +25,8 @@ import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
  */
 public class SetIntersectionView extends SetView<SetVar> {
 
-    public SetIntersection lb;
-    public SetIntersection ub;
+    protected SetIntersection lb;
+    protected SetIntersection ub;
 
     /**
      * Create a set intersection view.
@@ -42,8 +42,8 @@ public class SetIntersectionView extends SetView<SetVar> {
             LBs[i] = variables[i].getLB();
             UBs[i] = variables[i].getUB();
         }
-        this.lb = new SetIntersection(variables[0].getModel(), LBs);
-        this.ub = new SetIntersection(variables[0].getModel(), UBs);
+        this.lb = new SetIntersection(getModel(), LBs);
+        this.ub = new SetIntersection(getModel(), UBs);
     }
 
     @Override
