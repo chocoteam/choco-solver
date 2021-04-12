@@ -7,64 +7,63 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.variables.view.graph.directed;
+package org.chocosolver.solver.variables.view.graph.undirected;
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
-import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
 import org.chocosolver.util.objects.graphs.GraphFactory;
-import org.chocosolver.util.objects.graphs.SubgraphType;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * GENERIC CLASS FOR BACKTRACKABLE DIRECTED SUBGRAPHS VIEWS:
+ * EDGE INDUCED UNDIRECTED SUBGRAPH VIEWS:
  *
- *  - EXCLUDE_NODES:
- *      Construct a directed graph view G' = (V', E') from another graph G = (V, E) such that:
- *          V' = E \ nodes;
- *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+ * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+ *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+ *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
  *
- *  - INDUCED_BY_NODES:
- *      Construct a directed graph view G = (V', E') from G = (V, E) such that:
- *          V' = V \cap nodes;
- *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+ * with edges a fixed set of edges.
  *
  * @author Dimitri Justeau-Allaire
  * @since 31/03/2021
  */
-public class DirectedSubgraphInducedByNodesView extends DirectedGraphView<DirectedGraphVar> {
+public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraphVar> {
 
-    protected DirectedGraph lb;
-    protected DirectedGraph ub;
+    protected UndirectedGraph lb;
+    protected UndirectedGraph ub;
 
-    protected DirectedGraphVar graphVar;
-    protected SubgraphType type;
-    protected ISet nodes;
+    protected UndirectedGraphVar graphVar;
+    protected boolean exclude;
+    protected int[][] edges;
 
     /**
-     * Creates a graph view.
+     * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
      *
      * @param name      name of the view
      * @param graphVar observed variable
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
      */
-    public DirectedSubgraphInducedByNodesView(String name, DirectedGraphVar graphVar, ISet nodes, SubgraphType type) {
-        super(name, new DirectedGraphVar[] {graphVar});
-        this.nodes = nodes;
-        this.type = type;
+    public EdgeInducedSubgraphView(String name, UndirectedGraphVar graphVar, int[][] edges, boolean exclude) {
+        super(name, new UndirectedGraphVar[] {graphVar});
+        this.exclude = exclude;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getLB(), nodes, type);
-        this.ub = GraphFactory.makeSubgraphInducedByNodes(getModel(), graphVar.getUB(), nodes, type);
+        this.edges = edges;
+        this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), edges, exclude);
+        this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), edges, exclude);
     }
 
     @Override
-    public DirectedGraph getLB() {
+    public UndirectedGraph getLB() {
         return lb;
     }
 
     @Override
-    public DirectedGraph getUB() {
+    public UndirectedGraph getUB() {
         return ub;
     }
 
@@ -85,8 +84,8 @@ public class DirectedSubgraphInducedByNodesView extends DirectedGraphView<Direct
         }
         ISet suc;
         for (int i : getUB().getNodes()) {
-            suc = getPotentialSuccessorsOf(i);
-            if (suc.size() != getLB().getSuccessorsOf(i).size()) {
+            suc = getPotentialNeighborsOf(i);
+            if (suc.size() != getLB().getNeighborsOf(i).size()) {
                 return false;
             }
         }

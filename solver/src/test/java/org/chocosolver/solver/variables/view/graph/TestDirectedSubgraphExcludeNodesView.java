@@ -39,7 +39,7 @@ public class TestDirectedSubgraphExcludeNodesView {
         DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
-        DirectedGraphVar g2 = m.subgraphExcludeNodesView(g, SetFactory.makeConstantSet(new int[]{0, 4}));
+        DirectedGraphVar g2 = m.nodeInducedSubgraphView(g, SetFactory.makeConstantSet(new int[]{0, 4}), true);
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 3);
         m.getSolver().setSearch(Search.graphVarLexSearch(g));
@@ -67,7 +67,7 @@ public class TestDirectedSubgraphExcludeNodesView {
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
         ISet excluded = SetFactory.makeConstantSet(new int[] {0, 4});
-        DirectedGraphVar g2 = m.subgraphExcludeNodesView(g, excluded);
+        DirectedGraphVar g2 = m.nodeInducedSubgraphView(g, excluded, true);
         DirectedGraph gVal = GraphFactory.makeDirectedGraph(
                 n, SetType.BITSET, SetType.BITSET,
                 new int[] {1, 2, 3, 5},
@@ -104,7 +104,7 @@ public class TestDirectedSubgraphExcludeNodesView {
         SetVar nodesG = m.graphNodeSetView(g);
         m.member(0, nodesG).post();
         ISet excluded = SetFactory.makeConstantSet(new int[] {0, 4});
-        DirectedGraphVar g2 = m.subgraphExcludeNodesView(g, excluded);
+        DirectedGraphVar g2 = m.nodeInducedSubgraphView(g, excluded, true);
         m.nbNodes(g2, m.intVar(1, 4)).post();
         m.stronglyConnected(g2).post();
         m.getSolver().setSearch(Search.graphVarLexSearch(g));

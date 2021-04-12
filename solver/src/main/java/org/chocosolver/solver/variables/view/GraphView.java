@@ -146,7 +146,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
         for (int i = 0; i < getNbMaxNodes(); i++) {
             if (value.getNodes().contains(i)) {
                 enforceNode(i, cause);
-            } else {
+            } else if (getUB().containsNode(i)) {
                 removeNode(i, cause);
             }
         }
@@ -155,7 +155,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
                 if (value.getNodes().contains(i) && value.getNodes().contains(j)) {
                     if (value.getSuccessorsOf(i).contains(j)) {
                         enforceEdge(i, j, cause);
-                    } else {
+                    } else if (getUB().containsEdge(i, j)) {
                         removeEdge(i, j, cause);
                     }
                 }
