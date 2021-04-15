@@ -21,7 +21,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 /**
- * Interface to make variables (BoolVar, IntVar, RealVar and SetVar)
+ * Interface to make variables (BoolVar, IntVar, RealVar, SetVar, and GraphVar)
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
@@ -837,6 +837,10 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default UndirectedGraphVar graphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
         return new UndirectedGraphVarImpl(name, ref(), LB, UB);
+    }
+
+    default UndirectedNodeInducedGraphVarImpl nodeInducedGraphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
+        return new UndirectedNodeInducedGraphVarImpl(name, ref(), LB, UB);
     }
 
     /**
