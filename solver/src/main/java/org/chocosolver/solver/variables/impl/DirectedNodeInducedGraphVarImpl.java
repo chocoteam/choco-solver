@@ -14,11 +14,12 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
- * Undirected Graph variable guaranteeing that any instantiation is a node-induced subgraph of the envelope
+ * Directed graph variable guaranteeing that any instantiation is a node-induced subgraph of the envelope
  * used to construct the graph variable. Any two nodes that are connected in the envelope are connected in
  * any instantiation containing these two nodes. More formally:
  *
@@ -28,21 +29,21 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * @author Dimitri Justeau-Allaire
  * @since 15/04/2021
  */
-public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
+public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl {
 
-    private UndirectedGraph originalUB;
+    private DirectedGraph originalUB;
 
     /**
-     * Creates an undirected node-induced (from the envelope) graph variable
+     * Creates an directed node-induced (from the envelope) graph variable
      *
      * @param name
      * @param solver
      * @param LB
      * @param UB
      */
-    public UndirectedNodeInducedGraphVarImpl(String name, Model solver, UndirectedGraph LB, UndirectedGraph UB) {
+    public DirectedNodeInducedGraphVarImpl(String name, Model solver, DirectedGraph LB, DirectedGraph UB) {
         super(name, solver, LB, UB);
-        this.originalUB = new UndirectedGraph(UB);
+        this.originalUB = new DirectedGraph(UB);
     }
 
     @Override
@@ -52,12 +53,23 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
             return false;
         }
         boolean edgeEnforced = true;
-        for (int y : originalUB.getNeighborsOf(x)) {
+        for (int y : originalUB.getSuccessorsOf(x)) {
             if (LB.containsNode(y)) {
                 if (LB.addEdge(x, y)) {
                     if (reactOnModification) {
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                         delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
+                    }
+                    edgeEnforced = true;
+                }
+            }
+        }
+        for (int y : originalUB.getPredecessorsOf(x)) {
+            if (LB.containsNode(y)) {
+                if (LB.addEdge(y, x)) {
+                    if (reactOnModification) {
+                        delta.add(y, GraphDelta.EDGE_ENFORCED_TAIL, cause);
+                        delta.add(x, GraphDelta.EDGE_ENFORCED_HEAD, cause);
                     }
                     edgeEnforced = true;
                 }
@@ -91,9 +103,13 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
         } else if (!UB.getNodes().contains(x)) {
             return false;
         }
-        ISet nei = UB.getNeighborsOf(x);
+        ISet nei = UB.getSuccessorsOf(x);
         for (int i : nei) {
             super.removeEdge(x, i, cause);
+        }
+        nei = UB.getPredecessorsOf(x);
+        for (int i : nei) {
+            super.removeEdge(i, x, cause);
         }
         if (UB.removeNode(x)) {
             if (reactOnModification) {

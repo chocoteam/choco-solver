@@ -839,6 +839,20 @@ public interface IVariableFactory extends ISelf<Model> {
         return new UndirectedGraphVarImpl(name, ref(), LB, UB);
     }
 
+    /**
+     * Creates a node-induced undirected graph variable guaranteeing that any instantiation is a node-induced subgraph
+     * of the envelope used to construct the graph variable. Any two nodes that are connected in the envelope
+     * are connected by an edge in any instantiation containing these two nodes. More formally:
+     *
+     *  - G = (V, E) \in [G_lb, G_ub], with G_ub = (V_ub, E_ub);
+     *  - E = { (x, y) \in E_ub | x \in V \land y \in V }.
+     *
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return An undirected graph variable taking its values in the graph domain [LB, UB] and such that any value is
+     *         a node-induced subgraph of UB.
+     */
     default UndirectedNodeInducedGraphVarImpl nodeInducedGraphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
         return new UndirectedNodeInducedGraphVarImpl(name, ref(), LB, UB);
     }
@@ -855,6 +869,24 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default DirectedGraphVar digraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
         return new DirectedGraphVarImpl(name, ref(), LB, UB);
+    }
+
+    /**
+     * Creates a node-induced directed graph variable guaranteeing that any instantiation is a node-induced subgraph
+     * of the envelope used to construct the graph variable. Any two nodes that are connected in the envelope
+     * are connected by an edge in any instantiation containing these two nodes. More formally:
+     *
+     *  - G = (V, E) \in [G_lb, G_ub], with G_ub = (V_ub, E_ub);
+     *  - E = { (x, y) \in E_ub | x \in V \land y \in V }.
+     *
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return A directed graph variable taking its values in the graph domain [LB, UB] and such that any value is
+     *         a node-induced subgraph of UB.
+     */
+    default DirectedNodeInducedGraphVarImpl nodeInducedDigraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
+        return new DirectedNodeInducedGraphVarImpl(name, ref(), LB, UB);
     }
 
     //*************************************************************************************
