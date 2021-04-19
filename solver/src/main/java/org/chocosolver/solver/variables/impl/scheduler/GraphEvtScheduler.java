@@ -11,8 +11,6 @@ package org.chocosolver.solver.variables.impl.scheduler;
 
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
 
 /**
  * Updated by Dimitri Justeau-Allaire 16/04/2021: graph events were not scheduled before.
@@ -21,34 +19,32 @@ public class GraphEvtScheduler implements EvtScheduler<GraphEventType> {
 
     private final int[] DIS = new int[] {
 
-            0, 1, 2, 3, 6, 8, 10, 12, 13, 15, -1, // N-
-            1, 3, 8, 13, 14, 15, -1, // N+
-            3, 4, 5, 7, 8, 9, 10, 11, 12, 15, -1, // E-
-            4, 6, 7, 8, 9, 10, 11, 15, -1, // E+
-            0, 15, -1, // ALL EVENTS
+            0, 1, 2, 3, 6, 8, 10, 12, 13, 15, -1, // N- (mask = 1) // IDX[1] = 0
+            1, 3, 8, 13, 14, 15, -1, // N+ (mask = 2) // IDX[2] = 11
+            3, 4, 5, 7, 8, 9, 10, 11, 12, 15, -1, // E- (mask = 4) // IDX[4] = 18
+            4, 6, 7, 8, 9, 10, 11, 15, -1, // E+ (mask = 8) // IDX[8] = 29
+            0, 15, -1, // ALL EVENTS // IDX[15] = 38
 
-            0, 3, 6, 15, -1, // N+- // 42
-            0, 1, 2, 4, 5, 9, 10, 15, - 1, // N- E- // 46
-            1, 3, 4, 6, 7, 15, -1, // N+ E+ // 55
-            1, 4, 5, 7, 8, 15, -1, // N+ E- // 62
-            0, 1, 2, 3, 4, 8, 9, 15, -1, // N- E+ // 68
-
-            // REMAINING : 7, 12, 13, 14,
+            0, 3, 6, 15, -1, // N+- (mask = 3) // IDX[3] = 41
+            0, 1, 2, 4, 5, 9, 10, 15, - 1, // N- E- (mask = 5) // IDX[5] = 46
+            1, 3, 4, 6, 7, 15, -1, // N+ E+ (mask = 10) // IDX[10] = 55
+            1, 4, 5, 7, 8, 15, -1, // N+ E- (mask = 6) // IDX[6] = 62
+            0, 1, 2, 3, 4, 8, 9, 15, -1, // N- E+ (mask = 9) // IDX[9] = 69
+            0, 4, 5, 15, -1, // N+- E- (mask = 7) // IDX[7] = 78
+            3, 15, -1, // E+- (mask = 12) // IDX[12] = 83
+            0, 1, 2, 15, -1, // N- E+- (mask = 13) // IDX[13] = 86
+            1, 15, -1, // N+ E+- (mask = 14) // IDX[14] = 91
+            0, 3, 4, 15, -1 // N+- E+ (mask = 11) // IDX[11] = 94
     };
 
     private int i = 0;
 
     private static final int[] IDX = new int[] {
-            -1, 0, 11, 42, 18, 46, 62, 38, 29, 68, 55, 38, 38, 38, 38, 38
-//            -1, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38, 38
+            -1, 0, 11, 41, 18, 46, 62, 78, 29, 69, 55, 94, 83, 86, 91, 38
     };
 
     @Override
     public void init(int mask) {
-        ISet s = SetFactory.makeConstantSet(new int[] {1, 2, 3, 4, 5, 6, 8, 9, 10});
-        if (!s.contains(mask)) {
-            System.out.println(mask);
-        }
         i = IDX[mask];
     }
 
