@@ -7,24 +7,25 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.search.strategy.selectors.values;
+package org.chocosolver.solver.search.strategy.selectors.values.graph.node;
 
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Random;
 
-public class GraphRandomNode extends GraphNodeSelector<GraphVar> {
+public class GraphRandomNode implements GraphNodeSelector {
 
     private Random rd;
 
-    public GraphRandomNode(GraphVar g, long seed) {
-        super(g);
+    public GraphRandomNode(long seed) {
         this.rd = new Random(seed);
 
     }
 
-    @Override
-    public int nextNode() {
+    public int selectNode(GraphVar g) {
+        ISet envNodes = g.getPotentialNodes();
+        ISet kerNodes = g.getMandatoryNodes();
         int delta = envNodes.size() - kerNodes.size();
         if (delta != 0) {
             delta = rd.nextInt(delta);

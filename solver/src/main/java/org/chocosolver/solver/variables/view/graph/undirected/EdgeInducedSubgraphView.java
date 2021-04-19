@@ -101,7 +101,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         if (enforceNodes.contains(node)) {
             contradiction(this, "Try to remove mandatory node");
         }
-        return false;
+        return true;
     }
 
     @Override
@@ -130,7 +130,12 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
-        if (event == GraphEventType.REMOVE_EDGE) {
+        // Edge addition in observed can cause node addition
+        if ((event.getMask() & GraphEventType.ADD_EDGE.getMask()) > 0) {
+            notifyPropagators(GraphEventType.ADD_NODE, this);
+        }
+        // Edge removal in observed variable can cause node removal
+        if ((event.getMask() & GraphEventType.REMOVE_EDGE.getMask()) > 0){
             for (int node : enforceNodes) {
                 ISet potNeigh = getPotentialNeighborsOf(node);
                 if (potNeigh.size() == 1) {
@@ -138,6 +143,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                     enforceNodes.remove(node);
                 }
             }
+            notifyPropagators(GraphEventType.REMOVE_NODE, this);
         }
         notifyPropagators(event, this);
     }

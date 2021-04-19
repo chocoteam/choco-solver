@@ -11,8 +11,10 @@ package org.chocosolver.solver.constraints.graph.cost.hcp;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphEdgeSelector;
-import org.chocosolver.solver.search.strategy.strategy.GraphStrategy;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphEdgesOnly;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -70,7 +72,14 @@ public class KnightTourProblem {
 
         // basically branch on sparse areas of the graph
         Solver solver = model.getSolver();
-        solver.setSearch(new GraphStrategy(graph, null, new MinNeigh(graph), GraphStrategy.NodeEdgePriority.EDGES));
+        solver.setSearch(Search.graphVarSearch(
+                new InputOrder<>(model),
+                new GraphEdgesOnly(),
+                null,
+                new MinNeigh(),
+                true,
+                graph
+        ));
         solver.limitTime("20s");
 
         if(solver.solve()){
@@ -83,20 +92,14 @@ public class KnightTourProblem {
     // HEURISTICS
     //***********************************************************************************
 
-    private static class MinNeigh extends GraphEdgeSelector<UndirectedGraphVar> {
-        int n;
+    private static class MinNeigh implements GraphEdgeSelector<UndirectedGraphVar> {
 
-        public MinNeigh(UndirectedGraphVar graphVar) {
-            super(graphVar);
-            n = graphVar.getNbMaxNodes();
-        }
-
-        @Override
-        public boolean computeNextEdge() {
+        public int[] selectEdge(UndirectedGraphVar g) {
             ISet suc;
+            int n = g.getNbMaxNodes();
             int size = n + 1;
             int sizi;
-            from = -1;
+            int from = -1;
             for (int i = 0; i < n; i++) {
                 sizi = g.getPotentialNeighborsOf(i).size() - g.getMandatoryNeighborsOf(i).size();
                 if (sizi < size && sizi > 0) {
@@ -105,13 +108,13 @@ public class KnightTourProblem {
                 }
             }
             if (from == -1) {
-                return false;
+                return new int[] {-1, -1};
             }
             suc = g.getPotentialNeighborsOf(from);
             for (int j : suc) {
                 if (!g.getMandatoryNeighborsOf(from).contains(j)) {
-                    to = j;
-                    return true;
+                    int to = j;
+                    return new int[] {from, to};
                 }
             }
             throw new UnsupportedOperationException();

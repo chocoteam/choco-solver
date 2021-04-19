@@ -12,7 +12,7 @@ package org.chocosolver.solver.constraints.graph.tree;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.strategy.GraphStrategy;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -61,7 +61,7 @@ public class DirectedTreeForestTest {
             m.minInDegrees(g, indeg).post();
         }
         m.nbNodes(g, m.intVar("nbNodes", n / 3, n)).post();
-        m.getSolver().setSearch(new GraphStrategy(g, seed));
+        m.getSolver().setSearch(Search.randomGraphVarSearch(seed, g));
         m.getSolver().limitSolution(100);
         while(m.getSolver().solve());
         return m.getSolver();

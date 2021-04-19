@@ -24,6 +24,14 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactor
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IbexDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphLexEdge;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphRandomEdge;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphLexNode;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphNodeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphRandomNode;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenEdges;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
@@ -155,9 +163,31 @@ public class Search {
     // ************************************************************************************
 
     /**
-     * Lexicographic graph branching strategy.
-     * Branch on nodes then edges.
-     * <br>
+     * Generic strategy to branch on graph variables
+     *
+     * @param varS          Variable selection strategy
+     * @param nodeOrEdgeS   Node or edge selection (defines if whenever a decision must be on nodes or edges)
+     * @param nodeS         Node selector (defines which node to enforce/remove if decision is on nodes)
+     * @param edgeS         Edge selector (defines which edge to enforce/remove if decision is on edges)
+     * @param enforceFirst  branching order true = enforce first; false = remove first
+     * @param graphs        GraphVar array to branch on
+     * @return
+     */
+    public static GraphStrategy graphVarSearch(VariableSelector<GraphVar> varS, GraphNodeOrEdgeSelector nodeOrEdgeS,
+                                               GraphNodeSelector nodeS, GraphEdgeSelector edgeS, boolean enforceFirst,
+                                               GraphVar... graphs) {
+        return new GraphStrategy(graphs, varS, nodeOrEdgeS, nodeS, edgeS, enforceFirst);
+    }
+
+    /**
+     * Default graph var search.
+     *
+     * Variable selection: input order.
+     * Node or edges selection: nodes first then edges.
+     * Node selection: lexicographic order.
+     * Edge selection lexicographic order.
+     * Enforce first.
+     *
      * <br> node branching:
      * Let i be the first node such that
      * i in envelope(g) and i not in kernel(g).
@@ -171,10 +201,41 @@ public class Search {
      * The decision adds (i,j) to the kernel of g.
      * It is fails, then (i,j) is removed from the envelope of g
      *
-     * @param g a graph variable to branch on
+     * @param graphs graph variables to branch on
      */
-    public static GraphStrategy graphVarLexSearch(GraphVar g) {
-        return new GraphStrategy(g);
+    public static GraphStrategy graphVarSearch(GraphVar... graphs) {
+        return graphVarSearch(
+                new InputOrder<>(graphs[0].getModel()),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true,
+                graphs
+        );
+    }
+
+    /**
+     * Random graph var search.
+     *
+     * Variable selection: random.
+     * Node or edges selection: nodes first then edges.
+     * Node selection: random.
+     * Edge selection random.
+     * Enforce first.
+     *
+     * @param seed the seed for random selection
+     * @param graphs graph variables to branch on
+     * @return a randomized graph variables search strategy
+     */
+    public static GraphStrategy randomGraphVarSearch(long seed, GraphVar... graphs) {
+        return graphVarSearch(
+                new Random<>(seed),
+                new GraphNodeThenEdges(),
+                new GraphRandomNode(seed),
+                new GraphRandomEdge(seed),
+                true,
+                graphs
+        );
     }
 
     // ************************************************************************************
@@ -523,9 +584,7 @@ public class Search {
             strats.add(setVarSearch(lsvars.toArray(new SetVar[0])));
         }
         if (lgvars.size() > 0) {
-            for (GraphVar g : lgvars) {
-                strats.add(new GraphStrategy(g));
-            }
+            strats.add(graphVarSearch(lgvars.toArray(new GraphVar[0])));
         }
         if (lrvars.size() > 0) {
             strats.add(realVarSearch(lrvars.toArray(new RealVar[0])));
