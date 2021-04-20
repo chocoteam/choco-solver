@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view.graph.directed;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -108,6 +109,10 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        // Node addition in observed variable can cause edge addition
+        if ((event.getMask() & GraphEventType.ADD_NODE.getMask()) > 0) {
+            notifyPropagators(GraphEventType.ADD_EDGE, this);
+        }
         notifyPropagators(event, this);
     }
 
