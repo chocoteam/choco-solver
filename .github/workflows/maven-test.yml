@@ -13,9 +13,16 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    # For GitHub packages
+    permissions: 
+      contents: read
+      packages: write 
+    # Tests matrix
     strategy:
       matrix:
-        group: ["1s", "10s", "checker", "mzn", "xcsp","dimacs","mps"]
+        group: ["1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex"]
+
+    # The different steps
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -23,18 +30,24 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-    
+
+    - name: Install Ibex
+      run: sh scripts/install-ibex.sh  
+
+    # Caching deps
     - name: Cache Maven packages
       uses: actions/cache@v2
       with:
         path: ~/.m2
         key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
         restore-keys: ${{ runner.os }}-m2
-    
+
     # Regression tests
     - name: Test ${{ matrix.group }}
-      run: mvn -B --file pom.xml install -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+      run: mvn -B --file pom.xml package -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+    
 
+    # JaCoCo code coverage
     - name: Generate JaCoCo Badge
       id: jacoco
       uses: cicirello/jacoco-badge-generator@v2.0.1
@@ -60,4 +73,5 @@ jobs:
       with:
         name: jacoco-report
         path: target/site/jacoco/
+
 
