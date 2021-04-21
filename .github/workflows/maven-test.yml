@@ -44,7 +44,7 @@ jobs:
 
     # Regression tests
     - name: Test ${{ matrix.group }}
-      run: mvn -B --file pom.xml package -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+      run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
     
 
     # JaCoCo code coverage

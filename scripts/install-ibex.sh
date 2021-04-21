@@ -17,4 +17,4 @@ cd -
 sudo rm -r ibex-${ibexver}.tar.gz
 sudo rm -r ibex-java-${ibexjavaver}.tar.gz
 
-mvn validate -Dibex.path=ibex-lib-ibex-${ibexver}/plugins/java
+ibexsolve -v
