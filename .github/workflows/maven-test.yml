@@ -20,7 +20,7 @@ jobs:
     # Tests matrix
     strategy:
       matrix:
-        group: ["1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex"]
+        group: ["1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps"]
 
     # The different steps
     steps:
@@ -30,9 +30,6 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
-
-    - name: Install Ibex
-      run: sh scripts/install-ibex.sh  
 
     # Caching deps
     - name: Cache Maven packages
@@ -45,6 +42,14 @@ jobs:
     # Regression tests
     - name: Test ${{ matrix.group }}
       run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+    
+    # Install Ibex
+    - name: Install Ibex
+      run: sh scripts/install-ibex.sh
+        
+    # Test Ibex
+    - name: Test Ibex
+      run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups="ibex"
     
 
     # JaCoCo code coverage
