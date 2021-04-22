@@ -93,7 +93,12 @@ public class Set_FixedArray implements ISet {
 		return SetType.FIXED_ARRAY;
 	}
 
-	@Override
+    @Override
+    public void registerObserver(ISet set, int idx) {
+        // Set is fixed, no need to register.
+    }
+
+    @Override
 	public int min() {
 		if(isEmpty()) throw new IllegalStateException("cannot find minimum of an empty set");
 		return values[0];

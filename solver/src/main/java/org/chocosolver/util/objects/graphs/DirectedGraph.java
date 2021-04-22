@@ -10,10 +10,13 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.stream.IntStream;
 
 /**
  * Directed graph implementation : directed edges are indexed per endpoints
@@ -140,6 +143,126 @@ public class DirectedGraph implements IGraph {
             predecessors[i] = SetFactory.makeConstantSet(g.getPredecessorsOf(i).toArray());
             successors[i] = SetFactory.makeConstantSet(g.getSuccessorsOf(i).toArray());
         }
+    }
+
+    /**
+     * CONSTRUCTOR FOR BACKTRACKABLE DIRECTED SUBGRAPHS:
+     *
+     * Construct a backtrackable directed graph G' = (V', E') from another directed graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param nodes the set of nodes to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public DirectedGraph(Model model, DirectedGraph g, ISet nodes, boolean exclude) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        if (exclude) {
+            this.nodes = new SetDifference(model, g.getNodes(), nodes);
+        } else {
+            this.nodes = new SetIntersection(model, g.getNodes(), nodes);
+        }
+        predecessors = new ISet[n];
+        successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            if (exclude) {
+                predecessors[i] = new SetDifference(model, g.getPredecessorsOf(i), nodes);
+                successors[i] = new SetDifference(model, g.getSuccessorsOf(i), nodes);
+            } else {
+                predecessors[i] = new SetIntersection(model, g.getPredecessorsOf(i), nodes);
+                successors[i] = new SetIntersection(model, g.getSuccessorsOf(i), nodes);
+            }
+        }
+    }
+
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED DIRECTED SUBGRAPHS:
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' or (y, x) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param edgesPredecessors the set of edges (node predecessors) to construct the subgraph from (see exclude parameter)
+     * @param edgesSuccessors the set of edges (node successors) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public DirectedGraph(Model model, DirectedGraph g, ISet[] edgesPredecessors, ISet[] edgesSuccessors, boolean exclude) {
+        assert edgesPredecessors.length == g.getNbMaxNodes();
+        assert edgesSuccessors.length == g.getNbMaxNodes();
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        this.predecessors = new ISet[n];
+        this.successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            if (exclude) {
+                predecessors[i] = new SetDifference(model, g.getPredecessorsOf(i), edgesPredecessors[i]);
+                successors[i] = new SetDifference(model, g.getSuccessorsOf(i), edgesSuccessors[i]);
+            } else {
+                predecessors[i] = new SetIntersection(model, g.getPredecessorsOf(i), edgesPredecessors[i]);
+                successors[i] = new SetIntersection(model, g.getSuccessorsOf(i), edgesSuccessors[i]);
+            }
+        }
+        this.nodes = new SetUnion(model, new SetUnion(model, predecessors), new SetUnion(model, successors));
+    }
+
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public DirectedGraph(Model model, DirectedGraph g, int[][] edges, boolean exclude) {
+        this(model, g, edgesArrayToPredecessorsSets(g.getNbMaxNodes(), edges), edgesArrayToSuccessorsSets(g.getNbMaxNodes(), edges), exclude);
+    }
+
+    public static ISet[] edgesArrayToPredecessorsSets(int n, int[][] edges) {
+        ISet[] predecessors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            int finalI = i;
+            predecessors[i] = SetFactory.makeConstantSet(IntStream.range(0, edges.length)
+                    .filter(v -> {
+                        assert edges[v].length == 2;
+                        return edges[v][1] == finalI;
+                    })
+                    .map(v -> edges[v][0])
+                    .toArray()
+            );
+        }
+        return predecessors;
+    }
+
+    public static ISet[] edgesArrayToSuccessorsSets(int n, int[][] edges) {
+        ISet[] successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            int finalI = i;
+            successors[i] = SetFactory.makeConstantSet(IntStream.range(0, edges.length)
+                    .filter(v -> {
+                        assert edges[v].length == 2;
+                        return edges[v][0] == finalI;
+                    })
+                    .map(v -> edges[v][1])
+                    .toArray()
+            );
+        }
+        return successors;
     }
 
     //***********************************************************************************

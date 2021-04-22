@@ -10,10 +10,12 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.ISet;
-import org.chocosolver.util.objects.setDataStructures.ISetIterator;
-import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+
+import java.util.stream.IntStream;
 
 /**
  * Specific implementation of an undirected graph
@@ -131,6 +133,110 @@ public class UndirectedGraph implements IGraph {
         for (int i = 0; i < n; i++) {
             neighbors[i] = SetFactory.makeConstantSet(g.getNeighborsOf(i).toArray());
         }
+    }
+
+    // Subgraph constructors
+
+    /**
+     * CONSTRUCTOR FOR BACKTRACKABLE NODE INDUCED SUBGRAPHS:
+     *
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param nodes the set of nodes to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, ISet nodes, boolean exclude) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        if (exclude) {
+            this.nodes = new SetDifference(model, g.getNodes(), nodes);
+        } else {
+            this.nodes = new SetIntersection(model, g.getNodes(), nodes);
+        }
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            if (exclude) {
+                neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), nodes);
+            } else {
+                neighbors[i] = new SetIntersection(model, g.getNeighborsOf(i), nodes);
+            }
+        }
+    }
+
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param edges the set of edges to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, ISet[] edges, boolean exclude) {
+        assert edges.length == g.getNbMaxNodes();
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            if (exclude) {
+                neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), edges[i]);
+            } else {
+                neighbors[i] = new SetIntersection(model, g.getNeighborsOf(i), edges[i]);
+            }
+        }
+        this.nodes = new SetUnion(model, neighbors);
+    }
+
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, int[][] edges, boolean exclude) {
+        this(model, g, edgesArrayToEdgesSets(g.getNbMaxNodes(), edges), exclude);
+    }
+
+    public static ISet[] edgesArrayToEdgesSets(int n, int[][] edges) {
+        ISet[] neigh = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            int finalI = i;
+            neigh[i] = SetFactory.makeConstantSet(IntStream.range(0, edges.length)
+                    .filter(v -> {
+                        assert edges[v].length == 2;
+                        return edges[v][0] == finalI || edges[v][1] == finalI;
+                    })
+                    .map(v -> {
+                        if (edges[v][0] == finalI) {
+                            return edges[v][1];
+                        } else {
+                            return edges[v][0];
+                        }
+                    }).toArray()
+            );
+        }
+        return neigh;
     }
 
     //***********************************************************************************

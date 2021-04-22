@@ -12,6 +12,7 @@ package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.Set_ReadOnly;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;

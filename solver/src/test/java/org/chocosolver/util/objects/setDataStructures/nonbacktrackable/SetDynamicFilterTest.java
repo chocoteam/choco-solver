@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.setDataStructures.nonbacktrackable;
 
 import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDynamicFilterOnSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -32,7 +33,7 @@ public class SetDynamicFilterTest {
         Assert.assertTrue(odd.contains(9));
         Assert.assertEquals(odd.min(), 1);
         Assert.assertEquals(odd.max(), 9);
-        Assert.assertEquals(odd.getSetType(), SetType.DYNAMIC_FILTER);
+        Assert.assertEquals(odd.getSetType(), SetType.DYNAMIC);
         // Test iterate
         for (int i : odd) {
             Assert.assertTrue(i % 2 != 0);
