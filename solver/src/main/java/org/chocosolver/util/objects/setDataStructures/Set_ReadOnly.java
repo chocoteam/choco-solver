@@ -101,4 +101,9 @@ public class Set_ReadOnly extends AbstractSet {
     public void notifyElementRemoved(int element, int idx) {
         notifyObservingElementRemoved(element);
     }
+
+    @Override
+    public void notifyCleared(int idx) {
+        notifyObservingCleared();
+    }
 }
