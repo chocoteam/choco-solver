@@ -47,7 +47,6 @@ public class TestEdgeInducedSubgraphView {
         ISet[] neigh = UndirectedGraph.edgesArrayToEdgesSets(g.getNbMaxNodes(), edges);
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 5);
-        m.getSolver().setSearch(Search.graphVarLexSearch(g));
         while (m.getSolver().solve()) {
             Assert.assertTrue(!g2.getValue().containsNode(4));
             for (int i : g.getValue().getNodes()) {
@@ -92,13 +91,13 @@ public class TestEdgeInducedSubgraphView {
             Assert.assertTrue(g2.isInstantiated());
             Assert.assertTrue(g2.getValue().equals(gVal));
             Assert.assertFalse(g.isInstantiated());
-            Assert.assertEquals(g.getPotentialNodes().size(), 4);
+            Assert.assertEquals(g.getPotentialNodes().size(), 6);
             Assert.assertEquals(g.getMandatoryNeighborsOf(0).size(), 1);
-            Assert.assertEquals(g.getPotentialNeighborsOf(0).size(), 3);
+            Assert.assertEquals(g.getPotentialNeighborsOf(0).size(), 5);
             Assert.assertEquals(g.getMandatoryNeighborsOf(1).size(), 2);
             Assert.assertEquals(g.getPotentialNeighborsOf(1).size(), 3);
             Assert.assertEquals(g.getMandatoryNeighborsOf(3).size(), 1);
-            Assert.assertEquals(g.getPotentialNeighborsOf(3).size(), 3);
+            Assert.assertEquals(g.getPotentialNeighborsOf(3).size(), 5);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -122,7 +121,6 @@ public class TestEdgeInducedSubgraphView {
         m.member(3, nodesG).post();
         m.nbNodes(g2, m.intVar(1, 4)).post();
         m.connected(g2).post();
-        m.getSolver().setSearch(Search.graphVarLexSearch(g));
         while (m.getSolver().solve()) {
             Assert.assertTrue(g.getValue().containsNode(3));
             for (int i : g.getValue().getNodes()) {

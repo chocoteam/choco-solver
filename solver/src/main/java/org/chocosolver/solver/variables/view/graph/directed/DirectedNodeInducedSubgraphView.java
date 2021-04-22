@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view.graph.directed;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -110,5 +111,10 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.NON_INJECTIVE_VIEW | Variable.GRAPH;
     }
 }

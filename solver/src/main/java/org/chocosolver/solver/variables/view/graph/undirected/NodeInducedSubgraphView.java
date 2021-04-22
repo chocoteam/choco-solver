@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view.graph.undirected;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
 import org.chocosolver.util.objects.graphs.GraphFactory;
@@ -111,5 +112,10 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.NON_INJECTIVE_VIEW | Variable.GRAPH;
     }
 }
