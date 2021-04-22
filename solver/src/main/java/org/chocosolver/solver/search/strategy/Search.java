@@ -32,6 +32,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphN
 import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphRandomNode;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenEdges;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenNeighbors;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
@@ -233,6 +234,18 @@ public class Search {
                 new GraphNodeThenEdges(),
                 new GraphRandomNode(seed),
                 new GraphRandomEdge(seed),
+                true,
+                graphs
+        );
+    }
+
+    public static GraphStrategy nodeThenNeighborsGraphVarSearch(GraphVar... graphs) {
+        GraphNodeThenNeighbors selector = new GraphNodeThenNeighbors();
+        return graphVarSearch(
+                new InputOrder<>(graphs[0].getModel()),
+                selector,
+                selector,
+                selector,
                 true,
                 graphs
         );
