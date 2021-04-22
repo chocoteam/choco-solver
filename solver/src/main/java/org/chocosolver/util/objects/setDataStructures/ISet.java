@@ -104,16 +104,36 @@ public interface ISet extends Iterable<Integer>{
      */
     SetType getSetType();
 
+    /**
+     * Register an observer to this set. Observers are dynamic set data structures whose value depends on observed
+     * sets. This method must be called by observers' constructors.
+     * @param set The observer to register
+     * @param idx This index of this set in the observing set.
+     */
     void registerObserver(ISet set, int idx);
 
+    /**
+     * Operations to perform when an observed set has an element added.
+     * @param element the element added to the observed set.
+     * @param idx the index of the observed set.
+     */
     default void notifyElementAdded(int element, int idx) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Operations to perform when an observed set has an element removed.
+     * @param element the element removed to the observed set.
+     * @param idx the index of the observed set.
+     */
     default void notifyElementRemoved(int element, int idx) {
         throw new UnsupportedOperationException();
     }
 
+    /**
+     * Operations to perform when an observed set is cleared
+     * @param idx the index of the observed set.
+     */
     default void notifyCleared(int idx) {
         throw new UnsupportedOperationException();
     }
