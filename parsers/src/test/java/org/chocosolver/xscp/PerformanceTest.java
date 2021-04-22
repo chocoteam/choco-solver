@@ -64,12 +64,12 @@ public class PerformanceTest {
         return parameters.toArray(new Object[0][0]);
     }
 
-    @Test(groups = "xcsp", dataProvider = "instances", timeOut = 60000)
+    @Test(groups = "xcsp", dataProvider = "instances", timeOut = 120000)
     public void testThemAll(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
         String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
                 file,
-                "-limit", "[50s]", // but, problems are expected to end within 30s max
+                "-limit", "[80s]", // but, problems are expected to end within 30s max
                 //"-stat",
                 "-p", "1"
         };
