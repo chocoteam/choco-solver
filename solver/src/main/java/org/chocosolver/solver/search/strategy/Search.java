@@ -239,18 +239,6 @@ public class Search {
         );
     }
 
-    public static GraphStrategy nodeThenNeighborsGraphVarSearch(GraphVar... graphs) {
-        GraphNodeThenNeighbors selector = new GraphNodeThenNeighbors();
-        return graphVarSearch(
-                new InputOrder<>(graphs[0].getModel()),
-                selector,
-                selector,
-                selector,
-                true,
-                graphs
-        );
-    }
-
     // ************************************************************************************
     // REALVAR STRATEGIES
     // ************************************************************************************
