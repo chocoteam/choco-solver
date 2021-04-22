@@ -135,37 +135,37 @@ public class SymmetryBreakingTest {
         );
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testSimple1() {
         test(1, 1, 1);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testSimple2() {
         test(5, 4, 2);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testSimple3() {
         test(3, 5, 4);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testSimple4() {
         test(2, 1, 3);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testSimple5() {
         test(3, 2, 3);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testMedium1() {
         test(4, 3, 3);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testAllSmall() {
         for (int n = 1; n <= 6; n++) {
             for (int m = 1; m <= 6; m++) {
@@ -179,7 +179,7 @@ public class SymmetryBreakingTest {
     // OEIS, A006856
     private static final int[] a = new int[] {0, 0, 1, 2, 3, 5, 6, 8, 10, 12, 15, 16, 18, 21, 23, 36, 28, 31};
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness() {
         for (int n = 5; n <= 7; n++) {
             Assert.assertEquals(solutionExists(n, a[n], 5, true), true);
@@ -187,19 +187,19 @@ public class SymmetryBreakingTest {
         }
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness1() {
         int n = 10;
         Assert.assertEquals(solutionExists(n, a[n], 5, true), true);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness2() {
         int n = 8;
         Assert.assertEquals(solutionExists(n, a[n] + 1, 5, true), false);
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testHardNoSolution() {
         Assert.assertEquals(
                 solutionExists(8, 10, 6, true),
@@ -207,7 +207,7 @@ public class SymmetryBreakingTest {
         );
     }
 
-    @Test
+    @Test(groups = "1s", timeOut = 60000)
     public static void testHardSolutionExists() {
         Assert.assertEquals(
                 solutionExists(10, 10, 9, true),
