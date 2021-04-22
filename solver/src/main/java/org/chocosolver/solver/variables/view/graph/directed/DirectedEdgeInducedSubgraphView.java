@@ -11,11 +11,15 @@ package org.chocosolver.solver.variables.view.graph.directed;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * EDGE INDUCED DIRECTED SUBGRAPH VIEWS:
@@ -36,7 +40,9 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     protected DirectedGraphVar graphVar;
     protected boolean exclude;
-    protected int[][] edges;
+    protected ISet[] inEdges;
+    protected ISet[] outEdges;
+    protected ISet enforceNodes;
 
     /**
      * Construct an edge-induced directed graph view G = (V', E') from G = (V, E) such that:
@@ -52,7 +58,9 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
      */
     public DirectedEdgeInducedSubgraphView(String name, DirectedGraphVar graphVar, int[][] edges, boolean exclude) {
         super(name, new DirectedGraphVar[] {graphVar});
-        this.edges = edges;
+        this.inEdges = DirectedGraph.edgesArrayToPredecessorsSets(graphVar.getNbMaxNodes(), edges);
+        this.outEdges = DirectedGraph.edgesArrayToSuccessorsSets(graphVar.getNbMaxNodes(), edges);
+        this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.exclude = exclude;
         this.graphVar = graphVar;
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), edges, exclude);
@@ -96,12 +104,27 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
-        return graphVar.removeNode(node, this);
+        if (enforceNodes.contains(node)) {
+            contradiction(this, "Try to remove mandatory node");
+        }
+        return false;
     }
 
     @Override
     protected boolean doEnforceNode(int node) throws ContradictionException {
-        return graphVar.enforceNode(node, this);
+        boolean b = graphVar.enforceNode(node, this);
+        if (!getMandatoryNodes().contains(node)) {
+            ISet potPred = getPotentialPredecessorOf(node);
+            ISet potSucc = getPotentialSuccessorsOf(node);
+            if (potPred.size() == 0 && potSucc.size() == 1) {
+                b = graphVar.enforceEdge(node, potSucc.newIterator().nextInt(), this) || b;
+            } else if (potPred.size() == 1 && potSucc.size() == 0) {
+                b = graphVar.enforceEdge(potPred.newIterator().nextInt(), node, this) || b;
+            } else {
+                enforceNodes.add(node);
+            }
+        }
+        return b;
     }
 
     @Override
@@ -116,6 +139,24 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        if (event == GraphEventType.REMOVE_EDGE) {
+            for (int node : enforceNodes) {
+                ISet potPred = getPotentialPredecessorOf(node);
+                ISet potSucc = getPotentialSuccessorsOf(node);
+                if (potPred.size() == 0 && potSucc.size() == 1) {
+                    graphVar.enforceEdge(node, potSucc.newIterator().nextInt(), this);
+                    enforceNodes.remove(node);
+                } else if (potPred.size() == 1 && potSucc.size() == 0) {
+                    graphVar.enforceEdge(potPred.newIterator().nextInt(), node, this);
+                    enforceNodes.remove(node);
+                }
+            }
+        }
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.NON_INJECTIVE_VIEW | Variable.GRAPH;
     }
 }

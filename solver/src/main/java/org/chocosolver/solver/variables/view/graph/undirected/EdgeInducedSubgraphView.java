@@ -11,11 +11,15 @@ package org.chocosolver.solver.variables.view.graph.undirected;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 
 /**
  * EDGE INDUCED UNDIRECTED SUBGRAPH VIEWS:
@@ -36,7 +40,8 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     protected UndirectedGraphVar graphVar;
     protected boolean exclude;
-    protected int[][] edges;
+    protected ISet[] edges;
+    protected ISet enforceNodes;
 
     /**
      * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
@@ -52,7 +57,8 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         super(name, new UndirectedGraphVar[] {graphVar});
         this.exclude = exclude;
         this.graphVar = graphVar;
-        this.edges = edges;
+        this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
+        this.edges = UndirectedGraph.edgesArrayToEdgesSets(graphVar.getNbMaxNodes(), edges);
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), edges, exclude);
     }
@@ -94,12 +100,24 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
-        return graphVar.removeNode(node, this);
+        if (enforceNodes.contains(node)) {
+            contradiction(this, "Try to remove mandatory node");
+        }
+        return false;
     }
 
     @Override
     protected boolean doEnforceNode(int node) throws ContradictionException {
-        return graphVar.enforceNode(node, this);
+        boolean b = graphVar.enforceNode(node, this);
+        if (!getMandatoryNodes().contains(node)) {
+            ISet potNeigh = getPotentialNeighborsOf(node);
+            if (potNeigh.size() == 1) {
+                b = graphVar.enforceEdge(node, potNeigh.newIterator().nextInt(), this) || b;
+            } else {
+                enforceNodes.add(node);
+            }
+        }
+        return b;
     }
 
     @Override
@@ -114,6 +132,20 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        if (event == GraphEventType.REMOVE_EDGE) {
+            for (int node : enforceNodes) {
+                ISet potNeigh = getPotentialNeighborsOf(node);
+                if (potNeigh.size() == 1) {
+                    graphVar.enforceEdge(node, potNeigh.newIterator().nextInt(), this);
+                    enforceNodes.remove(node);
+                }
+            }
+        }
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.NON_INJECTIVE_VIEW | Variable.GRAPH;
     }
 }

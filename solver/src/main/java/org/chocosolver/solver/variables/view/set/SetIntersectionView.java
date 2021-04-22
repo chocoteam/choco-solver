@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -100,5 +101,10 @@ public class SetIntersectionView extends SetView<SetVar> {
             b = b && set.force(element, this);
         }
         return b;
+    }
+
+    @Override
+    public int getTypeAndKind() {
+        return Variable.NON_INJECTIVE_VIEW | Variable.SET;
     }
 }

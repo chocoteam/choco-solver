@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view.graph;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -47,7 +46,6 @@ public class TestDirectedEdgeInducedSubgraphView {
         ISet[] succ = DirectedGraph.edgesArrayToSuccessorsSets(g.getNbMaxNodes(), edges);
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 4);
-        m.getSolver().setSearch(Search.graphVarLexSearch(g));
         while (m.getSolver().solve()) {
             Assert.assertTrue(!g2.getValue().containsNode(4));
             for (int i : g.getValue().getNodes()) {
@@ -102,14 +100,14 @@ public class TestDirectedEdgeInducedSubgraphView {
             Assert.assertTrue(g2.isInstantiated());
             Assert.assertTrue(g2.getValue().equals(gVal));
             Assert.assertFalse(g.isInstantiated());
-            Assert.assertEquals(g.getPotentialNodes().size(), 4);
+            Assert.assertEquals(g.getPotentialNodes().size(), 6);
             Assert.assertEquals(g.getMandatoryPredecessorsOf(0).size(), 0);
             Assert.assertEquals(g.getMandatorySuccessorsOf(0).size(), 1);
-            Assert.assertEquals(g.getPotentialSuccessorsOf(0).size(), 3);
+            Assert.assertEquals(g.getPotentialSuccessorsOf(0).size(), 5);
             Assert.assertEquals(g.getMandatorySuccessorsOf(1).size(), 1);
             Assert.assertEquals(g.getPotentialSuccessorsOf(1).size(), 3);
             Assert.assertEquals(g.getMandatoryPredecessorsOf(3).size(), 1);
-            Assert.assertEquals(g.getPotentialSuccessorsOf(3).size(), 3);
+            Assert.assertEquals(g.getPotentialSuccessorsOf(3).size(), 5);
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
@@ -132,7 +130,6 @@ public class TestDirectedEdgeInducedSubgraphView {
         SetVar nodesG = m.graphNodeSetView(g);
         m.member(3, nodesG).post();
         m.nbNodes(g2, m.intVar(1, 4)).post();
-        m.getSolver().setSearch(Search.graphVarLexSearch(g));
         while (m.getSolver().solve()) {
             Assert.assertTrue(g.getValue().containsNode(3));
             for (int i : g.getValue().getNodes()) {
