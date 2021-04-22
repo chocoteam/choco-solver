@@ -35,7 +35,6 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     protected UndirectedGraphVar graphVar;
     protected boolean exclude;
-    protected ISet nodes;
 
     /**
      * Creates a node-induced subgraph view.
@@ -47,7 +46,6 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
      */
     public NodeInducedSubgraphView(String name, UndirectedGraphVar graphVar, ISet nodes, boolean exclude) {
         super(name, new UndirectedGraphVar[] {graphVar});
-        this.nodes = nodes;
         this.exclude = exclude;
         this.graphVar = graphVar;
         this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), nodes, exclude);

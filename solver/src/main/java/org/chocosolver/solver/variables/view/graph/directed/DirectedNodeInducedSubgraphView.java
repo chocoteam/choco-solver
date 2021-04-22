@@ -35,7 +35,6 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     protected DirectedGraphVar graphVar;
     protected boolean exclude;
-    protected ISet nodes;
 
     /**
      * Creates a node induced directed subgraph view.
@@ -46,7 +45,6 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
      */
     public DirectedNodeInducedSubgraphView(String name, DirectedGraphVar graphVar, ISet nodes, boolean exclude) {
         super(name, new DirectedGraphVar[] {graphVar});
-        this.nodes = nodes;
         this.exclude = exclude;
         this.graphVar = graphVar;
         this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), nodes, exclude);

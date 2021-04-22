@@ -40,8 +40,6 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     protected DirectedGraphVar graphVar;
     protected boolean exclude;
-    protected ISet[] inEdges;
-    protected ISet[] outEdges;
     protected ISet enforceNodes;
 
     /**
@@ -58,8 +56,6 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
      */
     public DirectedEdgeInducedSubgraphView(String name, DirectedGraphVar graphVar, int[][] edges, boolean exclude) {
         super(name, new DirectedGraphVar[] {graphVar});
-        this.inEdges = DirectedGraph.edgesArrayToPredecessorsSets(graphVar.getNbMaxNodes(), edges);
-        this.outEdges = DirectedGraph.edgesArrayToSuccessorsSets(graphVar.getNbMaxNodes(), edges);
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.exclude = exclude;
         this.graphVar = graphVar;
