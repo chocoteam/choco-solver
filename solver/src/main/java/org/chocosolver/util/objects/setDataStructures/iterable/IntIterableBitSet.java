@@ -9,7 +9,6 @@
  */
 package org.chocosolver.util.objects.setDataStructures.iterable;
 
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
 
 /**
@@ -72,6 +71,7 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
             if (!set.contains(i + offset)) {
                 values.clear(i);
+                notifyObservingElementRemoved(i);
 				card--;
             }
         }
@@ -84,6 +84,7 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
         for (int i = values.nextSetBit(0); i >= 0; i = values.nextSetBit(i + 1)) {
             if (set.contains(i + offset)) {
                 values.clear(i);
+                notifyObservingElementRemoved(i);
 				card--;
             }
         }
@@ -97,6 +98,7 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
         int prevCard = card;
         values.clear(f, t);
 		card = values.cardinality();
+		notifyObservingRemovedBetween(f, t);
         return card - prevCard != 0;
     }
 
@@ -189,15 +191,13 @@ public class IntIterableBitSet extends Set_BitSet implements IntIterableSet {
     @Override
     public void plus(int x) {
         this.offset += x;
+        notifyObservingFullUpdate();
     }
 
     @Override
     public void minus(int x) {
         this.offset -= x;
+        notifyObservingFullUpdate();
     }
 
-    @Override
-    public void registerObserver(ISet set, int idx) {
-        throw new UnsupportedOperationException("IntIterableBitset is not (yet) observable");
-    }
 }

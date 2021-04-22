@@ -61,6 +61,44 @@ public abstract class AbstractSet implements ISet {
         }
     }
 
+    protected void notifyObservingAddedBetween(int from, int to) {
+        for (int i = 0; i < obsIdx; i++) {
+            for (int e = from; e <= to; e++) {
+                observing[i].notifyElementAdded(e, idxInObserving[i]);
+            }
+        }
+    }
+
+    protected void notifyObservingRemovedBetween(int from, int to) {
+        for (int i = 0; i < obsIdx; i++) {
+            for (int e = from; e <= to; e++) {
+                observing[i].notifyElementRemoved(e, idxInObserving[i]);
+            }
+        }
+    }
+
+    protected void notifyObservingRetainedBetween(int from, int to) {
+        for (int i = 0; i < obsIdx; i++) {
+            observing[i].notifyCleared(idxInObserving[i]);
+            for (int e = from; e <= to; e++) {
+                observing[i].notifyElementAdded(e, idxInObserving[i]);
+            }
+        }
+    }
+
+    protected void notifyObservingFullUpdate() {
+        if (obsIdx ==  0) {
+            return;
+        }
+        int[] values = this.toArray();
+        for (int i = 0; i < obsIdx; i++) {
+            observing[i].notifyCleared(idxInObserving[i]);
+            for (int e : values) {
+                observing[i].notifyElementAdded(e, idxInObserving[i]);
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder("{");
