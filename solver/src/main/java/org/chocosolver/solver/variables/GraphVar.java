@@ -187,7 +187,10 @@ public interface GraphVar<E extends IGraph> extends Variable {
      *
      * @return the current value (or kernel if not yet instantiated).
      */
-    E getValue();
+    default E getValue() {
+        assert isInstantiated();
+        return getLB();
+    }
 
     @Override
     GraphDelta getDelta();

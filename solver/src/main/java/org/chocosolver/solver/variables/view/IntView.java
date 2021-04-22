@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
+ * Abstract class for defining integer views on integer variables
+ *
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
  * Invoking an operation on the view executes the appropriate operation on the view's variable."
  * <p/>
@@ -57,12 +59,12 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     /**
      * Value iterator
      */
-    DisposableValueIterator _viterator;
+    protected DisposableValueIterator _viterator;
 
     /**
      * Range iterator
      */
-    DisposableRangeIterator _riterator;
+    protected DisposableRangeIterator _riterator;
 
     /**
      * Value iterator allowing for(int i:this) loops
@@ -79,7 +81,7 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
      * @param name name of the view
      * @param var observed variable
      */
-    IntView(String name, I var) {
+    protected IntView(String name, I var) {
         super(name, var);
         this.var = var;
         this.delta = NoDelta.singleton;

@@ -16,6 +16,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 
 public class UndirectedGraphVarImpl extends AbstractGraphVar<UndirectedGraph> implements UndirectedGraphVar {
 
@@ -37,47 +38,27 @@ public class UndirectedGraphVarImpl extends AbstractGraphVar<UndirectedGraph> im
         super(name, solver, LB, UB);
     }
 
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    @Override
-    public boolean removeEdge(int x, int y, ICause cause) throws ContradictionException {
+    public boolean removeNode(int x, ICause cause) throws ContradictionException {
         assert cause != null;
-        if (LB.containsEdge(x, y)) {
-            this.contradiction(cause, "remove mandatory edge");
+        assert (x >= 0 && x < n);
+        if (LB.getNodes().contains(x)) {
+            this.contradiction(cause, "remove mandatory node");
+            return true;
+        } else if (!UB.getNodes().contains(x)) {
             return false;
         }
-        if (UB.removeEdge(x, y)) {
+        ISet nei = UB.getNeighborsOf(x);
+        for (int i : nei) {
+            removeEdge(x, i, cause);
+        }
+        if (UB.removeNode(x)) {
             if (reactOnModification) {
-                delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
-                delta.add(y, GraphDelta.EDGE_REMOVED_HEAD, cause);
+                delta.add(x, GraphDelta.NODE_REMOVED, cause);
             }
-            GraphEventType e = GraphEventType.REMOVE_EDGE;
+            GraphEventType e = GraphEventType.REMOVE_NODE;
             notifyPropagators(e, cause);
             return true;
         }
-        return false;
-    }
-
-    @Override
-    public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
-        assert cause != null;
-        enforceNode(x, cause);
-        enforceNode(y, cause);
-        if (UB.containsEdge(x, y)) {
-            if (LB.addEdge(x, y)) {
-                if (reactOnModification) {
-                    delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
-                    delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
-                }
-                GraphEventType e = GraphEventType.ADD_EDGE;
-                notifyPropagators(e, cause);
-                return true;
-            }
-            return false;
-        }
-        this.contradiction(cause, "enforce edge which is not in the domain");
         return false;
     }
 }
