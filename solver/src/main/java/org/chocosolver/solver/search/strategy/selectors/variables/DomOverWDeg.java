@@ -85,15 +85,15 @@ public class DomOverWDeg extends AbstractCriterionBasedStrategy implements IMoni
     }
 
     @Override
-    protected double weight(IntVar v) {
-        int w = 1;
+    protected int weight(IntVar v) {
+        int w = 0;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
-            Propagator prop = v.getPropagator(i);
+            Propagator<?> prop = v.getPropagator(i);
             if (futVars(prop) > 1) {
                 w += p2w.get(prop.getId());
             }
         }
-        return w * 1.d / v.getDomainSize();
+        return w;
     }
 }

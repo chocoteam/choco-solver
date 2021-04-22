@@ -101,8 +101,8 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
     }
 
     @Override
-    protected double weight(IntVar v) {
-        double w = 1d;
+    protected int weight(IntVar v) {
+        int w = 0;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
             Propagator prop = v.getPropagator(i);
@@ -121,7 +121,7 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
                 }
             }
         }
-        return w / v.getDomainSize();
+        return w;
     }
 
 

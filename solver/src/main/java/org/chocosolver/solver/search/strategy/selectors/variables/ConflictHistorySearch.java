@@ -31,8 +31,8 @@ import org.chocosolver.solver.variables.IntVar;
  */
 @SuppressWarnings("rawtypes")
 public class ConflictHistorySearch
-    extends AbstractCriterionBasedStrategy
-    implements IMonitorContradiction, IMonitorRestart {
+        extends AbstractCriterionBasedStrategy
+        implements IMonitorContradiction, IMonitorRestart {
 
     /**
      * Decreasing step for {@link #a}.
@@ -66,7 +66,7 @@ public class ConflictHistorySearch
     @Override
     public boolean init() {
         Solver solver = vars[0].getModel().getSolver();
-        if(!solver.getSearchMonitors().contains(this)) {
+        if (!solver.getSearchMonitors().contains(this)) {
             vars[0].getModel().getSolver().plugMonitor(this);
         }
         return true;
@@ -75,7 +75,7 @@ public class ConflictHistorySearch
     @Override
     public void remove() {
         Solver solver = vars[0].getModel().getSolver();
-        if(solver.getSearchMonitors().contains(this)) {
+        if (solver.getSearchMonitors().contains(this)) {
             vars[0].getModel().getSolver().unplugMonitor(this);
         }
     }
@@ -99,8 +99,8 @@ public class ConflictHistorySearch
     }
 
     @Override
-    protected double weight(IntVar v) {
-        double w = 0.;
+    protected int weight(IntVar v) {
+        int w = 0;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
             Propagator prop = v.getPropagator(i);
@@ -108,7 +108,7 @@ public class ConflictHistorySearch
                 w += q.get(prop) + D;
             }
         }
-        return w / v.getDomainSize();
+        return w;
     }
 
     @Override

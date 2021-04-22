@@ -35,11 +35,11 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
     /***
      * Pointer to the last uninstantiated variable
      */
-    private IStateInt last;
+    private final IStateInt last;
     /**
      * The way value is selected for a given variable
      */
-    private IntValueSelector valueSelector;
+    private final IntValueSelector valueSelector;
     /**
      * Temporary. Stores index of variables with the same (best) score
      */
@@ -62,14 +62,14 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
     @Override
     public Decision<IntVar> getDecision() {
         IntVar best = null;
-        bests.resetQuick();
+                bests.resetQuick();
         pid2arity.clear();
         double w = 0.;
         int to = last.get();
         for (int idx = 0; idx <= to; idx++) {
             int dsize = vars[idx].getDomainSize();
             if (dsize > 1) {
-                double weight = weight(vars[idx]);
+                double weight = (weight(vars[idx])*1.d) / dsize;
                 if (w < weight) {
                     bests.resetQuick();
                     bests.add(idx);
@@ -105,9 +105,9 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
                         .makeIntEq(), currentVal);
     }
 
-    protected abstract double weight(IntVar v);
+    protected abstract int weight(IntVar v);
 
-    protected final int futVars(Propagator prop) {
+    protected final int futVars(Propagator<?> prop) {
         int pid = prop.getId();
         int futVars = pid2arity.get(pid);
         if (futVars == -1) {
@@ -116,7 +116,7 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
         return futVars;
     }
 
-    private int computeFutvars(Propagator prop, int pid) {
+    private int computeFutvars(Propagator<?> prop, int pid) {
         int futVars = 0;
         for (int i = 0; i < prop.getNbVars(); i++) {
             if (!prop.getVar(i).isInstantiated()) {
