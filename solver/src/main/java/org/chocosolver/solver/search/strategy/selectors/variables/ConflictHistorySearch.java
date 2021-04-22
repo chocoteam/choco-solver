@@ -13,12 +13,10 @@ import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
 /**
@@ -31,7 +29,7 @@ import org.chocosolver.solver.variables.IntVar;
  */
 @SuppressWarnings("rawtypes")
 public class ConflictHistorySearch
-        extends AbstractCriterionBasedStrategy
+        extends AbstractCriterionBasedVariableSelector
         implements IMonitorContradiction, IMonitorRestart {
 
     /**
@@ -57,26 +55,22 @@ public class ConflictHistorySearch
      */
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
-
-    public ConflictHistorySearch(IntVar[] vars, long seed, IntValueSelector valueSelector) {
-        super(vars, seed, valueSelector);
-        vars[0].getModel().getSolver().plugMonitor(this);
+    public ConflictHistorySearch(IntVar[] vars, long seed) {
+        super(vars, seed);
     }
 
     @Override
     public boolean init() {
-        Solver solver = vars[0].getModel().getSolver();
         if (!solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().plugMonitor(this);
+            solver.plugMonitor(this);
         }
         return true;
     }
 
     @Override
     public void remove() {
-        Solver solver = vars[0].getModel().getSolver();
         if (solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().unplugMonitor(this);
+            solver.unplugMonitor(this);
         }
     }
 

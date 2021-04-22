@@ -10,11 +10,9 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.IntMap;
 
@@ -30,7 +28,7 @@ import java.util.stream.Stream;
  * @since 12/07/12
  */
 @SuppressWarnings("rawtypes")
-public class DomOverWDeg extends AbstractCriterionBasedStrategy implements IMonitorContradiction {
+public class DomOverWDeg extends AbstractCriterionBasedVariableSelector implements IMonitorContradiction {
 
     /**
      * Map (propagator - weight), where weight is the number of times the propagator fails.
@@ -42,10 +40,9 @@ public class DomOverWDeg extends AbstractCriterionBasedStrategy implements IMoni
      *
      * @param variables     decision variables
      * @param seed          seed for breaking ties randomly
-     * @param valueSelector a value selector
      */
-    public DomOverWDeg(IntVar[] variables, long seed, IntValueSelector valueSelector) {
-        super(variables, seed, valueSelector);
+    public DomOverWDeg(IntVar[] variables, long seed) {
+        super(variables, seed);
         Model model = variables[0].getModel();
         p2w = new IntMap(10, 0);
         init(Stream.of(model.getCstrs())
@@ -61,18 +58,16 @@ public class DomOverWDeg extends AbstractCriterionBasedStrategy implements IMoni
 
     @Override
     public boolean init() {
-        Solver solver = vars[0].getModel().getSolver();
         if(!solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().plugMonitor(this);
+            solver.plugMonitor(this);
         }
         return true;
     }
 
     @Override
     public void remove() {
-        Solver solver = vars[0].getModel().getSolver();
         if(solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().unplugMonitor(this);
+            solver.unplugMonitor(this);
         }
     }
 

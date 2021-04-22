@@ -9,11 +9,9 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.HashMap;
@@ -27,7 +25,7 @@ import java.util.HashMap;
  * @since 12/06/20
  */
 @SuppressWarnings("rawtypes")
-public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IMonitorContradiction {
+public class DomOverWDegRef extends AbstractCriterionBasedVariableSelector implements IMonitorContradiction {
 
     /**
      * Map (propagator - weight), where weight is the number of times the propagator fails.
@@ -41,10 +39,9 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
      *
      * @param variables     decision variables
      * @param seed          seed for breaking ties randomly
-     * @param valueSelector a value selector
      */
-    public DomOverWDegRef(IntVar[] variables, long seed, IntValueSelector valueSelector) {
-        this(variables, seed, valueSelector, "CACD");
+    public DomOverWDegRef(IntVar[] variables, long seed) {
+        this(variables, seed, "CACD");
     }
 
     /**
@@ -52,29 +49,26 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
      *
      * @param variables     decision variables
      * @param seed          seed for breaking ties randomly
-     * @param valueSelector a value selector
      * @param incWeight     name of the weight incrementer to use (among: "ONE", "IA", "CA", "CD", "CACD")
      */
-    public DomOverWDegRef(IntVar[] variables, long seed, IntValueSelector valueSelector, String incWeight) {
-        super(variables, seed, valueSelector);
+    public DomOverWDegRef(IntVar[] variables, long seed, String incWeight) {
+        super(variables, seed);
         p2w = new HashMap<>(10);
         this.incWeight = IncWeight.valueOf(incWeight.toUpperCase());
     }
 
     @Override
     public boolean init() {
-        Solver solver = vars[0].getModel().getSolver();
         if (!solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().plugMonitor(this);
+            solver.plugMonitor(this);
         }
         return true;
     }
 
     @Override
     public void remove() {
-        Solver solver = vars[0].getModel().getSolver();
         if (solver.getSearchMonitors().contains(this)) {
-            vars[0].getModel().getSolver().unplugMonitor(this);
+            solver.unplugMonitor(this);
         }
     }
 

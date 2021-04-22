@@ -25,6 +25,7 @@ import org.chocosolver.solver.search.strategy.decision.DecisionMakerTest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
@@ -442,7 +443,7 @@ public class ObjectiveTest {
         solver.attach(solution);
         int[] t = new int[2];
 
-        solver.setSearch(new DomOverWDeg(ticks, 0L,
+        solver.setSearch(new IntStrategy(ticks, new DomOverWDeg(ticks, 0L),
             new IntDomainLast(solution, new IntDomainBest(),
             (x, v) -> {
                 int c = 0;

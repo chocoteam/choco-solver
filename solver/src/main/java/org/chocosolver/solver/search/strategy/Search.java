@@ -317,7 +317,7 @@ public class Search {
             model.getSolver().attach(model.getSolver().defaultSolution());
             valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
         }
-        return new DomOverWDeg(vars, 0, valueSelector);
+        return new IntStrategy(vars, new DomOverWDeg(vars, 0), valueSelector);
     }
 
     /**
@@ -331,7 +331,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return new DomOverWDeg(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDeg(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -344,7 +344,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
-        return new DomOverWDegRef(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDegRef(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -374,7 +374,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
-        return new ConflictHistorySearch(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new ConflictHistorySearch(vars, 0), new IntDomainMin());
     }
 
 
@@ -638,8 +638,8 @@ public class Search {
         CHS {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new ConflictHistorySearch(vars,
-                        solver.getModel().getSeed(),
+                return new IntStrategy(vars,
+                        new ConflictHistorySearch(vars,solver.getModel().getSeed()),
                         valueSelector.make(solver, last));
             }
         },
@@ -665,8 +665,8 @@ public class Search {
         DOMWDEG {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new DomOverWDeg(vars,
-                        solver.getModel().getSeed(),
+                return new IntStrategy(vars,
+                        new DomOverWDeg(vars, solver.getModel().getSeed()),
                         valueSelector.make(solver, last));
             }
         },
@@ -678,10 +678,9 @@ public class Search {
         DOMWDEGR {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new DomOverWDegRef(vars,
-                        solver.getModel().getSeed(),
-                        valueSelector.make(solver, last),
-                        "CACD");
+                return new IntStrategy(vars,
+                        new DomOverWDegRef(vars, solver.getModel().getSeed(), "CACD"),
+                        valueSelector.make(solver, last));
             }
         },
         /**
@@ -874,7 +873,7 @@ public class Search {
                     return MIN.make(solver, last);
                 }
                 Solution lastSol = solver.defaultSolution();
-                return last(solver,new IntDomainBest((v,i) -> lastSol.exists() && lastSol.getIntVal(v) == i), last);
+                return last(solver, new IntDomainBest((v, i) -> lastSol.exists() && lastSol.getIntVal(v) == i), last);
             }
         },
         /**

@@ -11,11 +11,8 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.IntMap;
 
@@ -26,50 +23,48 @@ import org.chocosolver.util.objects.IntMap;
  * @author Charles Prud'homme
  * @since 26/02/2020.
  */
-public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<IntVar> {
+public abstract class AbstractCriterionBasedVariableSelector implements VariableSelector<IntVar> {
 
     /**
      * Randomness to break ties
      */
-    private java.util.Random random;
+    private final java.util.Random random;
     /***
      * Pointer to the last uninstantiated variable
      */
     private final IStateInt last;
     /**
-     * The way value is selected for a given variable
-     */
-    private final IntValueSelector valueSelector;
-    /**
      * Temporary. Stores index of variables with the same (best) score
      */
-    private TIntArrayList bests = new TIntArrayList();
+    private final TIntArrayList bests = new TIntArrayList();
+    /**
+     * A reference to the Solver
+     */
+    protected final Solver solver;
 
     /**
      * Kind of duplicate of pid2ari to limit calls of backtrackable objects
      */
     IntMap pid2arity;
 
-    public AbstractCriterionBasedStrategy(IntVar[] vars, long seed,
-                                          IntValueSelector valueSelector) {
-        super(vars);
+    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed) {
         this.random = new java.util.Random(seed);
-        this.valueSelector = valueSelector;
+        this.solver = vars[0].getModel().getSolver();
         this.last = vars[0].getModel().getEnvironment().makeInt(vars.length - 1);
         pid2arity = new IntMap(vars[0].getModel().getCstrs().length * 3 / 2 + 1, -1);
     }
 
     @Override
-    public Decision<IntVar> getDecision() {
+    public IntVar getVariable(IntVar[] vars) {
         IntVar best = null;
-                bests.resetQuick();
+        bests.resetQuick();
         pid2arity.clear();
         double w = 0.;
         int to = last.get();
         for (int idx = 0; idx <= to; idx++) {
             int dsize = vars[idx].getDomainSize();
             if (dsize > 1) {
-                double weight = (weight(vars[idx])*1.d) / dsize;
+                double weight = (weight(vars[idx]) * 1.d) / dsize;
                 if (w < weight) {
                     bests.resetQuick();
                     bests.add(idx);
@@ -91,18 +86,7 @@ public abstract class AbstractCriterionBasedStrategy extends AbstractStrategy<In
             int currentVar = bests.get(random.nextInt(bests.size()));
             best = vars[currentVar];
         }
-        return computeDecision(best);
-    }
-
-    @Override
-    public Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.isInstantiated()) {
-            return null;
-        }
-        int currentVal = valueSelector.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath()
-                .makeIntDecision(variable, DecisionOperatorFactory
-                        .makeIntEq(), currentVal);
+        return best;
     }
 
     protected abstract int weight(IntVar v);

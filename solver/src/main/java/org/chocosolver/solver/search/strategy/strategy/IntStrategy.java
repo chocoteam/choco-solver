@@ -79,10 +79,15 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 
     @Override
     public boolean init() {
-        return true;
+        return variableSelector.init();
     }
 
-    @Override
+	@Override
+	public void remove() {
+		variableSelector.remove();
+	}
+
+	@Override
     public Decision<IntVar> computeDecision(IntVar variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;
