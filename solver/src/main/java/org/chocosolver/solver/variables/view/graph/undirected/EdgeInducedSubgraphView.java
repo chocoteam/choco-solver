@@ -40,7 +40,6 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     protected UndirectedGraphVar graphVar;
     protected boolean exclude;
-    protected ISet[] edges;
     protected ISet enforceNodes;
 
     /**
@@ -58,7 +57,6 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         this.exclude = exclude;
         this.graphVar = graphVar;
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
-        this.edges = UndirectedGraph.edgesArrayToEdgesSets(graphVar.getNbMaxNodes(), edges);
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), edges, exclude);
     }
