@@ -12,26 +12,22 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
-import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-
 /**
- * Test suite for UndirectedGraphVarImpl class
+ * Test suite for UndirectedNodeInducedGraphVarImpl class
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class UndirectedGraphVarImplTest {
+public class UndirectedNodeInducedGraphVarImplTest {
 
     /**
-     * Instantiate an UndirectedGraphVar and test the basic methods.
+     * Instantiate an UndirectedNodeInducedGraphVar and test the basic methods.
      */
     @Test(groups="1s", timeOut=60000)
     public void basicTest() {
@@ -39,23 +35,7 @@ public class UndirectedGraphVarImplTest {
         int n = 3;
         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
-        UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
-        int[] mandNeigZero = g.getMandatoryNeighborsOf(0).toArray();
-        int[] potNeigZero = g.getPotentialNeighborsOf(0).toArray();
-        int[] mandPredZero = g.getMandatoryPredecessorsOf(0).toArray();
-        int[] potPredZero = g.getPotentialPredecessorOf(0).toArray();
-        int[] mandSuccZero = g.getMandatorySuccessorsOf(0).toArray();
-        int[] potSuccZero = g.getPotentialSuccessorsOf(0).toArray();
-        Arrays.sort(mandNeigZero);
-        Arrays.sort(potNeigZero);
-        Arrays.sort(mandPredZero);
-        Arrays.sort(potPredZero);
-        Arrays.sort(mandSuccZero);
-        Arrays.sort(potSuccZero);
-        Assert.assertTrue(Arrays.equals(g.getMandatoryPredecessorsOf(0).toArray(), mandNeigZero));
-        Assert.assertTrue(Arrays.equals(g.getMandatorySuccessorsOf(0).toArray(), mandNeigZero));
-        Assert.assertTrue(Arrays.equals(g.getPotentialPredecessorOf(0).toArray(), potNeigZero));
-        Assert.assertTrue(Arrays.equals(g.getPotentialSuccessorsOf(0).toArray(), potNeigZero));
+        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
         ICause fakeCause = new ICause() {};
         try {
             g.instantiateTo(UB, fakeCause);
@@ -72,17 +52,18 @@ public class UndirectedGraphVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateAndGenerate() {
         Model m = new Model();
-        int n = 3;
+        int n = 10;
         for (SetType nodeSetType : SetType.values()) {
             if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
                     if (!arcSetType.name().contains("FIXED") && !arcSetType.name().contains("DYNAMIC")) {
                         UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, nodeSetType, arcSetType);
                         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, nodeSetType, arcSetType, false);
-                        UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+                        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
                         Assert.assertFalse(g.isDirected());
-                        while (m.getSolver().solve()) ;
-                        Assert.assertEquals(18, m.getSolver().getSolutionCount());
+                        while (m.getSolver().solve());
+                        // There are exactly 2^n node-induced subgraphs of a graph with n nodes.
+                        Assert.assertEquals(m.getSolver().getSolutionCount(), Math.pow(2, n));
                     }
                 }
             }
@@ -96,7 +77,7 @@ public class UndirectedGraphVarImplTest {
     @Test(groups="1s", timeOut=60000)
     public void testInstantiateAndGenerateTwo() {
         Model m = new Model();
-        int n = 3;
+        int n = 6;
         for (SetType nodeSetType : SetType.values()) {
             if(!nodeSetType.name().contains("FIXED") && !nodeSetType.name().contains("DYNAMIC")) {
                 for (SetType arcSetType : SetType.values()) {
@@ -105,13 +86,37 @@ public class UndirectedGraphVarImplTest {
                         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(m, n, nodeSetType, arcSetType);
                         UndirectedGraph UB1 = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, nodeSetType, arcSetType, false);
                         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, nodeSetType, arcSetType, false);
-                        UndirectedGraphVar g1 = new UndirectedGraphVarImpl("g1", m, LB1, UB1);
-                        UndirectedGraphVar g2 = new UndirectedGraphVarImpl("g2", m, LB2, UB2);
+                        UndirectedGraphVar g1 = m.nodeInducedGraphVar("g1", LB1, UB1);
+                        UndirectedGraphVar g2 = m.nodeInducedGraphVar("g2", LB2, UB2);
                         while (m.getSolver().solve()) ;
-                        Assert.assertEquals(18 * 18, m.getSolver().getSolutionCount());
+                        Assert.assertEquals(Math.pow(2, n) * Math.pow(2, n), m.getSolver().getSolutionCount());
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Instantiate a node-induced graph with a value which is not a node-induced subgraph of the envelope
+     * and assert that is fails.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testForbiddenInstantiation() {
+        Model m = new Model();
+        int n = 5;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
+        UndirectedGraph wrongValue = GraphFactory.makeUndirectedGraph(
+                n, SetType.BITSET, SetType.BITSET,
+                new int[] {0, 1, 2},
+                new int[][] { {0, 1} }
+        );
+        try {
+            g.instantiateTo(wrongValue, new ICause() {});
+            Assert.fail();
+        } catch (ContradictionException e) {
+            // OK
         }
     }
 
@@ -121,13 +126,39 @@ public class UndirectedGraphVarImplTest {
         int n = 3;
         UndirectedGraph LB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
-        UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
+        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
         Assert.assertTrue(g.isInstantiated());
         UndirectedGraph gval = g.getValue();
         Assert.assertEquals(gval.getNodes().size(), 3);
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
-        UndirectedGraphVar g2 = new UndirectedGraphVarImpl("g2", m, LB2, UB2);
+        UndirectedGraphVar g2 = m.nodeInducedGraphVar("g2", LB2, UB2);
         Assert.assertFalse(g2.isInstantiated());
+    }
+
+    /**
+     * Test a basic constrained problem (connectedness) for which the number of solutions can be counted and
+     * ensure that every solution is found.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testUseCase() {
+        Model m = new Model();
+        int n = 4;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        UB.removeEdge(0, 3); UB.removeEdge(1, 2);
+        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
+        m.connected(g).post();
+        while (m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 14);
+        // Test with a general graph var.
+        m = new Model();
+        LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        UB.removeEdge(0, 3); UB.removeEdge(1, 2);
+        g = m.graphVar("g", LB, UB);
+        m.connected(g).post();
+        while (m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 18);
     }
 }
