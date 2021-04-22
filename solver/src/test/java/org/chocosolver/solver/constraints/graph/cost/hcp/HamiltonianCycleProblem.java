@@ -31,7 +31,7 @@ import org.testng.annotations.Test;
  */
 public class HamiltonianCycleProblem {
 
-    @Test(groups = "10", timeOut = 60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testHCP() {
         // TSPLIB HCP Instance (see http://comopt.ifi.uni-heidelberg.de/software/TSPLIB95/)
         String inst = getClass().getResource("alb1000.hcp").getPath();

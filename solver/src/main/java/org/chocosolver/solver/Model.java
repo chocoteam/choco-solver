@@ -20,7 +20,6 @@ import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -574,32 +573,6 @@ public class Model implements IModel {
             SatConstraint minisat = (SatConstraint) getHook(MINISAT_HOOK_NAME);
             unpost(minisat);
             removeHook(MINISAT_HOOK_NAME);
-        }
-    }
-
-    /**
-     * Return a constraint embedding a nogood store (based on a sat model).
-     * A call to this method will create and post the constraint if it does not exist already.
-     *
-     * @return the no good constraint
-     */
-    public NogoodConstraint getNogoodStore() {
-        if (getHook(NOGOODS_HOOK_NAME) == null) {
-            NogoodConstraint nogoods = new NogoodConstraint(this);
-            nogoods.post();
-            addHook(NOGOODS_HOOK_NAME, nogoods);
-        }
-        return (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
-    }
-
-    /**
-     * Unpost nogood store constraint from model, if any.
-     */
-    public void removeNogoodStore() {
-        if (getHook(NOGOODS_HOOK_NAME) != null) {
-            NogoodConstraint nogoods = (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
-            unpost(nogoods);
-            removeHook(NOGOODS_HOOK_NAME);
         }
     }
 
