@@ -85,7 +85,7 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
             Propagator<IntVar> p = (Propagator<IntVar>) cex.c;
             double[] weigths = p2w.computeIfAbsent(p.getId(), k -> new double[p.getNbVars()]);
             if (p.getNbVars() >= weigths.length) {
-                // may happen propagators (like PropNogoods) with dynamic variable addition
+                // may happen propagators (like PropSat) with dynamic variable addition
                 double[] nws = new double[p.getNbVars()];
                 System.arraycopy(weigths, 0, nws, 0, weigths.length);
                 p2w.replace(p.getId(), nws);
@@ -111,7 +111,7 @@ public class DomOverWDegRef extends AbstractCriterionBasedStrategy implements IM
                 if (ws != null) {
                     int idx = v.getIndexInPropagator(i);
                     if (idx >= ws.length) {
-                        // may happen propagators (like PropNogoods) with dynamic variable addition
+                        // may happen propagators (like PropSat) with dynamic variable addition
                         double[] nws = new double[prop.getNbVars()];
                         System.arraycopy(ws, 0, nws, 0, ws.length);
                         p2w.replace(prop.getId(), nws);

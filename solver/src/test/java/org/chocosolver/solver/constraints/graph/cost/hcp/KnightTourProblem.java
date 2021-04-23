@@ -34,7 +34,7 @@ import org.testng.annotations.Test;
  */
 public class KnightTourProblem {
 
-    @Test(groups = "10", timeOut = 60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testKnightTourProblem() {
         boolean[][] matrix;
         boolean closedTour = true; //Open tour (path instead of cycle)
