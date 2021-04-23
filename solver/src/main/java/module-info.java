@@ -23,7 +23,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.memory.structure;
 
     exports org.chocosolver.cutoffseq;
-
+    exports org.chocosolver.sat;
     exports org.chocosolver.solver;
     exports org.chocosolver.solver.learn;
     exports org.chocosolver.solver.constraints;
@@ -55,7 +55,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.nary.globalcardinality;
     exports org.chocosolver.solver.constraints.nary.lex;
     exports org.chocosolver.solver.constraints.nary.min_max;
-    exports org.chocosolver.solver.constraints.nary.nogood;
     exports org.chocosolver.solver.constraints.nary.nvalue;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.rules;
@@ -125,7 +124,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.tools;
 
     requires trove4j;
-    requires org.chocosolver.sat;
     requires org.jgrapht.core;
     requires cpprof.java;
     requires java.desktop;

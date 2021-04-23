@@ -1,0 +1,15 @@
+#name,sat,nodes,fails
+hole1.cnf,false
+hole2.cnf,false
+hole3.cnf,false
+hole4.cnf,false
+hole5.cnf,false
+hole6.cnf,false
+hole7.cnf,false
+par8-1-c.cnf,true
+quinn.cnf,true
+zebra_v155_c1135.cnf,true
+ais6.cnf,true
+qg1-07.cnf,true
+bmc-ibm-2.cnf,true
+aim-50-1_6-yes1-4.cnf,true

@@ -145,7 +145,7 @@ public class DirectedGraphVarImplTest {
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
         DirectedGraphVar g = new DirectedGraphVarImpl("g", m, LB, UB);
         Assert.assertTrue(g.isInstantiated());
-        DirectedGraph gval = (DirectedGraph) g.getValue();
+        DirectedGraph gval = g.getValue();
         Assert.assertEquals(gval.getNodes().size(), 3);
         DirectedGraph LB2 = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);

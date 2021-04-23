@@ -123,7 +123,7 @@ public class UndirectedGraphVarImplTest {
         UndirectedGraph UB = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
         UndirectedGraphVar g = new UndirectedGraphVarImpl("g", m, LB, UB);
         Assert.assertTrue(g.isInstantiated());
-        UndirectedGraph gval = (UndirectedGraph) g.getValue();
+        UndirectedGraph gval = g.getValue();
         Assert.assertEquals(gval.getNodes().size(), 3);
         UndirectedGraph LB2 = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
         UndirectedGraph UB2 = GraphFactory.makeCompleteStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);

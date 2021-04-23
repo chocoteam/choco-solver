@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.bitset;
 
+import org.chocosolver.util.objects.setDataStructures.AbstractSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -21,7 +22,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_BitSet implements ISet {
+public class Set_BitSet extends AbstractSet {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -89,6 +90,7 @@ public class Set_BitSet implements ISet {
 		}else{
 			card++;
 			values.set(element-offset);
+			notifyObservingElementAdded(element);
 			return true;
 		}
 	}
@@ -98,6 +100,7 @@ public class Set_BitSet implements ISet {
 		if(contains(element)) {
 			values.clear(element - offset);
 			card--;
+			notifyObservingElementRemoved(element);
 			return true;
 		}else{
 			return false;
@@ -118,6 +121,7 @@ public class Set_BitSet implements ISet {
 	public void clear() {
 		card = 0;
 		values.clear();
+		notifyObservingCleared();
 	}
 
 	@Override
