@@ -103,7 +103,7 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
         if (enforceNodes.contains(node)) {
             contradiction(this, "Try to remove mandatory node");
         }
-        return true;
+        return !getPotentialNodes().contains(node);
     }
 
     @Override
