@@ -16,13 +16,14 @@
 
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.assignments.GraphAssignment;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
 import org.chocosolver.solver.search.strategy.decision.GraphDecision;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphEdgesOnly;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-public class GraphSearch extends GraphStrategy {
+public class GraphCostBasedSearch extends GraphStrategy {
 
 
     //***********************************************************************************
@@ -44,18 +45,19 @@ public class GraphSearch extends GraphStrategy {
     private int n;
     private int mode;
     private int[][] costs;
-    private GraphAssignment decisionType;
+    private GraphDecisionOperator decisionType;
     private int from, to;
     private int value;
     private boolean useLC;
     private int lastFrom = -1;
+    private GraphVar g;
 
     /**
      * Search strategy for graphs
      *
      * @param graphVar varriable to branch on
      */
-    public GraphSearch(GraphVar graphVar) {
+    public GraphCostBasedSearch(GraphVar graphVar) {
         this(graphVar, null);
     }
 
@@ -65,9 +67,10 @@ public class GraphSearch extends GraphStrategy {
      * @param graphVar   varriable to branch on
      * @param costMatrix can be null
      */
-    public GraphSearch(GraphVar graphVar, int[][] costMatrix) {
-        super(graphVar, null, null, NodeEdgePriority.EDGES);
+    public GraphCostBasedSearch(GraphVar graphVar, int[][] costMatrix) {
+        super(new GraphVar[] {graphVar}, null, new GraphEdgesOnly(),null, null, true);
         costs = costMatrix;
+        this.g = graphVar;
         n = g.getNbMaxNodes();
     }
 
@@ -76,7 +79,7 @@ public class GraphSearch extends GraphStrategy {
      *
      * @param policy way to select arcs
      */
-    public GraphSearch configure(int policy) {
+    public GraphCostBasedSearch configure(int policy) {
         return configure(policy, true);
     }
 
@@ -87,17 +90,17 @@ public class GraphSearch extends GraphStrategy {
      * @param enforce true if a decision is an arc enforcing
      *                false if a decision is an arc removal
      */
-    public GraphSearch configure(int policy, boolean enforce) {
+    public GraphCostBasedSearch configure(int policy, boolean enforce) {
         if (enforce) {
-            decisionType = GraphAssignment.graph_enforcer;
+            decisionType = DecisionOperatorFactory.makeGraphEnforce();
         } else {
-            decisionType = GraphAssignment.graph_remover;
+            decisionType = DecisionOperatorFactory.makeGraphRemove();
         }
         mode = policy;
         return this;
     }
 
-    public GraphSearch useLastConflict() {
+    public GraphCostBasedSearch useLastConflict() {
         useLC = true;
         return this;
     }
@@ -107,12 +110,8 @@ public class GraphSearch extends GraphStrategy {
         if (g.isInstantiated()) {
             return null;
         }
-        GraphDecision dec = pool.getE();
-        if (dec == null) {
-            dec = new GraphDecision(pool);
-        }
         computeNextArc();
-        dec.setEdge(g, from, to, decisionType);
+        GraphDecision dec = g.getModel().getSolver().getDecisionPath().makeGraphEdgeDecision(g, decisionType, from, to);
         lastFrom = from;
         return dec;
     }

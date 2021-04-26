@@ -16,7 +16,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.loop.lns.neighbors.IntNeighbor;
-import org.chocosolver.solver.search.strategy.strategy.GraphSearch;
+import org.chocosolver.solver.search.strategy.strategy.GraphCostBasedSearch;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -82,7 +82,7 @@ public class TSP_lns {
         model.tsp(graph, totalCost, costMatrix, 2).post();
 
         // intuitive heuristic (cheapest edges first)
-        final GraphSearch search = new GraphSearch(graph, costMatrix).configure(GraphSearch.MIN_COST);
+        final GraphCostBasedSearch search = new GraphCostBasedSearch(graph, costMatrix).configure(GraphCostBasedSearch.MIN_COST);
         Solver solver = model.getSolver();
         solver.setSearch(search);
         solver.limitTime(LIMIT+"s");
@@ -94,7 +94,7 @@ public class TSP_lns {
         model.setObjective(Model.MINIMIZE, totalCost);
 
         while (solver.solve()){
-            search.configure(GraphSearch.MIN_DELTA_DEGREE);
+            search.configure(GraphCostBasedSearch.MIN_DELTA_DEGREE);
             System.out.println("solution found : " + totalCost);
             bestSolutionValue = totalCost.getValue();
         }
