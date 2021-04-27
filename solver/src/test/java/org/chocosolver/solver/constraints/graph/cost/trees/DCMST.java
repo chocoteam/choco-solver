@@ -14,7 +14,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.search.strategy.strategy.GraphSearch;
+import org.chocosolver.solver.search.strategy.strategy.GraphCostBasedSearch;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -79,14 +79,14 @@ public class DCMST {
         // degree constrained-minimum spanning tree constraint
         model.dcmst(graph,degrees,totalCost,dist,2).post();
 
-        final GraphSearch mainSearch = new GraphSearch(graph, dist);
+        final GraphCostBasedSearch mainSearch = new GraphCostBasedSearch(graph, dist);
         // find the first solution by selecting cheap edges
-        mainSearch.configure(GraphSearch.MIN_COST);
+        mainSearch.configure(GraphCostBasedSearch.MIN_COST);
         Solver s = model.getSolver();
         // then select the most expensive ones (fail first principle, with last conflict)
         s.plugMonitor((IMonitorSolution) () -> {
             mainSearch.useLastConflict();
-            mainSearch.configure(GraphSearch.MIN_P_DEGREE);
+            mainSearch.configure(GraphCostBasedSearch.MIN_P_DEGREE);
             System.out.println("Solution found : "+totalCost);
         });
         // bottom-up optimization : find a first solution then reach the global minimum from below

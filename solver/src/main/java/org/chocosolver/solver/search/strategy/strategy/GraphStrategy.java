@@ -9,155 +9,61 @@
  */
 package org.chocosolver.solver.search.strategy.strategy;
 
-import org.chocosolver.solver.search.strategy.assignments.GraphAssignment;
-import org.chocosolver.solver.search.strategy.decision.GraphDecision;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphLexEdge;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphRandomEdge;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphLexNode;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphRandomNode;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphEdgeSelector;
-import org.chocosolver.solver.search.strategy.selectors.values.GraphNodeSelector;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphNodeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.VariableSelector;
 import org.chocosolver.solver.variables.GraphVar;
-import org.chocosolver.util.PoolManager;
 
 /**
- * <br/>
+ * @author Dimitri Justeau-Allaire
+ * @since 19/04/2021
  *
- * @author Jean-Guillaume Fages
- * @since 1 April 2011
+ * Strategy for branching on graph variables, replacement of choco-graph's original
+ * implementation for a consistent design with other variables' kinds strategies.
  */
 public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
-    //***********************************************************************************
-    // VARIABLES
-    //***********************************************************************************
+    protected VariableSelector<GraphVar> varSelector;
 
-    protected GraphVar g;
-    protected GraphNodeSelector nodeStrategy;
-    protected GraphEdgeSelector edgeStrategy;
-    protected NodeEdgePriority priority;
-    protected PoolManager<GraphDecision> pool;
+    private GraphNodeOrEdgeSelector nodeOrEdgeSelector;
 
-    public enum NodeEdgePriority {
-        NODES_THEN_EDGES,
-        EDGES
-    }
+    protected GraphNodeSelector nodeSelector;
 
-    //***********************************************************************************
-    // CONSTRUCTORS
-    //***********************************************************************************
+    protected GraphEdgeSelector edgeSelector;
 
-    /**
-     * Dedicated graph branching strategy.
-     *
-     * @param g        a graph variable to branch on
-     * @param ns       strategy over nodes
-     * @param as       strategy over edges
-     * @param priority enables to mention if it should first branch on nodes
-     */
-    public GraphStrategy(GraphVar g, GraphNodeSelector ns, GraphEdgeSelector as, NodeEdgePriority priority) {
-        super(g);
-        this.g = g;
-        this.nodeStrategy = ns;
-        this.edgeStrategy = as;
-        this.priority = priority;
-        pool = new PoolManager<>();
-    }
+    protected GraphDecisionOperator operator;
 
-    /**
-     * Lexicographic graph branching strategy.
-     * Branch on nodes then edges.
-     * <br>
-     * <br> node branching:
-     * Let i be the first node such that
-     * i in envelope(g) and i not in kernel(g).
-     * The decision adds i to the kernel of g.
-     * It is fails, then i is removed from the envelope of g.
-     * <br>
-     * edge branching:
-     * <br> node branching:
-     * Let (i,j) be the first edge such that
-     * (i,j) in envelope(g) and (i,j) not in kernel(g).
-     * The decision adds (i,j) to the kernel of g.
-     * It is fails, then (i,j) is removed from the envelope of g
-     *
-     * @param g a graph variable to branch on
-     */
-    public GraphStrategy(GraphVar g) {
-        this(g, new GraphLexNode(g), new GraphLexEdge(g), NodeEdgePriority.NODES_THEN_EDGES);
-    }
-
-    /**
-     * Random graph branching strategy.
-     * Alternate randomly node and edge decisions.
-     * <br>
-     * <br> node branching:
-     * Let i be a randomly selected node such that
-     * i in envelope(g) and i not in kernel(g).
-     * The decision adds i to the kernel of g.
-     * It is fails, then i is removed from the envelope of g.
-     * <br>
-     * edge branching:
-     * <br> node branching:
-     * Let (i,j) be a randomly selected edge such that
-     * (i,j) in envelope(g) and (i,j) not in kernel(g).
-     * The decision adds (i,j) to the kernel of g.
-     * It is fails, then (i,j) is removed from the envelope of g
-     *
-     * @param g    a graph variable to branch on
-     * @param seed randomness seed
-     */
-    public GraphStrategy(GraphVar g, long seed) {
-        this(g, new GraphRandomNode(g, seed), new GraphRandomEdge(g, seed), NodeEdgePriority.NODES_THEN_EDGES);
-    }
-
-    //***********************************************************************************
-    // METHODS
-    //***********************************************************************************
-
-    @Override
-    public boolean init() {
-        return true;
+    public GraphStrategy(GraphVar[] scope, VariableSelector<GraphVar> varSelector, GraphNodeOrEdgeSelector nodeOrEdgeSelector, GraphNodeSelector nodeSelector, GraphEdgeSelector edgeSelector, boolean enforceFirst) {
+        super(scope);
+        this.varSelector = varSelector;
+        this.nodeOrEdgeSelector = nodeOrEdgeSelector;
+        this.nodeSelector = nodeSelector;
+        this.edgeSelector = edgeSelector;
+        this.operator = enforceFirst ? DecisionOperatorFactory.makeGraphEnforce() : DecisionOperatorFactory.makeGraphRemove();
     }
 
     @Override
-    public GraphDecision getDecision() {
-        if (g.isInstantiated()) {
+    public Decision<GraphVar> getDecision() {
+        GraphVar variable = varSelector.getVariable(vars);
+        return computeDecision(variable);
+    }
+
+    @Override
+    public Decision<GraphVar> computeDecision(GraphVar g) {
+        if (g == null) {
             return null;
         }
-        GraphDecision dec = pool.getE();
-        if (dec == null) {
-            dec = new GraphDecision(pool);
+        assert !g.isInstantiated();
+        if (nodeOrEdgeSelector.nextIsNode(g)) {
+            return g.getModel().getSolver().getDecisionPath().makeGraphNodeDecision(g, operator, nodeSelector.selectNode(g));
+        } else {
+            int[] edge = edgeSelector.selectEdge(g);
+            assert edge.length == 2;
+            return g.getModel().getSolver().getDecisionPath().makeGraphEdgeDecision(g, operator, edge[0], edge[1]);
         }
-        switch (priority) {
-            case NODES_THEN_EDGES:
-                int node = nextNode();
-                if (node != -1) {
-                    dec.setNode(g, node, GraphAssignment.graph_enforcer);
-                } else {
-                    if (edgeStrategy == null) {
-                        return null;
-                    }
-                    nextEdge();
-                    dec.setEdge(g, edgeStrategy.getFrom(), edgeStrategy.getTo(), GraphAssignment.graph_enforcer);
-                }
-                break;
-            case EDGES:
-            default:
-                if (!nextEdge()) {
-                    return null;
-                }
-                dec.setEdge(g, edgeStrategy.getFrom(), edgeStrategy.getTo(), GraphAssignment.graph_enforcer);
-                break;
-        }
-        return dec;
-    }
-
-    public int nextNode() {
-        return nodeStrategy.nextNode();
-    }
-
-    public boolean nextEdge() {
-        return edgeStrategy.computeNextEdge();
     }
 }
