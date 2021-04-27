@@ -13,7 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
-import org.chocosolver.solver.search.strategy.strategy.GraphSearch;
+import org.chocosolver.solver.search.strategy.strategy.GraphCostBasedSearch;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -55,7 +55,7 @@ public class HamiltonianCycleProblem {
 
 
         Solver solver = model.getSolver();
-        solver.setSearch(new GraphSearch(graph).configure(GraphSearch.MIN_P_DEGREE).useLastConflict());
+        solver.setSearch(new GraphCostBasedSearch(graph).configure(GraphCostBasedSearch.MIN_P_DEGREE).useLastConflict());
         solver.limitTime("10s");
         solver.showStatistics();
         // restart search every 100 fails
