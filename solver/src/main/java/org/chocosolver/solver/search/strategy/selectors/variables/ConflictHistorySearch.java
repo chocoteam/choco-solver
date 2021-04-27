@@ -14,10 +14,11 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
+
+import java.util.stream.Stream;
 
 /**
  * Source: "Conflict History Based Branching Heuristic for CSP Solving", Habet and Terrioux.
@@ -30,14 +31,20 @@ import org.chocosolver.solver.variables.IntVar;
 @SuppressWarnings("rawtypes")
 public class ConflictHistorySearch
         extends AbstractCriterionBasedVariableSelector
-        implements IMonitorContradiction, IMonitorRestart {
+        implements IMonitorRestart {
 
     /**
-     * Decreasing step for {@link #a}.
+     * Related to CHS,
+     * Bottom alpha limit
+     */
+    private static final double ALPHA_LIMIT = 0.06;
+    /**
+     * Decreasing step for {@link #alpha}.
      */
     private static final double STEP = 10e-6;
     private static final double D = 10e-4;
     private static final double DECAY = .995;
+
     /**
      * Score of each propagator.
      */
@@ -45,11 +52,7 @@ public class ConflictHistorySearch
     /**
      * Step-size, 0 < a < 1.
      */
-    private double a = .4d;
-    /**
-     * The number of conflicts which have occurred since the beginning of the search.
-     */
-    private int conflicts = 0;
+    private double alpha = .4d;
     /**
      * Last {@link #conflicts} value where a propagator led to a failure.
      */
@@ -74,35 +77,33 @@ public class ConflictHistorySearch
         }
     }
 
-
     @Override
-    public void onContradiction(ContradictionException cex) {
-        if (cex.c instanceof Propagator) {
-            Propagator p = (Propagator) cex.c;
-            double qj = q.get(p);
-            // compute the reward
-            double r = 1d / (conflicts - conflict.get(p) + 1);
-            // update q
-            q.put(p, (1 - a) * qj + a * r);
-            // decrease a
-            a = Math.max(0.06, a - STEP);
-            // update conflicts
-            conflict.put(p, conflicts);
-            conflicts++;
-        }
-    }
-
-    @Override
-    protected int weight(IntVar v) {
-        int w = 0;
+    protected double weight(IntVar v) {
+        double w = 0.;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
-            Propagator prop = v.getPropagator(i);
-            if (futVars(prop) > 1) {
-                w += q.get(prop) + D;
+            Propagator<?> prop = v.getPropagator(i);
+            long fut = Stream.of(prop.getVars())
+                    .filter(Variable::isInstantiated)
+                    .limit(2)
+                    .count();
+            if (fut > 1) {
+                w += refinedWeights.get(prop)[0] + D;
             }
         }
         return w;
+    }
+
+    @Override
+    void increase(Propagator<?> prop, Element elt, double[] ws) {
+        // for CHS, 0 stores the scoring
+        // compute the reward
+        double r = 1d / (conflicts - elt.ws[2] + 1);
+        // update q
+        ws[0] = (1 - alpha) * ws[0] + alpha * r;
+        // decrease a
+        alpha = Math.max(ALPHA_LIMIT, alpha - STEP);
+        elt.ws[2] = conflicts;
     }
 
     @Override
@@ -111,6 +112,6 @@ public class ConflictHistorySearch
             double qj = q.get(p);
             q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
         }
-        a = .4d;
+        alpha = .4d;
     }
 }

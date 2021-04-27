@@ -679,7 +679,7 @@ public class Search {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDegRef(vars, solver.getModel().getSeed(), "CACD"),
+                        new DomOverWDegRef(vars, solver.getModel().getSeed()),
                         valueSelector.make(solver, last));
             }
         },

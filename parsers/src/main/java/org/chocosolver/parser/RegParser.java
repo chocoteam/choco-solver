@@ -236,7 +236,8 @@ public abstract class RegParser implements IParser {
             // do not enumerate on the complementary search (greedy assignment)
             if (k > 0) {
                 solver.setSearch(solver.getSearch(),
-                        Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        //Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        Search.inputOrderLBSearch(Arrays.copyOf(ovars, k)));
             }
         }
     }
