@@ -291,5 +291,9 @@ public class EnvironmentTrailing extends AbstractEnvironment {
     public void save(IOperation oldValue) {
         getOperationTrail().savePreviousState(oldValue);
     }
+
+    public void saveAt(IOperation oldValue, int at) {
+        getOperationTrail().savePreviousStateAt(oldValue, at, this.getWorldIndex());
+    }
 }
 

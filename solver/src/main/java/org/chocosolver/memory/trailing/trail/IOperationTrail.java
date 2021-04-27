@@ -20,5 +20,7 @@ import org.chocosolver.memory.structure.IOperation;
  */
 public interface IOperationTrail extends IStorage {
 
-    void savePreviousState(IOperation oldValue);
+    void savePreviousState(IOperation operation);
+
+    void savePreviousStateAt(IOperation operation, int at, int currentWorldIndex);
 }
