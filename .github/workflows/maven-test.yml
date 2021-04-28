@@ -10,13 +10,13 @@ on:
     branches: [ master ]
 
 jobs:
-  tests:
+  test-suite:
     runs-on: ubuntu-latest
     # Tests matrix
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex" ]
+        group: [ "dimacs" ]
 
     # The different steps
     steps:
@@ -46,11 +46,12 @@ jobs:
 
       # upload jacoco-csv files
       - name: Prepare upload
-        run: |
-          mkdir -p jacoco/
-          cp -p solver/target/site/jacoco/jacoco.csv jacoco/solver-${{ matrix.group }}.csv 2>/dev/null
-          cp -p parser/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv 2>/dev/null
+        run: mkdir -p jacoco/
+      - run: cp solver/target/site/jacoco/jacoco.csv jacoco/solver-${{ matrix.group }}.csv 2>/dev/null
+      - run: cp parser/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv 2>/dev/null
+        if: ${{ always() }}
       - name: Upload jacoco-csv files
+        if: ${{ always() }}
         uses: actions/upload-artifact@master
         with:
           name: ${{ matrix.group }}
@@ -60,7 +61,7 @@ jobs:
           if-no-files-found: ignore
 
   coverage:
-    needs: [ tests ]
+    needs: [ test-suite ]
     runs-on: ubuntu-latest
     steps:
       # Download jacoco-csv files
