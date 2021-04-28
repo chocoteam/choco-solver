@@ -47,10 +47,8 @@ jobs:
       # upload jacoco-csv files
       - name: Prepare upload
         run: mkdir -p jacoco/
-      - run: pwd
-      - run: ls -l
-      - run: cp solver/target/site/jacoco/jacoco.csv jacoco/solver-${{ matrix.group }}.csv
-      - run: cp parsers/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv
+      - run: cp ./solver/target/site/jacoco/jacoco.csv ./jacoco/solver-${{ matrix.group }}.csv
+      - run: cp ./parsers/target/site/jacoco/jacoco.csv ./jacoco/parsers-${{ matrix.group }}.csv
         if: ${{ always() }}
       - name: Upload jacoco-csv files
         if: ${{ always() }}
