@@ -11,49 +11,80 @@ on:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest
     # Tests matrix
     strategy:
       #fail-fast: false
       matrix:
-        group: ["1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex"]
+        group: [ "1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex" ]
 
     # The different steps
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'adopt'
 
-    # Caching deps
-    - name: Cache Maven packages
-      uses: actions/cache@v2
-      with:
-        path: ~/.m2
-        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-        restore-keys: ${{ runner.os }}-m2
+      # Caching deps
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
 
-    # Install Ibex
-    - name: Install Ibex
-      if: ${{ matrix.group }} == "ibex"
-      run: sh scripts/install-ibex.sh
+      # Install Ibex
+      - name: Install Ibex
+        if: ${{ matrix.group }} == "ibex"
+        run: sh scripts/install-ibex.sh
 
-    # Regression tests
-    - name: Test ${{ matrix.group }} 
-      run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+      # Regression tests
+      - name: Test ${{ matrix.group }}
+        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
-    - name: Generate JaCoCo Badge
-      id: jacoco
-      uses: cicirello/jacoco-badge-generator@v2.1.0
-      with:
-        generate-branches-badge: true
-        jacoco-csv-file: >
-          solver/target/site/jacoco/jacoco.csv
-          parsers/target/site/jacoco/jacoco.csv
+      # upload jacoco-csv files
+      - name: Prepare upload
+        run: |
+          mkdir -p jacoco/
+          cp -p solver/target/site/jacoco/jacoco.csv jacoco/solver-${{ matrix.group }}.csv 2>/dev/null
+          cp -p parser/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv 2>/dev/null
+      - name: Upload jacoco-csv files
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ matrix.group }}
+          path: |
+            jacoco/solver-${{ matrix.group }}.csv
+            jacoco/parsers-${{ matrix.group }}.csv
+          if-no-files-found: ignore
 
-    - name: Log coverage percentage
-      run: |
-        echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
-        echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      # Download jacoco-csv files
+      - uses: actions/download-artifact@v2
+      - name: Download jacoco-csv files
+        with:
+          path: jacoco/
+
+      - name: Generate JaCoCo Badge
+        id: jacoco
+        uses: cicirello/jacoco-badge-generator@v2.1.0
+        with:
+          generate-branches-badge: true
+          jacoco-csv-file: >
+            jacoco/solver-1s.csv
+            jacoco/parser-1s.csv
+            jacoco/solver-10s.csv
+            jacoco/solver-checker.csv
+            jacoco/solver-ibex.csv
+            jacoco/parser-mzn.csv
+            jacoco/parser-xcsp.csv
+            jacoco/parser-mps.csv
+            jacoco/parser-dimacs.csv
+
+      - name: Log coverage percentage
+        run: |
+          echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+          echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
