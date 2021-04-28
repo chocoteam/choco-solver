@@ -37,7 +37,7 @@ jobs:
 
       # Install Ibex
       - name: Install Ibex
-        if: ${{ matrix.group == "ibex"}}
+        if: matrix.group == 'ibex'
         run: sh scripts/install-ibex.sh
 
       # Regression tests
