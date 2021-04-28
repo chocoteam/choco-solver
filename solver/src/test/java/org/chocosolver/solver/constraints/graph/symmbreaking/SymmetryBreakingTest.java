@@ -11,7 +11,7 @@ package org.chocosolver.solver.constraints.graph.symmbreaking;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.search.strategy.strategy.GraphStrategy;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -96,7 +96,7 @@ public class SymmetryBreakingTest {
         }
         UndirectedGraphVar graph = model.graphVar("G", GLB, GUB);
         // graph mush contains n nodes, m edges and have girth exactly l
-        model.getSolver().setSearch(new GraphStrategy(graph));
+        model.getSolver().setSearch(Search.graphVarSearch(graph));
         model.nbEdges(graph, model.intVar(m)).post();
         model.connected(graph).post(); // GCF.postSymmetryBreaking is sb predicate only for connected undirected graphs
         new Constraint("GirthConstraint", new PropGirth(graph, model.intVar(l))).post();

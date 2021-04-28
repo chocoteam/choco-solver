@@ -7,34 +7,26 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.search.strategy.selectors.values;
+package org.chocosolver.solver.search.strategy.selectors.values.graph.edge;
 
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
-public class GraphLexEdge extends GraphEdgeSelector<GraphVar> {
+public class GraphLexEdge implements GraphEdgeSelector {
 
-    public GraphLexEdge(GraphVar g) {
-        super(g);
-    }
-
-    @Override
-    public boolean computeNextEdge() {
+    public int[] selectEdge(GraphVar g) {
         ISet envSuc, kerSuc;
-        for (int i : envNodes) {
+        for (int i : g.getPotentialNodes()) {
             envSuc = g.getPotentialSuccessorsOf(i);
             kerSuc = g.getMandatorySuccessorsOf(i);
             if (envSuc.size() != kerSuc.size()) {
                 for (int j : envSuc) {
                     if (!kerSuc.contains(j)) {
-                        this.from = i;
-                        this.to = j;
-                        return true;
+                        return new int[] {i, j};
                     }
                 }
             }
         }
-        this.from = this.to = -1;
-        return false;
+        return new int[] {-1, -1};
     }
 }
