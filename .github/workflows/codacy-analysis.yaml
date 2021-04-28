@@ -1,6 +1,6 @@
 name: Codacy Analysis CLI
 
-on: ["push"]
+on: [ "push" ]
 
 jobs:
   codacy-analysis-cli:
@@ -8,7 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
 
-      - name: Run Codacy Analysis CLI
-        uses: codacy/codacy-analysis-cli-action@master
+      - name: Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@3.0.0
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          upload: true
+          max-allowed-issues: 2147483647
