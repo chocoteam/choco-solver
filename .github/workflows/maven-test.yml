@@ -44,5 +44,16 @@ jobs:
     - name: Test ${{ matrix.group }} 
       run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
+    - name: Generate JaCoCo Badge
+      id: jacoco
+      uses: cicirello/jacoco-badge-generator@v2.1.0
+      with:
+        generate-branches-badge: true
+        jacoco-csv-file: >
+          solver/target/site/jacoco/jacoco.csv
+          parsers/target/site/jacoco/jacoco.csv
 
-
+    - name: Log coverage percentage
+      run: |
+        echo "coverage = ${{ steps.jacoco.outputs.coverage }}"
+        echo "branch coverage = ${{ steps.jacoco.outputs.branches }}"
