@@ -16,7 +16,7 @@ jobs:
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "dimacs" ]
+        group: [ "1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex" ]
 
     # The different steps
     steps:
@@ -37,7 +37,7 @@ jobs:
 
       # Install Ibex
       - name: Install Ibex
-        if: ${{ matrix.group }} == "ibex"
+        if: ${{ matrix.group == "ibex"}}
         run: sh scripts/install-ibex.sh
 
       # Regression tests
@@ -48,7 +48,7 @@ jobs:
       - name: Prepare upload
         run: mkdir -p jacoco/
       - run: cp solver/target/site/jacoco/jacoco.csv jacoco/solver-${{ matrix.group }}.csv 2>/dev/null
-      - run: cp parser/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv 2>/dev/null
+      - run: cp parsers/target/site/jacoco/jacoco.csv jacoco/parsers-${{ matrix.group }}.csv 2>/dev/null
         if: ${{ always() }}
       - name: Upload jacoco-csv files
         if: ${{ always() }}
@@ -77,14 +77,14 @@ jobs:
           generate-branches-badge: true
           jacoco-csv-file: >
             jacoco/solver-1s.csv
-            jacoco/parser-1s.csv
+            jacoco/parsers-1s.csv
             jacoco/solver-10s.csv
             jacoco/solver-checker.csv
             jacoco/solver-ibex.csv
-            jacoco/parser-mzn.csv
-            jacoco/parser-xcsp.csv
-            jacoco/parser-mps.csv
-            jacoco/parser-dimacs.csv
+            jacoco/parsers-mzn.csv
+            jacoco/parsers-xcsp.csv
+            jacoco/parsers-mps.csv
+            jacoco/parsers-dimacs.csv
 
       - name: Log coverage percentage
         run: |
