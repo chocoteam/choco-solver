@@ -187,26 +187,11 @@
                                 </goals>
                             </execution>
                             <execution>
-                                <id>generate-code-coverage-report</id>
+                                <id>report</id>
+                                <phase>test</phase>
                                 <goals>
                                     <goal>report</goal>
                                 </goals>
-                            </execution>
-                            <execution>
-                                <id>merge-result</id>
-                                <goals>
-                                    <goal>merge</goal>
-                                </goals>
-                                <configuration>
-                                    <fileSets>
-                                        <fileSet>
-                                            <directory>${basedir}</directory>
-                                            <includes>
-                                                <include>**/target/jacoco.exec</include>
-                                            </includes>
-                                        </fileSet>
-                                    </fileSets>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
