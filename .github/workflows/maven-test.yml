@@ -36,7 +36,7 @@ jobs:
 
       # Regression tests
       - name: Test ${{ matrix.group }}
-        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups={"1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex"}
+        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=1s,10s,checker,mzn,xcsp,dimacs,mps,ibex
 
       - name: Generate JaCoCo Badge
         id: jacoco
