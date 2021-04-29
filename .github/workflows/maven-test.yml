@@ -56,8 +56,8 @@ jobs:
         with:
           name: ${{ matrix.group }}
           path: |
-            jacoco/solver-${{ matrix.group }}.csv
-            jacoco/parsers-${{ matrix.group }}.csv
+            jacoco/solver.csv
+            jacoco/parsers.csv
           if-no-files-found: ignore
 
   coverage:
@@ -76,15 +76,15 @@ jobs:
         with:
           generate-branches-badge: true
           jacoco-csv-file: >
-            jacoco/1s/solver-1s.csv
-            jacoco/1s/parsers-1s.csv
-            jacoco/10s/solver-10s.csv
-            jacoco/checker/solver-checker.csv
-            jacoco/ibex/solver-ibex.csv
-            jacoco/mzn/parsers-mzn.csv
-            jacoco/mzn/parsers-xcsp.csv
-            jacoco/mps/parsers-mps.csv
-            jacoco/dimacs/parsers-dimacs.csv
+            jacoco/1s/solver.csv
+            jacoco/1s/parsers.csv
+            jacoco/10s/solver.csv
+            jacoco/checker/solver.csv
+            jacoco/ibex/solver.csv
+            jacoco/mzn/parsers.csv
+            jacoco/mzn/parsers.csv
+            jacoco/mps/parsers.csv
+            jacoco/dimacs/parsers.csv
 
       - name: Log coverage percentage
         run: |
