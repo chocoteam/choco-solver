@@ -97,7 +97,7 @@
                 <version>3.0.0-M5</version>
                 <configuration>
                     <!--suppress UnresolvedMavenProperty -->
-                    <argLine>-Djava.library.path=/usr/local/lib</argLine>
+                    <argLine>${argLine} -Djava.library.path=/usr/local/lib</argLine>
                 </configuration>
             </plugin>
             <plugin>
