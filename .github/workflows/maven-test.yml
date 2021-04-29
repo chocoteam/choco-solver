@@ -12,11 +12,6 @@ on:
 jobs:
   test-suite:
     runs-on: ubuntu-latest
-    # Tests matrix
-    strategy:
-      #fail-fast: false
-      matrix:
-        group: [ "1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex" ]
 
     # The different steps
     steps:
@@ -37,38 +32,11 @@ jobs:
 
       # Install Ibex
       - name: Install Ibex
-        if: matrix.group == 'ibex'
         run: sh scripts/install-ibex.sh
 
       # Regression tests
       - name: Test ${{ matrix.group }}
-        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
-
-      # upload jacoco-csv files
-      - name: Prepare upload
-        run: mkdir -p jacoco/
-      - run: cp solver/target/site/jacoco/jacoco.csv jacoco/solver.csv
-      - run: cp parsers/target/site/jacoco/jacoco.csv jacoco/parsers.csv
-        if: ${{ always() }}
-      - name: Upload jacoco-csv files
-        if: ${{ always() }}
-        uses: actions/upload-artifact@master
-        with:
-          name: ${{ matrix.group }}
-          path: |
-            jacoco/solver.csv
-            jacoco/parsers.csv
-          if-no-files-found: ignore
-
-  coverage:
-    needs: [ test-suite ]
-    runs-on: ubuntu-latest
-    steps:
-      # Download jacoco-csv files
-      - uses: actions/download-artifact@v2
-        name: Download jacoco-csv files
-        with:
-          path: jacoco/
+        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups={"1s", "10s", "checker", "mzn", "xcsp", "dimacs", "mps", "ibex"}
 
       - name: Generate JaCoCo Badge
         id: jacoco
@@ -76,15 +44,8 @@ jobs:
         with:
           generate-branches-badge: true
           jacoco-csv-file: >
-            jacoco/1s/solver.csv
-            jacoco/1s/parsers.csv
-            jacoco/10s/solver.csv
-            jacoco/checker/solver.csv
-            jacoco/ibex/solver.csv
-            jacoco/mzn/parsers.csv
-            jacoco/mzn/parsers.csv
-            jacoco/mps/parsers.csv
-            jacoco/dimacs/parsers.csv
+            solver/target/site/jacoco/jacoco.csv
+            parsers/target/site/jacoco/jacoco.csv
 
       - name: Log coverage percentage
         run: |
