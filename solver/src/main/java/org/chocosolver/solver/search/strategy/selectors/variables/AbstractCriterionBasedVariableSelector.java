@@ -106,7 +106,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
      * for DOMWDEG_REFINED and CHS
      */
     final HashMap<Propagator<?>, double[]> refinedWeights = new HashMap<>();
-
+    static final double[] rw = {0.};
 
     public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed) {
         this.random = new java.util.Random(seed);

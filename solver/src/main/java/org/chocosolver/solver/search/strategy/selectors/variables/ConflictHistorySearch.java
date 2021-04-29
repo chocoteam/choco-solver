@@ -88,7 +88,7 @@ public class ConflictHistorySearch
                     .limit(2)
                     .count();
             if (fut > 1) {
-                w += refinedWeights.get(prop)[0] + D;
+                w += refinedWeights.getOrDefault(prop, rw)[0] + D;
             }
         }
         return w;
