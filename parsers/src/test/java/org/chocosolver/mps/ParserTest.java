@@ -66,7 +66,7 @@ public class ParserTest {
     }
 
     @Test(groups = "mps", timeOut = 120000, dataProvider = "small")
-    private void run(String path, int solutions, Double bst, int nodes, int failures, boolean comp) throws SetUpException {
+    public void test1(String path, int solutions, Double bst, int nodes, int failures, boolean comp) throws SetUpException {
         String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
                 file,
