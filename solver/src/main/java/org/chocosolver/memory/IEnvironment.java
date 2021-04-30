@@ -166,6 +166,13 @@ public interface IEnvironment  {
     void save(IOperation operation);
 
     /**
+     * Save this operation onto the stack of operations to undo on backtrack, at level `worldIndex`.
+     * @param operation operation to undo
+     * @param worldIndex when to apply this
+     */
+    void saveAt(IOperation operation, int worldIndex);
+
+    /**
      * Return the current time stamp.
      * It differs from world index since it never decrements.
      * @return the timestamp

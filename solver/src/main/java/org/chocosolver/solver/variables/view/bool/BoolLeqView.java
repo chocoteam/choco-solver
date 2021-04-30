@@ -58,7 +58,6 @@ public final class BoolLeqView<I extends IntVar> extends BoolIntView {
             this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            notifyPropagators(IntEventType.INSTANTIATE, cause);
             this.fixed.set(true);
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
@@ -68,6 +67,7 @@ public final class BoolLeqView<I extends IntVar> extends BoolIntView {
             } else {
                 done = var.updateLowerBound(cste + 1, this);
             }
+            notifyPropagators(IntEventType.INSTANTIATE, cause);
         }
         return done;
     }

@@ -32,4 +32,20 @@ public interface VariableSelector<V extends Variable>  {
      */
     V getVariable(V[] variables);
 
+    /**
+     * Prepare <code>this</code> to be used in a search loop
+     * The initialization can detect inconsistency, in that case, it returns false
+     */
+    default boolean init() {
+        return true;
+    }
+
+    /**
+     * Remove the current strategy.
+     * This implies unplugging variable or search monitors.
+     */
+    default void remove() {
+
+    }
+
 }
