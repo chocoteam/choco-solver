@@ -9,12 +9,14 @@
  */
 package org.chocosolver.util.graphOperations.connectivity;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
+import java.util.List;
 
 /**
  * @author Jean-Guillaume FAGES (cosling)
@@ -30,16 +32,21 @@ public class UGVarConnectivityHelper {
     private final int[] fifo;
 
     // internal variables for Articulation Points and Bridge detection
-    private TIntArrayList bridgeFrom, bridgeTo;
-    private BitSet hasMandInSubtree, visited;
-    private ISet articulationPoints;
-    private int[] parent, time, minT;
-    private int[] timer = new int[1];
+    private int numOrder;
+    private int[] num;
+    private BitSet visited;
 
+    // output data
+    private ISet articulationPoints = SetFactory.makeBipartiteSet(0);
+    private List<int[]> bridges = new ArrayList<>();
+
+    // --- constructor
     public UGVarConnectivityHelper(UndirectedGraphVar g){
         this.g = g;
         this.n = g.getNbMaxNodes();
         this.fifo = new int[n];
+        this.num = new int[n];
+        this.visited = new BitSet(n);
     }
 
     //***********************************************************************************
@@ -67,111 +74,75 @@ public class UGVarConnectivityHelper {
     // ARTICULATION POINTS AND BRIDGES
     //***********************************************************************************
 
-    public ISet getArticulationPoints(){
-        return articulationPoints;
-    }
-
-    public TIntArrayList getBridgeFrom() {
-        return bridgeFrom;
-    }
-
-    public TIntArrayList getBridgeTo() {
-        return bridgeTo;
-    }
-
-    public void findMandatoryArticulationPointsAndBridges() {
-        if(articulationPoints == null){
-            articulationPoints = SetFactory.makeBipartiteSet(0);
-            bridgeFrom = new TIntArrayList();
-            bridgeTo = new TIntArrayList();
-            hasMandInSubtree = new BitSet(n);
-            visited = new BitSet(n);
-            parent = new int[n];
-            time = new int[n];
-            minT = new int[n];
-        }
+    public void computeMandatoryArticulationPointsAndBridges() {
         articulationPoints.clear();
-        bridgeFrom.clear();
-        bridgeTo.clear();
+        bridges.clear();
         ISet mNodes = g.getMandatoryNodes();
-        if(mNodes.size()>=2) {
-            visited.clear();
-            hasMandInSubtree.clear();
-            for(int root : mNodes.toArray()) { // uses to array because default iterator may be used within the algorithm
-                if(!visited.get(root)) {
-                    // root node init
-                    visited.set(root);
-                    parent[root] = root;
-                    timer[0] = 0;
-                    // DFS from root
-                    findMAPBFrom(root);
-                }
-            }
-        }
-    }
+        if(g.getMandatoryNodes().size()<2) return;
 
-    private void findMAPBFrom(int i){
-        int nbMandChilds = 0;
-        for (int j : g.getPotentialNeighborsOf(i)) {
-            if (!visited.get(j)) {
-                visited.set(j);
-                parent[j] = i;
-                timer[0]++;
-                minT[j] = time[j] = timer[0];
-                if(g.getMandatoryNodes().contains(j)) hasMandInSubtree.set(j);
-                findMAPBFrom(j);
-
-                // j sub-tree has been fully explored
-                // propagates to i if subtrees of j have links to ancestors of i
-                minT[i] = Math.min(minT[i], minT[j]);
-                // propagates to i if subtrees of j include mandatory nodes
-                if(hasMandInSubtree.get(j)) hasMandInSubtree.set(i);
-
-                if(hasMandInSubtree.get(j)){
-                    nbMandChilds ++;
-                }
-
-                // If the lowest vertex reachable from subtree under j is below i in DFS tree,
-                // then (i,j) is a bridge
-                if (minT[j] > time[i] && !g.getMandatoryNeighborsOf(i).contains(j)){
-                    bridgeFrom.add(i);
-                    bridgeTo.add(j);
-                }
-
-                // root node ?
-                if(parent[i] == i){
-                    // root has >1 child with mandatory nodes in their subtrees
-                    if(nbMandChilds>1 && !g.getMandatoryNodes().contains(i))
-                        articulationPoints.add(i);
-
-                }else{
-                    // j sub-tree has been explored and cannot go above i
-                    if(minT[j] >= time[i] && hasMandInSubtree.get(j) && !g.getMandatoryNodes().contains(i))
-                        articulationPoints.add(i);
-                }
-            }
-            if(j != parent[i]){ // i can reach j (which might be above i)
-                minT[i] = Math.min(minT[i], time[j]);
+        visited.clear();
+        Arrays.fill(num, 0);
+        for(int root : mNodes.toArray()) { // uses to array because default iterator may be used within the algorithm
+            if(!visited.get(root)) {
+                // root node init
+                visited.set(root);
+                // DFS from root
+                computeMandatoryArticulationPointsAndBridgesFrom(root);
             }
         }
     }
 
     /**
-     * @return True if the graph var is biconnected, the empty graph is not considered biconnected
+     * Computes ridge and articulation point detection linking mandatory nodes.
+     * @param s root node, must be a mandatory node itself
      */
-    public boolean isBiconnected() {
-        if (g.getPotentialNodes().size() <= 1) {
-            return false;
+    private void computeMandatoryArticulationPointsAndBridgesFrom(int s) {
+        assert g.getMandatoryNodes().contains(s);
+        numOrder = 1;
+        num[s] = numOrder++;
+        for (int next:g.getPotentialNeighborsOf(s)) {
+            if (num[next] == 0) {
+                int[] LowMand = doFindArticulation(next, s);
+                int lowN = LowMand[0];
+                int mandN = LowMand[1];
+                if(num[next] == lowN && mandN == 1 && !g.getMandatoryNeighborsOf(s).contains(next)){
+                    bridges.add(new int[]{s,next});
+                }
+            }
         }
-        int root = g.getPotentialNodes().iterator().next();
-        if(visited==null)visited = new BitSet(n);
-        exploreFrom(root,visited);
-        if(visited.cardinality()<g.getPotentialNodes().size()) {
-            return false;
+    }
+
+    private int[] doFindArticulation (int s, int parent) {
+        int lowpt = num[s] = numOrder++;
+        int mand = g.getMandatoryNodes().contains(s)?1:0;
+        for (int next:g.getPotentialNeighborsOf(s)) {
+            if (num[next] == 0) {
+                int[] LowMand = doFindArticulation(next, s);
+                int lowN = LowMand[0];
+                int mandN = LowMand[1];
+                lowpt = Math.min(lowN, lowpt);
+                mand = Math.max(mand, mandN);
+                if (lowN >= num[s] && mandN == 1) {
+                    articulationPoints.add(s);
+                    if(num[next] == lowN && !g.getMandatoryNeighborsOf(s).contains(next)){
+                        bridges.add(new int[]{s,next});
+                    }
+                }
+            } else if (num[next] < num[s] && next != parent) {
+                lowpt = Math.min(num[next],lowpt);
+                mand = Math.max(mand, g.getMandatoryNodes().contains(next)?1:0);
+            }
         }
-        // articulation point exist?
-        findMandatoryArticulationPointsAndBridges();
-        System.out.println(articulationPoints);
-        return articulationPoints.isEmpty();
+        return new int[]{lowpt, mand};
+    }
+
+    // --- accessors
+
+    public ISet getArticulationPoints() {
+        return articulationPoints;
+    }
+
+    public List<int[]> getBridges() {
+        return bridges;
     }
 }
