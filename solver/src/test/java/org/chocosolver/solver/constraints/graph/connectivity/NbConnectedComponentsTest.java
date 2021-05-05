@@ -247,11 +247,9 @@ public class NbConnectedComponentsTest {
         m.nbConnectedComponents(g, m.intVar(1)).post();
 		Solver s = m.getSolver();
 
-		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
-
-//		s.propagate();
-//		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
-//		Assert.assertTrue(g.isInstantiated());
+		s.propagate();
+		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
 		Assert.assertTrue(s.getSolutionCount() == 1);
@@ -273,11 +271,9 @@ public class NbConnectedComponentsTest {
 		m.nbConnectedComponents(g, m.intVar(1)).post();
 		Solver s = m.getSolver();
 
-		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
-
-//		s.propagate();
-//		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
-//		Assert.assertTrue(g.isInstantiated());
+		s.propagate();
+		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
 		Assert.assertTrue(s.getSolutionCount() == 1);
@@ -413,13 +409,11 @@ public class NbConnectedComponentsTest {
 		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
-		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
-
-//		m.getSolver().propagate();
-//		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-//		Assert.assertTrue(graph.getMandatoryNodes().size()==2);
-//		Assert.assertTrue(!graph.getPotentialNodes().contains(4));
-//		Assert.assertTrue(!graph.getPotentialNodes().contains(5));
+		m.getSolver().propagate();
+		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
+		Assert.assertTrue(graph.getMandatoryNodes().size()==2);
+		Assert.assertTrue(!graph.getPotentialNodes().contains(4));
+		Assert.assertTrue(!graph.getPotentialNodes().contains(5));
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -444,12 +438,10 @@ public class NbConnectedComponentsTest {
 		UndirectedGraphVar graph = m.graphVar("G", GLB, GUB);
 		m.nbConnectedComponents(graph, m.intVar(2)).post();
 
-		// TESTS TO BE REACTIVATED WHEN ISTHMA DETECTION WILL BE FIXED
-
-//		m.getSolver().propagate();
-//		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-//		Assert.assertTrue(graph.getMandatoryNodes().size()==5);
-//		Assert.assertTrue(graph.getMandatoryNeighborsOf(5).size()==2);
+		m.getSolver().propagate();
+		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
+		Assert.assertTrue(graph.getMandatoryNodes().size()==5);
+		Assert.assertTrue(graph.getMandatoryNeighborsOf(5).size()==2);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
