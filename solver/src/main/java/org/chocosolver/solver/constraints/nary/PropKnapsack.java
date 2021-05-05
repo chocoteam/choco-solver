@@ -87,7 +87,7 @@ public class PropKnapsack extends Propagator<IntVar> {
                     if (delta <= remainingCapacity) {
                         maxPower += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
                         remainingCapacity -= delta;
-                        if (remainingCapacity == 0) {
+                        if (weigth[idx] > 0 && remainingCapacity == 0) {
                             power.updateUpperBound(maxPower, this);
                             return;
                         }

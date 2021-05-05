@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
-import org.chocosolver.solver.search.strategy.assignments.GraphAssignment;
+import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.PoolManager;
@@ -20,7 +20,7 @@ public class GraphDecision extends Decision<GraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    protected GraphAssignment assignment;
+    protected GraphDecisionOperator operator;
     protected int from, to;
     protected final PoolManager<GraphDecision> poolManager;
 
@@ -42,18 +42,18 @@ public class GraphDecision extends Decision<GraphVar> {
         }
     }
 
-    public void setNode(GraphVar variable, int node, GraphAssignment graph_ass) {
+    public void setNode(GraphVar variable, int node, GraphDecisionOperator operator) {
         super.set(variable);
         this.from = node;
         this.to = -1;
-        assignment = graph_ass;
+        this.operator = operator;
     }
 
-    public void setEdge(GraphVar variable, int from, int to, GraphAssignment graph_ass) {
+    public void setEdge(GraphVar variable, int from, int to, GraphDecisionOperator operator) {
         super.set(variable);
         this.from = from;
         this.to = to;
-        assignment = graph_ass;
+        this.operator = operator;
     }
 
     //***********************************************************************************
@@ -64,15 +64,15 @@ public class GraphDecision extends Decision<GraphVar> {
     public void apply() throws ContradictionException {
         if (branch == 1) {
             if (to == -1) {
-                assignment.apply(var, from, this);
+                operator.apply(var, from, this);
             } else {
-                assignment.apply(var, from, to, this);
+                operator.apply(var, from, to, this);
             }
         } else if (branch == 2) {
             if (to == -1) {
-                assignment.unapply(var, from, this);
+                operator.unapply(var, from, this);
             } else {
-                assignment.unapply(var, from, to, this);
+                operator.unapply(var, from, to, this);
             }
         }
     }
@@ -85,8 +85,8 @@ public class GraphDecision extends Decision<GraphVar> {
     @Override
     public String toString() {
         if (to == -1) {
-            return " node " + from + assignment.toString();
+            return " node " + from + operator.toString();
         }
-        return " edge (" + from + "," + to + ")" + assignment.toString();
+        return " edge (" + from + "," + to + ")" + operator.toString();
     }
 }

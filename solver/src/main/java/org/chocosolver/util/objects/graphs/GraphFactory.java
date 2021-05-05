@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -403,6 +404,74 @@ public class GraphFactory {
             g.addEdge(e[0], e[1]);
         }
         return g;
+    }
+
+    //***********************************************************************************
+    // SUBGRAPHS
+    //***********************************************************************************
+
+    /**
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param nodes
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public static UndirectedGraph makeNodeInducedSubgraph(Model model, UndirectedGraph graph, ISet nodes, boolean exclude) {
+        return new UndirectedGraph(model, graph, nodes, exclude);
+    }
+
+    /**
+     * Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param nodes
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public static DirectedGraph makeNodeInducedSubgraph(Model model, DirectedGraph graph, ISet nodes, boolean exclude) {
+        return new DirectedGraph(model, graph, nodes, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude the type of subgraph to construct
+     */
+    public static UndirectedGraph makeEdgeInducedSubgraph(Model model, UndirectedGraph graph, int[][] edges, boolean exclude) {
+        return new UndirectedGraph(model, graph, edges, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public static DirectedGraph makeEdgeInducedSubgraph(Model model, DirectedGraph graph, int[][] edges, boolean exclude) {
+        return new DirectedGraph(model, graph, edges, exclude);
     }
 
     //***********************************************************************************

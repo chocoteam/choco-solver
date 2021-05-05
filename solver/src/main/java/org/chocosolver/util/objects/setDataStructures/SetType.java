@@ -17,6 +17,6 @@ public enum SetType {
 	FIXED_ARRAY,
 	FIXED_INTERVAL,
 	RANGESET,
-	DYNAMIC_FILTER
+    DYNAMIC,
 }
 

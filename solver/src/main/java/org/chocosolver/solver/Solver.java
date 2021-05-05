@@ -646,7 +646,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         defaultSearch = false;
         completeSearch = false;
         mModel.removeMinisat();
-        mModel.removeNogoodStore();
     }
 
     /**

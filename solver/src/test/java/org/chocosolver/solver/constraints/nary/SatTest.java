@@ -16,6 +16,7 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -37,7 +38,7 @@ public class SatTest {
         return new Object[][]{{true}, {false}};
     }
 
-    @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
+    @Test(groups = "1s", timeOut = 600000, dataProvider = "satornot")
     public void test1(boolean sat) {
         Model model = new Model(new DefaultSettings().setEnableSAT(sat));
         BoolVar b1, b2;
@@ -188,7 +189,7 @@ public class SatTest {
         BoolVar[] bs = model.boolVarArray("b", 3);
         BoolVar d = model.boolVar("d");
         model.addClausesSumBoolArrayLessEqKVar(bs, d);
-        
+
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
     }
@@ -218,5 +219,34 @@ public class SatTest {
         }
         assertEquals(solution.getIntVal(var), 2);
 
+    }
+
+
+    @Test(groups = "1s")
+    public void testSatVar() {
+        Model model = new Model();
+        BoolVar[] boolVars = model.boolVarArray(3);
+        int b1 = boolVars[0].satVar();
+        int b2 = boolVars[1].satVar();
+        int b3 = boolVars[2].satVar();
+        model.addClause(model.lit(b1), model.lit(b2), model.lit(b3));
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 7);
+        Assert.assertEquals(model.getMinisat().getPropSat().getMiniSat().solve(),
+                TRUE);
+    }
+
+    @Test(groups = "1s")
+    public void testSatVar2() {
+        Model model = new Model();
+        IntVar[] intVars = model.intVarArray(3, 1, 2);
+        int b1 = intVars[0].eq(1).satVar();
+        int b2 = intVars[1].eq(1).satVar();
+        int b3 = intVars[2].eq(1).satVar();
+        model.addClause(model.lit(b1), model.lit(b2), model.lit(b3));
+        model.getSolver().findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 7);
+        Assert.assertEquals(model.getMinisat().getPropSat().getMiniSat().solve(),
+                TRUE);
     }
 }

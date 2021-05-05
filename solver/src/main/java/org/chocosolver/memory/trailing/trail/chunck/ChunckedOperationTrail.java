@@ -62,7 +62,12 @@ public class ChunckedOperationTrail extends ChunckedTrail<OperationWorld> implem
     }
 
     @Override
-    public void savePreviousState(IOperation oldValue) {
-        current.savePreviousState(oldValue);
+    public void savePreviousState(IOperation operation) {
+        current.savePreviousState(operation);
+    }
+
+    @Override
+    public void savePreviousStateAt(IOperation operation, int at, int currentWorldIndex) {
+        worlds[at].savePreviousState(operation);
     }
 }

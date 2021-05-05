@@ -38,10 +38,10 @@ public class PropTableStr2 extends Propagator<IntVar> {
     //***********************************************************************************
 
     private final int[][] table;
-    private final str2_var[] str2vars;
+    private final Str2_var[] str2vars;
     private final ISet tuples;
-    private final ArrayList<str2_var> ssup;
-    private final ArrayList<str2_var> sval;
+    private final ArrayList<Str2_var> ssup;
+    private final ArrayList<Str2_var> sval;
     private boolean firstProp = true;
     private final Tuples tuplesObject;
     private final int star;
@@ -59,10 +59,10 @@ public class PropTableStr2 extends Propagator<IntVar> {
         if (table.length > 0) {
             size = table[0].length;
         }
-        str2vars = new str2_var[size];
+        str2vars = new Str2_var[size];
         int max = 0;
         for (int i = 0; i < size; i++) {
-            str2vars[i] = new str2_var(model.getEnvironment(), vars_[i], i);
+            str2vars[i] = new Str2_var(model.getEnvironment(), vars_[i], i);
             max = Math.max(max, vars_[i].getUB());
         }
         this.star = tuplesObject.allowUniversalValue() ? tuplesObject.getStarValue() : max + 1;
@@ -118,9 +118,10 @@ public class PropTableStr2 extends Propagator<IntVar> {
     //***********************************************************************************
 
     private boolean is_tuple_supported(int tuple_index) {
-        for (str2_var v : sval) {
-            if (table[tuple_index][v.indice] != star &&
-                    !v.var.contains(table[tuple_index][v.indice])) {
+        for (int i = 0; i < sval.size(); i++) {
+            Str2_var v  = sval.get(i);
+            if (table[tuple_index][v.index] != star &&
+                    !v.var.contains(table[tuple_index][v.index])) {
                 return false;
             }
         }
@@ -140,7 +141,7 @@ public class PropTableStr2 extends Propagator<IntVar> {
         ssup.clear();
         sval.clear();
         for (int i = 0; i < str2vars.length; i++) {
-            str2_var tmp = str2vars[i];
+            Str2_var tmp = str2vars[i];
             ssup.add(tmp);
             tmp.reset();
             if (tmp.last_size.get() != tmp.cnt) {
@@ -151,8 +152,8 @@ public class PropTableStr2 extends Propagator<IntVar> {
         for (int tuple : tuples) {
             if (is_tuple_supported(tuple)) {
                 for (int var = 0; var < ssup.size(); var++) {
-                    str2_var v = ssup.get(var);
-                    int a = table[tuple][v.indice];
+                    Str2_var v = ssup.get(var);
+                    int a = table[tuple][v.index];
                     if (a == star) {
                         v.cnt = 0;
                         ssup.set(var, ssup.get(ssup.size() - 1));
@@ -171,15 +172,15 @@ public class PropTableStr2 extends Propagator<IntVar> {
                 tuples.remove(tuple);
             }
         }
-        for (str2_var v : ssup) {
-            v.remove_unsupported_value(this);
+        for (int i = 0; i < ssup.size(); i++) {
+            ssup.get(i).remove_unsupported_value(this);
         }
     }
 
     /**
      * var class which will save local var information
      */
-    private class str2_var {
+    private static class Str2_var {
         /**
          * original var
          */
@@ -187,11 +188,11 @@ public class PropTableStr2 extends Propagator<IntVar> {
         /**
          * index in the table
          */
-        private final int indice;
+        private final int index;
 
         private final IStateInt last_size;
         /**
-         * Store consistant values
+         * Store consistent values
          */
         private final BitSet ac;
         /**
@@ -207,10 +208,10 @@ public class PropTableStr2 extends Propagator<IntVar> {
          * contains all the value of the variable
          */
 
-        private str2_var(IEnvironment env, IntVar var_, int indice_) {
+        private Str2_var(IEnvironment env, IntVar var_, int index_) {
             var = var_;
             last_size = env.makeInt(0);
-            indice = indice_;
+            index = index_;
             ac = new BitSet();
         }
 

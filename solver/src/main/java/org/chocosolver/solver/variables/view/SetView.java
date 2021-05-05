@@ -27,6 +27,7 @@ import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
  * An abstract class for set views over other variables.
+ *
  * @author Dimitri Justeau-Allaire
  * @since 01/03/2021
  */
