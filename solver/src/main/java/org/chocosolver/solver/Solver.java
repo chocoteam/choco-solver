@@ -395,7 +395,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
         mMeasures.startStopwatch();
         rootWorldIndex = mModel.getEnvironment().getWorldIndex();
-        mModel.getEnvironment().buildFakeHistoryOn(mModel.getSettings().getEnvironmentHistorySimulationCondition());
         // Indicates which decision was previously applied before selecting the move.
         // Always sets to ROOT for the first move
         M.setTopDecisionPosition(0);

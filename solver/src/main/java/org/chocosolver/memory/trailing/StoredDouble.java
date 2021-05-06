@@ -28,9 +28,6 @@ public class StoredDouble extends IStateDouble {
     public StoredDouble(final EnvironmentTrailing env, final double i) {
         super(env, i);
         myTrail = env.getDoubleTrail();
-        if(env.fakeHistoryNeeded()){
-            myTrail.buildFakeHistory(this, i, timeStamp);
-        }
     }
 
     /**
