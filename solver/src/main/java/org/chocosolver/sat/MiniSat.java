@@ -767,7 +767,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
 
     void claBumpActivity(Clause c) {
-        if ((c.activity += cla_inc) > 1e20) {
+        if ((c.activity += cla_inc) > 1e20d) {
             // Rescale:
             for (int i = 0; i < learnts.size(); i++) {
                 learnts.get(i).activity *= 1e-20d;
@@ -898,7 +898,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
         private final int[] literals_;
         private final boolean learnt;
-        private float activity;
+        private double activity;
 
         Clause(int[] ps, boolean learnt) {
             literals_ = ps.clone();

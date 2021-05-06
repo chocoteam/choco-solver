@@ -161,7 +161,7 @@ public class MixedScalarTest {
         int nbSol = 0;
         while (model.getSolver().solve()) {
             nbSol++;
-            int computed = 0;
+            double computed = 0;
             for (int i = 0; i < vars.length; i++) {
                 computed += coeffs[i] * vars[i].getValue();
             }
