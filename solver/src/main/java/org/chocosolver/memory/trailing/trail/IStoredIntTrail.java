@@ -22,5 +22,4 @@ public interface IStoredIntTrail extends IStorage {
 
     void savePreviousState(StoredInt v, int oldValue, int oldStamp);
 
-    void buildFakeHistory(StoredInt v, int initValue, int fromStamp);
 }

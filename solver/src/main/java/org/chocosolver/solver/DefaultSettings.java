@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.memory.Except_0;
 import org.chocosolver.memory.ICondition;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.Search;
@@ -58,8 +57,6 @@ public class DefaultSettings implements Settings {
     private boolean sortPropagatorActivationWRTPriority = true;
 
     private Function<Model, AbstractStrategy> defaultSearch = Search::defaultSearch;
-
-    private ICondition environmentHistorySimulationCondition = new Except_0();
 
     private boolean warnUser = false;
 
@@ -230,15 +227,16 @@ public class DefaultSettings implements Settings {
         return this;
     }
 
+    @Deprecated
     @Override
     public ICondition getEnvironmentHistorySimulationCondition() {
-        return environmentHistorySimulationCondition;
+        return null;
     }
 
+    @Deprecated
     @Override
     public DefaultSettings setEnvironmentHistorySimulationCondition(ICondition environmentHistorySimulationCondition) {
-        this.environmentHistorySimulationCondition = environmentHistorySimulationCondition;
-        return this;
+        return null;
     }
 
     @Override
