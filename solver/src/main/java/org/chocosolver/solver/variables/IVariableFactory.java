@@ -21,7 +21,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 /**
- * Interface to make variables (BoolVar, IntVar, RealVar and SetVar)
+ * Interface to make variables (BoolVar, IntVar, RealVar, SetVar, and GraphVar)
  *
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
@@ -270,6 +270,23 @@ public interface IVariableFactory extends ISelf<Model> {
             } else {
                 return new BitsetIntVarImpl(name, values, ref());
             }
+        }
+    }
+
+    /**
+     * Create an integer variable of initial domain based on <code>from</code>.
+     * @param name name of the variable to create
+     * @param from variable to copy values from
+     * @return a new variable whom domain is the same as the one of <code>from</code>
+     */
+    default IntVar intVar(String name, IntVar from){
+        if(from.hasEnumeratedDomain()){
+            int[] values = from.stream().toArray();
+            return intVar(name, values);
+        }else{
+            int lb = from.getLB();
+            int ub = from.getUB();
+            return intVar(name, lb, ub);
         }
     }
 
@@ -840,6 +857,24 @@ public interface IVariableFactory extends ISelf<Model> {
     }
 
     /**
+     * Creates a node-induced undirected graph variable guaranteeing that any instantiation is a node-induced subgraph
+     * of the envelope used to construct the graph variable. Any two nodes that are connected in the envelope
+     * are connected by an edge in any instantiation containing these two nodes. More formally:
+     *
+     *  - G = (V, E) \in [G_lb, G_ub], with G_ub = (V_ub, E_ub);
+     *  - E = { (x, y) \in E_ub | x \in V \land y \in V }.
+     *
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return An undirected graph variable taking its values in the graph domain [LB, UB] and such that any value is
+     *         a node-induced subgraph of UB.
+     */
+    default UndirectedNodeInducedGraphVarImpl nodeInducedGraphVar(String name, UndirectedGraph LB, UndirectedGraph UB) {
+        return new UndirectedNodeInducedGraphVarImpl(name, ref(), LB, UB);
+    }
+
+    /**
      * Creates a directed graph variable, taking its values in the graph domain [LB, UB].
      * An instantiation of a graph variable is a graph composed of nodes and edges.
      * LB is the kernel graph (or lower bound), that must be a subgraph of any instantiation.
@@ -851,6 +886,24 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default DirectedGraphVar digraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
         return new DirectedGraphVarImpl(name, ref(), LB, UB);
+    }
+
+    /**
+     * Creates a node-induced directed graph variable guaranteeing that any instantiation is a node-induced subgraph
+     * of the envelope used to construct the graph variable. Any two nodes that are connected in the envelope
+     * are connected by an edge in any instantiation containing these two nodes. More formally:
+     *
+     *  - G = (V, E) \in [G_lb, G_ub], with G_ub = (V_ub, E_ub);
+     *  - E = { (x, y) \in E_ub | x \in V \land y \in V }.
+     *
+     * @param name Name of the variable
+     * @param LB The lower bound graph (or kernel)
+     * @param UB The upper bound graph (or envelope)
+     * @return A directed graph variable taking its values in the graph domain [LB, UB] and such that any value is
+     *         a node-induced subgraph of UB.
+     */
+    default DirectedNodeInducedGraphVarImpl nodeInducedDigraphVar(String name, DirectedGraph LB, DirectedGraph UB) {
+        return new DirectedNodeInducedGraphVarImpl(name, ref(), LB, UB);
     }
 
     //*************************************************************************************

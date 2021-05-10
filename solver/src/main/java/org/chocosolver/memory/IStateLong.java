@@ -28,7 +28,7 @@ public abstract class IStateLong  {
     public IStateLong(IEnvironment env, long i) {
         environment = env;
         currentValue = i;
-        timeStamp = environment.getWorldIndex();
+        timeStamp = -1;
     }
 
     /**

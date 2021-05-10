@@ -144,33 +144,6 @@ public class StoredIntTrail implements IStoredIntTrail {
         }
     }
 
-    @Override
-    public void buildFakeHistory(StoredInt v, int initValue, int olderStamp) {
-        // from world 0 to fromStamp (excluded), create a fake history based on initValue
-        // kind a copy of the current elements
-        // first save the current state on the top of the stack
-        savePreviousState(v, initValue, olderStamp - 1);
-        // second: ensures capacities
-        while (currentLevel + olderStamp > variableStack.length) {
-            resizeUpdateCapacity();
-        }
-        int i1, f, s = currentLevel;
-        for (int w = olderStamp; w > 1; w--) {
-            f = worldStartLevels[w];
-            i1 = f + w - 1;
-            s -= f;
-            System.arraycopy(variableStack, f, variableStack, i1, s);
-            System.arraycopy(valueStack, f, valueStack, i1, s);
-            System.arraycopy(stampStack, f, stampStack, i1, s);
-            variableStack[i1 - 1] = v;
-            valueStack[i1 - 1] = initValue;
-            stampStack[i1 - 1] = w - 2;
-            worldStartLevels[w] += w - 1;
-            currentLevel++;
-            s = f;
-        }
-    }
-
 
     private void resizeUpdateCapacity() {
         final int newCapacity = (int) (variableStack.length * loadfactor);

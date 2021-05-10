@@ -10,6 +10,8 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
+import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
+import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -39,6 +41,8 @@ public class DecisionMaker {
      */
     private PoolManager<SetDecision> setDecisionPool;
 
+    private PoolManager<GraphDecision> graphDecisionPool;
+
     /**
      * Create a decision maker, that eases decision creation.
      */
@@ -46,6 +50,7 @@ public class DecisionMaker {
         this.intDecisionPool = new PoolManager<>();
         this.realDecisionPool = new PoolManager<>();
         this.setDecisionPool = new PoolManager<>();
+        this.graphDecisionPool = new PoolManager<>();
     }
 
     /**
@@ -99,4 +104,21 @@ public class DecisionMaker {
         return d;
     }
 
+    public GraphDecision makeGraphNodeDecision(GraphVar var, GraphDecisionOperator dop, int node) {
+        GraphDecision d = graphDecisionPool.getE();
+        if (d == null) {
+            d = new GraphDecision(graphDecisionPool);
+        }
+        d.setNode(var, node, dop);
+        return d;
+    }
+
+    public GraphDecision makeGraphEdgeDecision(GraphVar var, GraphDecisionOperator dop, int from, int to) {
+        GraphDecision d = graphDecisionPool.getE();
+        if (d == null) {
+            d = new GraphDecision(graphDecisionPool);
+        }
+        d.setEdge(var, from, to, dop);
+        return d;
+    }
 }

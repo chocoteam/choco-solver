@@ -17,11 +17,10 @@ package org.chocosolver.memory;
  * @author Charles Prud'homme
  * @version choco
  * @since 24/09/2014
+ * @deprecated
  */
+@Deprecated
 public interface ICondition  {
-
-    /** False condition, never satisfied */
-    ICondition FALSE = () -> false;
 
     boolean satisfied();
 

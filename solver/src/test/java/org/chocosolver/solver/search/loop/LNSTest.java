@@ -9,10 +9,6 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import static java.lang.Math.ceil;
-import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
-import static org.chocosolver.solver.search.strategy.Search.lastConflict;
-
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
@@ -20,11 +16,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
 import org.chocosolver.solver.search.loop.lns.INeighborFactory;
-import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
-import org.chocosolver.solver.search.loop.lns.neighbors.PropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.ReversePropagationGuidedNeighborhood;
-import org.chocosolver.solver.search.loop.lns.neighbors.SequenceNeighborhood;
+import org.chocosolver.solver.search.loop.lns.neighbors.*;
 import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveLNS;
@@ -33,12 +25,17 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import static java.lang.Math.ceil;
+import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
+import static org.chocosolver.solver.search.strategy.Search.lastConflict;
 
 /**
  * <br/>
@@ -326,7 +323,7 @@ public class LNSTest {
 
 
         // Set up basic search for first sol.
-        Move basicsearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 992634, new IntDomainMin()));
+        Move basicsearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg(decvars, 992634), new IntDomainMin()));
         Solver solver = model.getSolver();
         solver.setMove(basicsearch);
 
@@ -339,7 +336,7 @@ public class LNSTest {
         in.init(); // Should this be necessary?
 
         //   Type of search within LNS neighbourhoods
-        Move innersearch = new MoveBinaryDFS(new DomOverWDeg(decvars, 0L, new IntDomainMin()));
+        Move innersearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg(decvars, 0L), new IntDomainMin()));
 
         MoveLNS lns = new MoveLNS(innersearch, in, new BacktrackCounter(model, 50));
 

@@ -24,7 +24,6 @@
     </description>
 
     <modules>
-        <module>sat</module>
         <module>solver</module>
         <module>parsers</module>
         <module>examples</module>
@@ -46,11 +45,6 @@
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-sat</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.choco-solver</groupId>
                 <artifactId>choco-solver</artifactId>
@@ -136,7 +130,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -350,7 +344,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.0.rc2</version>
+                <version>4.1</version>
                 <configuration>
                     <header>${main_dir}/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
@@ -406,7 +400,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
@@ -443,7 +437,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.2</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -494,6 +488,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
                 <reportSets>
                     <reportSet>
                         <reports>

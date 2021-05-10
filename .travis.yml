@@ -32,6 +32,7 @@ env:
     - TEST_SUITE="1s"
     - TEST_SUITE="10s"
     - TEST_SUITE="checker"
+    - TEST_SUITE="expl"
     - TEST_SUITE="mzn"
     - TEST_SUITE="xcsp"
     - TEST_SUITE="dimacs"

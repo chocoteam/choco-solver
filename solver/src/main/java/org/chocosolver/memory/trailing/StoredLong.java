@@ -28,9 +28,6 @@ public class StoredLong extends IStateLong {
     public StoredLong(final EnvironmentTrailing env, final long i) {
         super(env, i);
         myTrail = env.getLongTrail();
-        if(env.fakeHistoryNeeded()){
-            myTrail.buildFakeHistory(this, i, timeStamp);
-        }
     }
 
     /**
