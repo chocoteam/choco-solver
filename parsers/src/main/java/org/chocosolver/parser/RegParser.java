@@ -49,8 +49,8 @@ public abstract class RegParser implements IParser {
             "0: automatic\n " +
             "1: FlatZinc (.fzn)\n" +
             "2: XCSP3 (.xml or .lzma)\n" +
-            "3: MPS (.mps)\n" +
-            "4: JSON (.json).")
+            "3: DIMACS (.cnf),\n" +
+            "4: MPS (.mps)")
     private int pa = 0;
 
     @Option(name = "-limit",

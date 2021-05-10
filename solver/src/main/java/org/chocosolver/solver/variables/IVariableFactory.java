@@ -273,6 +273,23 @@ public interface IVariableFactory extends ISelf<Model> {
         }
     }
 
+    /**
+     * Create an integer variable of initial domain based on <code>from</code>.
+     * @param name name of the variable to create
+     * @param from variable to copy values from
+     * @return a new variable whom domain is the same as the one of <code>from</code>
+     */
+    default IntVar intVar(String name, IntVar from){
+        if(from.hasEnumeratedDomain()){
+            int[] values = from.stream().toArray();
+            return intVar(name, values);
+        }else{
+            int lb = from.getLB();
+            int ub = from.getUB();
+            return intVar(name, lb, ub);
+        }
+    }
+
     // ARRAY
 
     /**
