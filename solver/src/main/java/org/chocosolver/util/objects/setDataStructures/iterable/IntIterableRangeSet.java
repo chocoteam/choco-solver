@@ -15,7 +15,6 @@ import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -303,13 +302,10 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
             throw new IllegalStateException("This set is immutable");
         }
         int c = this.CARDINALITY;
-        int s2 = this.SIZE >> 1;
-        if (s2 > 0) {
-            DisposableRangeIterator rit = var.getRangeIterator(true);
-            while (rit.hasNext()) {
-                this.addBetween(rit.min(), rit.max());
-                rit.next();
-            }
+        DisposableRangeIterator rit = var.getRangeIterator(true);
+        while (rit.hasNext()) {
+            this.addBetween(rit.min(), rit.max());
+            rit.next();
         }
         return CARDINALITY < c;
     }

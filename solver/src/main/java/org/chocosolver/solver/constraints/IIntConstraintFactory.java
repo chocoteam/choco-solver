@@ -35,6 +35,7 @@ import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.constraints.nary.automata.PropRegular;
 import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking;
+import org.chocosolver.solver.constraints.nary.binPacking.PropBinPacking2;
 import org.chocosolver.solver.constraints.nary.channeling.PropClauseChanneling;
 import org.chocosolver.solver.constraints.nary.channeling.PropEnumDomainChanneling;
 import org.chocosolver.solver.constraints.nary.channeling.PropInverseChannelAC;
@@ -892,6 +893,33 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
             model.sum(binLoad, "=", sum),
             model.allDifferent(list.toArray(new IntVar[0]))
+        );
+    }
+
+    default Constraint binPacking2(IntVar[] itemBin, int[] itemSize, int[] binLoad) {
+        if (itemBin.length != itemSize.length) {
+            throw new SolverException("itemBin and itemSize arrays should have same size");
+        }
+        Model model = itemBin[0].getModel();
+        // redundant filtering
+        int maxCapa = binLoad[0];
+        for (int j = 1; j < binLoad.length; j++) {
+            maxCapa = Math.max(maxCapa, binLoad[j]);
+        }
+        int thresholdCapa = (int) Math.ceil(1.0 * maxCapa / 2);
+        List<IntVar> list = new ArrayList<>(itemBin.length);
+        for (int i = 0; i < itemBin.length; i++) {
+            if (itemSize[i] > thresholdCapa) {
+                list.add(itemBin[i]);
+            }
+        }
+
+        return Constraint.merge(
+                ConstraintsName.BINPACKING,
+                new Constraint(ConstraintsName.BINPACKING,
+                        new PropBinPacking2(itemBin, itemSize, binLoad)),
+                    model.allDifferent(list.toArray(new IntVar[0])
+                    )
         );
     }
 
@@ -2133,7 +2161,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars      variables forming the tuples
      * @param tuples    the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
-     * @param algo to choose among {"TC+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
+     * @param algo to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
