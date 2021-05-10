@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.constraints.graph.connectivity;
 
-import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -18,7 +16,6 @@ import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.graphOperations.connectivity.UGVarConnectivityHelper;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.BitSet;
 
@@ -81,26 +78,13 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
                 g.removeNode(o, this);
             }
 
-            if (g.getMandatoryNodes().size() > 1) {
-
-                helper.findMandatoryArticulationPointsAndBridges();
-
-                // 2 --- enforce articulation points that link two mandatory nodes
-                for(int ap:helper.getArticulationPoints()){
-                    g.enforceNode(ap, this);
-                }
-
-                // 3 --- enforce isthma that link two mandatory nodes (current version is bugged)
-//				ISet mNodes = g.getMandatoryNodes();
-//				TIntArrayList brI = helper.getBridgeFrom();
-//				TIntArrayList brJ = helper.getBridgeTo();
-//				for(int k=0; k<brI.size(); k++){
-//					int i = brI.get(k);
-//					int j = brJ.get(k);
-//					if(mNodes.contains(i) && mNodes.contains(j)){
-//						g.enforceEdge(i, j, this);
-//					}
-//				}
+            // 2 --- enforce articulation points and bridges that link two mandatory nodes
+            helper.computeMandatoryArticulationPointsAndBridges();
+            for(int ap:helper.getArticulationPoints()) {
+                g.enforceNode(ap, this);
+            }
+            for(int[] bridge:helper.getBridges()) {
+                g.enforceEdge(bridge[0], bridge[1], this);
             }
         }
     }

@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-// Generated from Flatzinc4Parser.g4 by ANTLR 4.8
+// Generated from Flatzinc4Parser.g4 by ANTLR 4.9.2
 package org.chocosolver.parser.flatzinc;
 
 import org.antlr.v4.runtime.*;
@@ -28,7 +28,7 @@ import java.util.List;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.8", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.9.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
