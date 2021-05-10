@@ -28,9 +28,6 @@ public class StoredBool extends IStateBool {
     public StoredBool(final EnvironmentTrailing env, final boolean i) {
         super(env, i);
         myTrail = env.getBoolTrail();
-        if(env.fakeHistoryNeeded()){
-            myTrail.buildFakeHistory(this, i, timeStamp);
-        }
     }
 
     /**

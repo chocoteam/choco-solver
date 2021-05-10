@@ -43,7 +43,6 @@ public interface Settings {
      *    <li>{@link #setModelChecker(Predicate)}</li>
      *    <li>{@link #setDefaultSearch(Function)}</li>
      *    <li>{@link #setInitSolver(Function)}        </li>
-     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
      * @param properties a property file to load setting from.
@@ -106,7 +105,6 @@ public interface Settings {
      *    <li>{@link #setModelChecker(Predicate)}</li>
      *    <li>{@link #setDefaultSearch(Function)}</li>
      *    <li>{@link #setInitSolver(Function)}        </li>
-     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
      * @param      inStream   the input stream.
@@ -130,7 +128,6 @@ public interface Settings {
      *    <li>{@link #setModelChecker(Predicate)}</li>
      *    <li>{@link #setDefaultSearch(Function)}</li>
      *    <li>{@link #setInitSolver(Function)}        </li>
-     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
      * @return the property file
@@ -171,7 +168,6 @@ public interface Settings {
      *    <li>{@link #setModelChecker(Predicate)}</li>
      *    <li>{@link #setDefaultSearch(Function)}</li>
      *    <li>{@link #setInitSolver(Function)}        </li>
-     *    <li>{@link #setEnvironmentHistorySimulationCondition(ICondition)}</li>
      *    <li>{@link #setEnableIncrementalityOnBoolSum(IntPredicate)}           </li>
      * </ul>
      * @param   out      an output stream.
@@ -330,19 +326,15 @@ public interface Settings {
     Settings setDefaultSearch(Function<Model, AbstractStrategy> defaultSearch);
 
     /**
-     * @return the condition to satisfy when rebuilding history of backtrackable objects is needed.
+     * @deprecated
      */
+    @Deprecated
     ICondition getEnvironmentHistorySimulationCondition();
 
     /**
-     * Set the condition to satisfy when rebuilding history of backtrackable objects is needed.
-     * Building "fake" history is needed when a backtrackable object is created during the search, in order to restore a correct state upon backtrack.
-     * The default condition is "at least one env.worldPush() has been called since the creation of the bck object".
-     * The condition can be set to {@link org.chocosolver.memory.ICondition#FALSE} if no backtrackable object is created during the search.
-     *
-     * @param environmentHistorySimulationCondition the condition to satisfy when rebuilding history of backtrackable objects is needed.
-     * @return the current instance
+     * @deprecated
      */
+    @Deprecated
     Settings setEnvironmentHistorySimulationCondition(ICondition environmentHistorySimulationCondition);
 
     /**

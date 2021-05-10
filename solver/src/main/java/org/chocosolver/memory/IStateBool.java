@@ -28,7 +28,7 @@ public abstract class IStateBool  {
     public IStateBool(IEnvironment env, boolean i) {
         environment = env;
         currentValue = i;
-        timeStamp = environment.getWorldIndex();
+        timeStamp = -1;
     }
 
     /**

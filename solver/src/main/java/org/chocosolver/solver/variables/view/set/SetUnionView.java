@@ -74,9 +74,9 @@ public class SetUnionView extends SetView<SetVar> {
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
-        boolean b = true;
+        boolean b = false;
         for (SetVar set : variables) {
-            b = b && set.remove(element, this);
+            b |= set.remove(element, this);
         }
         return b;
     }

@@ -26,6 +26,7 @@ This is helpful when a Solution object is required in many places.
 
 ### Deprecated API (to be removed in next release):
 
+
 ### Other closed issues and pull requests:
 See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 

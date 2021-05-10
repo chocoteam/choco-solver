@@ -68,12 +68,4 @@ public class ChunckedIntTrail extends ChunckedTrail<IntWorld> implements IStored
         current.savePreviousState(v, oldValue, oldStamp);
     }
 
-    @Override
-    public void buildFakeHistory(StoredInt v, int initValue, int olderStamp) {
-        // rewrite older states
-        for (int w = olderStamp; w > 0; w--) {
-            IntWorld cur = worlds[w];
-            cur.savePreviousState(v, initValue, w - 1);
-        }
-    }
 }

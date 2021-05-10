@@ -70,6 +70,8 @@ public interface IView<V extends Variable> extends ICause, Variable {
      * @param variableIdx the index of the variable in the view's observed variables
      * @throws ContradictionException if a failure occurs
      */
-    void notify(IEventType event, int variableIdx) throws ContradictionException;
+    default void notify(IEventType event, int variableIdx) throws ContradictionException{
+        notifyPropagators(event, this);
+    }
 
 }

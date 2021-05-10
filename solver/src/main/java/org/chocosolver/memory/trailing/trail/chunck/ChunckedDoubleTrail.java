@@ -68,12 +68,4 @@ public class ChunckedDoubleTrail extends ChunckedTrail<DoubleWorld> implements I
         current.savePreviousState(v, oldValue, oldStamp);
     }
 
-    @Override
-    public void buildFakeHistory(StoredDouble v, double initValue, int olderStamp) {
-        // rewrite older states
-        for (int w = olderStamp; w > 0; w--) {
-            DoubleWorld cur = worlds[w];
-            cur.savePreviousState(v, initValue, w - 1);
-        }
-    }
 }

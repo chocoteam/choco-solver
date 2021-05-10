@@ -28,7 +28,7 @@ public abstract class IStateDouble  {
     public IStateDouble(IEnvironment env, double i) {
         environment = env;
         currentValue = i;
-        timeStamp = environment.getWorldIndex();
+        timeStamp = -1;
     }
 
     /**
