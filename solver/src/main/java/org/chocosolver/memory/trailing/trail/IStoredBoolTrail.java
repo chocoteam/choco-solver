@@ -22,5 +22,4 @@ public interface IStoredBoolTrail extends IStorage {
 
     void savePreviousState(StoredBool v, boolean oldValue, int oldStamp);
 
-    void buildFakeHistory(StoredBool v, boolean initValue, int fromStamp);
 }

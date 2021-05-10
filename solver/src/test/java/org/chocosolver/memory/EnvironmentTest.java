@@ -30,8 +30,8 @@ public class EnvironmentTest {
     @DataProvider(name = "env")
     public Object[][] env() {
         return new IEnvironment[][]{
-            {new EnvironmentBuilder().fromFlat().build()},
-            {new EnvironmentBuilder().fromChunk().build()}
+                {new EnvironmentBuilder().fromFlat().build()},
+                {new EnvironmentBuilder().fromChunk().build()}
         };
     }
 
@@ -104,13 +104,13 @@ public class EnvironmentTest {
         Assert.assertTrue(prim.get(i8));
         Assert.assertFalse(prim.get(i9));
         Assert.assertFalse(prim.get(i10));
-        prim.clear(i8, i10+1);
+        prim.clear(i8, i10 + 1);
         prim.set(i9, true);
         Assert.assertFalse(prim.get(i8));
         Assert.assertTrue(prim.get(i9));
         Assert.assertFalse(prim.get(i10));
         environment.worldPush();
-        prim.set(i8, i10+1);
+        prim.set(i8, i10 + 1);
         prim.set(i9, false);
         Assert.assertTrue(prim.get(i8));
         Assert.assertFalse(prim.get(i9));
@@ -135,7 +135,7 @@ public class EnvironmentTest {
         Assert.assertEquals(prim.prevSetBit(i9), i9);
         Assert.assertEquals(prim.prevSetBit(size - 1), i9);
         Assert.assertEquals(prim.prevSetBit(i8), -1);
-        Assert.assertEquals(prim.prevClearBit(i9), i9-1);
+        Assert.assertEquals(prim.prevClearBit(i9), i9 - 1);
         Assert.assertEquals(prim.prevClearBit(size - 1), size - 1);
         Assert.assertEquals(prim.prevClearBit(i8), i8);
 
@@ -148,7 +148,7 @@ public class EnvironmentTest {
         Assert.assertEquals(prim.toString(), "{}");
         Assert.assertEquals(prim.cardinality(), 0);
         Assert.assertTrue(prim.isEmpty());
-        try{
+        try {
             prim.set(-1);
             Assert.fail();
         } catch (IndexOutOfBoundsException ignored) { }
@@ -194,7 +194,7 @@ public class EnvironmentTest {
         solver.showDecisions();
         solver.solve();
         model.getEnvironment().worldCommit();
-        while(model.getEnvironment().getWorldIndex()>0){
+        while (model.getEnvironment().getWorldIndex() > 0) {
             model.getEnvironment().worldPop();
         }
     }
@@ -316,5 +316,74 @@ public class EnvironmentTest {
         } catch (Exception e) {
             assert false;
         }
+    }
+
+    @Test(groups = "1s", dataProvider = "env")
+    public void testSave(IEnvironment env) {
+        final int[] val = {0};
+        env.worldPush();
+        val[0] = 2;
+        env.save(() -> val[0] = 0);
+        env.worldPush();
+        val[0] = 4;
+        env.save(() -> val[0] = 2);
+        env.worldPush();
+        val[0] = 6;
+        env.save(() -> val[0] = 4);
+        Assert.assertEquals(val[0], 6);
+        env.worldPop();
+        Assert.assertEquals(val[0], 4);
+        env.worldPop();
+        Assert.assertEquals(val[0], 2);
+        env.worldPop();
+        Assert.assertEquals(val[0], 0);
+    }
+
+    @Test(groups = "1s", dataProvider = "env")
+    public void testSaveAt1(IEnvironment env) {
+        final int[] val = {0, 1};
+        env.worldPush();
+        val[0] = 2;
+        env.saveAt(() -> val[0] = 0, 1);
+        env.worldPush();
+        val[0] = 4;
+        env.saveAt(() -> val[0] = 2, 2);
+        env.worldPush();
+        val[0] = 6;
+        env.saveAt(() -> val[0] = 4, 3);
+        Assert.assertEquals(val, new int[]{6, 1});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{4, 1});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{2, 1});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{0, 1});
+    }
+
+    @Test(groups = "1s", dataProvider = "env")
+    public void testSaveAt2(IEnvironment env) {
+        final int[] val = {0, 1};
+        env.worldPush();
+        val[0] = 2;
+        val[1] = 3;
+        env.save(() -> val[1] = 1);
+        env.saveAt(() -> val[0] = 0, 1);
+        env.worldPush();
+        val[0] = 4;
+        val[1] = 5;
+        env.save(() -> val[1] = 3);
+        env.saveAt(() -> val[0] = 2, 2);
+        env.worldPush();
+        val[0] = 6;
+        val[1] = 7;
+        env.save(() -> val[1] = 5);
+        env.saveAt(() -> val[0] = 4, 3);
+        Assert.assertEquals(val, new int[]{6, 7});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{4, 5});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{2, 3});
+        env.worldPop();
+        Assert.assertEquals(val, new int[]{0, 1});
     }
 }

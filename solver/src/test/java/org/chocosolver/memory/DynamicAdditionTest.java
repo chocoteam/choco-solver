@@ -33,7 +33,6 @@ public class DynamicAdditionTest {
 
     @Test(groups="1s", timeOut=60000, dataProvider = "env")
     public void test1(EnvironmentTrailing environment) {
-        environment.buildFakeHistoryOn(new Except_0());
         IStateInt a = environment.makeInt(10);
         a.set(11);
         environment.worldPush();
@@ -95,7 +94,6 @@ public class DynamicAdditionTest {
 
     @Test(groups="1s", timeOut=60000, dataProvider = "env")
     public void test2(EnvironmentTrailing environment){
-        environment.buildFakeHistoryOn(new Except_0());
         int n = 100;
         int m = 100;
         int k = 100;
@@ -124,7 +122,6 @@ public class DynamicAdditionTest {
 
     @Test(groups="10s", timeOut=300000, dataProvider = "env")
     public void test3(EnvironmentTrailing environment) {
-        environment.buildFakeHistoryOn(new Except_0());
         int n = 5000;
         int m = 3000;
         int k = 100;

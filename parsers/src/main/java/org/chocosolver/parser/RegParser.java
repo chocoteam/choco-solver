@@ -49,8 +49,8 @@ public abstract class RegParser implements IParser {
             "0: automatic\n " +
             "1: FlatZinc (.fzn)\n" +
             "2: XCSP3 (.xml or .lzma)\n" +
-            "3: MPS (.mps)\n" +
-            "4: JSON (.json).")
+            "3: DIMACS (.cnf),\n" +
+            "4: MPS (.mps)")
     private int pa = 0;
 
     @Option(name = "-limit",
@@ -236,7 +236,8 @@ public abstract class RegParser implements IParser {
             // do not enumerate on the complementary search (greedy assignment)
             if (k > 0) {
                 solver.setSearch(solver.getSearch(),
-                        Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        //Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        Search.inputOrderLBSearch(Arrays.copyOf(ovars, k)));
             }
         }
     }

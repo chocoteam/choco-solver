@@ -66,7 +66,12 @@ public class SetStrategy extends AbstractStrategy<SetVar> {
 
     @Override
     public boolean init(){
-        return true;
+        return varSelector.init();
+    }
+
+    @Override
+    public void remove() {
+        varSelector.remove();
     }
 
     @Override

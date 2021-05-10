@@ -9,16 +9,19 @@
  */
 package org.chocosolver.mps;
 
-import org.chocosolver.parser.mps.MPS;
 import org.chocosolver.parser.SetUpException;
+import org.chocosolver.parser.mps.MPS;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p> Project: choco-parsers.
@@ -28,34 +31,46 @@ import java.nio.file.Paths;
  */
 public class ParserTest {
 
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void test1() throws Exception {
-        ClassLoader cl = this.getClass().getClassLoader();
-        String file = cl.getResource("mps/example1.mps").getFile();
-        run(file);
-    }
+    private static final String ROOT = "/mps/";
+    private static final String COMMENT = "#";
+    private static final String DELIMITER = ",";
 
     @DataProvider(name = "small")
-    public Object[][] mps() throws IOException {
-        ClassLoader cl = this.getClass().getClassLoader();
-        String folder = cl.getResource("mps").getFile();
-        return Files.walk(Paths.get(folder))
-                .filter(Files::isRegularFile)
-                .map(f -> new Object[]{f.toString()})
-                .toArray(Object[][]::new);
+    public Object[][] mps() {
+        List<Object[]> parameters = new ArrayList<>();
+        try (BufferedReader br = Files.newBufferedReader(
+                Paths.get(this.getClass().getResource(
+                        ROOT + "instances.csv").getPath()))) {
+            // read the file line by line
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.startsWith(COMMENT))
+                    continue;
+                // convert line into columns
+                String[] columns = line.split(DELIMITER);
+                parameters.add(new Object[]{
+                        ROOT + columns[0], // path
+                        Integer.parseInt(columns[1]), // solutions
+                        Double.parseDouble(columns[2]), // best
+                        Integer.parseInt(columns[3]), // nodes
+                        Integer.parseInt(columns[4]), // failures
+                        Boolean.parseBoolean(columns[5]) // failures
+                });
+            }
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return parameters.toArray(new Object[0][0]);
 
     }
 
     @Test(groups = "mps", timeOut = 120000, dataProvider = "small")
-    public void test2(String file) throws IOException, SetUpException {
-        run(file);
-    }
-
-    private void run(String file) throws SetUpException {
+    public void test1(String path, int solutions, Double bst, int nodes, int failures, boolean comp) throws SetUpException {
+        String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
                 file,
-                "-limit", "[60s]",
+                "-limit", "[30s]",
                 "-stat",
                 "-prec", "1.0E-4D",
                 "-ninf", "-999.D",
@@ -68,8 +83,17 @@ public class ParserTest {
         mps.buildModel();
         mps.configureSearch();
         mps.solve();
-        Assert.assertTrue(mps.getModel().getSolver().getSearchState().equals(SearchState.TERMINATED)
-                || mps.getModel().getSolver().getSolutionCount()>0);
+        if(comp){
+            Assert.assertEquals(mps.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+            Assert.assertEquals(mps.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
+            Assert.assertEquals(mps.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        }
+        Assert.assertEquals(mps.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        if (mps.getModel().getSolver().getObjectiveManager().getBestSolutionValue() instanceof Integer) {
+            Assert.assertEquals(mps.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst.intValue(), "Unexpected best solution");
+        } else {
+            Assert.assertEquals(mps.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
+        }
     }
 
 }
