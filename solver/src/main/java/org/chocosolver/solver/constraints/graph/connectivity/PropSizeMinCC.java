@@ -28,6 +28,8 @@ import java.util.Set;
  * Propagator ensuring that the number of vertices of the smallest connected is equal to sizeMinCC
  * (cf. MIN_NCC graph property http://www.emn.fr/x-info/sdemasse/gccat/sec2.2.2.4.html#uid940).
  *
+ * Reference for bounds and filtering scheme: https://arxiv.org/abs/2105.00663v1
+ *
  * @author Dimitri Justeau-Allaire
  */
 public class PropSizeMinCC extends Propagator<Variable> {

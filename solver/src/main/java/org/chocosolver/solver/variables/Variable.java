@@ -46,41 +46,34 @@ public interface Variable extends Identity, Comparable<Variable> {
     int VIEW = 1 << 2;
 
     /**
-     * Kind of variable: non-injective view (i.e. a value of the view can correspond to several values of the
-     * observed variable). It is not recommended to branch on such views as an instantiation of the view does not
-     * guarantee an instantiation of the observed variable.
-     */
-    int NON_INJECTIVE_VIEW = 1 << 3;
-
-    /**
      * Mask to get the type of a variable.
      */
-    int TYPE = (1 << 4) - 1;
+    int TYPE = (1 << 3) - 1;
 
     /**
      * Kind of variable: integer (unique).
      */
-    int INT = 1 << 4;
+    int INT = 1 << 3;
 
     /**
      * Kind of variable: boolean and integer too (unique).
      */
-    int BOOL = INT | (1 << 5);
+    int BOOL = INT | (1 << 4);
 
     /**
      * Kind of variable: set.
      */
-    int SET = 1 << 6;
+    int SET = 1 << 5;
 
     /**
      * Kind of variable: real.
      */
-    int REAL = 1 << 7;
+    int REAL = 1 << 6;
 
     /**
      * Kind of variable: graph.
      */
-    int GRAPH = 1 << 8;
+    int GRAPH = 1 << 7;
 
     /**
      * Mask to get the kind of a variable.

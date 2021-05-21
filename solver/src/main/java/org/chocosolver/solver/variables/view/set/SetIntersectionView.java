@@ -102,9 +102,4 @@ public class SetIntersectionView extends SetView<SetVar> {
         }
         return b;
     }
-
-    @Override
-    public int getTypeAndKind() {
-        return Variable.NON_INJECTIVE_VIEW | Variable.SET;
-    }
 }

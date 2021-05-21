@@ -178,7 +178,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
 
     @Override
     public int getTypeAndKind() {
-        return VAR | GRAPH;
+        return VIEW | GRAPH;
     }
 
     @Override

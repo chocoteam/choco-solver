@@ -541,7 +541,7 @@ public class Search {
         Variable objective = null;
         for (Variable var : variables) {
             int type = var.getTypeAndKind();
-            if ((type & (Variable.CSTE | Variable.NON_INJECTIVE_VIEW)) == 0) {
+            if ((type & (Variable.CSTE)) == 0) {
                 int kind = type & Variable.KIND;
                 switch (kind) {
                     case Variable.BOOL:
