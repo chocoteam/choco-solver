@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.graph.degree;
 
+import gnu.trove.stack.array.TIntArrayStack;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -18,9 +19,11 @@ import org.chocosolver.solver.variables.IncidentSet;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.Orientation;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.procedure.PairProcedure;
 
 /**
@@ -28,17 +31,19 @@ import org.chocosolver.util.procedure.PairProcedure;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
+public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar<?>> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure enf_proc;
-    private int[] degrees;
-    private IncidentSet target;
+    private final GraphVar<?> g;
+    private final int[] degrees;
+    private final IncidentSet target;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure proc;
+    private final IntProcedure nodeProc;
+    private final TIntArrayStack stack = new TIntArrayStack();
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -56,15 +61,16 @@ public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
         switch (setType) {
             case SUCCESSORS:
                 target = new IncidentSet.SuccessorsSet();
-                enf_proc = (i, j) -> checkAtMost(i);
+                proc = (i, j) -> stack.push(i);
                 break;
             case PREDECESSORS:
                 target = new IncidentSet.PredecessorsSet();
-                enf_proc = (i, j) -> checkAtMost(j);
+                proc = (i, j) -> stack.push(j);
                 break;
             default:
                 throw new UnsupportedOperationException("wrong parameter: use either PREDECESSORS or SUCCESSORS");
         }
+        nodeProc = stack::push;
     }
 
     public PropNodeDegreeAtMostIncr(UndirectedGraphVar graph, int degree) {
@@ -77,10 +83,11 @@ public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
         g = graph;
         gdm = g.monitorDelta(this);
         this.degrees = degrees;
-        enf_proc = (i, j) -> {
-            checkAtMost(i);
-            checkAtMost(j);
+        proc = (i, j) -> {
+            stack.push(i);
+            stack.push(j);
         };
+        nodeProc = stack::push;
     }
 
     private static int[] buildArray(int degree, int n) {
@@ -97,15 +104,26 @@ public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        ISet act = g.getPotentialNodes();
-        for (int node : act) {
-            checkAtMost(node);
+        if (PropagatorEventType.isFullPropagation(evtmask)) {
+            ISet act = g.getPotentialNodes();
+            for (int node : act) {
+                stack.push(node);
+            }
+        }
+        try {
+            while (stack.size() > 0) {
+                checkAtMost(stack.pop());
+            }
+        } finally {
+            stack.clear();
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        gdm.forEachEdge(enf_proc, GraphEventType.ADD_EDGE);
+        gdm.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
+        gdm.forEachEdge(proc, GraphEventType.ADD_EDGE);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     //***********************************************************************************
@@ -114,7 +132,7 @@ public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return GraphEventType.ADD_EDGE.getMask();
+        return GraphEventType.ADD_EDGE.getMask() + GraphEventType.REMOVE_NODE.getMask();
     }
 
     @Override
@@ -142,15 +160,22 @@ public class PropNodeDegreeAtMostIncr extends Propagator<GraphVar> {
      * should be removed
      */
     private void checkAtMost(int i) throws ContradictionException {
+        ISet pot = target.getPotentialSet(g, i);
         ISet ker = target.getMandatorySet(g, i);
-        ISet env = target.getPotentialSet(g, i);
-        int size = ker.size();
-        if (size > degrees[i]) {
+        int kerSize = ker.size();
+        if (kerSize > degrees[i]) {
+            for (int s : g.getPotentialPredecessorOf(i)) {
+                stack.push(s);
+            }
+            for (int s : g.getPotentialSuccessorsOf(i)) {
+                stack.push(s);
+            }
             g.removeNode(i, this);
-        } else if (size == degrees[i] && env.size() > size) {
-            for (int other : env) {
-                if (!ker.contains(other)) {
-                    target.remove(g, i, other, this);
+        } else if (kerSize == degrees[i] && pot.size() > kerSize) {
+            for (int s : pot) {
+                if (!ker.contains(s)) {
+                    target.remove(g, i, s, this);
+                    stack.push(s);
                 }
             }
         }

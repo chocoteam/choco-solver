@@ -171,13 +171,14 @@ public class SatDecorator extends MiniSat {
             while (toCheck.size() > 0) {
                 Variable cvar = toCheck.pollFirst();
                 List<Literalizer> myLits = vars.get(cvar);
-                for (Literalizer ltz : myLits) {
+                for (int i  = 0; i < myLits.size(); i++) {
+                    Literalizer ltz = myLits.get(i);
                     if (ltz.canReact()) {
                         int lit = ltz.toLit();
                         if (propagateOneLiteral(lit)) {
                             sat_trail_.set(trailMarker());
-                            for (int i = 0; i < touched_variables_.size(); ++i) {
-                                lit = touched_variables_.get(i);
+                            for (int j = 0; j < touched_variables_.size(); ++j) {
+                                lit = touched_variables_.get(j);
                                 Literalizer lzr = lits.get(var(lit));
                                 if (lzr != null && lzr.toEvent(lit, cause)) {
                                     toCheck.addFirst(lzr.cvar());

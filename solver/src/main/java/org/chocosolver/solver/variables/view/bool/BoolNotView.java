@@ -109,8 +109,9 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
+            boolean done = var.instantiateTo(1 - value, this);
             notifyPropagators(IntEventType.INSTANTIATE, cause);
-            return var.instantiateTo(1 - value, this);
+            return done;
         }
         return false;
     }

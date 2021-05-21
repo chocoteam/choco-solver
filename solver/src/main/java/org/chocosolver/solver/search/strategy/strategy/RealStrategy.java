@@ -30,11 +30,11 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
     /**
      * How a variable is selected
      */
-    private VariableSelector<RealVar> varselector;
+    private final VariableSelector<RealVar> varselector;
     /**
      * How a value is selected
      */
-    private RealValueSelector valueIterator;
+    private final RealValueSelector valueIterator;
     /**
      * Gap when refuting a decision
      */
@@ -77,7 +77,12 @@ public class RealStrategy extends AbstractStrategy<RealVar> {
 
     @Override
     public boolean init() {
-        return true;
+        return varselector.init();
+    }
+
+    @Override
+    public void remove() {
+        varselector.remove();
     }
 
     @Override

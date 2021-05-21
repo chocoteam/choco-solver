@@ -21,7 +21,6 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
 /**
- *
  * To developers: any constructor of variable must pass in parameter
  * the back-end ISolver, that is, in decreasing order:
  * - the model portfolio,
@@ -89,11 +88,39 @@ public interface Variable extends Identity, Comparable<Variable> {
     int KIND = (1 << 10) - 1 - TYPE;
 
     /**
-     * Indicates whether <code>this</code> is instantiated (see implemtations to know what instantiation means).
+     * Indicates whether <code>this</code> is instantiated (see implementations to know what instantiation means).
      *
      * @return <code>true</code> if <code>this</code> is instantiated
      */
     boolean isInstantiated();
+
+    /**
+     * Return the world index at which this variable has been instantiated is returned.
+     * If the variable is not instantiated, then it returns {@link Integer#MAX_VALUE}, that
+     * is a value greater than the current world index.
+     *
+     * @return the world index at which this variable has been instantiated is returned or
+     * {@link Integer#MAX_VALUE}.
+     * @implNote <p>
+     * Indeed, a call to {@link #recordWorldIndex()}
+     * is only when the variable becomes fixed (ie, instantiated),
+     * but nothing is (un)done upon backtrack, when the variable becomes free again.
+     * </p>
+     * <p>For constant, a call to this method returns 0.</p>
+     * @see #recordWorldIndex()
+     * @see Model#getEnvironment()
+     * @see IEnvironment#getWorldIndex()
+     */
+    int instantiationWorldIndex();
+
+    /**
+     * Record the world index at which this variable has been instantiated.
+     *
+     * @see #instantiationWorldIndex()
+     * @see Model#getEnvironment()
+     * @see IEnvironment#getWorldIndex()
+     */
+    void recordWorldIndex();
 
     /**
      * Returns the name of <code>this</code>
@@ -105,9 +132,9 @@ public interface Variable extends Identity, Comparable<Variable> {
     /**
      * Return the array of propagators this
      *
-     * @return the array of proapgators of this
+     * @return the array of propagators of this
      */
-    Propagator[] getPropagators();
+    Propagator<?>[] getPropagators();
 
     /**
      * Return the "idx" th propagator of this
@@ -116,7 +143,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @return a propagator
      */
     @SuppressWarnings("unused")
-    Propagator getPropagator(int idx);
+    Propagator<?> getPropagator(int idx);
 
     /**
      * Return the number of propagators
@@ -132,6 +159,7 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * Update the position of the variable in the propagator at position in {@link #getPropagators()}.
+     *
      * @param pos position of the propagator
      * @param val position of this variable in the propagator
      */
@@ -141,6 +169,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * This variable's propagators are stored in specific way which ease iteration based on propagation conditions.
      * Any event indicates, through the <i>dependency list</i> which propagators should be executed.
      * Thus, an event indicates a list of <code>i</code>s, passed as parameter, which help returning the right propagators.
+     *
      * @param i dependency index
      * @return index of the first propagator associated with that dependency.
      */
@@ -161,21 +190,23 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param monitor a variable monitor
      */
-    void addMonitor(IVariableMonitor monitor);
+    void addMonitor(IVariableMonitor<?> monitor);
 
     /**
      * Removes <code>monitor</code> form the list of this variable's monitors.
+     *
      * @param monitor the monitor to remove.
      */
     @SuppressWarnings("unused")
-    void removeMonitor(IVariableMonitor monitor);
+    void removeMonitor(IVariableMonitor<?> monitor);
 
     /**
      * Attaches a view to this variable.
+     *
      * @param view a view to add to this variable.
-     * @param idx the index of this variable in the view's array of observed variables
+     * @param idx  the index of this variable in the view's array of observed variables
      */
-    void subscribeView(IView view, int idx);
+    void subscribeView(IView<?> view, int idx);
 
     /**
      * Return the delta domain of this
@@ -197,7 +228,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param idxInProp  index of the variable in the propagator
      * @return return the index of the propagator within the variable
      */
-    int link(Propagator propagator, int idxInProp);
+    int link(Propagator<?> propagator, int idxInProp);
 
     /**
      * The propagator will not be informed of any modification of this anymore.
@@ -206,7 +237,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param idxInProp  index of the variable in the propagator
      * @return return the index of the propagator within the variable
      */
-    int swapOnPassivate(Propagator propagator, int idxInProp);
+    int swapOnPassivate(Propagator<?> propagator, int idxInProp);
 
     /**
      * The propagator will be informed back of any modification of this.
@@ -215,7 +246,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param idxInProp  index of the variable in the propagator
      * @return return the index of the propagator within the variable
      */
-    int swapOnActivate(Propagator propagator, int idxInProp);
+    int swapOnActivate(Propagator<?> propagator, int idxInProp);
 
     /**
      * Remove a propagator from the list of propagator of <code>this</code>.
@@ -223,9 +254,8 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param propagator the propagator to remove
      * @param idxInProp  index of the variable in the propagator
-     *
      */
-    void unlink(Propagator propagator, int idxInProp);
+    void unlink(Propagator<?> propagator, int idxInProp);
 
 
     /**
@@ -234,8 +264,7 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param event event on this object
      * @param cause object which leads to the modification of this object
-     * @throws ContradictionException
-     *          if a contradiction occurs during notification
+     * @throws ContradictionException if a contradiction occurs during notification
      */
     void notifyPropagators(IEventType event, ICause cause) throws ContradictionException;
 
@@ -253,13 +282,14 @@ public interface Variable extends Identity, Comparable<Variable> {
      */
     int getNbViews();
 
-	/**
-	 * Get the view at position <i>p</i> in this variable views.
+    /**
+     * Get the view at position <i>p</i> in this variable views.
      * The array is filled from position 0 to position {@link #getNbViews()} excluded.
+     *
      * @param p position of the view to return
-	 * @return view observing this variable, at position <i>p</i>
-	 */
-	IView getView(int p);
+     * @return view observing this variable, at position <i>p</i>
+     */
+    IView<?> getView(int p);
 
     /**
      * Notify monitors of observed variable modifications
@@ -271,6 +301,7 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * Throws a contradiction exception based on <cause, message>
+     *
      * @param cause   ICause causing the exception
      * @param message the detailed message  @throws ContradictionException expected behavior
      * @throws ContradictionException the build contradiction.
@@ -287,7 +318,7 @@ public interface Variable extends Identity, Comparable<Variable> {
     /**
      * @return the backtracking environment used for this variable
      */
-    default IEnvironment getEnvironment(){
+    default IEnvironment getEnvironment() {
         return getModel().getEnvironment();
     }
 
@@ -324,9 +355,10 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * For scheduling purpose only
+     *
      * @return the scheduler
      */
-    EvtScheduler getEvtScheduler();
+    EvtScheduler<?> getEvtScheduler();
 
     /**
      * @return this cast into an IntVar.
@@ -354,8 +386,9 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * Temporarily store modification events made on this.
-     * This is requiered by the propagation engine.
-     * @param mask event's mask
+     * This is required by the propagation engine.
+     *
+     * @param mask  event's mask
      * @param cause what causes the modification (cannot be null)
      */
     void storeEvents(int mask, ICause cause);
@@ -372,7 +405,7 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * @return cause stored through by {@link #storeEvents(int, ICause)} or {@link org.chocosolver.solver.Cause#Null}
-     * if differents causes modified this variable (this may happen when a view refers to this).
+     * if different causes modified this variable (this may happen when a view refers to this).
      */
     ICause getCause();
 }

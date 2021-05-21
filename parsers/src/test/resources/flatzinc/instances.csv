@@ -11,7 +11,7 @@
 2019,amaze3+2012-03-19.fzn,1,_,68704,68687
 2018,oocsp_racks+050_r1.fzn,1,_,9,4
 2018,rotating-workforce+ex1479.fzn,1,_,128979,128877
-2018,steiner-tree+es10fst03.stp.fzn,2,26003678,88211,88208
+2018,steiner-tree+es10fst03.stp.fzn,2,26003678,90342,90339
 2018,test-scheduling+t30m10r3-15.fzn,1,2785,7684,7683
 2017,group+u12g1pref0.fzn,13,297,819,794
 2017,tcgc2+k10_34.fzn,2,433,429538,429535
@@ -32,9 +32,9 @@
 2012,pattern-set-mining-k2+pattern_set_mining_k2+audiology.fzn,38,54,212187,212112
 2012,radiation+radiation+m06_15_15.fzn,1,711,307742,307741
 2012,ship-schedule+ship-schedule.cp+5Ships.fzn,359,483650,3139,2422
-2012,ship-schedule+ship-schedule.cp+6ShipsMixed.fzn,237,301650,16101,15628
+2012,ship-schedule+ship-schedule.cp+6ShipsMixed.fzn,237,301650,16089,15616
 2012,solbat+sb+sb_12_12_5_1.fzn,1,_,1315,1284
 2012,solbat+sb+sb_14_14_6_0.fzn,1,_,383,352
-2012,still-life-wastage+still-life+09.fzn,26,46,3473,3422
-2012,still-life-wastage+still-life+10.fzn,27,56,32548,32495
+2012,still-life-wastage+still-life+09.fzn,8,46,3564,3549
+2012,still-life-wastage+still-life+10.fzn,9,56,32568,32551
 2012,tpp+tpp+tpp_5_5_20_1.fzn,54,115,3215963,3215856

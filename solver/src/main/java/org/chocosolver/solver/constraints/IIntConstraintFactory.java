@@ -2133,7 +2133,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param vars      variables forming the tuples
      * @param tuples    the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
-     * @param algo to choose among {"TC+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
+     * @param algo to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         if (!tuples.allowUniversalValue() && vars.length == 2) {
