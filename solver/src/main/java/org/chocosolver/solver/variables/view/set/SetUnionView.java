@@ -100,9 +100,4 @@ public class SetUnionView extends SetView<SetVar> {
         }
         return false;
     }
-
-    @Override
-    public int getTypeAndKind() {
-        return Variable.NON_INJECTIVE_VIEW | Variable.SET;
-    }
 }

@@ -147,9 +147,4 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         }
         notifyPropagators(event, this);
     }
-
-    @Override
-    public int getTypeAndKind() {
-        return Variable.NON_INJECTIVE_VIEW | Variable.GRAPH;
-    }
 }
