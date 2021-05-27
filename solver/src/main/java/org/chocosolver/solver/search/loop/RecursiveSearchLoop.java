@@ -18,10 +18,6 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
-import java.util.Arrays;
-
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-
 /**
  * A list of service, just for fun
  * Created by cprudhom on 09/10/15.
@@ -63,7 +59,7 @@ class RecursiveSearchLoop {
         } else {
             assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
+            //System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
@@ -101,7 +97,7 @@ class RecursiveSearchLoop {
         } else {
             assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
+            //System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
@@ -143,7 +139,7 @@ class RecursiveSearchLoop {
         } else if (dis == 0) {
             assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
+            //System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
@@ -186,7 +182,7 @@ class RecursiveSearchLoop {
         } else if (dis == 0) {
             assert model.getSolver().isSatisfied() == ESat.TRUE;
             c++;
-            System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
+            //System.out.printf("Solution: %s\n", Arrays.toString(model.getVars()));
         }
         return c;
     }
@@ -199,7 +195,7 @@ class RecursiveSearchLoop {
         r.setEngine(new PropagationEngine(model));
         r.getEngine().initialize();
 //        System.out.printf("%d solutions\n", setDFS(solver, ISF.lexico_LB(X)));
-        System.out.printf("%d solutions\n", lds(model, inputOrderLBSearch(X), 3));
+        //System.out.printf("%d solutions\n", lds(model, inputOrderLBSearch(X), 3));
 //        for (int d = 2; d < 3; d++) {
 //            System.out.printf("%d solutions\n", ilds(solver, ISF.lexico_LB(X), d, X.length));
 //        }

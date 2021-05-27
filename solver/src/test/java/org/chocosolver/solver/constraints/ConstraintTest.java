@@ -131,7 +131,7 @@ public class ConstraintTest {
             c.reify();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -146,7 +146,7 @@ public class ConstraintTest {
             c.post();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -161,7 +161,7 @@ public class ConstraintTest {
             c.post();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -176,7 +176,7 @@ public class ConstraintTest {
             new Constraint("copycat", c.getPropagators());
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -190,7 +190,7 @@ public class ConstraintTest {
             m.unpost(c);
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }

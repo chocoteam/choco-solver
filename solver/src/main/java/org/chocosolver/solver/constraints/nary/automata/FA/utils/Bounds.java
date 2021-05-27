@@ -38,12 +38,4 @@ public class Bounds {
     public static Bounds makeBounds(int minValue, int minPrefered, int maxValue, int maxPrefered) {
         return new Bounds(minValue, minPrefered, maxValue, maxPrefered);
     }
-
-    public static void main(String[] args) {
-        Bounds a = new Bounds(0, 0, 0, 0);
-        Bounds b = new Bounds(9, 9, 9, 9);
-
-        System.out.println(b.min.prefered);
-        System.out.println(a.min.prefered);
-    }
 }
