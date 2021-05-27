@@ -325,8 +325,9 @@ public class SolverTest {
         Constraint expr = choco.arithm(choco.intVar(1, 2), "<", 2);
         expr.getOpposite().post();
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
-        choco.getSolver().setErr(new PrintStream(errContent));
+        choco.getSolver().log().add(new PrintStream(errContent));
         choco.getSolver().solve();
-        Assert.assertEquals("", errContent.toString());
+        Assert.assertEquals("No search strategies defined.\n" +
+                "Set to default ones.\n", errContent.toString());
     }
 }

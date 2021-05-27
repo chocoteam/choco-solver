@@ -164,13 +164,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().print("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            model.getSolver().log().bold().println("- objective in [" + globalLB + ", " + globalUB + "]");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         IntDecision dec = model.getSolver().getDecisionPath().makeIntDecision(obj, decOperator, target);
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().print("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target + "\n");
+            model.getSolver().log().bold().println("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target);
         }
         return dec;
     }

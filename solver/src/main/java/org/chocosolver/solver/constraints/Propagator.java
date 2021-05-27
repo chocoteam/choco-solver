@@ -824,7 +824,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
         if (DEFAULT_EXPL) {
-            if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for %s \n",this.getClass().getSimpleName());
+            if(OUTPUT_DEFAULT_EXPL)model.getSolver().log().bold().printf("-- default explain for %s \n",this.getClass().getSimpleName());
             defaultExplain(this, p, explanation);
         } else {
             ICause.super.explain(p, explanation);
