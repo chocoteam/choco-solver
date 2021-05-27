@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables.view.graph.undirected;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
@@ -82,21 +81,6 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
     }
 
     @Override
-    public boolean isInstantiated() {
-        if (getPotentialNodes().size() != getMandatoryNodes().size()) {
-            return false;
-        }
-        ISet suc;
-        for (int i : getUB().getNodes()) {
-            suc = getPotentialNeighborsOf(i);
-            if (suc.size() != getLB().getNeighborsOf(i).size()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
         if (enforceNodes.contains(node)) {
             contradiction(this, "Try to remove mandatory node");
@@ -141,6 +125,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                 if (potNeigh.size() == 1) {
                     graphVar.enforceEdge(node, potNeigh.newIterator().nextInt(), this);
                     enforceNodes.remove(node);
+                    break;
                 }
             }
             notifyPropagators(GraphEventType.REMOVE_NODE, this);

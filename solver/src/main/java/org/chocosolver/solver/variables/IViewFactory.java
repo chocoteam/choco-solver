@@ -16,12 +16,13 @@ import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedGraphUnionView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.EdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.NodeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.UndirectedGraphUnionView;
 import org.chocosolver.solver.variables.view.integer.*;
 import org.chocosolver.solver.variables.view.set.*;
-import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 import java.util.Arrays;
@@ -656,5 +657,27 @@ public interface IViewFactory extends ISelf<Model> {
      */
     default DirectedGraphVar edgeInducedSubgraphView(DirectedGraphVar g, int[][] edges, boolean exclude) {
         return new DirectedEdgeInducedSubgraphView(g.getName() + "{" + Arrays.deepToString(edges) + "}", g, edges, exclude);
+    }
+
+    /**
+     * Construct an undirected graph union view G = (V, E) from a set of undirected graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
+     *     V = V_1 \cup ... \cup V_k (\cup = set union);
+     *     E = E_1 \cup ... \cup E_k.
+     * @param graphVars the graphs to construct the union view from
+     * @return An undirected graph union view
+     */
+    default UndirectedGraphVar graphUnionView(UndirectedGraphVar... graphVars) {
+        return new UndirectedGraphUnionView("GraphUnionView", graphVars);
+    }
+
+    /**
+     * Construct a directed graph union view G = (V, E) from a set of directed graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
+     *     V = V_1 \cup ... \cup V_k (\cup = set union);
+     *     E = E_1 \cup ... \cup E_k.
+     * @param graphVars the graphs to construct the union view from
+     * @return A directed graph union view
+     */
+    default DirectedGraphVar graphUnionView(DirectedGraphVar... graphVars) {
+        return new DirectedGraphUnionView("GraphUnionView", graphVars);
     }
 }
