@@ -14,8 +14,12 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 
 /**
@@ -26,8 +30,9 @@ import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
  */
 public class SetIntersectionView extends SetView<SetVar> {
 
-    protected SetIntersection lb;
-    protected SetIntersection ub;
+    protected ISet lb;
+    protected ISet ub;
+    protected ISet remove;
 
     /**
      * Create a set intersection view.
@@ -37,6 +42,7 @@ public class SetIntersectionView extends SetView<SetVar> {
      */
     public SetIntersectionView(String name, SetVar... variables) {
         super(name, variables);
+        this.remove = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
         ISet[] LBs = new ISet[variables.length];
         ISet[] UBs = new ISet[variables.length];
         for (int i = 0; i < variables.length; i++) {
@@ -44,7 +50,7 @@ public class SetIntersectionView extends SetView<SetVar> {
             UBs[i] = variables[i].getUB();
         }
         this.lb = new SetIntersection(getModel(), LBs);
-        this.ub = new SetIntersection(getModel(), UBs);
+        this.ub = new SetDifference(getModel(), new SetIntersection(getModel(), UBs), this.remove);
     }
 
     @Override
@@ -69,6 +75,15 @@ public class SetIntersectionView extends SetView<SetVar> {
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        // Check if a multiple support removed element can effectively be removed
+        if ((event.getMask() & SetEventType.REMOVE_FROM_ENVELOPE.getMask()) > 0) {
+            for (int i : remove) {
+                if (doRemoveSetElement(i)) {
+                    remove.remove(i);
+                    break;
+                }
+            }
+        }
         notifyPropagators(event, this);
     }
 
@@ -89,6 +104,8 @@ public class SetIntersectionView extends SetView<SetVar> {
         if (nb == 1) {
             variables[idx].remove(element, this);
             return true;
+        } else {
+            remove.add(element);
         }
         return false;
     }
