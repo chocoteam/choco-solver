@@ -84,21 +84,6 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
     }
 
     @Override
-    public boolean isInstantiated() {
-        if (getPotentialNodes().size() != getMandatoryNodes().size()) {
-            return false;
-        }
-        ISet suc;
-        for (int i : getUB().getNodes()) {
-            suc = getPotentialSuccessorsOf(i);
-            if (suc.size() != getLB().getSuccessorsOf(i).size()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
         if (enforceNodes.contains(node)) {
             contradiction(this, "Try to remove mandatory node");
