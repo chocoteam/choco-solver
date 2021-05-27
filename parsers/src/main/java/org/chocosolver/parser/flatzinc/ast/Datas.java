@@ -11,6 +11,7 @@ package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.map.hash.THashMap;
 import org.chocosolver.parser.Exit;
+import org.chocosolver.parser.Level;
 import org.chocosolver.parser.flatzinc.ast.declaration.DArray;
 import org.chocosolver.parser.flatzinc.ast.declaration.Declaration;
 import org.chocosolver.parser.flatzinc.ast.expression.EArray;
@@ -28,8 +29,7 @@ import org.chocosolver.solver.variables.Variable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static org.chocosolver.parser.RegParser.PRINT_LOG;
+import java.util.Locale;
 
 /**
  * An object to maintain a link between the model and the solver, during the parsing phase.
@@ -51,10 +51,9 @@ public class Datas {
     private final List<Declaration.DType> output_arrays_types;
     private final List<Variable[]> output_arrays_vars;
 
-    private boolean printAll;
-    private boolean printStat;
+    private Level level = Level.COMPET;
     private int nbSolution;
-    private StringBuilder stringBuilder = new StringBuilder();
+    private final StringBuilder stringBuilder = new StringBuilder();
 
     private Model model;
     private Solution solution;
@@ -73,10 +72,9 @@ public class Datas {
         output_arrays_types = new ArrayList<>();
     }
 
-    public Datas(Model model, boolean printAll, boolean printStat) {
+    public Datas(Model model, Level theLevel) {
         this();
-        this.printAll = printAll;
-        this.printStat = printStat;
+        this.level = theLevel;
         this.model = model;
     }
 
@@ -165,36 +163,59 @@ public class Datas {
         }
     }
 
-    private void printSolution(){
+    private void printSolution() {
         for (int i = 0; i < output_names.size(); i++) {
-            if(PRINT_LOG)System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
-
+            if (level.isLoggable(Level.COMPET)) {
+                System.out.printf("%s = %s;\n", output_names.get(i), value(output_vars.get(i), output_types.get(i)));
+            }
         }
+        Solver solver = model.getSolver();
         for (int i = 0; i < output_arrays_names.size(); i++) {
             String name = output_arrays_names.get(i);
             Variable[] ivars = output_arrays_vars.get(i);
-            if (ivars.length > 0) {
-                Declaration.DType type = output_arrays_types.get(i);
-                stringBuilder.append(value(ivars[0], type));
-                for (int j = 1; j < ivars.length; j++) {
-                    stringBuilder.append(", ").append(value(ivars[j], type));
+            if (level.isLoggable(Level.COMPET)) {
+                if (ivars.length > 0) {
+                    Declaration.DType type = output_arrays_types.get(i);
+                    stringBuilder.append(value(ivars[0], type));
+                    for (int j = 1; j < ivars.length; j++) {
+                        stringBuilder.append(", ").append(value(ivars[j], type));
+                    }
+                    solver.log().printf(name, stringBuilder);
+                    stringBuilder.setLength(0);
+                } else {
+                    solver.log().print(name);
                 }
-                if(PRINT_LOG)System.out.printf(name, stringBuilder.toString());
-                stringBuilder.setLength(0);
-            } else {
-                if(PRINT_LOG)System.out.print(name);
             }
         }
-        if (printStat) {
-            // TODO used to use the toOneShortLineString that has been removed
-            if(PRINT_LOG)System.out.printf("%% %s \n", model.getSolver().getMeasures().toOneLineString());
+        if (level.isLoggable(Level.COMPET)) {
+            solver.log().bold().print("----------\n");
         }
-        if(PRINT_LOG)System.out.print("----------\n");
+        if (level.isLoggable(Level.INFO)) {
+            solver.log().white().printf("%s \n", solver.getMeasures().toOneLineString());
+        }
+        if (solver.getObjectiveManager().isOptimization()) {
+            if (level.is(Level.RESANA)) {
+                solver.log().printf(java.util.Locale.US, "o %d %.1f\n",
+                        solver.getObjectiveManager().getBestSolutionValue().intValue(),
+                        solver.getTimeCount());
+            }
+            if (level.is(Level.JSON)) {
+                solver.log().printf(Locale.US, "%s{\"bound\":%d,\"time\":%.1f}",
+                        solver.getSolutionCount() > 1 ? "," : "",
+                        solver.getObjectiveManager().getBestSolutionValue().intValue(),
+                        solver.getTimeCount());
+            }
+        } else {
+            if (level.is(Level.JSON)) {
+                solver.log().printf("{\"time\":%.1f},",
+                        solver.getTimeCount());
+            }
+        }
     }
 
     public void onSolution() {
         nbSolution++;
-        if(solution == null){
+        if (solution == null) {
             solution = new Solution(model, allOutPutVars());
         }
         solution.record();
@@ -203,7 +224,7 @@ public class Datas {
 
     private Variable[] allOutPutVars() {
         ArrayList<Variable> vars = new ArrayList<>(output_vars);
-        for(Variable[] vs:output_arrays_vars){
+        for (Variable[] vs : output_arrays_vars) {
             Collections.addAll(vars, vs);
         }
         return vars.toArray(new Variable[0]);
@@ -213,22 +234,34 @@ public class Datas {
         Solver solver = model.getSolver();
         // TODO there used to be "isComplete" (e.g. in case LNS stops)
 //        boolean complete = solver.getSearchState() == SearchState.TERMINATED;
-        if(nbSolution>0){
-            if(complete && (printAll || solver.getObjectiveManager().isOptimization())) {
-                if(PRINT_LOG)System.out.print("==========\n");
+        if (nbSolution > 0) {
+            if (complete && solver.getObjectiveManager().isOptimization()) {
+                if (level.isLoggable(Level.COMPET)) {
+                    solver.log().bold().green().print("==========\n");
+                }
             }
-        }else{
-            if(complete){
-                if(PRINT_LOG)System.out.print("=====UNSATISFIABLE=====\n");
-            }else{
-                if(PRINT_LOG)System.out.print("=====UNKNOWN=====\n");
+        } else {
+            if (complete) {
+                if (level.isLoggable(Level.COMPET)) {
+                    solver.log().bold().red().print("=====UNSATISFIABLE=====\n");
+                }
+            } else {
+                if (level.isLoggable(Level.COMPET)) {
+                    solver.log().bold().black().print("=====UNKNOWN=====\n");
+                }
             }
         }
-        if (printStat) {
-            // TODO used to use the toOneShortLineString that has been removed
-            if(PRINT_LOG)System.out.printf("%% %s \n", solver.getMeasures().toOneLineString());
-            if(PRINT_LOG)System.out.print("%% ");
-            if(PRINT_LOG)solver.printShortFeatures();
+        if (level.is(Level.RESANA)) {
+            solver.log().printf(java.util.Locale.US, "s %s %.1f\n",
+                    complete ? "T" : "S",
+                    solver.getTimeCount());
+        }
+        if (level.is(Level.JSON)) {
+            solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
+                    solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.isLoggable(Level.INFO)) {
+            solver.log().bold().white().printf("%s \n", solver.getMeasures().toOneLineString());
         }
     }
 }

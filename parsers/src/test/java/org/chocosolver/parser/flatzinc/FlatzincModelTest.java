@@ -32,7 +32,6 @@ public class FlatzincModelTest {
         InputStream in = new ByteArrayInputStream(("var 1 .. 2: a::output_var;" + "constraint int_ne(a, 1);" + "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -48,7 +47,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -66,7 +64,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -86,7 +83,6 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();

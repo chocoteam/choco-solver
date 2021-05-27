@@ -11,7 +11,7 @@ package org.chocosolver.parser.flatzinc;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.atn.PredictionMode;
-import org.chocosolver.parser.ParserListener;
+import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
@@ -43,7 +43,6 @@ public class Flatzinc extends RegParser {
     public Datas[] datas;
 
 
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -55,14 +54,9 @@ public class Flatzinc extends RegParser {
     public Flatzinc(boolean all, boolean free, int nb_cores) {
         super("ChocoFZN");
         this.all = all;
-        this.free = free ;
+        this.free = free;
         this.nb_cores = nb_cores;
         this.defaultSettings = new FznSettings();
-    }
-
-    @Override
-    public char getCommentChar() {
-        return '%';
     }
 
     @Override
@@ -76,7 +70,9 @@ public class Flatzinc extends RegParser {
             public void run() {
                 if (userinterruption) {
                     datas[bestModelID()].doFinalOutPut(false);
-                    if(PRINT_LOG)System.out.printf("%% Unexpected resolution interruption!");
+                    if (level.isLoggable(Level.COMPET)) {
+                        getModel().getSolver().log().bold().red().print("%% Unexpected resolution interruption!");
+                    }
                 }
             }
         };
@@ -88,38 +84,36 @@ public class Flatzinc extends RegParser {
 
     @Override
     public void createSolver() {
-        listeners.forEach(ParserListener::beforeSolverCreation);
-        assert nb_cores > 0;
-        if (nb_cores > 1) {
-            if(PRINT_LOG)System.out.printf("%% " + nb_cores + " solvers in parallel\n");
-        } else {
-            if(PRINT_LOG)System.out.printf("%% simple solver\n");
-        }
+        super.createSolver();
         datas = new Datas[nb_cores];
-        String iname = instance == null?"":Paths.get(instance).getFileName().toString();
+        String iname = instance == null ? "" : Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
-            datas[i] = new Datas(threadModel, all, stat);
+            datas[i] = new Datas(threadModel, level);
             threadModel.addHook("CUMULATIVE", "GLB");
         }
-        listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
     public void buildModel() {
-        listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
             try {
+                long ptime = -System.currentTimeMillis();
                 FileInputStream fileInputStream = new FileInputStream(new File(instance));
                 parse(models.get(i), datas[i], fileInputStream);
                 fileInputStream.close();
+                if (level.isLoggable(Level.INFO)) {
+                    models.get(i).getSolver().log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
+                }
+                if (level.is(Level.JSON)) {
+                    models.get(i).getSolver().log().printf("{\"name\":\"%s\",\"stats\":[", instance);
+                }
             } catch (IOException e) {
                 throw new Error(e.getMessage());
             }
         }
-        listeners.forEach(ParserListener::afterParsingFile);
     }
 
     public void parse(Model target, Datas data, InputStream is) {
@@ -134,21 +128,15 @@ public class Flatzinc extends RegParser {
         parser.flatzinc_model(target, data);
     }
 
-    @Override
-    public void solve() {
-        listeners.forEach(ParserListener::beforeSolving);
-        if (portfolio.getModels().size() == 1) {
-            singleThread();
-        } else {
-            manyThread();
-        }
-        listeners.forEach(ParserListener::afterSolving);
-    }
-
-    private void singleThread(){
+    protected void singleThread() {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
+        if (level.isLoggable(Level.INFO)) {
+            solver.printShortFeatures();
+            getModel().displayVariableOccurrences();
+            getModel().displayPropagatorOccurrences();
+        }
         if (enumerate) {
             while (solver.solve()) {
                 datas[0].onSolution();
@@ -163,7 +151,7 @@ public class Flatzinc extends RegParser {
         datas[0].doFinalOutPut(!userinterruption && runInTime());
     }
 
-    private void manyThread(){
+    protected void manyThread() {
         boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
             while (portfolio.solve()) {

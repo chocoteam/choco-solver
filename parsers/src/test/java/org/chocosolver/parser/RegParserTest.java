@@ -30,10 +30,6 @@ public class RegParserTest {
     @BeforeMethod(alwaysRun = true)
     public void before() {
         parser = new RegParser("test") {
-            @Override
-            public char getCommentChar() {
-                return 0;
-            }
 
             @Override
             public Settings createDefaultSettings() {
@@ -56,7 +52,12 @@ public class RegParserTest {
             }
 
             @Override
-            public void solve() {
+            protected void singleThread() {
+
+            }
+
+            @Override
+            protected void manyThread() {
 
             }
         };
@@ -121,9 +122,9 @@ public class RegParserTest {
     public void testStat1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertFalse(parser.stat);
-        p.parseArgument("-stat", "/file");
-        Assert.assertTrue(parser.stat);
+        Assert.assertEquals(parser.level, Level.COMPET);
+        p.parseArgument("-lvl", "INFO", "/file");
+        Assert.assertEquals(parser.level, Level.INFO);
     }
 
     @Test(groups = "1s")

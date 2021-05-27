@@ -21,8 +21,6 @@ import java.util.Properties;
  */
 public class FznSettings extends DefaultSettings {
 
-    private boolean print = false;
-
     private boolean adhocReification = true;
 
     public FznSettings() {
@@ -40,15 +38,6 @@ public class FznSettings extends DefaultSettings {
         this.setLearntClausesDominancePerimeter(0);
         this.setNbMaxLearntClauses(Integer.MAX_VALUE);
         this.setRatioForClauseStoreReduction(.66f);
-    }
-
-    public boolean printConstraints() {
-        return print;
-    }
-
-    public Settings setPrintConstraints(boolean print) {
-        this.print = print;
-        return this;
     }
 
     public boolean adhocReification() {
@@ -70,7 +59,6 @@ public class FznSettings extends DefaultSettings {
     @Override
     public Properties store() {
         Properties properties = super.store();
-        properties.setProperty("constraints.print", Boolean.toString(print));
         properties.setProperty("reification.adhoc", Boolean.toString(adhocReification));
         return properties;
     }

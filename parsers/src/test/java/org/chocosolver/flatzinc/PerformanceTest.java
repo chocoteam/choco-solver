@@ -10,7 +10,6 @@
 package org.chocosolver.flatzinc;
 
 import org.chocosolver.parser.SetUpException;
-import org.chocosolver.parser.flatzinc.BaseFlatzincListener;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
@@ -71,11 +70,10 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                "-stat",
+                "-lvl","COMPET",
                 "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.setUp(args);
         fzn.createSolver();
         fzn.buildModel();
@@ -101,11 +99,10 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
-                "-stat",
+                "-lvl","COMPET",
                 "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.setUp(args);
         fzn.createSolver();
         fzn.buildModel();
