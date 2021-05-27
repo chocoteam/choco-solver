@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
 
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.tools.VariableUtils;
 
 /**
  * Intersection Graph
@@ -78,16 +79,7 @@ public class Gi extends G {
     protected boolean intersect(int i, int j) {
         IntVar x = X[i];
         IntVar y = X[j];
-        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
-            return false;
-        }
-        int ub = x.getUB();
-        for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-            if (y.contains(val)) {
-                return true;
-            }
-        }
-        return false;
+        return VariableUtils.intersect(x,y);
     }
 
 }
