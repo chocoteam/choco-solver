@@ -53,7 +53,7 @@ public class SetUnionViewTest {
         Model m = new Model();
         SetVar setA = m.setVar(new int[] {}, new int[] {0, 1, 2});
         SetVar setB = m.setVar(new int[] {}, new int[] {0, 5, 8});
-        SetVar setC = m.setVar(new int[] {}, new int[] {2, 5, 6});
+        SetVar setC = m.setVar(new int[] {}, new int[] {2, 5, 6, 8});
         m.getSolver().setSearch(Search.setVarSearch(setA, setB, setC));
         SetVar union = m.setUnionView(setA, setB, setC);
         m.member(8, union).post();
@@ -95,8 +95,7 @@ public class SetUnionViewTest {
         Model m = new Model();
         SetVar setA = m.setVar(new int[] {}, IntStream.range(0, 10).toArray());
         SetVar setB = m.setVar(new int[] {}, new int[] {0, 5, 8, 9, 10});
-        SetVar setC = m.setVar(new int[] {}, new int[] {2, 5, 6, 22, 5, 14});
-        m.getSolver().setSearch(Search.setVarSearch(setA, setB, setC));
+        SetVar setC = m.setVar(new int[] {}, new int[] {2, 6, 22, 5, 14});
         SetVar union = m.setUnionView(setA, setB, setC);
         m.member(8, union).post();
         IntVar card = union.getCard();
@@ -107,8 +106,7 @@ public class SetUnionViewTest {
         m = new Model();
         setA = m.setVar(new int[] {}, IntStream.range(0, 10).toArray());
         setB = m.setVar(new int[] {}, new int[] {0, 5, 8, 9, 10});
-        setC = m.setVar(new int[] {}, new int[] {2, 5, 6, 22, 5, 14});
-        m.getSolver().setSearch(Search.setVarSearch(setA, setB, setC));
+        setC = m.setVar(new int[] {}, new int[] {2, 6, 22, 5, 14});
         union = m.setVar(new int[] {}, IntStream.range(0, 23).toArray());
         m.union(new SetVar[] {setA, setB, setC}, union).post();
         m.member(8, union).post();

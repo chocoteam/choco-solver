@@ -12,10 +12,12 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 
 /**
@@ -28,6 +30,7 @@ public class SetUnionView extends SetView<SetVar> {
 
     protected SetUnion lb;
     protected SetUnion ub;
+    protected ISet enforce;
 
     /**
      * Create a set union view.
@@ -37,12 +40,14 @@ public class SetUnionView extends SetView<SetVar> {
      */
     public SetUnionView(String name, SetVar... variables) {
         super(name, variables);
-        ISet[] LBs = new ISet[variables.length];
+        this.enforce = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+        ISet[] LBs = new ISet[variables.length + 1];
         ISet[] UBs = new ISet[variables.length];
         for (int i = 0; i < variables.length; i++) {
             LBs[i] = variables[i].getLB();
             UBs[i] = variables[i].getUB();
         }
+        LBs[variables.length] = enforce;
         this.lb = new SetUnion(getModel(), LBs);
         this.ub = new SetUnion(getModel(), UBs);
     }
@@ -69,11 +74,24 @@ public class SetUnionView extends SetView<SetVar> {
 
     @Override
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        // If an element is removed from an observed SetVar, it may be necessary to enforce
+        // an element that could not be enforced before.
+        if ((event.getMask() & SetEventType.REMOVE_FROM_ENVELOPE.getMask()) > 0) {
+            for (int i : enforce) {
+                if (doForceSetElement(i)) {
+                    enforce.remove(i);
+                    break;
+                }
+            }
+        }
         notifyPropagators(event, this);
     }
 
     @Override
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
+        if (enforce.contains(element)) {
+            contradiction(this, "Try to remove mandatory element");
+        }
         boolean b = false;
         for (SetVar set : variables) {
             b |= set.remove(element, this);
@@ -97,6 +115,8 @@ public class SetUnionView extends SetView<SetVar> {
         if (nb == 1) {
             variables[idx].force(element, this);
             return true;
+        } else {
+            enforce.add(element);
         }
         return false;
     }
