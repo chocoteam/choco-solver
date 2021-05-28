@@ -14,7 +14,6 @@ import org.chocosolver.util.objects.setDataStructures.*;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
-import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.stream.IntStream;
 
