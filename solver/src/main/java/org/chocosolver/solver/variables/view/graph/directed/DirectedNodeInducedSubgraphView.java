@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables.view.graph.directed;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
