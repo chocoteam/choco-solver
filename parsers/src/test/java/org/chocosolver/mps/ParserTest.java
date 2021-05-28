@@ -71,7 +71,7 @@ public class ParserTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[30s]",
-                "-stat",
+                "-lvl","COMPET",
                 "-prec", "1.0E-4D",
                 "-ninf", "-999.D",
                 "-pinf", "999.D",

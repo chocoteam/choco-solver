@@ -426,7 +426,7 @@ public class MPSParser {
                 }
             }
         }
-        System.out.printf("c Unimodular: %s\n", unimod);
+        model.getSolver().log().white().printf("c Unimodular: %s\n", unimod);
     }
 
     private void postIntEquation(Model model, List<String> vars, List<Number> coefs, String op,

@@ -21,7 +21,6 @@ public class ChocoFZN {
 
     public static void main(String[] args) throws Exception {
         Flatzinc fzn = new Flatzinc();
-        fzn.addListener(new BaseFlatzincListener(fzn));
         if(fzn.setUp(args)) {
             fzn.getSettings();
             fzn.createSolver();

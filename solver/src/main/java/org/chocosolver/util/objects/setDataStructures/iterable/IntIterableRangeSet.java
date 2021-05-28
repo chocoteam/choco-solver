@@ -1042,11 +1042,7 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
                 }
                 while (i > 0) {
                     ELEMENTS[i] = ELEMENTS[--i] + 1;
-                    try {
-                        CARDINALITY += ELEMENTS[i + 2] - ELEMENTS[i + 1] + 1;
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.print("tt");
-                    }
+                    CARDINALITY += ELEMENTS[i + 2] - ELEMENTS[i + 1] + 1;
                     ELEMENTS[i] = ELEMENTS[--i] - 1;
                 }
                 ELEMENTS[i] = lb;

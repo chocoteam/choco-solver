@@ -70,7 +70,7 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                //"-stat",
+                "-lvl","COMPET",
                 "-p", "1"
         };
         //RegParser.PRINT_LOG = false;

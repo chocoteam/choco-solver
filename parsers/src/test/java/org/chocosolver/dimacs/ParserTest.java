@@ -80,7 +80,8 @@ public class ParserTest {
         args.add(file);
         args.add("-limit");
         args.add("[60s]");
-        args.add("-stat");
+        args.add("-lvl");
+        args.add("COMPET");
         args.add("-p");
         args.add("1");
         DIMACS dimacs = new DIMACS();

@@ -15,6 +15,7 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.StringUtils;
 
 /**
  * A search monitor logger which prints statistics every XX ms.
@@ -24,24 +25,21 @@ import org.chocosolver.util.ESat;
  * @since 18 aug. 2010
  */
 public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMonitorClose {
-    public static final String ANSI_RESET = "\u001B[0m";
-    public static final String ANSI_BLACK = "\u001B[30m";
-    public static final String ANSI_WHITE = "\u001B[37m";
-    public static final String ANSI_BOLD = "\033[0;1m";
 
     /**
-     * A thread which prints short line statistics to {@link Solver#getOut()}.
+     * A thread which prints short line statistics.
      */
-    private Thread printer;
+    private final Thread printer;
 
-    private Solver solver;
+    private final Solver solver;
 
-    private long[] counters = new long[3];
+    private final long[] counters = new long[3];
     /**
      * A boolean to kill the printer when the resolution ends.
      */
     private volatile boolean alive;
 
+    private int calls = 0;
     /**
      * Create a monitor which outputs shot-line statistics every <i>duration</i> milliseconds
      *
@@ -67,7 +65,6 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
     @Override
     public void afterInitialize(boolean correct) {
         if (correct) {
-            header();
             if(!printer.isAlive())
                 printer.start();
         }
@@ -88,16 +85,17 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
 
     private void header() {
         boolean opt = solver.getObjectiveManager().isOptimization();
-        System.out.printf("%s" + (opt ? "          Objective        |" : "")
+        solver.log().white().printf((opt ? "          Objective        |" : "")
                         + "              Measures              |     Progress    %n" +
                         (opt ? "     CurrentDomain BestBnd |" : "")
-                        + " Depth Decisions WrongDecs Restarts | SolCount   Time |%n%s",
-                ANSI_WHITE,
-                ANSI_RESET
+                        + " Depth Decisions WrongDecs Restarts | SolCount   Time |%n"
         );
     }
 
     private void body(boolean onSol) {
+        if((calls % 20) == 0){
+            header();
+        }
         boolean opt = solver.getObjectiveManager().isOptimization();
         if (opt) {
             bodyOpt(onSol);
@@ -107,11 +105,12 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
         counters[0] = solver.getNodeCount();
         counters[1] = solver.getFailCount();
         counters[2] = solver.getRestartCount();
+        calls++;
     }
 
     private void bodySat(boolean onSol) {
-        System.out.format("%s %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
-                onSol ? ANSI_BOLD + ANSI_BLACK : ANSI_WHITE,
+        solver.log().white().printf("%s %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
+                onSol ? StringUtils.ANSI_BOLD + StringUtils.ANSI_BLACK : StringUtils.ANSI_WHITE,
                 solver.getCurrentDepth(),
                 solver.getNodeCount() - counters[0],
                 (solver.getFailCount() - counters[1]) * 100f / (solver.getNodeCount() - counters[0]),
@@ -119,7 +118,7 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
                 solver.getSolutionCount(),
                 solver.getTimeCount(),
                 onSol ? "*" : "",
-                ANSI_RESET
+                StringUtils.ANSI_RESET
         );
     }
 
@@ -127,8 +126,8 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
         IntVar obj = solver.getObjectiveManager().getObjective().asIntVar();
         Number best = solver.getObjectiveManager().getBestSolutionValue();
 
-        System.out.format("%s%8d %8d %8s | %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
-                onSol ? ANSI_BOLD + ANSI_BLACK : ANSI_WHITE,
+        solver.log().white().printf("%s%8d %8d %8s | %5d %9d %8.2f%% %8d | %8d %5.0fs |%s%n%s",
+                onSol ? StringUtils.ANSI_BOLD + StringUtils.ANSI_BLACK : StringUtils.ANSI_WHITE,
                 obj.getLB(),
                 obj.getUB(),
                 solver.getSolutionCount() > 0 ? best : "--",
@@ -139,7 +138,7 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
                 solver.getSolutionCount(),
                 solver.getTimeCount(),
                 onSol ? "*" : "",
-                ANSI_RESET
+                StringUtils.ANSI_RESET
         );
     }
 }

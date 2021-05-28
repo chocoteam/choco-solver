@@ -375,19 +375,27 @@ public class VariableUtils {
      * @return true if the two domains intersect
      */
     public static boolean intersect(IntVar x, IntVar y) {
-        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
-            return false;
-        }
-        if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
-            int ub = x.getUB();
-            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-                if (y.contains(val)) {
-                    return true;
-                }
+        int s1 = x.getDomainSize();
+        int s2 = y.getDomainSize();
+        int i = 0, j = 0;
+        int lbi, ubi, lbj, ubj;
+        lbi = x.getLB();
+        ubi = x.nextValueOut(lbi) - 1;
+        lbj = y.getLB();
+        ubj = y.nextValueOut(lbj) - 1;
+        while (i < s1 && j < s2) {
+            if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
+                return true;
             }
-            return false;
+            if (ubi <= ubj && ++i < s1) {
+                lbi = x.nextValue(ubi);
+                ubi = x.nextValueOut(lbi) - 1;
+            } else if (ubj <= ubi && ++j < s2) {
+                lbj = x.nextValue(ubj);
+                ubj = y.nextValueOut(lbj) - 1;
+            }
         }
-        return true;
+        return false;
     }
 
     /**

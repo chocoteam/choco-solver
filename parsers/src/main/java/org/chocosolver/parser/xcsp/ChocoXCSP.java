@@ -17,7 +17,6 @@ public class ChocoXCSP {
 
     public static void main(String[] args) throws Exception {
         XCSP xscp = new XCSP();
-        xscp.addListener(new BaseXCSPListener(xscp));
         if(xscp.setUp(args)) {
             xscp.createSolver();
             xscp.buildModel();

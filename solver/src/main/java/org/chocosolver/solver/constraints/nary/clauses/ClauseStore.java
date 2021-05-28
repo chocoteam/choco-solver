@@ -126,15 +126,15 @@ public class ClauseStore extends Propagator<IntVar> {
                 last = cl;
                 last.activity = clauseInc;
                 last.rawActivity = 1;
-                if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: %s\n", cl);
             } else {
-                if (XParameters.PRINT_CLAUSE) System.out.printf("add: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("add: %s\n", cl);
                 this.clauses.add(cl);
             }
             mSolver.getEngine().dynamicAddition(true, cl);
         } else {
             PropSignedClause cl = PropSignedClause.makeFromIn(vars, ranges);
-            if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+            if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: %s\n", cl);
             new Constraint("SC", cl).post();
         }
     }
@@ -253,7 +253,7 @@ public class ClauseStore extends Propagator<IntVar> {
             }
         }
         if (size > learnts.size() && model.getSettings().warnUser()) {
-            System.out.printf("Simplify DB: %d -> %d\n", size, learnts.size());
+            model.getSolver().log().white().printf("Simplify DB: %d -> %d%n", size, learnts.size());
         }
     }
 
@@ -273,7 +273,7 @@ public class ClauseStore extends Propagator<IntVar> {
                 }
             }
             if (size > learnts.size() && model.getSettings().warnUser()) {
-                System.out.printf("Reduce DB: %d -> %d\n", size, learnts.size());
+                model.getSolver().log().white().printf("Reduce DB: %d -> %d%n", size, learnts.size());
             }
             for (IntervalTree<Container> t : watches.values()) {
                 Stack<Container> del = new Stack<>();
@@ -300,16 +300,16 @@ public class ClauseStore extends Propagator<IntVar> {
             }
         }
         if (size > learnts.size() && model.getSettings().warnUser()) {
-            System.out.printf("Dominance DB: %d -> %d\n", size, learnts.size());
+            model.getSolver().log().white().printf("Dominance DB: %d -> %d%n", size, learnts.size());
         }
     }
 
 
     public void printStatistics() {
         learnts.sort(Comparator.comparingInt(c -> -c.rawActivity));
-        System.out.print("Top ten clauses:\n");
+        model.getSolver().log().white().print("Top ten clauses:\n");
         for (int i = 0; i < 10 && i < learnts.size(); i++) {
-            System.out.printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
+            model.getSolver().log().white().printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
         }
     }
 

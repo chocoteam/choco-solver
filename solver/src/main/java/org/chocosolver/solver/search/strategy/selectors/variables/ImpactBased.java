@@ -231,9 +231,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 //            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
             return false;
         } else if (System.currentTimeMillis() > tl) {
-            if (model.getSettings().warnUser()) {
-                model.getSolver().getErr().print("impact Search stops its init phase -- reach time limit!");
-            }
+            model.getSolver().log().println("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();

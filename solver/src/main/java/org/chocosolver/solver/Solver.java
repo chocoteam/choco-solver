@@ -42,8 +42,9 @@ import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
+import org.chocosolver.util.logger.ANSILogger;
+import org.chocosolver.util.logger.Logger;
 
-import java.io.PrintStream;
 import java.util.*;
 
 import static org.chocosolver.solver.Solver.Action.*;
@@ -111,16 +112,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * The standard output stream (default: System.out)
-     */
-    private transient PrintStream out = System.out;
-
-    /**
-     * The standard error stream (default: System.err)
-     */
-    private transient PrintStream err = System.err;
 
     /**
      * The propagate component of this search loop
@@ -236,6 +227,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * This object is accessible lazily
      */
     private Solution lastSol = null;
+
+    /**
+     * Default logger
+     */
+    private Logger logger = new ANSILogger();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////      CONSTRUCTOR      //////////////////////////////////////////////////////
@@ -378,14 +374,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                         .filter(c -> (c.getStatus() == FREE))
                         .findFirst();
                 if (undeclared.isPresent()) {
-                    getErr().print(
-                            "At least one constraint is free, i.e., neither posted or reified. ).\n");
+                    logger.white().println(
+                            "At least one constraint is free, i.e., neither posted or reified. ).");
                     instances
                             .stream()
                             .filter(c -> c.getStatus() == FREE)
                             .limit(mModel.getSettings().printAllUndeclaredConstraints() ? Integer.MAX_VALUE
                                     : 1)
-                            .forEach(c -> getErr().printf("%s is free\n", c.toString()));
+                            .forEach(c -> logger.white().printf(String.format("%s is free\n", c)));
                 }
             }
         }
@@ -425,15 +421,14 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
-            if (mModel.getSettings().warnUser()) {
-                getErr().print("No search strategies defined.\nSet to default ones.\n");
-            }
+            logger.white().println("No search strategies defined.");
+            logger.white().println("Set to default ones.");
             defaultSearch = true;
             setSearch(mModel.getSettings().makeDefaultSearch(mModel));
         }
         if (completeSearch && !defaultSearch) {
             AbstractStrategy<Variable> declared = M.getStrategy();
-            AbstractStrategy complete = mModel.getSettings().makeDefaultSearch(mModel);
+            AbstractStrategy<?> complete = mModel.getSettings().makeDefaultSearch(mModel);
             setSearch(declared, complete);
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
@@ -629,7 +624,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *     <li>call {@link Solver#setNoLearning()}</li>
      *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
      *     <li>call {@link Model#removeMinisat()}</li>
-     *     <li>call {@link Model#removeNogoodStore()}</li>
      * </ul>
      * </p>
      *
@@ -714,10 +708,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     private void restoreRootNode() {
         IEnvironment environment = mModel.getEnvironment();
-            while (environment.getWorldIndex() > searchWorldIndex) {
-                getMeasures().incBackTrackCount();
-                environment.worldPop();
-            }
+        while (environment.getWorldIndex() > searchWorldIndex) {
+            getMeasures().incBackTrackCount();
+            environment.worldPop();
+        }
         dpath.synchronize();
     }
 
@@ -765,7 +759,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #getDecisionPath()
      * @see AbstractStrategy#getDecision()
      */
-    public boolean moveForward(Decision decision) {
+    public boolean moveForward(Decision<?> decision) {
         if (!engine.isInitialized()) {
             engine.initialize();
         }
@@ -832,7 +826,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     public boolean moveBackward() {
         this.getEnvironment().worldPop();
         boolean success = false;
-        Decision head = dpath.getLastDecision();
+        Decision<?> head = dpath.getLastDecision();
         while (!success && head.getPosition() > 0) {
             if (head.hasNext()) {
                 this.getEnvironment().worldPush();
@@ -920,7 +914,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public <V extends Variable> AbstractStrategy<V> getSearch() {
         if (M.getChildMoves().size() > 1 && mModel.getSettings().warnUser()) {
-            err.print(
+            logger.bold().println(
                     "This search loop is based on a sequential Move, the returned strategy may not reflect the reality.");
         }
         return M.getStrategy();
@@ -1041,9 +1035,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             if (c.isEnabled()) {
                 ESat satC = c.isSatisfied();
                 if (FALSE == satC) {
-                    if (getModel().getSettings().warnUser()) {
-                        System.err.printf("FAILURE >> %s (%s)%n", c.toString(), satC);
-                    }
+                    logger.bold().red().printf("FAILURE >> %s (%s)%n", c, satC);
                     return FALSE;
                 } else if (TRUE == satC) {
                     OK++;
@@ -1289,10 +1281,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * The first call to this method will create a new solution based on all variables
      * of the model and attach it to this.
      * Next calls return the solution instance.
+     *
      * @return a global solution.
      */
-    public Solution defaultSolution(){
-        if(lastSol == null){
+    public Solution defaultSolution() {
+        if (lastSol == null) {
             lastSol = new Solution(this.getModel());
             this.attach(lastSol);
         }
@@ -1431,23 +1424,25 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     ///////////////////////////////////////       OUTPUT        ////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Override
-    public void setOut(PrintStream printStream) {
-        out = printStream;
+
+    /**
+     * Return the current used logger.
+     * By default, logger prints to {@link System#out}.
+     * Any trace from choco-solver are redirected to this logger.
+     *
+     * @return the current logger.
+     * @see #logWithANSI(boolean)
+     */
+    public Logger log() {
+        return logger;
     }
 
-    @Override
-    public PrintStream getOut() {
-        return out;
-    }
-
-    @Override
-    public void setErr(PrintStream printStream) {
-        err = printStream;
-    }
-
-    @Override
-    public PrintStream getErr() {
-        return err;
+    /**
+     * Defines whether (when {@code ansi} is set to {@code true}) or not
+     * ANSI tags are added to any trace from choco-solver.
+     * @param ansi {@code true} to enable colors
+     */
+    public void logWithANSI(boolean ansi) {
+        logger = ansi ? new ANSILogger() : new Logger();
     }
 }

@@ -27,6 +27,7 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -976,14 +977,28 @@ public class Model implements IModel {
      */
     public void displayVariableOccurrences() {
         Map<String, Integer> l = new HashMap<>();
-        System.out.println("Involved variables: ");
+        int cnt = 0;
         for (Variable v : this.getVars()) {
-            l.compute(v.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+            cnt++;
+            if(v.isAConstant()){
+                l.compute("constants", (n, k) -> k == null ? 1 : k + 1);
+            }else{
+                if(VariableUtils.isView(v)){
+                    l.compute("views", (n, k) -> k == null ? 1 : k + 1);
+                }else
+                if(VariableUtils.isInt(v)){
+                    IntVar iv = v.asIntVar();
+                    l.compute(String.format("[%d,%d]", iv.getLB(), iv.getUB()), (n, k) -> k == null ? 1 : k + 1);
+                }else{
+                    l.compute(v.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+                }
+            }
         }
+        solver.log().bold().printf("== %d variables ==%n", cnt);
         l.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .forEach(e ->
-                        System.out.printf("\t%s (%d)\n", e.getKey(), e.getValue())
+                        solver.log().printf("\t%s #%d\n", e.getKey(), e.getValue())
                 );
     }
 
@@ -992,16 +1007,18 @@ public class Model implements IModel {
      */
     public void displayPropagatorOccurrences() {
         Map<String, Integer> l = new HashMap<>();
-        System.out.println("Involved propagators: ");
+        int cnt = 0;
         for (Constraint c : this.getCstrs()) {
-            for (Propagator p : c.getPropagators()) {
+            for (Propagator<?> p : c.getPropagators()) {
                 l.compute(p.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+                cnt++;
             }
         }
+        solver.log().bold().printf("== %d propagators ==%n", cnt);
         l.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
                 .forEach(e ->
-                        System.out.printf("\t%s (%d)\n", e.getKey(), e.getValue())
+                        solver.log().printf("\t%s #%d\n", e.getKey(), e.getValue())
                 );
     }
 

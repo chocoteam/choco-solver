@@ -109,6 +109,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.graphOperations.connectivity;
     exports org.chocosolver.util.graphOperations.dominance;
     exports org.chocosolver.util.iterators;
+    exports org.chocosolver.util.logger;
     exports org.chocosolver.util.objects;
     exports org.chocosolver.util.objects.graphs;
     exports org.chocosolver.util.objects.queues;
