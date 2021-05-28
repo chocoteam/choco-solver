@@ -39,13 +39,14 @@ public class DirectedGraphUnionView extends DirectedGraphView<DirectedGraphVar> 
             LBs[i] = graphs[i].getLB();
             UBs[i] = graphs[i].getUB();
         }
-        this.lb = GraphFactory.makeUnionGraph(getModel(), LBs);
         this.ub = GraphFactory.makeUnionGraph(getModel(), UBs);
         this.nodesToEnforce = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.edgesToEnforce = new ISet[getNbMaxNodes()];
         for (int i = 0; i < getNbMaxNodes(); i++) {
             this.edgesToEnforce[i] = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         }
+        this.lb = new DirectedGraph(getModel(), nodesToEnforce, edgesToEnforce, LBs);
+
     }
 
     @Override

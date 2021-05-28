@@ -264,6 +264,40 @@ public class DirectedGraph implements IGraph {
         }
     }
 
+    /**
+     * Construct an directed graph G = (V, E) as the union of a set of directed graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)}, i.e. :
+     *      V = V_1 \cup ... \cup V_k (\cup = set union);
+     *      E = E_1 \cup ... \cup E_k.
+     * @param model the model
+     * @param graphs the graphs to construct the union graph from
+     * @param additionalNodes additional nodes to include in the graph
+     * @param additionalSuccs additional edges (successors) to include in the graph
+     */
+    public DirectedGraph(Model model, ISet additionalNodes, ISet[] additionalSuccs, DirectedGraph... graphs) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = IntStream.range(0, graphs.length).map(i -> graphs[i].getNbMaxNodes()).max().getAsInt();
+        ISet[] nodeSets = new ISet[graphs.length + 1];
+        for (int i = 0; i < graphs.length; i++) {
+            nodeSets[i] = graphs[i].getNodes();
+        }
+        nodeSets[graphs.length] = additionalNodes;
+        this.nodes = new SetUnion(model, nodeSets);
+        predecessors = new ISet[n];
+        successors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            ISet[] predSet = new ISet[graphs.length];
+            ISet[] succSet = new ISet[graphs.length + 1];
+            for (int j = 0; j < graphs.length; j++) {
+                predSet[j] = graphs[j].getPredecessorsOf(i);
+                succSet[j] = graphs[j].getSuccessorsOf(i);
+            }
+            succSet[graphs.length] = additionalSuccs[i];
+            predecessors[i] = new SetUnion(model, predSet);
+            successors[i] = new SetUnion(model, succSet);
+        }
+    }
+
     public static ISet[] edgesArrayToPredecessorsSets(int n, int[][] edges) {
         ISet[] predecessors = new ISet[n];
         for (int i = 0; i < n; i++) {
