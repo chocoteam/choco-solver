@@ -125,7 +125,6 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                 if (potNeigh.size() == 1) {
                     graphVar.enforceEdge(node, potNeigh.newIterator().nextInt(), this);
                     enforceNodes.remove(node);
-                    break;
                 }
             }
             notifyPropagators(GraphEventType.REMOVE_NODE, this);
