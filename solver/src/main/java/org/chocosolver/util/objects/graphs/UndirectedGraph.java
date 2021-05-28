@@ -246,6 +246,36 @@ public class UndirectedGraph implements IGraph {
         }
     }
 
+    /**
+     * Construct an undirected graph G = (V, E) as the union of a set of undirected graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)}, i.e. :
+     *      V = V_1 \cup ... \cup V_k (\cup = set union);
+     *      E = E_1 \cup ... \cup E_k.
+     * @param model the model
+     * @param graphs the graphs to construct the union graph from
+     * @param additionalNodes additional nodes to include in the graph
+     * @param additionalNeigh additional edges to include in the graph
+     */
+    public UndirectedGraph(Model model, ISet additionalNodes, ISet[] additionalNeigh, UndirectedGraph... graphs) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = IntStream.range(0, graphs.length).map(i -> graphs[i].getNbMaxNodes()).max().getAsInt();
+        ISet[] nodeSets = new ISet[graphs.length + 1];
+        for (int i = 0; i < graphs.length; i++) {
+            nodeSets[i] = graphs[i].getNodes();
+        }
+        nodeSets[graphs.length] = additionalNodes;
+        this.nodes = new SetUnion(model, nodeSets);
+        neighbors = new ISet[n];
+        for (int i = 0; i < n; i++) {
+            ISet[] neighSet = new ISet[graphs.length + 1];
+            for (int j = 0; j < graphs.length; j++) {
+                neighSet[j] = graphs[j].getNeighborsOf(i);
+            }
+            neighSet[graphs.length] = additionalNeigh[i];
+            neighbors[i] = new SetUnion(model, neighSet);
+        }
+    }
+
     public static ISet[] edgesArrayToEdgesSets(int n, int[][] edges) {
         ISet[] neigh = new ISet[n];
         for (int i = 0; i < n; i++) {
