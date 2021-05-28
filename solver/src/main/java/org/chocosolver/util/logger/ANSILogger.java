@@ -22,6 +22,14 @@ public class ANSILogger extends Logger {
 
     private final StringBuilder pf = new StringBuilder();
 
+    public ANSILogger() {
+        super();
+    }
+
+    public ANSILogger(Logger aLogger) {
+        super(aLogger);
+    }
+
     @Override
     public Logger bold() {
         pf.append(StringUtils.ANSI_BOLD);
