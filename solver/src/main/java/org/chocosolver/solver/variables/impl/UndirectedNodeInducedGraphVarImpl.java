@@ -54,6 +54,9 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
         boolean edgeEnforced = true;
         for (int y : originalUB.getNeighborsOf(x)) {
             if (LB.containsNode(y)) {
+                if (!UB.containsEdge(x, y)) {
+                    this.contradiction(cause, "Cannot enforce node " + x + " because edge (" + x + ", " + y + ") was removed from the envelope");
+                }
                 if (LB.addEdge(x, y)) {
                     if (reactOnModification) {
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
@@ -61,6 +64,8 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
                     }
                     edgeEnforced = true;
                 }
+            } else if (UB.containsNode(y) && !UB.containsEdge(x, y)) {
+                removeNode(y, cause);
             }
         }
         notifyPropagators(GraphEventType.ADD_NODE, cause);
@@ -76,8 +81,17 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl {
         if (!edgeRemoved) {
             return false;
         }
-        removeNode(x, cause);
-        removeNode(y, cause);
+        boolean xInKer = getMandatoryNodes().contains(x);
+        boolean yInKer = getMandatoryNodes().contains(y);
+        if (xInKer && yInKer) {
+            this.contradiction(cause, "Remove mandatory edge");
+        }
+        if (xInKer && !yInKer) {
+            removeNode(y, cause);
+        }
+        if (!xInKer && yInKer) {
+            removeNode(x, cause);
+        }
         return true;
     }
 
