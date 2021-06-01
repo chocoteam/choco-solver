@@ -13,8 +13,11 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -183,5 +186,25 @@ public class DirectedNodeInducedGraphVarImplTest {
         DirectedGraph UB2 = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, true);
         DirectedGraphVar g2 = m.nodeInducedDigraphVar("g2", LB2, UB2);
         Assert.assertFalse(g2.isInstantiated());
+    }
+
+    /**
+     * Ensure that the removeEdge operation does not filters possible solutions:
+     *     if LB = empty graph, UB = 0 -> 1, and edge (0, 1) is forbidden by a constraint, then
+     *     the possible solutions are 0, 1, and the empty graph.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testUseCase2() {
+        Model m = new Model();
+        int n = 2;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UB.addNode(0); UB.addNode(1);
+        UB.addEdge(0, 1);
+        DirectedGraphVar g = m.nodeInducedDigraphVar("g", LB, UB);
+        SetVar s = m.graphSuccessorsSetView(g, 0);
+        m.notMember(1, s).post();
+        while (m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }
 }

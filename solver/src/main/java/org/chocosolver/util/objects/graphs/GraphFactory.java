@@ -475,6 +475,32 @@ public class GraphFactory {
     }
 
     //***********************************************************************************
+    // ARITHMETIC GRAPH VIEWS
+    //***********************************************************************************
+
+    /**
+     * Construct an undirected graph G = (V, E) as the union of a set of undirected graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)}, i.e. :
+     *      V = V_1 \cup ... \cup V_k (\cup = set union);
+     *      E = E_1 \cup ... \cup E_k.
+     * @param model the model
+     * @param graphs the graphs to construct the union graph from
+     */
+    public static UndirectedGraph makeUnionGraph(Model model, UndirectedGraph... graphs) {
+        return new UndirectedGraph(model, graphs);
+    }
+
+    /**
+     * Construct an directed graph G = (V, E) as the union of a set of directed graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)}, i.e. :
+     *      V = V_1 \cup ... \cup V_k (\cup = set union);
+     *      E = E_1 \cup ... \cup E_k.
+     * @param model the model
+     * @param graphs the graphs to construct the union graph from
+     */
+    public static DirectedGraph makeUnionGraph(Model model, DirectedGraph... graphs) {
+        return new DirectedGraph(model, graphs);
+    }
+
+    //***********************************************************************************
     // ADJACENCY MATRIX
     //***********************************************************************************
 

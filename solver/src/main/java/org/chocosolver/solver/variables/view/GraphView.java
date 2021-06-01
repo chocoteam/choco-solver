@@ -20,7 +20,6 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.graphs.IGraph;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
@@ -61,7 +60,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             this.contradiction(cause, "enforce node which is not in the domain");
             return false;
         }
-        if (doEnforceNode(node)) {
+        if (!getMandatoryNodes().contains(node) && doEnforceNode(node)) {
             if (reactOnModification) {
                 delta.add(node, GraphDelta.NODE_ENFORCED, cause);
             }
@@ -194,5 +193,20 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
     @Override
     public void justifyEvent(IntEventType mask, int one, int two, int three) {
         throw new UnsupportedOperationException("GraphView does not support explanation.");
+    }
+
+    @Override
+    public boolean isInstantiated() {
+        if (getPotentialNodes().size() != getMandatoryNodes().size()) {
+            return false;
+        }
+        ISet suc;
+        for (int i : getUB().getNodes()) {
+            suc = getPotentialSuccessorsOf(i);
+            if (suc.size() != getLB().getSuccessorsOf(i).size()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

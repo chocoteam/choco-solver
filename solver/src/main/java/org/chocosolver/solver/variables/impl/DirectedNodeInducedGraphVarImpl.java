@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
@@ -29,7 +28,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * @author Dimitri Justeau-Allaire
  * @since 15/04/2021
  */
-public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl {
+public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implements ICause {
 
     private DirectedGraph originalUB;
 
@@ -52,33 +51,39 @@ public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl {
         if (!nodeEnforced) {
             return false;
         }
-        boolean edgeEnforced = true;
         for (int y : originalUB.getSuccessorsOf(x)) {
             if (LB.containsNode(y)) {
+                if (!UB.containsEdge(x, y)) {
+                    this.contradiction(cause, "Cannot enforce node " + x + " because edge (" + x + ", " + y + ") was removed from the envelope");
+                }
                 if (LB.addEdge(x, y)) {
                     if (reactOnModification) {
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                         delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
                     }
-                    edgeEnforced = true;
+                    notifyPropagators(GraphEventType.ADD_EDGE, this);
                 }
+            } else if (UB.containsNode(y) && !UB.containsEdge(x, y)) {
+                removeNode(y, this);
             }
         }
         for (int y : originalUB.getPredecessorsOf(x)) {
             if (LB.containsNode(y)) {
+                if (!UB.containsEdge(x, y)) {
+                    this.contradiction(cause, "Cannot enforce node " + x + " because edge (" + y + ", " + x + ") was removed from the envelope");
+                }
                 if (LB.addEdge(y, x)) {
                     if (reactOnModification) {
                         delta.add(y, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                         delta.add(x, GraphDelta.EDGE_ENFORCED_HEAD, cause);
                     }
-                    edgeEnforced = true;
+                    notifyPropagators(GraphEventType.ADD_EDGE, this);
                 }
+            } else if (UB.containsNode(y) && !UB.containsEdge(y, x)) {
+                removeNode(y, this);
             }
         }
         notifyPropagators(GraphEventType.ADD_NODE, cause);
-        if (edgeEnforced) {
-            notifyPropagators(GraphEventType.ADD_EDGE, cause);
-        }
         return true;
     }
 
@@ -88,37 +93,17 @@ public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl {
         if (!edgeRemoved) {
             return false;
         }
-        removeNode(x, cause);
-        removeNode(y, cause);
+        boolean xInKer = getMandatoryNodes().contains(x);
+        boolean yInKer = getMandatoryNodes().contains(y);
+        if (xInKer && yInKer) {
+            this.contradiction(cause, "Remove mandatory edge");
+        }
+        if (xInKer && !yInKer) {
+            removeNode(y, this);
+        }
+        if (!xInKer && yInKer) {
+            removeNode(x, this);
+        }
         return true;
-    }
-
-    @Override
-    public boolean removeNode(int x, ICause cause) throws ContradictionException {
-        assert cause != null;
-        assert (x >= 0 && x < n);
-        if (LB.getNodes().contains(x)) {
-            this.contradiction(cause, "remove mandatory node");
-            return true;
-        } else if (!UB.getNodes().contains(x)) {
-            return false;
-        }
-        ISet nei = UB.getSuccessorsOf(x);
-        for (int i : nei) {
-            super.removeEdge(x, i, cause);
-        }
-        nei = UB.getPredecessorsOf(x);
-        for (int i : nei) {
-            super.removeEdge(i, x, cause);
-        }
-        if (UB.removeNode(x)) {
-            if (reactOnModification) {
-                delta.add(x, GraphDelta.NODE_REMOVED, cause);
-            }
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
-            return true;
-        }
-        return false;
     }
 }

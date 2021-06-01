@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables.view.graph.directed;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
@@ -70,21 +69,6 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
     @Override
     public boolean isDirected() {
         return graphVar.isDirected();
-    }
-
-    @Override
-    public boolean isInstantiated() {
-        if (getPotentialNodes().size() != getMandatoryNodes().size()) {
-            return false;
-        }
-        ISet suc;
-        for (int i : getUB().getNodes()) {
-            suc = getPotentialSuccessorsOf(i);
-            if (suc.size() != getLB().getSuccessorsOf(i).size()) {
-                return false;
-            }
-        }
-        return true;
     }
 
     @Override
