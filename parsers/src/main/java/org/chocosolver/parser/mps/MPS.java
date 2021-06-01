@@ -11,9 +11,9 @@ package org.chocosolver.parser.mps;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -63,12 +63,13 @@ public class MPS extends RegParser {
 
     public MPS() {
         super("ChocoMPS");
-        this.defaultSettings = new MPSSettings();
     }
 
     @Override
-    public Settings createDefaultSettings() {
-        return new MPSSettings();
+    public void createSettings() {
+        defaultSettings = Settings.init()
+                .setCheckDeclaredConstraints(false)
+                .setModelChecker(solver -> true);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class MPS extends RegParser {
                 throw new RuntimeException("UNSUPPORTED");
             }
         }
-        if (((MPSSettings) getModel().getSettings()).printConstraints()) {
+        if (level.is(Level.JSON)) {
             getModel().displayVariableOccurrences();
             getModel().displayPropagatorOccurrences();
         }

@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropConditional;
@@ -144,7 +144,7 @@ public class DynamicPostTest {
 
     private void pareto(boolean clauses) {
         // Objectives are to maximize "a" and maximize "b".
-        Model model = new Model(new DefaultSettings().setSwapOnPassivate(false));
+        Model model = new Model(Settings.init().setSwapOnPassivate(false));
         IntVar a = model.intVar("a", 0, 2, false);
         IntVar b = model.intVar("b", 0, 2, false);
         IntVar c = model.intVar("c", 0, 2, false);

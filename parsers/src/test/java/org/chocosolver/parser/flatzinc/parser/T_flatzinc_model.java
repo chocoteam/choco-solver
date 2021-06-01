@@ -10,7 +10,6 @@
 package org.chocosolver.parser.flatzinc.parser;
 
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
 import org.chocosolver.solver.Model;
 import org.testng.Assert;
@@ -34,7 +33,7 @@ public class T_flatzinc_model extends GrammarTest {
 
     @BeforeMethod(alwaysRun = true)
     public void before() {
-        mSolver = new Model(new FznSettings());
+        mSolver = new Model();
         datas = new Datas();
         st = new StringBuilder();
     }

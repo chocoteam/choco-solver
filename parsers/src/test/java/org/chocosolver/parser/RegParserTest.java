@@ -9,7 +9,6 @@
  */
 package org.chocosolver.parser;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.strategy.Search;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -32,8 +31,7 @@ public class RegParserTest {
         parser = new RegParser("test") {
 
             @Override
-            public Settings createDefaultSettings() {
-                return null;
+            public void createSettings() {
             }
 
             @Override

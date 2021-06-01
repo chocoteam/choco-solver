@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.learn.EventRecorder;
@@ -34,7 +34,7 @@ public interface ILearnFactory extends ISelf<Solver> {
      * Creates a learning object based on Conflict-Driven Clause-Learning (CD-CL) strategy.
      * It backtracks up to the most recent decision involved in the explanation, and forget younger decisions.
      * It also posts signed clauses learnt on failures.
-     * Some settings related to explanation can be define thanks to {@link org.chocosolver.solver.Settings}:
+     * Some settings related to explanation can be define thanks to {@link Settings}:
      * <ul>
      *     <il>{@link Settings#setNbMaxLearntClauses(int)}</il>
      *     <il>{@link Settings#setRatioForClauseStoreReduction(float)}</il>

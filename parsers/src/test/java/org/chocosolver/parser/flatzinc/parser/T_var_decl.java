@@ -11,8 +11,8 @@ package org.chocosolver.parser.flatzinc.parser;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -36,7 +36,7 @@ public class T_var_decl extends GrammarTest {
 
     @BeforeMethod(alwaysRun = true)
     public void before() {
-        mSolver = new Model(new FznSettings().setEnableViews(true));
+        mSolver = new Model(Settings.init().setEnableViews(true));
         datas = new Datas();
     }
 
@@ -78,9 +78,9 @@ public class T_var_decl extends GrammarTest {
         SetVar var = ((SetVar) o);
         Assert.assertEquals("s", var.getName());
         int[] UB = var.getUB().toArray();
-        int[] values = new int[]{1,2,3};
-        for(int i=0;i<UB.length;i++){
-            Assert.assertEquals(UB[i],values[i]);
+        int[] values = new int[]{1, 2, 3};
+        for (int i = 0; i < UB.length; i++) {
+            Assert.assertEquals(UB[i], values[i]);
         }
     }
 

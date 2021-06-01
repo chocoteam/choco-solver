@@ -10,7 +10,7 @@
 package org.chocosolver.examples.integer;
 
 import org.chocosolver.examples.AbstractProblem;
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
@@ -46,7 +46,7 @@ public class Takuzu extends AbstractProblem {
 
     @Override
     public void buildModel() {
-        model = new Model(new DefaultSettings().setEnableTableSubstitution(false));
+        model = new Model(Settings.init().setEnableTableSubstitution(false));
         int n = data.grid.length;
         int m = data.grid[0].length;
         cells = new BoolVar[n][m];

@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A Flatzinc to Choco parser.
@@ -56,12 +57,18 @@ public class Flatzinc extends RegParser {
         this.all = all;
         this.free = free;
         this.nb_cores = nb_cores;
-        this.defaultSettings = new FznSettings();
     }
 
     @Override
-    public Settings createDefaultSettings() {
-        return new FznSettings();
+    public void createSettings() {
+        defaultSettings = Settings.init()
+                .setCheckDeclaredConstraints(false)
+                .setModelChecker(solver -> true)
+                .setMinCardinalityForSumDecomposition(256)
+                .setLearntClausesDominancePerimeter(0)
+                .setNbMaxLearntClauses(Integer.MAX_VALUE)
+                .setRatioForClauseStoreReduction(.66f)
+                .set("adhocReification", true);
     }
 
     @Override

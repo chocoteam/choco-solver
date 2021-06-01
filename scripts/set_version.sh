@@ -42,8 +42,7 @@ then
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/DefaultSettings.java
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%welcome.message=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR;%"  ./solver/src/main/resources/Assert.properties
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
     sedInPlace "s%COPY --from=builder /choco-solver/parsers/target/choco-parsers-.*%COPY --from=builder /choco-solver/parsers/target/choco-parsers-$VERSION-jar-with-dependencies.jar /entry_data/choco-parsers.jar%"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
 

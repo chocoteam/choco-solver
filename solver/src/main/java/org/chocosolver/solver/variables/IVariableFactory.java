@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.impl.*;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -36,6 +35,8 @@ public interface IVariableFactory extends ISelf<Model> {
      * Default prefix for constants
      */
     String CSTE_NAME = "cste -- ";
+
+    String DEFAULT_PREFIX = "TMP_";
 
     //*************************************************************************************
     // BOOLEAN VARIABLES
@@ -957,12 +958,12 @@ public interface IVariableFactory extends ISelf<Model> {
     }
 
     /**
-     * Return a generated short string, prefixed with {@link Settings#defaultPrefix()}
+     * Return a generated short string, prefixed with {@link #DEFAULT_PREFIX}
      * and followed with a single-use number.
      * @return generated String to name internally created variables
      */
     default String generateName() {
-        return "TMP_" + ref().nextNameId();
+        return generateName(DEFAULT_PREFIX);
     }
 
     /**

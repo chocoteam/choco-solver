@@ -3,13 +3,13 @@
 STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
 EXP="no"
-STAT="no"
+LVL="COMPET"
 SOLS=-1
 SEED=0
 NB_NODES=1
 TIME_LIMIT=-1
 DIR=`dirname "$0"`
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.4-SNAPSHOT/choco-parsers-4.10.4-SNAPSHOT-jar-with-dependencies.jar
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.7-SNAPSHOT/choco-parsers-4.10.7-SNAPSHOT-jar-with-dependencies.jar
 #${DIR}/${JAR_NAME}
 usage="\
 
@@ -32,6 +32,9 @@ OPTIONS:
 
     -f
         When invoked with this option the solver ignores any specified search strategy.
+
+    -v
+        When invoked with this option verbose solving is activated.
 
     -s
         When invoked with this option the solver outputs statistics for solving
@@ -97,8 +100,12 @@ do
             shift
         ;;
 
-        -s)
-            STAT="yes"
+        -v)
+            LVL="INFO"
+        ;;
+
+       -s)
+            #output statistics for solving
         ;;
 
         -n)
@@ -146,13 +153,8 @@ then
     ARGS=$ARGS" -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
 fi
 
-if test "${STAT}" = "yes"
-then
-    ARGS=$ARGS" -lvl COMPET"
-fi
-
-CMD="java -XX:+UseSerialGC -server -Xmx8G -Xss64M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
+CMD="java -XX:+UseSerialGC -server -Xmx8G -Xss64M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"
 
 echo "% $CMD"
-eval ${CMD}
+eval "${CMD}"
 
