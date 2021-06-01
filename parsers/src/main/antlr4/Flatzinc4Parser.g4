@@ -237,6 +237,7 @@ constraint
 	    CONSTRAINT IDENTIFIER LP e=expr {exps.add($e.exp);} (CM e=expr{exps.add($e.exp);})* RP anns=annotations SC
     {
     String name = $IDENTIFIER.text;
+    datas.incCstrCounter(name);
     FConstraint.valueOf(name).build(mModel, datas, name, exps, $anns.anns);
     }
 	;

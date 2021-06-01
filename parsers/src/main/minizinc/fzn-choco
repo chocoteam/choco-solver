@@ -2,6 +2,7 @@
 
 STOP_AT_FIRST="yes"
 FREE_SEARCH="no"
+STAT_SOL="no"
 EXP="no"
 LVL="COMPET"
 SOLS=-1
@@ -105,15 +106,17 @@ do
         ;;
 
        -s)
-            #output statistics for solving
+            STAT_SOL="yes"
         ;;
 
         -n)
             SOLS="$2"
+            shift
         ;;
 
         -r)
             SEED="$2"
+            shift
         ;;
 
         -jar)
@@ -151,6 +154,11 @@ fi
 if test "${FREE_SEARCH}" = "yes"
 then
     ARGS=$ARGS" -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
+fi
+
+if test "${STAT_SOL}" = "yes"
+then
+    ARGS=$ARGS" -stasol"
 fi
 
 CMD="java -XX:+UseSerialGC -server -Xmx8G -Xss64M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"

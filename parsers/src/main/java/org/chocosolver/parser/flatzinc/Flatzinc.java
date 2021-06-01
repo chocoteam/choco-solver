@@ -18,6 +18,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.kohsuke.args4j.Option;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -35,6 +36,9 @@ import java.util.Map;
  * @author Charles Prud'Homme, Jean-Guillaume Fages
  */
 public class Flatzinc extends RegParser {
+
+    @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
+    protected boolean oss = false;
 
     //***********************************************************************************
     // VARIABLES
@@ -97,7 +101,7 @@ public class Flatzinc extends RegParser {
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
             portfolio.addModel(threadModel);
-            datas[i] = new Datas(threadModel, level);
+            datas[i] = new Datas(threadModel, level, oss);
             threadModel.addHook("CUMULATIVE", "GLB");
         }
     }
@@ -132,7 +136,15 @@ public class Flatzinc extends RegParser {
         parser.getInterpreter().setPredictionMode(PredictionMode.SLL);
         parser.setBuildParseTree(false);
         parser.setTrimParseTree(false);
+        //parser.setProfile(true);
         parser.flatzinc_model(target, data);
+        /*ParseInfo parseInfo = parser.getParseInfo();
+        ATN atn = parser.getATN();
+        for (DecisionInfo di : parseInfo.getDecisionInfo()) {
+            DecisionState ds = atn.decisionToState.get(di.decision);
+            String ruleName = Flatzinc4Parser.ruleNames[ds.ruleIndex];
+            System.out.println(ruleName +" -> " + di.toString());
+        }*/
     }
 
     protected void singleThread() {
@@ -140,6 +152,12 @@ public class Flatzinc extends RegParser {
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
         if (level.isLoggable(Level.INFO)) {
+            solver.log().bold().printf("== %d flatzinc ==%n", datas[0].cstrCounter().values().stream().mapToInt(i -> i).sum());
+            datas[0].cstrCounter().entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue())
+                    .forEach(e ->
+                            solver.log().printf("\t%s #%d\n", e.getKey(), e.getValue())
+                    );
             solver.printShortFeatures();
             getModel().displayVariableOccurrences();
             getModel().displayPropagatorOccurrences();

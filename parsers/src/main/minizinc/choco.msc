@@ -1,6 +1,6 @@
 {
   "name": "Choco-solver",
-  "version": "4.10.4-SNAPSHOT",
+  "version": "4.10.7-SNAPSHOT",
   "id": "org.choco-solver.choco",
   "executable": "fzn-choco",
   "mznlib": "mzn-lib",
@@ -8,6 +8,8 @@
   "stdFlags": [
     "-a",
     "-n",
+    "-s",
+    "-v",
     "-p",
     "-r",
     "-f",
