@@ -11,9 +11,9 @@ package org.chocosolver.parser.dimacs;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -43,12 +43,15 @@ public class DIMACS extends RegParser {
 
     public DIMACS() {
         super("ChocoDimacs");
-        this.defaultSettings = new DIMACSSettings();
     }
 
     @Override
-    public Settings createDefaultSettings() {
-        return new DIMACSSettings().setEnableSAT(!cp);
+    public void createSettings() {
+        defaultSettings = Settings.init()
+                .setWarnUser(false)
+                .setCheckDeclaredConstraints(false)
+                .setModelChecker(solver -> true)
+                .setEnableSAT(!cp);
     }
 
     @Override
@@ -97,7 +100,7 @@ public class DIMACS extends RegParser {
                 throw new RuntimeException("UNSUPPORTED");
             }
         }
-        if (((DIMACSSettings) getModel().getSettings()).printConstraints()) {
+        if (level.isLoggable(Level.INFO)) {
             getModel().displayVariableOccurrences();
             getModel().displayPropagatorOccurrences();
         }

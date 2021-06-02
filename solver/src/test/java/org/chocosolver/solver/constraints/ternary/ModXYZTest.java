@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
@@ -153,7 +153,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testMod3VarsIntoMod2VarsMod() {
-		Model model = new Model(new DefaultSettings().setEnableTableSubstitution(false));
+		Model model = new Model(Settings.init().setEnableTableSubstitution(false));
 		System.out.printf("%s\n", model.getClass());
 		IntVar x = model.intVar("x", 0,9);
 		IntVar y = model.intVar("y", 5);

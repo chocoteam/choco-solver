@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -67,7 +67,7 @@ public class BoundGlobalCardinalityTest {
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);
             //solver 1
-            Model model = new Model(new DefaultSettings().setCheckDeclaredConstraints(false));
+            Model model = new Model(Settings.init().setCheckDeclaredConstraints(false));
             int[] values = new int[m];
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
@@ -80,7 +80,7 @@ public class BoundGlobalCardinalityTest {
                 model.getSolver().setSearch(inputOrderLBSearch(append(vars, cards)));
             }
             // reformulation
-            Model ref = new Model(new DefaultSettings().setCheckDeclaredConstraints(false));
+            Model ref = new Model(Settings.init().setCheckDeclaredConstraints(false));
             {
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
@@ -104,7 +104,7 @@ public class BoundGlobalCardinalityTest {
             int n = 1 + random.nextInt(6);
             int m = 1 + random.nextInt(4);
             //solver 1
-            Model model = new Model(new DefaultSettings().setCheckDeclaredConstraints(false));
+            Model model = new Model(Settings.init().setCheckDeclaredConstraints(false));
             int[] values = new int[m];
             for (int i = 0; i < values.length; i++) {
                 values[i] = i;
@@ -117,7 +117,7 @@ public class BoundGlobalCardinalityTest {
                 model.getSolver().setSearch(inputOrderLBSearch(vars));
             }
             // reformulation
-            Model ref = new Model(new DefaultSettings().setCheckDeclaredConstraints(false));
+            Model ref = new Model(Settings.init().setCheckDeclaredConstraints(false));
             {
                 IntVar[] cards = ref.intVarArray("cards", m, 0, n, true);
                 IntVar[] vars = ref.intVarArray("vars", n, 0, m - 1, true);

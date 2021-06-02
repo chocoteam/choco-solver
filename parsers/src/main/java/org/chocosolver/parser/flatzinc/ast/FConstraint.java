@@ -11,7 +11,6 @@ package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
@@ -413,7 +412,7 @@ public enum FConstraint {
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
 
-            if (((FznSettings) model.getSettings()).adhocReification()) {
+            if ((boolean)model.getSettings().get("adhocReification")) {
                 if (bs.length == 1) {
                     if (bs[0].isInstantiated() || c.isInstantiated()) {
                         IntVar x;
@@ -647,7 +646,7 @@ public enum FConstraint {
             if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
             } else {
-                if (((FznSettings) model.getSettings()).adhocReification()) {
+                if ((boolean)model.getSettings().get("adhocReification")) {
                     if (a.isInstantiated() || b.isInstantiated()) {
                         IntVar x;
                         int c;

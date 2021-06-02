@@ -22,9 +22,6 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 
 /**
@@ -120,9 +117,6 @@ public abstract class RegParser implements IParser {
     @Option(name = "-dfx", usage = "Force default explanation algorithm.")
     public boolean dftexp = false;
 
-    @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
-    protected File settingsFile = null;
-
     /**
      * Default settings to apply
      */
@@ -158,7 +152,9 @@ public abstract class RegParser implements IParser {
         this.parser_cmd = parser_cmd;
     }
 
-    public abstract Settings createDefaultSettings();
+    public void createSettings(){
+        defaultSettings = Settings.init();
+    }
 
     public final Settings getSettings() {
         return defaultSettings;
@@ -191,17 +187,7 @@ public abstract class RegParser implements IParser {
         if (level.isLoggable(Level.INFO)) {
             System.out.printf("%s\n", Arrays.toString(args));
         }
-        cmdparser.getArguments();
-        defaultSettings = createDefaultSettings();
-        if (settingsFile != null) {
-            try {
-                FileInputStream fileInputStream = new FileInputStream(settingsFile);
-                defaultSettings.load(fileInputStream);
-                fileInputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        createSettings();
         Runtime.getRuntime().addShutdownHook(statOnKill);
         return true;
     }

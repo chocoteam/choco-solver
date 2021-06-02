@@ -26,10 +26,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 /**
  * An object to maintain a link between the model and the solver, during the parsing phase.
@@ -50,8 +47,10 @@ public class Datas {
     private final List<String> output_arrays_names;
     private final List<Declaration.DType> output_arrays_types;
     private final List<Variable[]> output_arrays_vars;
+    private final HashMap<String, Integer> cstrCounter;
 
     private Level level = Level.COMPET;
+    private boolean oss = false;
     private int nbSolution;
     private final StringBuilder stringBuilder = new StringBuilder();
 
@@ -70,12 +69,14 @@ public class Datas {
         output_arrays_names = new ArrayList<>();
         output_arrays_vars = new ArrayList<>();
         output_arrays_types = new ArrayList<>();
+        cstrCounter = new HashMap<>();
     }
 
-    public Datas(Model model, Level theLevel) {
+    public Datas(Model model, Level theLevel, boolean oss) {
         this();
         this.level = theLevel;
         this.model = model;
+        this.oss = oss;
     }
 
     //***********************************************************************************
@@ -263,5 +264,26 @@ public class Datas {
         if (level.isLoggable(Level.INFO)) {
             solver.log().bold().white().printf("%s \n", solver.getMeasures().toOneLineString());
         }
+        if(oss){
+            solver.log().printf(Locale.US, "%%%%%%mzn-stat: initTime=%.3f%n", solver.getReadingTimeCount());
+            solver.log().printf(Locale.US, "%%%%%%mzn-stat: solveTime=%.3f%n", solver.getTimeCount());
+            solver.log().printf("%%%%%%mzn-stat: solutions=%d%n", solver.getSolutionCount());
+            solver.log().printf("%%%%%%mzn-stat: variables=%d%n", solver.getModel().getNbVars());
+            solver.log().printf("%%%%%%mzn-stat: constraints=%d%n", solver.getModel().getNbCstrs());
+            solver.log().printf("%%%%%%mzn-stat: nodes=%d%n", solver.getNodeCount());
+            solver.log().printf("%%%%%%mzn-stat: failures=%d%n", solver.getFailCount());
+            solver.log().printf("%%%%%%mzn-stat: restarts=%d%n", solver.getRestartCount());
+            solver.log().println("%%%mzn-stat-end");
+        }
+    }
+
+    public void incCstrCounter(String name) {
+        if (level.isLoggable(Level.INFO)) {
+            this.cstrCounter.compute(name, (s, c) -> c == null ? 1 : c + 1);
+        }
+    }
+
+    public Map<String, Integer> cstrCounter() {
+        return this.cstrCounter;
     }
 }

@@ -11,8 +11,8 @@ package org.chocosolver.parser.flatzinc.parser;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.flatzinc.Flatzinc4Parser;
-import org.chocosolver.parser.flatzinc.FznSettings;
 import org.chocosolver.parser.flatzinc.ast.Datas;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -36,7 +36,7 @@ public class T_var_decl extends GrammarTest {
 
     @BeforeMethod(alwaysRun = true)
     public void before() {
-        mSolver = new Model(new FznSettings().setEnableViews(true));
+        mSolver = new Model(Settings.init().setEnableViews(true));
         datas = new Datas();
     }
 
@@ -78,9 +78,9 @@ public class T_var_decl extends GrammarTest {
         SetVar var = ((SetVar) o);
         Assert.assertEquals("s", var.getName());
         int[] UB = var.getUB().toArray();
-        int[] values = new int[]{1,2,3};
-        for(int i=0;i<UB.length;i++){
-            Assert.assertEquals(UB[i],values[i]);
+        int[] values = new int[]{1, 2, 3};
+        for (int i = 0; i < UB.length; i++) {
+            Assert.assertEquals(UB[i], values[i]);
         }
     }
 
@@ -155,7 +155,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test8() throws IOException {
-        datas = new Datas(null, Level.SILENT);
+        datas = new Datas(null, Level.SILENT, false);
 
         Flatzinc4Parser fp = parser("var 123456789..987654321: INT____00001 :: is_defined_var :: var_is_introduced;", mSolver, datas);
 
@@ -177,7 +177,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test9() throws IOException {
-        datas = new Datas(null, Level.SILENT);
+        datas = new Datas(null, Level.SILENT, false);
 
         Flatzinc4Parser fp = parser("array[1 .. 3] of var 0 .. 9: C::output_array([ 1 .. 3 ]);", mSolver, datas);
 
@@ -192,7 +192,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test10() throws IOException {
-        datas = new Datas(null, Level.SILENT);
+        datas = new Datas(null, Level.SILENT, false);
 
         Flatzinc4Parser fp = parser("var 1 .. 5: a ::output_var;", mSolver, datas);
         fp.var_decl();
@@ -215,7 +215,7 @@ public class T_var_decl extends GrammarTest {
 
     @Test(groups = "1s")
     public void test11() throws IOException {
-        datas = new Datas(null, Level.SILENT);
+        datas = new Datas(null, Level.SILENT, false);
 
         Flatzinc4Parser fp = parser("array [1..8] of var 1..8: queens " +
                 ":: output_array([1..8]) " +

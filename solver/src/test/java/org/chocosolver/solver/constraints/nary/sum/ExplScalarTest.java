@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
@@ -338,7 +338,7 @@ public class ExplScalarTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test13() throws ContradictionException {
         // 3.[0,1] + 3.[0,1] + 3.[0,1] + 3.[0,1] <= 5
-        Model model = new Model(new DefaultSettings().explainGlobalFailureInSum(true));
+        Model model = new Model(Settings.init().explainGlobalFailureInSum(true));
         IntVar x0 = model.intVar("w", 0, 1);
         IntVar x1 = model.intVar("x", 0, 1);
         IntVar x2 = model.intVar("y", 0, 1);
@@ -368,7 +368,7 @@ public class ExplScalarTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test14() throws ContradictionException {
         // 1.[0,1] + 2.[2,3] + 2.[3,4] <= 20
-        Model model = new Model(new DefaultSettings().explainGlobalFailureInSum(true));
+        Model model = new Model(Settings.init().explainGlobalFailureInSum(true));
         IntVar x0 = model.intVar("x0", 0, 19);
         IntVar x1 = model.intVar("x1", 0, 19);
         IntVar x2 = model.intVar("x2", 0, 19);
@@ -396,7 +396,7 @@ public class ExplScalarTest {
     @Test(groups = "1s", timeOut = 60000)
     public void test15() throws ContradictionException {
         // 5.[7,8] + 1.[12,14] + 1.[-3,-1] <= 40
-        Model model = new Model(new DefaultSettings().explainGlobalFailureInSum(true));
+        Model model = new Model(Settings.init().explainGlobalFailureInSum(true));
         IntVar x0 = model.intVar("w", 0, 8);
         IntVar x1 = model.intVar("x", 0, 15);
         IntVar x2 = model.intVar("y", -15, 0);

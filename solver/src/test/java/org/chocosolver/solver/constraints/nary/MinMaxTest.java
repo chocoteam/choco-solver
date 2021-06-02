@@ -468,7 +468,7 @@ public class MinMaxTest {
         for(int n = 2; n < s; n++) {
             for (int i = 0; i < l; i++) {
                 rnd.setSeed(i * s + n);
-                Settings settings = new DefaultSettings().setWarnUser(false);
+                Settings settings = Settings.init().setWarnUser(false);
                 Model model = new Model(settings);
                 BoolVar[] bvars = new BoolVar[n];
                 for (int j = 0; j < n; j++) {
@@ -495,7 +495,7 @@ public class MinMaxTest {
         for(int n = 2; n < s; n++) {
             for (int i = 0; i < l; i++) {
                 rnd.setSeed(i * s + n);
-                Settings settings = new DefaultSettings().setWarnUser(false);
+                Settings settings = Settings.init().setWarnUser(false);
                 Model model = new Model(settings);
                 BoolVar[] bvars = new BoolVar[n];
                 for (int j = 0; j < n; j++) {

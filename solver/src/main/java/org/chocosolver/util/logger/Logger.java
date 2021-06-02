@@ -35,6 +35,10 @@ public class Logger {
         pstreams.add(System.out);
     }
 
+    public Logger(Logger aLogger) {
+        pstreams.addAll(aLogger.pstreams);
+    }
+
     public final void add(PrintStream ps) {
         this.pstreams.add(ps);
     }
@@ -51,7 +55,7 @@ public class Logger {
         return this;
     }
 
-    public final void reset(){
+    public final void reset() {
         postfix();
     }
 

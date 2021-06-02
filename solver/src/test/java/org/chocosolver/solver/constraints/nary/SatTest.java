@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -40,7 +40,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 600000, dataProvider = "satornot")
     public void test1(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -51,7 +51,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test2(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -62,7 +62,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test3(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -74,7 +74,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test4(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -86,7 +86,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test5(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -98,7 +98,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test6(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -110,7 +110,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test7(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -121,7 +121,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test8(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -134,7 +134,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test9(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1, b2, r;
         b1 = model.boolVar("b1");
         b2 = model.boolVar("b2");
@@ -148,7 +148,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test10(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1;
         b1 = model.boolVar("b1");
         model.addClauseTrue(b1);
@@ -160,7 +160,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test11(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar b1;
         b1 = model.boolVar("b1");
         model.addClauseFalse(b1);
@@ -172,7 +172,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test12(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar[] bs = model.boolVarArray("b", 3);
         model.addClausesBoolOrArrayEqualTrue(bs);
         model.addClauseFalse(bs[0]);
@@ -185,7 +185,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void test13(boolean sat) {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         BoolVar[] bs = model.boolVarArray("b", 3);
         BoolVar d = model.boolVar("d");
         model.addClausesSumBoolArrayLessEqKVar(bs, d);
@@ -196,7 +196,7 @@ public class SatTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "satornot")
     public void testAlexLoboda(boolean sat) throws ContradictionException {
-        Model model = new Model(new DefaultSettings().setEnableSAT(sat));
+        Model model = new Model(Settings.init().setEnableSAT(sat));
         // VARS
         IntVar var = model.intVar("var", new int[]{0, 2});
         BoolVar eq2 = model.boolVar("eq2");

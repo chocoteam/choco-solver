@@ -507,13 +507,13 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void test329() {
-        Model s1 = new Model(new DefaultSettings().setMaxTupleSizeForSubstitution(0));
+        Model s1 = new Model(Settings.init().setMaxTupleSizeForSubstitution(0));
         {
             BoolVar[] bs = s1.boolVarArray("b", 3);
             BoolVar r = s1.boolVar("r");
             s1.scalar(bs, new int[]{-1, -1, -1}, "<=", -2).reifyWith(r);
         }
-        Model s2 = new Model(new DefaultSettings().setMaxTupleSizeForSubstitution(1000));
+        Model s2 = new Model(Settings.init().setMaxTupleSizeForSubstitution(1000));
         {
             BoolVar[] bs = s2.boolVarArray("b", 3);
             BoolVar r = s2.boolVar("r");

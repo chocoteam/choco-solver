@@ -24,6 +24,7 @@ This is helpful when a Solution object is required in many places.
 - Change some default settings 
 - Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`)
 - Add Logger (Solver.log()) to trace Model/Solver.
+- Revamp `Settings`, now is defined as a factory pattern
 
 ### Deprecated API (to be removed in next release):
 

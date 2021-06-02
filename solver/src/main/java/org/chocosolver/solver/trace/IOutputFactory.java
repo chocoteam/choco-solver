@@ -34,10 +34,16 @@ import java.util.List;
 public interface IOutputFactory extends ISelf<Solver> {
 
     /**
+     * Default welcome message
+     */
+    String WELCOME_MESSAGE =
+            "** Choco 4.10.6 (2020-12) : Constraint Programming Solver, Copyright (c) 2010-2020";
+    
+    /**
      * Print the version message.
      */
     default void printVersion() {
-        ref().log().bold().blue().println(ref().getModel().getSettings().getWelcomeMessage());
+        ref().log().bold().blue().println(WELCOME_MESSAGE);
     }
 
     /**

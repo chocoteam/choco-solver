@@ -42,10 +42,12 @@ then
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
 
     ## The configuration file
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/DefaultSettings.java
-    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%welcome.message=** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR;%"  ./solver/src/main/resources/Assert.properties
+    sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
+    ## For MiniZinc
     sedInPlace "s%COPY --from=builder /choco-solver/parsers/target/choco-parsers-.*%COPY --from=builder /choco-solver/parsers/target/choco-parsers-$VERSION-jar-with-dependencies.jar /entry_data/choco-parsers.jar%"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
+    sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
+    sedInPlace "s%CHOCO_JAR=.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minzinc/fzn-choco
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION

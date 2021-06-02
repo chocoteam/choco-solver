@@ -12,9 +12,9 @@ package org.chocosolver.parser.xcsp;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
@@ -51,12 +51,13 @@ public class XCSP extends RegParser {
 
     public XCSP() {
         super("ChocoXCSP");
-        this.defaultSettings = new XCSPSettings(); // todo: rename or create the right one
     }
 
     @Override
-    public Settings createDefaultSettings() {
-        return new XCSPSettings();
+    public void createSettings() {
+        defaultSettings = Settings.init()
+                .setEnableSAT(true)
+                .setModelChecker(solver -> true);
     }
 
     @Override

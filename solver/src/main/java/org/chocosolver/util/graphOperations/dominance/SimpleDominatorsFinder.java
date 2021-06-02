@@ -50,7 +50,7 @@ public class SimpleDominatorsFinder extends AbstractLengauerTarjanDominatorsFind
 
     protected void compress(int v) {
         int k = v;
-        list.clear();
+        list.resetQuick();
         while (ancestor[ancestor[k]] != -1) {
             list.add(k);
             k = ancestor[k];

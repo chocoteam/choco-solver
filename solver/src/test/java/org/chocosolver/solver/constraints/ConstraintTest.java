@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -391,7 +391,7 @@ public class ConstraintTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testAmIMeYet() {
-        Model model = new Model("model", new DefaultSettings()
+        Model model = new Model("model", Settings.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
 
@@ -410,7 +410,7 @@ public class ConstraintTest {
 
     @Test(groups = "10s", timeOut = 60000)
     public void testJitee2() {
-        Model model = new Model("model", new DefaultSettings()
+        Model model = new Model("model", Settings.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
         IntVar a = model.intVar("a", 0, 1000, false);

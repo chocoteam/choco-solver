@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -160,5 +161,25 @@ public class UndirectedNodeInducedGraphVarImplTest {
         m.connected(g).post();
         while (m.getSolver().solve());
         Assert.assertEquals(m.getSolver().getSolutionCount(), 18);
+    }
+
+    /**
+     * Ensure that the removeEdge operation does not filters possible solutions:
+     *     if LB = empty graph, UB = 0 - 1, and edge (0, 1) is forbidden by a constraint, then
+     *     the possible solutions are 0, 1, and the empty graph.
+     */
+    @Test(groups="1s", timeOut=60000)
+    public void testUseCase2() {
+        Model m = new Model();
+        int n = 2;
+        UndirectedGraph LB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UndirectedGraph UB = GraphFactory.makeStoredUndirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        UB.addNode(0); UB.addNode(1);
+        UB.addEdge(0, 1);
+        UndirectedGraphVar g = m.nodeInducedGraphVar("g", LB, UB);
+        SetVar s = m.graphNeighborsSetView(g, 0);
+        m.notMember(1, s).post();
+        while (m.getSolver().solve());
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }
 }

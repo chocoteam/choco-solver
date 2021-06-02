@@ -1443,6 +1443,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * @param ansi {@code true} to enable colors
      */
     public void logWithANSI(boolean ansi) {
-        logger = ansi ? new ANSILogger() : new Logger();
+        logger = ansi ? new ANSILogger(logger) : new Logger(logger);
     }
 }

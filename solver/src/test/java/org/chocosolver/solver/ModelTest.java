@@ -21,8 +21,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
@@ -530,7 +528,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
-        Model model = new Model(new DefaultSettings().setSwapOnPassivate(true));
+        Model model = new Model(Settings.init().setSwapOnPassivate(true));
         int n = 11;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -598,15 +596,7 @@ public class ModelTest {
             mode.getSolver().hardReset();
         }
     }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testSettings2() throws IOException {
-        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
-        Settings settings = new DefaultSettings().load(inStream);
-        System.out.printf("%s\n", settings.getWelcomeMessage());
-        settings.store(System.out, "Test");
-    }
-
+    
     @Test(groups = "1s", timeOut = 60000)
     public void testHR() {
         Model m = new Model();

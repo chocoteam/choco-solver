@@ -1309,6 +1309,7 @@ public class Flatzinc4Parser extends Parser {
 			match(SC);
 
 			    String name = (((ConstraintContext)_localctx).IDENTIFIER!=null?((ConstraintContext)_localctx).IDENTIFIER.getText():null);
+			    datas.incCstrCounter(name);
 			    FConstraint.valueOf(name).build(mModel, datas, name, exps, ((ConstraintContext)_localctx).anns.anns);
 			    
 			}

@@ -66,8 +66,6 @@ public class Model implements IModel {
 
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
-    public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
-
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
 
     public static final String CLAUSESBUILDER_HOOK_NAME = "H_CLAUSESBUILDER";
@@ -82,7 +80,7 @@ public class Model implements IModel {
     /**
      * A map to cache constants (considered as fixed variables)
      */
-    private TIntObjectHashMap<IntVar> cachedConstants;
+    private final TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
      * Variables of the model
@@ -148,7 +146,7 @@ public class Model implements IModel {
     /**
      * Stores this model's creation time -- in nanoseconds
      */
-    private long creationTime;
+    private final long creationTime;
 
     /**
      * Counter used to set ids to variables and propagators
@@ -163,7 +161,7 @@ public class Model implements IModel {
     /**
      * Enable attaching hooks to a model.
      */
-    private Map<String, Object> hooks;
+    private final Map<String, Object> hooks;
 
     /**
      * Resolution policy (sat/min/max)
@@ -210,7 +208,7 @@ public class Model implements IModel {
      * @param name        The name of the model (for logging purpose)
      */
     public Model(IEnvironment environment, String name) {
-        this(environment, name, new DefaultSettings());
+        this(environment, name, Settings.init());
     }
 
     /**
@@ -232,7 +230,7 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, new DefaultSettings());
+        this(new EnvironmentBuilder().fromFlat().build(), name, Settings.init());
     }
 
     /**
@@ -621,7 +619,7 @@ public class Model implements IModel {
     /**
      * Return the current settings for the solver
      *
-     * @return a {@link org.chocosolver.solver.Settings}
+     * @return a {@link Settings}
      */
     public Settings getSettings() {
         return this.settings;
@@ -645,7 +643,6 @@ public class Model implements IModel {
      * @see IObjectiveManager#setWalkingDynamicCut()
      * @see IObjectiveManager#setCutComputer(Function)
      */
-    @SuppressWarnings("unchecked")
     public void setObjective(boolean maximize, Variable objective) {
         if (objective == null) {
             throw new SolverException("Cannot set objective to null");
@@ -867,7 +864,7 @@ public class Model implements IModel {
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
-            for (Propagator p : c.getPropagators()) {
+            for (Propagator<?> p : c.getPropagators()) {
                 if(p.isPassive()){
                     throw new SolverException("Try to add a constraint with a passive propagator");
                 }
@@ -902,7 +899,7 @@ public class Model implements IModel {
                             "A call to Model.post(Constraint) is more appropriate.");
                 }
                 if (getSolver().getEngine().isInitialized()) {
-                    for (Propagator p : c.getPropagators()) {
+                    for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }
                 }
@@ -937,7 +934,7 @@ public class Model implements IModel {
                     engine.dynamicDeletion(c.getPropagators());
                 }
                 // 4. remove the propagators of the constraint from its variables
-                for (Propagator prop : c.getPropagators()) {
+                for (Propagator<?> prop : c.getPropagators()) {
                     prop.unlinkVariables();
                 }
             }
