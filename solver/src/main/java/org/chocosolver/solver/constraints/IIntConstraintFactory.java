@@ -1295,7 +1295,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             // uses two propagator to perform a fix point
             return new Constraint(
                     ConstraintsName.ELEMENT,
-                    new PropElementV_fast(value, table, index, offset, true));
+                    new PropElementV_fast(value, table, index, offset, false));
         }
     }
 
