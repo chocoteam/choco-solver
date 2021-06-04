@@ -10,10 +10,10 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.Opposite;
+import org.chocosolver.solver.constraints.reification.PropImplied;
+import org.chocosolver.solver.constraints.reification.PropImplies;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
 
@@ -57,7 +57,7 @@ public class Constraint {
     }
 
     /**
-     *  Propagators of the constraint (they will filter domains and eventually check solutions)
+     * Propagators of the constraint (they will filter domains and eventually check solutions)
      */
     final protected Propagator[] propagators;
 
@@ -109,14 +109,14 @@ public class Constraint {
         this.propagators = propagators;
         this.mStatus = Status.FREE;
         this.cidx = -1;
-        for (Propagator propagator : propagators) {
+        for (Propagator<?> propagator : propagators) {
             propagator.defineIn(this);
         }
         Model model = propagators[0].getModel();
-        if(model.getSettings().checkDeclaredConstraints()) {
+        if (model.getSettings().checkDeclaredConstraints()) {
             @SuppressWarnings("unchecked")
             Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if(instances == null){
+            if (instances == null) {
                 instances = new HashSet<>();
                 model.addHook("cinstances", instances);
             }
@@ -156,7 +156,7 @@ public class Constraint {
      */
     public ESat isSatisfied() {
         int sat = 0;
-        for (Propagator propagator : propagators) {
+        for (Propagator<?> propagator : propagators) {
             ESat entail = propagator.isEntailed();
             if (entail.equals(ESat.FALSE)) {
                 return entail;
@@ -195,11 +195,11 @@ public class Constraint {
             boolReif = bool;
             assert opposite.boolReif == null;
             opposite.boolReif = this.boolReif.not();
-            if(boolReif.isInstantiatedTo(1)){
+            if (boolReif.isInstantiatedTo(1)) {
                 this.post();
-            }else if(boolReif.isInstantiatedTo(0)){
+            } else if (boolReif.isInstantiatedTo(0)) {
                 this.opposite.post();
-            }else {
+            } else {
                 new ReificationConstraint(boolReif, this, opposite).post();
             }
         } else if (bool != boolReif) {
@@ -210,6 +210,7 @@ public class Constraint {
     /**
      * Get/make the boolean variable indicating whether the constraint is satisfied or not
      * This should not be posted.
+     *
      * @return the boolean reifying the constraint
      */
     public final BoolVar reify() {
@@ -218,6 +219,47 @@ public class Constraint {
             reifyWith(model.boolVar(model.generateName("REIF_")));
         }
         return boolReif;
+    }
+
+    /**
+     * Encapsulate this constraint in an implication relationship:
+     * <p>
+     * c &rArr; r
+     * </p>
+     * where 'c' is this constraint and 'r' is a boolean variable.
+     * <p>
+     * After a call to this method, this constraint 'c' can be posted,
+     * but a better option would be to set 'r' to true.
+     * 'c' can also be reified, but a better option would be to link the reifying boolean to 'r' directly.
+     * </p>
+     *
+     * @param r a boolean variable
+     */
+    public final void implies(BoolVar r) {
+        new Constraint(ConstraintsName.IMPLYCONSTRAINT, new PropImplies(this, r)).post();
+    }
+
+    /**
+     * Encapsulate this constraint in an implication relationship:
+     * <p>
+     * r &rArr; c
+     * </p>
+     * where 'r' is a boolean variable and 'c' is this constraint.
+     * <br/>
+     * <p>
+     * After a call to this method, this constraint 'c' can be posted,
+     * but then 'r' can take any value.
+     * 'c' can also be reified, but a better option would be to link the reifying boolean to 'r' directly.
+     * </p>
+     *
+     * @param r a boolean variable
+     */
+    public final void impliedBy(BoolVar r) {
+        if (r.isInstantiatedTo(1)) {
+            this.post();
+        } else {
+            new Constraint(ConstraintsName.IMPLIEDCONSTRAINT, new PropImplied(r, this)).post();
+        }
     }
 
     /**
@@ -230,27 +272,29 @@ public class Constraint {
 
     /**
      * When a constraint has been declared but neither posted or reified,
-     * a call to {@link #ignore()} ensures this constraint will be ignored
+     * a call to {@code ignore()} ensures this constraint will be ignored
      * when declared constraints are checked.
      */
-    public final void ignore(){
-        assert mStatus == Status.FREE:"Cannot ignore a posted or reified constraint";
+    public final void ignore() {
+        assert mStatus == Status.FREE : "Cannot ignore a posted or reified constraint";
         Model model = propagators[0].getModel();
-        if(model.getSettings().checkDeclaredConstraints()) {
+        if (model.getSettings().checkDeclaredConstraints()) {
             @SuppressWarnings("unchecked")
             Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if(instances == null){
+            if (instances == null) {
                 instances = new HashSet<>();
                 model.addHook("cinstances", instances);
             }
             instances.remove(this);
         }
     }
+
     /**
      * For internal usage only, declare the status of this constraint in the model
      * and, if need be, its position in the constraint list.
+     *
      * @param aStatus status of this constraint in the model
-     * @param idx position of this constraint in the constraint list.
+     * @param idx     position of this constraint in the constraint list.
      * @throws SolverException if the constraint a incoherent status is declared
      */
     public final void declareAs(Status aStatus, int idx) throws SolverException {
@@ -258,16 +302,16 @@ public class Constraint {
         mStatus = aStatus;
         cidx = idx;
         Model model = propagators[0].getModel();
-        if(model.getSettings().checkDeclaredConstraints()) {
+        if (model.getSettings().checkDeclaredConstraints()) {
             @SuppressWarnings("unchecked")
             Set<Constraint> instances = (Set<Constraint>) model.getHook("cinstances");
-            if(instances == null){
+            if (instances == null) {
                 instances = new HashSet<>();
                 model.addHook("cinstances", instances);
             }
-            if(mStatus != Status.FREE) {
+            if (mStatus != Status.FREE) {
                 instances.remove(this);
-            }else{
+            } else {
                 instances.add(this);
             }
         }
@@ -275,14 +319,15 @@ public class Constraint {
 
     /**
      * Check if the new status is not in conflict with the current one
+     *
      * @param aStatus new status of the constraint
      * @throws SolverException if the constraint a incoherent status is declared
      */
-    public final void checkNewStatus(Status aStatus) throws SolverException{
+    public final void checkNewStatus(Status aStatus) throws SolverException {
         switch (mStatus) {
             default:
             case FREE:
-                if(aStatus == Status.FREE){
+                if (aStatus == Status.FREE) {
                     throw new SolverException("Try to remove a constraint which is not known from the model.");
                 }
                 break;
@@ -311,8 +356,7 @@ public class Constraint {
 
     /**
      * @return the {@link Status} of this constraint
-     * @implNote
-     * The constraint's status takes into account the state of the opposite constraint if it exists
+     * @implNote The constraint's status takes into account the state of the opposite constraint if it exists
      */
     public final Status getStatus() {
         return (mStatus == Status.FREE && opposite != null) ? opposite.mStatus : mStatus;
@@ -343,7 +387,7 @@ public class Constraint {
         return opposite;
     }
 
-    protected void setOpposite(Constraint opp){
+    protected void setOpposite(Constraint opp) {
         opposite = opp;
         opposite.opposite = this;
     }
@@ -378,7 +422,7 @@ public class Constraint {
      */
     public PropagatorPriority computeMaxPriority() {
         int priority = 1;
-        for (Propagator p : propagators) {
+        for (Propagator<?> p : propagators) {
             priority = Math.max(priority, p.getPriority().priority);
         }
         return PropagatorPriority.get(priority);
@@ -386,7 +430,8 @@ public class Constraint {
 
     /**
      * Creates a new constraint with all propagators of toMerge
-     * @param name name of the new constraint
+     *
+     * @param name    name of the new constraint
      * @param toMerge a set of constraints to merge in this
      * @return a new constraint with all propagators of toMerge
      */
@@ -422,7 +467,7 @@ public class Constraint {
      * It means that, constraint should be disabled only before any interaction with
      * the ({@link org.chocosolver.solver.Solver}) class to prevent side-effects.
      *
-     * @param enabled
+     * @param enabled a boolean
      * @throws SolverException when setEnabled is called during solving
      */
     public void setEnabled(boolean enabled) {
@@ -431,7 +476,7 @@ public class Constraint {
         }
         if (this.enabled != enabled) {
             this.enabled = enabled;
-            for (Propagator p : propagators) {
+            for (Propagator<?> p : propagators) {
                 if (p != null) {
                     p.setEnabled(enabled);
                 }
