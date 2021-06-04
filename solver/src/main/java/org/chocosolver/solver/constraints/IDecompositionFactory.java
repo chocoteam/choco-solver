@@ -92,7 +92,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         for (int r = 0; r < matrix.length; r++) {
             int min = IntStream.of(matrix[r]).min().orElse(IntVar.MIN_INT_BOUND);
             int max = IntStream.of(matrix[r]).max().orElse(IntVar.MAX_INT_BOUND);
-            results[r] = ref().intVar("val["+r+"]", min, max);
+            results[r] = ref().intVar("val[" + r + "]", min, max);
             ref().element(results[r], matrix[r], colIndex, colOffset).post();
         }
         ref().element(value, results, rowIndex, rowOffset).post();
@@ -141,7 +141,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
             layer[i] = new TIntHashSet();
         }
         layer[0].add(automaton.getInitialState());
-        states[0] = ref().intVar("Q_"+ref().nextId(), layer[0].toArray());
+        states[0] = ref().intVar("Q_" + ref().nextId(), layer[0].toArray());
         TIntHashSet nexts = new TIntHashSet();
         for (int i = 0; i < n; i++) {
             int ub = vars[i].getUB();
@@ -191,5 +191,30 @@ public interface IDecompositionFactory extends ISelf<Model> {
             }
             ref().scalar(in, w, "=", load[i]).post();
         }
+    }
+
+    /**
+     * <p>
+     * Creates and posts a decomposition of the {@link IIntConstraintFactory#circuit(IntVar[], int)} constraint.
+     * </p>
+     * <p>
+     * It relies on two {@link IIntConstraintFactory#allDifferent(IntVar[], String)} constraints and some
+     * {@link IIntConstraintFactory#element(IntVar, IntVar[], IntVar, int)} constraints.
+     * </p>
+     *
+     * @param S      successors variables
+     * @param offset 0 by default but typically 1 if used within MiniZinc
+     *               (which counts from 1 to n instead of from 0 to n-1)
+     */
+    default void circuitDec(IntVar[] S, int offset) {
+        int n = S.length;
+        ref().allDifferent(S, "AC").post();
+        IntVar[] t = ref().intVarArray("t", n - 1, 1 + offset, n - 1 + offset);
+        ref().allDifferent(t, "AC3").post();
+        ref().element(t[0], S, ref().intVar(offset), 0).post();
+        for (int i = 1; i < n - 2; i++) {
+            ref().element(t[i], S, t[i - 1], 0).post();
+        }
+        ref().element(ref().intVar(offset), S, t[n - 2], 0).post();
     }
 }
