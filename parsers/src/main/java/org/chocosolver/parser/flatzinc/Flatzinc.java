@@ -115,6 +115,7 @@ public class Flatzinc extends RegParser {
                 FileInputStream fileInputStream = new FileInputStream(new File(instance));
                 parse(models.get(i), datas[i], fileInputStream);
                 fileInputStream.close();
+                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
                 }

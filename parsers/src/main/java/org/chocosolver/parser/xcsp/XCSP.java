@@ -94,6 +94,7 @@ public class XCSP extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(models.get(i), parsers[i], i);
+                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
                 }
