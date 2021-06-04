@@ -25,6 +25,9 @@ This is helpful when a Solution object is required in many places.
 - Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`)
 - Add Logger (Solver.log()) to trace Model/Solver.
 - Revamp `Settings`, now is defined as a factory pattern
+- Make *half reification* possible. Seed `c.implies(b)` or `c.impliedBy(b)` 
+  where `c` is a Constraint and `b` a BoolVar.
+- Update MiniZinc constraints definition.
 
 ### Deprecated API (to be removed in next release):
 

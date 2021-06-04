@@ -4,5 +4,4 @@
 % set of the other array.
 %-----------------------------------------------------------------------------%
 predicate fzn_inverse(array[int] of var int: f,
-                  array[int] of var int: invf) =
-    inverseChoco(f, invf);
+                  array[int] of var int: invf);

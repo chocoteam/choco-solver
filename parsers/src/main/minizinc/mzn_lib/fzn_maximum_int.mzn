@@ -3,6 +3,5 @@
 % Assumptions: |x| > 0.
 %-----------------------------------------------------------------------------%
 
-predicate fzn_maximum_int(var int: m, array[int] of var int: x) =
-    maximumChoco(m,x);
+predicate fzn_maximum_int(var int: m, array[int] of var int: x);
 

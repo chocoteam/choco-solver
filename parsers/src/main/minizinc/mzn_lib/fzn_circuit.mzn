@@ -3,5 +3,4 @@
 % that 'j' is the successor of 'i'.
 %-----------------------------------------------------------------------------%
 
-predicate fzn_circuit(array[int] of var int: x) =
-    circuitChoco(x);
+predicate fzn_circuit(array[int] of var int: x);
