@@ -144,7 +144,7 @@ public class PerformanceTest {
 
     @Test(groups = "mzn", timeOut = 120_000)
     public void test_lot_sizing_cp_pigment15b() throws SetUpException {
-        // Specific to lot_sizing_cp_pigment15b which takes less time when element+(fast = false)
+        // Specific to lot_sizing_cp_pigment15b which takes less time when element+(fast = adaptive)
         String file = this.getClass().getResource("/flatzinc/2020/lot_sizing_cp+pigment15b.psp.fzn").getFile();
         String[] args = new String[]{
                 file,
@@ -163,8 +163,8 @@ public class PerformanceTest {
         fzn.solve();
         Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 35, "Unexpected number of solutions");
-        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 822_034, "Unexpected number of nodes");
-        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 821_965, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 841_296, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 841_227, "Unexpected number of failures");
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 1123, "Unexpected best solution");
     }
 }

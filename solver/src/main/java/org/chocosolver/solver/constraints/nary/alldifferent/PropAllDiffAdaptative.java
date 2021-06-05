@@ -28,7 +28,7 @@ public class PropAllDiffAdaptative extends PropAllDiffAC {
     // VARIABLES
     //***********************************************************************************
 
-    private Random rd;
+    private final Random rd;
     private int calls, success;
 
     //***********************************************************************************

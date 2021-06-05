@@ -23,6 +23,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Random;
+
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static java.lang.Math.max;
@@ -40,24 +42,45 @@ public class PropElementV_fast extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar var, index;
-    private int offset;
-    private final boolean fast;
+    private final IntVar var;
+    private final IntVar index;
+    private final int offset;
+    private boolean fast;
+    private final Random rd;
+    private int calls, success;
+    private boolean rem;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset, boolean fast) {
+    public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset) {
         super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, false);
         this.var = vars[0];
         this.index = vars[1];
         this.offset = offset;
-        this.fast = fast;
+        this.fast = true;
+        rd = new Random(vars[0].getModel().getSeed());
+        calls = success = 1;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        double p = (success * 1.d) / (calls * 1.d);
+        fast = rd.nextFloat() < p;
+        //if((calls % 1_000)==0) System.out.printf("%d\t%d\t%.3f%n", success, calls, p);
+        rem = false; // is modified in filter
+        try {
+            filter();
+        } finally {
+            calls++;
+            if (rem) {
+                success++;
+            }
+        }
+    }
+
+    private void filter()  throws ContradictionException {
         boolean filter;
         do {
             filter = index.updateBounds(offset, vars.length + offset - 3, this);
@@ -101,8 +124,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
         boolean filter = a.updateBounds(b.getLB(), b.getUB(), this);
         filter |= b.updateBounds(a.getLB(), a.getUB(), this);
         if (!fast) {
-            filterFrom(a, b);
-            filterFrom(b, a);
+            rem |= filterFrom(a, b);
+            rem |= filterFrom(b, a);
         }
         if (a.getDomainSize() + b.getDomainSize() != s) {
             filter |= propagateEquality(a, b);
@@ -138,6 +161,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
                 return false;
             }
         }
+        rem = true;
         return true;
     }
 
