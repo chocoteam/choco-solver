@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,18 +11,15 @@ package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntIntHashMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.propagation.PropagationEngine;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Class which stores the value of each variable in a solution <br/>
@@ -152,9 +149,8 @@ public class Solution implements ICause {
                 }
             }
         }
-        if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
-            model.getSolver().getOut()
-                .print("Some non decision variables are not instantiated in the current solution.\n");
+        if (warn) {
+            model.getSolver().log().red().println("Some non decision variables are not instantiated in the current solution.");
         }
         return this;
     }

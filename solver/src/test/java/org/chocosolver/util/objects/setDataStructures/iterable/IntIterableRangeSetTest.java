@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.iterable;
 
+import org.chocosolver.util.objects.setDataStructures.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -87,6 +88,7 @@ public class IntIterableRangeSetTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testAdd() {
         IntIterableRangeSet is = new IntIterableRangeSet();
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertTrue(is.add(2));
         Assert.assertFalse(is.add(2));
         Assert.assertTrue(is.add(1));
@@ -111,6 +113,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.SIZE, 2);
         Assert.assertEquals(is.CARDINALITY, 10);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 10});
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -119,12 +122,14 @@ public class IntIterableRangeSetTest {
         sLi.ELEMENTS = new int[]{2, 7, 9, 10, 0, 10, 0, 0, 0, 0};
         sLi.SIZE = 4;
         sLi.CARDINALITY = 8;
+        PassiveCopySet cop = new PassiveCopySet(sLi);
         sLi.clear();
         sLi.add(7);
         sLi.add(8);
         Assert.assertEquals(sLi.ELEMENTS, new int[]{7, 8, 9, 10, 0, 10, 0, 0, 0, 0});
         Assert.assertEquals(sLi.SIZE, 2);
         Assert.assertEquals(sLi.CARDINALITY, 2);
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -133,6 +138,7 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 3, 5, 5, 7, 10};
         is.SIZE = 6;
         is.CARDINALITY = 8;
+        PassiveCopySet cop = new PassiveCopySet(is);
 
         Assert.assertTrue(is.remove(1));
         Assert.assertFalse(is.remove(1));
@@ -153,6 +159,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.SIZE, 0);
         Assert.assertEquals(is.CARDINALITY, 0);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{});
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -161,10 +168,12 @@ public class IntIterableRangeSetTest {
         sLi.ELEMENTS = new int[]{2, 2, 4, 4, 6, 6, 8, 15, 0, 0};
         sLi.SIZE = 8;
         sLi.CARDINALITY = 11;
+        PassiveCopySet cop = new PassiveCopySet(sLi);
         sLi.remove(14);
         Assert.assertEquals(sLi.ELEMENTS, new int[]{2, 2, 4, 4, 6, 6, 8, 13, 15, 15});
         Assert.assertEquals(sLi.SIZE, 10);
         Assert.assertEquals(sLi.CARDINALITY, 10);
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -173,6 +182,7 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 3, 5, 5, 7, 10};
         is.SIZE = 6;
         is.CARDINALITY = 8;
+        PassiveCopySet cop = new PassiveCopySet(is);
 
         Assert.assertEquals(is.nextValue(-10), 1);
         Assert.assertEquals(is.nextValue(0), 1);
@@ -187,7 +197,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.nextValue(9), 10);
         Assert.assertEquals(is.nextValue(10), Integer.MAX_VALUE);
         Assert.assertEquals(is.nextValue(15), Integer.MAX_VALUE);
-
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -196,10 +206,12 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 2, 4, 4, 6, 7, 9, 13, 15, 15};
         is.SIZE = 10;
         is.CARDINALITY = 11;
+        PassiveCopySet cop = new PassiveCopySet(is);
 
         Assert.assertEquals(is.nextValue(3), 4);
         is.remove(4);
         Assert.assertEquals(is.nextValue(4), 6);
+        Assert.assertTrue(cop.isEqualToObserved());
 
     }
 
@@ -679,6 +691,7 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
         is.CARDINALITY = 25;
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertTrue(is.removeBetween(35, 40));
         Assert.assertEquals(is.CARDINALITY, 19);
         Assert.assertEquals(is.SIZE, 10);
@@ -703,6 +716,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.CARDINALITY, 6);
         Assert.assertEquals(is.SIZE, 8);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 25, 25, 28, 28, 32, 32});
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -711,6 +725,7 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
         is.CARDINALITY = 25;
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertTrue(is.removeBetween(34, 41));
         Assert.assertEquals(is.CARDINALITY, 19);
         Assert.assertEquals(is.SIZE, 10);
@@ -731,6 +746,7 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.CARDINALITY, 8);
         Assert.assertEquals(is.SIZE, 6);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{13, 15, 25, 28, 32, 32});
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -738,12 +754,13 @@ public class IntIterableRangeSetTest {
         IntIterableRangeSet is = new IntIterableRangeSet();
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
-        is.CARDINALITY = 26;
+        is.CARDINALITY = 25;
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertTrue(is.removeBetween(26, 38));
-        Assert.assertEquals(is.CARDINALITY, 16);
+        Assert.assertEquals(is.CARDINALITY, 15);
         Assert.assertEquals(is.SIZE, 10);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{1, 5, 10, 15, 20, 20, 25, 25, 39, 40});
-
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -752,10 +769,12 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{0, 1, 4, 4, 7, 7, 11, 12, 15, 15};
         is.SIZE = 10;
         is.CARDINALITY = 7;
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertTrue(is.removeBetween(0, 5));
         Assert.assertEquals(is.CARDINALITY, 4);
         Assert.assertEquals(is.SIZE, 6);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{7, 7, 11, 12, 15, 15});
+        Assert.assertTrue(cop.isEqualToObserved());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -764,6 +783,7 @@ public class IntIterableRangeSetTest {
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
         is.CARDINALITY = 25;
+        PassiveCopySet cop = new PassiveCopySet(is);
         Assert.assertFalse(is.retainBetween(0, 41));
         Assert.assertEquals(is.CARDINALITY, 25);
         Assert.assertEquals(is.SIZE, 12);
@@ -784,19 +804,114 @@ public class IntIterableRangeSetTest {
         Assert.assertEquals(is.CARDINALITY, 0);
         Assert.assertEquals(is.SIZE, 0);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{});
+        Assert.assertTrue(cop.isEqualToObserved());
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
         is.CARDINALITY = 25;
+        cop = new PassiveCopySet(is);
         Assert.assertTrue(is.retainBetween(-3, -1));
         Assert.assertEquals(is.CARDINALITY, 0);
         Assert.assertEquals(is.SIZE, 0);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{});
+        Assert.assertTrue(cop.isEqualToObserved());
         is.ELEMENTS = new int[]{1, 5, 10, 15, 20, 20, 25, 30, 32, 32, 35, 40};
         is.SIZE = 12;
         is.CARDINALITY = 25;
+        cop = new PassiveCopySet(is);
         Assert.assertTrue(is.retainBetween(41, 43));
         Assert.assertEquals(is.CARDINALITY, 0);
         Assert.assertEquals(is.SIZE, 0);
         Assert.assertEquals(Arrays.copyOf(is.ELEMENTS, is.SIZE), new int[]{});
+        Assert.assertTrue(cop.isEqualToObserved());
+    }
+
+    class PassiveCopySet extends AbstractSet {
+
+        private ISet set;
+        private ISet values;
+
+        public PassiveCopySet(ISet set) {
+            super();
+            this.set = set;
+            this.values = SetFactory.makeLinkedList();
+            this.set.registerObserver(this, 0);
+            for (int e : this.set) {
+                this.values.add(e);
+            }
+        }
+
+        @Override
+        public void notifyElementAdded(int element, int idx) {
+            this.values.add(element);
+        }
+
+        @Override
+        public void notifyElementRemoved(int element, int idx) {
+            this.values.remove(element);
+        }
+
+        @Override
+        public void notifyCleared(int idx) {
+            this.values.clear();
+        }
+
+        @Override
+        public int size() {
+            return values.size();
+        }
+
+        public boolean isEqualToObserved() {
+            int[] obsValues = set.toArray();
+            int[] thisValues = values.toArray();
+            Arrays.sort(obsValues);
+            Arrays.sort(thisValues);
+            return Arrays.equals(obsValues, thisValues);
+        }
+
+        @Override
+        public ISetIterator iterator() {
+            return null;
+        }
+
+        @Override
+        public ISetIterator newIterator() {
+            return null;
+        }
+
+        @Override
+        public boolean add(int element) {
+            return false;
+        }
+
+        @Override
+        public boolean remove(int element) {
+            return false;
+        }
+
+        @Override
+        public boolean contains(int element) {
+            return false;
+        }
+
+
+        @Override
+        public void clear() {
+
+        }
+
+        @Override
+        public int min() {
+            return 0;
+        }
+
+        @Override
+        public int max() {
+            return 0;
+        }
+
+        @Override
+        public SetType getSetType() {
+            return null;
+        }
     }
 }

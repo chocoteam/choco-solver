@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -87,7 +87,7 @@ public class PropKnapsack extends Propagator<IntVar> {
                     if (delta <= remainingCapacity) {
                         maxPower += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
                         remainingCapacity -= delta;
-                        if (remainingCapacity == 0) {
+                        if (weigth[idx] > 0 && remainingCapacity == 0) {
                             power.updateUpperBound(maxPower, this);
                             return;
                         }

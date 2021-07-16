@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,7 +11,9 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
@@ -122,11 +124,16 @@ public interface SetVar extends Variable {
 		return getLB();
 	}
 
+	ISetDelta getDelta();
+
     /**
      * Allow propagator to monitor element removal/enforcing of this
      *
      * @param propagator observer
      * @return a new SetDeltaMonitor
      */
-	ISetDeltaMonitor monitorDelta(ICause propagator);
+	default ISetDeltaMonitor monitorDelta(ICause propagator) {
+		createDelta();
+		return new SetDeltaMonitor(getDelta(), propagator);
+	}
 }

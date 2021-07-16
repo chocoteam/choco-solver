@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -103,9 +103,9 @@ public class PropSubcircuitDominatorFilter extends Propagator<IntVar> {
 			int ub = vars[i].getUB();
 			for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
 				if (i == duplicatedNode || i == y-offSet) {
-					connectedGraph.addArc(n, y - offSet);
+					connectedGraph.addEdge(n, y - offSet);
 				}else{
-					connectedGraph.addArc(i, y - offSet);
+					connectedGraph.addEdge(i, y - offSet);
 				}
 			}
 		}
@@ -143,9 +143,9 @@ public class PropSubcircuitDominatorFilter extends Propagator<IntVar> {
 			int ub = vars[i].getUB();
 			for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
 				if (y - offSet == duplicatedNode || i == y-offSet) {
-					connectedGraph.addArc(n, i);
+					connectedGraph.addEdge(n, i);
 				}else{
-					connectedGraph.addArc(y - offSet, i);
+					connectedGraph.addEdge(y - offSet, i);
 				}
 			}
 		}
@@ -176,8 +176,8 @@ public class PropSubcircuitDominatorFilter extends Propagator<IntVar> {
 
 	private void clear(){
 		for (int i = 0; i < n + 1; i++) {
-			connectedGraph.getSuccOf(i).clear();
-			connectedGraph.getPredOf(i).clear();
+			connectedGraph.getSuccessorsOf(i).clear();
+			connectedGraph.getPredecessorsOf(i).clear();
 		}
 	}
 

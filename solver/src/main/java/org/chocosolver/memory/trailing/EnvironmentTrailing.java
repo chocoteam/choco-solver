@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -290,6 +290,10 @@ public class EnvironmentTrailing extends AbstractEnvironment {
 
     public void save(IOperation oldValue) {
         getOperationTrail().savePreviousState(oldValue);
+    }
+
+    public void saveAt(IOperation oldValue, int at) {
+        getOperationTrail().savePreviousStateAt(oldValue, at, this.getWorldIndex());
     }
 }
 

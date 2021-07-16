@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,9 +23,9 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorInitialize;
 public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
 
     /**
-     * A thread which prints short line statistics to {@link Solver#getOut()}.
+     * A thread which prints short line statistics.
      */
-    private Thread printer;
+    private final Thread printer;
 
     /**
      * A boolean to kill the printer when the resolution ends.
@@ -45,7 +45,7 @@ public class LogStatEveryXXms implements IMonitorInitialize, IMonitorClose {
                 Thread.sleep(duration);
                 //noinspection InfiniteLoopStatement
                 do {
-                    solver.getOut().println(String.format(">> %s", solver.toOneLineString()));
+                    solver.log().white().printf(">> %s %n", solver.toOneLineString());
                     Thread.sleep(duration);
                 } while (alive);
             } catch (InterruptedException ignored) {

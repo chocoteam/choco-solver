@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,6 @@
  */
 package org.chocosolver.parser;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.search.strategy.Search;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -30,14 +29,9 @@ public class RegParserTest {
     @BeforeMethod(alwaysRun = true)
     public void before() {
         parser = new RegParser("test") {
-            @Override
-            public char getCommentChar() {
-                return 0;
-            }
 
             @Override
-            public Settings createDefaultSettings() {
-                return null;
+            public void createSettings() {
             }
 
             @Override
@@ -56,7 +50,12 @@ public class RegParserTest {
             }
 
             @Override
-            public void solve() {
+            protected void singleThread() {
+
+            }
+
+            @Override
+            protected void manyThread() {
 
             }
         };
@@ -121,9 +120,9 @@ public class RegParserTest {
     public void testStat1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertFalse(parser.stat);
-        p.parseArgument("-stat", "/file");
-        Assert.assertTrue(parser.stat);
+        Assert.assertEquals(parser.level, Level.COMPET);
+        p.parseArgument("-lvl", "INFO", "/file");
+        Assert.assertEquals(parser.level, Level.INFO);
     }
 
     @Test(groups = "1s")

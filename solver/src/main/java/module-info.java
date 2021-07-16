@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,7 +23,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.memory.structure;
 
     exports org.chocosolver.cutoffseq;
-
+    exports org.chocosolver.sat;
     exports org.chocosolver.solver;
     exports org.chocosolver.solver.learn;
     exports org.chocosolver.solver.constraints;
@@ -55,7 +55,6 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.nary.globalcardinality;
     exports org.chocosolver.solver.constraints.nary.lex;
     exports org.chocosolver.solver.constraints.nary.min_max;
-    exports org.chocosolver.solver.constraints.nary.nogood;
     exports org.chocosolver.solver.constraints.nary.nvalue;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
     //exports org.chocosolver.solver.constraints.nary.nvalue.amnv.rules;
@@ -110,6 +109,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.graphOperations.connectivity;
     exports org.chocosolver.util.graphOperations.dominance;
     exports org.chocosolver.util.iterators;
+    exports org.chocosolver.util.logger;
     exports org.chocosolver.util.objects;
     exports org.chocosolver.util.objects.graphs;
     exports org.chocosolver.util.objects.queues;
@@ -125,11 +125,10 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.tools;
 
     requires trove4j;
-    requires org.chocosolver.sat;
     requires org.jgrapht.core;
     requires cpprof.java;
     requires java.desktop;
-    requires xchart;
+    requires org.knowm.xchart;
     requires java.management;
     requires automaton;
 
@@ -149,7 +148,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers;
-    
+    exports org.chocosolver.util.bandit;
 
 
 }

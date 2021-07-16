@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,6 @@
 package org.chocosolver.flatzinc;
 
 import org.chocosolver.parser.SetUpException;
-import org.chocosolver.parser.flatzinc.BaseFlatzincListener;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
@@ -71,23 +70,101 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                "-stat",
+                "-lvl", "COMPET",
                 "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
-        fzn.addListener(new BaseFlatzincListener(fzn));
         fzn.setUp(args);
         fzn.createSolver();
         fzn.buildModel();
         fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
         fzn.solve();
         Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
-        if(bst != null){
+        if (bst != null) {
             Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
         }
     }
 
+
+    @Test(groups = "mzn", timeOut = 120_000)
+    public void testCellda_y_10s() throws SetUpException {
+        // Specific to bnn+cellda_y_10s which take more time on Travis
+        // 2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
+        String file = this.getClass().getResource("/flatzinc/2020/bnn+cellda_y_10s.fzn").getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[100s]", // but, problems are expected to end within 30s max
+                "-lvl", "COMPET",
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 1, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 16582, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 16581, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 6, "Unexpected best solution");
+    }
+
+    @Test(groups = "mzn", timeOut = 120_000)
+    public void test_is_A3PZaPjnUz() throws SetUpException {
+        // Specific to is_A3PZaPjnUz which is faster when implication is enable
+        String file = this.getClass().getResource("/flatzinc/2020/is+A3PZaPjnUz.fzn").getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[100s]", // but, problems are expected to end within 30s max
+                "-lvl", "COMPET",
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 33, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 2_174_212, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 2_174_147, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 103936, "Unexpected best solution");
+    }
+
+    @Test(groups = "mzn", timeOut = 120_000)
+    public void test_lot_sizing_cp_pigment15b() throws SetUpException {
+        // Specific to lot_sizing_cp_pigment15b which takes less time when element+(fast = adaptive)
+        String file = this.getClass().getResource("/flatzinc/2020/lot_sizing_cp+pigment15b.psp.fzn").getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[100s]", // but, problems are expected to end within 30s max
+                "-lvl", "INFO",
+                "-stasol",
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 35, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 841_296, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 841_227, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 1123, "Unexpected best solution");
+    }
 }

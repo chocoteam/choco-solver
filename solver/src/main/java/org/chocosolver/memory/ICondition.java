@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,11 +17,10 @@ package org.chocosolver.memory;
  * @author Charles Prud'homme
  * @version choco
  * @since 24/09/2014
+ * @deprecated
  */
+@Deprecated
 public interface ICondition  {
-
-    /** False condition, never satisfied */
-    ICondition FALSE = () -> false;
 
     boolean satisfied();
 

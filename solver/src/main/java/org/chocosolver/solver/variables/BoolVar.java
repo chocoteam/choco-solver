@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.sat.Literalizer;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -55,5 +56,13 @@ public interface BoolVar extends IntVar, ILogical, ReExpression {
     @Override
     default void extractVar(HashSet<IntVar> variables){
         variables.add(this);
+    }
+
+    /**
+     * Creates, or returns if already existing, the SAT variable twin of this.
+     * @return the SAT variable of this
+     */
+    default int satVar() {
+        return this.getModel().satVar(this, new Literalizer.BoolLit(this));
     }
 }

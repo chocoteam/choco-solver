@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -106,8 +106,8 @@ public class AlgoAllDiffAC {
 
     private void findMaximumMatching() throws ContradictionException {
         for (int i = 0; i < n2; i++) {
-            digraph.getSuccOf(i).clear();
-            digraph.getPredOf(i).clear();
+            digraph.getSuccessorsOf(i).clear();
+            digraph.getPredecessorsOf(i).clear();
         }
         free.set(0, n2);
         int k, ub;
@@ -120,11 +120,11 @@ public class AlgoAllDiffAC {
                 int j = map.get(k);
                 if (mate == j) {
                     assert free.get(i) && free.get(j);
-                    digraph.addArc(j, i);
+                    digraph.addEdge(j, i);
                     free.clear(i);
                     free.clear(j);
                 } else {
-                    digraph.addArc(i, j);
+                    digraph.addEdge(i, j);
                 }
             }
         }
@@ -132,7 +132,7 @@ public class AlgoAllDiffAC {
             tryToMatch(i);
         }
         for (int i = 0; i < n; i++) {
-            matching[i] = digraph.getPredOf(i).isEmpty()?-1:digraph.getPredOf(i).iterator().next();
+            matching[i] = digraph.getPredecessorsOf(i).isEmpty()?-1:digraph.getPredecessorsOf(i).iterator().next();
         }
     }
 
@@ -143,8 +143,8 @@ public class AlgoAllDiffAC {
             free.clear(i);
             int tmp = mate;
             while (tmp != i) {
-                digraph.removeArc(father[tmp], tmp);
-                digraph.addArc(tmp, father[tmp]);
+                digraph.removeEdge(father[tmp], tmp);
+                digraph.addEdge(tmp, father[tmp]);
                 tmp = father[tmp];
             }
         } else {
@@ -160,7 +160,7 @@ public class AlgoAllDiffAC {
         ISetIterator succs;
         while (indexFirst != indexLast) {
             x = fifo[indexFirst++];
-            succs = digraph.getSuccOf(x).iterator();
+            succs = digraph.getSuccessorsOf(x).iterator();
             while (succs.hasNext()) {
                 int y = succs.nextInt();
                 if (!in.get(y)) {
@@ -186,9 +186,9 @@ public class AlgoAllDiffAC {
             digraph.addNode(n2);
             for (int i = n; i < n2; i++) {
                 if (free.get(i)) {
-                    digraph.addArc(i, n2);
+                    digraph.addEdge(i, n2);
                 } else {
-                    digraph.addArc(n2, i);
+                    digraph.addEdge(n2, i);
                 }
             }
         }
@@ -212,7 +212,7 @@ public class AlgoAllDiffAC {
                     filter |= v.instantiateTo(k, aCause);
                 } else {
                     filter |= v.removeValue(k, aCause);
-                    digraph.removeArc(i, j);
+                    digraph.removeEdge(i, j);
                 }
             }
         }
@@ -234,14 +234,14 @@ public class AlgoAllDiffAC {
                 ub = v.getUB();
                 for (int k = v.getLB(); k <= ub; k++) {
                     j = map.get(k);
-                    if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                    if (!(digraph.containsEdge(i, j) || digraph.containsEdge(j, i))) {
                         filter |= v.removeValue(k, aCause);
                     }
                 }
                 int lb = v.getLB();
                 for (int k = v.getUB(); k >= lb; k--) {
                     j = map.get(k);
-                    if (!(digraph.arcExists(i, j) || digraph.arcExists(j, i))) {
+                    if (!(digraph.containsEdge(i, j) || digraph.containsEdge(j, i))) {
                         filter |= v.removeValue(k, aCause);
                     }
                 }

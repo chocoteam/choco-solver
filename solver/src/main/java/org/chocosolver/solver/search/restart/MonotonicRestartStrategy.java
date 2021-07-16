@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -30,5 +30,10 @@ public class MonotonicRestartStrategy implements ICutoffStrategy{
     @Override
     public long getNextCutoff() {
         return gap;
+    }
+
+    @Override
+    public void reset() {
+        // nothing
     }
 }

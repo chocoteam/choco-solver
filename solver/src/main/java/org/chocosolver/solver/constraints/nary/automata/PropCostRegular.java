@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -90,16 +90,11 @@ public class PropCostRegular extends Propagator<IntVar> {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             // as the graph was build on initial domain, this is allowed (specific case)
             for (int i = 0; i < idms.length; i++) {
-                idms[i].freeze();
                 idms[i].forEachRemVal(rem_proc.set(i));
             }
             initialize();
         }
         filter();
-		// added by JG: the propagator should be idempotent so it should not iterate over its own removals
-		for (int i = 0; i < idms.length; i++) {
-			idms[i].unfreeze();
-		}
     }
 
     @Override
@@ -108,9 +103,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         if (varIdx == zIdx) { // z only deals with bound events
             boundChange.set(true);
         } else { // other variables only deals with removal events
-            idms[varIdx].freeze();
             idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-            idms[varIdx].unfreeze();
         }
         forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }

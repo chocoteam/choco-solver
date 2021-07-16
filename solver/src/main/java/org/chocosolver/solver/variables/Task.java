@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,7 +14,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.view.OffsetView;
+import org.chocosolver.solver.variables.view.integer.IntOffsetView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
@@ -114,9 +114,9 @@ public class Task {
     }
 
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
-        if(e instanceof OffsetView) {
-            OffsetView offsetView = (OffsetView) e;
-            return offsetView.cste == d && offsetView.getVariable().equals(s);
+        if(e instanceof IntOffsetView) {
+            IntOffsetView intOffsetView = (IntOffsetView) e;
+            return intOffsetView.cste == d && intOffsetView.getVariable().equals(s);
         }
         return false;
     }

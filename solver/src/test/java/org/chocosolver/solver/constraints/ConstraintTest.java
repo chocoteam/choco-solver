@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -131,7 +131,7 @@ public class ConstraintTest {
             c.reify();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -146,7 +146,7 @@ public class ConstraintTest {
             c.post();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -161,7 +161,7 @@ public class ConstraintTest {
             c.post();
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -176,7 +176,7 @@ public class ConstraintTest {
             new Constraint("copycat", c.getPropagators());
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -190,7 +190,7 @@ public class ConstraintTest {
             m.unpost(c);
             fail();
         } catch (SolverException se) {
-            se.printStackTrace(m.getSolver().getOut());
+            se.printStackTrace();
             throw se;
         }
     }
@@ -391,7 +391,7 @@ public class ConstraintTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testAmIMeYet() {
-        Model model = new Model("model", new DefaultSettings()
+        Model model = new Model("model", Settings.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
 
@@ -410,7 +410,7 @@ public class ConstraintTest {
 
     @Test(groups = "10s", timeOut = 60000)
     public void testJitee2() {
-        Model model = new Model("model", new DefaultSettings()
+        Model model = new Model("model", Settings.init()
                 .setCheckDeclaredConstraints(true)
                 .setPrintAllUndeclaredConstraints(true));
         IntVar a = model.intVar("a", 0, 1000, false);

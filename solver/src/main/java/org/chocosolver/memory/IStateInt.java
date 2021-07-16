@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,7 +28,7 @@ public abstract class IStateInt  {
     public IStateInt(IEnvironment env, int i) {
         environment = env;
         currentValue = i;
-        timeStamp = environment.getWorldIndex();
+        timeStamp = -1;
     }
 
     /**

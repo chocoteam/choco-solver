@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,6 +12,20 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.view.*;
+import org.chocosolver.solver.variables.view.bool.BoolNotView;
+import org.chocosolver.solver.variables.view.bool.BoolEqView;
+import org.chocosolver.solver.variables.view.bool.BoolLeqView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedGraphUnionView;
+import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.EdgeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.NodeInducedSubgraphView;
+import org.chocosolver.solver.variables.view.graph.undirected.UndirectedGraphUnionView;
+import org.chocosolver.solver.variables.view.integer.*;
+import org.chocosolver.solver.variables.view.set.*;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+
+import java.util.Arrays;
 
 import static java.lang.Math.max;
 
@@ -74,11 +88,11 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().intVar(name, var.getValue() + cste);
         }
         if (ref().getSettings().enableViews()) {
-            int p = checkDeclaredView(var, cste, OffsetView.class);
+            int p = checkDeclaredView(var, cste, IntOffsetView.class);
             if(p>-1){
                 return var.getView(p).asIntVar();
             }else {
-                return new OffsetView(var, cste);
+                return new IntOffsetView(var, cste);
             }
         } else {
             int lb = var.getLB() + cste;
@@ -106,14 +120,14 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().intVar(-var.getValue());
         }
         if (ref().getSettings().enableViews()) {
-            if (var instanceof MinusView) {
-                return ((MinusView) var).getVariable();
+            if (var instanceof IntMinusView) {
+                return ((IntMinusView) var).getVariable();
             } else {
-                int p = checkDeclaredView(var, -1, MinusView.class);
+                int p = checkDeclaredView(var, -1, IntMinusView.class);
                 if(p>-1){
                     return var.getView(p).asIntVar();
                 }else {
-                    return new MinusView(var);
+                    return new IntMinusView(var);
                 }
             }
         } else {
@@ -161,11 +175,11 @@ public interface IViewFactory extends ISelf<Model> {
             if (ref().getSettings().enableViews()) {
                 boolean rev = cste < 0;
                 cste = Math.abs(cste);
-                int p = checkDeclaredView(var, cste, ScaleView.class);
+                int p = checkDeclaredView(var, cste, IntScaleView.class);
                 if(p>-1){
                     return var.getView(p).asIntVar();
                 }else {
-                    v2 = new ScaleView(var, cste);
+                    v2 = new IntScaleView(var, cste);
                 }
                 if(rev){
                     v2 = intMinusView(v2);
@@ -257,11 +271,11 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().boolVar(false);
         } else {
             if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, EqView.class);
+                int p = checkDeclaredView(x, c, BoolEqView.class);
                 if (p >= 0) {
                     return x.getView(p).asBoolVar();
                 } else {
-                    return new EqView(x, c);
+                    return new BoolEqView(x, c);
                 }
             }else{
                 BoolVar b = ref().boolVar();
@@ -285,11 +299,11 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().boolVar(true);
         } else {
             if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, EqView.class);
+                int p = checkDeclaredView(x, c, BoolEqView.class);
                 if (p >= 0) {
                     return x.getView(p).asBoolVar().not();
                 } else {
-                    return new EqView(x, c).not();
+                    return new BoolEqView(x, c).not();
                 }
             } else {
                 BoolVar b = ref().boolVar();
@@ -313,11 +327,11 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().boolVar(false);
         } else {
             if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, LeqView.class);
+                int p = checkDeclaredView(x, c, BoolLeqView.class);
                 if (p >= 0) {
                     return x.getView(p).asBoolVar();
                 } else {
-                    return new LeqView(x, c);
+                    return new BoolLeqView(x, c);
                 }
             }else {
                 BoolVar b = ref().boolVar();
@@ -341,11 +355,11 @@ public interface IViewFactory extends ISelf<Model> {
             return ref().boolVar(false);
         } else {
             if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c - 1, LeqView.class);
+                int p = checkDeclaredView(x, c - 1, BoolLeqView.class);
                 if (p >= 0) {
                     return x.getView(p).asBoolVar().not();
                 } else {
-                    return new LeqView(x, c - 1).not();
+                    return new BoolLeqView(x, c - 1).not();
                 }
             }else {
                 BoolVar b = ref().boolVar();
@@ -358,25 +372,25 @@ public interface IViewFactory extends ISelf<Model> {
     static int checkDeclaredView(IntVar x, int c, Class clazz){
         for(int i = 0; i < x.getNbViews(); i++)
             if (clazz.isInstance(x.getView(i))) {
-                if(clazz  == EqView.class){
-                    EqView v = (EqView) x.getView(i);
+                if(clazz  == BoolEqView.class){
+                    BoolEqView v = (BoolEqView) x.getView(i);
                     if(v.cste == c){
                         return i;
                     }
-                }else if(clazz  == LeqView.class){
-                    LeqView v = (LeqView) x.getView(i);
+                }else if(clazz  == BoolLeqView.class){
+                    BoolLeqView v = (BoolLeqView) x.getView(i);
                     if(v.cste == c){
                         return i;
                     }
-                }else if(clazz == MinusView.class){
+                }else if(clazz == IntMinusView.class){
                     return i;
-                }else if(clazz == OffsetView.class){
-                    OffsetView v = (OffsetView) x.getView(i);
+                }else if(clazz == IntOffsetView.class){
+                    IntOffsetView v = (IntOffsetView) x.getView(i);
                     if(v.cste == c){
                         return i;
                     }
-                }else if(clazz == ScaleView.class){
-                    ScaleView v = (ScaleView) x.getView(i);
+                }else if(clazz == IntScaleView.class){
+                    IntScaleView v = (IntScaleView) x.getView(i);
                     if(v.cste == c){
                         return i;
                     }
@@ -454,4 +468,216 @@ public interface IViewFactory extends ISelf<Model> {
     // SET VARIABLES
     //*************************************************************************************
 
+    // OVER ARRAY OF BOOLEAN VARIABLES
+
+    /**
+     * Create a set view over an array of boolean variables defined such that:
+     * boolVars[x - offset] = True <=> x in setView
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropBoolChannel} constraint.
+     * @param boolVars observed boolean variables
+     * @param offset Offset between boolVars array indices and set elements
+     * @return a set view such that boolVars[x - offset] = True <=> x in setView
+     */
+    default SetVar boolsSetView(BoolVar[] boolVars, int offset) {
+        return new SetBoolsView(offset, boolVars);
+    }
+
+    // OVER ARRAY OF INTEGER VARIABLES
+
+    /**
+     * Create a set view over an array of integer variables, such that:
+     * intVars[x - offset] = v[x - offset] <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v array of integers that "toggle" integer variables index inclusion in the set view
+     * @param offset offset between intVars indices and setViews elements
+     * @return a set view such that intVars[x - offset] = v[x - offset] <=> x in setView.
+     */
+    default SetVar intsSetView(IntVar[] intVars, int[] v, int offset) {
+        return new SetIntsView(v, offset, intVars);
+    }
+
+    /**
+     * Create a set view over an array of integer variables, such that:
+     * intVars[x - offset] = v <=> x in set view.
+     *
+     * @param intVars array of integer variables
+     * @param v integer that "toggle" integer variables index inclusion in the set view
+     * @param offset offset between intVars indices and setViews elements
+     * @return a set view such that intVars[x - offset] = v <=> x in setView.
+     */
+    default SetVar intsSetView(IntVar[] intVars, int v, int offset) {
+        int[] vals = new int[intVars.length];
+        Arrays.fill(vals, v);
+        return intsSetView(intVars, vals, offset);
+    }
+
+    /**
+     * Instantiate an array of set views over an array of integer variables, such that:
+     * x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     *
+     * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropIntChannel} constraint.
+     *
+     * @param intVars array of integer variables
+     * @param nbSets number of set views to create
+     * @param offset1 offset between setViews indices and intVars values
+     * @param offset2 offset between intVars indices and setViews elements
+     * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
+     */
+    default SetVar[] intsSetsView(IntVar[] intVars, int nbSets, int offset1, int offset2) {
+        SetVar[] setVars = new SetVar[nbSets];
+        for (int i = 0; i < nbSets; i++) {
+            setVars[i] = intsSetView(intVars, i + offset1, offset2);
+        }
+        return setVars;
+    }
+
+    //  OVER SET VARIABLES
+
+    /**
+     * Creates a set view representing the union of a list of set variables.
+     * @param sets The set variables to observe.
+     * @return A set union view.
+     */
+    default SetVar setUnionView(SetVar... sets) {
+        return new SetUnionView("setUnion", sets);
+    }
+
+    /**
+     * Creates a set view representing the intersection of a list of set variables.
+     * @param sets The set variables to observe.
+     * @return A set intersection view.
+     */
+    default SetVar setIntersectionView(SetVar... sets) {
+        return new SetIntersectionView("setIntersection", sets);
+    }
+
+    /**
+     * Creates a set view z representing the set difference between x and y: z = x \ y.
+     * @param x A set variable.
+     * @param y A set variable.
+     * @return A set difference z view such that z = x \ y.
+     */
+    default SetVar setDifferenceView(SetVar x, SetVar y) {
+        return new SetDifferenceView("setDifference", x, y);
+    }
+
+    //  OVER GRAPH VARIABLES
+
+    /**
+     * Creates a set view over the set of nodes of a graph variable.
+     * @param g observed graph variable
+     * @return a set view over the set of nodes of a graph variable
+     */
+    default SetVar graphNodeSetView(GraphVar g) {
+        return new SetNodeGraphView(g);
+    }
+
+    /**
+     * Creates a set view over the set of successors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of successors of a node of a directed graph variable.
+     */
+    default SetVar graphSuccessorsSetView(DirectedGraphVar g, int node) {
+        return new SetSuccessorsGraphView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of predecessors of a node of a directed graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of predecessors of a node of a directed graph variable.
+     */
+    default SetVar graphPredecessorsSetView(DirectedGraphVar g, int node) {
+        return new SetPredecessorsGraphView(g, node);
+    }
+
+    /**
+     * Creates a set view over the set of neighbors of a node of an undirected graph variable.
+     * @param g observed graph variable
+     * @param node observed node
+     * @return a set view over the set of neighbors of a node of an udirected graph variable.
+     */
+    default SetVar graphNeighborsSetView(UndirectedGraphVar g, int node) {
+        return new SetSuccessorsGraphView(g, node);
+    }
+
+    //*************************************************************************************
+    // GRAPH VARIABLES
+    //*************************************************************************************
+
+    /**
+     * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
+     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * @param g The graph variable to observe
+     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    default UndirectedGraphVar nodeInducedSubgraphView(UndirectedGraphVar g, ISet nodes, boolean exclude) {
+        return new NodeInducedSubgraphView(g.getName() + "[" + nodes.toString() + "]", g, nodes, exclude);
+    }
+
+    /**
+     * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
+     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * @param g The graph variable to observe
+     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    default DirectedGraphVar nodeInducedSubgraphView(DirectedGraphVar g, ISet nodes, boolean exclude) {
+        return new DirectedNodeInducedSubgraphView(g.getName() + "[" + nodes.toString() + "]", g, nodes, exclude);
+    }
+
+    /**
+     * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * @param g observed variable
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    default UndirectedGraphVar edgeInducedSubgraphView(UndirectedGraphVar g, int[][] edges, boolean exclude) {
+        return new EdgeInducedSubgraphView(g.getName() + "{" + Arrays.deepToString(edges) + "}", g, edges, exclude);
+    }
+
+    /**
+     * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * @param g observed variable
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    default DirectedGraphVar edgeInducedSubgraphView(DirectedGraphVar g, int[][] edges, boolean exclude) {
+        return new DirectedEdgeInducedSubgraphView(g.getName() + "{" + Arrays.deepToString(edges) + "}", g, edges, exclude);
+    }
+
+    /**
+     * Construct an undirected graph union view G = (V, E) from a set of undirected graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
+     *     V = V_1 \cup ... \cup V_k (\cup = set union);
+     *     E = E_1 \cup ... \cup E_k.
+     * @param graphVars the graphs to construct the union view from
+     * @return An undirected graph union view
+     */
+    default UndirectedGraphVar graphUnionView(UndirectedGraphVar... graphVars) {
+        return new UndirectedGraphUnionView("GraphUnionView", graphVars);
+    }
+
+    /**
+     * Construct a directed graph union view G = (V, E) from a set of directed graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
+     *     V = V_1 \cup ... \cup V_k (\cup = set union);
+     *     E = E_1 \cup ... \cup E_k.
+     * @param graphVars the graphs to construct the union view from
+     * @return A directed graph union view
+     */
+    default DirectedGraphVar graphUnionView(DirectedGraphVar... graphVars) {
+        return new DirectedGraphUnionView("GraphUnionView", graphVars);
+    }
 }

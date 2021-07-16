@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,11 +14,6 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
 import gnu.trove.stack.array.TIntArrayStack;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.HashSet;
-import java.util.List;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -42,6 +37,8 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.jgrapht.graph.DirectedMultigraph;
 
+import java.util.*;
+
 
 /**
  * Created by IntelliJ IDEA.
@@ -63,8 +60,6 @@ import org.jgrapht.graph.DirectedMultigraph;
  * Resource constrained  shortest/longest path problems
  */
 public final class PropMultiCostRegular extends Propagator<IntVar> {
-
-    private static final boolean DEBUG = false;
 
     /**
      * Maximum number of iteration during a bound computation
@@ -240,19 +235,13 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
             initialize();
         }
         filter();
-		// added by JG: the propagator should be idempotent so it should not iterate over its own removals
-		for (int i = 0; i < idms.length; i++) {
-			idms[i].unfreeze();
-		}
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx < offset) {
             checkWorld();
-            idms[varIdx].freeze();
             idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-            idms[varIdx].unfreeze();
         } else {// if (EventType.isInstantiate(mask) || EventType.isBound(mask)) {
             boundUpdate.add(varIdx - offset);
             computed = false;
@@ -882,10 +871,10 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
         for (int i = 0; i < gcost.length; i++) {
             if (!z[i].isInstantiated()) {
-                if(DEBUG) model.getSolver().getOut().print("z[" + i + "] in MCR should be instantiated : " + z[i]);
+                //if(DEBUG) System.out.print("z[" + i + "] in MCR should be instantiated : " + z[i]);
                 return false;
             } else if (z[i].getValue() != (int)gcost[i]) {
-                if(DEBUG) model.getSolver().getOut().print("cost: " + gcost[i] + " != z:" + z[i].getValue());
+                //if(DEBUG) System.out.print("cost: " + gcost[i] + " != z:" + z[i].getValue());
                 return false;
             }
 

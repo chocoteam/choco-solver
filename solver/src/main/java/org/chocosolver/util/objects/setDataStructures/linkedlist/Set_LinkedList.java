@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.linkedlist;
 
+import org.chocosolver.util.objects.setDataStructures.AbstractSet;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -23,7 +24,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  * User: Jean-Guillaume Fages, chameau
  * Date: 9 fevr. 2011
  */
-public class Set_LinkedList implements ISet {
+public class Set_LinkedList extends AbstractSet {
 
 	//***********************************************************************************
 	// VARIABLE
@@ -73,6 +74,7 @@ public class Set_LinkedList implements ISet {
 			last=first;
 		}
 		this.size++;
+		notifyObservingElementAdded(element);
 		return true;
 	}
 
@@ -85,6 +87,7 @@ public class Set_LinkedList implements ISet {
 			first = first.next;
 			if(first==null)last=null;
 			size--;
+			notifyObservingElementRemoved(element);
 			return true;
 		}else {
 			IntCell previous = first;
@@ -97,6 +100,7 @@ public class Set_LinkedList implements ISet {
 					current.next = poolGC;
 					poolGC = current;
 					size--;
+					notifyObservingElementRemoved(element);
 					return true;
 				}
 				previous = current;
@@ -115,6 +119,7 @@ public class Set_LinkedList implements ISet {
 		first = null;
 		last = null;
 		size = 0;
+        notifyObservingCleared();
 	}
 
 	@Override

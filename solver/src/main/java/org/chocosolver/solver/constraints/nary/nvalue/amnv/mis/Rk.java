@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -87,7 +87,7 @@ public class Rk implements F {
             }
             inMIS.set(idx);
             out.set(idx);
-            ISetIterator nei = graph.getNeighOf(idx).iterator();
+            ISetIterator nei = graph.getNeighborsOf(idx).iterator();
             while (nei.hasNext()) {
                 out.set(nei.nextInt());
             }

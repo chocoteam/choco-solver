@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,7 +13,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
 
@@ -66,7 +65,7 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     private IntIterableBitSet vrms;
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
-        super(vs, relation);
+        super(vs, relation, false);
         this.arity = vs.length;
         this.futureVars = new BitSet(arity);
         this.gacValues = new BitSet[arity];
@@ -116,11 +115,6 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     public void propagate(int evtmask) throws ContradictionException {
         valcheck.sortvars();
         gacstr();
-    }
-
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
 

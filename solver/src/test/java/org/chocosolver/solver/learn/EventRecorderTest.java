@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,7 @@
 package org.chocosolver.solver.learn;
 
 import org.chocosolver.memory.EnvironmentBuilder;
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -57,7 +57,7 @@ import static org.testng.Assert.*;
 public class EventRecorderTest {
 
 
-    @Test(groups = {"10s","expl"}, timeOut = 60000)
+    @Test(groups = {"expl"}, timeOut = 60000)
     public void testNosol0E() {
         for (int n = 500; n < 4501; n += 500) {
             final Model model = new Model();
@@ -75,7 +75,7 @@ public class EventRecorderTest {
         }
     }
 
-    @Test(groups = {"10s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testNosol0B() {
         for (int n = 500; n < 4501; n += 500) {
             final Model model = new Model();
@@ -94,7 +94,7 @@ public class EventRecorderTest {
         }
     }
 
-    @Test(groups = {"10s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testNosol1E() {
         int m = 15000;
         for (int n = m; n < m+1; n += 500) {
@@ -112,7 +112,7 @@ public class EventRecorderTest {
         }
     }
 
-    @Test(groups = {"10s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testNosol1B() {
         for (int n = 500; n < 4501; n += 500) {
             final Model model = new Model();
@@ -130,7 +130,7 @@ public class EventRecorderTest {
         }
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testReif() {
         for (long seed = 0; seed < 1; seed++) {
             int m = 1000;
@@ -151,7 +151,7 @@ public class EventRecorderTest {
         }
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testReif2() { // to test PropagatorActivation, from bs to p
 
         final Model model = new Model();
@@ -175,7 +175,7 @@ public class EventRecorderTest {
 
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testReif3() { // to test PropagatorActivation, from bs to p
 
         final Model model = new Model();
@@ -259,7 +259,7 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][2]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "ls")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "ls")
     public void testLSsmall(int m, int a) {
         testLS(m, a);
     }
@@ -305,7 +305,7 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][2]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "ca")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "ca")
     public void testsmallCA(int n, int a) {
         testCA(n, a);
     }
@@ -360,7 +360,7 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][2]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "gr")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "gr")
     public void testsmallGR(int m, int a) {
         testGR(m, a);
     }
@@ -397,7 +397,7 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][3]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "ln")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "ln")
     public void testsmallLN(int n, int k, int a) {
         testLN(n, k, a);
     }
@@ -461,7 +461,7 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][2]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "ms")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "ms")
     public void testMSsmall(int n, int a) {
         testMS(n, a);
     }
@@ -546,12 +546,12 @@ public class EventRecorderTest {
         return elt.toArray(new Object[elt.size()][2]);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000, dataProvider = "pa")
+    @Test(groups = { "expl"}, timeOut = 60000, dataProvider = "pa")
     public void testPAsmall(int N, int a) {
         testPA(N, a);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testClauses() {
         int n = 4;
         Model model = new Model();
@@ -580,7 +580,7 @@ public class EventRecorderTest {
         Assert.assertNotNull(ex.getLiterals());
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testClauses2() {
         int n = 5;
         Model model = new Model();
@@ -609,7 +609,7 @@ public class EventRecorderTest {
         Assert.assertNotNull(ex.getLiterals());
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testClauses3() {
         int n = 12;
         Model model = new Model();
@@ -644,7 +644,7 @@ public class EventRecorderTest {
         Assert.assertNotNull(ex.getLiterals());
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testClauses4() {
         int n = 12;
         Model model = new Model();
@@ -675,7 +675,7 @@ public class EventRecorderTest {
         Assert.assertNotNull(ex.getLiterals());
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void test01() {
         int n = 6;
         int m = 10;
@@ -702,7 +702,7 @@ public class EventRecorderTest {
     }
 
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testOnce1() {
         Model model = new Model();
         int n = 4;
@@ -721,7 +721,7 @@ public class EventRecorderTest {
         while (model.getSolver().solve()) ;
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void testIntSat() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", -2, 3, true);
@@ -762,7 +762,7 @@ public class EventRecorderTest {
         ex.learnSignedClause(c);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 60000)
+    @Test(groups = { "expl"}, timeOut = 60000)
     public void test111() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 1, true);
@@ -774,7 +774,7 @@ public class EventRecorderTest {
         model.getSolver().propagate();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="expl", timeOut=60000)
     public void testCumul1(){
         Model model = new Model();
         IntVar start1 = model.intVar("S1", 0, 3, true);
@@ -825,17 +825,17 @@ public class EventRecorderTest {
         return params;
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 120000, dataProvider = "fuzzy")
+    @Test(groups = { "expl"}, timeOut = 120000, dataProvider = "fuzzy")
     public void testFuzzy1(long seed, boolean iviews) {
         rcpsp(1, 0, seed, iviews);
     }
 
-    @Test(groups = {"1s", "expl"}, timeOut = 120000, dataProvider = "fuzzy")
+    @Test(groups = { "expl"}, timeOut = 120000, dataProvider = "fuzzy")
     public void testFuzzy2(long seed, boolean iviews) {
         rcpsp(2, 0, seed, iviews);
     }
 
-    @Test(groups = {"10s", "expl"}, timeOut = 120000, dataProvider = "rcpspP")
+    @Test(groups = { "expl"}, timeOut = 120000, dataProvider = "rcpspP")
     public void testRCPSP(int learn, int nbnodes, long seed, boolean eviews) {
         rcpsp(learn, nbnodes, seed, eviews);
     }
@@ -886,7 +886,7 @@ public class EventRecorderTest {
                         .fromChunk()
                         .build(),
                 "rcpcp-00",
-                new DefaultSettings()
+                Settings.init()
                         .setHybridizationOfPropagationEngine((byte) 0b00)
                         .setEnableViews(eviews));
         IntVar[] S = model.intVarArray("S", 30, 0, 160, false);

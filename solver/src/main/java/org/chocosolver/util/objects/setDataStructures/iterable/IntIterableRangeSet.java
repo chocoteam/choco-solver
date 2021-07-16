@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,7 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
+import org.chocosolver.util.objects.setDataStructures.AbstractSet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -31,7 +32,7 @@ import java.util.function.IntConsumer;
  * @author Charles Prud'homme
  * @since 14/01/2016.
  */
-public class IntIterableRangeSet implements IntIterableSet {
+public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     //***********************************************************************************
     // VARIABLES
@@ -262,6 +263,7 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
             modified = true;
             CARDINALITY++;
+            notifyObservingElementAdded(e);
         }
         return modified;
     }
@@ -300,13 +302,10 @@ public class IntIterableRangeSet implements IntIterableSet {
             throw new IllegalStateException("This set is immutable");
         }
         int c = this.CARDINALITY;
-        int s2 = this.SIZE >> 1;
-        if (s2 > 0) {
-            DisposableRangeIterator rit = var.getRangeIterator(true);
-            while (rit.hasNext()) {
-                this.addBetween(rit.min(), rit.max());
-                rit.next();
-            }
+        DisposableRangeIterator rit = var.getRangeIterator(true);
+        while (rit.hasNext()) {
+            this.addBetween(rit.min(), rit.max());
+            rit.next();
         }
         return CARDINALITY < c;
     }
@@ -357,7 +356,11 @@ public class IntIterableRangeSet implements IntIterableSet {
             this.clear();
             return c - CARDINALITY > 0;
         } else {
-            return IntIterableSetUtils.intersectionOf(this, set);
+            boolean b = IntIterableSetUtils.intersectionOf(this, set);
+            if (b) {
+                notifyObservingFullUpdate();
+            }
+            return b;
         }
     }
 
@@ -400,6 +403,7 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
             modified = true;
             CARDINALITY--;
+            notifyObservingElementRemoved(e);
         }
         return modified;
     }
@@ -445,6 +449,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         }
         CARDINALITY = 0;
         SIZE = 0;
+        notifyObservingCleared();
     }
 
     @Override
@@ -542,6 +547,9 @@ public class IntIterableRangeSet implements IntIterableSet {
             CARDINALITY = Math.addExact(b + 1, -a);
             change = true;
         }
+        if (change) {
+            notifyObservingAddedBetween(a, b);
+        }
         return change;
     }
 
@@ -613,6 +621,9 @@ public class IntIterableRangeSet implements IntIterableSet {
             }
             rem = true;
         }
+        if (rem) {
+            notifyObservingRemovedBetween(f, t);
+        }
         return rem;
     }
 
@@ -659,6 +670,7 @@ public class IntIterableRangeSet implements IntIterableSet {
             for (int k = 0; k < SIZE; k += 2) {
                 CARDINALITY += ELEMENTS[k + 1] - ELEMENTS[k] + 1;
             }
+            notifyObservingRetainedBetween(f, t);
         } else {
             this.clear();
         }
@@ -845,6 +857,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         for (int i = 0; i < SIZE; i++) {
             ELEMENTS[i] -= x;
         }
+        notifyObservingFullUpdate();
     }
 
     /**
@@ -872,6 +885,7 @@ public class IntIterableRangeSet implements IntIterableSet {
             this.clear();
             this.add(0);
         }
+        notifyObservingFullUpdate();
     }
 
     /**
@@ -956,6 +970,7 @@ public class IntIterableRangeSet implements IntIterableSet {
         ELEMENTS[SIZE++] = lb;
         ELEMENTS[SIZE++] = ub;
         CARDINALITY += Math.addExact(ub + 1, -lb);
+        notifyObservingFullUpdate();
     }
 
     /**
@@ -1027,17 +1042,14 @@ public class IntIterableRangeSet implements IntIterableSet {
                 }
                 while (i > 0) {
                     ELEMENTS[i] = ELEMENTS[--i] + 1;
-                    try {
-                        CARDINALITY += ELEMENTS[i + 2] - ELEMENTS[i + 1] + 1;
-                    } catch (ArrayIndexOutOfBoundsException e) {
-                        System.out.print("tt");
-                    }
+                    CARDINALITY += ELEMENTS[i + 2] - ELEMENTS[i + 1] + 1;
                     ELEMENTS[i] = ELEMENTS[--i] - 1;
                 }
                 ELEMENTS[i] = lb;
                 CARDINALITY += ELEMENTS[i + 1] - ELEMENTS[i] + 1;
             }
         }
+        notifyObservingFullUpdate();
         return this;
 
     }

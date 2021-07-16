@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -103,29 +103,41 @@ public class PropSumOfElements extends Propagator<Variable> {
 		int min = lbSum+ubNegSum;
 		int max = lbSum+ubPosSum;
 		sum.updateBounds(min, max, this);
-		boolean again = false;
 		// filter set
 		int lb = sum.getLB();
 		int ub = sum.getUB();
+		if (lb == min && ub == max) {
+			return;
+		}
 		iter = set.getUB().iterator();
 		while (iter.hasNext()){
 			int j = iter.nextInt();
 			if (!set.getLB().contains(j)) {
-				if(min + get(j) > ub || max + get(j) < lb){
+				if (min + get(j) > ub) {
 					if (set.remove(j, this)) {
-						again = true;
+						// weights[j] is positive
+						ubPosSum -= get(j);
 					}
-				}
-				if(max - get(j) < lb || min - get(j) > ub) {
-					if (set.force(j, this)) {
-						again = true;
+				} else {
+					if (max + get(j) < lb) {
+						if (set.remove(j, this)) {
+							// weights[j] is negative
+							ubNegSum -= get(j);
+						}
+					} else {
+						if (max - get(j) < lb || min - get(j) > ub) {
+							if (set.force(j, this)) {
+								// weight[j] is positive
+								lbSum += get(j);
+							}
+						}
 					}
 				}
 			}
 		}
-		if (again) {
-			propagate(0, 0);
-		}
+		min = lbSum + ubNegSum;
+		max = lbSum + ubPosSum;
+		sum.updateBounds(min, max, this);
 	}
 
 	private boolean outOfScope(int j){

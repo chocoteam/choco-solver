@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,7 +20,6 @@ import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
 import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
-import org.chocosolver.solver.constraints.nary.nogood.NogoodConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -28,6 +27,7 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -66,8 +66,6 @@ public class Model implements IModel {
 
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
-    public static final String NOGOODS_HOOK_NAME = "H_NOGOODS";
-
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
 
     public static final String CLAUSESBUILDER_HOOK_NAME = "H_CLAUSESBUILDER";
@@ -82,7 +80,7 @@ public class Model implements IModel {
     /**
      * A map to cache constants (considered as fixed variables)
      */
-    private TIntObjectHashMap<IntVar> cachedConstants;
+    private final TIntObjectHashMap<IntVar> cachedConstants;
 
     /**
      * Variables of the model
@@ -148,7 +146,7 @@ public class Model implements IModel {
     /**
      * Stores this model's creation time -- in nanoseconds
      */
-    private long creationTime;
+    private final long creationTime;
 
     /**
      * Counter used to set ids to variables and propagators
@@ -163,7 +161,7 @@ public class Model implements IModel {
     /**
      * Enable attaching hooks to a model.
      */
-    private Map<String, Object> hooks;
+    private final Map<String, Object> hooks;
 
     /**
      * Resolution policy (sat/min/max)
@@ -210,7 +208,7 @@ public class Model implements IModel {
      * @param name        The name of the model (for logging purpose)
      */
     public Model(IEnvironment environment, String name) {
-        this(environment, name, new DefaultSettings());
+        this(environment, name, Settings.init());
     }
 
     /**
@@ -232,7 +230,7 @@ public class Model implements IModel {
      * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, new DefaultSettings());
+        this(new EnvironmentBuilder().fromFlat().build(), name, Settings.init());
     }
 
     /**
@@ -578,32 +576,6 @@ public class Model implements IModel {
     }
 
     /**
-     * Return a constraint embedding a nogood store (based on a sat model).
-     * A call to this method will create and post the constraint if it does not exist already.
-     *
-     * @return the no good constraint
-     */
-    public NogoodConstraint getNogoodStore() {
-        if (getHook(NOGOODS_HOOK_NAME) == null) {
-            NogoodConstraint nogoods = new NogoodConstraint(this);
-            nogoods.post();
-            addHook(NOGOODS_HOOK_NAME, nogoods);
-        }
-        return (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
-    }
-
-    /**
-     * Unpost nogood store constraint from model, if any.
-     */
-    public void removeNogoodStore() {
-        if (getHook(NOGOODS_HOOK_NAME) != null) {
-            NogoodConstraint nogoods = (NogoodConstraint) getHook(NOGOODS_HOOK_NAME);
-            unpost(nogoods);
-            removeHook(NOGOODS_HOOK_NAME);
-        }
-    }
-
-    /**
      * Return a constraint embedding a signed-clauses store.
      * A call to this method will create and post the constraint if it does not exist already.
      *
@@ -647,7 +619,7 @@ public class Model implements IModel {
     /**
      * Return the current settings for the solver
      *
-     * @return a {@link org.chocosolver.solver.Settings}
+     * @return a {@link Settings}
      */
     public Settings getSettings() {
         return this.settings;
@@ -671,7 +643,6 @@ public class Model implements IModel {
      * @see IObjectiveManager#setWalkingDynamicCut()
      * @see IObjectiveManager#setCutComputer(Function)
      */
-    @SuppressWarnings("unchecked")
     public void setObjective(boolean maximize, Variable objective) {
         if (objective == null) {
             throw new SolverException("Cannot set objective to null");
@@ -893,7 +864,7 @@ public class Model implements IModel {
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
-            for (Propagator p : c.getPropagators()) {
+            for (Propagator<?> p : c.getPropagators()) {
                 if(p.isPassive()){
                     throw new SolverException("Try to add a constraint with a passive propagator");
                 }
@@ -928,7 +899,7 @@ public class Model implements IModel {
                             "A call to Model.post(Constraint) is more appropriate.");
                 }
                 if (getSolver().getEngine().isInitialized()) {
-                    for (Propagator p : c.getPropagators()) {
+                    for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }
                 }
@@ -963,7 +934,7 @@ public class Model implements IModel {
                     engine.dynamicDeletion(c.getPropagators());
                 }
                 // 4. remove the propagators of the constraint from its variables
-                for (Propagator prop : c.getPropagators()) {
+                for (Propagator<?> prop : c.getPropagators()) {
                     prop.unlinkVariables();
                 }
             }
@@ -996,6 +967,56 @@ public class Model implements IModel {
             st.append(cstrs[c].toString()).append('\n');
         }
         return st.toString();
+    }
+
+    /**
+     * Display for each variable involved in the model, its number of occurrences.
+     */
+    public void displayVariableOccurrences() {
+        Map<String, Integer> l = new HashMap<>();
+        int cnt = 0;
+        for (Variable v : this.getVars()) {
+            cnt++;
+            if(v.isAConstant()){
+                l.compute("constants", (n, k) -> k == null ? 1 : k + 1);
+            }else{
+                if(VariableUtils.isView(v)){
+                    l.compute("views", (n, k) -> k == null ? 1 : k + 1);
+                }else
+                if(VariableUtils.isInt(v)){
+                    IntVar iv = v.asIntVar();
+                    l.compute(String.format("[%d,%d]", iv.getLB(), iv.getUB()), (n, k) -> k == null ? 1 : k + 1);
+                }else{
+                    l.compute(v.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+                }
+            }
+        }
+        solver.log().bold().printf("== %d variables ==%n", cnt);
+        l.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(e ->
+                        solver.log().printf("\t%s #%d\n", e.getKey(), e.getValue())
+                );
+    }
+
+    /**
+     * Display for each propagator involved in the model, its number of occurrences.
+     */
+    public void displayPropagatorOccurrences() {
+        Map<String, Integer> l = new HashMap<>();
+        int cnt = 0;
+        for (Constraint c : this.getCstrs()) {
+            for (Propagator<?> p : c.getPropagators()) {
+                l.compute(p.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
+                cnt++;
+            }
+        }
+        solver.log().bold().printf("== %d propagators ==%n", cnt);
+        l.entrySet().stream()
+                .sorted(Map.Entry.comparingByValue())
+                .forEach(e ->
+                        solver.log().printf("\t%s #%d\n", e.getKey(), e.getValue())
+                );
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

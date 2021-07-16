@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,16 +34,16 @@ public class PropCircuit_AntiArboFiltering extends PropCircuit_ArboFiltering {
 
 	protected void filterFromDom(int duplicatedNode) throws ContradictionException {
 		for (int i = 0; i < n + 1; i++) {
-			connectedGraph.getSuccOf(i).clear();
-			connectedGraph.getPredOf(i).clear();
+			connectedGraph.getSuccessorsOf(i).clear();
+			connectedGraph.getPredecessorsOf(i).clear();
 		}
 		for (int i = 0; i < n; i++) {
 			int ub = vars[i].getUB();
 			for (int y = vars[i].getLB(); y <= ub; y = vars[i].nextValue(y)) {
 				if (y - offSet == duplicatedNode) {
-					connectedGraph.addArc(n, i);
+					connectedGraph.addEdge(n, i);
 				}else {
-					connectedGraph.addArc(y - offSet, i);
+					connectedGraph.addEdge(y - offSet, i);
 				}
 			}
 		}

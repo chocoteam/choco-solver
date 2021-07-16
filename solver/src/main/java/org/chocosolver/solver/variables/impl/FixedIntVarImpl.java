@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -257,7 +257,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void subscribeView(IView view) {
+    public void subscribeView(IView view, int idx) {
     }
 
 

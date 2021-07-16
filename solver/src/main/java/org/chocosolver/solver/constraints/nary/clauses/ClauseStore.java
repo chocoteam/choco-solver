@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,6 +18,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.learn.XParameters;
+import org.chocosolver.solver.search.strategy.selectors.variables.ClausesBased;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -27,16 +28,10 @@ import org.chocosolver.util.objects.tree.Interval;
 import org.chocosolver.util.objects.tree.IntervalTree;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.stream.Stream;
 
-import static org.chocosolver.util.ESat.FALSE;
-import static org.chocosolver.util.ESat.TRUE;
-import static org.chocosolver.util.ESat.UNDEFINED;
+import static org.chocosolver.util.ESat.*;
 
 /**
  * A class to manage life of sclauses during resolution. TODO
@@ -85,6 +80,8 @@ public class ClauseStore extends Propagator<IntVar> {
      */
     private double clauseInc = 1d;
 
+    private ClausesBased strat;
+
     /**
      * Create a Nogood store connected to a model.
      *
@@ -112,6 +109,10 @@ public class ClauseStore extends Propagator<IntVar> {
         return learnts.size();
     }
 
+    public void declareClausesBasedStrategy(ClausesBased strat) {
+        this.strat = strat;
+    }
+
     /**
      * Declare a new signed clause in this store
      */
@@ -125,15 +126,15 @@ public class ClauseStore extends Propagator<IntVar> {
                 last = cl;
                 last.activity = clauseInc;
                 last.rawActivity = 1;
-                if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: %s\n", cl);
             } else {
-                if (XParameters.PRINT_CLAUSE) System.out.printf("add: %s\n", cl);
+                if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("add: %s\n", cl);
                 this.clauses.add(cl);
             }
             mSolver.getEngine().dynamicAddition(true, cl);
         } else {
             PropSignedClause cl = PropSignedClause.makeFromIn(vars, ranges);
-            if (XParameters.PRINT_CLAUSE) System.out.printf("learn: %s\n", cl);
+            if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: %s\n", cl);
             new Constraint("SC", cl).post();
         }
     }
@@ -205,6 +206,9 @@ public class ClauseStore extends Propagator<IntVar> {
      * Try to delete signed clauses from this nogood store.
      */
     public void forget() {
+        if(strat != null){
+            strat.decayActivity();
+        }
         decayActivity();
         if (mSolver.getDecisionPath().size() == 1) { // at root node
             simplifyDB();
@@ -213,6 +217,9 @@ public class ClauseStore extends Propagator<IntVar> {
                 check(last);
             }
             detectDominance();
+            if(strat != null){
+                Stream.of(last.getVars()).forEach(v -> strat.bump(v));
+            }
         }
         // 2. reduce database
         reduceDB();
@@ -246,7 +253,7 @@ public class ClauseStore extends Propagator<IntVar> {
             }
         }
         if (size > learnts.size() && model.getSettings().warnUser()) {
-            System.out.printf("Simplify DB: %d -> %d\n", size, learnts.size());
+            model.getSolver().log().white().printf("Simplify DB: %d -> %d%n", size, learnts.size());
         }
     }
 
@@ -266,7 +273,7 @@ public class ClauseStore extends Propagator<IntVar> {
                 }
             }
             if (size > learnts.size() && model.getSettings().warnUser()) {
-                System.out.printf("Reduce DB: %d -> %d\n", size, learnts.size());
+                model.getSolver().log().white().printf("Reduce DB: %d -> %d%n", size, learnts.size());
             }
             for (IntervalTree<Container> t : watches.values()) {
                 Stack<Container> del = new Stack<>();
@@ -293,16 +300,16 @@ public class ClauseStore extends Propagator<IntVar> {
             }
         }
         if (size > learnts.size() && model.getSettings().warnUser()) {
-            System.out.printf("Dominance DB: %d -> %d\n", size, learnts.size());
+            model.getSolver().log().white().printf("Dominance DB: %d -> %d%n", size, learnts.size());
         }
     }
 
 
     public void printStatistics() {
         learnts.sort(Comparator.comparingInt(c -> -c.rawActivity));
-        System.out.print("Top ten clauses:\n");
+        model.getSolver().log().white().print("Top ten clauses:\n");
         for (int i = 0; i < 10 && i < learnts.size(); i++) {
-            System.out.printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
+            model.getSolver().log().white().printf("%d : %d %s\n", i, learnts.get(i).rawActivity, learnts.get(i));
         }
     }
 

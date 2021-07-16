@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -148,6 +148,10 @@ public class ConstraintsName {
     public static final String SETNOTMEMBER = "SETNOTMEMBER";
 
     public static final String REIFICATIONCONSTRAINT = "REIFICATIONCONSTRAINT";
+
+    public static final String IMPLYCONSTRAINT = "IMPLYCONSTRAINT";
+
+    public static final String IMPLIEDCONSTRAINT = "IMPLIEDCONSTRAINT";
 
     public static final String SATCONSTRAINT = "SATCONSTRAINT";
 

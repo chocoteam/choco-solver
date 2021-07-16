@@ -8,12 +8,54 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Simplify the way deltamonitors work. There is no need to `freeze` and `unfreeze` 
+them before calling `forEach...` methods. But, a call to `forEach...` consumes all values stored.
+- Fix a bug related to incremental propagators, views and missing events.
+- STR2+ now deals with STAR tuples. Can be used when CT+ is not efficient (mainly due to very large domain size)
+- Resetting cutoff strategies now possible
+- Change restart behavior to reset cutoff on solutions (can be disabled though, calling `solver.setRestarts(..)` API).
+- Display occurrences of variable types and occurrences of propagator types
+- Now `IntDomainBest` offers API to break ties (see `Search.ValH.BLAST` for an example).
+- Add `solver.defaultSolution()` which creates lazily a solution recording everything, plugs it and returns it. 
+This is helpful when a Solution object is required in many places. 
+- Modification of the management of expressions in order to reduce the number of created variables (WIP).
+- Add `IntVar.stream()` that streams a variable's values (in increasing order)
+- Add `Search.ValH.BMIN` and `Search.ValH.BLAST`
+- Change some default settings 
+- Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`)
+- Add Logger (Solver.log()) to trace Model/Solver.
+- Revamp `Settings`, now is defined as a factory pattern
+- Make *half reification* possible. Seed `c.implies(b)` or `c.impliedBy(b)` 
+  where `c` is a Constraint and `b` a BoolVar.
+- Update MiniZinc constraints definition.
+
+### Deprecated API (to be removed in next release):
+
+
+### Other closed issues and pull requests:
+See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+4.10.6 - 11 Dec 2020
+-------------------             
+
+### Major features:
+- Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.
+- `ParallelPortfolio` now allows to add *unreliable* models, that is models whose resolution is deliberately made incomplete. 
+These models should not stop the parallel resolution process when they no longer find a solution. 
+Only complete models can inform the portfolio that they have proven the full exploration of the search space. 
 - Add `org.chocosolver.util.tools.PreProcessing` class, and a first preprocessing rule: equalities detection
-- Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
-- Update XCSP3 parser
-- Fix `InDomainMedian` when domain size is even
-- Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). Fixes for issues #653 and #740. 
+- Upgrade ibex integration to support ibex-java [v1.2.0](https://github.com/ibex-team/ibex-java/releases/tag/1.2.0). 
+Fixes for issues #653 and #740. 
 - Add QuickXPlain algorithm to find the Minimum Conflicting Set (see issue #509)
+- Update XCSP3 parser.
+- Fix `InDomainMedian` when domain size is even
+- Add new way to watch solving: `solver.verboseSolving()`
+- Deal with annotations for some Flatzinc constraints (allDifferent and inverse)
+- Add `MultiArmedBandit` strategy sequencer
+
 
 ### Deprecated API (to be removed in next release):
 
@@ -22,6 +64,7 @@ See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
 
 4.10.5 - 02 Oct 2020
 -------------------

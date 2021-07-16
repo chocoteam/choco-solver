@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -24,6 +24,7 @@ module org.chocosolver.parsers {
 
     opens org.chocosolver.parser to args4j, testng;
     opens org.chocosolver.parser.mps to args4j;
-    opens org.chocosolver.parser.xcsp to args4j;
     opens org.chocosolver.parser.flatzinc to args4j;
+    opens org.chocosolver.parser.xcsp to args4j;
+    opens org.chocosolver.parser.dimacs to args4j;
 }

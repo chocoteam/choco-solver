@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,7 @@ public class FlatzincModelTest {
         InputStream in = new ByteArrayInputStream(("var 1 .. 2: a::output_var;" + "constraint int_ne(a, 1);" + "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -48,7 +48,7 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -66,7 +66,7 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();
@@ -86,7 +86,7 @@ public class FlatzincModelTest {
                 "solve satisfy;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
-        fzn.addListener(new BaseFlatzincListener(fzn));
+        fzn.createSettings();
         fzn.createSolver();
         fzn.parse(fzn.getModel(), fzn.datas[0], in);
         Model model = fzn.getModel();

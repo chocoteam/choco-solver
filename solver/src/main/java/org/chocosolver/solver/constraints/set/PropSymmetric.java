@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -81,18 +81,13 @@ public class PropSymmetric extends Propagator<SetVar> {
                 vars[iter.nextInt() - offSet].force(i + offSet, this);
             }
         }
-        for (int i = 0; i < n; i++) {
-            sdm[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         currentSet = idxVarInProp;
-        sdm[currentSet].freeze();
         sdm[currentSet].forEach(elementForced, SetEventType.ADD_TO_KER);
         sdm[currentSet].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-        sdm[currentSet].unfreeze();
     }
 
     @Override

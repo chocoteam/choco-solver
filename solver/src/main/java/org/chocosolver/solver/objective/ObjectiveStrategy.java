@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -164,13 +164,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
 
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().print("- objective in [" + globalLB + ", " + globalUB + "]\n");
+            model.getSolver().log().bold().println("- objective in [" + globalLB + ", " + globalUB + "]");
         }
         int target;
         target = (globalLB * coefLB + globalUB * coefUB) / (coefLB + coefUB);
         IntDecision dec = model.getSolver().getDecisionPath().makeIntDecision(obj, decOperator, target);
         if(model.getSettings().warnUser()){
-            model.getSolver().getErr().print("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target + "\n");
+            model.getSolver().log().bold().println("- trying " + obj + " " + (decOperator == decUB ? "<=" : ">=") + " " + target);
         }
         return dec;
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -54,18 +54,6 @@ public interface IEnvironment  {
      * Not used yet.
      */
     void worldCommit();
-
-    /**
-     * Force to build fake history when a stored object on a particular condition.
-     * The default condition is {@link ICondition#FALSE}.
-     * @param condition to satisfy to build fake history
-     */
-    void buildFakeHistoryOn(ICondition condition);
-
-    /**
-     * @return true if building fake history is needed (the condition is satisfied).
-     */
-    boolean fakeHistoryNeeded();
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -164,6 +152,13 @@ public interface IEnvironment  {
      * @param operation operation to undo
      */
     void save(IOperation operation);
+
+    /**
+     * Save this operation onto the stack of operations to undo on backtrack, at level `worldIndex`.
+     * @param operation operation to undo
+     * @param worldIndex when to apply this
+     */
+    void saveAt(IOperation operation, int worldIndex);
 
     /**
      * Return the current time stamp.

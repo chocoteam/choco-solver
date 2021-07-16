@@ -2,7 +2,7 @@
 
     This file is part of choco-parsers, http://choco-solver.org/
 
-    Copyright (c) 2020, IMT Atlantique. All rights reserved.
+    Copyright (c) 2021, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>4.10.6-SNAPSHOT</version>
+        <version>4.10.7-SNAPSHOT</version>
     </parent>
     <artifactId>choco-parsers</artifactId>
     <packaging>jar</packaging>
@@ -44,22 +44,22 @@
         <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
-            <version>1.2.2</version>
+            <version>1.2.3</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.8-1</version>
+            <version>4.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>4.8-1</version>
+            <version>4.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>4.1.2</version>
+            <version>5.0.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -68,7 +68,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -106,7 +106,7 @@
                 <!--version 4.5 is the last one that generates
                 in the right ouptut directory
                 without specific configurations -->
-                <version>4.8-1</version>
+                <version>4.9.2</version>
                 <configuration>
                     <listener>false</listener>
                     <visitor>false</visitor>

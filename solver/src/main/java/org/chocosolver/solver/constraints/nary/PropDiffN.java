@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -77,7 +77,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
     private void prop(int varIdx) {
         int v = varIdx % n;
-        ISetIterator iter = overlappingBoxes.getNeighOf(v).iterator();
+        ISetIterator iter = overlappingBoxes.getNeighborsOf(v).iterator();
         while (iter.hasNext()) {
             int i = iter.nextInt();
             if (!mayOverlap(v, i)) {
@@ -125,7 +125,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
     private boolean prune(int j) throws ContradictionException {
         boolean hasFiltered = false;
-        ISetIterator iter = overlappingBoxes.getNeighOf(j).iterator();
+        ISetIterator iter = overlappingBoxes.getNeighborsOf(j).iterator();
         while (iter.hasNext()) {
             int i = iter.nextInt();
             if(doOverlap(i, j, true)) {
@@ -146,7 +146,7 @@ public class PropDiffN extends Propagator<IntVar> {
         int am = vars[i + 2 * n].getLB() * vars[i + 3 * n].getLB();
         int xLengthMin = vars[i + 2 * n].getLB();
         int yLengthMin = vars[i + 3 * n].getLB();
-        ISetIterator iter = overlappingBoxes.getNeighOf(i).iterator();
+        ISetIterator iter = overlappingBoxes.getNeighborsOf(i).iterator();
         while (iter.hasNext()) {
             int j = iter.nextInt();
             xm = Math.min(xm, vars[j].getLB());
@@ -163,7 +163,7 @@ public class PropDiffN extends Propagator<IntVar> {
 
         if (xLengthMin > 0 && yLengthMin > 0) {
             int maxNumberRectangles = ((xM - xm) / xLengthMin) * ((yM - ym) / yLengthMin);
-            if (maxNumberRectangles < overlappingBoxes.getNeighOf(i).size()+1) {
+            if (maxNumberRectangles < overlappingBoxes.getNeighborsOf(i).size()+1) {
                 fails();
             }
         }

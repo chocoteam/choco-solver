@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,12 +22,7 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * A regular parser with default and common services
@@ -35,7 +30,6 @@ import java.util.List;
  * Project: choco-parsers.
  */
 public abstract class RegParser implements IParser {
-    public static boolean PRINT_LOG = true;
     /**
      * Name of the parser
      */
@@ -49,18 +43,23 @@ public abstract class RegParser implements IParser {
             "0: automatic\n " +
             "1: FlatZinc (.fzn)\n" +
             "2: XCSP3 (.xml or .lzma)\n" +
-            "3: MPS (.mps)\n" +
-            "4: JSON (.json).")
+            "3: DIMACS (.cnf),\n" +
+            "4: MPS (.mps)")
     private int pa = 0;
+
+    @Option(name = "-ansi", usage = "Enable ANSI colour codes (default: false).")
+    protected boolean ansi = false;
+
+    @Option(name = "-lvl",
+            aliases = "--log-level",
+            usage = "Define log level."
+    )
+    protected Level level = Level.COMPET;
 
     @Option(name = "-limit",
             handler = LimitHandler.class,
             usage = "Resolution limits (XXhYYmZZs,Nruns,Msols) where each is optional (no space allowed).")
     protected ParserParameters.LimConf limits = new ParserParameters.LimConf(-1, -1, -1);
-
-    @Option(name = "-stat", aliases = {
-            "--print-statistics"}, usage = "Print statistics on each solution (default: false).")
-    protected boolean stat = false;
 
     @Option(name = "-csv", aliases = {
             "--print-csv"}, usage = "Print statistics on exit (default: false).")
@@ -121,13 +120,6 @@ public abstract class RegParser implements IParser {
     @Option(name = "-dfx", usage = "Force default explanation algorithm.")
     public boolean dftexp = false;
 
-    @Option(name = "-s", aliases = {"--settings"}, usage = "Configuration settings.")
-    protected File settingsFile = null;
-
-    /**
-     * List of listeners
-     */
-    protected List<ParserListener> listeners = new LinkedList<>();
     /**
      * Default settings to apply
      */
@@ -147,6 +139,7 @@ public abstract class RegParser implements IParser {
      */
     protected final Thread statOnKill = actionOnKill();
 
+    protected long creationTime;
     /**
      * Execution time
      */
@@ -162,9 +155,9 @@ public abstract class RegParser implements IParser {
         this.parser_cmd = parser_cmd;
     }
 
-    public abstract char getCommentChar();
-
-    public abstract Settings createDefaultSettings();
+    public void createSettings(){
+        defaultSettings = Settings.init();
+    }
 
     public final Settings getSettings() {
         return defaultSettings;
@@ -173,20 +166,18 @@ public abstract class RegParser implements IParser {
     /**
      * Create the solver
      */
-    public abstract void createSolver();
-
-    public final void addListener(ParserListener listener) {
-        listeners.add(listener);
-    }
-
-    public final void removeListener(ParserListener listener) {
-        listeners.remove(listener);
+    public void createSolver() {
+        creationTime = -System.nanoTime();
+        assert nb_cores > 0;
+        if (level.isLoggable(Level.INFO)) {
+            if (nb_cores > 1) {
+                System.out.printf("%s solvers in parallel\n", nb_cores);
+            }
+        }
     }
 
     @Override
     public final boolean setUp(String... args) throws SetUpException {
-        listeners.forEach(ParserListener::beforeParsingParameters);
-        if(PRINT_LOG)System.out.printf("%s %s\n", getCommentChar(), Arrays.toString(args));
         CmdLineParser cmdparser = new CmdLineParser(this);
         try {
             cmdparser.parseArgument(args);
@@ -196,18 +187,10 @@ public abstract class RegParser implements IParser {
             cmdparser.printUsage(System.err);
             return false;
         }
-        cmdparser.getArguments();
-        listeners.forEach(ParserListener::afterParsingParameters);
-        defaultSettings = createDefaultSettings();
-        if (settingsFile != null) {
-            try {
-                FileInputStream fileInputStream = new FileInputStream(settingsFile);
-                defaultSettings.load(fileInputStream);
-                fileInputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (level.isLoggable(Level.INFO)) {
+            System.out.printf("%s\n", Arrays.toString(args));
         }
+        createSettings();
         Runtime.getRuntime().addShutdownHook(statOnKill);
         return true;
     }
@@ -217,7 +200,7 @@ public abstract class RegParser implements IParser {
      *
      * @param m a Model
      */
-    private static void makeComplementarySearch(Model m) {
+    private void makeComplementarySearch(Model m) {
         Solver solver = m.getSolver();
         if (solver.getSearch() != null) {
             IntVar[] ovars = new IntVar[m.getNbVars()];
@@ -232,23 +215,28 @@ public abstract class RegParser implements IParser {
             // do not enumerate on the complementary search (greedy assignment)
             if (k > 0) {
                 solver.setSearch(solver.getSearch(),
-                        Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        //Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
+                        Search.inputOrderLBSearch(Arrays.copyOf(ovars, k)));
             }
         }
     }
 
     @Override
     public final void configureSearch() {
-        listeners.forEach(ParserListener::beforeConfiguringSearch);
         Solver solver = portfolio.getModels().get(0).getSolver();
+        if(level.is(Level.VERBOSE)) {
+            solver.verboseSolving(1000);
+        }
         if (nb_cores == 1) {
             if (exp) {
-                if(PRINT_LOG)System.out.printf("%s exp is on\n", getCommentChar());
+                if (level.isLoggable(Level.INFO)) {
+                    solver.log().white().println("exp is on");
+                }
                 solver.setLearningSignedClauses();
                 // THEN PARAMETERS
                 XParameters.DEFAULT_X = dftexp;
-                XParameters.PROOF = XParameters.FINE_PROOF = true;
-                XParameters.PRINT_CLAUSE = true;
+                XParameters.PROOF = XParameters.FINE_PROOF = false;
+                XParameters.PRINT_CLAUSE = false;
                 XParameters.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
                 XParameters.ASSERT_NO_LEFT_BRANCH = false;
                 XParameters.INTERVAL_TREE = true;
@@ -257,18 +245,20 @@ public abstract class RegParser implements IParser {
                 }
             }
             if (free) {
-                if(PRINT_LOG)System.out.printf("%s set search to: (%s,%s) + %s\n", getCommentChar(), varH, valH, restarts.pol);
-                if(lc > 0 || cos || last){
-                    if(PRINT_LOG)System.out.printf("%s add techniques: ", getCommentChar());
-                    if(cos){
-                        if(PRINT_LOG)System.out.print("-cos ");
-                    }else if(lc>0){
-                        if(PRINT_LOG)System.out.printf("-lc %d ", lc);
+                if (level.isLoggable(Level.INFO)) {
+                    solver.log().white().printf("set search to: (%s,%s) + %s\n", varH, valH, restarts.pol);
+                }
+                if (lc > 0 || cos || last) {
+                    if (level.isLoggable(Level.INFO)) solver.log().white().print("add techniques: ");
+                    if (cos) {
+                        if (level.isLoggable(Level.INFO)) solver.log().white().print("-cos ");
+                    } else if (lc > 0) {
+                        if (level.isLoggable(Level.INFO)) solver.log().white().printf("-lc %d ", lc);
                     }
-                    if(last){
-                        if(PRINT_LOG)System.out.print("-last");
+                    if (last) {
+                        if (level.isLoggable(Level.INFO)) solver.log().white().print("-last");
                     }
-                    if(PRINT_LOG)System.out.print("\n");
+                    if (level.isLoggable(Level.INFO)) solver.log().white().print("\n");
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
                 IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
@@ -288,9 +278,9 @@ public abstract class RegParser implements IParser {
                 } else {
                     solver.setSearch(strategy);
                 }
-                if(cos){
+                if (cos) {
                     solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
-                }else if(lc>0){
+                } else if (lc > 0) {
                     solver.setSearch(Search.lastConflict(solver.getSearch(), lc));
                 }
                 restarts.declare(solver);
@@ -310,8 +300,25 @@ public abstract class RegParser implements IParser {
             }
             makeComplementarySearch(portfolio.getModels().get(i));
         }
-        listeners.forEach(ParserListener::afterConfiguringSearch);
     }
+
+    @Override
+    public final void solve() {
+        getModel().getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
+        if (level.isLoggable(Level.INFO)) {
+            getModel().getSolver().log().white().print("solve instance...\n");
+        }
+        if (portfolio.getModels().size() == 1) {
+            singleThread();
+        } else {
+            manyThread();
+        }
+    }
+
+    protected abstract void singleThread();
+
+    protected abstract void manyThread();
+
 
     @Override
     public final Model getModel() {

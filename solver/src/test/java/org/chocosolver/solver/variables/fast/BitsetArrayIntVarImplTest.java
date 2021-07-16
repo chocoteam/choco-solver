@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -670,10 +670,8 @@ public class BitsetArrayIntVarImplTest {
 		IntVar i = s.intVar("i", new int[]{0, 98, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
 		i.updateUpperBound(98, Cause.Null);
-		d.freeze();
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
-		d.unfreeze();
 		Assert.assertEquals(remvals.size(), 1);
 		Assert.assertEquals(remvals.get(0), 99);
 	}
@@ -684,10 +682,8 @@ public class BitsetArrayIntVarImplTest {
 		IntVar i = s.intVar("i", new int[]{0, 98, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
 		i.updateBounds(0,98, Cause.Null);
-		d.freeze();
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
-		d.unfreeze();
 		Assert.assertEquals(remvals.size(), 1);
 		Assert.assertEquals(remvals.get(0), 99);
 	}
@@ -698,10 +694,8 @@ public class BitsetArrayIntVarImplTest {
 		IntVar i = s.intVar("i", new int[]{2, 3, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
 		i.updateLowerBound(3, Cause.Null);
-		d.freeze();
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
-		d.unfreeze();
 		Assert.assertEquals(remvals.size(), 1);
 		Assert.assertEquals(remvals.get(0), 2);
 	}
@@ -712,10 +706,8 @@ public class BitsetArrayIntVarImplTest {
 		IntVar i = s.intVar("i", new int[]{2, 3, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
 		i.updateBounds(3,99, Cause.Null);
-		d.freeze();
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
-		d.unfreeze();
 		Assert.assertEquals(remvals.size(), 1);
 		Assert.assertEquals(remvals.get(0), 2);
 	}

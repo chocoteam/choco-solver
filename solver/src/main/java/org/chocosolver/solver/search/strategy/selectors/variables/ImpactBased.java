@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -47,20 +47,20 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
     private final int aging; // aging parameter
     private double[][] Ilabel; // impact per labeling
     private int[] offsets; // initial lower bound of each variable
-    private int split; // domains are divided into at most 2^s subdomains
-    private IStateDouble searchSpaceSize;
+    private final int split; // domains are divided into at most 2^s subdomains
+    private final IStateDouble searchSpaceSize;
 
     private int currentVar = -1, currentVal = -1;
 
-    private IntList bests = new IntList();
+    private final IntList bests = new IntList();
 
-    private Random random; //  a random object to break ties
+    private final Random random; //  a random object to break ties
 
-    private int nodeImpact;
+    private final int nodeImpact;
 
-    private Model model;
+    private final Model model;
 
-    private boolean initOnly;
+    private final boolean initOnly;
 
     private boolean asgntFailed; // does the assignment leads to a failure
 
@@ -231,9 +231,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 //            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
             return false;
         } else if (System.currentTimeMillis() > tl) {
-            if (model.getSettings().warnUser()) {
-                model.getSolver().getErr().print("impact Search stops its init phase -- reach time limit!");
-            }
+            model.getSolver().log().println("impact Search stops its init phase -- reach time limit!");
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();

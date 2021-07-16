@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,9 +9,6 @@
  */
 package org.chocosolver.solver.constraints.nary.binPacking;
 
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.stream.IntStream;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -27,6 +24,10 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.procedure.UnaryIntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.stream.IntStream;
 
 /**
  * Propagator for a Bin Packing constraint
@@ -329,9 +330,7 @@ public class PropBinPacking extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if(idxVarInProp < nbItems) {
-            monitors[idxVarInProp].freeze();
             monitors[idxVarInProp].forEachRemVal(procedure.set(idxVarInProp));
-            monitors[idxVarInProp].unfreeze();
             if(itemBin[idxVarInProp].isInstantiated()) {
                 int j = itemBin[idxVarInProp].getValue() - offset;
                 updateRAfterInstantiation(j, idxVarInProp);
@@ -360,9 +359,6 @@ public class PropBinPacking extends Propagator<IntVar> {
                 }
             }
             binsToProcess.set(0, nbAvailableBins);
-            for(int i=0; i<nbItems; i++){
-                monitors[i].unfreeze();
-            }
         }
         while(!binsToProcess.isEmpty()) {
             processBin(binsToProcess.nextSetBit(0));

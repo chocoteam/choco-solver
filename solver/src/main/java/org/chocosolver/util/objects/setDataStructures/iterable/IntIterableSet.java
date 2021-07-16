@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,7 +19,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * Project: choco.
  * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface IntIterableSet extends ISet{
+public interface IntIterableSet extends ISet {
 
     /**
      * Adds all of the elements in the array to this set.

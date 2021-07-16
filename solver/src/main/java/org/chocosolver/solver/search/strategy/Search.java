@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,21 +17,33 @@ import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
+import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
 import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.IbexDecision;
 import org.chocosolver.solver.search.strategy.selectors.values.*;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphLexEdge;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.edge.GraphRandomEdge;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphLexNode;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphNodeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphRandomNode;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenEdges;
+import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenNeighbors;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.bandit.MOSS;
+import org.chocosolver.util.bandit.Static;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.function.ToDoubleBiFunction;
 
 public class Search {
 
@@ -145,6 +157,86 @@ public class Search {
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
         return setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), true, sets);
+    }
+
+    // ************************************************************************************
+    // GRAPHVAR STRATEGIES
+    // ************************************************************************************
+
+    /**
+     * Generic strategy to branch on graph variables
+     *
+     * @param varS          Variable selection strategy
+     * @param nodeOrEdgeS   Node or edge selection (defines if whenever a decision must be on nodes or edges)
+     * @param nodeS         Node selector (defines which node to enforce/remove if decision is on nodes)
+     * @param edgeS         Edge selector (defines which edge to enforce/remove if decision is on edges)
+     * @param enforceFirst  branching order true = enforce first; false = remove first
+     * @param graphs        GraphVar array to branch on
+     * @return
+     */
+    public static GraphStrategy graphVarSearch(VariableSelector<GraphVar> varS, GraphNodeOrEdgeSelector nodeOrEdgeS,
+                                               GraphNodeSelector nodeS, GraphEdgeSelector edgeS, boolean enforceFirst,
+                                               GraphVar... graphs) {
+        return new GraphStrategy(graphs, varS, nodeOrEdgeS, nodeS, edgeS, enforceFirst);
+    }
+
+    /**
+     * Default graph var search.
+     *
+     * Variable selection: input order.
+     * Node or edges selection: nodes first then edges.
+     * Node selection: lexicographic order.
+     * Edge selection lexicographic order.
+     * Enforce first.
+     *
+     * <br> node branching:
+     * Let i be the first node such that
+     * i in envelope(g) and i not in kernel(g).
+     * The decision adds i to the kernel of g.
+     * It is fails, then i is removed from the envelope of g.
+     * <br>
+     * edge branching:
+     * <br> node branching:
+     * Let (i,j) be the first edge such that
+     * (i,j) in envelope(g) and (i,j) not in kernel(g).
+     * The decision adds (i,j) to the kernel of g.
+     * It is fails, then (i,j) is removed from the envelope of g
+     *
+     * @param graphs graph variables to branch on
+     */
+    public static GraphStrategy graphVarSearch(GraphVar... graphs) {
+        return graphVarSearch(
+                new InputOrder<>(graphs[0].getModel()),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true,
+                graphs
+        );
+    }
+
+    /**
+     * Random graph var search.
+     *
+     * Variable selection: random.
+     * Node or edges selection: nodes first then edges.
+     * Node selection: random.
+     * Edge selection random.
+     * Enforce first.
+     *
+     * @param seed the seed for random selection
+     * @param graphs graph variables to branch on
+     * @return a randomized graph variables search strategy
+     */
+    public static GraphStrategy randomGraphVarSearch(long seed, GraphVar... graphs) {
+        return graphVarSearch(
+                new Random<>(seed),
+                new GraphNodeThenEdges(),
+                new GraphRandomNode(seed),
+                new GraphRandomEdge(seed),
+                true,
+                graphs
+        );
     }
 
     // ************************************************************************************
@@ -284,11 +376,10 @@ public class Search {
             valueSelector = new IntDomainMin();
         } else {
             valueSelector = new IntDomainBest();
-            Solution lastSolution = new Solution(model, vars);
-            model.getSolver().attach(lastSolution);
-            valueSelector = new IntDomainLast(lastSolution, valueSelector, null);
+            model.getSolver().attach(model.getSolver().defaultSolution());
+            valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
         }
-        return new DomOverWDeg(vars, 0, valueSelector);
+        return new IntStrategy(vars, new DomOverWDeg(vars, 0), valueSelector);
     }
 
     /**
@@ -302,7 +393,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return new DomOverWDeg(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDeg(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -315,7 +406,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
-        return new DomOverWDegRef(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDegRef(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -345,7 +436,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
-        return new ConflictHistorySearch(vars, 0, new IntDomainMin());
+        return new IntStrategy(vars, new ConflictHistorySearch(vars, 0), new IntDomainMin());
     }
 
 
@@ -434,7 +525,7 @@ public class Search {
 
     /**
      * Creates a default search strategy for the given model. This heuristic is complete (handles
-     * IntVar, BoolVar, SetVar and RealVar)
+     * IntVar, BoolVar, SetVar, GraphVar, and RealVar)
      *
      * @param model a model requiring a default search strategy
      */
@@ -444,12 +535,13 @@ public class Search {
         // 1. retrieve variables, keeping the declaration order, and put them in four groups:
         List<IntVar> livars = new ArrayList<>(); // integer and boolean variables
         List<SetVar> lsvars = new ArrayList<>(); // set variables
+        List<GraphVar> lgvars = new ArrayList<>(); // graph variables
         List<RealVar> lrvars = new ArrayList<>();// real variables.
         Variable[] variables = model.getVars();
         Variable objective = null;
         for (Variable var : variables) {
             int type = var.getTypeAndKind();
-            if ((type & Variable.CSTE) == 0) {
+            if ((type & (Variable.CSTE)) == 0) {
                 int kind = type & Variable.KIND;
                 switch (kind) {
                     case Variable.BOOL:
@@ -458,6 +550,9 @@ public class Search {
                         break;
                     case Variable.SET:
                         lsvars.add((SetVar) var);
+                        break;
+                    case Variable.GRAPH:
+                        lgvars.add((GraphVar) var);
                         break;
                     case Variable.REAL:
                         lrvars.add((RealVar) var);
@@ -488,6 +583,9 @@ public class Search {
         }
         if (lsvars.size() > 0) {
             strats.add(setVarSearch(lsvars.toArray(new SetVar[0])));
+        }
+        if (lgvars.size() > 0) {
+            strats.add(graphVarSearch(lgvars.toArray(new GraphVar[0])));
         }
         if (lrvars.size() > 0) {
             strats.add(realVarSearch(lrvars.toArray(new RealVar[0])));
@@ -600,8 +698,8 @@ public class Search {
         CHS {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new ConflictHistorySearch(vars,
-                        solver.getModel().getSeed(),
+                return new IntStrategy(vars,
+                        new ConflictHistorySearch(vars,solver.getModel().getSeed()),
                         valueSelector.make(solver, last));
             }
         },
@@ -627,8 +725,8 @@ public class Search {
         DOMWDEG {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new DomOverWDeg(vars,
-                        solver.getModel().getSeed(),
+                return new IntStrategy(vars,
+                        new DomOverWDeg(vars, solver.getModel().getSeed()),
                         valueSelector.make(solver, last));
             }
         },
@@ -640,10 +738,9 @@ public class Search {
         DOMWDEGR {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return new DomOverWDegRef(vars,
-                        solver.getModel().getSeed(),
-                        valueSelector.make(solver, last),
-                        "CACD");
+                return new IntStrategy(vars,
+                        new DomOverWDegRef(vars, solver.getModel().getSeed()),
+                        valueSelector.make(solver, last));
             }
         },
         /**
@@ -710,7 +807,52 @@ public class Search {
                         vars);
             }
         },
-        ;
+        MAB_CHS_DWDEG_STATIC {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                //noinspection unchecked
+                return new MultiArmedBanditSequencer<IntVar>(
+                        new AbstractStrategy[]{
+                                CHS.make(solver, vars, valueSelector, last),
+                                DOMWDEG.make(solver, vars, valueSelector, last)
+                        },
+                        new Static(new double[]{.7, .3}, new java.util.Random(solver.getModel().getSeed())),
+                        (a, t) -> 0.d
+                );
+            }
+        },
+        MAB_CHS_DWDEG_MOSS {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+                final long[] pat = {0, 0};
+                final HashSet<IntVar> selected = new HashSet<>();
+                ToDoubleBiFunction<Integer, Integer> reward = (a, t) -> {
+                    double r = Math.log(solver.getNodeCount() - pat[0]) /
+                            Math.log(VariableUtils.searchSpaceSize(selected.iterator()))
+                            //+ solver.getSolutionCount() - pat[1]
+                            ;
+                    pat[0] = solver.getNodeCount();
+                    pat[1] = solver.getSolutionCount();
+                    selected.clear();
+                    return r;
+                };
+                solver.plugMonitor(new IMonitorOpenNode() {
+                    @Override
+                    public void afterOpenNode() {
+                        selected.add((IntVar) solver.getDecisionPath().getLastDecision().getDecisionVariable());
+                    }
+                });
+                //noinspection unchecked
+                return new MultiArmedBanditSequencer<IntVar>(
+                        new AbstractStrategy[]{
+                                CHS.make(solver, vars, valueSelector, last),
+                                DOMWDEG.make(solver, vars, valueSelector, last)
+                        },
+                        new MOSS(2),
+                        reward
+                );
+            }
+        };
 
         /**
          * Declare the search strategy based on parameters
@@ -751,6 +893,50 @@ public class Search {
             }
         },
         /**
+         * To select the best value according to the best objective bound when looking for
+         * the first solution, then return the lowest bound.
+         *
+         * @see IntDomainBest
+         * @see IntDomainMin
+         */
+        BMIN {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                if (solver.getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return MIN.make(solver, last);
+                }
+
+
+                return last(solver,
+                        new IntValueSelector() {
+                            IntValueSelector sel = new IntDomainBest();
+
+                            @Override
+                            public int selectValue(IntVar var) {
+                                if (var.getModel().getSolver().getSolutionCount() > 0) {
+                                    sel = new IntDomainMin();
+                                }
+                                return sel.selectValue(var);
+                            }
+                        }, last);
+            }
+        },
+        /**
+         * To select the best value according to the best objective bound.
+         *
+         * @see IntDomainBest
+         */
+        BLAST {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                if (solver.getModel().getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
+                    return MIN.make(solver, last);
+                }
+                Solution lastSol = solver.defaultSolution();
+                return last(solver, new IntDomainBest((v, i) -> lastSol.exists() && lastSol.getIntVal(v) == i), last);
+            }
+        },
+        /**
          * Return {@link #BEST}.
          */
         DEFAULT {
@@ -779,6 +965,28 @@ public class Search {
             @Override
             public IntValueSelector make(Solver solver, boolean last) {
                 return last(solver, new IntDomainMedian(), last);
+            }
+        },
+        /**
+         * To select the middle value in the current domain of the selected variable with floor rounding.
+         *
+         * @see IntDomainMiddle
+         */
+        MIDFLOOR {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMiddle(true), last);
+            }
+        },
+        /**
+         * To select the middle value in the current domain of the selected variable with ceil rouding.
+         *
+         * @see IntDomainMiddle
+         */
+        MIDCEIL {
+            @Override
+            public IntValueSelector make(Solver solver, boolean last) {
+                return last(solver, new IntDomainMiddle(false), last);
             }
         },
         /**
@@ -829,9 +1037,8 @@ public class Search {
                     return selector;
                 }
                 final IntVar[] vars = model.retrieveIntVars(true);
-                Solution lastSolution = new Solution(model, vars);
-                model.getSolver().attach(lastSolution);
-                return new IntDomainLast(lastSolution, selector, null);
+                model.getSolver().attach(model.getSolver().defaultSolution());
+                return new IntDomainLast(model.getSolver().defaultSolution(), selector, null);
             } else {
                 return selector;
             }

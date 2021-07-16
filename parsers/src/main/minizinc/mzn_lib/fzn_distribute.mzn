@@ -4,5 +4,4 @@
 */
 predicate fzn_distribute(array[int] of var int: card,
                      array[int] of var int: value,
-                     array[int] of var int: base) =
-    distributeChoco(card, value, base);
+                     array[int] of var int: base);

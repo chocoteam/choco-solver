@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -115,12 +115,6 @@ public class PropIntChannel extends Propagator<Variable> {
                 ints[iter.nextInt() - offSet2].instantiateTo(i + offSet1, this);
             }
         }
-        for (int i = 0; i < nSets; i++) {
-            sdm[i].unfreeze();
-        }
-        for (int i = 0; i < nInts; i++) {
-            idm[i].unfreeze();
-        }
     }
 
     @Override
@@ -128,19 +122,15 @@ public class PropIntChannel extends Propagator<Variable> {
         idx = idxVarInProp;
         if (idx < nSets) {
             idx += offSet1;
-            sdm[idxVarInProp].freeze();
             sdm[idxVarInProp].forEach(elementForced, SetEventType.ADD_TO_KER);
             sdm[idxVarInProp].forEach(elementRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-            sdm[idxVarInProp].unfreeze();
         } else {
             idx -= nSets;
             if (ints[idx].isInstantiated()) {
                 sets[ints[idx].getValue() - offSet1].force(idx + offSet2, this);
             }
             idx += offSet2;
-            idm[idxVarInProp - nSets].freeze();
             idm[idxVarInProp - nSets].forEachRemVal(valRem);
-            idm[idxVarInProp - nSets].unfreeze();
         }
     }
 

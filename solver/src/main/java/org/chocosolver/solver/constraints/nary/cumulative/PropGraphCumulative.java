@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -84,12 +84,12 @@ public class PropGraphCumulative extends PropCumulative {
                 ISetIterator tcIt = toCompute.iterator();
                 while (tcIt.hasNext()){
                     int i = tcIt.nextInt();
-                    for (int j : g.getNeighOf(i)) {
+                    for (int j : g.getNeighborsOf(i)) {
                         if (disjoint(i, j)) {
                             g.removeEdge(i, j);
                         }
                     }
-                    count += g.getNeighOf(i).size();
+                    count += g.getNeighborsOf(i).size();
                     if(count >= 2*n)break;
                 }
                 if (count >= 2*n) {
@@ -117,7 +117,7 @@ public class PropGraphCumulative extends PropCumulative {
             int v = varIdx % n;
             if(h[v].getUB()==0 || d[v].getUB()==0){
                 allTasks.remove(v);
-                ISetIterator gIt = g.getNeighOf(v).iterator();
+                ISetIterator gIt = g.getNeighborsOf(v).iterator();
                 while (gIt.hasNext()){
                     g.removeEdge(v,gIt.nextInt());
                 }
@@ -134,7 +134,7 @@ public class PropGraphCumulative extends PropCumulative {
     protected void filterAround(int taskIndex) throws ContradictionException {
         tasks.clear();
         tasks.add(taskIndex);
-        ISetIterator env = g.getNeighOf(taskIndex).iterator();
+        ISetIterator env = g.getNeighborsOf(taskIndex).iterator();
         while (env.hasNext()) {
             tasks.add(env.nextInt());
         }
@@ -147,7 +147,7 @@ public class PropGraphCumulative extends PropCumulative {
 
     private void graphComputation() {
         for (int i = 0; i < n; i++) {
-            g.getNeighOf(i).clear();
+            g.getNeighborsOf(i).clear();
         }
         Event[] events = new Event[2 * n];
         ArraySort<Event> sort = new ArraySort<>(events.length, true, false);

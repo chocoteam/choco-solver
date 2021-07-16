@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -426,7 +426,7 @@ public class MPSParser {
                 }
             }
         }
-        System.out.printf("c Unimodular: %s\n", unimod);
+        model.getSolver().log().white().printf("c Unimodular: %s\n", unimod);
     }
 
     private void postIntEquation(Model model, List<String> vars, List<Number> coefs, String op,

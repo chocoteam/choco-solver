@@ -4,7 +4,6 @@
 % is not in the circuit.
 %-----------------------------------------------------------------------------%
 
-predicate fzn_subcircuit(array[int] of var int: x) =
-    subcircuitChoco(x);
+predicate fzn_subcircuit(array[int] of var int: x);
 
 %-----------------------------------------------------------------------------%

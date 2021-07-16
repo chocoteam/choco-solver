@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,16 +40,6 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
         this.deltamonitor = deltamonitor;
         values = new TIntArrayList(8);
         filler = new Filler();
-    }
-
-    @Override
-    public void freeze() {
-        this.deltamonitor.freeze();
-    }
-
-    @Override
-    public void unfreeze() {
-        this.deltamonitor.unfreeze();
     }
 
     @Override

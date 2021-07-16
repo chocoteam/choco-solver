@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,7 +17,6 @@ public class ChocoXCSP {
 
     public static void main(String[] args) throws Exception {
         XCSP xscp = new XCSP();
-        xscp.addListener(new BaseXCSPListener(xscp));
         if(xscp.setUp(args)) {
             xscp.createSolver();
             xscp.buildModel();

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
@@ -294,7 +295,7 @@ public class ClauseTest {
         for (int i = 1; i < n; i++) {
             e.worldPush();
             bs[i] = s.boolVar("b" + i);
-            sat.addLearnt(sat.makeLiteral(bs[i], true));
+            sat.addLearnt(MiniSat.makeLiteral(sat.makeBool(bs[i]), true));
             s.getSolver().propagate();
             Assert.assertTrue(bs[i].isInstantiatedTo(1));
         }

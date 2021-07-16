@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -238,13 +238,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
         this.priority = priority;
-        // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
-        // This is the responsibility of the propagator's developer to take care of that point.
-        if (model.getSettings().cloneVariableArrayInPropagator()) {
-            this.vars = vars.clone();
-        } else {
-            this.vars = vars;
-        }
+        this.vars = vars.clone();
         this.vindices = new int[vars.length];
         Arrays.fill(vindices, -1);
         ID = model.nextId();
@@ -825,7 +819,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
         if (DEFAULT_EXPL) {
-            if(OUTPUT_DEFAULT_EXPL)System.out.printf("-- default explain for %s \n",this.getClass().getSimpleName());
+            if(OUTPUT_DEFAULT_EXPL)model.getSolver().log().bold().printf("-- default explain for %s \n",this.getClass().getSimpleName());
             defaultExplain(this, p, explanation);
         } else {
             ICause.super.explain(p, explanation);

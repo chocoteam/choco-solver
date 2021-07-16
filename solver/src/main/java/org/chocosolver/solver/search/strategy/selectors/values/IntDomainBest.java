@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -16,6 +16,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
+
+import java.util.function.BiPredicate;
 
 /**
  * Value selector for optimization problems:
@@ -37,23 +39,56 @@ public final class IntDomainBest implements IntValueSelector {
     private DecisionOperator<IntVar> dop;
 
     /**
-	 * Create a value selector that returns the best value wrt to the objective to optimize.
-	 * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
-     *
-     * @param maxdom a maximum domain size to satisfy to use this value selector.
-     * @param dop    the decision operator used to make the decision
+     * Condition for tie breaking
      */
-	public IntDomainBest(int maxdom, DecisionOperator<IntVar> dop) {
+    private BiPredicate<IntVar, Integer> condition;
+
+    /**
+     * Create a value selector that returns the best value wrt to the objective to optimize.
+     * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
+     *
+     * <p>
+     * {@code condition} is called when the evaluated {@code value} returns a score
+     * equals to the current best one. In that case, if {@code condition} returns {@code true}
+     * then {@code value} is retained as the new best candidate, otherwise the previous one
+     * is kept.
+     * </p>
+     *
+     * @param maxdom    a maximum domain size to satisfy to use this value selector.
+     * @param dop       the decision operator used to make the decision
+     * @param condition predicate to break ties
+     */
+    public IntDomainBest(int maxdom, DecisionOperator<IntVar> dop, BiPredicate<IntVar, Integer> condition) {
         this.maxdom = maxdom;
         this.dop = dop;
+        this.condition = condition;
     }
 
     /**
      * Create a value selector for assignments that returns the best value wrt to the objective to
      * optimize. When an enumerated variable domain exceeds 100, only bounds are considered.
+     *
+     * <p>
+     * {@code condition} is called when the evaluated {@code value} returns a score
+     * equals to the current best one. In that case, if {@code condition} returns {@code true}
+     * then {@code value} is retained as the new best candidate, otherwise the previous one
+     * is kept.
+     * </p>
+     *
+     * @param condition predicate to break ties
+     */
+    public IntDomainBest(BiPredicate<IntVar, Integer> condition) {
+        this(100, DecisionOperatorFactory.makeIntEq(), condition);
+    }
+
+
+    /**
+     * Create a value selector for assignments that returns the best value wrt to the objective to
+     * optimize. When an enumerated variable domain exceeds 100, only bounds are considered.
+     * Always-false condition is set by default.
      */
     public IntDomainBest() {
-		this(100, DecisionOperatorFactory.makeIntEq());
+        this(100, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
     }
 
     /**
@@ -69,7 +104,7 @@ public final class IntDomainBest implements IntValueSelector {
             int bestV = dop == DecisionOperatorFactory.makeIntReverseSplit() ? ub : var.getLB();
             for (int v = var.getLB(); v <= ub; v = var.nextValue(v)) {
                 int bound = bound(var, v);
-                if (bound < bestCost) {
+                if (bound < bestCost || (bound == bestCost && condition.test(var, v))) {
                     bestCost = bound;
                     bestV = v;
                 }

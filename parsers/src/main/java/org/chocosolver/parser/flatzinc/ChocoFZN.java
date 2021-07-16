@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -21,9 +21,8 @@ public class ChocoFZN {
 
     public static void main(String[] args) throws Exception {
         Flatzinc fzn = new Flatzinc();
-        fzn.addListener(new BaseFlatzincListener(fzn));
         if(fzn.setUp(args)) {
-            fzn.getSettings();
+            fzn.createSettings();
             fzn.createSolver();
             fzn.buildModel();
             fzn.configureSearch();

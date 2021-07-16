@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,8 +22,6 @@ public abstract class AbstractEnvironment implements IEnvironment {
     protected int currentWorld = 0;
 
     private static final int SIZE = 128;
-
-    private ICondition condition = ICondition.FALSE;
 
     protected int timestamp;
 
@@ -89,16 +87,5 @@ public abstract class AbstractEnvironment implements IEnvironment {
             createSharedBipartiteSet(SIZE);
         }
         return booleanSet;
-    }
-
-    @Override
-    public boolean fakeHistoryNeeded() {
-        return condition.satisfied();
-    }
-
-    @Override
-    public void buildFakeHistoryOn(ICondition condition) {
-        this.condition = condition;
-        this.condition.set(this);
     }
 }

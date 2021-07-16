@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.testng.annotations.Test;
@@ -81,7 +81,7 @@ public class MaxViewTest {
         for (int seed = 169; seed < 9999; seed++) {
             random.setSeed(seed);
             int[][] domains = buildFullDomains(3, 1, 15, random, random.nextDouble(), random.nextBoolean());
-            Model ref = new Model(new DefaultSettings().setCheckDeclaredConstraints(false));
+            Model ref = new Model(Settings.init().setCheckDeclaredConstraints(false));
             {
                 IntVar[] xs = new IntVar[3];
                 xs[0] = ref.intVar("x", domains[0]);

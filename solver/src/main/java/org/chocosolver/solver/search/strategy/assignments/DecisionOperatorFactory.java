@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.strategy.assignments;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
@@ -50,6 +51,11 @@ public final class DecisionOperatorFactory {
     public static DecisionOperator<SetVar> makeSetRemove() {
         return SetRemoveDecision.getInstance();
     }
+
+    public static GraphDecisionOperator makeGraphEnforce() { return GraphEnforceDecision.getInstance(); }
+
+    public static GraphDecisionOperator makeGraphRemove() { return GraphRemoveDecision.getInstance(); }
+
     // INTEGERS
     private static final class IntEqDecision implements DecisionOperator<IntVar> {
 
@@ -305,6 +311,114 @@ public final class DecisionOperatorFactory {
         @Override
         public DecisionOperator<SetVar> opposite() {
             return DecisionOperatorFactory.makeSetForce();
+        }
+    }
+
+    // GRAPHS
+    public static final class GraphEnforceDecision implements GraphDecisionOperator {
+
+        private final static GraphEnforceDecision INSTANCE = new DecisionOperatorFactory.GraphEnforceDecision();
+
+        public static GraphEnforceDecision getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean apply(GraphVar var, int node, ICause cause) throws ContradictionException {
+            if (node < var.getNbMaxNodes()) {
+                return var.enforceNode(node, cause);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public boolean unapply(GraphVar var, int node, ICause cause) throws ContradictionException {
+            if (node < var.getNbMaxNodes()) {
+                return var.removeNode(node, cause);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public boolean apply(GraphVar var, int from, int to, ICause cause) throws ContradictionException {
+            if (from == -1 || to == -1) {
+                throw new UnsupportedOperationException();
+            }
+            return var.enforceEdge(from, to, cause);
+        }
+
+        @Override
+        public boolean unapply(GraphVar var, int from, int to, ICause cause) throws ContradictionException {
+            if (from == -1 || to == -1) {
+                throw new UnsupportedOperationException();
+            }
+            return var.removeEdge(from, to, cause);
+        }
+
+        @Override
+        public GraphDecisionOperator opposite() {
+            return makeGraphRemove();
+        }
+
+        @Override
+        public String toString() {
+            return " enforcing ";
+        }
+
+    }
+
+    public static final class GraphRemoveDecision implements GraphDecisionOperator {
+
+        private final static GraphRemoveDecision INSTANCE = new DecisionOperatorFactory.GraphRemoveDecision();
+
+        public static GraphRemoveDecision getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public boolean apply(GraphVar var, int node, ICause cause) throws ContradictionException {
+            if (node < var.getNbMaxNodes()) {
+                return var.removeNode(node, cause);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public boolean unapply(GraphVar var, int node, ICause cause) throws ContradictionException {
+            if (node < var.getNbMaxNodes()) {
+                return var.enforceNode(node, cause);
+            } else {
+                throw new UnsupportedOperationException();
+            }
+        }
+
+        @Override
+        public boolean apply(GraphVar var, int from, int to, ICause cause) throws ContradictionException {
+            if (from == -1 || to == -1) {
+                throw new UnsupportedOperationException();
+            }
+            return var.removeEdge(from, to, cause);
+        }
+
+        @Override
+        public boolean unapply(GraphVar var, int from, int to, ICause cause) throws ContradictionException {
+            if (from == -1 || to == -1) {
+                throw new UnsupportedOperationException();
+            }
+            return var.enforceEdge(from, to, cause);
+        }
+
+        @Override
+        public GraphDecisionOperator opposite() {
+            return makeGraphEnforce();
+        }
+
+        @Override
+        public String toString() {
+            return " removal ";
         }
     }
 }

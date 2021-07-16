@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.nary.nvalue.amnv.graph;
 
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.tools.VariableUtils;
 
 /**
  * Intersection Graph
@@ -47,7 +48,7 @@ public class Gi extends G {
     public void build() {
         int n = getNbMaxNodes();
         for (int i = 0; i < n; i++) {
-            getNeighOf(i).clear();
+            getNeighborsOf(i).clear();
         }
         for (int i = 0; i < n; i++) {
             for (int i2 = i + 1; i2 < n; i2++) {
@@ -66,7 +67,7 @@ public class Gi extends G {
     }
 
     public void update(int i) {
-        ISetIterator nei = getNeighOf(i).iterator();
+        ISetIterator nei = getNeighborsOf(i).iterator();
         while (nei.hasNext()) {
             int j = nei.nextInt();
             if (!intersect(i, j)) {
@@ -78,16 +79,7 @@ public class Gi extends G {
     protected boolean intersect(int i, int j) {
         IntVar x = X[i];
         IntVar y = X[j];
-        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
-            return false;
-        }
-        int ub = x.getUB();
-        for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-            if (y.contains(val)) {
-                return true;
-            }
-        }
-        return false;
+        return VariableUtils.intersect(x,y);
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,20 +9,22 @@
  */
 package org.chocosolver.parser.mps;
 
-import org.chocosolver.parser.ParserListener;
+import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
 
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by cprudhom on 01/09/15. Project: choco-parsers.
@@ -61,17 +63,13 @@ public class MPS extends RegParser {
 
     public MPS() {
         super("ChocoMPS");
-        this.defaultSettings = new MPSSettings();
     }
 
     @Override
-    public char getCommentChar() {
-        return 'c';
-    }
-
-    @Override
-    public Settings createDefaultSettings() {
-        return new MPSSettings();
+    public void createSettings() {
+        defaultSettings = Settings.init()
+                .setCheckDeclaredConstraints(false)
+                .setModelChecker(solver -> true);
     }
 
     @Override
@@ -79,20 +77,16 @@ public class MPS extends RegParser {
         return new Thread(() -> {
             if (userinterruption) {
                 finalOutPut(getModel().getSolver());
-                System.out.printf("%c Unexpected resolution interruption!", getCommentChar());
+                if (level.isLoggable(Level.COMPET)) {
+                    getModel().getSolver().log().bold().red().println("Unexpected resolution interruption!");
+                }
             }
         });
     }
 
     @Override
     public void createSolver() {
-        listeners.forEach(ParserListener::beforeSolverCreation);
-        assert nb_cores > 0;
-        if (nb_cores > 1) {
-            System.out.printf("%c %s solvers in parallel\n", getCommentChar(), nb_cores);
-        } else {
-            System.out.printf("%c simple solver\n", getCommentChar());
-        }
+        super.createSolver();
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new MPSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
@@ -101,24 +95,35 @@ public class MPS extends RegParser {
             portfolio.addModel(threadModel);
             parsers[i] = new MPSParser();
         }
-        listeners.forEach(ParserListener::afterSolverCreation);
     }
 
     @Override
     public void buildModel() {
-        listeners.forEach(ParserListener::beforeParsingFile);
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
             try {
+                long ptime = -System.currentTimeMillis();
                 parse(models.get(i), parsers[i], i);
+                models.get(i).getSolver().logWithANSI(ansi);
+                if (level.isLoggable(Level.INFO)) {
+                    models.get(i).getSolver().log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
+                }
+                if (level.is(Level.JSON)) {
+                    models.get(i).getSolver().log().printf("{\"name\":\"%s\",\"stats\":[", instance);
+                }
             } catch (Exception e) {
-                System.out.printf("s UNSUPPORTED\n");
-                System.out.printf("%c %s\n", getCommentChar(), e.getMessage());
+                if (level.isLoggable(Level.INFO)) {
+                    models.get(i).getSolver().log().red().print("UNSUPPORTED\n");
+                    models.get(i).getSolver().log().printf("%s\n", e.getMessage());
+                }
                 e.printStackTrace();
                 throw new RuntimeException("UNSUPPORTED");
             }
         }
-        listeners.forEach(ParserListener::afterParsingFile);
+        if (level.is(Level.JSON)) {
+            getModel().displayVariableOccurrences();
+            getModel().displayPropagatorOccurrences();
+        }
     }
 
     public void parse(Model target, MPSParser parser, int i) throws Exception {
@@ -141,24 +146,11 @@ public class MPS extends RegParser {
     }
 
 
-    @Override
-    public void solve() {
-        listeners.forEach(ParserListener::beforeSolving);
-        if (portfolio.getModels().size() == 1) {
-            singleThread();
-        } else {
-            manyThread();
-        }
-        listeners.forEach(ParserListener::afterSolving);
-    }
-
-    private void singleThread() {
+    protected void singleThread() {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
-//        solver.showDashboard();
-        if (stat) {
-            solver.getOut().print("c ");
+        if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();
         }
         if (enumerate) {
@@ -175,7 +167,7 @@ public class MPS extends RegParser {
         finalOutPut(solver);
     }
 
-    private void manyThread() {
+    protected void manyThread() {
         boolean enumerate = portfolio.getModels().get(0).getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         if (enumerate) {
             while (portfolio.solve()) {
@@ -194,33 +186,62 @@ public class MPS extends RegParser {
 
     private void onSolution(Solver solver, MPSParser parser) {
         if (solver.getObjectiveManager().isOptimization()) {
-            solver.getOut().printf("o %.12f \n", solver.getObjectiveManager().getBestSolutionValue().doubleValue());
+            if (level.is(Level.RESANA))
+                solver.log().printf(java.util.Locale.US, "o %d %.1f\n",
+                        solver.getObjectiveManager().getBestSolutionValue().intValue(),
+                        solver.getTimeCount());
+            if (level.is(Level.JSON)) {
+                solver.log().printf(Locale.US, "%s{\"bound\":%d,\"time\":%.1f}",
+                        solver.getSolutionCount() > 1 ? "," : "",
+                        solver.getObjectiveManager().getBestSolutionValue().intValue(),
+                        solver.getTimeCount());
+            }
+        } else {
+            if (level.is(Level.JSON)) {
+                solver.log().printf("{\"time\":%.1f},",
+                        solver.getTimeCount());
+            }
         }
         output.setLength(0);
         output.append(parser.printSolution());
-        if (stat) {
-            solver.getOut().printf("%c %s \n", getCommentChar(), solver.getMeasures().toOneLineString());
+        if (level.isLoggable(Level.INFO)) {
+            solver.log().white().printf("%s %n", solver.getMeasures().toOneLineString());
         }
     }
 
     private void finalOutPut(Solver solver) {
         boolean complete = !userinterruption && runInTime();
+        Logger log = solver.log().bold();
         if (solver.getSolutionCount() > 0) {
+            log = log.green();
             if (solver.getObjectiveManager().isOptimization() && complete) {
-                output.insert(0, "s OPTIMUM FOUND\n");
+                output.insert(0, "OPTIMUM FOUND\n");
             } else {
-                output.insert(0, "s SATISFIABLE\n");
+                output.insert(0, "SATISFIABLE\n");
             }
         } else if (complete) {
-            output.insert(0, "s UNSATISFIABLE\n");
+            log = log.red();
+            output.insert(0, "UNSATISFIABLE\n");
         } else {
-            output.insert(0, "s UNKNOWN\n");
+            log = log.black();
+            output.insert(0, "UNKNOWN\n");
         }
-        solver.getOut().printf("%s", output);
-        if (stat) {
-            solver.getOut().print("c ");
+        if (level.isLoggable(Level.COMPET)) {
+            log.println(output.toString());
+        }
+        log.reset();
+        if (level.is(Level.RESANA)) {
+            solver.log().printf(java.util.Locale.US, "s %s %.1f\n",
+                    complete ? "T" : "S",
+                    solver.getTimeCount());
+        }
+        if (level.is(Level.JSON)) {
+            solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
+                    solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();
-            solver.getOut().printf("%c %s \n", getCommentChar(), solver.getMeasures().toOneLineString());
+            solver.getMeasures().toOneLineString();
         }
     }
 }

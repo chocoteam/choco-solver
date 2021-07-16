@@ -3,7 +3,7 @@
 
     This file is part of choco, http://choco-solver.org/
 
-    Copyright (c) 2020, IMT Atlantique. All rights reserved.
+    Copyright (c) 2021, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -15,7 +15,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.choco-solver</groupId>
     <artifactId>choco</artifactId>
-    <version>4.10.6-SNAPSHOT</version>
+    <version>4.10.7-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>choco</name>
     <url>http://choco-solver.org/</url>
@@ -24,7 +24,6 @@
     </description>
 
     <modules>
-        <module>sat</module>
         <module>solver</module>
         <module>parsers</module>
         <module>examples</module>
@@ -39,18 +38,13 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>7.3.0</version>
+            <version>7.4.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.choco-solver</groupId>
-                <artifactId>choco-sat</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.choco-solver</groupId>
                 <artifactId>choco-solver</artifactId>
@@ -136,7 +130,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -268,7 +262,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
-                    <version>3.1.1</version>
+                    <version>3.1.2</version>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
                         <encoding>UTF-8</encoding>
@@ -300,7 +294,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>8.36.2</version>
+                            <version>8.41</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -350,7 +344,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>4.0.rc2</version>
+                <version>4.1</version>
                 <configuration>
                     <header>${main_dir}/etc/header.txt</header>
                     <!--<header>LICENSE</header>-->
@@ -406,7 +400,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.6</version>
+                <version>0.8.7</version>
                 <executions>
                     <execution>
                         <goals>
@@ -429,7 +423,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
-                <version>3.4</version>
+                <version>3.9.1</version>
             </plugin>
         </plugins>
     </build>
@@ -443,7 +437,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>2.7</version>
+                <version>3.1.2</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -458,7 +452,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-report-plugin</artifactId>
-                <version>2.20</version>
+                <version>2.22.2</version>
                 <configuration>
                     <linkXRef>false</linkXRef>
                 </configuration>
@@ -494,6 +488,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
                 <reportSets>
                     <reportSet>
                         <reports>
@@ -507,7 +502,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>3.1.1</version>
+                <version>3.1.2</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
                     <encoding>UTF-8</encoding>

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -69,8 +69,8 @@ public class PerformanceTest {
         String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
                 file,
-                "-limit", "[40s]", // but, problems are expected to end within 30s max
-                "-stat",
+                "-limit", "[50s]", // but, problems are expected to end within 30s max
+                "-lvl","COMPET",
                 "-p", "1"
         };
         //RegParser.PRINT_LOG = false;
@@ -78,7 +78,10 @@ public class PerformanceTest {
         xcsp.setUp(args);
         xcsp.createSolver();
         xcsp.buildModel();
+        //xcsp.getModel().displayVariableOccurrences();
+        //xcsp.getModel().displayPropagatorOccurrences();
         xcsp.configureSearch();
+        //xcsp.getModel().getSolver().showShortStatistics();
         xcsp.solve();
         /*System.out.println(path +
                 "," + xcsp.getModel().getSolver().getSolutionCount() +

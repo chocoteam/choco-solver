@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -68,16 +68,11 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
             enumeratedFilteringOfX(i);
             enumeratedFilteringOfY(i);
         }
-        for (int i = 0; i < vars.length; i++) {
-            idms[i].unfreeze();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
-        idms[varIdx].freeze();
         idms[varIdx].forEachRemVal(rem_proc.set(varIdx));
-        idms[varIdx].unfreeze();
     }
 
     private void enumeratedFilteringOfX(int var) throws ContradictionException {

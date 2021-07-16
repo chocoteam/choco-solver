@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -44,8 +44,8 @@ public class OperationTrail implements IOperationTrail {
     /**
      * Constructs a trail with predefined size.
      *
-     * @param nUpdates maximal number of updates that will be stored
-     * @param nWorlds  maximal number of worlds that will be stored
+     * @param nUpdates   maximal number of updates that will be stored
+     * @param nWorlds    maximal number of worlds that will be stored
      * @param loadfactor load factor for structures
      */
     public OperationTrail(int nUpdates, int nWorlds, double loadfactor) {
@@ -95,10 +95,23 @@ public class OperationTrail implements IOperationTrail {
      * Reacts when a StoredInt is modified: push the former value & timestamp
      * on the stacks.
      */
-    public void savePreviousState(IOperation oldValue) {
-        valueStack[currentLevel++] = oldValue;
+    public void savePreviousState(IOperation operation) {
+        valueStack[currentLevel++] = operation;
         if (currentLevel == valueStack.length) {
             resizeUpdateCapacity();
+        }
+    }
+
+    @Override
+    public void savePreviousStateAt(IOperation operation, int at, int currentWorldIndex) {
+        savePreviousState(null); // make sure there is enough space
+        // keep the order
+        int length = currentLevel - worldStartLevels[at];
+        // set 'operation' as first one to be popped at world 'at'
+        System.arraycopy(valueStack, worldStartLevels[at], valueStack, worldStartLevels[at] + 1, length);
+        valueStack[worldStartLevels[at]] = operation;
+        for (int t = currentWorldIndex; t > at; t--) {
+            worldStartLevels[t]++;
         }
     }
 

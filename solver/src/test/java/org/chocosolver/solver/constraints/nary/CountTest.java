@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -150,7 +150,7 @@ public class CountTest {
             int sizeDom = 4;
             int sizeOccurence = 4;
 
-            Model model = new Model(new DefaultSettings().setHybridizationOfPropagationEngine((byte)0b00));
+            Model model = new Model(Settings.init().setHybridizationOfPropagationEngine((byte)0b00));
             IntVar[] vars;
             if (enumvar) {
                 vars = model.intVarArray("e", nbVar, 0, sizeDom, false);

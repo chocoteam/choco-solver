@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -67,15 +67,12 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
                 }
             }
         }
-        idm.unfreeze();
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == n) {
-            idm.freeze();
             idm.forEachRemVal(rem_proc);
-            idm.unfreeze();
         } else {
             if (vars[varIdx].getValue() == 1) {
                 vars[n].instantiateTo(varIdx + offSet, this);

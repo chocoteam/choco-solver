@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.propagation;
 
-import org.chocosolver.solver.DefaultSettings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -22,8 +21,6 @@ import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import static java.util.Arrays.sort;
-import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.solver.constraints.PropagatorPriority.UNARY;
 import static org.chocosolver.solver.search.strategy.Search.minDomLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -32,7 +29,6 @@ import static org.chocosolver.solver.variables.events.IntEventType.VOID;
 import static org.chocosolver.util.ESat.TRUE;
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.fail;
 
 /**
@@ -89,20 +85,6 @@ public class PropEngineTest {
         model.unpost(CSTR);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 9);
-    }
-
-    // test clone in propagators
-    @Test(groups="1s", timeOut=60000, expectedExceptions = AssertionError.class)
-    public void testClone() throws ContradictionException {
-        Model model = new Model(new DefaultSettings().setCloneVariableArrayInPropagator(false));
-        IntVar[] vars = model.intVarArray("V", 3, 0, 4, false);
-        model.allDifferent(vars).post();
-        sort(vars, (o1, o2) -> o2.getId() - o1.getId());
-
-        model.getSolver().propagate();
-        vars[0].instantiateTo(0, Null);
-        model.getSolver().propagate();
-        assertFalse(vars[0].isInstantiatedTo(0));
     }
 
     public static void main(String[] args) {

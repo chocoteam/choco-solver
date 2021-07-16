@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -194,7 +194,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             rfMove = new MoveRestart(model.getSolver().getMove(),
                 new MonotonicRestartStrategy(1),
                 new FailCounter(model.getSolver().getModel(), 1),
-                MAX_VALUE);
+                MAX_VALUE, true);
             model.getSolver().setMove(rfMove);
         }
         return true;

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,5 +31,21 @@ public interface VariableSelector<V extends Variable>  {
      * @return the current selected variable if any, {@code null} otherwise.
      */
     V getVariable(V[] variables);
+
+    /**
+     * Prepare <code>this</code> to be used in a search loop
+     * The initialization can detect inconsistency, in that case, it returns false
+     */
+    default boolean init() {
+        return true;
+    }
+
+    /**
+     * Remove the current strategy.
+     * This implies unplugging variable or search monitors.
+     */
+    default void remove() {
+
+    }
 
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,9 +14,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.view.BoolNotView;
-import org.chocosolver.solver.variables.view.EqView;
-import org.chocosolver.solver.variables.view.LeqView;
+import org.chocosolver.solver.variables.view.bool.BoolNotView;
+import org.chocosolver.solver.variables.view.bool.BoolEqView;
+import org.chocosolver.solver.variables.view.bool.BoolLeqView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 import org.chocosolver.util.tools.VariableUtils;
@@ -151,17 +151,17 @@ public class ClauseBuilder {
                 );
         while (!keys.isEmpty()) {
             IntVar v = keys.pop();
-            if (v instanceof EqView) {
-                eliminateEqView((EqView) v, keys);
-            } else if (v instanceof LeqView) {
-                eliminateLeqView((LeqView) v, keys);
+            if (v instanceof BoolEqView) {
+                eliminateEqView((BoolEqView) v, keys);
+            } else if (v instanceof BoolLeqView) {
+                eliminateLeqView((BoolLeqView) v, keys);
             } else if (v instanceof BoolNotView) {
                 eliminateNotView((BoolNotView) v, keys);
             }
         }
     }
 
-    private void eliminateEqView(EqView ev, Stack<IntVar> keys) {
+    private void eliminateEqView(BoolEqView ev, Stack<IntVar> keys) {
         IntIterableRangeSet set = sets.get(ev.getId());
         assert set.size() == 1;
         assert set.min()>=0 && set.max() <=1;
@@ -190,7 +190,7 @@ public class ClauseBuilder {
         set.clear();
     }
 
-    private void eliminateLeqView(LeqView lv, Stack<IntVar> keys) {
+    private void eliminateLeqView(BoolLeqView lv, Stack<IntVar> keys) {
         IntIterableRangeSet set = sets.get(lv.getId());
         assert set.size() == 1;
         assert set.min()>=0 && set.max() <=1;

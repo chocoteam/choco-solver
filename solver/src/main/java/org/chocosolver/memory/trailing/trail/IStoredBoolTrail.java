@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,5 +22,4 @@ public interface IStoredBoolTrail extends IStorage {
 
     void savePreviousState(StoredBool v, boolean oldValue, int oldStamp);
 
-    void buildFakeHistory(StoredBool v, boolean initValue, int fromStamp);
 }

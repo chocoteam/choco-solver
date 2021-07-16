@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -35,9 +35,9 @@ public class SetEvtScheduler implements EvtScheduler<SetEventType> {
     @Override
     public int select(int mask) {
         switch (mask) {
-            case 1: // instantiate
+            case 1: // Add to ker
                 return 0;
-            case 2: // lb or more
+            case 2: // Remove from envelope
                 return 1;
             case 3:
             case 255: // all

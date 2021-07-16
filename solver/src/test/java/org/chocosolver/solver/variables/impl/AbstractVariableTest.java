@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,9 +9,11 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
@@ -33,10 +35,10 @@ public class AbstractVariableTest {
 
 
     @BeforeMethod(alwaysRun = true)
-    public void setup(){
+    public void setup() {
         model = new Model();
-        IntVar[] is =  model.intVarArray(5, 0,6);
-        v = (AbstractVariable)is[0];
+        IntVar[] is = model.intVarArray(5, 0, 6);
+        v = (AbstractVariable) is[0];
         props = new Propagator[5];
         props[0] = new PropAllDiffInst(new IntVar[]{is[0]});
         props[1] = new PropAllDiffInst(new IntVar[]{is[1], is[0]});
@@ -48,7 +50,7 @@ public class AbstractVariableTest {
 
     @Test(groups = "1s")
     public void testSubscribe1() throws Exception {
-        props[0].setVIndices(0,v.subscribe(props[0], 0, 4));
+        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
         Assert.assertEquals(v.propagators[0], props[0]);
         Assert.assertEquals(v.pindices[0], 0);
         Assert.assertEquals(props[0].getVIndices(), new int[]{0});
@@ -107,7 +109,7 @@ public class AbstractVariableTest {
 
     @Test(groups = "1s")
     public void testSubscribe2() throws Exception {
-        props[0].setVIndices(0,v.subscribe(props[0], 0, 4));
+        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
         Assert.assertEquals(v.propagators[0], props[0]);
         Assert.assertEquals(v.pindices[0], 0);
         Assert.assertEquals(props[0].getVIndices(), new int[]{0});
@@ -167,7 +169,7 @@ public class AbstractVariableTest {
 
     @Test(groups = "1s")
     public void testCancel1() throws Exception {
-        props[0].setVIndices(0,v.subscribe(props[0], 0, 4));
+        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
         props[1].setVIndices(1, v.subscribe(props[1], 1, 4));
         props[2].setVIndices(2, v.subscribe(props[2], 2, 4));
         props[3].setVIndices(3, v.subscribe(props[3], 3, 4));
@@ -239,6 +241,22 @@ public class AbstractVariableTest {
         fix.addMonitor(mon);
         var.removeMonitor(mon);
         fix.removeMonitor(mon);
+    }
+
+    @Test(groups = "1s")
+    public void testWI() throws ContradictionException {
+        Model model = new Model();
+        IntVar var = model.intVar(0, 10);
+        IntVar fix = model.intVar(10);
+        Assert.assertEquals(var.instantiationWorldIndex(), Integer.MAX_VALUE);
+        Assert.assertEquals(fix.instantiationWorldIndex(), 0);
+        model.getEnvironment().worldPush();
+        var.instantiateTo(2, Cause.Null);
+        Assert.assertEquals(var.instantiationWorldIndex(), 1);
+        Assert.assertEquals(fix.instantiationWorldIndex(), 0);
+        model.getEnvironment().worldPop();
+        Assert.assertEquals(var.instantiationWorldIndex(), Integer.MAX_VALUE);
+        Assert.assertEquals(fix.instantiationWorldIndex(), 0);
     }
 
 

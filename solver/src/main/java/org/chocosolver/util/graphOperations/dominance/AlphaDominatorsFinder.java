@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -95,7 +95,7 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
 
     protected void compress(int v) {
         int k = v;
-        list.clear();
+        list.resetQuick();
         while (ancestor[ancestor[k]] != -1) {
             list.add(k);
             k = ancestor[k];

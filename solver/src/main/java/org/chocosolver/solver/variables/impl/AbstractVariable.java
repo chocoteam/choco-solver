@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,12 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IVariableMonitor;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -87,7 +82,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of propagators of this variable.
      */
-    protected Propagator[] propagators;
+    protected Propagator<?>[] propagators;
 
     /**
      * Store the index of this variable in each of its propagators.
@@ -97,16 +92,21 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Dependency indices, for efficient scheduling purpose.
      */
-    private int[] dindices;
+    private final int[] dindices;
     /**
      * Nb dependencies
      */
-    private int dsize;
+    private final int dsize;
 
     /**
      * List of views based on this variable.
      */
-    private IView[] views;
+    private IView<?>[] views;
+
+    /**
+     * Indices of this variable in subscribed views
+     */
+    private int[] idxInViews;
 
     /**
      * Index of the last not null view in <code>views</code>.
@@ -127,7 +127,12 @@ public abstract class AbstractVariable implements Variable {
      * The event scheduler of this variable, for efficient scheduling purpose. It stores propagators
      * wrt the propagation conditions.
      */
-    private EvtScheduler scheduler;
+    private final EvtScheduler<?> scheduler;
+
+    /**
+     * World index of last instantiation event.
+     */
+    private int instWI;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // FOR PROPAGATION PURPOSE
@@ -153,6 +158,7 @@ public abstract class AbstractVariable implements Variable {
         this.name = name;
         this.model = model;
         this.views = new IView[2];
+        this.idxInViews = new int[2];
         this.monitors = new IVariableMonitor[2];
         this.propagators = new Propagator[8];
         this.pindices = new int[8];
@@ -161,9 +167,10 @@ public abstract class AbstractVariable implements Variable {
         this.scheduler = createScheduler();
         this.dsize = this.scheduler.select(0) + 1;
         this.dindices = new int[dsize + 1];
+        this.instWI = 0; // set to 0 to capture constant automatically
     }
 
-    protected abstract EvtScheduler createScheduler();
+    protected abstract EvtScheduler<?> createScheduler();
 
     @Override
     public final int getId() {
@@ -171,10 +178,10 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public final int link(Propagator propagator, int idxInProp) {
+    public final int link(Propagator<?> propagator, int idxInProp) {
         // 1. ensure capacity
         if (dindices[dsize] == propagators.length) {
-            Propagator[] tmp = propagators;
+            Propagator<?>[] tmp = propagators;
             propagators = new Propagator[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, propagators, 0, dindices[dsize]);
 
@@ -207,7 +214,7 @@ public abstract class AbstractVariable implements Variable {
         }
     }
 
-    int subscribe(Propagator p, int ip, int i) {
+    int subscribe(Propagator<?> p, int ip, int i) {
         int j = dsize - 1;
         for (; j >= i; j--) {
             move(dindices[j], dindices[j + 1]);
@@ -219,7 +226,7 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public int swapOnPassivate(Propagator propagator, int idxInProp) {
+    public int swapOnPassivate(Propagator<?> propagator, int idxInProp) {
         int pp = propagator.getVIndice(idxInProp);
         assert pp != -1;
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
@@ -234,9 +241,9 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public int swapOnActivate(Propagator propagator, int idxInProp) {
+    public int swapOnActivate(Propagator<?> propagator, int idxInProp) {
         int pp = propagator.getVIndice(idxInProp);
-        if(pp > -1) {
+        if (pp > -1) {
             assert propagators[pp] == propagator;
             assert dindices[dsize - 1] <= pp && pp <= dindices[dsize];
             int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
@@ -248,20 +255,20 @@ public abstract class AbstractVariable implements Variable {
             propagators[dindices[i]] = propagator;
             pindices[dindices[i]] = idxInProp;
             return dindices[i];
-        }else{
+        } else {
             assert propagator.getConstraint().getStatus() == Constraint.Status.FREE;
             return -1;
         }
     }
 
     @Override
-    public final void unlink(Propagator propagator, int idxInProp) {
+    public final void unlink(Propagator<?> propagator, int idxInProp) {
         int i = propagator.getVIndice(idxInProp); // todo deal with -1
         if (i > -1) {
             assert propagators[i] == propagator : "Try to unlink :\n" + propagator + "\nfrom " + this.getName() + " but found:\n" + propagators[i];
             // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
             int mask = 0;
-            if(i < dindices[dsize-1]){ // the position above this limit indicates a propagator that was swapped to passivate
+            if (i < dindices[dsize - 1]) { // the position above this limit indicates a propagator that was swapped to passivate
                 mask = propagator.getPropagationConditions(pindices[i]);
             }
             cancel(i, scheduler.select(mask));
@@ -280,12 +287,12 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public final Propagator[] getPropagators() {
+    public final Propagator<?>[] getPropagators() {
         return propagators;
     }
 
     @Override
-    public final Propagator getPropagator(int idx) {
+    public final Propagator<?> getPropagator(int idx) {
         return propagators[idx];
     }
 
@@ -315,6 +322,16 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
+    public int instantiationWorldIndex() {
+        return this.isInstantiated() ? this.instWI : Integer.MAX_VALUE;
+    }
+
+    @Override
+    public void recordWorldIndex() {
+        this.instWI = model.getEnvironment().getWorldIndex();
+    }
+
+    @Override
     public final String getName() {
         return this.name;
     }
@@ -326,6 +343,9 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
+        if(this.isInstantiated()){
+            recordWorldIndex();
+        }
         model.getSolver().getEngine().onVariableUpdate(this, event, cause);
         notifyMonitors(event);
         notifyViews(event, cause);
@@ -342,26 +362,26 @@ public abstract class AbstractVariable implements Variable {
         assert cause != null;
         if (cause == Cause.Null) {
             for (int i = vIdx - 1; i >= 0; i--) {
-                views[i].notify(event);
+                views[i].notify(event, idxInViews[i]);
             }
         } else {
             for (int i = vIdx - 1; i >= 0; i--) {
                 if (views[i] != cause) { // reference is enough
-                    views[i].notify(event);
+                    views[i].notify(event, idxInViews[i]);
                 }
             }
         }
     }
 
     @Override
-    public void addMonitor(IVariableMonitor monitor) {
+    public void addMonitor(IVariableMonitor<?> monitor) {
         // 1. check the non redundancy of a monitor
         for (int i = 0; i < mIdx; i++) {
             if (monitors[i] == monitor) return;
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {
-            IVariableMonitor[] tmp = monitors;
+            IVariableMonitor<?>[] tmp = monitors;
             monitors = new IVariableMonitor[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, monitors, 0, mIdx);
         }
@@ -369,25 +389,30 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public void removeMonitor(IVariableMonitor monitor) {
+    public void removeMonitor(IVariableMonitor<?> monitor) {
         int i = mIdx - 1;
-        for (; i >= 0 ; i--) {
+        for (; i >= 0; i--) {
             if (monitors[i] == monitor) break;
         }
-        if(i< mIdx-1) {
-            System.arraycopy(monitors, i + 1, monitors, i, mIdx - (i+1));
+        if (i < mIdx - 1) {
+            System.arraycopy(monitors, i + 1, monitors, i, mIdx - (i + 1));
         }
         monitors[--mIdx] = null;
     }
 
     @Override
-    public void subscribeView(IView view) {
+    public void subscribeView(IView<?> view, int idx) {
         if (vIdx == views.length) {
-            IView[] tmp = views;
+            IView<?>[] tmp = views;
+            int[] tmpIdx = idxInViews;
             views = new IView[tmp.length * 3 / 2 + 1];
+            idxInViews = new int[tmp.length * 3 / 2 + 1];
             System.arraycopy(tmp, 0, views, 0, vIdx);
+            System.arraycopy(tmpIdx, 0, idxInViews, 0, vIdx);
         }
-        views[vIdx++] = view;
+        views[vIdx] = view;
+        idxInViews[vIdx] = idx;
+        vIdx++;
     }
 
     @Override
@@ -401,12 +426,12 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public int getNbViews(){
+    public int getNbViews() {
         return vIdx;
     }
 
     @Override
-    public IView getView(int idx) {
+    public IView<?> getView(int idx) {
         return views[idx];
     }
 
@@ -437,8 +462,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * @return the event scheduler
      */
-    @SuppressWarnings("unchecked")
-    public final EvtScheduler getEvtScheduler() {
+    public final EvtScheduler<?> getEvtScheduler() {
         return scheduler;
     }
 
@@ -464,10 +488,10 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void storeEvents(int m, ICause cause) {
-        assert cause != null:"an event's cause is not supposed to be null";
-        if(this.cause == null){
+        assert cause != null : "an event's cause is not supposed to be null";
+        if (this.cause == null) {
             this.cause = cause;
-        }else if (this.cause != cause){
+        } else if (this.cause != cause) {
             this.cause = Cause.Null;
         }
         mask |= m;

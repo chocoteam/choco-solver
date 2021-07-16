@@ -8,7 +8,7 @@ ARGS=$2
 FILE=$3
 
 # Configuration of the command
-JARGS="-Xss64m -Xms64m -Xmx4096m -server"
+JARGS="-XX:+UseSerialGC -server -Xmx8G -Xss64M"
 PARSER="org.chocosolver.parser.xcsp.ChocoXCSP"
 
 # Build the command

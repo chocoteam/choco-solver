@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,7 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.memory.EnvironmentBuilder;
-import org.chocosolver.solver.DefaultSettings;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -114,7 +114,7 @@ public class TimesTest extends AbstractTernaryTest {
 
 	@Test(groups="1s", timeOut=60000)
 	public void testJL6() {
-		Model s = new Model(new DefaultSettings().setEnableTableSubstitution(false));
+		Model s = new Model(Settings.init().setEnableTableSubstitution(false));
 		IntVar i1 = s.intVar("i1", new int[]{1, 55000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 55000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 55000});
@@ -123,7 +123,7 @@ public class TimesTest extends AbstractTernaryTest {
 
     @Test(groups="1s", timeOut=60000)
     public void testJL7() {
-		Model s = new Model(new DefaultSettings().setEnableTableSubstitution(false));
+		Model s = new Model(Settings.init().setEnableTableSubstitution(false));
 		IntVar i1 = s.intVar("i1", new int[]{1, 10000});
 		IntVar i2 = s.intVar("i2", new int[]{1, 10000});
 		IntVar i3 = s.intVar("i3", new int[]{1, 10000});

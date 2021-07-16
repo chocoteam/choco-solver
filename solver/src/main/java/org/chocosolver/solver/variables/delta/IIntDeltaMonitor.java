@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,41 +19,36 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  * @author Charles Prud'homme
  * @since 25/05/12
  */
-public interface IIntDeltaMonitor extends IDeltaMonitor {
+public interface IIntDeltaMonitor {
 
     /**
-     * Apply 'proc' on each value removed. No filtering allowed
+     * Apply 'proc' on each value removed. No filtering allowed.
+     * A call to this method <b>consumes</b> the elements stored.
+     *
      * @param proc a procedure
      */
     void forEachRemVal(SafeIntProcedure proc);
 
     /**
      * Apply 'proc' on each value removed. Filtering allowed
+     * A call to this method <b>consumes</b> the elements stored.
+     *
      * @param proc a procedure
      * @throws ContradictionException if contradiction occurs
      */
 
     void forEachRemVal(IntProcedure proc) throws ContradictionException;
 
-	/**
-     * @return a rough estimation of the number of removed values 
+    /**
+     * @return a rough estimation of the number of removed values
      */
     int sizeApproximation();
 
     enum Default implements IIntDeltaMonitor {
         NONE() {
             @Override
-           	public int sizeApproximation(){
-           		return 0;
-           	}
-            @Override
-            public void freeze() {
-                // nothing to do by default
-            }
-
-            @Override
-            public void unfreeze() {
-                // nothing to do by default
+            public int sizeApproximation() {
+                return 0;
             }
 
             @Override

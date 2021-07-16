@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -102,7 +102,6 @@ public class PropBoolChannel extends Propagator<Variable> {
             int j = iter.nextInt();
             bools[j - offSet].setToTrue(this);
         }
-        sdm.unfreeze();
     }
 
     @Override
@@ -114,10 +113,8 @@ public class PropBoolChannel extends Propagator<Variable> {
                 set.force(i + offSet, this);
             }
         } else {
-            sdm.freeze();
             sdm.forEach(setForced, SetEventType.ADD_TO_KER);
             sdm.forEach(setRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
-            sdm.unfreeze();
         }
     }
 

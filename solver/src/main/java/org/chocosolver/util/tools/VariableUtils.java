@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,6 +17,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.RealInterval;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.stream.IntStream;
 
 import static java.util.Arrays.stream;
@@ -352,24 +353,49 @@ public class VariableUtils {
     }
 
     /**
+         * Compute the search space size
+         *
+         * @return search space size
+         */
+        public static double searchSpaceSize(Iterator<IntVar> vars) {
+            double size = 1;
+            while (vars.hasNext()) {
+                IntVar var = vars.next();
+                size *= var.getDomainSize();
+            }
+            if (size <= 0 || size == Double.POSITIVE_INFINITY) {
+                size = Double.MAX_VALUE;
+            }
+            return size;
+        }
+
+    /**
      * @param x an int variable
      * @param y another int variable
      * @return true if the two domains intersect
      */
     public static boolean intersect(IntVar x, IntVar y) {
-        if (x.getLB() > y.getUB() || y.getLB() > x.getUB()) {
-            return false;
-        }
-        if (x.hasEnumeratedDomain() && y.hasEnumeratedDomain()) {
-            int ub = x.getUB();
-            for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
-                if (y.contains(val)) {
-                    return true;
-                }
+        int s1 = x.getDomainSize();
+        int s2 = y.getDomainSize();
+        int i = 0, j = 0;
+        int lbi, ubi, lbj, ubj;
+        lbi = x.getLB();
+        ubi = x.nextValueOut(lbi) - 1;
+        lbj = y.getLB();
+        ubj = y.nextValueOut(lbj) - 1;
+        while (i < s1 && j < s2) {
+            if ((lbi <= lbj && lbj <= ubi) || (lbj <= lbi && lbi <= ubj)) {
+                return true;
             }
-            return false;
+            if (ubi <= ubj && ++i < s1) {
+                lbi = x.nextValue(ubi);
+                ubi = x.nextValueOut(lbi) - 1;
+            } else if (ubj <= ubi && ++j < s2) {
+                lbj = x.nextValue(ubj);
+                ubj = y.nextValueOut(lbj) - 1;
+            }
         }
-        return true;
+        return false;
     }
 
     /**

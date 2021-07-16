@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,7 +22,12 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 
 /**
@@ -639,5 +644,23 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
             // this is the first occurrence of the variable during explanation
             this.unionLit(v, explanation);
         }
+    }
+
+    default IntStream stream() {
+        Spliterators.AbstractIntSpliterator it = new Spliterators.AbstractIntSpliterator(IntVar.this.getDomainSize(),
+                Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL) {
+            final int[] val = {IntVar.this.getLB() - 1};
+
+            @Override
+            public boolean tryAdvance(IntConsumer action) {
+                if ((val[0] = IntVar.this.nextValue(val[0])) < Integer.MAX_VALUE) {
+                    action.accept(val[0]);
+                    return true;
+                }
+                return false;
+            }
+
+        };
+        return StreamSupport.intStream(it, false);
     }
 }

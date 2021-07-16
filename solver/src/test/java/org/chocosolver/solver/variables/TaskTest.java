@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,7 +12,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.view.OffsetView;
+import org.chocosolver.solver.variables.view.integer.IntOffsetView;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -187,7 +187,7 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t1));
 
         Task t2 = m.taskVar(s, m.intVar(2));
-        Assert.assertTrue(t2.getEnd() instanceof OffsetView);
+        Assert.assertTrue(t2.getEnd() instanceof IntOffsetView);
         Assert.assertFalse(hasTaskMonitor(t2));
     }
 

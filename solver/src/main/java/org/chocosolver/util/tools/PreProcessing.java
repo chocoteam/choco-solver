@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -127,7 +127,7 @@ public class PreProcessing {
                             IntVar[] ivars) {
         component.add(ivars[v]);
         visited.set(v);
-        for (int x : g.getNeighOf(v)) {
+        for (int x : g.getNeighborsOf(v)) {
             if (!visited.get(x)) {
                 scc(x, visited, g, component, ivars);
             }

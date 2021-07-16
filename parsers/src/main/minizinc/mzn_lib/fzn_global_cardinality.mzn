@@ -2,10 +2,15 @@
 % Requires that the number of occurrences of 'cover[i]' in 'x' is 'counts[i]'.
 %-----------------------------------------------------------------------------%
 
+predicate choco_fzn_global_cardinality(array[int] of var int: x,
+	  		     array[int] of int: cover,
+                 array[int] of var int: counts,
+                 bool: closed);
+
 predicate fzn_global_cardinality(array[int] of var int: x,
 	  		     array[int] of int: cover,
                  array[int] of var int: counts) =
-    globalCardinalityChoco(x,cover,counts,false);
+    choco_fzn_global_cardinality(x,cover,counts,false);
 
 
 %-----------------------------------------------------------------------------%

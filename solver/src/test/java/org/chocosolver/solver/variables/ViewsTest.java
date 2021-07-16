@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -671,7 +671,7 @@ public class ViewsTest {
 
     private static Model makeModel(final boolean withViews) {
         Model m = new Model("with" + (withViews ? "" : "out") + " views",
-            new DefaultSettings().setEnableViews(withViews));
+                Settings.init().setEnableViews(withViews));
         return m;
     }
 
@@ -828,7 +828,7 @@ public class ViewsTest {
     public void testCP01() {
         for (int a = -5; a < 6; a++) {
             for (int b = 5; b > -6; b--) {
-                Model base = new Model(new DefaultSettings().setEnableViews(false));
+                Model base = new Model(Settings.init().setEnableViews(false));
                 {
                     IntVar i = base.intVar("i", -5, 5);
                     IntVar f = base.intAffineView(a, i, b);
@@ -837,7 +837,7 @@ public class ViewsTest {
                     Solver s = base.getSolver();
                     s.findAllSolutions();
                 }
-                Model comp = new Model(new DefaultSettings().setEnableViews(true));
+                Model comp = new Model(Settings.init().setEnableViews(true));
                 {
                     IntVar i = comp.intVar("i", -5, 5);
                     IntVar f = comp.intAffineView(a, i, b);

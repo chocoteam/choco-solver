@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,17 +12,27 @@ package org.chocosolver.util.tools;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 
 /*
-* User : charles
-* Mail : cprudhom(a)emn.fr
-* Date : 3 juil. 2009
-* Since : Choco 2.1.0
-* Update : Choco 2.1.0
-*
-* Provides some short and usefull methods to deal with String object
-* and pretty print of IPretty objects.
-*
-*/
+ * User : charles
+ * Mail : cprudhom(a)emn.fr
+ * Date : 3 juil. 2009
+ * Since : Choco 2.1.0
+ * Update : Choco 2.1.0
+ *
+ * Provides some short and usefull methods to deal with String object
+ * and pretty print of IPretty objects.
+ *
+ */
 public class StringUtils {
+
+
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_BLACK = "\u001B[30m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+    public static final String ANSI_WHITE = "\u001B[37m";
+    public static final String ANSI_BOLD = "\u001B[1m";
+
     private StringUtils() {
     }
 

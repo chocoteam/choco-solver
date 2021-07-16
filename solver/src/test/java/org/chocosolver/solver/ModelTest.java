@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,20 +13,17 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.RealVar;
-import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ProblemMaker;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -50,10 +47,14 @@ public class ModelTest {
     final static int[] nbOmax = {4, 6, 17};
     final static int n = 3;
 
-    /** For autonumbering anonymous models. */
+    /**
+     * For autonumbering anonymous models.
+     */
     private static int modelInitNumber;
 
-    /** @return next model's number, for anonymous models. */
+    /**
+     * @return next model's number, for anonymous models.
+     */
     private static synchronized int nextModelNum() {
         return modelInitNumber++;
     }
@@ -461,9 +462,9 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 600000)
     public void testFindAllOptimalSolutions2() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        int cstrs= m.getNbCstrs();
+        int cstrs = m.getNbCstrs();
         Assert.assertEquals(m.getSolver().streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
-        Assert.assertEquals(cstrs,  m.getNbCstrs());
+        Assert.assertEquals(cstrs, m.getNbCstrs());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -527,7 +528,7 @@ public class ModelTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testSwapOnPassivate() {
-        Model model = new Model(new DefaultSettings().setSwapOnPassivate(true));
+        Model model = new Model(Settings.init().setSwapOnPassivate(true));
         int n = 11;
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -595,19 +596,75 @@ public class ModelTest {
             mode.getSolver().hardReset();
         }
     }
-
+    
     @Test(groups = "1s", timeOut = 60000)
-    public void testSettings2() throws IOException {
-        InputStream inStream = this.getClass().getClassLoader().getResourceAsStream("Assert.properties");
-        Settings settings = new DefaultSettings().load(inStream);
-        System.out.printf("%s\n",settings.getWelcomeMessage());
-        settings.store(System.out, "Test");
-    }
-
-    @Test(groups="1s", timeOut=60000)
-    public void testHR(){
+    public void testHR() {
         Model m = new Model();
         IntVar i = m.intVar("i", 1, 2);
         m.getSolver().hardReset();
+    }
+
+    @Test(groups = "1s")
+    public void testFindOptimalSolutionUsingCuts1() {
+        int[] weights = new int[]{2, 5, 3, 4, 12, 9, 1, 0, 5, 6, 2, 4};
+        int nbItems = weights.length;
+        int nbBins = 3;
+        Model model = new Model();
+        IntVar[] bins = model.intVarArray("bin", nbItems, 0, nbBins - 1, false);
+        IntVar[] loads = model.intVarArray("load", nbBins, 0, 1000, true);
+        IntVar minLoad = model.intVar("minLoad", 0, 1000, true);
+        model.binPacking(bins, weights, loads, 0).post();
+        model.min(minLoad, loads).post();
+        model.setObjective(true, minLoad);
+        model.getSolver().setSearch(Search.inputOrderLBSearch(bins));
+        model.getSolver().showShortStatistics();
+        //model.getSolver().findOptimalSolution(minLoad, true);
+        //model.getSolver().reset();
+        Solution solution = new Solution(model);
+        Assert.assertTrue(model.getSolver().findOptimalSolutionWithBounds(
+                minLoad,
+                () -> new int[]{minLoad.getValue() * 2, 1000},
+                (i, b) -> i,
+                () -> false, // no limit
+                r -> r > 1 && model.getSolver().getNodeCount() == 0,
+                solution::record
+        ));
+    }
+
+    @Test(groups = "1s")
+    public void testFindOptimalSolutionUsingCuts2() {
+        Model model = new Model("Cumulative example: makespan minimisation");
+        IntVar capa = model.intVar(6);
+        int n = 10;
+        int max = 1000;
+        IntVar makespan = model.intVar("makespan", 0, max, true);
+        IntVar[] start = model.intVarArray("start", n, 0, max, true);
+        IntVar[] end = new IntVar[n];
+        IntVar[] duration = new IntVar[n];
+        IntVar[] height = new IntVar[n];
+        Task[] task = new Task[n];
+        Random rd = new Random(0);
+        for (int i = 0; i < n; i++) {
+            duration[i] = model.intVar(rd.nextInt(20) + 1);
+            height[i] = model.intVar(rd.nextInt(5) + 1);
+            end[i] = model.intOffsetView(start[i], duration[i].getValue());
+            task[i] = new Task(start[i], duration[i], end[i]);
+        }
+        model.cumulative(task, height, capa).post();
+        model.max(makespan, end).post();
+        model.setObjective(false, makespan);
+        model.getSolver().setSearch(Search.inputOrderLBSearch(start));
+        model.getSolver().showShortStatistics();
+        //model.getSolver().findOptimalSolution(makespan, false);
+        //model.getSolver().reset();
+        Assert.assertTrue(model.getSolver().findOptimalSolutionWithBounds(
+                makespan,
+                () -> new int[]{0, (int) (makespan.getValue() * .99)},
+                (i, b) -> i,
+                () -> model.getSolver().getNodeCount() > 10000,
+                r -> r == 2 && model.getSolver().getNodeCount() == 0,
+                () -> {
+                }
+        ));
     }
 }

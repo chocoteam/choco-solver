@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,9 +28,6 @@ public class StoredBool extends IStateBool {
     public StoredBool(final EnvironmentTrailing env, final boolean i) {
         super(env, i);
         myTrail = env.getBoolTrail();
-        if(env.fakeHistoryNeeded()){
-            myTrail.buildFakeHistory(this, i, timeStamp);
-        }
     }
 
     /**

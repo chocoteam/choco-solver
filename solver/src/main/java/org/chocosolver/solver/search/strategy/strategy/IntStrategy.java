@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -79,10 +79,15 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 
     @Override
     public boolean init() {
-        return true;
+        return variableSelector.init();
     }
 
-    @Override
+	@Override
+	public void remove() {
+		variableSelector.remove();
+	}
+
+	@Override
     public Decision<IntVar> computeDecision(IntVar variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;

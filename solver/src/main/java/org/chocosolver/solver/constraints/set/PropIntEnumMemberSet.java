@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -95,15 +95,12 @@ public class PropIntEnumMemberSet extends Propagator<Variable> {
             set.force(iv.getValue(), this);
             setPassive();
         }
-        sdm.unfreeze();
     }
 
     @Override
     public void propagate(int i, int mask) throws ContradictionException {
         if (i == 0) {
-            sdm.freeze();
             sdm.forEach(elemRem, SetEventType.REMOVE_FROM_ENVELOPE);
-            sdm.unfreeze();
         }
         if (iv.isInstantiated()) {
             set.force(iv.getValue(), this);

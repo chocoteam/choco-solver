@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -104,14 +104,14 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 
 	protected void initParams(boolean inverseGraph) {
 		for (int i = 0; i < n; i++) {
-			T.getSuccOf(i).clear();
-			T.getPredOf(i).clear();
+			T.getSuccessorsOf(i).clear();
+			T.getPredecessorsOf(i).clear();
 			if (inverseGraph) {
-				succs[i] = g.getPredOf(i);
-				preds[i] = g.getSuccOf(i);
+				succs[i] = g.getPredecessorsOf(i);
+				preds[i] = g.getSuccessorsOf(i);
 			} else {
-				succs[i] = g.getSuccOf(i);
-				preds[i] = g.getPredOf(i);
+				succs[i] = g.getSuccessorsOf(i);
+				preds[i] = g.getPredecessorsOf(i);
 			}
 			semi[i] = -1;
 			ancestor[i] = -1;
@@ -191,7 +191,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 			if (dom[w] != vertex[semi[w]]) {
 				dom[w] = dom[dom[w]];
 			}
-			T.addArc(dom[w], w);
+			T.addEdge(dom[w], w);
 		}
 		dom[root] = root;
 	}
@@ -256,7 +256,7 @@ public abstract class AbstractLengauerTarjanDominatorsFinder {
 		// semi     = out = closing time = postorder
 		for (int i = 0; i < n; i++) {
 			parent[i] = -1;
-			succs[i] = T.getSuccOf(i);
+			succs[i] = T.getSuccessorsOf(i);
 			iterator[i] = succs[i].iterator();
 		}
 		//PREPROCESSING

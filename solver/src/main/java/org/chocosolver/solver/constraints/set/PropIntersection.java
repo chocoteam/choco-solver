@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -132,15 +132,11 @@ public class PropIntersection extends Propagator<SetVar> {
                         }
                 }
             }
-            // ------------------
-			for (int i = 0; i <= k; i++)
-				sdm[i].unfreeze();
         }
     }
 
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        sdm[idxVarInProp].freeze();
         if (idxVarInProp < k) {
             sdm[idxVarInProp].forEach(setForced, SetEventType.ADD_TO_KER);
             sdm[idxVarInProp].forEach(setRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
@@ -148,7 +144,6 @@ public class PropIntersection extends Propagator<SetVar> {
             sdm[idxVarInProp].forEach(intersectionForced, SetEventType.ADD_TO_KER);
             sdm[idxVarInProp].forEach(intersectionRemoved, SetEventType.REMOVE_FROM_ENVELOPE);
         }
-        sdm[idxVarInProp].unfreeze();
     }
 
     @Override
