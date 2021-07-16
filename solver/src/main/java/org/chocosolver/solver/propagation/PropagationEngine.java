@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2020, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -110,6 +110,7 @@ public class PropagationEngine {
      */
     public PropagationEngine(Model model) {
         this.model = model;
+        AddedPropagatorPriority.initPriorityCounter();
         //noinspection unchecked
         this.pro_queue = new CircularQueue[8];
         for (int i = 0; i < 8; i++) {
@@ -132,6 +133,10 @@ public class PropagationEngine {
 
     public static class AddedPropagatorPriority implements Priority {
         private static int NEW_PRIORITY = 8;
+
+        private static void initPriorityCounter() {
+            NEW_PRIORITY = 8;
+        }
 
         private final int priority;
 
@@ -162,14 +167,14 @@ public class PropagationEngine {
             }
             if (model.getSettings().sortPropagatorActivationWRTPriority()) {
                 propagators.sort(
-                        (p1, p2) -> {
-                            int p = p1.getPriority().getPriority() - p2.getPriority().getPriority();
-                            if (p == 0) {
-                                return p1.getNbVars() - p2.getNbVars();
-                            } else {
-                                return p;
-                            }
-                        });
+                    (p1, p2) -> {
+                        int p = p1.getPriority().getPriority() - p2.getPriority().getPriority();
+                        if (p == 0) {
+                            return p1.getNbVars() - p2.getNbVars();
+                        } else {
+                            return p;
+                        }
+                    });
             }
             for (int i = 0; i < propagators.size(); i++) {
                 propagators.get(i).setPosition(i);
