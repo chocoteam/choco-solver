@@ -47,6 +47,8 @@ public class ConstraintsName {
 
     public static final String ALLDIFFERENT = "ALLDIFFERENT";
 
+    public static final String ALLDIFFPREC = "ALLDIFFPREC";
+
     public static final String AMONG = "AMONG";
 
     public static final String ATLEASTNVALUES = "ATLEASTNVALUES";

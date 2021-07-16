@@ -107,6 +107,24 @@ public class Set_BitSet extends AbstractSet {
 		}
 	}
 
+	public int previousValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.previousSetBit(val);
+	}
+
+	public int nextValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.nextSetBit(val);
+	}
+
+	public int getOffset() {
+		return offset;
+	}
+
 	@Override
 	public boolean contains(int element) {
 		return element >= offset && values.get(element - offset);
