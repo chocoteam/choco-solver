@@ -48,10 +48,7 @@ import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMin;
-import org.chocosolver.solver.constraints.nary.min_max.PropMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropMin;
+import org.chocosolver.solver.constraints.nary.min_max.*;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
@@ -1579,6 +1576,34 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, false));
+    }
+
+    /**
+     * Creates an Argmax constraint.
+     * z is the index of the maximum value of the collection of domain variables vars.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default Constraint argmax(IntVar z, int offset, IntVar[] vars) {
+        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
+    }
+
+    /**
+     * Creates an Argmin constraint.
+     * z is the index of the minimum value of the collection of domain variables vars.
+     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntMinusView}[]
+     * and returns an {@link #argmax(IntVar, int, IntVar[])} constraint
+     * on this views.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
+        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 
     /**
