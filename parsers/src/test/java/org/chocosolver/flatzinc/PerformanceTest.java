@@ -120,7 +120,7 @@ public class PerformanceTest {
     @Test(groups = "mzn", timeOut = 120_000)
     public void test_is_A3PZaPjnUz() throws SetUpException {
         // Specific to is_A3PZaPjnUz which is faster when implication is enable
-        String file = this.getClass().getResource("/flatzinc/2020/is+A3PZaPjnUz.fzn").getFile();
+        String file = this.getClass().getResource("/flatzinc/2020/is+A3PZaPjnUz_new.fzn").getFile();
         String[] args = new String[]{
                 file,
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
