@@ -2026,6 +2026,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a sum constraint.
+     * Enforces that &#8721;<sub>x in vars1</sub>x operator &#8721;<sub>y in vars2</sub>y.
+     *
+     * @param vars1     a collection of IntVar
+     * @param operator operator in {"=", "!=", ">","<",">=","<="}
+     * @param vars2     a collection of IntVar
+     * @return a sum constraint
+     */
+    default Constraint sum(IntVar[] vars1, String operator, IntVar[] vars2) {
+        int[] coeffs = new int[vars1.length+ vars2.length];
+        Arrays.fill(coeffs, 0, vars1.length, 1);
+        Arrays.fill(coeffs, vars1.length, vars1.length + vars2.length, -1);
+        return scalar(ArrayUtils.append(vars1, vars2), coeffs, operator, 0, ref().getSettings().getMinCardForSumDecomposition());
+    }
+
+    /**
+     * Creates a sum constraint.
      * Enforces that &#8721;<sub>i in |vars|</sub>vars<sub>i</sub> operator sum.
      *
      * @param vars             a collection of IntVar
