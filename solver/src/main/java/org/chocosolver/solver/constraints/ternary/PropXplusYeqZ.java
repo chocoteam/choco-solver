@@ -29,6 +29,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  */
 public class PropXplusYeqZ extends Propagator<IntVar> {
 
+    private static final int THRESHOLD = 300;
     /**
      * Position of X in {@link #vars}
      */
@@ -88,7 +89,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
-        if (vars[v1].getDomainSize() * vars[v2].getDomainSize() > 200) return change;
+        if (vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
         if (!allbounded) {
             set.clear();
             int ub1 = vars[v1].getUB();
@@ -124,7 +125,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
         boolean change = vars[vr].updateBounds(lb, ub, this);
-        if (vars[v1].getDomainSize() * vars[v2].getDomainSize() > 200) return change;
+        if (vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
         if (!allbounded) {
             set.clear();
             int ub1 = vars[v1].getUB();
