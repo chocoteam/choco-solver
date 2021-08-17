@@ -12,5 +12,4 @@ Assumptions:
 @param P: sum of profits of all items in the knapsack
 */
 
-predicate fzn_knapsack(array[int] of int: w, array[int] of int: p, array[int] of var int: x, var int: W,var int: P) =
-	knapsackChoco(w, p, x, W, P);
+predicate fzn_knapsack(array[int] of int: w, array[int] of int: p, array[int] of var int: x, var int: W,var int: P);

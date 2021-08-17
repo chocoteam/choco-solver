@@ -3,6 +3,7 @@
 % lexicographically ordered.  Adjacent rows and adjacent columns cannot be
 % equal.
 %-----------------------------------------------------------------------------%
+predicate choco_fzn_lex2(array[int, int] of var int: x, bool: strict);
 
 predicate fzn_strict_lex2(array[int, int] of var int: x) =
-    lex2Choco(x,true);
+    choco_fzn_lex2(x,true);

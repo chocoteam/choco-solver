@@ -6,5 +6,8 @@
 % 1..Q).  We reserve state 0 to be an always failing state.
 %-----------------------------------------------------------------------------%
 predicate fzn_regular(array[int] of var int: x, int: Q, int: S,
-                  array[int,int] of int: d, int: q0, set of int: F) =
-    regularChoco(x,Q,S,d,q0,F);
+                         array[int] of int: d, int: q0, set of int: F);
+
+predicate fzn_regular(array[int] of var int: x, int: Q, int: S,
+                      array[int,int] of int: d, int: q0, set of int: F) =
+  fzn_regular(x,Q,S,array1d(d),q0,F);

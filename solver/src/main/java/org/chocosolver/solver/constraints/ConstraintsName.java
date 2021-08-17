@@ -41,6 +41,8 @@ public class ConstraintsName {
 
     public static final String DIVISION = "DIVISION";
 
+    public static final String ARGMAX = "ARGMAX";
+
     public static final String MAX = "MAX";
 
     public static final String MIN = "MIN";
@@ -148,6 +150,10 @@ public class ConstraintsName {
     public static final String SETNOTMEMBER = "SETNOTMEMBER";
 
     public static final String REIFICATIONCONSTRAINT = "REIFICATIONCONSTRAINT";
+
+    public static final String IMPLYCONSTRAINT = "IMPLYCONSTRAINT";
+
+    public static final String IMPLIEDCONSTRAINT = "IMPLIEDCONSTRAINT";
 
     public static final String SATCONSTRAINT = "SATCONSTRAINT";
 

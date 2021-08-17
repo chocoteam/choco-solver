@@ -3,8 +3,12 @@
 % Compares them from first to last element, regardless of indices
 %-----------------------------------------------------------------------------%
 
+predicate choco_fzn_lex_less(array[int] of var bool: x,
+                       array[int] of var bool: y,
+                       bool: strict);
+
 predicate fzn_lex_less_bool(array[int] of var bool: x,
                        array[int] of var bool: y) =
-    lex_lessChoco(x,y,true);
+    choco_fzn_lex_less(x,y,true);
 
 

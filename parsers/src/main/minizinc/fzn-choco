@@ -163,6 +163,9 @@ fi
 
 CMD="java -XX:+UseSerialGC -server -Xmx8G -Xss64M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"
 
-echo "% $CMD"
+if test "${LVL}" = "INFO"
+then
+  echo "% $CMD"
+fi
 eval "${CMD}"
 

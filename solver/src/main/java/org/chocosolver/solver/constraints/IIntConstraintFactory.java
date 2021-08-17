@@ -48,10 +48,7 @@ import org.chocosolver.solver.constraints.nary.element.PropElementV_fast;
 import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinality;
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropBoolMin;
-import org.chocosolver.solver.constraints.nary.min_max.PropMax;
-import org.chocosolver.solver.constraints.nary.min_max.PropMin;
+import org.chocosolver.solver.constraints.nary.min_max.*;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
@@ -1295,7 +1292,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             // uses two propagator to perform a fix point
             return new Constraint(
                     ConstraintsName.ELEMENT,
-                    new PropElementV_fast(value, table, index, offset, true));
+                    new PropElementV_fast(value, table, index, offset));
         }
     }
 
@@ -1579,6 +1576,34 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
         return new Constraint(ConstraintsName.LEX, new PropLex(vars1, vars2, false));
+    }
+
+    /**
+     * Creates an Argmax constraint.
+     * z is the index of the maximum value of the collection of domain variables vars.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default Constraint argmax(IntVar z, int offset, IntVar[] vars) {
+        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
+    }
+
+    /**
+     * Creates an Argmin constraint.
+     * z is the index of the minimum value of the collection of domain variables vars.
+     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntMinusView}[]
+     * and returns an {@link #argmax(IntVar, int, IntVar[])} constraint
+     * on this views.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
+        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 
     /**
@@ -1997,6 +2022,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint sum(IntVar[] vars, String operator, int sum) {
         return sum(vars, operator, sum, ref().getSettings().getMinCardForSumDecomposition());
+    }
+
+    /**
+     * Creates a sum constraint.
+     * Enforces that &#8721;<sub>x in vars1</sub>x operator &#8721;<sub>y in vars2</sub>y.
+     *
+     * @param vars1     a collection of IntVar
+     * @param operator operator in {"=", "!=", ">","<",">=","<="}
+     * @param vars2     a collection of IntVar
+     * @return a sum constraint
+     */
+    default Constraint sum(IntVar[] vars1, String operator, IntVar[] vars2) {
+        int[] coeffs = new int[vars1.length+ vars2.length];
+        Arrays.fill(coeffs, 0, vars1.length, 1);
+        Arrays.fill(coeffs, vars1.length, vars1.length + vars2.length, -1);
+        return scalar(ArrayUtils.append(vars1, vars2), coeffs, operator, 0, ref().getSettings().getMinCardForSumDecomposition());
     }
 
     /**

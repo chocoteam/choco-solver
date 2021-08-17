@@ -22,8 +22,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Implication constraint: boolean b => constraint c
- * Also known as half reification
+ * Equivalence constraint: boolean b <=> constraint c
+ * Also known as reification
  * <br/>
  *
  * @author Jean-Guillaume Fages

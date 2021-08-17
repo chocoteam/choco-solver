@@ -47,6 +47,9 @@ public abstract class RegParser implements IParser {
             "4: MPS (.mps)")
     private int pa = 0;
 
+    @Option(name = "-ansi", usage = "Enable ANSI colour codes (default: false).")
+    protected boolean ansi = false;
+
     @Option(name = "-lvl",
             aliases = "--log-level",
             usage = "Define log level."

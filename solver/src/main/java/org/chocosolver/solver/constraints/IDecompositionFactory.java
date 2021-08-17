@@ -17,6 +17,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
 import java.util.stream.IntStream;
@@ -92,7 +93,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         for (int r = 0; r < matrix.length; r++) {
             int min = IntStream.of(matrix[r]).min().orElse(IntVar.MIN_INT_BOUND);
             int max = IntStream.of(matrix[r]).max().orElse(IntVar.MAX_INT_BOUND);
-            results[r] = ref().intVar("val["+r+"]", min, max);
+            results[r] = ref().intVar("val[" + r + "]", min, max);
             ref().element(results[r], matrix[r], colIndex, colOffset).post();
         }
         ref().element(value, results, rowIndex, rowOffset).post();
@@ -141,7 +142,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
             layer[i] = new TIntHashSet();
         }
         layer[0].add(automaton.getInitialState());
-        states[0] = ref().intVar("Q_"+ref().nextId(), layer[0].toArray());
+        states[0] = ref().intVar("Q_" + ref().nextId(), layer[0].toArray());
         TIntHashSet nexts = new TIntHashSet();
         for (int i = 0; i < n; i++) {
             int ub = vars[i].getUB();
@@ -191,5 +192,154 @@ public interface IDecompositionFactory extends ISelf<Model> {
             }
             ref().scalar(in, w, "=", load[i]).post();
         }
+    }
+
+    /**
+     * <p>
+     * Creates and posts a decomposition of the {@link IIntConstraintFactory#circuit(IntVar[], int)} constraint.
+     * </p>
+     * <p>
+     * It relies on two {@link IIntConstraintFactory#allDifferent(IntVar[], String)} constraints and some
+     * {@link IIntConstraintFactory#element(IntVar, IntVar[], IntVar, int)} constraints.
+     * </p>
+     *
+     * @param S      successors variables
+     * @param offset 0 by default but typically 1 if used within MiniZinc
+     *               (which counts from 1 to n instead of from 0 to n-1)
+     */
+    default void circuitDec(IntVar[] S, int offset) {
+        int n = S.length;
+        ref().allDifferent(S, "AC").post();
+        IntVar[] t = ref().intVarArray("t", n - 1, 1 + offset, n - 1 + offset);
+        ref().allDifferent(t, "AC3").post();
+        ref().element(t[0], S, ref().intVar(offset), 0).post();
+        for (int i = 1; i < n - 2; i++) {
+            ref().element(t[i], S, t[i - 1], 0).post();
+        }
+        ref().element(ref().intVar(offset), S, t[n - 2], 0).post();
+    }
+
+    /**
+     * Creates a decomposition of the Argmax constraint.
+     * z is the index of the maximum value of the collection of domain variables vars.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default void argmaxDec(IntVar z, int offset, IntVar[] vars) {
+        int n = vars.length;
+        int min = Stream.of(vars).mapToInt(IntVar::getLB).min().getAsInt();
+        int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
+        IntVar[] q = new IntVar[n];
+        IntVar M = ref().intVar("M", n * min, n * (max + 1));
+        for (int j = 0; j < n; j++) {
+            q[j] = ref().intAffineView(n, vars[j], n - j);
+            z.ne(j + offset).iff(M.gt(q[j])).post();
+        }
+        ref().max(M, q).post();
+    }
+
+    /**
+     * Creates a decomposition of the Argmin constraint.
+     * z is the index of the minimum value of the collection of domain variables vars.
+     *
+     * @param z      a variable
+     * @param offset offset wrt to 'z'
+     * @param vars   a vector of variables, of size > 0
+     */
+    default void argminDec(IntVar z, int offset, IntVar[] vars) {
+        int n = vars.length;
+        int min = Stream.of(vars).mapToInt(IntVar::getLB).min().getAsInt();
+        int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
+        IntVar[] q = new IntVar[n];
+        IntVar M = ref().intVar("M", n * min, n * (max + 1));
+        for (int j = 0; j < n; j++) {
+            q[j] = ref().intAffineView(n, vars[j], j);
+            z.ne(j + offset).iff(M.lt(q[j])).post();
+        }
+        ref().min(M, q).post();
+    }
+
+    /**
+     * <p>
+     * Creates a decomposition that encodes an "if-then-else" constraint.
+     * </p>
+     * <p>
+     * If c[0] then y = x[0]
+     * <br>else if c[1] then y = x[1]
+     * <br>...
+     * <br>else y is not constrained.
+     * </p>
+     *
+     * @param c array of boolean variables
+     * @param x array of ints
+     * @param y a integer variable
+     * @implNote This is encoded thanks to a table constraint.
+     */
+    default void ifThenElseDec(BoolVar[] c, int[] x, IntVar y) {
+        Tuples tuples = new Tuples();
+        int star = Math.max(2, y.getUB() + 1);
+        tuples.setUniversalValue(star);
+        int[] t = new int[c.length + 1];
+        Arrays.fill(t, 0);
+        t[c.length] = star;
+        tuples.add(t.clone());
+        Arrays.fill(t, star);
+        for (int i = 0; i < c.length; i++) {
+            if (i > 0) t[i - 1] = 0;
+            t[i] = 1;
+            t[c.length] = x[i];
+            tuples.add(t.clone());
+        }
+        ref().table(ArrayUtils.append(c, new IntVar[]{y}), tuples).post();
+    }
+
+    /**
+     * <p>
+     * Creates a decomposition that encodes an "if-then-else" constraint.
+     * </p>
+     * <p>
+     * If c[0] then y = x[0]
+     * <br>else if c[1] then y = x[1]
+     * <br>...
+     * <br>else y is not constrained.
+     * </p>
+     *
+     * @param c array of boolean variables
+     * @param x array of integer variables
+     * @param y a integer variable
+     * @implNote This introduces an additional variable
+     * and is based on a table constraint and an element constraint.
+     */
+    default void ifThenElseDec(BoolVar[] c, IntVar[] x, IntVar y) {
+        /*
+        BoolVar[] d = ref().boolVarArray(c.length);
+        d[0] = ref().boolVar(true);
+        //y.eq(x[0]).decompose().impliedBy(c[0]);
+        c[0].imp(y.eq(x[0])).post();
+        for (int i = 1; i < c.length; i++) {
+            d[i].eq(c[i - 1].not().and(d[i - 1])).post();
+            //y.eq(x[i]).decompose().impliedBy(c[i].and(d[i]).boolVar());
+            c[i].and(d[i]).imp(y.eq(x[i])).post();
+        }/*/
+        Tuples tuples = new Tuples();
+        int univ = Math.max(2, y.getUB() + 1);
+        tuples.setUniversalValue(univ);
+        int[] t = new int[c.length + 1];
+        Arrays.fill(t, 0);
+        t[c.length] = c.length;
+        tuples.add(t.clone());
+        Arrays.fill(t, univ);
+        for (int i = 0; i < c.length; i++) {
+            if (i > 0) t[i - 1] = 0;
+            t[i] = 1;
+            t[c.length] = i;
+            tuples.add(t.clone());
+        }
+        IntVar idx = ref().intVar(0, c.length);
+        ref().table(ArrayUtils.append(c, new IntVar[]{idx}), tuples).post();
+        ref().element(y, ArrayUtils.append(x, new IntVar[]{y}), idx, 0).post();
+        //*/
     }
 }

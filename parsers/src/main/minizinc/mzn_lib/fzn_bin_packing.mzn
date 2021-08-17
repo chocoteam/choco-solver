@@ -6,7 +6,6 @@
 % - c >=0
 %-----------------------------------------------------------------------------%
 
-predicate fzn_bin_packing(int: c, array[int] of var int: bin, array[int] of int: w) =
-    bin_packingChoco(c,bin,w);
+predicate fzn_bin_packing(int: c, array[int] of var int: bin, array[int] of int: w);
 
 %-----------------------------------------------------------------------------%
