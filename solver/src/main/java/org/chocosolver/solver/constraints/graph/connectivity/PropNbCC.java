@@ -125,7 +125,7 @@ public class PropNbCC extends Propagator<Variable> {
     private int minCC() {
         int min = 0;
         visitedMin.clear();
-        for (int i : g.getMandatoryNodes().toArray()) {
+        for (int i : g.getMandatoryNodes()) {
             if (!visitedMin.get(i)) {
                 helper.exploreFrom(i, visitedMin);
                 min++;
@@ -137,7 +137,7 @@ public class PropNbCC extends Propagator<Variable> {
     private int maxCC() {
         int nbK = 0;
         visitedMax.clear();
-        for(int i:g.getMandatoryNodes().toArray()) {
+        for(int i:g.getMandatoryNodes()) {
             if(!visitedMax.get(i)) {
                 exploreLBFrom(i, visitedMax);
                 nbK++;
