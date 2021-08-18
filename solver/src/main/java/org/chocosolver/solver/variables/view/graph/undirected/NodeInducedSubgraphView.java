@@ -48,8 +48,8 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         super(name, new UndirectedGraphVar[] {graphVar});
         this.exclude = exclude;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), nodes, exclude);
-        this.ub = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getUB(), nodes, exclude);
+        this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), nodes, exclude);
+        this.ub = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), nodes, exclude);
     }
 
     @Override
