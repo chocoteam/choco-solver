@@ -370,7 +370,7 @@ public class DirectedGraph implements IGraph {
 
     @Override
     public boolean addNode(int x) {
-        return !nodes.contains(x) && nodes.add(x);
+        return nodes.add(x);
     }
 
     @Override
@@ -401,9 +401,9 @@ public class DirectedGraph implements IGraph {
      * @return true iff directed edge (from,to) was in the graph
      */
     public boolean removeEdge(int from, int to) {
-        if (successors[from].contains(to)) {
-            assert (predecessors[to].contains(from)) : "incoherent directed graph";
-            return successors[from].remove(to) | predecessors[to].remove(from);
+        if (successors[from].remove(to)) {
+            assert (predecessors[to].remove(from)) : "incoherent directed graph";
+            return true;
         }
         return false;
     }
@@ -438,9 +438,9 @@ public class DirectedGraph implements IGraph {
     public boolean addEdge(int from, int to) {
         addNode(from);
         addNode(to);
-        if (!successors[from].contains(to)) {
-            assert (!predecessors[to].contains(from)) : "incoherent directed graph";
-            return successors[from].add(to) & predecessors[to].add(from);
+        if (successors[from].add(to)) {
+            assert (predecessors[to].add(from)) : "incoherent directed graph";
+            return true;
         }
         return false;
     }
