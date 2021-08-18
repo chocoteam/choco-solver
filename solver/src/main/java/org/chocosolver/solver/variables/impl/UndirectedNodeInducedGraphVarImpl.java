@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Undirected Graph variable guaranteeing that any instantiation is a node-induced subgraph of the envelope
@@ -67,7 +66,6 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
                 removeNode(y, this);
             }
         }
-        notifyPropagators(GraphEventType.ADD_NODE, cause);
         return true;
     }
 
