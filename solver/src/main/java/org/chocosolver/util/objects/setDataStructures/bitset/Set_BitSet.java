@@ -22,7 +22,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_BitSet extends AbstractSet {
+public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -81,6 +81,10 @@ public class Set_BitSet extends AbstractSet {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	public int getOffset() {
+		return offset;
+	}
 
 	@Override
 	public boolean add(int element) {
