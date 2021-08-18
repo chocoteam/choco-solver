@@ -58,8 +58,8 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.exclude = exclude;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), edges, exclude);
-        this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), edges, exclude);
+        this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), edges, exclude);
+        this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), edges, exclude);
     }
 
     @Override
