@@ -15,6 +15,7 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.graphs.IGraph;
@@ -240,6 +241,14 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
             reactOnModification = true;
             delta = new GraphDelta(getEnvironment());
         }
+    }
+
+    @Override
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        model.getSolver().getEngine().onVariableUpdate(this, event, cause);
+        notifyMonitors(event);
+        notifyViews(event, cause);
     }
 
     //***********************************************************************************

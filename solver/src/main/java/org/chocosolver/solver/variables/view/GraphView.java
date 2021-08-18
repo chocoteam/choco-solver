@@ -16,6 +16,7 @@ import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -173,6 +174,14 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             reactOnModification = true;
             delta = new GraphDelta(getEnvironment());
         }
+    }
+
+    @Override
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        model.getSolver().getEngine().onVariableUpdate(this, event, cause);
+        notifyMonitors(event);
+        notifyViews(event, cause);
     }
 
     @Override
