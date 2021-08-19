@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.dynamic;
 
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.*;
 
@@ -141,24 +142,28 @@ public class SetDifference extends AbstractSet {
     @Override
     public void notifyElementRemoved(int element, int idx) {
         if (idx == 0) {
-            values.remove(element);
-            notifyObservingElementRemoved(element);
+            if (values.remove(element)) {
+                notifyObservingElementRemoved(element);
+            }
         }
         if (idx == 1 && setA.contains(element)) {
-            values.add(element);
-            notifyObservingElementAdded(element);
+            if (values.add(element)) {
+                notifyObservingElementAdded(element);
+            }
         }
     }
 
     @Override
     public void notifyElementAdded(int element, int idx) {
         if (idx == 0 && !setB.contains(element)) {
-            values.add(element);
-            notifyObservingElementAdded(element);
+            if (values.add(element)) {
+                notifyObservingElementAdded(element);
+            }
         }
         if (idx == 1 && setA.contains(element)) {
-            values.remove(element);
-            notifyObservingElementRemoved(element);
+            if (values.remove(element)) {
+                notifyObservingElementRemoved(element);
+            }
         }
     }
 

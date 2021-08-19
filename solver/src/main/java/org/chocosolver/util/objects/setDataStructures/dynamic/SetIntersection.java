@@ -131,8 +131,9 @@ public class SetIntersection extends AbstractSet {
 
     @Override
     public void notifyElementRemoved(int element, int idx) {
-        values.remove(element);
-        notifyObservingElementRemoved(element);
+        if (values.remove(element)) {
+            notifyObservingElementRemoved(element);
+        }
     }
 
     @Override
