@@ -134,8 +134,7 @@ public class SetUnion extends AbstractSet {
 
     @Override
     public void notifyElementAdded(int element, int idx) {
-        if (!values.contains(element)) {
-            values.add(element);
+        if (values.add(element)) {
             notifyObservingElementAdded(element);
         }
     }
