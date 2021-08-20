@@ -18,8 +18,6 @@ import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.delta.ISetDelta;
-import org.chocosolver.solver.variables.delta.SetDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
@@ -33,7 +31,6 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public abstract class SetView<V extends Variable> extends AbstractView<V> implements SetVar {
 
-    protected SetDelta delta;
     protected boolean reactOnModification;
     protected IntVar cardinality = null;
 
@@ -67,9 +64,6 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     public boolean force(int element, ICause cause) throws ContradictionException {
         assert cause != null;
         if (!getLB().contains(element) && doForceSetElement(element)) {
-            if (reactOnModification) {
-                delta.add(element, SetDelta.LB, cause);
-            }
             SetEventType e = SetEventType.ADD_TO_KER;
             notifyPropagators(e, cause);
             return true;
@@ -81,9 +75,6 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     public boolean remove(int element, ICause cause) throws ContradictionException {
         assert cause != null;
         if (getUB().contains(element) && doRemoveSetElement(element)) {
-            if (reactOnModification) {
-                delta.add(element, SetDelta.UB, cause);
-            }
             SetEventType e = SetEventType.REMOVE_FROM_ENVELOPE;
             notifyPropagators(e, cause);
             return true;
@@ -92,17 +83,7 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     }
 
     @Override
-    public void createDelta() {
-        if (!reactOnModification) {
-            reactOnModification = true;
-            delta = new SetDelta(model.getEnvironment());
-        }
-    }
-
-    @Override
-    public ISetDelta getDelta() {
-        return delta;
-    }
+    public abstract void createDelta();
 
     @Override
     public int getTypeAndKind() {
