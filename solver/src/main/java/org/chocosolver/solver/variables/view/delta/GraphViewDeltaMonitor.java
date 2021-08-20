@@ -10,18 +10,18 @@
 package org.chocosolver.solver.variables.view.delta;
 
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
-import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+
 /**
- * Delta monitor dedicated to set views over graph variables.
+ * Delta monitor dedicated to graph views.
  *
  * @author Dimitri Justeau-Allaire
  * @since 20/08/2021
  */
-public abstract class SetGraphViewDeltaMonitor implements ISetDeltaMonitor {
+public abstract class GraphViewDeltaMonitor implements IGraphDeltaMonitor {
 
-    protected IGraphDeltaMonitor deltaMonitor;
+    protected IGraphDeltaMonitor[] deltaMonitors;
 
-    public SetGraphViewDeltaMonitor(IGraphDeltaMonitor deltaMonitor) {
-        this.deltaMonitor = deltaMonitor;
+    public GraphViewDeltaMonitor(IGraphDeltaMonitor... deltaMonitors) {
+        this.deltaMonitors = deltaMonitors;
     }
 }

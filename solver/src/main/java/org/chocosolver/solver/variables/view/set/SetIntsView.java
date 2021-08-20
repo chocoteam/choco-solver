@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
@@ -21,10 +20,7 @@ import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
-import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.*;
-import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
-import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.chocosolver.util.procedure.IntProcedure;
 
 import java.util.Arrays;
@@ -58,6 +54,7 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     private ISet lb;
     private ISet ub;
 
+    protected boolean reactOnModification;
     private ISetDelta delta;
 
     /**

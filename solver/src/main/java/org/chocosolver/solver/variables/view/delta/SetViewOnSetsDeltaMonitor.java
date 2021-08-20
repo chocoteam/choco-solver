@@ -16,7 +16,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 
 /**
- * Delta monitor delta monitor dedicated to set views over set variables.
+ * Delta monitor dedicated to set views over set variables.
  *
  * @author Dimitri Justeau-Allaire
  * @since 20/08/2021
@@ -29,6 +29,8 @@ public abstract class SetViewOnSetsDeltaMonitor implements ISetDeltaMonitor {
 
     public SetViewOnSetsDeltaMonitor(ISetDeltaMonitor... deltaMonitors) {
         this.deltaMonitors = deltaMonitors;
+        addedValues = new ISet[deltaMonitors.length];
+        removedValues = new ISet[deltaMonitors.length];
         for (int i = 0; i < deltaMonitors.length; i++) {
             addedValues[i] = SetFactory.makeSmallBipartiteSet();
             removedValues[i] = SetFactory.makeSmallBipartiteSet();
