@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.view.SetView;
 
 /**
@@ -52,6 +53,16 @@ public abstract class SetGraphView<E extends GraphVar> extends SetView<E> {
 
     public E getVariable() {
         return graphVar;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetGraphView does not support getDelta()");
+    }
+
+    @Override
+    public void createDelta() {
+        graphVar.createDelta();
     }
 
 }

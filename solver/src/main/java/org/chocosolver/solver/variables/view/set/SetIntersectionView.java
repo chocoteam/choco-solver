@@ -12,14 +12,19 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
+import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * Set view over set variables representing the intersection of these variables.
@@ -117,5 +122,38 @@ public class SetIntersectionView extends SetView<SetVar> {
             b = b && set.force(element, this);
         }
         return b;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetIntersectionView does not support getDelta()");
+    }
+
+    @Override
+    public void createDelta() {
+        for (SetVar s : variables) {
+            s.createDelta();
+        }
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        return new SetViewOnSetsDeltaMonitor() {
+            ISet remove = new SetUnion(removedValues);
+            ISet add = new SetIntersection(addedValues);
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                fillValues();
+                if (evt == SetEventType.ADD_TO_KER) {
+                    for (int v : add) {
+                        proc.execute(v);
+                    }
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    for (int v : remove) {
+                        proc.execute(v);
+                    }
+                }
+            }
+        };
     }
 }
