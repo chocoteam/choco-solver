@@ -102,7 +102,6 @@ public class SetNodeGraphView<E extends GraphVar> extends SetGraphView<E> {
     }
 
     public ISetDeltaMonitor monitorDelta(ICause propagator) {
-        createDelta();
         return new SetGraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {

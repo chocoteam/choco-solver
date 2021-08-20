@@ -46,6 +46,7 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     private ISet lb;
     private ISet ub;
 
+    protected boolean reactOnModification;
     private ISetDelta delta;
 
     /**

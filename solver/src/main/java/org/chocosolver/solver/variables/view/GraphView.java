@@ -31,9 +31,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  */
 public abstract class GraphView<V extends Variable, E extends IGraph> extends AbstractView<V> implements GraphVar<E> {
 
-    protected GraphDelta delta;
-    protected boolean reactOnModification;
-
     /**
      * Creates a graph view.
      *
@@ -62,9 +59,6 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (!getMandatoryNodes().contains(node) && doEnforceNode(node)) {
-            if (reactOnModification) {
-                delta.add(node, GraphDelta.NODE_ENFORCED, cause);
-            }
             GraphEventType e = GraphEventType.ADD_NODE;
             notifyPropagators(e, cause);
             return true;
@@ -91,9 +85,6 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             removeEdge(i, node, cause);
         }
         if (doRemoveNode(node)) {
-            if (reactOnModification) {
-                delta.add(node, GraphDelta.NODE_REMOVED, cause);
-            }
             GraphEventType e = GraphEventType.REMOVE_NODE;
             notifyPropagators(e, cause);
             return true;
@@ -111,10 +102,6 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (doEnforceEdge(x, y)) {
-            if (reactOnModification) {
-                delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
-                delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
-            }
             GraphEventType e = GraphEventType.ADD_EDGE;
             notifyPropagators(e, cause);
             return true;
@@ -130,10 +117,6 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (doRemoveEdge(x, y)) {
-            if (reactOnModification) {
-                delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
-                delta.add(y, GraphDelta.EDGE_REMOVED_HEAD, cause);
-            }
             GraphEventType e = GraphEventType.REMOVE_EDGE;
             notifyPropagators(e, cause);
             return true;
@@ -165,14 +148,13 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
 
     @Override
     public GraphDelta getDelta() {
-        return delta;
+        throw new UnsupportedOperationException("GraphView does not support getDelta()");
     }
 
     @Override
     public void createDelta() {
-        if (!reactOnModification) {
-            reactOnModification = true;
-            delta = new GraphDelta(getEnvironment());
+        for (Variable v : getVariables()) {
+            v.createDelta();
         }
     }
 

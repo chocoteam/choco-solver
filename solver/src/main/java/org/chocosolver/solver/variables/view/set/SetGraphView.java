@@ -59,10 +59,4 @@ public abstract class SetGraphView<E extends GraphVar> extends SetView<E> {
     public ISetDelta getDelta() {
         throw new UnsupportedOperationException("SetGraphView does not support getDelta()");
     }
-
-    @Override
-    public void createDelta() {
-        graphVar.createDelta();
-    }
-
 }

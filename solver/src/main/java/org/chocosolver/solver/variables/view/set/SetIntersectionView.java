@@ -130,15 +130,12 @@ public class SetIntersectionView extends SetView<SetVar> {
     }
 
     @Override
-    public void createDelta() {
-        for (SetVar s : variables) {
-            s.createDelta();
-        }
-    }
-
-    @Override
     public ISetDeltaMonitor monitorDelta(ICause propagator) {
-        return new SetViewOnSetsDeltaMonitor() {
+        ISetDeltaMonitor[] deltaMonitors = new ISetDeltaMonitor[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            deltaMonitors[i] = variables[i].monitorDelta(propagator);
+        }
+        return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
             ISet remove = new SetUnion(removedValues);
             ISet add = new SetIntersection(addedValues);
             @Override

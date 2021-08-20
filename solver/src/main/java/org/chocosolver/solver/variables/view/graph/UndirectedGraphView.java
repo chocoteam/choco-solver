@@ -13,7 +13,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.view.GraphView;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -57,9 +56,6 @@ public abstract class UndirectedGraphView<V extends Variable> extends GraphView<
             removeEdge(node, i, cause);
         }
         if (doRemoveNode(node)) {
-            if (reactOnModification) {
-                delta.add(node, GraphDelta.NODE_REMOVED, cause);
-            }
             GraphEventType e = GraphEventType.REMOVE_NODE;
             notifyPropagators(e, cause);
             return true;

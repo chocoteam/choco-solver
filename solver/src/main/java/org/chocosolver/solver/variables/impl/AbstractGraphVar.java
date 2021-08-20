@@ -14,6 +14,8 @@ import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
+import org.chocosolver.solver.variables.delta.monitor.GraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
@@ -320,5 +322,11 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
                 }
             }
         }
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new GraphDeltaMonitor(getDelta(), propagator);
     }
 }

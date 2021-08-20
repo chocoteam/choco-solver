@@ -9,16 +9,22 @@
  */
 package org.chocosolver.solver.variables.view.graph.undirected;
 
+import gnu.trove.map.hash.TIntIntHashMap;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.delta.GraphViewDeltaMonitor;
 import org.chocosolver.solver.variables.view.graph.UndirectedGraphView;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.PairProcedure;
 
 /**
  * EDGE INDUCED UNDIRECTED SUBGRAPH VIEWS:
@@ -40,6 +46,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
     protected UndirectedGraphVar graphVar;
     protected boolean exclude;
     protected ISet enforceNodes;
+    protected ISet[] edges;
 
     /**
      * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
@@ -55,6 +62,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         super(name, new UndirectedGraphVar[] {graphVar});
         this.exclude = exclude;
         this.graphVar = graphVar;
+        this.edges = UndirectedGraph.edgesArrayToEdgesSets(getNbMaxNodes(), edges);
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), edges, exclude);
@@ -130,5 +138,54 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
             notifyPropagators(GraphEventType.REMOVE_NODE, this);
         }
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        return new GraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
+            TIntIntHashMap nodes = new TIntIntHashMap(8);
+            PairProcedure filter = (from, to) -> { // Count the edges effectively impacted in the view
+                if ((exclude && !edges[from].contains(to)) || (!exclude && edges[from].contains(to))) {
+                    if (!nodes.containsKey(from)) {
+                        nodes.put(from, 1);
+                    } else {
+                        nodes.put(from, nodes.get(from) + 1);
+                    }
+                    if (!nodes.containsKey(to)) {
+                        nodes.put(to, 1);
+                    } else {
+                        nodes.put(to, nodes.get(to) + 1);
+                    }
+                }
+            };
+            @Override
+            public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+                nodes.clear();
+                deltaMonitors[0].forEachEdge(filter, evt);
+                if (evt == GraphEventType.ADD_NODE) {
+                    // A node is added iff all of its neighbors were added in the delta
+                    for (int node : nodes.keys()) {
+                        if (nodes.get(node) == getMandatoryNeighborsOf(node).size()) {
+                            proc.execute(node);
+                        }
+                    }
+                } else if (evt == GraphEventType.REMOVE_NODE) {
+                    // A node is removed iff it had a neighbor removed and is not any more in the view
+                    for (int node : nodes.keys()) {
+                        if (!getPotentialNodes().contains(node)) {
+                            proc.execute(node);
+                        }
+                    }
+                }
+            }
+            @Override
+            public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+                deltaMonitors[0].forEachEdge((from, to) -> {
+                    if ((exclude && !edges[from].contains(to)) || (!exclude && edges[from].contains(to))) {
+                        proc.execute(from, to);
+                    }
+                }, evt);
+            }
+        };
     }
 }

@@ -9,16 +9,23 @@
  */
 package org.chocosolver.solver.variables.view.graph.directed;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.delta.GraphViewDeltaMonitor;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.PairProcedure;
 
 /**
  * @author Dimitri Justeau-Allaire
@@ -159,5 +166,125 @@ public class DirectedGraphUnionView extends DirectedGraphView<DirectedGraphVar> 
     @Override
     public int getNbMaxNodes() {
         return ub.getNbMaxNodes();
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        IGraphDeltaMonitor[] deltaMonitors = new IGraphDeltaMonitor[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            deltaMonitors[i] = variables[i].monitorDelta(propagator);
+        }
+        return new DirectedGraphUnionDeltaMonitor(deltaMonitors);    }
+
+    class DirectedGraphUnionDeltaMonitor extends GraphViewDeltaMonitor {
+
+        ISet[] nodesAdded;
+        ISet[][] edgesAdded;
+        ISet[] nodesRemoved;
+        ISet[][] edgesRemoved;
+        ISet addNode;
+        ISet removeNode;
+        ISet[] addEdge;
+        ISet[] removeEdge;
+
+        public DirectedGraphUnionDeltaMonitor(IGraphDeltaMonitor... deltaMonitors) {
+            super(deltaMonitors);
+            // Init nodes structs
+            nodesAdded = new ISet[deltaMonitors.length];
+            nodesRemoved = new ISet[deltaMonitors.length];
+            for (int i = 0; i < deltaMonitors.length; i++) {
+                nodesAdded[i] = SetFactory.makeSmallBipartiteSet();
+                nodesRemoved[i] = SetFactory.makeSmallBipartiteSet();
+            }
+            addNode = new SetUnion(nodesAdded);
+            removeNode = new SetIntersection(nodesRemoved);
+            // Init edges structs
+            edgesAdded = new ISet[getNbMaxNodes()][];
+            edgesRemoved = new ISet[getNbMaxNodes()][];
+            for (int i = 0; i < getNbMaxNodes(); i++) {
+                edgesAdded[i] = new ISet[deltaMonitors.length];
+                edgesRemoved[i] = new ISet[deltaMonitors.length];
+                for (int j = 0; j < deltaMonitors.length; j++) {
+                    edgesAdded[i][j] = SetFactory.makeSmallBipartiteSet();
+                    edgesRemoved[i][j] = SetFactory.makeSmallBipartiteSet();
+                }
+            }
+            addEdge = new ISet[getNbMaxNodes()];
+            removeEdge = new ISet[getNbMaxNodes()];
+            for (int i = 0; i < getNbMaxNodes(); i++) {
+                addEdge[i] = new SetUnion(edgesAdded[i]);
+                removeEdge[i] = new SetIntersection(edgesRemoved[i]);
+            }
+        }
+
+        protected void fillAddNodes() throws ContradictionException {
+            for (int i = 0; i < deltaMonitors.length; i++) {
+                int finalI = i;
+                nodesAdded[i].clear();
+                deltaMonitors[i].forEachNode(x -> nodesAdded[finalI].add(x), GraphEventType.ADD_NODE);
+            }
+        }
+
+        protected void fillRemoveNodes() throws ContradictionException {
+            for (int i = 0; i < deltaMonitors.length; i++) {
+                int finalI = i;
+                nodesRemoved[i].clear();
+                deltaMonitors[i].forEachNode(x -> nodesRemoved[finalI].add(x), GraphEventType.REMOVE_NODE);
+            }
+        }
+
+        protected void fillAddEdges() throws ContradictionException {
+            for (int i = 0; i < deltaMonitors.length; i++) {
+                int finalI = i;
+                for (int j = 0; j < getNbMaxNodes(); j++) {
+                    edgesAdded[j][i].clear();
+                }
+                deltaMonitors[i].forEachEdge((from, to) -> edgesAdded[from][finalI].add(to), GraphEventType.ADD_EDGE);
+            }
+        }
+
+        protected void fillRemoveEdges() throws ContradictionException {
+            for (int i = 0; i < deltaMonitors.length; i++) {
+                int finalI = i;
+                for (int j = 0; j < getNbMaxNodes(); j++) {
+                    edgesRemoved[j][i].clear();
+                }
+                deltaMonitors[i].forEachEdge((from, to) -> edgesRemoved[from][finalI].add(to), GraphEventType.REMOVE_EDGE);
+            }
+        }
+
+        @Override
+        public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+            if (evt == GraphEventType.ADD_NODE) {
+                fillAddNodes();
+                for (int v : addNode) {
+                    proc.execute(v);
+                }
+            } else if (evt == GraphEventType.REMOVE_NODE) {
+                fillRemoveNodes();
+                for (int v : removeNode) {
+                    proc.execute(v);
+                }
+            }
+        }
+
+        @Override
+        public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+            if (evt == GraphEventType.ADD_EDGE) {
+                fillAddEdges();
+                for (int from = 0; from < getNbMaxNodes(); from++) {
+                    for (int to : addEdge[from]) {
+                        proc.execute(from, to);
+                    }
+                }
+            } else if (evt == GraphEventType.REMOVE_EDGE) {
+                fillRemoveEdges();
+                for (int from = 0; from < getNbMaxNodes(); from++) {
+                    for (int to : removeEdge[from]) {
+                        proc.execute(from, to);
+                    }
+                }
+            }
+        }
     }
 }

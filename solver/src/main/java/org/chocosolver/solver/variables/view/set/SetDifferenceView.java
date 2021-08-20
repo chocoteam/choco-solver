@@ -134,10 +134,4 @@ public class SetDifferenceView extends SetView<SetVar> {
             }
         };
     }
-
-    @Override
-    public void createDelta() {
-        x.createDelta();
-        y.createDelta();
-    }
 }

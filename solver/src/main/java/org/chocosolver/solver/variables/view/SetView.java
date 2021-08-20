@@ -31,7 +31,6 @@ import org.chocosolver.util.iterators.EvtScheduler;
  */
 public abstract class SetView<V extends Variable> extends AbstractView<V> implements SetVar {
 
-    protected boolean reactOnModification;
     protected IntVar cardinality = null;
 
     /**
@@ -83,7 +82,11 @@ public abstract class SetView<V extends Variable> extends AbstractView<V> implem
     }
 
     @Override
-    public abstract void createDelta();
+    public void createDelta() {
+        for (Variable v : getVariables()) {
+            v.createDelta();
+        }
+    }
 
     @Override
     public int getTypeAndKind() {
