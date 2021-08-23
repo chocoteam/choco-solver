@@ -153,9 +153,7 @@ public class SetIntersection extends AbstractSet {
 
     @Override
     public void notifyCleared(int idx) {
-        for (int v : sets[idx]) {
-            values.remove(v);
-            notifyObservingElementRemoved(v);
-        }
+        values.clear();
+        notifyObservingCleared();
     }
 }
