@@ -23,6 +23,7 @@ import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.procedure.PairProcedure;
 
@@ -46,6 +47,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
     protected UndirectedGraphVar graphVar;
     protected boolean exclude;
     protected ISet enforceNodes;
+    protected ISet LBnodes;
     protected ISet[] edges;
 
     /**
@@ -66,6 +68,12 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), edges, exclude);
+        this.LBnodes = new SetUnion(getModel(), this.lb.getNodes(), enforceNodes);
+    }
+
+    @Override
+    public ISet getMandatoryNodes() {
+        return this.LBnodes;
     }
 
     @Override
@@ -90,8 +98,8 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
-        if (enforceNodes.contains(node)) {
-            contradiction(this, "Try to remove mandatory node");
+        for (int i : getPotentialNeighborsOf(node)) {
+            doRemoveEdge(node, i);
         }
         return !getPotentialNodes().contains(node);
     }
@@ -99,7 +107,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
     @Override
     protected boolean doEnforceNode(int node) throws ContradictionException {
         boolean b = graphVar.enforceNode(node, this);
-        if (!getMandatoryNodes().contains(node)) {
+        if (!getLB().getNodes().contains(node)) {
             ISet potNeigh = getPotentialNeighborsOf(node);
             if (potNeigh.size() == 1) {
                 b = graphVar.enforceEdge(node, potNeigh.newIterator().nextInt(), this) || b;
