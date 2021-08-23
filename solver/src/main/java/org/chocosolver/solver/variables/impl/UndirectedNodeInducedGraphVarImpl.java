@@ -44,6 +44,7 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
         this.originalUB = new UndirectedGraph(UB);
     }
 
+    // TODO: SEE IF NOTIFY CALLS CANNOT BE REDUCED
     @Override
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         boolean nodeEnforced = super.enforceNode(x, cause);

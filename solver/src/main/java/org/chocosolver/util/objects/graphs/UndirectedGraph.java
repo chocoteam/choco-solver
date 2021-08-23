@@ -15,7 +15,6 @@ import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 
-import java.util.Set;
 import java.util.stream.IntStream;
 
 /**
@@ -316,7 +315,7 @@ public class UndirectedGraph implements IGraph {
                     if (!edges[i].contains(j)) {
                         needDynamic = true;
                         nodeNeedDynamic = true;
-                        neighbors[i] = new SetIntersection(model, g.getNeighborsOf(i), edges[i]);
+                        neighbors[i] = new SetIntersection(model, g.getEdgeSetType(), 0, g.getNeighborsOf(i), edges[i]);
                         break;
                     }
                 }
@@ -326,7 +325,7 @@ public class UndirectedGraph implements IGraph {
             }
         }
         if (nodeNeedDynamic) {
-            this.nodes = new SetUnion(model, neighbors);
+            this.nodes = new SetUnion(model, g.nodeSetType, 0, neighbors);
         } else {
             this.nodes = g.nodes;
         }

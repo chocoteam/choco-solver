@@ -16,7 +16,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 public class UndirectedGraphVarImpl extends AbstractGraphVar<UndirectedGraph> implements UndirectedGraphVar {
 
@@ -47,13 +46,17 @@ public class UndirectedGraphVarImpl extends AbstractGraphVar<UndirectedGraph> im
         } else if (!UB.getNodes().contains(x)) {
             return false;
         }
-        ISet nei = UB.getNeighborsOf(x);
-        for (int i : nei) {
-            removeEdge(x, i, cause);
-        }
+        int[] nei = UB.getNeighborsOf(x).toArray();
         if (UB.removeNode(x)) {
             if (reactOnModification) {
+                for (int i : nei) {
+                    delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
+                    delta.add(i, GraphDelta.EDGE_REMOVED_HEAD, cause);
+                }
                 delta.add(x, GraphDelta.NODE_REMOVED, cause);
+            }
+            if (nei.length > 0) {
+                notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             }
             GraphEventType e = GraphEventType.REMOVE_NODE;
             notifyPropagators(e, cause);
