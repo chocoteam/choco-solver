@@ -16,7 +16,6 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.view.GraphView;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * An abstract class for undirected graph views over other variables
@@ -51,11 +50,11 @@ public abstract class UndirectedGraphView<V extends Variable> extends GraphView<
         } else if (!getPotentialNodes().contains(node)) {
             return false;
         }
-        ISet nei = getPotentialNeighborsOf(node);
-        for (int i : nei) {
-            removeEdge(node, i, cause);
-        }
+        int neiSize = getPotentialNeighborsOf(node).size();
         if (doRemoveNode(node)) {
+            if (neiSize > 0 ) {
+                notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
+            }
             GraphEventType e = GraphEventType.REMOVE_NODE;
             notifyPropagators(e, cause);
             return true;

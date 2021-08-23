@@ -66,6 +66,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
         return false;
     }
 
+    // TODO: OPTIMIZE
     @Override
     public boolean removeNode(int node, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -92,6 +93,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
         return false;
     }
 
+    // TODO: OPTIMIZE
     @Override
     public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
