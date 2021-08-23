@@ -74,8 +74,10 @@ public class PropConnected extends Propagator<UndirectedGraphVar> {
             visited.clear();
             int root = g.getMandatoryNodes().iterator().next();
             helper.exploreFrom(root, visited);
-            for (int o = visited.nextClearBit(0); o < n; o = visited.nextClearBit(o + 1)) {
-                g.removeNode(o, this);
+            for (int o : g.getPotentialNodes()) {
+                if (!visited.get(o)) {
+                    g.removeNode(o, this);
+                }
             }
 
             // 2 --- enforce articulation points and bridges that link two mandatory nodes
