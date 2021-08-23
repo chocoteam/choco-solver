@@ -83,8 +83,10 @@ public class PropNbCC extends Propagator<Variable> {
 
                 // 1 --- remove unreachable nodes
                 int n = g.getNbMaxNodes();
-                for (int o = visitedMin.nextClearBit(0); o < n; o = visitedMin.nextClearBit(o + 1)) {
-                    g.removeNode(o, this);
+                for (int o : g.getPotentialNodes()) {
+                    if (!visitedMin.get(o)) {
+                        g.removeNode(o, this);
+                    }
                 }
 
                 // 2 --- enforce articulation points and bridges that link two mandatory nodes
