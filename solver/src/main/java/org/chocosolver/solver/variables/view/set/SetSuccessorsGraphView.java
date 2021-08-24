@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
@@ -49,16 +50,29 @@ public class SetSuccessorsGraphView<E extends GraphVar> extends SetGraphView<E> 
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
-        this.arcRemoved = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
-            }
-        };
-        this.arcEnforced = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.ADD_TO_KER, this);
-            }
-        };
+        if (!graphVar.isDirected()) {
+            this.arcRemoved = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        } else {
+            this.arcRemoved = (from, to) -> {
+                if (from == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (from == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        }
     }
 
     /**

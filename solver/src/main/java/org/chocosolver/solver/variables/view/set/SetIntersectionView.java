@@ -137,13 +137,15 @@ public class SetIntersectionView extends SetView<SetVar> {
         }
         return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
             ISet remove = new SetUnion(removedValues);
-            ISet add = new SetIntersection(addedValues);
+            ISet add = new SetUnion(addedValues);
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
                 fillValues();
                 if (evt == SetEventType.ADD_TO_KER) {
                     for (int v : add) {
-                        proc.execute(v);
+                        if (getLB().contains(v)) {
+                            proc.execute(v);
+                        }
                     }
                 } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
                     for (int v : remove) {

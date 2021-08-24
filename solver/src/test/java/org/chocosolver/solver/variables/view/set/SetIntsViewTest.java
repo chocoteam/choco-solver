@@ -12,9 +12,15 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.set.SetIntsView;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -135,5 +141,42 @@ public class SetIntsViewTest {
                 Assert.assertTrue(setViews[val].getValue().contains(i));
             }
         }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testDelta() throws ContradictionException {
+        Model m = new Model();
+        IntVar[] intVars = m.intVarArray(20, 0, 2);
+        SetVar setView = m.intsSetView(intVars, 0, 0);
+        ICause fakeCauseA = new ICause() {};
+        ICause fakeCauseB = new ICause() {};
+        ISetDeltaMonitor monitor = setView.monitorDelta(fakeCauseA);
+        // Test add elements
+        intVars[1].instantiateTo(0, fakeCauseB);
+        intVars[5].instantiateTo(0, fakeCauseB);
+        intVars[7].instantiateTo(0, fakeCauseB);
+        intVars[9].instantiateTo(0, fakeCauseB);
+        ISet delta = SetFactory.makeBitSet(0);
+        IntProcedure addToDelta = i -> delta.add(i);
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.contains(1));
+        Assert.assertTrue(delta.contains(5));
+        Assert.assertTrue(delta.contains(7));
+        Assert.assertTrue(delta.contains(9));
+        Assert.assertTrue(delta.size() == 4);
+        // Test remove elements
+        intVars[0].instantiateTo(1, fakeCauseB);
+        intVars[4].instantiateTo(1, fakeCauseB);
+        intVars[6].instantiateTo(1, fakeCauseB);
+        intVars[8].removeValue(0, fakeCauseB);
+        intVars[10].instantiateTo(2, fakeCauseB);
+        delta.clear();
+        monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
+        Assert.assertTrue(delta.contains(0));
+        Assert.assertTrue(delta.contains(4));
+        Assert.assertTrue(delta.contains(6));
+        Assert.assertTrue(delta.contains(8));
+        Assert.assertTrue(delta.contains(10));
+        Assert.assertTrue(delta.size() == 5);
     }
 }
