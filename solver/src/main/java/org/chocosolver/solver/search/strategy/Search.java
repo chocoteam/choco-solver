@@ -32,7 +32,6 @@ import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphN
 import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphRandomNode;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenEdges;
-import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenNeighbors;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
@@ -632,8 +631,8 @@ public class Search {
      * @return a strategy that lets Ibex terminates the solving process.
      */
     public static AbstractStrategy ibexSolving(Model model) {
-        return new AbstractStrategy<Variable>(model.getVars()) {
-            IbexDecision dec = new IbexDecision(model);
+        return new AbstractStrategy<>(model.getVars()) {
+            final IbexDecision dec = new IbexDecision(model);
 
             @Override
             public Decision<Variable> getDecision() {
@@ -666,8 +665,8 @@ public class Search {
          */
         ABS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return ACTIVITY.make(solver, vars, Search.ValH.DEFAULT, last);
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return ACTIVITY.make(solver, vars, Search.ValH.DEFAULT, flushThs, last);
             }
         },
         /**
@@ -678,7 +677,7 @@ public class Search {
          */
         ACTIVITY {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 Model model = solver.getModel();
                 return new ActivityBased(model,
                         vars,
@@ -697,9 +696,9 @@ public class Search {
          */
         CHS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new ConflictHistorySearch(vars,solver.getModel().getSeed()),
+                        new ConflictHistorySearch(vars,solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -710,7 +709,7 @@ public class Search {
          */
         DOM {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new FirstFail(solver.getModel()),
                         valueSelector.make(solver, last),
@@ -724,9 +723,9 @@ public class Search {
          */
         DOMWDEG {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDeg(vars, solver.getModel().getSeed()),
+                        new DomOverWDeg(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -737,9 +736,9 @@ public class Search {
          */
         DOMWDEGR {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDegRef(vars, solver.getModel().getSeed()),
+                        new DomOverWDegRef(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -748,7 +747,7 @@ public class Search {
          */
         DEFAULT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 //noinspection unchecked
                 return defaultSearch(solver.getModel());
             }
@@ -761,8 +760,8 @@ public class Search {
          */
         IBS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return IMPACT.make(solver, vars, Search.ValH.DEFAULT, last);
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return IMPACT.make(solver, vars, Search.ValH.DEFAULT, flushThs, last);
             }
         },
         /**
@@ -773,7 +772,7 @@ public class Search {
          */
         IMPACT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new ImpactBased(vars,
                         valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last),
                         2,
@@ -788,7 +787,7 @@ public class Search {
          */
         INPUT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new InputOrder<>(solver.getModel()),
                         valueSelector.make(solver, last),
@@ -800,7 +799,7 @@ public class Search {
          */
         RAND {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new Random<>(solver.getModel().getSeed()),
                         valueSelector.make(solver, last),
@@ -809,12 +808,12 @@ public class Search {
         },
         MAB_CHS_DWDEG_STATIC {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 //noinspection unchecked
                 return new MultiArmedBanditSequencer<IntVar>(
                         new AbstractStrategy[]{
-                                CHS.make(solver, vars, valueSelector, last),
-                                DOMWDEG.make(solver, vars, valueSelector, last)
+                                CHS.make(solver, vars, valueSelector, flushThs, last),
+                                DOMWDEG.make(solver, vars, valueSelector, flushThs, last)
                         },
                         new Static(new double[]{.7, .3}, new java.util.Random(solver.getModel().getSeed())),
                         (a, t) -> 0.d
@@ -823,7 +822,7 @@ public class Search {
         },
         MAB_CHS_DWDEG_MOSS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 final long[] pat = {0, 0};
                 final HashSet<IntVar> selected = new HashSet<>();
                 ToDoubleBiFunction<Integer, Integer> reward = (a, t) -> {
@@ -845,8 +844,8 @@ public class Search {
                 //noinspection unchecked
                 return new MultiArmedBanditSequencer<IntVar>(
                         new AbstractStrategy[]{
-                                CHS.make(solver, vars, valueSelector, last),
-                                DOMWDEG.make(solver, vars, valueSelector, last)
+                                CHS.make(solver, vars, valueSelector, flushThs, last),
+                                DOMWDEG.make(solver, vars, valueSelector, flushThs, last)
                         },
                         new MOSS(2),
                         reward
@@ -860,10 +859,11 @@ public class Search {
          * @param solver        target solver
          * @param vars          array of integer variables
          * @param valueSelector the value selector enum
+         * @param flushThs flush threshold, when reached, it flushes scores
          * @param last          set to {@code true} to use {@link IntDomainLast} meta value strategy.
          * @return a search strategy on {@code IntVar[]}
          */
-        public abstract AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last);
+        public abstract AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last);
     }
 
     /**

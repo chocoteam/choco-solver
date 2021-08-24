@@ -104,6 +104,9 @@ public abstract class RegParser implements IParser {
             usage = "Tell the solver to use use progress (or phase) saving.")
     protected boolean last = false;
 
+    @Option(name = "-flush", usage = "Autoflush weights on black-box strategies (default: 32).")
+    protected int flush = 5000;
+
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     public boolean all = false;
 
@@ -267,7 +270,7 @@ public abstract class RegParser implements IParser {
                         .toArray(IntVar[]::new);
                 solver.getMove().removeStrategy();
                 solver.setMove(new MoveBinaryDFS());
-                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, last);
+                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, flush, last);
 
                 if (obj != null) {
                     boolean max = solver.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
