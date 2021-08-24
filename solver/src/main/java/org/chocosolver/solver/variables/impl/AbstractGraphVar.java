@@ -89,20 +89,24 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
         } else if (!UB.getNodes().contains(x)) {
             return false;
         }
-        ISet nei = UB.getSuccessorsOf(x);
-        for (int i : nei) {
-            removeEdge(x, i, cause);
-        }
-        nei = UB.getPredecessorsOf(x);
-        for (int i : nei) {
-            removeEdge(i, x, cause);
-        }
+        int[] succ = UB.getSuccessorsOf(x).toArray();
+        int[] pred = UB.getPredecessorsOf(x).toArray();
         if (UB.removeNode(x)) {
             if (reactOnModification) {
                 delta.add(x, GraphDelta.NODE_REMOVED, cause);
+                for (int i : succ) {
+                    delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
+                    delta.add(i, GraphDelta.EDGE_REMOVED_HEAD, cause);
+                }
+                for (int i : pred) {
+                    delta.add(i, GraphDelta.EDGE_REMOVED_TAIL, cause);
+                    delta.add(x, GraphDelta.EDGE_REMOVED_HEAD, cause);
+                }
             }
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
+            if (succ.length > 0 || pred.length > 0) {
+                notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
+            }
+            notifyPropagators(GraphEventType.REMOVE_NODE, cause);
             return true;
         }
         return false;
@@ -124,8 +128,7 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
                 if (reactOnModification) {
                     delta.add(x, GraphDelta.NODE_ENFORCED, cause);
                 }
-                GraphEventType e = GraphEventType.ADD_NODE;
-                notifyPropagators(e, cause);
+                notifyPropagators(GraphEventType.ADD_NODE, cause);
                 return true;
             }
             return false;
@@ -146,8 +149,7 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
                 delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
                 delta.add(y, GraphDelta.EDGE_REMOVED_HEAD, cause);
             }
-            GraphEventType e = GraphEventType.REMOVE_EDGE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             return true;
         }
         return false;
@@ -156,16 +158,24 @@ public abstract class AbstractGraphVar<E extends IGraph> extends AbstractVariabl
     @Override
     public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
-        enforceNode(x, cause);
-        enforceNode(y, cause);
+        boolean addX = !LB.containsNode(x);
+        boolean addY = !LB.containsNode(y);
         if (UB.containsEdge(x, y)) {
             if (LB.addEdge(x, y)) {
                 if (reactOnModification) {
                     delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                     delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
+                    if (addX) {
+                        delta.add(x, GraphDelta.NODE_ENFORCED, cause);
+                    }
+                    if (addY) {
+                        delta.add(y, GraphDelta.NODE_ENFORCED, cause);
+                    }
                 }
-                GraphEventType e = GraphEventType.ADD_EDGE;
-                notifyPropagators(e, cause);
+                if (addX || addY) {
+                    notifyPropagators(GraphEventType.ADD_NODE, cause);
+                }
+                notifyPropagators(GraphEventType.ADD_EDGE, cause);
                 return true;
             }
             return false;

@@ -55,8 +55,7 @@ public abstract class UndirectedGraphView<V extends Variable> extends GraphView<
             if (neiSize > 0 ) {
                 notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             }
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_NODE, cause);
             return true;
         }
         return false;

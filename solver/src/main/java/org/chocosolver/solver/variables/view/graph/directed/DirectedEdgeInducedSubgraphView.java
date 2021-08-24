@@ -23,6 +23,7 @@ import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.procedure.PairProcedure;
 
@@ -46,6 +47,7 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
     protected DirectedGraphVar graphVar;
     protected boolean exclude;
     protected ISet enforceNodes;
+    protected ISet LBnodes;
     protected ISet[] successors;
 
     /**
@@ -68,6 +70,12 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
         successors = DirectedGraph.edgesArrayToSuccessorsSets(getNbMaxNodes(), edges);
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), edges, exclude);
+        this.LBnodes = new SetUnion(getModel(), this.lb.getNodes(), enforceNodes);
+    }
+
+    @Override
+    public ISet getMandatoryNodes() {
+        return this.LBnodes;
     }
 
     @Override
@@ -92,8 +100,11 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     @Override
     protected boolean doRemoveNode(int node) throws ContradictionException {
-        if (enforceNodes.contains(node)) {
-            contradiction(this, "Try to remove mandatory node");
+        for (int i : getPotentialPredecessorOf(node)) {
+            doRemoveEdge(i, node);
+        }
+        for (int i : getPotentialSuccessorsOf(node)) {
+            doRemoveEdge(node, i);
         }
         return !getPotentialNodes().contains(node);
     }
@@ -101,7 +112,7 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
     @Override
     protected boolean doEnforceNode(int node) throws ContradictionException {
         boolean b = graphVar.enforceNode(node, this);
-        if (!getMandatoryNodes().contains(node)) {
+        if (!getLB().getNodes().contains(node)) {
             ISet potPred = getPotentialPredecessorOf(node);
             ISet potSucc = getPotentialSuccessorsOf(node);
             if (potPred.size() == 0 && potSucc.size() == 1) {
