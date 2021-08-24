@@ -49,16 +49,29 @@ public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
-        this.arcRemoved = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
-            }
-        };
-        this.arcEnforced = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.ADD_TO_KER, this);
-            }
-        };
+        if (!graphVar.isDirected()) {
+            this.arcRemoved = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        } else {
+            this.arcRemoved = (from, to) -> {
+                if (to == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (to == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        }
     }
 
     /**

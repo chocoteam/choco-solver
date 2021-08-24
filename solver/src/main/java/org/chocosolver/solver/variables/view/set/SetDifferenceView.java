@@ -47,7 +47,7 @@ public class SetDifferenceView extends SetView<SetVar> {
         this.x = x;
         this.y = y;
         this.lb = new SetDifference(getModel(), x.getLB(), y.getLB());
-        this.ub = new SetDifference(getModel(), x.getUB(), y.getUB());
+        this.ub = new SetDifference(getModel(), x.getUB(), y.getLB());
     }
 
     @Override
@@ -121,7 +121,7 @@ public class SetDifferenceView extends SetView<SetVar> {
                     }
                 } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
                     for (int v : removedValues[0]) {
-                        if (!y.getUB().contains(v) && !removedValues[1].contains(v)) {
+                        if (!y.getLB().contains(v) && !removedValues[1].contains(v)) {
                             proc.execute(v);
                         }
                     }
