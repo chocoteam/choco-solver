@@ -67,7 +67,7 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
         this.enforceNodes = SetFactory.makeStoredSet(SetType.BITSET, 0, getModel());
         this.exclude = exclude;
         this.graphVar = graphVar;
-        successors = DirectedGraph.edgesArrayToSuccessorsSets(getNbMaxNodes(), edges);
+        this.successors = DirectedGraph.edgesArrayToSuccessorsSets(getNbMaxNodes(), edges);
         this.lb = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), edges, exclude);
         this.ub = GraphFactory.makeEdgeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(), edges, exclude);
         this.LBnodes = new SetUnion(getModel(), this.lb.getNodes(), enforceNodes);
@@ -162,10 +162,21 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     @Override
     public IGraphDeltaMonitor monitorDelta(ICause propagator) {
-        return new GraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
-            TIntIntHashMap nodes = new TIntIntHashMap(8);
-            PairProcedure filter = (from, to) -> { // Count the edges effectively impacted in the view
-                if ((exclude && !successors[from].contains(to)) || (!exclude && successors[from].contains(to))) {
+        return new DirectedEdgeInducedSubgraphMonitor(this, graphVar.monitorDelta(propagator));
+    }
+
+    class DirectedEdgeInducedSubgraphMonitor extends GraphViewDeltaMonitor {
+
+        TIntIntHashMap nodes;
+        DirectedEdgeInducedSubgraphView g;
+        PairProcedure filter;
+
+        DirectedEdgeInducedSubgraphMonitor(DirectedEdgeInducedSubgraphView g, IGraphDeltaMonitor... deltaMonitors) {
+            super(deltaMonitors);
+            this.g = g;
+            nodes = new TIntIntHashMap(8);
+            filter = (from, to) -> { // Count the edges effectively impacted in the view
+                if ((g.exclude && !g.successors[from].contains(to)) || (!g.exclude && g.successors[from].contains(to))) {
                     if (!nodes.containsKey(from)) {
                         nodes.put(from, 1);
                     } else {
@@ -178,34 +189,35 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
                     }
                 }
             };
-            @Override
-            public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
-                nodes.clear();
-                deltaMonitors[0].forEachEdge(filter, evt == GraphEventType.ADD_NODE ? GraphEventType.ADD_EDGE : GraphEventType.REMOVE_EDGE);
-                if (evt == GraphEventType.ADD_NODE) {
-                    // A node is added iff all of its neighbors were added in the delta
-                    for (int node : nodes.keys()) {
-                        if (nodes.get(node) == (getMandatoryPredecessorsOf(node).size() + getMandatorySuccessorsOf(node).size())) {
-                            proc.execute(node);
-                        }
+        }
+
+        @Override
+        public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+            nodes.clear();
+            deltaMonitors[0].forEachEdge(filter, evt == GraphEventType.ADD_NODE ? GraphEventType.ADD_EDGE : GraphEventType.REMOVE_EDGE);
+            if (evt == GraphEventType.ADD_NODE) {
+                // A node is added iff all of its neighbors were added in the delta
+                for (int node : nodes.keys()) {
+                    if (nodes.get(node) == (g.getMandatoryPredecessorsOf(node).size() + g.getMandatorySuccessorsOf(node).size())) {
+                        proc.execute(node);
                     }
-                } else if (evt == GraphEventType.REMOVE_NODE) {
-                    // A node is removed iff it had a neighbor removed and is not any more in the view
-                    for (int node : nodes.keys()) {
-                        if (!getPotentialNodes().contains(node)) {
-                            proc.execute(node);
-                        }
+                }
+            } else if (evt == GraphEventType.REMOVE_NODE) {
+                // A node is removed iff it had a neighbor removed and is not any more in the view
+                for (int node : nodes.keys()) {
+                    if (!g.getPotentialNodes().contains(node)) {
+                        proc.execute(node);
                     }
                 }
             }
-            @Override
-            public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
-                deltaMonitors[0].forEachEdge((from, to) -> {
-                    if ((exclude && !successors[from].contains(to)) || (!exclude && successors[from].contains(to))) {
-                        proc.execute(from, to);
-                    }
-                }, evt);
-            }
-        };
-    }
+        }
+        @Override
+        public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+            deltaMonitors[0].forEachEdge((from, to) -> {
+                if ((g.exclude && !g.successors[from].contains(to)) || (!g.exclude && g.successors[from].contains(to))) {
+                    proc.execute(from, to);
+                }
+            }, evt);
+        }
+    };
 }

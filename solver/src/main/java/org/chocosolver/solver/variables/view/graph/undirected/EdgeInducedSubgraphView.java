@@ -150,10 +150,21 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
 
     @Override
     public IGraphDeltaMonitor monitorDelta(ICause propagator) {
-        return new GraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
-            TIntIntHashMap nodes = new TIntIntHashMap(8);
-            PairProcedure filter = (from, to) -> { // Count the edges effectively impacted in the view
-                if ((exclude && !edges[from].contains(to)) || (!exclude && edges[from].contains(to))) {
+        return new EdgeInducedSubgraphMonitor(this, graphVar.monitorDelta(propagator));
+    }
+
+    class EdgeInducedSubgraphMonitor extends GraphViewDeltaMonitor {
+
+        TIntIntHashMap nodes;
+        EdgeInducedSubgraphView g;
+        PairProcedure filter;
+
+        EdgeInducedSubgraphMonitor(EdgeInducedSubgraphView g, IGraphDeltaMonitor... deltaMonitors) {
+            super(deltaMonitors);
+            this.g = g;
+            this.nodes = new TIntIntHashMap(8);
+            this.filter = (from, to) -> { // Count the edges effectively impacted in the view
+                if ((g.exclude && !g.edges[from].contains(to)) || (!g.exclude && g.edges[from].contains(to))) {
                     if (!nodes.containsKey(from)) {
                         nodes.put(from, 1);
                     } else {
@@ -166,34 +177,35 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                     }
                 }
             };
-            @Override
-            public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
-                nodes.clear();
-                deltaMonitors[0].forEachEdge(filter, evt == GraphEventType.ADD_NODE ? GraphEventType.ADD_EDGE : GraphEventType.REMOVE_EDGE);
-                if (evt == GraphEventType.ADD_NODE) {
-                    // A node is added iff all of its neighbors were added in the delta
-                    for (int node : nodes.keys()) {
-                        if (nodes.get(node) == getMandatoryNeighborsOf(node).size()) {
-                            proc.execute(node);
-                        }
+        }
+
+        @Override
+        public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+            nodes.clear();
+            deltaMonitors[0].forEachEdge(filter, evt == GraphEventType.ADD_NODE ? GraphEventType.ADD_EDGE : GraphEventType.REMOVE_EDGE);
+            if (evt == GraphEventType.ADD_NODE) {
+                // A node is added iff all of its neighbors were added in the delta
+                for (int node : nodes.keys()) {
+                    if (nodes.get(node) == g.getMandatoryNeighborsOf(node).size()) {
+                        proc.execute(node);
                     }
-                } else if (evt == GraphEventType.REMOVE_NODE) {
-                    // A node is removed iff it had a neighbor removed and is not any more in the view
-                    for (int node : nodes.keys()) {
-                        if (!getPotentialNodes().contains(node)) {
-                            proc.execute(node);
-                        }
+                }
+            } else if (evt == GraphEventType.REMOVE_NODE) {
+                // A node is removed iff it had a neighbor removed and is not any more in the view
+                for (int node : nodes.keys()) {
+                    if (!g.getPotentialNodes().contains(node)) {
+                        proc.execute(node);
                     }
                 }
             }
-            @Override
-            public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
-                deltaMonitors[0].forEachEdge((from, to) -> {
-                    if ((exclude && !edges[from].contains(to)) || (!exclude && edges[from].contains(to))) {
-                        proc.execute(from, to);
-                    }
-                }, evt);
-            }
-        };
-    }
+        }
+        @Override
+        public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+            deltaMonitors[0].forEachEdge((from, to) -> {
+                if ((g.exclude && !g.edges[from].contains(to)) || (!g.exclude && g.edges[from].contains(to))) {
+                    proc.execute(from, to);
+                }
+            }, evt);
+        }
+    };
 }
