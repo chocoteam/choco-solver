@@ -29,6 +29,7 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /*
  * User : CPRUDHOM
@@ -906,7 +907,14 @@ public enum FConstraint {
                 for (IntVar v : vars) {
                     min = Math.min(min, v.getLB());
                 }
-                model.circuit(vars, min).post();
+                if(min >=0) {
+                    model.circuit(vars, min).post();
+                }else{
+                    int finalMin = min;
+                    model.circuit(
+                            Stream.of(vars).map(v -> model.intOffsetView(v, finalMin)).toArray(IntVar[]::new),
+                            min).post();
+                }
             }
 
         }
@@ -1421,7 +1429,16 @@ public enum FConstraint {
                 for (IntVar v : vars) {
                     min = Math.min(min, v.getLB());
                 }
-                model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
+                //model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
+                if(min >=0) {
+                    model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
+                } else {
+                    int finalMin = min;
+                    model.subCircuit(
+                            Stream.of(vars).map(v -> model.intOffsetView(v, finalMin)).toArray(IntVar[]::new),
+                            min,
+                            model.intVar("length", 0, vars.length, true)).post();
+                }
             }
 
         }
