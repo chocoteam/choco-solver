@@ -136,7 +136,8 @@ public class SetIntersectionView extends SetView<SetVar> {
             deltaMonitors[i] = variables[i].monitorDelta(propagator);
         }
         return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
-            ISet remove = new SetUnion(removedValues);
+            ISet removed = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            ISet remove = new SetDifference(new SetUnion(removedValues), removed);
             ISet add = new SetUnion(addedValues);
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
@@ -150,6 +151,9 @@ public class SetIntersectionView extends SetView<SetVar> {
                 } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
                     for (int v : remove) {
                         proc.execute(v);
+                    }
+                    for (int v : remove) {
+                        removed.add(v);
                     }
                 }
             }

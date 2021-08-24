@@ -159,5 +159,9 @@ public class SetIntersectionViewTest {
         Assert.assertTrue(delta.contains(7));
         Assert.assertTrue(delta.contains(6));
         Assert.assertTrue(delta.size() == 3);
+        delta.clear();
+        setB.remove(8, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
+        Assert.assertTrue(delta.size() == 0);
     }
 }

@@ -147,6 +147,9 @@ public class SetUnionViewTest {
         delta.clear();
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
         Assert.assertTrue(delta.size() == 0);
+        setB.force(0, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.size() == 0);
         // Test remove elements
         delta.clear();
         setA.remove(8, fakeCauseB);

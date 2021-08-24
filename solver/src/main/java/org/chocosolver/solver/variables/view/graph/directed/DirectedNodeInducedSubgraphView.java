@@ -115,7 +115,7 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
                 IntProcedure filter = i -> {
                     if (exclude && !nodes.contains(i)) {
                         proc.execute(i);
-                    } else if (nodes.contains(i)) {
+                    } else if (!exclude && nodes.contains(i)) {
                         proc.execute(i);
                     }
                 };
@@ -126,7 +126,7 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
                 PairProcedure filter = (from, to) -> {
                     if (exclude && !nodes.contains(from) && !nodes.contains(to)) {
                         proc.execute(from, to);
-                    } else if (nodes.contains(from) && nodes.contains(to)) {
+                    } else if (!exclude && nodes.contains(from) && nodes.contains(to)) {
                         proc.execute(from, to);
                     }
                 };

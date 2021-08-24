@@ -21,6 +21,7 @@ import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.chocosolver.util.procedure.IntProcedure;
@@ -139,13 +140,17 @@ public class SetUnionView extends SetView<SetVar> {
         }
         return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
             ISet remove = new SetUnion(removedValues);
-            ISet add = new SetUnion(addedValues);
+            ISet added = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            ISet add = new SetDifference(new SetUnion(addedValues), added);
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
                 fillValues();
                 if (evt == SetEventType.ADD_TO_KER) {
                     for (int v : add) {
                         proc.execute(v);
+                    }
+                    for (int v : add) {
+                        added.add(v);
                     }
                 } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
                     for (int v : remove) {

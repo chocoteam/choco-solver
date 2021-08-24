@@ -116,7 +116,7 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                 IntProcedure filter = i -> {
                     if (exclude && !nodes.contains(i)) {
                         proc.execute(i);
-                    } else if (nodes.contains(i)) {
+                    } else if (!exclude && nodes.contains(i)) {
                         proc.execute(i);
                     }
                 };
@@ -127,7 +127,7 @@ public class NodeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                 PairProcedure filter = (from, to) -> {
                     if (exclude && !nodes.contains(from) && !nodes.contains(to)) {
                         proc.execute(from, to);
-                    } else if (nodes.contains(from) && nodes.contains(to)) {
+                    } else if (!exclude && nodes.contains(from) && nodes.contains(to)) {
                         proc.execute(from, to);
                     }
                 };
