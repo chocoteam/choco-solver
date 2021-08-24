@@ -58,8 +58,7 @@ public class UndirectedGraphVarImpl extends AbstractGraphVar<UndirectedGraph> im
             if (nei.length > 0) {
                 notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             }
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_NODE, cause);
             return true;
         }
         return false;

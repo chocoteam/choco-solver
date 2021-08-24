@@ -44,13 +44,13 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
         this.originalUB = new UndirectedGraph(UB);
     }
 
-    // TODO: SEE IF NOTIFY CALLS CANNOT BE REDUCED
     @Override
     public boolean enforceNode(int x, ICause cause) throws ContradictionException {
         boolean nodeEnforced = super.enforceNode(x, cause);
         if (!nodeEnforced) {
             return false;
         }
+        boolean edgeAdded = false;
         for (int y : originalUB.getNeighborsOf(x)) {
             if (LB.containsNode(y)) {
                 if (!UB.containsEdge(x, y)) {
@@ -61,11 +61,14 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, this);
                         delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, this);
                     }
-                    notifyPropagators(GraphEventType.ADD_EDGE, this);
+                    edgeAdded = true;
                 }
             } else if (UB.containsNode(y) && !UB.containsEdge(x, y)) {
                 removeNode(y, this);
             }
+        }
+        if (edgeAdded) {
+            notifyPropagators(GraphEventType.ADD_EDGE, this);
         }
         return true;
     }

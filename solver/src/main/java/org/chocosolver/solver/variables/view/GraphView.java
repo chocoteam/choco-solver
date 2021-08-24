@@ -59,14 +59,12 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (!getMandatoryNodes().contains(node) && doEnforceNode(node)) {
-            GraphEventType e = GraphEventType.ADD_NODE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.ADD_NODE, cause);
             return true;
         }
         return false;
     }
 
-    // TODO: OPTIMIZE
     @Override
     public boolean removeNode(int node, ICause cause) throws ContradictionException {
         assert cause != null;
@@ -77,35 +75,32 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
         } else if (!getPotentialNodes().contains(node)) {
             return false;
         }
-        ISet nei = getPotentialSuccessorsOf(node);
-        for (int i : nei) {
-            removeEdge(node, i, cause);
-        }
-        nei = getPotentialPredecessorOf(node);
-        for (int i : nei) {
-            removeEdge(i, node, cause);
-        }
+        int succSize = getPotentialSuccessorsOf(node).size();
+        int predSize= getPotentialPredecessorOf(node).size();
         if (doRemoveNode(node)) {
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
+            if (succSize + predSize > 0) {
+                notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
+            }
+            notifyPropagators(GraphEventType.REMOVE_NODE, cause);
             return true;
         }
         return false;
     }
 
-    // TODO: OPTIMIZE
     @Override
     public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
-        enforceNode(x, cause);
-        enforceNode(y, cause);
+        boolean addX = !getMandatoryNodes().contains(x);
+        boolean addY = !getMandatoryNodes().contains(y);
         if (!getPotentialSuccessorsOf(x).contains(y)) {
             this.contradiction(cause, "enforce edge which is not in the domain");
             return false;
         }
         if (doEnforceEdge(x, y)) {
-            GraphEventType e = GraphEventType.ADD_EDGE;
-            notifyPropagators(e, cause);
+            if (addX || addY) {
+                notifyPropagators(GraphEventType.ADD_NODE, cause);
+            }
+            notifyPropagators(GraphEventType.ADD_EDGE, cause);
             return true;
         }
         return false;
@@ -119,8 +114,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (doRemoveEdge(x, y)) {
-            GraphEventType e = GraphEventType.REMOVE_EDGE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             return true;
         }
         return false;
