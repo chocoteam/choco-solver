@@ -169,7 +169,7 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
             @Override
             public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
                 nodes.clear();
-                deltaMonitors[0].forEachEdge(filter, evt);
+                deltaMonitors[0].forEachEdge(filter, evt == GraphEventType.ADD_NODE ? GraphEventType.ADD_EDGE : GraphEventType.REMOVE_EDGE);
                 if (evt == GraphEventType.ADD_NODE) {
                     // A node is added iff all of its neighbors were added in the delta
                     for (int node : nodes.keys()) {
