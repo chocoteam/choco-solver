@@ -15,6 +15,7 @@ import org.chocosolver.solver.variables.view.*;
 import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
+import org.chocosolver.solver.variables.view.bool.BoolSetView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedGraphUnionView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedSubgraphView;
@@ -68,6 +69,37 @@ public interface IViewFactory extends ISelf<Model> {
             not._setNot(bool);
             return not;
         }
+    }
+
+    /**
+     * Creates a boolean view b over a set variable S such that:
+     *
+     * given v an integer, b = true iff S contains v.
+     *
+     * @param setVar The set variable to observe.
+     * @param v The value to observe in the set variable.
+     * @return A boolvar equals to S.contains(v).
+     */
+    default BoolVar setBoolView(SetVar setVar, int v) {
+        return new BoolSetView(v, setVar);
+    }
+
+    /**
+     * Creates an array of boolean views b over a set variable S such that:
+     *
+     * b[i - offset] = true <=> i in S.
+     *
+     * @param setVar The set variable to observe
+     * @param size The size of the bool var array
+     * @param offset The offset
+     * @return A boolvar array such that b[i - offset] = true <=> i in S.
+     */
+    default BoolVar[] setBoolsView(SetVar setVar, int size, int offset) {
+        BoolVar[] bools = new BoolVar[size];
+        for (int i = 0; i < size; i++) {
+            bools[i] = setBoolView(setVar, i + offset);
+        }
+        return bools;
     }
 
     //*************************************************************************************
