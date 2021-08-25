@@ -268,6 +268,9 @@ public abstract class RegParser implements IParser {
                         .map(Variable::asIntVar)
                         .filter(v -> v != obj)
                         .toArray(IntVar[]::new);
+                if(dvars.length == 0){
+                    dvars = new IntVar[]{solver.getModel().intVar(0)};
+                }
                 solver.getMove().removeStrategy();
                 solver.setMove(new MoveBinaryDFS());
                 AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, flush, last);

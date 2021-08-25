@@ -421,8 +421,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
-            logger.white().println("No search strategies defined.");
-            logger.white().println("Set to default ones.");
+            if(getModel().getSettings().warnUser()) {
+                logger.white().println("No search strategies defined.");
+                logger.white().println("Set to default ones.");
+            }
             defaultSearch = true;
             setSearch(mModel.getSettings().makeDefaultSearch(mModel));
         }
@@ -1038,9 +1040,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     logger.bold().red().printf("FAILURE >> %s (%s)%n", c, satC);
                     return FALSE;
                 } else if (TRUE == satC) {
+                    logger.bold().green().printf("OK >> %s (%s)%n", c, satC);
                     OK++;
                 }
             } else {
+                System.out.printf("plop\n");
                 OK++;
             }
         }
