@@ -1,7 +1,7 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/solver/src/resources/png/ChocoLogo-160x135.png)
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
-[![Build Status](https://travis-ci.com/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.org/chocoteam/choco-solver)
+[![Build Status](https://travis-ci.com/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.com/chocoteam/choco-solver)
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
