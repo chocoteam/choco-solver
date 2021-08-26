@@ -1,7 +1,7 @@
 predicate fzn_inverse(array [int] of var int: f,array [int] of var int: invf);
 predicate fzn_all_different_int(array [int] of var int: x);
 predicate choco_array_var_int_element_nonshifted(var int: idx,int: os,array [int] of var int: x,var int: c);
-predicate fzn_circuit(array [int] of var int: x);
+predicate fzn_circuit(int: offset,array [int] of var int: x);
 predicate choco_fzn_lex_less(array [int] of var int: x,array [int] of var int: y,bool: strict);
 array [1..11] of int: X_INTRODUCED_1705_ = [1,2,3,4,5,6,7,8,9,10,-1];
 var 56..540: objective:: output_var:: is_defined_var;
@@ -1235,7 +1235,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_238_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_241_,1,X_INTRODUCED_242_,X_INTRODUCED_220_):: domain:: defines_var(X_INTRODUCED_220_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_244_,1,X_INTRODUCED_245_,X_INTRODUCED_221_):: domain:: defines_var(X_INTRODUCED_221_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_247_,1,X_INTRODUCED_248_,X_INTRODUCED_222_):: domain:: defines_var(X_INTRODUCED_222_);
-constraint fzn_circuit(X_INTRODUCED_209_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_209_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_251_,1,X_INTRODUCED_252_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_264_,1,X_INTRODUCED_265_,X_INTRODUCED_255_):: domain:: defines_var(X_INTRODUCED_255_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_267_,1,X_INTRODUCED_268_,X_INTRODUCED_256_):: domain:: defines_var(X_INTRODUCED_256_);
@@ -1246,7 +1246,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_279_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_282_,1,X_INTRODUCED_283_,X_INTRODUCED_261_):: domain:: defines_var(X_INTRODUCED_261_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_285_,1,X_INTRODUCED_286_,X_INTRODUCED_262_):: domain:: defines_var(X_INTRODUCED_262_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_288_,1,X_INTRODUCED_289_,X_INTRODUCED_263_):: domain:: defines_var(X_INTRODUCED_263_);
-constraint fzn_circuit(X_INTRODUCED_250_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_250_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_292_,1,X_INTRODUCED_293_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_305_,1,X_INTRODUCED_306_,X_INTRODUCED_296_):: domain:: defines_var(X_INTRODUCED_296_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_308_,1,X_INTRODUCED_309_,X_INTRODUCED_297_):: domain:: defines_var(X_INTRODUCED_297_);
@@ -1257,7 +1257,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_320_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_323_,1,X_INTRODUCED_324_,X_INTRODUCED_302_):: domain:: defines_var(X_INTRODUCED_302_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_326_,1,X_INTRODUCED_327_,X_INTRODUCED_303_):: domain:: defines_var(X_INTRODUCED_303_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_329_,1,X_INTRODUCED_330_,X_INTRODUCED_304_):: domain:: defines_var(X_INTRODUCED_304_);
-constraint fzn_circuit(X_INTRODUCED_291_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_291_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_333_,1,X_INTRODUCED_334_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_346_,1,X_INTRODUCED_347_,X_INTRODUCED_337_):: domain:: defines_var(X_INTRODUCED_337_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_349_,1,X_INTRODUCED_350_,X_INTRODUCED_338_):: domain:: defines_var(X_INTRODUCED_338_);
@@ -1268,7 +1268,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_361_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_364_,1,X_INTRODUCED_365_,X_INTRODUCED_343_):: domain:: defines_var(X_INTRODUCED_343_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_367_,1,X_INTRODUCED_368_,X_INTRODUCED_344_):: domain:: defines_var(X_INTRODUCED_344_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_370_,1,X_INTRODUCED_371_,X_INTRODUCED_345_):: domain:: defines_var(X_INTRODUCED_345_);
-constraint fzn_circuit(X_INTRODUCED_332_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_332_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_374_,1,X_INTRODUCED_375_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_387_,1,X_INTRODUCED_388_,X_INTRODUCED_378_):: domain:: defines_var(X_INTRODUCED_378_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_390_,1,X_INTRODUCED_391_,X_INTRODUCED_379_):: domain:: defines_var(X_INTRODUCED_379_);
@@ -1279,7 +1279,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_402_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_405_,1,X_INTRODUCED_406_,X_INTRODUCED_384_):: domain:: defines_var(X_INTRODUCED_384_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_408_,1,X_INTRODUCED_409_,X_INTRODUCED_385_):: domain:: defines_var(X_INTRODUCED_385_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_411_,1,X_INTRODUCED_412_,X_INTRODUCED_386_):: domain:: defines_var(X_INTRODUCED_386_);
-constraint fzn_circuit(X_INTRODUCED_373_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_373_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_415_,1,X_INTRODUCED_416_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_428_,1,X_INTRODUCED_429_,X_INTRODUCED_419_):: domain:: defines_var(X_INTRODUCED_419_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_431_,1,X_INTRODUCED_432_,X_INTRODUCED_420_):: domain:: defines_var(X_INTRODUCED_420_);
@@ -1290,7 +1290,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_443_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_446_,1,X_INTRODUCED_447_,X_INTRODUCED_425_):: domain:: defines_var(X_INTRODUCED_425_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_449_,1,X_INTRODUCED_450_,X_INTRODUCED_426_):: domain:: defines_var(X_INTRODUCED_426_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_452_,1,X_INTRODUCED_453_,X_INTRODUCED_427_):: domain:: defines_var(X_INTRODUCED_427_);
-constraint fzn_circuit(X_INTRODUCED_414_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_414_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_456_,1,X_INTRODUCED_457_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_469_,1,X_INTRODUCED_470_,X_INTRODUCED_460_):: domain:: defines_var(X_INTRODUCED_460_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_472_,1,X_INTRODUCED_473_,X_INTRODUCED_461_):: domain:: defines_var(X_INTRODUCED_461_);
@@ -1301,7 +1301,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_484_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_487_,1,X_INTRODUCED_488_,X_INTRODUCED_466_):: domain:: defines_var(X_INTRODUCED_466_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_490_,1,X_INTRODUCED_491_,X_INTRODUCED_467_):: domain:: defines_var(X_INTRODUCED_467_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_493_,1,X_INTRODUCED_494_,X_INTRODUCED_468_):: domain:: defines_var(X_INTRODUCED_468_);
-constraint fzn_circuit(X_INTRODUCED_455_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_455_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_497_,1,X_INTRODUCED_498_,X_INTRODUCED_93_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_510_,1,X_INTRODUCED_511_,X_INTRODUCED_501_):: domain:: defines_var(X_INTRODUCED_501_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_513_,1,X_INTRODUCED_514_,X_INTRODUCED_502_):: domain:: defines_var(X_INTRODUCED_502_);
@@ -1312,7 +1312,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_525_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_528_,1,X_INTRODUCED_529_,X_INTRODUCED_507_):: domain:: defines_var(X_INTRODUCED_507_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_531_,1,X_INTRODUCED_532_,X_INTRODUCED_508_):: domain:: defines_var(X_INTRODUCED_508_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_534_,1,X_INTRODUCED_535_,X_INTRODUCED_509_):: domain:: defines_var(X_INTRODUCED_509_);
-constraint fzn_circuit(X_INTRODUCED_496_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_496_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_538_,1,X_INTRODUCED_539_,X_INTRODUCED_105_):: domain:: defines_var(X_INTRODUCED_105_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_551_,1,X_INTRODUCED_552_,X_INTRODUCED_542_):: domain:: defines_var(X_INTRODUCED_542_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_554_,1,X_INTRODUCED_555_,X_INTRODUCED_543_):: domain:: defines_var(X_INTRODUCED_543_);
@@ -1323,7 +1323,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_566_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_569_,1,X_INTRODUCED_570_,X_INTRODUCED_548_):: domain:: defines_var(X_INTRODUCED_548_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_572_,1,X_INTRODUCED_573_,X_INTRODUCED_549_):: domain:: defines_var(X_INTRODUCED_549_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_575_,1,X_INTRODUCED_576_,X_INTRODUCED_550_):: domain:: defines_var(X_INTRODUCED_550_);
-constraint fzn_circuit(X_INTRODUCED_537_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_537_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_579_,1,X_INTRODUCED_580_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_592_,1,X_INTRODUCED_593_,X_INTRODUCED_583_):: domain:: defines_var(X_INTRODUCED_583_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_595_,1,X_INTRODUCED_596_,X_INTRODUCED_584_):: domain:: defines_var(X_INTRODUCED_584_);
@@ -1334,7 +1334,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_607_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_610_,1,X_INTRODUCED_611_,X_INTRODUCED_589_):: domain:: defines_var(X_INTRODUCED_589_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_613_,1,X_INTRODUCED_614_,X_INTRODUCED_590_):: domain:: defines_var(X_INTRODUCED_590_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_616_,1,X_INTRODUCED_617_,X_INTRODUCED_591_):: domain:: defines_var(X_INTRODUCED_591_);
-constraint fzn_circuit(X_INTRODUCED_578_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_578_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_620_,1,X_INTRODUCED_621_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_633_,1,X_INTRODUCED_634_,X_INTRODUCED_624_):: domain:: defines_var(X_INTRODUCED_624_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_636_,1,X_INTRODUCED_637_,X_INTRODUCED_625_):: domain:: defines_var(X_INTRODUCED_625_);
@@ -1345,7 +1345,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_648_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_651_,1,X_INTRODUCED_652_,X_INTRODUCED_630_):: domain:: defines_var(X_INTRODUCED_630_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_654_,1,X_INTRODUCED_655_,X_INTRODUCED_631_):: domain:: defines_var(X_INTRODUCED_631_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_657_,1,X_INTRODUCED_658_,X_INTRODUCED_632_):: domain:: defines_var(X_INTRODUCED_632_);
-constraint fzn_circuit(X_INTRODUCED_619_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_619_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_661_,1,X_INTRODUCED_662_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_674_,1,X_INTRODUCED_675_,X_INTRODUCED_665_):: domain:: defines_var(X_INTRODUCED_665_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_677_,1,X_INTRODUCED_678_,X_INTRODUCED_666_):: domain:: defines_var(X_INTRODUCED_666_);
@@ -1356,7 +1356,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_689_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_692_,1,X_INTRODUCED_693_,X_INTRODUCED_671_):: domain:: defines_var(X_INTRODUCED_671_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_695_,1,X_INTRODUCED_696_,X_INTRODUCED_672_):: domain:: defines_var(X_INTRODUCED_672_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_698_,1,X_INTRODUCED_699_,X_INTRODUCED_673_):: domain:: defines_var(X_INTRODUCED_673_);
-constraint fzn_circuit(X_INTRODUCED_660_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_660_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_702_,1,X_INTRODUCED_703_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_715_,1,X_INTRODUCED_716_,X_INTRODUCED_706_):: domain:: defines_var(X_INTRODUCED_706_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_718_,1,X_INTRODUCED_719_,X_INTRODUCED_707_):: domain:: defines_var(X_INTRODUCED_707_);
@@ -1367,7 +1367,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_730_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_733_,1,X_INTRODUCED_734_,X_INTRODUCED_712_):: domain:: defines_var(X_INTRODUCED_712_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_736_,1,X_INTRODUCED_737_,X_INTRODUCED_713_):: domain:: defines_var(X_INTRODUCED_713_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_739_,1,X_INTRODUCED_740_,X_INTRODUCED_714_):: domain:: defines_var(X_INTRODUCED_714_);
-constraint fzn_circuit(X_INTRODUCED_701_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_701_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_743_,1,X_INTRODUCED_744_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_756_,1,X_INTRODUCED_757_,X_INTRODUCED_747_):: domain:: defines_var(X_INTRODUCED_747_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_759_,1,X_INTRODUCED_760_,X_INTRODUCED_748_):: domain:: defines_var(X_INTRODUCED_748_);
@@ -1378,7 +1378,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_771_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_774_,1,X_INTRODUCED_775_,X_INTRODUCED_753_):: domain:: defines_var(X_INTRODUCED_753_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_777_,1,X_INTRODUCED_778_,X_INTRODUCED_754_):: domain:: defines_var(X_INTRODUCED_754_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_780_,1,X_INTRODUCED_781_,X_INTRODUCED_755_):: domain:: defines_var(X_INTRODUCED_755_);
-constraint fzn_circuit(X_INTRODUCED_742_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_742_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_784_,1,X_INTRODUCED_785_,X_INTRODUCED_105_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_797_,1,X_INTRODUCED_798_,X_INTRODUCED_788_):: domain:: defines_var(X_INTRODUCED_788_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_800_,1,X_INTRODUCED_801_,X_INTRODUCED_789_):: domain:: defines_var(X_INTRODUCED_789_);
@@ -1389,7 +1389,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_812_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_815_,1,X_INTRODUCED_816_,X_INTRODUCED_794_):: domain:: defines_var(X_INTRODUCED_794_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_818_,1,X_INTRODUCED_819_,X_INTRODUCED_795_):: domain:: defines_var(X_INTRODUCED_795_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_821_,1,X_INTRODUCED_822_,X_INTRODUCED_796_):: domain:: defines_var(X_INTRODUCED_796_);
-constraint fzn_circuit(X_INTRODUCED_783_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_783_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_825_,1,X_INTRODUCED_826_,X_INTRODUCED_117_):: domain:: defines_var(X_INTRODUCED_117_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_838_,1,X_INTRODUCED_839_,X_INTRODUCED_829_):: domain:: defines_var(X_INTRODUCED_829_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_841_,1,X_INTRODUCED_842_,X_INTRODUCED_830_):: domain:: defines_var(X_INTRODUCED_830_);
@@ -1400,7 +1400,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_853_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_856_,1,X_INTRODUCED_857_,X_INTRODUCED_835_):: domain:: defines_var(X_INTRODUCED_835_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_859_,1,X_INTRODUCED_860_,X_INTRODUCED_836_):: domain:: defines_var(X_INTRODUCED_836_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_862_,1,X_INTRODUCED_863_,X_INTRODUCED_837_):: domain:: defines_var(X_INTRODUCED_837_);
-constraint fzn_circuit(X_INTRODUCED_824_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_824_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_866_,1,X_INTRODUCED_867_,X_INTRODUCED_117_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_879_,1,X_INTRODUCED_880_,X_INTRODUCED_870_):: domain:: defines_var(X_INTRODUCED_870_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_882_,1,X_INTRODUCED_883_,X_INTRODUCED_871_):: domain:: defines_var(X_INTRODUCED_871_);
@@ -1411,7 +1411,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_894_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_897_,1,X_INTRODUCED_898_,X_INTRODUCED_876_):: domain:: defines_var(X_INTRODUCED_876_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_900_,1,X_INTRODUCED_901_,X_INTRODUCED_877_):: domain:: defines_var(X_INTRODUCED_877_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_903_,1,X_INTRODUCED_904_,X_INTRODUCED_878_):: domain:: defines_var(X_INTRODUCED_878_);
-constraint fzn_circuit(X_INTRODUCED_865_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_865_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_907_,1,X_INTRODUCED_908_,X_INTRODUCED_117_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_920_,1,X_INTRODUCED_921_,X_INTRODUCED_911_):: domain:: defines_var(X_INTRODUCED_911_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_923_,1,X_INTRODUCED_924_,X_INTRODUCED_912_):: domain:: defines_var(X_INTRODUCED_912_);
@@ -1422,7 +1422,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_935_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_938_,1,X_INTRODUCED_939_,X_INTRODUCED_917_):: domain:: defines_var(X_INTRODUCED_917_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_941_,1,X_INTRODUCED_942_,X_INTRODUCED_918_):: domain:: defines_var(X_INTRODUCED_918_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_944_,1,X_INTRODUCED_945_,X_INTRODUCED_919_):: domain:: defines_var(X_INTRODUCED_919_);
-constraint fzn_circuit(X_INTRODUCED_906_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_906_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_948_,1,X_INTRODUCED_949_,X_INTRODUCED_117_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_961_,1,X_INTRODUCED_962_,X_INTRODUCED_952_):: domain:: defines_var(X_INTRODUCED_952_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_964_,1,X_INTRODUCED_965_,X_INTRODUCED_953_):: domain:: defines_var(X_INTRODUCED_953_);
@@ -1433,7 +1433,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_976_,1,X_INTRODUC
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_979_,1,X_INTRODUCED_980_,X_INTRODUCED_958_):: domain:: defines_var(X_INTRODUCED_958_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_982_,1,X_INTRODUCED_983_,X_INTRODUCED_959_):: domain:: defines_var(X_INTRODUCED_959_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_985_,1,X_INTRODUCED_986_,X_INTRODUCED_960_):: domain:: defines_var(X_INTRODUCED_960_);
-constraint fzn_circuit(X_INTRODUCED_947_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_947_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_989_,1,X_INTRODUCED_990_,X_INTRODUCED_117_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1002_,1,X_INTRODUCED_1003_,X_INTRODUCED_993_):: domain:: defines_var(X_INTRODUCED_993_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1005_,1,X_INTRODUCED_1006_,X_INTRODUCED_994_):: domain:: defines_var(X_INTRODUCED_994_);
@@ -1444,7 +1444,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1017_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1020_,1,X_INTRODUCED_1021_,X_INTRODUCED_999_):: domain:: defines_var(X_INTRODUCED_999_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1023_,1,X_INTRODUCED_1024_,X_INTRODUCED_1000_):: domain:: defines_var(X_INTRODUCED_1000_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1026_,1,X_INTRODUCED_1027_,X_INTRODUCED_1001_):: domain:: defines_var(X_INTRODUCED_1001_);
-constraint fzn_circuit(X_INTRODUCED_988_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_988_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1030_,1,X_INTRODUCED_1031_,X_INTRODUCED_117_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1043_,1,X_INTRODUCED_1044_,X_INTRODUCED_1034_):: domain:: defines_var(X_INTRODUCED_1034_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1046_,1,X_INTRODUCED_1047_,X_INTRODUCED_1035_):: domain:: defines_var(X_INTRODUCED_1035_);
@@ -1455,7 +1455,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1058_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1061_,1,X_INTRODUCED_1062_,X_INTRODUCED_1040_):: domain:: defines_var(X_INTRODUCED_1040_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1064_,1,X_INTRODUCED_1065_,X_INTRODUCED_1041_):: domain:: defines_var(X_INTRODUCED_1041_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1067_,1,X_INTRODUCED_1068_,X_INTRODUCED_1042_):: domain:: defines_var(X_INTRODUCED_1042_);
-constraint fzn_circuit(X_INTRODUCED_1029_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1029_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1071_,1,X_INTRODUCED_1072_,X_INTRODUCED_129_):: domain:: defines_var(X_INTRODUCED_129_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1084_,1,X_INTRODUCED_1085_,X_INTRODUCED_1075_):: domain:: defines_var(X_INTRODUCED_1075_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1087_,1,X_INTRODUCED_1088_,X_INTRODUCED_1076_):: domain:: defines_var(X_INTRODUCED_1076_);
@@ -1466,7 +1466,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1099_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1102_,1,X_INTRODUCED_1103_,X_INTRODUCED_1081_):: domain:: defines_var(X_INTRODUCED_1081_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1105_,1,X_INTRODUCED_1106_,X_INTRODUCED_1082_):: domain:: defines_var(X_INTRODUCED_1082_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1108_,1,X_INTRODUCED_1109_,X_INTRODUCED_1083_):: domain:: defines_var(X_INTRODUCED_1083_);
-constraint fzn_circuit(X_INTRODUCED_1070_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1070_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1112_,1,X_INTRODUCED_1113_,X_INTRODUCED_129_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1125_,1,X_INTRODUCED_1126_,X_INTRODUCED_1116_):: domain:: defines_var(X_INTRODUCED_1116_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1128_,1,X_INTRODUCED_1129_,X_INTRODUCED_1117_):: domain:: defines_var(X_INTRODUCED_1117_);
@@ -1477,7 +1477,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1140_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1143_,1,X_INTRODUCED_1144_,X_INTRODUCED_1122_):: domain:: defines_var(X_INTRODUCED_1122_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1146_,1,X_INTRODUCED_1147_,X_INTRODUCED_1123_):: domain:: defines_var(X_INTRODUCED_1123_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1149_,1,X_INTRODUCED_1150_,X_INTRODUCED_1124_):: domain:: defines_var(X_INTRODUCED_1124_);
-constraint fzn_circuit(X_INTRODUCED_1111_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1111_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1153_,1,X_INTRODUCED_1154_,X_INTRODUCED_129_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1166_,1,X_INTRODUCED_1167_,X_INTRODUCED_1157_):: domain:: defines_var(X_INTRODUCED_1157_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1169_,1,X_INTRODUCED_1170_,X_INTRODUCED_1158_):: domain:: defines_var(X_INTRODUCED_1158_);
@@ -1488,7 +1488,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1181_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1184_,1,X_INTRODUCED_1185_,X_INTRODUCED_1163_):: domain:: defines_var(X_INTRODUCED_1163_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1187_,1,X_INTRODUCED_1188_,X_INTRODUCED_1164_):: domain:: defines_var(X_INTRODUCED_1164_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1190_,1,X_INTRODUCED_1191_,X_INTRODUCED_1165_):: domain:: defines_var(X_INTRODUCED_1165_);
-constraint fzn_circuit(X_INTRODUCED_1152_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1152_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1194_,1,X_INTRODUCED_1195_,X_INTRODUCED_129_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1207_,1,X_INTRODUCED_1208_,X_INTRODUCED_1198_):: domain:: defines_var(X_INTRODUCED_1198_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1210_,1,X_INTRODUCED_1211_,X_INTRODUCED_1199_):: domain:: defines_var(X_INTRODUCED_1199_);
@@ -1499,7 +1499,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1222_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1225_,1,X_INTRODUCED_1226_,X_INTRODUCED_1204_):: domain:: defines_var(X_INTRODUCED_1204_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1228_,1,X_INTRODUCED_1229_,X_INTRODUCED_1205_):: domain:: defines_var(X_INTRODUCED_1205_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1231_,1,X_INTRODUCED_1232_,X_INTRODUCED_1206_):: domain:: defines_var(X_INTRODUCED_1206_);
-constraint fzn_circuit(X_INTRODUCED_1193_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1193_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1235_,1,X_INTRODUCED_1236_,X_INTRODUCED_129_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1248_,1,X_INTRODUCED_1249_,X_INTRODUCED_1239_):: domain:: defines_var(X_INTRODUCED_1239_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1251_,1,X_INTRODUCED_1252_,X_INTRODUCED_1240_):: domain:: defines_var(X_INTRODUCED_1240_);
@@ -1510,7 +1510,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1263_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1266_,1,X_INTRODUCED_1267_,X_INTRODUCED_1245_):: domain:: defines_var(X_INTRODUCED_1245_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1269_,1,X_INTRODUCED_1270_,X_INTRODUCED_1246_):: domain:: defines_var(X_INTRODUCED_1246_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1272_,1,X_INTRODUCED_1273_,X_INTRODUCED_1247_):: domain:: defines_var(X_INTRODUCED_1247_);
-constraint fzn_circuit(X_INTRODUCED_1234_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1234_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1276_,1,X_INTRODUCED_1277_,X_INTRODUCED_141_):: domain:: defines_var(X_INTRODUCED_141_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1289_,1,X_INTRODUCED_1290_,X_INTRODUCED_1280_):: domain:: defines_var(X_INTRODUCED_1280_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1292_,1,X_INTRODUCED_1293_,X_INTRODUCED_1281_):: domain:: defines_var(X_INTRODUCED_1281_);
@@ -1521,7 +1521,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1304_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1307_,1,X_INTRODUCED_1308_,X_INTRODUCED_1286_):: domain:: defines_var(X_INTRODUCED_1286_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1310_,1,X_INTRODUCED_1311_,X_INTRODUCED_1287_):: domain:: defines_var(X_INTRODUCED_1287_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1313_,1,X_INTRODUCED_1314_,X_INTRODUCED_1288_):: domain:: defines_var(X_INTRODUCED_1288_);
-constraint fzn_circuit(X_INTRODUCED_1275_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1275_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1317_,1,X_INTRODUCED_1318_,X_INTRODUCED_141_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1330_,1,X_INTRODUCED_1331_,X_INTRODUCED_1321_):: domain:: defines_var(X_INTRODUCED_1321_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1333_,1,X_INTRODUCED_1334_,X_INTRODUCED_1322_):: domain:: defines_var(X_INTRODUCED_1322_);
@@ -1532,7 +1532,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1345_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1348_,1,X_INTRODUCED_1349_,X_INTRODUCED_1327_):: domain:: defines_var(X_INTRODUCED_1327_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1351_,1,X_INTRODUCED_1352_,X_INTRODUCED_1328_):: domain:: defines_var(X_INTRODUCED_1328_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1354_,1,X_INTRODUCED_1355_,X_INTRODUCED_1329_):: domain:: defines_var(X_INTRODUCED_1329_);
-constraint fzn_circuit(X_INTRODUCED_1316_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1316_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1358_,1,X_INTRODUCED_1359_,X_INTRODUCED_141_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1371_,1,X_INTRODUCED_1372_,X_INTRODUCED_1362_):: domain:: defines_var(X_INTRODUCED_1362_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1374_,1,X_INTRODUCED_1375_,X_INTRODUCED_1363_):: domain:: defines_var(X_INTRODUCED_1363_);
@@ -1543,7 +1543,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1386_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1389_,1,X_INTRODUCED_1390_,X_INTRODUCED_1368_):: domain:: defines_var(X_INTRODUCED_1368_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1392_,1,X_INTRODUCED_1393_,X_INTRODUCED_1369_):: domain:: defines_var(X_INTRODUCED_1369_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1395_,1,X_INTRODUCED_1396_,X_INTRODUCED_1370_):: domain:: defines_var(X_INTRODUCED_1370_);
-constraint fzn_circuit(X_INTRODUCED_1357_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1357_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1399_,1,X_INTRODUCED_1400_,X_INTRODUCED_141_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1412_,1,X_INTRODUCED_1413_,X_INTRODUCED_1403_):: domain:: defines_var(X_INTRODUCED_1403_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1415_,1,X_INTRODUCED_1416_,X_INTRODUCED_1404_):: domain:: defines_var(X_INTRODUCED_1404_);
@@ -1554,7 +1554,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1427_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1430_,1,X_INTRODUCED_1431_,X_INTRODUCED_1409_):: domain:: defines_var(X_INTRODUCED_1409_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1433_,1,X_INTRODUCED_1434_,X_INTRODUCED_1410_):: domain:: defines_var(X_INTRODUCED_1410_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1436_,1,X_INTRODUCED_1437_,X_INTRODUCED_1411_):: domain:: defines_var(X_INTRODUCED_1411_);
-constraint fzn_circuit(X_INTRODUCED_1398_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1398_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1440_,1,X_INTRODUCED_1441_,X_INTRODUCED_153_):: domain:: defines_var(X_INTRODUCED_153_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1453_,1,X_INTRODUCED_1454_,X_INTRODUCED_1444_):: domain:: defines_var(X_INTRODUCED_1444_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1456_,1,X_INTRODUCED_1457_,X_INTRODUCED_1445_):: domain:: defines_var(X_INTRODUCED_1445_);
@@ -1565,7 +1565,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1468_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1471_,1,X_INTRODUCED_1472_,X_INTRODUCED_1450_):: domain:: defines_var(X_INTRODUCED_1450_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1474_,1,X_INTRODUCED_1475_,X_INTRODUCED_1451_):: domain:: defines_var(X_INTRODUCED_1451_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1477_,1,X_INTRODUCED_1478_,X_INTRODUCED_1452_):: domain:: defines_var(X_INTRODUCED_1452_);
-constraint fzn_circuit(X_INTRODUCED_1439_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1439_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1481_,1,X_INTRODUCED_1482_,X_INTRODUCED_153_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1494_,1,X_INTRODUCED_1495_,X_INTRODUCED_1485_):: domain:: defines_var(X_INTRODUCED_1485_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1497_,1,X_INTRODUCED_1498_,X_INTRODUCED_1486_):: domain:: defines_var(X_INTRODUCED_1486_);
@@ -1576,7 +1576,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1509_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1512_,1,X_INTRODUCED_1513_,X_INTRODUCED_1491_):: domain:: defines_var(X_INTRODUCED_1491_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1515_,1,X_INTRODUCED_1516_,X_INTRODUCED_1492_):: domain:: defines_var(X_INTRODUCED_1492_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1518_,1,X_INTRODUCED_1519_,X_INTRODUCED_1493_):: domain:: defines_var(X_INTRODUCED_1493_);
-constraint fzn_circuit(X_INTRODUCED_1480_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1480_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1522_,1,X_INTRODUCED_1523_,X_INTRODUCED_153_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1535_,1,X_INTRODUCED_1536_,X_INTRODUCED_1526_):: domain:: defines_var(X_INTRODUCED_1526_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1538_,1,X_INTRODUCED_1539_,X_INTRODUCED_1527_):: domain:: defines_var(X_INTRODUCED_1527_);
@@ -1587,7 +1587,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1550_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1553_,1,X_INTRODUCED_1554_,X_INTRODUCED_1532_):: domain:: defines_var(X_INTRODUCED_1532_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1556_,1,X_INTRODUCED_1557_,X_INTRODUCED_1533_):: domain:: defines_var(X_INTRODUCED_1533_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1559_,1,X_INTRODUCED_1560_,X_INTRODUCED_1534_):: domain:: defines_var(X_INTRODUCED_1534_);
-constraint fzn_circuit(X_INTRODUCED_1521_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1521_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1563_,1,X_INTRODUCED_1564_,X_INTRODUCED_165_):: domain:: defines_var(X_INTRODUCED_165_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1576_,1,X_INTRODUCED_1577_,X_INTRODUCED_1567_):: domain:: defines_var(X_INTRODUCED_1567_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1579_,1,X_INTRODUCED_1580_,X_INTRODUCED_1568_):: domain:: defines_var(X_INTRODUCED_1568_);
@@ -1598,7 +1598,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1591_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1594_,1,X_INTRODUCED_1595_,X_INTRODUCED_1573_):: domain:: defines_var(X_INTRODUCED_1573_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1597_,1,X_INTRODUCED_1598_,X_INTRODUCED_1574_):: domain:: defines_var(X_INTRODUCED_1574_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1600_,1,X_INTRODUCED_1601_,X_INTRODUCED_1575_):: domain:: defines_var(X_INTRODUCED_1575_);
-constraint fzn_circuit(X_INTRODUCED_1562_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1562_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1604_,1,X_INTRODUCED_1605_,X_INTRODUCED_165_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1617_,1,X_INTRODUCED_1618_,X_INTRODUCED_1608_):: domain:: defines_var(X_INTRODUCED_1608_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1620_,1,X_INTRODUCED_1621_,X_INTRODUCED_1609_):: domain:: defines_var(X_INTRODUCED_1609_);
@@ -1609,7 +1609,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1632_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1635_,1,X_INTRODUCED_1636_,X_INTRODUCED_1614_):: domain:: defines_var(X_INTRODUCED_1614_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1638_,1,X_INTRODUCED_1639_,X_INTRODUCED_1615_):: domain:: defines_var(X_INTRODUCED_1615_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1641_,1,X_INTRODUCED_1642_,X_INTRODUCED_1616_):: domain:: defines_var(X_INTRODUCED_1616_);
-constraint fzn_circuit(X_INTRODUCED_1603_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1603_):: domain;
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1645_,1,X_INTRODUCED_1646_,X_INTRODUCED_177_):: domain:: defines_var(X_INTRODUCED_177_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1658_,1,X_INTRODUCED_1659_,X_INTRODUCED_1649_):: domain:: defines_var(X_INTRODUCED_1649_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1661_,1,X_INTRODUCED_1662_,X_INTRODUCED_1650_):: domain:: defines_var(X_INTRODUCED_1650_);
@@ -1620,7 +1620,7 @@ constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1673_,1,X_INTRODU
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1676_,1,X_INTRODUCED_1677_,X_INTRODUCED_1655_):: domain:: defines_var(X_INTRODUCED_1655_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1679_,1,X_INTRODUCED_1680_,X_INTRODUCED_1656_):: domain:: defines_var(X_INTRODUCED_1656_);
 constraint choco_array_var_int_element_nonshifted(X_INTRODUCED_1682_,1,X_INTRODUCED_1683_,X_INTRODUCED_1657_):: domain:: defines_var(X_INTRODUCED_1657_);
-constraint fzn_circuit(X_INTRODUCED_1644_):: domain;
+constraint fzn_circuit(1,X_INTRODUCED_1644_):: domain;
 constraint choco_fzn_lex_less(X_INTRODUCED_91_,X_INTRODUCED_103_,true);
 constraint choco_fzn_lex_less(X_INTRODUCED_103_,X_INTRODUCED_115_,true);
 constraint choco_fzn_lex_less(X_INTRODUCED_115_,X_INTRODUCED_127_,true);

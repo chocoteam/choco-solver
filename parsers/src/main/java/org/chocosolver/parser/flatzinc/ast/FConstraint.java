@@ -29,7 +29,6 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 /*
  * User : CPRUDHOM
@@ -894,29 +893,23 @@ public enum FConstraint {
     circuitChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_circuit.build(model, datas, id, exps, annotations);
-        }
-    },
-    fzn_circuit {
-        @Override
-        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 0) {
                 int min = vars[0].getLB();
                 for (IntVar v : vars) {
                     min = Math.min(min, v.getLB());
                 }
-                if(min >=0) {
-                    model.circuit(vars, min).post();
-                }else{
-                    int finalMin = min;
-                    model.circuit(
-                            Stream.of(vars).map(v -> model.intOffsetView(v, finalMin)).toArray(IntVar[]::new),
-                            min).post();
-                }
+                model.circuit(vars, min).post();
             }
+        }
+    },
+    fzn_circuit {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
+            int offset = exps.get(0).intValue();
+            IntVar[] vars = exps.get(1).toIntVarArray(model);
+            model.circuit(vars, offset).post();
         }
     },
     count_eqchoco {
@@ -1416,31 +1409,23 @@ public enum FConstraint {
     subcircuitChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_subcircuit.build(model, datas, id, exps, annotations);
-        }
-    },
-    fzn_subcircuit {
-        @Override
-        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 0) {
                 int min = vars[0].getLB();
                 for (IntVar v : vars) {
                     min = Math.min(min, v.getLB());
                 }
-                //model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
-                if(min >=0) {
-                    model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
-                } else {
-                    int finalMin = min;
-                    model.subCircuit(
-                            Stream.of(vars).map(v -> model.intOffsetView(v, finalMin)).toArray(IntVar[]::new),
-                            min,
-                            model.intVar("length", 0, vars.length, true)).post();
-                }
+                model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
             }
+        }
+    },
+    fzn_subcircuit {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
+            int offset = exps.get(0).intValue();
+            IntVar[] vars = exps.get(1).toIntVarArray(model);
+            model.subCircuit(vars, offset, model.intVar("length", 0, vars.length, true)).post();
         }
     },
     tableChoco {
