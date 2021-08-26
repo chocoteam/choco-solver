@@ -264,10 +264,18 @@ public abstract class RegParser implements IParser {
                     if (level.isLoggable(Level.INFO)) solver.log().white().print("\n");
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
-                IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
-                        .map(Variable::asIntVar)
-                        .filter(v -> v != obj)
-                        .toArray(IntVar[]::new);
+                IntVar[] dvars;
+                if(solver.getMove().getStrategy()!=null) {
+                    dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
+                                .map(Variable::asIntVar)
+                                .filter(v -> v != obj)
+                                .toArray(IntVar[]::new);
+                }else{
+                    dvars = Arrays.stream(solver.getModel().retrieveIntVars(true))
+                            .map(Variable::asIntVar)
+                            .filter(v -> v != obj)
+                            .toArray(IntVar[]::new);
+                }
                 if(dvars.length == 0){
                     dvars = new IntVar[]{solver.getModel().intVar(0)};
                 }
