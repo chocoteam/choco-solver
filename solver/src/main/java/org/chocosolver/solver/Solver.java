@@ -1040,11 +1040,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     logger.bold().red().printf("FAILURE >> %s (%s)%n", c, satC);
                     return FALSE;
                 } else if (TRUE == satC) {
-                    logger.bold().green().printf("OK >> %s (%s)%n", c, satC);
                     OK++;
                 }
             } else {
-                System.out.printf("plop\n");
                 OK++;
             }
         }
