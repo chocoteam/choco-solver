@@ -21,6 +21,7 @@ import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
@@ -109,6 +110,13 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
             return ESat.FALSE;
         }
         return ESat.UNDEFINED;
+    }
+
+    public void notify(IEventType event, int variableIdx) throws ContradictionException {
+        if (!fixed.get() && isInstantiated()) {
+            fixed.set(true);
+            notifyPropagators(event, this);
+        }
     }
 
     @Override
