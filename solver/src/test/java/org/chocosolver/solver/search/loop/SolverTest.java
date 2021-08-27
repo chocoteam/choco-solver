@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.NodeCounter;
@@ -112,7 +113,7 @@ public class SolverTest {
         r.setHBFS(.05, .1, 32);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getNodeCount(), 5777);
+        assertEquals(model.getSolver().getNodeCount(), 4542);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -321,7 +322,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testMessage() {
-        Model choco = new Model();
+        Model choco = new Model(Settings.init().setWarnUser(true));
         Constraint expr = choco.arithm(choco.intVar(1, 2), "<", 2);
         expr.getOpposite().post();
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();

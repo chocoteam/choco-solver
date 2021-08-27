@@ -34,6 +34,17 @@ public class DomOverWDegRef extends DomOverWDeg {
     }
 
     /**
+     * Creates a DomOverWDegRef variable selector with "CACD" as weight incrementer.
+     *
+     * @param variables decision variables
+     * @param seed      seed for breaking ties randomly
+     * @param flushThs flush threshold, when reached, it flushes scores
+     */
+    public DomOverWDegRef(IntVar[] variables, long seed, int flushThs) {
+        super(variables, seed, flushThs);
+    }
+
+    /**
      * @implNote
      * This is the reason this class exists.
      * The only difference with {@link DomOverWDeg} is the increment

@@ -18,14 +18,19 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -35,7 +40,7 @@ import java.util.function.BiFunction;
  * @since 26/02/2020.
  */
 public abstract class AbstractCriterionBasedVariableSelector implements VariableSelector<IntVar>,
-        IVariableMonitor<Variable>, IMonitorContradiction {
+        IVariableMonitor<Variable>, IMonitorContradiction, IMonitorRestart {
 
     /**
      * An element helps to keep 2 things up to date:
@@ -64,6 +69,13 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
                 }
                 return w;
             };
+
+    protected static final int FLUSH_TOPS = 20;
+    protected static final double FLUSH_RATIO = .9 * FLUSH_TOPS;
+    protected int flushThs;
+
+    protected final HashSet<Object> tops = new HashSet<>();
+    protected int loop = 0;
 
     /**
      * Randomness to break ties
@@ -108,11 +120,12 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
     final HashMap<Propagator<?>, double[]> refinedWeights = new HashMap<>();
     static final double[] rw = {0.};
 
-    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed) {
+    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed, int flush) {
         this.random = new java.util.Random(seed);
         this.solver = vars[0].getModel().getSolver();
         this.environment = vars[0].getModel().getEnvironment();
         this.last = environment.makeInt(vars.length - 1);
+        this.flushThs = flush;
     }
 
     @Override
@@ -213,6 +226,34 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
 
     int remapInc() {
         return 0;
+    }
+
+    /**
+     * This method sorts elements wrt to their weight.
+     * If 90% of the top 20 elements remain unchanged, then weights are flushed
+     *
+     * @return <i>true</i> if the weights should be flushed
+     */
+    protected boolean flushWeights(TObjectDoubleMap<?> q) {
+        //if(true)return false;
+        List<Variable> temp = weights.keySet().stream()
+                .sorted(Comparator.comparingDouble(q::get))
+                .limit(FLUSH_TOPS)
+                .collect(Collectors.toList());
+        long cnt = temp.stream().filter(tops::contains).count();
+        if (cnt >= FLUSH_RATIO) {
+            loop++;
+        } else {
+            loop = 0;
+        }
+        tops.clear();
+        if (loop == flushThs) {
+            loop = 0;
+            return true;
+        } else {
+            tops.addAll(temp);
+            return false;
+        }
     }
 
     //////////////////////////////////////////////////////////////////////

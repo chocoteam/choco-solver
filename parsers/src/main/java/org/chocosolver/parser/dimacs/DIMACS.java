@@ -11,9 +11,9 @@ package org.chocosolver.parser.dimacs;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -215,6 +215,16 @@ public class DIMACS extends RegParser {
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
                     solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.is(Level.IRACE)) {
+            solver.log().printf(Locale.US, "%d %d",
+                    solver.getObjectiveManager().isOptimization() ?
+                            (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                    * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            -solver.getSolutionCount(),
+                    complete ?
+                            (int) Math.ceil(solver.getTimeCount()) :
+                            Integer.MAX_VALUE);
         }
         if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();
