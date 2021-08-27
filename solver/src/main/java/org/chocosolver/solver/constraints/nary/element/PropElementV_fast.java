@@ -162,10 +162,11 @@ public class PropElementV_fast extends Propagator<IntVar> {
         return true;
     }
 
-    private boolean intersect(IntVar a, int la, int ua, IntVar b, int lb, int ub) {
-        int upp = Math.min(ua, ub);
-        for (int i = Math.max(la, lb); i <= upp; i = a.nextValue(i)) {
-            if (b.contains(i)) {
+    private boolean intersect(IntVar v1, int l1, int u1, IntVar v2, int l2, int u2) {
+        int low = Math.max(l1, l2);
+        int upp = Math.min(u1, u2);
+        for (int i = v1.nextValue(low -1); i <= upp; i = v1.nextValue(i)) {
+            if (v2.contains(i)) {
                 return true;
             }
         }
