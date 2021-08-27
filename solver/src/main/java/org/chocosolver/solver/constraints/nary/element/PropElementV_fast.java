@@ -150,11 +150,11 @@ public class PropElementV_fast extends Propagator<IntVar> {
             return false;
         }
         if (a.getDomainSize() <= b.getDomainSize()) {
-            if (notIntersect(a, la, ua, b, lb, ub)) {
+            if (intersect(a, la, ua, b, lb, ub)) {
                 return false;
             }
         } else {
-            if (notIntersect(b, lb, ub, a, la, ua)) {
+            if (intersect(b, lb, ub, a, la, ua)) {
                 return false;
             }
         }
@@ -162,7 +162,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         return true;
     }
 
-    private boolean notIntersect(IntVar a, int la, int ua, IntVar b, int lb, int ub) {
+    private boolean intersect(IntVar a, int la, int ua, IntVar b, int lb, int ub) {
         int upp = Math.min(ua, ub);
         for (int i = Math.max(la, lb); i <= upp; i = a.nextValue(i)) {
             if (b.contains(i)) {
