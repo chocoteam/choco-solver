@@ -146,6 +146,11 @@ public abstract class AbstractVariable implements Variable {
      */
     private ICause cause;
 
+    /**
+     * True if related propagators are scheduled for propagation
+     */
+    public boolean scheduled;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -168,9 +173,25 @@ public abstract class AbstractVariable implements Variable {
         this.dsize = this.scheduler.select(0) + 1;
         this.dindices = new int[dsize + 1];
         this.instWI = 0; // set to 0 to capture constant automatically
+        this.scheduled = false;
     }
 
     protected abstract EvtScheduler<?> createScheduler();
+
+    @Override
+    public boolean isScheduled() {
+        return scheduled;
+    }
+
+    @Override
+    public void schedule() {
+        this.scheduled = true;
+    }
+
+    @Override
+    public void unschedule() {
+        this.scheduled = false;
+    }
 
     @Override
     public final int getId() {
@@ -501,6 +522,7 @@ public abstract class AbstractVariable implements Variable {
     public void clearEvents() {
         this.cause = null;
         mask = 0;
+        this.unschedule();
     }
 
     @Override
