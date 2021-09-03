@@ -48,7 +48,11 @@ public class SetDifference extends AbstractSet {
     public SetDifference(ISet setA, ISet setB, SetType setType, int offset) {
         this.setA = setA;
         this.setB = setB;
-        this.values = SetFactory.makeSet(setType, offset);
+        if (setType == SetType.FIXED_ARRAY || setType == SetType.FIXED_INTERVAL) {
+            this.values = SetFactory.makeRangeSet();
+        } else {
+            this.values = SetFactory.makeSet(setType, offset);
+        }
         init();
     }
 
