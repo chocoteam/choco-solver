@@ -62,6 +62,8 @@ public class Settings {
 
     private boolean checkDeclaredConstraints = true;
 
+    private boolean checkDeclaredViews = true;
+
     private boolean printAllUndeclaredConstraints = false;
 
     private byte hybridEngine = 0b00;
@@ -413,6 +415,26 @@ public class Settings {
      */
     public Settings setPrintAllUndeclaredConstraints(boolean printAllUndeclaredConstraints) {
         this.printAllUndeclaredConstraints = printAllUndeclaredConstraints;
+        return this;
+    }
+
+    /**
+     * @return <i>true</i> (default value) to check prior to creation
+     * if a view already semantically exists.
+     */
+    public boolean checkDeclaredViews() {
+        return checkDeclaredViews;
+    }
+
+
+    /**
+     * Check if a view already semantically exists before creating it.
+     *
+     * @param checkDeclaredViews {@code true} to check views before creation
+     * @return the current instance
+     */
+    public Settings setCheckDeclaredViews(boolean checkDeclaredViews) {
+        this.checkDeclaredViews = checkDeclaredViews;
         return this;
     }
 
