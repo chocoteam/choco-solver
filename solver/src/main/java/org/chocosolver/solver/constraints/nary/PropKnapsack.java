@@ -30,10 +30,13 @@ public class PropKnapsack extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int[] weigth, energy, order;
-    private double[] ratio;
-    private int n;
-    private IntVar capacity, power;
+    private final int[] weigth;
+    private final int[] energy;
+    private final int[] order;
+    private final double[] ratio;
+    private final int n;
+    private final IntVar capacity;
+    private final IntVar power;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -47,7 +50,6 @@ public class PropKnapsack extends Propagator<IntVar> {
         this.n = itemOccurence.length;
         this.capacity = vars[n];
         this.power = vars[n + 1];
-        this.order = new int[n];
         this.ratio = new double[n];
         for (int i = 0; i < n; i++) {
             ratio[i] = weight[i] == 0?Double.MAX_VALUE : ((double) (energy[i]) / (double) (weight[i]));
@@ -71,8 +73,9 @@ public class PropKnapsack extends Propagator<IntVar> {
         int remainingCapacity = capacity.getUB();
 		int maxPower = 0;
         for (int i = 0; i < n; i++) {
-            remainingCapacity -= weigth[i] * vars[i].getLB();
-            maxPower += energy[i] * vars[i].getLB();
+            int lb = vars[i].getLB();
+            remainingCapacity -= weigth[i] * lb;
+            maxPower += energy[i] * lb;
         }
         power.updateLowerBound(maxPower, this);
         if (remainingCapacity < 0) {
@@ -82,10 +85,11 @@ public class PropKnapsack extends Propagator<IntVar> {
             for (int i = 0; i < n; i++) {
                 assert remainingCapacity >= 0;
                 idx = order[i];
-                if (vars[idx].getUB() - vars[idx].getLB() > 0) {
-					int delta = weigth[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                int range = vars[idx].getUB() - vars[idx].getLB();
+                if (range > 0) {
+					int delta = weigth[idx] * (range);
                     if (delta <= remainingCapacity) {
-                        maxPower += energy[idx] * (vars[idx].getUB() - vars[idx].getLB());
+                        maxPower += energy[idx] * (range);
                         remainingCapacity -= delta;
                         if (weigth[idx] > 0 && remainingCapacity == 0) {
                             power.updateUpperBound(maxPower, this);
