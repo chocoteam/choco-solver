@@ -132,7 +132,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
     public final IntVar getVariable(IntVar[] vars) {
         IntVar best = null;
         bests.resetQuick();
-        double w = 0.;
+        double w = Double.NEGATIVE_INFINITY;
         int to = last.get();
         for (int idx = 0; idx <= to; idx++) {
             int domSize = vars[idx].getDomainSize();
@@ -317,19 +317,24 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
             elt.ws[i] = w;
         } else {
             // It means that futvars <= 1
-            Variable other = p.getVar(elt.ws[1 - i]);
+            int k = 1 - i;
+            Variable other = p.getVar(elt.ws[k]);
             if (!other.isInstantiated()) {
                 // 'var' is the last one not instantiated,
                 // so this counter will not be taken into account
                 double[] delta = {0.};
                 double[] ws = refinedWeights.get(p);
-                if (elt.ws[i] < ws.length) {
+                if (elt.ws[k] < ws.length) {
                     // may happen propagators (like PropSat) with dynamic variable addition
-                    delta[0] = ws[elt.ws[i]];
+                    delta[0] = ws[elt.ws[k]];
                 }
                 weights.adjustValue(other, -delta[0]);
                 // but it should be restored upon backtrack
-                environment.save(() -> weights.adjustValue(other, +delta[0]));
+                environment.save(() -> {
+                    double ww = weights.get(other) + delta[0];
+                    ww = Math.max(ww, 0.);
+                    weights.put(other, ww);
+                });
             }
         }
     }
