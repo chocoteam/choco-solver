@@ -1,0 +1,14 @@
+predicate fzn_circuit(int: offset,array [int] of var int: x);
+var 1..4: X_INTRODUCED_0_;
+var 1..4: X_INTRODUCED_1_;
+var 1..4: X_INTRODUCED_2_;
+var 1..4: X_INTRODUCED_3_;
+var -100..100: X_INTRODUCED_4_;
+var -100..100: X_INTRODUCED_5_;
+var -100..100: X_INTRODUCED_6_;
+var -100..100: X_INTRODUCED_7_;
+array [1..4] of var int: c1:: output_array([1..4]):: add_to_output = [X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_];
+array [1..4] of var int: c2:: output_array([2..5]) = [X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_];
+constraint fzn_circuit(1,c1);
+constraint fzn_circuit(2,c2);
+solve  satisfy;
