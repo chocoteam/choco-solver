@@ -89,7 +89,7 @@ public class ArgmaxminTest {
         Solver solver = model.getSolver();
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getSolutionCount(), 84);
+        Assert.assertEquals(solver.getSolutionCount(), 24);
         solver.printShortStatistics();
     }
 

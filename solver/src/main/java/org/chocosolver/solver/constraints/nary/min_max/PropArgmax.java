@@ -72,6 +72,7 @@ public class PropArgmax extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        vars[n].updateBounds(0, n-1, this);
         filterUb();
         lbi.set(argmax(IntVar::getLB));
         filterZ();
