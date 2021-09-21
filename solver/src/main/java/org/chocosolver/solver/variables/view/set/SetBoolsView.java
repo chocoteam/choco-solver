@@ -12,6 +12,10 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.delta.SetDelta;
+import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
@@ -41,6 +45,9 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
      */
     private ISet lb;
     private ISet ub;
+
+    protected boolean reactOnModification;
+    private ISetDelta delta;
 
     /**
      * Instantiate an set view over an array of boolean variables such that:
@@ -86,6 +93,9 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].instantiateTo(BoolVar.kFALSE, this)) {
             ub.remove(element);
+            if (reactOnModification) {
+                delta.add(element, SetDelta.UB, this);
+            }
             return true;
         }
         return false;
@@ -95,6 +105,9 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     protected boolean doForceSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].instantiateTo(BoolVar.kTRUE, this)) {
             lb.add(element);
+            if (reactOnModification) {
+                delta.add(element, SetDelta.LB, this);
+            }
             return true;
         }
         return false;
@@ -104,9 +117,15 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kTRUE)) {
             lb.add(variableIdx + offset);
+            if (reactOnModification) {
+                delta.add(variableIdx + offset, SetDelta.LB, this);
+            }
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else if (this.getVariables()[variableIdx].isInstantiatedTo(BoolVar.kFALSE)) {
             ub.remove(variableIdx + offset);
+            if (reactOnModification) {
+                delta.add(variableIdx + offset, SetDelta.UB, this);
+            }
             notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
         }
     }
@@ -146,5 +165,24 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
             }
         }
         return true;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        return delta;
+    }
+
+    @Override
+    public void createDelta() {
+        if (!reactOnModification) {
+            reactOnModification = true;
+            delta = new SetDelta(model.getEnvironment());
+        }
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new SetDeltaMonitor(getDelta(), propagator);
     }
 }

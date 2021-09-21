@@ -13,7 +13,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
-import org.chocosolver.solver.variables.delta.monitor.GraphDeltaMonitor;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
@@ -201,8 +200,5 @@ public interface GraphVar<E extends IGraph> extends Variable {
      * @param propagator A propagator involving this graph variable
      * @return A new instance of GraphDeltaMonitor to make incremental propagators
      */
-    default IGraphDeltaMonitor monitorDelta(ICause propagator) {
-        createDelta();
-        return new GraphDeltaMonitor(getDelta(), propagator);
-    }
+    public IGraphDeltaMonitor monitorDelta(ICause propagator);
 }

@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.dynamic;
 
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.*;
 
@@ -26,17 +27,57 @@ public class SetDifference extends AbstractSet {
     public ISet setB;
     protected ISet values;
 
+    /**
+     * Constructor for unstored SetDifference. If setA is not Dynamic, setA.getSetType() is used for internal
+     * storage of values (as values cannot be inferior than setA's minimum possible element), else RANGESET is used
+     * as it does not need an offset.
+      * @param setA
+     * @param setB
+     */
     public SetDifference(ISet setA, ISet setB) {
+        this(setA, setB,
+                setA.getSetType() != SetType.DYNAMIC ? setA.getSetType() : SetType.RANGESET,
+                setA instanceof ISet.WithOffset ? ((ISet.WithOffset)setA).getOffset() : 0);
+    }
+
+    /**
+     * Constructor for unstored SetDifference with manual specification of set type for internal storage.
+     * @param setA
+     * @param setB
+     */
+    public SetDifference(ISet setA, ISet setB, SetType setType, int offset) {
         this.setA = setA;
         this.setB = setB;
-        this.values = SetFactory.makeRangeSet();
+        if (setType == SetType.FIXED_ARRAY || setType == SetType.FIXED_INTERVAL) {
+            this.values = SetFactory.makeRangeSet();
+        } else {
+            this.values = SetFactory.makeSet(setType, offset);
+        }
         init();
     }
 
+    /**
+     * Constructor for stored SetDifference. If setA is not Dynamic, setA.getSetType() is used for internal
+     * storage of values (as values cannot be inferior than setA's minimum possible element), else RANGESET is used
+     * as it does not need an offset.
+     * @param setA
+     * @param setB
+     */
     public SetDifference(Model model, ISet setA, ISet setB) {
+        this(model, setA, setB,
+                setA.getSetType() != SetType.DYNAMIC ? setA.getSetType() : SetType.RANGESET,
+                setA instanceof ISet.WithOffset ? ((ISet.WithOffset)setA).getOffset() : 0);
+    }
+
+    /**
+     * Constructor for stored SetDifference with manual specification of set type for internal storage.
+     * @param setA
+     * @param setB
+     */
+    public SetDifference(Model model, ISet setA, ISet setB, SetType setType, int offset) {
         this.setA = setA;
         this.setB = setB;
-        this.values = SetFactory.makeStoredSet(SetType.RANGESET, 0, model);
+        this.values = SetFactory.makeStoredSet(setType, offset, model);
         init();
     }
 
@@ -105,24 +146,28 @@ public class SetDifference extends AbstractSet {
     @Override
     public void notifyElementRemoved(int element, int idx) {
         if (idx == 0) {
-            values.remove(element);
-            notifyObservingElementRemoved(element);
+            if (values.remove(element)) {
+                notifyObservingElementRemoved(element);
+            }
         }
         if (idx == 1 && setA.contains(element)) {
-            values.add(element);
-            notifyObservingElementAdded(element);
+            if (values.add(element)) {
+                notifyObservingElementAdded(element);
+            }
         }
     }
 
     @Override
     public void notifyElementAdded(int element, int idx) {
         if (idx == 0 && !setB.contains(element)) {
-            values.add(element);
-            notifyObservingElementAdded(element);
+            if (values.add(element)) {
+                notifyObservingElementAdded(element);
+            }
         }
         if (idx == 1 && setA.contains(element)) {
-            values.remove(element);
-            notifyObservingElementRemoved(element);
+            if (values.remove(element)) {
+                notifyObservingElementRemoved(element);
+            }
         }
     }
 

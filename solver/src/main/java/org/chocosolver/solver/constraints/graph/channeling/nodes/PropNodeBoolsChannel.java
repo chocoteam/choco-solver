@@ -50,7 +50,6 @@ public class PropNodeBoolsChannel extends Propagator<Variable> {
         gdm = g.monitorDelta(this);
         forceG = element -> bools[element].setToTrue(this);
         remG = element -> bools[element].setToFalse(this);
-        super.linkVariables();
     }
 
     //***********************************************************************************

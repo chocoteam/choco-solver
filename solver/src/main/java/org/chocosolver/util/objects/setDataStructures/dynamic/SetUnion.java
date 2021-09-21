@@ -25,22 +25,39 @@ public class SetUnion extends AbstractSet {
     public ISet[] sets;
     protected ISet values;
 
+    /**
+     * Constructor for unstored SetUnion. Internal storage is RANGESET by default.
+     */
     public SetUnion(ISet... sets) {
-        this.sets = sets;
-        this.values = SetFactory.makeRangeSet();
-        // init the union
-        for (int i = 0; i < sets.length; i++) {
-            this.sets[i].registerObserver(this, i);
-            for (int v : this.sets[i]) {
-                values.add(v);
-            }
-        }
+        this(SetType.RANGESET, 0, sets);
     }
 
-    public SetUnion(Model model, ISet... sets) {
+    /**
+     * Constructor for unstored SetUnion with manual specification of set type for internal storage.
+     */
+    public SetUnion(SetType setType, int offset, ISet... sets) {
         this.sets = sets;
-        this.values = SetFactory.makeStoredSet(SetType.RANGESET, 0, model);
-        // init the union
+        this.values = SetFactory.makeSet(setType, 0);
+        init();
+    }
+
+    /**
+     * Constructor for stored SetUnion. Internal storage is RANGESET by default.
+     */
+    public SetUnion(Model model, ISet... sets) {
+        this(model, SetType.RANGESET, 0, sets);
+    }
+
+    /**
+     * Constructor for stored SetUnion with manual specification of set type for internal storage.
+     */
+    public SetUnion(Model model, SetType setType, int offset, ISet... sets) {
+        this.sets = sets;
+        this.values = SetFactory.makeStoredSet(setType, offset, model);
+        init();
+    }
+
+    private void init() {
         for (int i = 0; i < sets.length; i++) {
             this.sets[i].registerObserver(this, i);
             for (int v : this.sets[i]) {
@@ -117,8 +134,7 @@ public class SetUnion extends AbstractSet {
 
     @Override
     public void notifyElementAdded(int element, int idx) {
-        if (!values.contains(element)) {
-            values.add(element);
+        if (values.add(element)) {
             notifyObservingElementAdded(element);
         }
     }

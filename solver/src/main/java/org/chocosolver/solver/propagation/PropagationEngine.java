@@ -279,7 +279,10 @@ public class PropagationEngine {
             }
             assert found : variable + " not in scope of " + cause;
         }
-        var_queue.addLast(variable);
+        if (!variable.isScheduled()) {
+            var_queue.addLast(variable);
+            variable.schedule();
+        }
         variable.storeEvents(type.getMask(), cause);
     }
 

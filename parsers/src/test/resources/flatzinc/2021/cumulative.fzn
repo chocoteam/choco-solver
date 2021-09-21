@@ -1,0 +1,7 @@
+predicate fzn_cumulative(array [int] of var int: s,array [int] of var int: d,array [int] of var int: r,var int: b);
+array [1..6] of int: X_INTRODUCED_0_ = [2,3,1,4,3,2];
+array [1..6] of int: X_INTRODUCED_1_ = [3,2,5,2,1,4];
+array [1..6] of int: X_INTRODUCED_2_ = [0,3,4,6,8,8];
+var 1..6: bound:: output_var;
+constraint fzn_cumulative(X_INTRODUCED_2_,X_INTRODUCED_1_,X_INTRODUCED_0_,bound);
+solve  satisfy;

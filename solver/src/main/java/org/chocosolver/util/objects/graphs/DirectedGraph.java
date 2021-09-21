@@ -145,7 +145,7 @@ public class DirectedGraph implements IGraph {
     }
 
     /**
-     * CONSTRUCTOR FOR BACKTRACKABLE DIRECTED SUBGRAPHS:
+     * CONSTRUCTOR FOR BACKTRACKABLE DIRECTED NODE INDUCED SUBGRAPHS:
      *
      * Construct a backtrackable directed graph G' = (V', E') from another directed graph G = (V, E) such that:
      *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
@@ -175,6 +175,100 @@ public class DirectedGraph implements IGraph {
             } else {
                 predecessors[i] = new SetIntersection(model, g.getPredecessorsOf(i), nodes);
                 successors[i] = new SetIntersection(model, g.getSuccessorsOf(i), nodes);
+            }
+        }
+    }
+
+    /**
+     * CONSTRUCTOR FOR BACKTRACKABLE DIRECTED NODE INDUCED SUBGRAPHS:
+     *
+     * Construct a backtrackable directed graph G' = (V', E') from another directed graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param nodes the set of nodes to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public DirectedGraph(Model model, DirectedGraph g, DirectedGraph UB, ISet nodes, boolean exclude) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        boolean needDynamic = false;
+        ISet neighNeeded = UB.nodes;
+        if (exclude) {
+            for (int i : nodes) {
+                if (UB.getNodes().contains(i)) {
+                    needDynamic = true;
+                    this.nodes = new SetDifference(model, g.getNodes(), nodes);
+                    neighNeeded = new SetDifference(model, UB.getNodes(), nodes);
+                    break;
+                }
+            }
+        } else {
+            for (int i : UB.getNodes()) {
+                if (!nodes.contains(i)) {
+                    needDynamic = true;
+                    SetType nodeSetType = g.getNodeSetType();
+                    int offset = g.getNodes() instanceof ISet.WithOffset ?
+                            ((ISet.WithOffset)g.getNodes()).getOffset() : 0;
+                    this.nodes = new SetIntersection(model, nodeSetType, offset, g.getNodes(), nodes);
+                    neighNeeded = new SetIntersection(model, nodeSetType, offset, UB.getNodes(), nodes);
+                    break;
+                }
+            }
+        }
+        if (!needDynamic) {
+            this.nodes = g.nodes;
+        }
+        predecessors = new ISet[n];
+        successors = new ISet[n];
+        for (int i : neighNeeded) {
+            // SUCCESSORS
+            needDynamic = false;
+            if (exclude) {
+                for (int j : nodes) {
+                    if (UB.getSuccessorsOf(i).contains(j)) {
+                        needDynamic = true;
+                        successors[i] = new SetDifference(model, g.getSuccessorsOf(i), nodes);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getSuccessorsOf(i)) {
+                    if (!nodes.contains(j)) {
+                        needDynamic = true;
+                        SetType edgeSetType = g.getEdgeSetType();
+                        successors[i] = new SetIntersection(model, edgeSetType, 0, g.getSuccessorsOf(i), nodes);
+                    }
+                }
+            }
+            if (!needDynamic) {
+                successors[i] = g.successors[i];
+            }
+            // PREDECESSORS
+            needDynamic = false;
+            if (exclude) {
+                for (int j : nodes) {
+                    if (UB.getPredecessorsOf(i).contains(j)) {
+                        needDynamic = true;
+                        predecessors[i] = new SetDifference(model, g.getPredecessorsOf(i), nodes);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getPredecessorsOf(i)) {
+                    if (!nodes.contains(j)) {
+                        needDynamic = true;
+                        SetType edgeSetType = g.getEdgeSetType();
+                        predecessors[i] = new SetIntersection(model, edgeSetType, 0, g.getPredecessorsOf(i), nodes);
+                    }
+                }
+            }
+            if (!needDynamic) {
+                predecessors[i] = g.predecessors[i];
             }
         }
     }
@@ -215,6 +309,91 @@ public class DirectedGraph implements IGraph {
     }
 
     /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED DIRECTED SUBGRAPHS:
+     *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' or (y, x) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param edgesPredecessors the set of edges (node predecessors) to construct the subgraph from (see exclude parameter)
+     * @param edgesSuccessors the set of edges (node successors) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public DirectedGraph(Model model, DirectedGraph g, DirectedGraph UB, ISet[] edgesPredecessors, ISet[] edgesSuccessors, boolean exclude) {
+        assert edgesPredecessors.length == g.getNbMaxNodes();
+        assert edgesSuccessors.length == g.getNbMaxNodes();
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        this.predecessors = new ISet[n];
+        this.successors = new ISet[n];
+        boolean nodeNeedDynamic = false;
+        for (int i = 0; i < n; i++) {
+            // PREDECESSORS
+            boolean needDynamic = false;
+            if (exclude) {
+                for (int j : edgesPredecessors[i]) {
+                    if (UB.getPredecessorsOf(i).contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        predecessors[i] = new SetDifference(model, g.getPredecessorsOf(i), edgesPredecessors[i]);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getPredecessorsOf(i)) {
+                    if (!edgesPredecessors[i].contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        predecessors[i] = new SetIntersection(model, g.getPredecessorsOf(i), edgesPredecessors[i]);
+                        break;
+                    }
+                }
+            }
+            if (!needDynamic) {
+                predecessors[i] = g.predecessors[i];
+            }
+            // SUCCESSORS
+            needDynamic = false;
+            if (exclude) {
+                for (int j : edgesSuccessors[i]) {
+                    if (UB.getSuccessorsOf(i).contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        successors[i] = new SetDifference(model, g.getSuccessorsOf(i), edgesSuccessors[i]);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getSuccessorsOf(i)) {
+                    if (!edgesSuccessors[i].contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        successors[i] = new SetIntersection(model, g.getSuccessorsOf(i), edgesSuccessors[i]);
+                        break;
+                    }
+                }
+            }
+            if (!needDynamic) {
+                successors[i] = g.successors[i];
+            }
+        }
+        if (nodeNeedDynamic) {
+            this.nodes = new SetUnion(model, new SetUnion(model, predecessors), new SetUnion(model, successors));
+        } else {
+            this.nodes = g.nodes;
+        }
+    }
+
+    /**
      * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
      *
      * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
@@ -230,6 +409,10 @@ public class DirectedGraph implements IGraph {
      */
     public DirectedGraph(Model model, DirectedGraph g, int[][] edges, boolean exclude) {
         this(model, g, edgesArrayToPredecessorsSets(g.getNbMaxNodes(), edges), edgesArrayToSuccessorsSets(g.getNbMaxNodes(), edges), exclude);
+    }
+
+    public DirectedGraph(Model model, DirectedGraph g, DirectedGraph UB, int[][] edges, boolean exclude) {
+        this(model, g, UB, edgesArrayToPredecessorsSets(g.getNbMaxNodes(), edges), edgesArrayToSuccessorsSets(g.getNbMaxNodes(), edges), exclude);
     }
 
     // Graph arithmetic constructors
@@ -370,7 +553,7 @@ public class DirectedGraph implements IGraph {
 
     @Override
     public boolean addNode(int x) {
-        return !nodes.contains(x) && nodes.add(x);
+        return nodes.add(x);
     }
 
     @Override
@@ -401,9 +584,9 @@ public class DirectedGraph implements IGraph {
      * @return true iff directed edge (from,to) was in the graph
      */
     public boolean removeEdge(int from, int to) {
-        if (successors[from].contains(to)) {
-            assert (predecessors[to].contains(from)) : "incoherent directed graph";
-            return successors[from].remove(to) | predecessors[to].remove(from);
+        if (successors[from].remove(to)) {
+            assert (predecessors[to].remove(from)) : "incoherent directed graph";
+            return true;
         }
         return false;
     }
@@ -438,9 +621,9 @@ public class DirectedGraph implements IGraph {
     public boolean addEdge(int from, int to) {
         addNode(from);
         addNode(to);
-        if (!successors[from].contains(to)) {
-            assert (!predecessors[to].contains(from)) : "incoherent directed graph";
-            return successors[from].add(to) & predecessors[to].add(from);
+        if (successors[from].add(to)) {
+            assert (predecessors[to].add(from)) : "incoherent directed graph";
+            return true;
         }
         return false;
     }

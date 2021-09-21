@@ -25,7 +25,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropBoolMax extends Propagator<BoolVar> {
 
     private final int n;
-    private int[] lits;
+    private final int[] lits;
 
     public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
         super(ArrayUtils.concat(variables, maxVar), PropagatorPriority.UNARY, true);
@@ -75,6 +75,12 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == n) {
+            if(vars[lits[0]].isInstantiated()){
+                find(0);
+            }
+            if (vars[lits[1]].isInstantiated()) {
+                find(1);
+            }
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(1)) {

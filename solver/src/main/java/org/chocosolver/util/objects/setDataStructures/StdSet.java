@@ -114,6 +114,7 @@ public class StdSet extends AbstractSet {
             op.set(set, iter.nextInt(), ADD);
         }
         set.clear();
+        notifyObservingCleared();
     }
 
     @Override

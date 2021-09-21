@@ -13,6 +13,10 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.delta.SetDelta;
+import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
@@ -50,8 +54,11 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     private ISet lb;
     private ISet ub;
 
+    protected boolean reactOnModification;
+    private ISetDelta delta;
+
     /**
-     * Instantiate an set view over an array of integer variables such that:
+     * Instantiate a set view over an array of integer variables such that:
      * intVariables[x - offset] = v[x - offset] <=> x in set
      *
      * @param name  name of the variable
@@ -73,6 +80,9 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
             this.valRemoved[i] = val -> {
                 if (val == this.v[finalI]) {
                     this.ub.remove(finalI + offset);
+                    if (reactOnModification) {
+                        delta.add(finalI + offset, SetDelta.UB, this);
+                    }
                     notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
                 }
             };
@@ -111,6 +121,9 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     protected boolean doRemoveSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].removeValue(this.v[element - this.offset], this)) {
             ub.remove(element);
+            if (reactOnModification) {
+                delta.add(element, SetDelta.UB, this);
+            }
             return true;
         }
         return false;
@@ -120,6 +133,9 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     protected boolean doForceSetElement(int element) throws ContradictionException {
         if (getVariables()[element - this.offset].instantiateTo(this.v[element - this.offset], this)) {
             lb.add(element);
+            if (reactOnModification) {
+                delta.add(element, SetDelta.LB, this);
+            }
             return true;
         }
         return false;
@@ -129,6 +145,9 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     public void notify(IEventType event, int variableIdx) throws ContradictionException {
         if (this.getVariables()[variableIdx].isInstantiatedTo(this.v[variableIdx])) {
             lb.add(variableIdx + offset);
+            if (reactOnModification) {
+                delta.add(variableIdx + offset, SetDelta.LB, this);
+            }
             notifyPropagators(SetEventType.ADD_TO_KER, this);
         } else {
             this.idm[variableIdx].forEachRemVal(this.valRemoved[variableIdx]);
@@ -170,5 +189,24 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
             }
         }
         return true;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        return delta;
+    }
+
+    @Override
+    public void createDelta() {
+        if (!reactOnModification) {
+            reactOnModification = true;
+            delta = new SetDelta(model.getEnvironment());
+        }
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new SetDeltaMonitor(getDelta(), propagator);
     }
 }

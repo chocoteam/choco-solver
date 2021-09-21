@@ -153,7 +153,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -f -varh CHS -valh BLAST -restarts '[luby,200,50000]' -flush 32 -lc 1"
+    ARGS=$ARGS" -f -varh DOMWDEGR -valh BMIN -last -restarts '[luby,100,50000]' -flush 32 -lc 1"
 fi
 
 if test "${STAT_SOL}" = "yes"

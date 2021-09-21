@@ -25,7 +25,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  *
  * @author : Jean-Guillaume Fages
  */
-public class Set_Swap extends AbstractSet {
+public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -54,6 +54,10 @@ public class Set_Swap extends AbstractSet {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	public int getOffset() {
+		return mapOffset;
+	}
 
 	/**
 	 * Get the nth element in the set
