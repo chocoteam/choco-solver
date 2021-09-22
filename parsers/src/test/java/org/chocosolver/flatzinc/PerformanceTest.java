@@ -70,8 +70,9 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                "-lvl", "COMPET",
-                "-p", "1"
+                "-lvl", "SILENT",
+                "-p", "1",
+                "-stasol"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -99,8 +100,9 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
-                "-lvl", "COMPET",
-                "-p", "1"
+                "-lvl", "SILENT",
+                "-p", "1",
+                "-stasol"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -124,8 +126,9 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
-                "-lvl", "COMPET",
-                "-p", "1"
+                "-lvl", "SILENT",
+                "-p", "1",
+                "-stasol"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -149,7 +152,7 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
-                "-lvl", "INFO",
+                "-lvl", "SILENT",
                 "-stasol",
                 "-p", "1"
         };
