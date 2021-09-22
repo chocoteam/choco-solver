@@ -21,10 +21,10 @@ This is helpful when a Solution object is required in many places.
 - Modification of the management of expressions in order to reduce the number of created variables (WIP).
 - Add `IntVar.stream()` that streams a variable's values (in increasing order)
 - Add `Search.ValH.BMIN` and `Search.ValH.BLAST`
-- Change some default settings 
 - Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`)
 - Add Logger (`solver.log()`) to trace from Model/Solver.
-- Revamp `Settings`, now is defined as a factory pattern
+- Change some default settings
+- Revamp `Settings`, now is defined as a factory pattern + add `Settings.dev()` and `Settings.prod()` profiles.
 - Make *half reification* possible. Seed `c.implies(b)` or `c.impliedBy(b)` 
   where `c` is a Constraint and `b` a BoolVar.
 - Update MiniZinc constraints definition + flatzinc files (for testing).
