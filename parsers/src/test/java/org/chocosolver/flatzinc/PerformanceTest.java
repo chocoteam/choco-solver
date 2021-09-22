@@ -64,7 +64,7 @@ public class PerformanceTest {
         return parameters.toArray(new Object[0][0]);
     }
 
-    @Test(groups = "mzn", dataProvider = "instances", timeOut = 60000)
+    @Test(groups = "mzn", dataProvider = "instances", timeOut = 60000, priority = 2)
     public void testThemAll(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
         String file = this.getClass().getResource(path).getFile();
         String[] args = new String[]{
@@ -91,7 +91,7 @@ public class PerformanceTest {
     }
 
 
-    @Test(groups = "mzn", timeOut = 120_000)
+    @Test(groups = "mzn", timeOut = 120_000, priority = 2)
     public void testCellda_y_10s() throws SetUpException {
         // Specific to bnn+cellda_y_10s which take more time on Travis
         // 2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
@@ -117,7 +117,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 6, "Unexpected best solution");
     }
 
-    @Test(groups = "mzn", timeOut = 120_000)
+    @Test(groups = "mzn", timeOut = 120_000, priority = 2)
     public void test_is_A3PZaPjnUz() throws SetUpException {
         // Specific to is_A3PZaPjnUz which is faster when implication is enable
         String file = this.getClass().getResource("/flatzinc/2020/is+A3PZaPjnUz_new.fzn").getFile();
@@ -142,7 +142,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 103936, "Unexpected best solution");
     }
 
-    @Test(groups = "mzn", timeOut = 120_000)
+    @Test(groups = "mzn", timeOut = 120_000, priority = 2)
     public void test_lot_sizing_cp_pigment15b() throws SetUpException {
         // Specific to lot_sizing_cp_pigment15b which takes less time when element+(fast = adaptive)
         String file = this.getClass().getResource("/flatzinc/2020/lot_sizing_cp+pigment15b.psp.fzn").getFile();
