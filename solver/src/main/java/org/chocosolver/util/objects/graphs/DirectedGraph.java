@@ -15,6 +15,7 @@ import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 
+import java.util.Arrays;
 import java.util.stream.IntStream;
 
 /**
@@ -27,12 +28,12 @@ public class DirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-    private ISet[] successors;
-    private ISet[] predecessors;
+    private final ISet[] successors;
+    private final ISet[] predecessors;
     private ISet nodes;
-    private int n;
-    private SetType nodeSetType;
-    private SetType edgeSetType;
+    private final int n;
+    private final SetType nodeSetType;
+    private final SetType edgeSetType;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -427,7 +428,7 @@ public class DirectedGraph implements IGraph {
     public DirectedGraph(Model model, DirectedGraph... graphs) {
         this.nodeSetType = SetType.DYNAMIC;
         this.edgeSetType = SetType.DYNAMIC;
-        this.n = IntStream.range(0, graphs.length).map(i -> graphs[i].getNbMaxNodes()).max().getAsInt();
+        this.n = Arrays.stream(graphs).mapToInt(DirectedGraph::getNbMaxNodes).max().getAsInt();
         ISet[] nodeSets = new ISet[graphs.length];
         for (int i = 0; i < graphs.length; i++) {
             nodeSets[i] = graphs[i].getNodes();
@@ -459,7 +460,7 @@ public class DirectedGraph implements IGraph {
     public DirectedGraph(Model model, ISet additionalNodes, ISet[] additionalSuccs, DirectedGraph... graphs) {
         this.nodeSetType = SetType.DYNAMIC;
         this.edgeSetType = SetType.DYNAMIC;
-        this.n = IntStream.range(0, graphs.length).map(i -> graphs[i].getNbMaxNodes()).max().getAsInt();
+        this.n = Arrays.stream(graphs).mapToInt(DirectedGraph::getNbMaxNodes).max().getAsInt();
         ISet[] nodeSets = new ISet[graphs.length + 1];
         for (int i = 0; i < graphs.length; i++) {
             nodeSets[i] = graphs[i].getNodes();
@@ -585,7 +586,8 @@ public class DirectedGraph implements IGraph {
      */
     public boolean removeEdge(int from, int to) {
         if (successors[from].remove(to)) {
-            assert (predecessors[to].remove(from)) : "incoherent directed graph";
+            boolean b = predecessors[to].remove(from);
+            assert b : "incoherent directed graph";
             return true;
         }
         return false;
@@ -600,7 +602,8 @@ public class DirectedGraph implements IGraph {
      */
     public boolean containsEdge(int from, int to) {
         if (successors[from].contains(to)) {
-            assert (predecessors[to].contains(from)) : "incoherent directed graph";
+            boolean b = predecessors[to].add(from);
+            assert b : "incoherent directed graph";
             return true;
         }
         return false;
@@ -652,7 +655,7 @@ public class DirectedGraph implements IGraph {
      * Structural equality test between two directed graph vars.
      * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,
      * and different attributes such as nbMaxNodes and allNodes.
-     * @param other
+     * @param other a directed graph
      * @return true iff `this` and `other` contains exactly the same nodes and same edges.
      */
     public boolean equals(DirectedGraph other) {
