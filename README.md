@@ -56,9 +56,7 @@ solver.printStatistics();
 <a name="doc"></a>
 ## Documentation, Support and Issues
 
-The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
-[tarball](https://github.com/chocoteam/choco-solver/releases/download/4.10.6/choco-4.10.6.zip) which contains
-the binary, the source code, the user guide (pdf) and the apidocs (zip).
+The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to binaries and source code.
 
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
 Most support requests are answered very fast.
