@@ -1,7 +1,6 @@
 % This file is intentionally empty since there are no standard redefinitions
 % of FlatZinc built-ins.  The file has to exist because globals.mzn includes
 % it.
-include "nosets.mzn";
 
 predicate array_bool_and_imp(array [int] of var bool: as, var bool: r);
 predicate array_bool_or_imp(array [int] of var bool: as, var bool: r);

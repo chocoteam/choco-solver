@@ -95,4 +95,22 @@ public class FlatzincModelTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 
+    @Test(groups = "1s")
+    public void test12() {
+
+        InputStream in = new ByteArrayInputStream(("var set of 1..10: x:: output_var;\n" +
+                "var 0..10: X_INTRODUCED_1_ ::var_is_introduced ;\n" +
+                "constraint set_card(x,X_INTRODUCED_1_);\n" +
+                "solve  maximize X_INTRODUCED_1_;").getBytes());
+
+        Flatzinc fzn = new Flatzinc(false, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+    }
+
 }
