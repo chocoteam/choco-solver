@@ -185,7 +185,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default Stream<Solution> streamSolutions(Criterion... stop) {
         ref().addStopCriterion(stop);
-        Spliterator<Solution> it = new Spliterator<>() {
+        /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
+        Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -407,7 +408,8 @@ public interface IResolutionHelper extends ISelf<Solver> {
             ref().getModel().getEnvironment().save(() -> ref().getModel().unpost(forceOptimal));
             if (defaultS)
                 ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
-            Spliterator<Solution> it = new Spliterator<>() {
+            /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
+            Spliterator<Solution> it = new Spliterator<Solution>() {
 
                 @Override
                 public boolean tryAdvance(Consumer<? super Solution> action) {
