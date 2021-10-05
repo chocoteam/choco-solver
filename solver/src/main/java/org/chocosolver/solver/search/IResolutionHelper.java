@@ -18,7 +18,7 @@ import org.chocosolver.solver.constraints.UpdatablePropagator;
 import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
-import org.chocosolver.solver.objective.ParetoOptimizer;
+import org.chocosolver.solver.objective.ParetoMaximizer;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.Search;
@@ -185,7 +185,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default Stream<Solution> streamSolutions(Criterion... stop) {
         ref().addStopCriterion(stop);
-        Spliterator<Solution> it = new Spliterator<Solution>() {
+        Spliterator<Solution> it = new Spliterator<>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -407,7 +407,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             ref().getModel().getEnvironment().save(() -> ref().getModel().unpost(forceOptimal));
             if (defaultS)
                 ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
-            Spliterator<Solution> it = new Spliterator<Solution>() {
+            Spliterator<Solution> it = new Spliterator<>() {
 
                 @Override
                 public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -462,7 +462,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * <p>
      * <pre>
      * {@code
-     * ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
+     * ParetoMaximizer pareto = new ParetoMaximizer(maximize, objectives);
      * 	while (ref().solve()) {
      * 		pareto.onSolution();
      *    }
@@ -475,16 +475,21 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @param objectives the array of variables to optimize
      * @param maximize   set to <tt>true</tt> to solve a maximization problem, set to <tt>false</tt> to solve a minimization
      *                   problem.
-     * @param stop       optional criterions to stop the search before finding all/best solution
+     * @param stop       optional criteria to stop the search before finding all/best solution
      * @return a list that contained the solutions found.
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
-        ParetoOptimizer pareto = new ParetoOptimizer(maximize, objectives);
+        ParetoMaximizer pareto = new ParetoMaximizer(
+                Stream.of(objectives).map(o -> maximize?o:ref().getModel().intMinusView(o)).toArray(IntVar[]::new)
+        );
+        Constraint c = new Constraint("PARETO", pareto);
+        c.post();
         while (ref().solve()) {
             pareto.onSolution();
         }
         ref().removeStopCriterion(stop);
+        ref().getModel().unpost(c);
         return pareto.getParetoFront();
     }
 
@@ -610,7 +615,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @return {@code true} if at least one solution has been found, {@code false} otherwise.
      * @implNote If the given problem is a satisfaction problem, calling this method will do nothing and return false.
      */
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "unchecked"})
+    @SuppressWarnings({"unchecked"})
     default boolean findOptimalSolutionWithBounds(IntVar bounded,
                                                   Supplier<int[]> bounder,
                                                   BiFunction<int[], int[], int[]> boundsRelaxer,

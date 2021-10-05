@@ -31,6 +31,7 @@ This is helpful when a Solution object is required in many places.
 - Update `choco.msc` (for MiniZinc IDE) + `./minizinc/README.md`   
 - Add `Argmax` and `Argmin` constraints
 - Add `IfThenElse` as a decomposed constraint
+- Improvement of `solver.findParetoFront()`
 
 ### Deprecated API (to be removed in next release):
 
@@ -39,7 +40,9 @@ This is helpful when a Solution object is required in many places.
 See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
+- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
+- [Charles Vernerey](https://github.com/ChaVer) (chaver) 
 
 4.10.6 - 11 Dec 2020
 -------------------             
