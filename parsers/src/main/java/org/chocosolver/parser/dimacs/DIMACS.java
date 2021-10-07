@@ -47,10 +47,7 @@ public class DIMACS extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setWarnUser(false)
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true)
+        defaultSettings = Settings.prod()
                 .setEnableSAT(!cp);
     }
 

@@ -7,23 +7,37 @@ There exists different ways to parse and solve MiniZinc files with Choco-solver.
 
 ### MiniZinc IDE
 
-The first approach, that should be favoured, is to add Choco-solver as a [third-Party Solver in MiniZinc IDE](https://www.minizinc.org/doc-2.4.3/en/fzn-spec.html#solver-configuration-files). 
+The first approach, that should be favoured, is to add Choco-solver as a [third-Party Solver in MiniZinc IDE](https://www.minizinc.org/doc-2.5.5/en/fzn-spec.html#solver-configuration-files). 
 A *solver configuration file* that contains some basic information is available, named [choco.msc](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/choco.msc).
 With respect to MiniZinc specification, this file should be added in:
 > the directory `$HOME/.minizinc/solvers` on Linux and macOS systems, and the Application Data directory on Windows systems.
 > [Source](https://www.minizinc.org/doc-2.4.3/en/fzn-spec.html#solver-configuration-files)
 
 The executable `fzn_choco` referred to in this file, together with global constraints definition can be downloaded from [the MiniZinc repository](https://github.com/chocoteam/choco-solver/tree/master/parsers/src/main/minizinc) on GitHub.
+    
+1. Edit `./parsers/src/main/minizinc/choco.msc` and 
+update the follwing fields with the right path: `"mznlib"` and `"executable"`
+                                                                             
+2. Either copy `choco.msc` to `~/.minizinc/solvers/` directory :
+
+````shell
+cp ./parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/
+````
+or declare a symbolic link:
+````shell
+ln -s ./parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/
+````
+
 
 ### Converting from MiniZinc to FlatZinc
 
 If one wants to manually convert MiniZinc files into FlatZinc files parsable by Choco-solver. 
 
 The [`mzn_lib`](https://github.com/chocoteam/choco-solver/blob/master/parsers/src/main/minizinc/mzn_lib) directory lists the supported global constraints for Choco-solver.
-It is needed as an argument of `mzn2fzn`, a tool to convert MiniZinc files to FlatZinc files. 
+It is needed as an argument of `minizinc`, a tool to convert MiniZinc files to FlatZinc files. 
     
 ```bash
-mzn2fzn -I "/path/to/mzn_lib" model.mzn -d data.dzn -o output.fzn
+minizinc -c --solver org.minizinc.mzn-fzn -I "/path/to/mzn_lib" model.mzn -d data.dzn -o output.fzn
 ```
 
 where `model.mzn` is the MiniZinc file describing the model, 

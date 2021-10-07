@@ -65,9 +65,7 @@ public class Flatzinc extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true)
+        defaultSettings = Settings.prod()
                 .setMinCardinalityForSumDecomposition(256)
                 .setLearntClausesDominancePerimeter(0)
                 .setNbMaxLearntClauses(Integer.MAX_VALUE)

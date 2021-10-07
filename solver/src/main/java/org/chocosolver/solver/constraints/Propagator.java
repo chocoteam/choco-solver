@@ -237,7 +237,13 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
         this.priority = priority;
-        this.vars = vars.clone();
+        // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
+        // This is the responsibility of the propagator's developer to take care of that point.
+        if (model.getSettings().cloneVariableArrayInPropagator()) {
+            this.vars = vars.clone();
+        } else {
+            this.vars = vars;
+        }
         this.vindices = new int[vars.length];
         Arrays.fill(vindices, -1);
         ID = model.nextId();

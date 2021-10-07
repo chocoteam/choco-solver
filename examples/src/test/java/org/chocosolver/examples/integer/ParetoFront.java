@@ -16,7 +16,6 @@ package org.chocosolver.examples.integer;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
-import org.chocosolver.solver.objective.ParetoOptimizer;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,15 +38,8 @@ public class ParetoFront {
 		IntVar c = model.intVar("c", 0, 2, false);
 		model.arithm(a, "+", b, "=", c).post();
 
-		// create an object that will store the best solutions and remove dominated ones
-		ParetoOptimizer po = new ParetoOptimizer(true,new IntVar[]{a,b});
-		model.getSolver().plugMonitor(po);
-
-		// optimization
-		while(model.getSolver().solve());
-
 		// retrieve the pareto front
-		List<Solution> paretoFront = po.getParetoFront();
+		List<Solution> paretoFront = model.getSolver().findParetoFront(new IntVar[]{a,b},true );
 		System.out.println("The pareto front has "+paretoFront.size()+" solutions : ");
 		Assert.assertEquals(3, paretoFront.size());
 		for(Solution s:paretoFront){

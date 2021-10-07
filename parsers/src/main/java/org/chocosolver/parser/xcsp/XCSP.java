@@ -55,9 +55,7 @@ public class XCSP extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setEnableSAT(true)
-                .setModelChecker(solver -> true);
+        defaultSettings = Settings.prod();
     }
 
     @Override

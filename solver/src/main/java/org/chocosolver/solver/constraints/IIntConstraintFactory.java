@@ -73,6 +73,7 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
+import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -377,10 +378,41 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a square constraint: var1 = var2^2
+     * @param var1 a variable
+     * @param var2 a variable
+     * @return a square constraint
      */
     default Constraint square(IntVar var1, IntVar var2) {
-        assert var1.getModel() == var2.getModel();
-        return new Constraint(ConstraintsName.SQUARE, new PropSquare(var1, var2));
+        assert var2.getModel() == var1.getModel();
+        if (var2.isInstantiated()) {
+            int v1 = var2.getValue();
+            if (var1.isInstantiated()) {
+                int v2 = var1.getValue();
+                if(v1 * v1 == v2){
+                    return ref().trueConstraint();
+                }else{
+                    return ref().falseConstraint();
+                }
+            } else {
+                return ref().arithm(var1, "=", v1*v1);
+            }
+        } else {
+            if (var1.isInstantiated()) {
+                int v2 = var1.getValue();
+                if (v2 == 0) {
+                    return ref().arithm(var2, "=", 0);
+                } else {
+                    if (v2 > 0 && MathUtils.isPerfectSquare(v2)) {
+                        int sqt = (int)Math.sqrt(v2);
+                        return ref().member(var2, new int[]{-sqt, sqt});
+                    } else {
+                        return ref().falseConstraint();
+                    }
+                }
+            } else {
+                return new Constraint(ConstraintsName.SQUARE, new PropSquare(var1, var2));
+            }
+        }
     }
 
     /**
@@ -408,7 +440,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
-        Propagator p;
+        Propagator<IntVar> p;
         if (tuples.allowUniversalValue()) {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
         } else {
@@ -1406,7 +1438,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (ac) {
             allEnum = true;
         }
-        Propagator ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
+        Propagator<IntVar> ip = allEnum ? new PropInverseChannelAC(vars1, vars2, offset1, offset2)
                 : new PropInverseChannelBC(vars1, vars2, offset1, offset2);
         Constraint alldiff1 = allDifferent(vars1, ac ? "AC" : "");
         alldiff1.ignore();
@@ -2204,7 +2236,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         if (tuples.allowUniversalValue() && !(algo.contains("CT+") || algo.contains("STR2+"))) {
             throw new SolverException(algo + " table algorithm cannot be used with short tuples.");
         }
-        Propagator p;
+        Propagator<IntVar> p;
         switch (algo) {
             case "CT+": {
                 if (tuples.allowUniversalValue()) {

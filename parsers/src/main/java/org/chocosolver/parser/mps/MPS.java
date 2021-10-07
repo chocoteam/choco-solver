@@ -67,9 +67,7 @@ public class MPS extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true);
+        defaultSettings = Settings.prod();
     }
 
     @Override

@@ -667,4 +667,30 @@ public class ModelTest {
                 }
         ));
     }
+
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testUnpost() {
+        Model model = new Model();
+
+        IntVar capacity = model.intVar(0, 16);
+        IntVar minCapacity = model.intVar(0, 10);
+
+        Constraint minCapacityCst = model.arithm(capacity, ">=", minCapacity);
+        model.post(minCapacityCst);
+
+        Constraint ifCst = model.arithm(minCapacity, "<", minCapacity.getUB());
+        Constraint thenCst = model.arithm(capacity, "=", minCapacity);
+        Constraint ifThenCst = model.arithm(ifCst.reify(), "<=", thenCst.reify());
+        model.post(ifThenCst);
+
+        boolean feasibleModel = model.getSolver().solve();
+        System.out.println(feasibleModel);
+
+        model.post(model.arithm(capacity, ">=", minCapacity.getValue()));
+
+        model.unpost(ifThenCst);
+
+        model.unpost(ifCst);
+        model.unpost(thenCst);
+    }
 }

@@ -24,7 +24,6 @@ import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
 
 import java.util.List;
 
@@ -58,12 +57,6 @@ public class FGoal {
             aModel.setObjective(type == ResolutionPolicy.MAXIMIZE, obj);
         }
         // Then define search goal
-        Variable[] vars = aModel. getVars();
-        IntVar[] ivars = new IntVar[vars.length];
-        for (int i = 0; i < ivars.length; i++) {
-            ivars[i] = (IntVar) vars[i];
-        }
-
         StringBuilder description = new StringBuilder();
         // Always read the search strategies, if any
         if (annotations.size() > 0) {
