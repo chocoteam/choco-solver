@@ -8,6 +8,19 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
 - Simplify the way deltamonitors work. There is no need to `freeze` and `unfreeze` 
 them before calling `forEach...` methods. But, a call to `forEach...` consumes all values stored.
 - Fix a bug related to incremental propagators, views and missing events.
