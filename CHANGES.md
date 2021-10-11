@@ -41,8 +41,9 @@ See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 - [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (jgFages)
 - [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
-- [Charles Vernerey](https://github.com/ChaVer) (chaver) 
+- [Charles Vernerey](https://github.com/ChaVer) (chaver)
 
 4.10.6 - 11 Dec 2020
 -------------------             
