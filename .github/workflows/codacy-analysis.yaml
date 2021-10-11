@@ -1,6 +1,10 @@
 name: Codacy Analysis CLI
 
-on: [ "push" ]
+on:
+  push:
+    branches: [ master ]
+  schedule:
+  - cron: '0 0 * * 0'
 
 jobs:
   codacy-analysis-cli:
