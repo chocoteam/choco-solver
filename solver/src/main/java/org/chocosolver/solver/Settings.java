@@ -86,7 +86,7 @@ public class Settings {
 
     private Function<Model, Solver> initSolver = Solver::new;
 
-    private HashMap<String, Object> additionalSettings = new HashMap<>();
+    private final HashMap<String, Object> additionalSettings = new HashMap<>();
 
     private Settings() {
     }
@@ -177,7 +177,7 @@ public class Settings {
      * @param cloneVariableArrayInPropagator {@code true} to clone variables array on constructor
      * @return the current instance
      */
-    Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator) {
+    public Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator) {
         this.cloneVariableArrayInPropagator = cloneVariableArrayInPropagator;
         return this;
     }
@@ -708,7 +708,7 @@ public class Settings {
      * it leads to different results in calculations like `Math.pow(10, 6)`.
      * See issue #740.
      *
-     * @param ibexRestoreRounding
+     * @param ibexRestoreRounding either Java or ibex rounding method
      * @implNote Supported since ibex-java version 1.2.0
      */
     public Settings setIbexRestoreRounding(boolean ibexRestoreRounding) {
