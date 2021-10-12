@@ -42,7 +42,7 @@ RUN apt-get update && \
 COPY --from=builder /choco-solver/parsers/src/main/minizinc/fzn-choco /choco/fzn-choco
 COPY --from=builder /choco-solver/parsers/src/main/minizinc/choco.msc /choco/choco.msc
 COPY --from=builder /choco-solver/parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
-COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.7-jar-with-dependencies.jar /choco/choco-parsers.jar
+COPY --from=builder /choco-solver/parsers/target/choco-parsers-*-jar-with-dependencies.jar /choco/choco-parsers.jar
 
 # Update files
 RUN sed -i 's&CHOCO_JAR=.*&CHOCO_JAR=/choco/choco.jar&g' /choco/fzn-choco
