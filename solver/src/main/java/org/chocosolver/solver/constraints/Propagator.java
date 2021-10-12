@@ -78,7 +78,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @since 0.01
  * @param <V> type of variables involved in this propagator
  */
-public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator> {
+public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>> {
 
     /**
      * Status of this propagator on creation.
@@ -527,7 +527,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * so it is useless to propagate it. Should not be called by the user.
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
-    @SuppressWarnings({"unchecked"})
     public void setPassive() throws SolverException {
         // Note: calling isCompletelyInstantiated() to avoid next steps may lead to error when
         // dealing with reification and dynamic addition.
@@ -670,7 +669,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Propagator && ((Propagator) o).ID == ID;
+        return o instanceof Propagator<?> && ((Propagator<?>) o).ID == ID;
     }
 
     /**
@@ -903,7 +902,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param queues array of queues in which this can be scheduled
      * @return propagator priority
      */
-    public int doSchedule(CircularQueue<Propagator>[] queues){
+    public int doSchedule(CircularQueue<Propagator<?>>[] queues){
         int prio = priority.priority;
         if(!scheduled) {
             queues[prio].addLast(this);
@@ -955,7 +954,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * undo filtering it has done at n-1).
      * See {@link Constraint#setEnabled(boolean)}
      *
-     * @param enabled
+     * @param enabled is this propagator enabled?
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
