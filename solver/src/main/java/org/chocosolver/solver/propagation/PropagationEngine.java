@@ -44,11 +44,11 @@ public class PropagationEngine {
     /**
      * The model declaring this engine
      */
-    private final Model model;
+    final Model model;
     /**
      * The array of propagators to execute
      */
-    private final List<Propagator<?>> propagators;
+    final List<Propagator<?>> propagators;
     /**
      * To deal with propagators added dynamically
      */
@@ -65,7 +65,7 @@ public class PropagationEngine {
     /**
      * The last propagator executed
      */
-    private Propagator<?> lastProp;
+    Propagator<?> lastProp;
     /**
      * One bit per queue: true if the queue is not empty.
      */
@@ -178,20 +178,24 @@ public class PropagationEngine {
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
-                if (lastProp.reactToFineEvent()) {
-                    lastProp.doFinePropagation();
-                    // now we can check whether a delayed propagation has been scheduled
-                    if (delayedPropagationType > 0) {
-                        lastProp.propagate(delayedPropagationType);
-                    }
-                } else if (lastProp.isActive()) { // need to be checked due to views
-                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-                }
+                propagateEvents();
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
             }
         } while (!var_queue.isEmpty());
+    }
+
+    protected void propagateEvents() throws ContradictionException {
+        if (lastProp.reactToFineEvent()) {
+            lastProp.doFinePropagation();
+            // now we can check whether a delayed propagation has been scheduled
+            if (delayedPropagationType > 0) {
+                lastProp.propagate(delayedPropagationType);
+            }
+        } else if (lastProp.isActive()) { // need to be checked due to views
+            lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
     }
 
     /**
@@ -320,6 +324,13 @@ public class PropagationEngine {
         assert propagator == lastProp;
         assert delayedPropagationType == 0 || delayedPropagationType == type.getMask();
         delayedPropagationType = type.getMask();
+    }
+
+    /**
+     * @return the propagator Event Type's mask for delayed propagation
+     */
+    int getDelayedPropagation(){
+        return delayedPropagationType;
     }
 
     /**
