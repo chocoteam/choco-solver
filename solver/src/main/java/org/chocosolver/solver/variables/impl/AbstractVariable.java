@@ -396,9 +396,11 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void addMonitor(IVariableMonitor<?> monitor) {
-        // 1. check the non redundancy of a monitor
-        for (int i = 0; i < mIdx; i++) {
-            if (monitors[i] == monitor) return;
+        // 1. check the non redundancy of a monitor if expected.
+        if (model.getSettings().checkDeclaredMonitors()) {
+            for (int i = 0; i < mIdx; i++) {
+                if (monitors[i] == monitor) return;
+            }
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {

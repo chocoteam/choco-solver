@@ -9,16 +9,25 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import com.beust.jcommander.internal.Lists;
 import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import org.testng.collections.Sets;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * <p>
@@ -259,5 +268,38 @@ public class AbstractVariableTest {
         Assert.assertEquals(fix.instantiationWorldIndex(), 0);
     }
 
+    @Test(groups = "1s")
+    public void testAddMonitor() throws ContradictionException{
+        Model model = new Model();
+        IntVar v1 = model.intVar(0, 10);
+        final AtomicInteger score = new AtomicInteger(0);
+        IVariableMonitor<IntVar> m1 = (var, evt) -> {score.addAndGet(1);};
+        IVariableMonitor<IntVar> m2 = (var, evt) -> {score.addAndGet(3);};
+        v1.addMonitor(m1);
+        v1.addMonitor(m2);
+        v1.notifyMonitors(IntEventType.VOID);
+        // 2 monitors added as they differ.
+        Assert.assertEquals(score.get(), 4);
+
+        // Redundancy checker disabled, we expect all monitors to be updated.
+        score.set(0);
+        v1 = model.intVar(0, 20);
+        model.getSettings().setCheckDeclaredMonitors(false);
+        v1.addMonitor(m1);
+        v1.addMonitor(m1);
+        v1.addMonitor(m2);
+        v1.notifyMonitors(IntEventType.VOID);
+        Assert.assertEquals(score.get(), 5);
+
+        // Redundancy checker enabled, we expect only 1 m1 and the m2.
+        score.set(0);
+        v1 = model.intVar(0, 20);
+        model.getSettings().setCheckDeclaredMonitors(true);
+        v1.addMonitor(m1);
+        v1.addMonitor(m2);
+        v1.addMonitor(m1);
+        v1.notifyMonitors(IntEventType.VOID);
+        Assert.assertEquals(score.get(), 4);
+    }
 
 }
