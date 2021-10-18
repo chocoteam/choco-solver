@@ -66,6 +66,8 @@ public class Settings {
 
     private boolean checkDeclaredViews = true;
 
+    private boolean checkDeclaredMonitors = true;
+
     private boolean printAllUndeclaredConstraints = false;
 
     private byte hybridEngine = 0b00;
@@ -114,6 +116,7 @@ public class Settings {
                 .setWarnUser(false)
                 .setCheckDeclaredConstraints(false)
                 .setCheckDeclaredViews(false)
+                .setCheckDeclaredMonitors(false)
                 .setPrintAllUndeclaredConstraints(false);
     }
 
@@ -129,6 +132,7 @@ public class Settings {
                 .setWarnUser(true)
                 .setCheckDeclaredConstraints(true)
                 .setCheckDeclaredViews(true)
+                .setCheckDeclaredMonitors(true)
                 .setPrintAllUndeclaredConstraints(true);
     }
 
@@ -494,6 +498,15 @@ public class Settings {
     public Settings setCheckDeclaredViews(boolean checkDeclaredViews) {
         this.checkDeclaredViews = checkDeclaredViews;
         return this;
+    }
+
+    public Settings setCheckDeclaredMonitors(boolean check) {
+        this.checkDeclaredMonitors = check;
+        return this;
+    }
+
+    public boolean checkDeclaredMonitors() {
+        return this.checkDeclaredMonitors;
     }
 
     /**
