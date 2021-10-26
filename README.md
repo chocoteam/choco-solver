@@ -1,15 +1,14 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/solver/src/resources/png/ChocoLogo-160x135.png)
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
-[![Build Status](https://app.travis-ci.com/chocoteam/choco-solver.svg?branch=master)](https://app.travis-ci.com/github/chocoteam/choco-solver)
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![javadoc.io](https://javadoc.io/badge2/org.choco-solver/choco-solver/javadoc.io.svg)](https://javadoc.io/doc/org.choco-solver/choco-solver)
 
+![Build](https://github.com/chocoteam/choco-solver/actions/workflows/maven-test.yml/badge.svg)
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/alerts/)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/b0ab28bdd7fd4da095ad72c2c46bce57)](https://www.codacy.com/app/cprudhom/choco-solver)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f1bafa113f94486b96343d63782c0f7a)](https://www.codacy.com/gh/chocoteam/choco-solver/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=chocoteam/choco-solver&amp;utm_campaign=Badge_Grade)
+
 
 * [Documentation, Support and Issues](#doc)
 * [Contributing](#con)
