@@ -14,12 +14,10 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
-import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -182,6 +180,7 @@ public class TestDirectedEdgeInducedSubgraphView {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         IGraphDeltaMonitor monitor = g2.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
         IntProcedure nodeProc = i -> delta.add(i);
         // Test add nodes

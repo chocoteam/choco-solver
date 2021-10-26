@@ -7,13 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -42,13 +35,18 @@ public class PropIntChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private int nInts, nSets, idx;
-    private SetVar[] sets;
-    private IntVar[] ints;
-    private int offSet1, offSet2;
-    private ISetDeltaMonitor[] sdm;
-    private IIntDeltaMonitor[] idm;
-    private IntProcedure elementForced, elementRemoved, valRem;
+    private final int nInts;
+    private final int nSets;
+    private int idx;
+    private final SetVar[] sets;
+    private final IntVar[] ints;
+    private final int offSet1;
+    private final int offSet2;
+    private final ISetDeltaMonitor[] sdm;
+    private final IIntDeltaMonitor[] idm;
+    private final IntProcedure elementForced;
+    private final IntProcedure elementRemoved;
+    private final IntProcedure valRem;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -104,16 +102,22 @@ public class PropIntChannel extends Propagator<Variable> {
         }
         for (int i = 0; i < nSets; i++) {
             ISetIterator iter = sets[i].getUB().iterator();
-            while (iter.hasNext()){
+            while (iter.hasNext()) {
                 int j = iter.nextInt();
                 if (j < offSet2 || j > nInts - 1 + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     sets[i].remove(j, this);
                 }
             }
             iter = sets[i].getLB().iterator();
-            while (iter.hasNext()){
+            while (iter.hasNext()) {
                 ints[iter.nextInt() - offSet2].instantiateTo(i + offSet1, this);
             }
+        }
+        for (int i = 0; i < nSets; i++) {
+            sdm[i].startMonitoring();
+        }
+        for (int i = 0; i < nInts; i++) {
+            idm[i].startMonitoring();
         }
     }
 
@@ -146,7 +150,7 @@ public class PropIntChannel extends Propagator<Variable> {
         }
         for (int i = 0; i < nSets; i++) {
             ISetIterator iter = sets[i].getLB().iterator();
-            while (iter.hasNext()){
+            while (iter.hasNext()) {
                 int j = iter.nextInt();
                 if (j < offSet2 || j >= nInts + offSet2 || !ints[j - offSet2].contains(i + offSet1)) {
                     return ESat.FALSE;

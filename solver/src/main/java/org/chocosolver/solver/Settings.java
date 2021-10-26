@@ -50,7 +50,7 @@ public class Settings {
 
     private boolean sortPropagatorActivationWRTPriority = true;
 
-    private Function<Model, AbstractStrategy> defaultSearch = Search::defaultSearch;
+    private Function<Model, AbstractStrategy<?>> defaultSearch = Search::defaultSearch;
 
     private boolean warnUser = false;
 
@@ -313,7 +313,7 @@ public class Settings {
      * @return a default search strategy for model
      * @see Search#defaultSearch(Model)
      */
-    public AbstractStrategy makeDefaultSearch(Model model) {
+    public AbstractStrategy<?> makeDefaultSearch(Model model) {
         return defaultSearch.apply(model);
     }
 
@@ -323,7 +323,7 @@ public class Settings {
      * @param defaultSearch what default search strategy should be
      * @return the current instance
      */
-    public Settings setDefaultSearch(Function<Model, AbstractStrategy> defaultSearch) {
+    public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
     }

@@ -170,8 +170,9 @@ public class TestGraphUnionView {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         IGraphDeltaMonitor monitor = g3.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
-        IntProcedure nodeProc = i -> delta.add(i);
+        IntProcedure nodeProc = delta::add;
         // Test add nodes
         g1.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
@@ -236,8 +237,9 @@ public class TestGraphUnionView {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         IGraphDeltaMonitor monitor = g3.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
-        IntProcedure nodeProc = i -> delta.add(i);
+        IntProcedure nodeProc = delta::add;
         // Test add nodes
         g1.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);

@@ -31,12 +31,12 @@ import java.util.Set;
  */
 public class PropIncrementalAdjacencyUndirectedMatrix extends Propagator<Variable> {
 
-    private UndirectedGraphVar graph;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure enforce;
-    private PairProcedure remove;
+    private final UndirectedGraphVar graph;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure enforce;
+    private final PairProcedure remove;
     private int n;
-    private BoolVar[] t;
+    private final BoolVar[] t;
 
     public PropIncrementalAdjacencyUndirectedMatrix(UndirectedGraphVar graphVar, BoolVar[] t) {
         super(ArrayUtils.append(new Variable[]{graphVar}, t), PropagatorPriority.LINEAR, true);
@@ -63,6 +63,7 @@ public class PropIncrementalAdjacencyUndirectedMatrix extends Propagator<Variabl
         propagateGraphChanged();
         propagateTChanged();
         // initializing incremental data-structures
+        gdm.startMonitoring();
     }
 
     private void propagateGraphChanged() throws ContradictionException {

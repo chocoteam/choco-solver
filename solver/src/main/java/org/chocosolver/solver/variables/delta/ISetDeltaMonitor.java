@@ -16,7 +16,7 @@ import org.chocosolver.util.procedure.IntProcedure;
 /**
  * @author Charles Prud'homme, Jean-Guillaume Fages
  */
-public interface ISetDeltaMonitor {
+public interface ISetDeltaMonitor extends IDeltaMonitor{
 
     /**
      * Apply 'proc' on each value store

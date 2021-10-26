@@ -15,7 +15,10 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.graph.basic.PropNbEdges;
 import org.chocosolver.solver.constraints.graph.basic.PropNbNodes;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
@@ -72,7 +75,7 @@ public class SetGraphPredecessorsViewTest {
         DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
         DirectedGraphVar g = m.digraphVar("g", LB, UB);
         SetPredecessorsGraphView s = new SetPredecessorsGraphView("s", g, 0);
-        m.allEqual(s, m.setVar(new int[] {1, 2, 4})).post();
+        m.allEqual(s, m.setVar(1, 2, 4)).post();
         while (m.getSolver().solve()) {
             int[] neighsInGraph = g.getValue().getPredecessorsOf(0).toArray();
             int[] neighSet = s.getValue().toArray();
@@ -119,7 +122,7 @@ public class SetGraphPredecessorsViewTest {
         UB.addEdge(0, 2);
         UndirectedGraphVar g = m.graphVar("g", LB, UB);
         SetVar s = m.graphNeighborsSetView(g, 0);
-        m.allEqual(s, m.setVar(new int[] {1, 2, 3})).post();
+        m.allEqual(s, m.setVar(1, 2, 3)).post();
         Assert.assertFalse(m.getSolver().solve());
     }
 
@@ -164,17 +167,18 @@ public class SetGraphPredecessorsViewTest {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         ISetDeltaMonitor monitor = setView.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
-        IntProcedure addToDelta = i -> delta.add(i);
+        IntProcedure addToDelta = delta::add;
         // Test add elements
         g.enforceEdge(0, 1, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         delta.clear();
         g.enforceEdge(2, 0, fakeCauseB);
         g.enforceEdge(3, 0, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
         Assert.assertTrue(delta.contains(2));
         Assert.assertTrue(delta.contains(3));
         // Test remove elements
@@ -187,6 +191,6 @@ public class SetGraphPredecessorsViewTest {
         Assert.assertEquals(delta.size(), 2);
         delta.clear();
         monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
     }
 }

@@ -33,12 +33,14 @@ public class PropTreeCostSimple extends Propagator<UndirectedGraphVar> {
     //***********************************************************************************
 
     protected UndirectedGraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure edgeEnf, edgeRem;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure edgeEnf;
+    private final PairProcedure edgeRem;
     protected int n;
     protected IntVar sum;
     protected int[][] distMatrix;
-    private IStateInt minSum, maxSum;
+    private final IStateInt minSum;
+    private final IStateInt maxSum;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -81,6 +83,7 @@ public class PropTreeCostSimple extends Propagator<UndirectedGraphVar> {
         maxSum.set(max);
         sum.updateLowerBound(min, this);
         sum.updateUpperBound(max, this);
+        gdm.startMonitoring();
     }
 
     @Override

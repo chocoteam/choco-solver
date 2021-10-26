@@ -137,6 +137,7 @@ public class SetIntersectionViewTest {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         ISetDeltaMonitor monitor = intersection.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
         IntProcedure addToDelta = i -> delta.add(i);
         // Test add elements

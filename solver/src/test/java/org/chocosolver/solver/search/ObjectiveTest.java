@@ -432,7 +432,7 @@ public class ObjectiveTest {
         assertNull(om2.getObjective());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testCP1() {
         Model model = makeGolombRuler(9);
         IntVar objective = (IntVar) model.getHook("objective");
@@ -453,7 +453,7 @@ public class ObjectiveTest {
                     }
                 }
                 double d =  (c * 1. / ticks.length);
-                double r = Math.exp(-t[0]++ / 25);
+                double r = Math.exp(-t[0]++ / 25.);
                 if (solver.getRestartCount() > t[1]) {
                     t[1] += 150;
                     t[0] = 0;
@@ -466,7 +466,6 @@ public class ObjectiveTest {
         solver.setNoGoodRecordingFromSolutions(ticks);
         solver.showShortStatistics();
         while (model.getSolver().solve()) {
-            ;
         }
         assertEquals(model.getSolver().isStopCriterionMet(), false);
         assertEquals(solver.getBestSolutionValue(), 44);

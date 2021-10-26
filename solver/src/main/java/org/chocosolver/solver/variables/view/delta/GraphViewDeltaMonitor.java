@@ -24,4 +24,11 @@ public abstract class GraphViewDeltaMonitor implements IGraphDeltaMonitor {
     public GraphViewDeltaMonitor(IGraphDeltaMonitor... deltaMonitors) {
         this.deltaMonitors = deltaMonitors;
     }
+
+    @Override
+    public void startMonitoring() {
+        for (IGraphDeltaMonitor d : deltaMonitors) {
+            d.startMonitoring();
+        }
+    }
 }

@@ -96,6 +96,7 @@ public class SetDifferenceViewTest {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         ISetDeltaMonitor monitor = difference.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
         IntProcedure addToDelta = i -> delta.add(i);
         // Test add elements

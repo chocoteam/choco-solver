@@ -24,4 +24,9 @@ public abstract class SetGraphViewDeltaMonitor implements ISetDeltaMonitor {
     public SetGraphViewDeltaMonitor(IGraphDeltaMonitor deltaMonitor) {
         this.deltaMonitor = deltaMonitor;
     }
+
+    @Override
+    public void startMonitoring() {
+        deltaMonitor.startMonitoring();
+    }
 }
