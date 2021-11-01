@@ -11,6 +11,7 @@ NEXT MILESTONE
 - Propagation is now observable, `solver.observePropagation(PropagationObserver)`. 
 Consequently, it is now possible to profil the propagation by calling `solver.profilePropagation()`. 
 See Javadoc for details and usages (#832).
+- Release 4.10.7 introduces a bug related to delta monitors, which is now fixed (#837).
 
 ### Deprecated API (to be removed in next release):
 

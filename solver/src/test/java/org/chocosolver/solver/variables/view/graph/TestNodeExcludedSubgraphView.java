@@ -46,8 +46,8 @@ public class TestNodeExcludedSubgraphView {
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 3);
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(0));
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(0));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             for (int i = 1; i < 4; i++) {
                 if (g.getValue().containsNode(i)) {
                     Assert.assertTrue(g2.getValue().containsNode(i));
@@ -110,9 +110,9 @@ public class TestNodeExcludedSubgraphView {
         m.nbNodes(g2, m.intVar(1, 4)).post();
         m.connected(g2).post();
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(0));
+            Assert.assertFalse(g2.getValue().containsNode(0));
             Assert.assertTrue(g.getValue().containsNode(0));
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             Assert.assertTrue(g2.getValue().getNodes().size() >= 1 && g2.getValue().getNodes().size() <= 4);
             for (int i = 0; i < n; i++) {
                 if (!excluded.contains(i)) {
@@ -141,30 +141,31 @@ public class TestNodeExcludedSubgraphView {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         IGraphDeltaMonitor monitor = g2.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
-        IntProcedure nodeProc = i -> delta.add(i);
+        IntProcedure nodeProc = delta::add;
         // Test add nodes
         g.enforceNode(0, fakeCauseB);
         g.enforceNode(1, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.enforceNode(4, fakeCauseB);
         g.enforceNode(6, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
         Assert.assertTrue(delta.contains(4));
         Assert.assertTrue(delta.contains(6));
         delta.clear();
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove node
         g.removeNode(2, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.removeNode(7, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
         Assert.assertTrue(delta.contains(7));
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         delta.clear();
         // Test add edges
         // First clear monitor from node operations that can cause edge operations
@@ -179,19 +180,19 @@ public class TestNodeExcludedSubgraphView {
         };
         g.enforceEdge(0, 4, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.enforceEdge(4, 3, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(3));
         delta.clear();
         // Test remove edges
         g.removeEdge(4, 1, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.removeEdge(5, 4, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(5));
     }
 }

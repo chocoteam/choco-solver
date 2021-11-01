@@ -138,6 +138,8 @@ public class DeltaTest {
 
         @Override
         public void propagate(int evtmask) throws ContradictionException {
+            iD.startMonitoring();
+            jD.startMonitoring();
         }
 
         @Override

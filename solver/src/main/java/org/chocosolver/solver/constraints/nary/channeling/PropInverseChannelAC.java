@@ -31,12 +31,14 @@ import java.util.Arrays;
  */
 public class PropInverseChannelAC extends Propagator<IntVar> {
 
-    private int minX, minY;
-    private int n;
-    private IntVar[] X, Y;
-    private RemProc rem_proc;
-    private IIntDeltaMonitor[] idms;
-    private ICause cause;
+    private final int minX;
+    private final int minY;
+    private final int n;
+    private final IntVar[] X;
+    private final IntVar[] Y;
+    private final RemProc rem_proc;
+    private final IIntDeltaMonitor[] idms;
+    private final ICause cause;
 
     public PropInverseChannelAC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);
@@ -67,6 +69,9 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         for (int i = 0; i < n; i++) {
             enumeratedFilteringOfX(i);
             enumeratedFilteringOfY(i);
+        }
+        for (int i = 0; i < vars.length; i++) {
+            idms[i].startMonitoring();
         }
     }
 
@@ -101,7 +106,7 @@ public class PropInverseChannelAC extends Propagator<IntVar> {
         private int var;
 
         @Override
-        public UnaryIntProcedure set(Integer idxVar) {
+        public UnaryIntProcedure<Integer> set(Integer idxVar) {
             this.var = idxVar;
             return this;
         }

@@ -34,16 +34,17 @@ public class PropNodeBoolsChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private BoolVar[] bools;
-    private GraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private IntProcedure remG, forceG;
+    private final BoolVar[] bools;
+    private final GraphVar<?> g;
+    private final IGraphDeltaMonitor gdm;
+    private final IntProcedure remG;
+    private final IntProcedure forceG;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeBoolsChannel(BoolVar[] vertices, GraphVar gV) {
+    public PropNodeBoolsChannel(BoolVar[] vertices, GraphVar<?> gV) {
         super(ArrayUtils.append(vertices, new Variable[]{gV}), PropagatorPriority.LINEAR, true);
         this.bools = vertices;
         this.g = gV;
@@ -81,6 +82,7 @@ public class PropNodeBoolsChannel extends Propagator<Variable> {
                 g.enforceNode(i, this);
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

@@ -117,6 +117,7 @@ public class TestDirectedEdgeExcludedSubgraphView {
         ICause fakeCauseA = new ICause() {};
         ICause fakeCauseB = new ICause() {};
         IGraphDeltaMonitor monitor = g2.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
         ISet delta = SetFactory.makeBitSet(0);
         IntProcedure nodeProc = i -> delta.add(i);
         // Test add nodes

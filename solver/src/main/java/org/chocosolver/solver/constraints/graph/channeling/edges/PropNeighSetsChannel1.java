@@ -26,17 +26,18 @@ import org.chocosolver.util.procedure.PairProcedure;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNeighSetsChannel1 extends Propagator<GraphVar> {
+public class PropNeighSetsChannel1 extends Propagator<GraphVar<?>> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private SetVar[] sets;
-    private IGraphDeltaMonitor gdm;
-    private GraphVar g;
-    private PairProcedure arcForced, arcRemoved;
+    private final int n;
+    private final SetVar[] sets;
+    private final IGraphDeltaMonitor gdm;
+    private final GraphVar<?> g;
+    private final PairProcedure arcForced;
+    private final PairProcedure arcRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -46,7 +47,7 @@ public class PropNeighSetsChannel1 extends Propagator<GraphVar> {
      * Channeling between a graph variable and set variables
      * representing either node neighbors or node successors
      */
-    public PropNeighSetsChannel1(SetVar[] setsV, GraphVar gV) {
+    public PropNeighSetsChannel1(SetVar[] setsV, GraphVar<?> gV) {
         super(new GraphVar[]{gV}, PropagatorPriority.LINEAR, true);
         this.sets = setsV;
         n = sets.length;
@@ -90,6 +91,7 @@ public class PropNeighSetsChannel1 extends Propagator<GraphVar> {
                 }
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

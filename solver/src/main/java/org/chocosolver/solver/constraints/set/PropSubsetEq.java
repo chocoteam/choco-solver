@@ -7,13 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -29,7 +22,9 @@ import org.chocosolver.util.procedure.IntProcedure;
 /**
  * Ensures that X subseteq Y
  *
+ * @since 14/01/13
  * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
  */
 public class PropSubsetEq extends Propagator<SetVar> {
 
@@ -37,8 +32,9 @@ public class PropSubsetEq extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure elementForced, elementRemoved;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure elementForced;
+    private final IntProcedure elementRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -85,6 +81,8 @@ public class PropSubsetEq extends Propagator<SetVar> {
             if (!vars[1].getUB().contains(j))
                 vars[0].remove(j, this);
         }
+        sdm[0].startMonitoring();
+        sdm[1].startMonitoring();
     }
 
     @Override

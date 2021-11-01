@@ -145,4 +145,16 @@ public class BinPackingTest {
 		bpcons[nbItems + nbBins] = s.sum(binLoad, "=", sum);
 		return Constraint.merge("BinPacking",bpcons);
 	}
+
+	@Test(groups="1s", timeOut=60000)
+	public void testFixedLoadBackPropag2() {
+		Model model = new Model();
+		int[] itemSize = new int[]{2, 2, 2};
+		IntVar[] itemBin = model.intVarArray("binOfItem", 3, 0, 2);
+		IntVar[] binLoad = model.intVarArray("binLoad", 3, 0, 5);
+		model.arithm(itemBin[0], "!=", 0).post();
+		model.binPacking(itemBin, itemSize, binLoad, 0).post();
+		model.getSolver().findAllSolutions();
+		Assert.assertEquals(model.getSolver().getSolutionCount(), 16);
+	}
 }
