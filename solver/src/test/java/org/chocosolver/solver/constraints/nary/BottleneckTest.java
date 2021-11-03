@@ -40,8 +40,7 @@ public class BottleneckTest {
                 model.scalar(new IntVar[]{bws[i], exps[i]}, new int[]{1, 1}, "=", nexts[i]).post();
             }
 
-            IntVar sum = model.intVar("sum", 0, 2000 * n, true);
-            model.sum(bws, "=", sum).post();
+            IntVar sum = model.sum("sum", bws);
 
             IntVar[] allvars = append(nexts, exps, bws, new IntVar[]{sum});
 

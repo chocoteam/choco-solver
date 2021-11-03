@@ -290,8 +290,7 @@ public class ElementTest {
 		for (int i = 0; i < 20; i++) {
 			Model model = new Model();
 			IntVar I = model.intVar("I", 0, 5, false);
-			IntVar R = model.intVar("R", 0, 10, false);
-			model.element(R, new int[]{7, 6, 4, 2, 0}, I).post();
+			IntVar R = model.element("R", new int[]{7, 6, 4, 2, 0}, I, 0);
 			model.getSolver().setSearch(randomSearch(new IntVar[]{I, R}, i));
 			while (model.getSolver().solve()) ;
 			assertEquals(model.getSolver().getSolutionCount(), 5);
@@ -373,6 +372,34 @@ public class ElementTest {
 		IntVar   value  = choco.intVar(new int[]{-1, 0, 3});
 
 		choco.element(value, values, index, 0).post();
+		choco.getSolver().propagate();
+
+		// FAILS !
+		Assert.assertTrue(index.isInstantiatedTo(0));
+	}
+
+	/**
+	 * In this case, the element factory maps the whole element constraint to
+	 * an arithmetic constraint (ElementFactory, line: 68) but forgets to care
+	 * about the value of `Index`.
+	 *
+	 * This could be fixed in constant time ensuring that
+	 * 0 <= index.getLB() - offset
+	 *
+	 * @throws ContradictionException never
+	 */
+	@Test(groups="1s", timeOut=60000)
+	public void improveElement1Result() throws ContradictionException {
+		Model choco = new Model();
+
+		IntVar[] values = new IntVar[]{
+				choco.intVar(new int[]{3})
+		};
+
+		IntVar   index  = choco.intVar(new int[]{-4, 0});
+		IntVar   value  = choco.element("value", values, index, 0);
+		choco.member(value, new int[]{-1, 0, 3}).post();
+
 		choco.getSolver().propagate();
 
 		// FAILS !

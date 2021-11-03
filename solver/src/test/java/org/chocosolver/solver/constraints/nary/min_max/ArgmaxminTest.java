@@ -51,6 +51,50 @@ public class ArgmaxminTest {
         return args.toArray(new Object[0][0]);
     }
 
+    @Test(groups = "1s")
+    public void testResultMin(long seed) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        x[0] = model.intVar("x1", 1, 3);
+        x[1] = model.intVar("x2", 2, 10);
+        x[2] = model.intVar("x3", 3, 5);
+        x[3] = model.intVar("x4", 4, 6);
+        IntVar z = model.argmin("z", x);
+        IntVar min = model.min("min", x);
+        model.member(z, new int[]{0, 2, 3});
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
+        while (solver.solve()){
+            for(int i=0;i<x.length;i++){
+                Assert.assertFalse(i!=z.getValue() && x[i].getValue()<min.getValue());
+            }
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 84);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s")
+    public void testResultMax(long seed) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        x[0] = model.intVar("x1", 1, 3);
+        x[1] = model.intVar("x2", 2, 10);
+        x[2] = model.intVar("x3", 3, 5);
+        x[3] = model.intVar("x4", 4, 6);
+        IntVar z = model.argmax("z", x);
+        IntVar max = model.min("max", x);
+        model.member(z, new int[]{0, 2, 3});
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
+        while (solver.solve()){
+            for(int i=0;i<x.length;i++){
+                Assert.assertFalse(i!=z.getValue() && x[i].getValue()>max.getValue());
+            }
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 84);
+        solver.printShortStatistics();
+    }
+
     @Test(groups = "1s", dataProvider = "decOrNot")
     public void test1(boolean dec, long seed) {
         Model model = new Model(Settings.init());

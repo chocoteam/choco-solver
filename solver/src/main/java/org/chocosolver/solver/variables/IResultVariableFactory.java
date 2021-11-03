@@ -119,8 +119,65 @@ public interface IResultVariableFactory extends ISelf<Model> {
 		return result;
 	}
 
-// TODO among, nvalues, min / max, argMin / argMax, scalar
+	/**
+	 * Creates a variable equal to min(vars)
+	 * @param name name of the result variable
+	 * @param vars a set of integer variables
+	 * @return a variable equal to min(vars)
+	 */
+	default IntVar min(String name, IntVar... vars) {
+		int lb = Arrays.stream(vars).mapToInt(IntVar::getLB).min().getAsInt();
+		int ub = Arrays.stream(vars).mapToInt(IntVar::getUB).max().getAsInt();
+		IntVar result = ref().intVar(name, lb, ub);
+		if (!result.isInstantiated()) {
+			ref().min(result, vars).post();
+		}
+		return result;
+	}
 
+	/**
+	 * Creates a variable equal to max(vars)
+	 * @param name name of the result variable
+	 * @param vars a set of integer variables
+	 * @return a variable equal to max(vars)
+	 */
+	default IntVar max(String name, IntVar[] vars) {
+		int lb = Arrays.stream(vars).mapToInt(IntVar::getLB).min().getAsInt();
+		int ub = Arrays.stream(vars).mapToInt(IntVar::getUB).max().getAsInt();
+		IntVar result = ref().intVar(name, lb, ub);
+		if (!result.isInstantiated()) {
+			ref().max(result, vars).post();
+		}
+		return result;
+	}
+
+	/**
+	 * Creates a variable equal to argmin(vars)
+	 * @param name name of the result variable
+	 * @param vars a set of integer variables
+	 * @return a variable equal to argmin(vars)
+	 */
+	default IntVar argmin(String name, IntVar[] vars) {
+		IntVar result = ref().intVar(name, 0, vars.length-1, false);
+		if (!result.isInstantiated()) {
+			ref().argmin(result, 0, vars).post();
+		}
+		return result;
+	}
+
+	/**
+	 * Creates a variable equal to argmax(vars)
+	 * @param name name of the result variable
+	 * @param vars a set of integer variables
+	 * @return a variable equal to argmax(vars)
+	 */
+	default IntVar argmax(String name, IntVar[] vars) {
+		IntVar result = ref().intVar(name, 0, vars.length-1, false);
+		if (!result.isInstantiated()) {
+			ref().argmax(result, 0, vars).post();
+		}
+		return result;
+	}
 
 
 	//*************************************************************************************
