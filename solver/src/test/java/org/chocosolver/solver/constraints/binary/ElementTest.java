@@ -379,12 +379,7 @@ public class ElementTest {
 	}
 
 	/**
-	 * In this case, the element factory maps the whole element constraint to
-	 * an arithmetic constraint (ElementFactory, line: 68) but forgets to care
-	 * about the value of `Index`.
-	 *
-	 * This could be fixed in constant time ensuring that
-	 * 0 <= index.getLB() - offset
+	 * In this case, the value variable is directly generated
 	 *
 	 * @throws ContradictionException never
 	 */
@@ -396,14 +391,14 @@ public class ElementTest {
 				choco.intVar(new int[]{3})
 		};
 
-		IntVar   index  = choco.intVar(new int[]{-4, 0});
+		IntVar   index  = choco.intVar("index", new int[]{-4, 0});
 		IntVar   value  = choco.element("value", values, index, 0);
 		choco.member(value, new int[]{-1, 0, 3}).post();
 
 		choco.getSolver().propagate();
 
-		// FAILS !
 		Assert.assertTrue(index.isInstantiatedTo(0));
+		Assert.assertTrue(value.isInstantiatedTo(3));
 	}
 
 	/**

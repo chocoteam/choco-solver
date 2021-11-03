@@ -94,9 +94,13 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	 * @return a variable equal to table[index-offser]
 	 */
 	default IntVar element(String name, int[] table, IntVar index, int offset){
-		IntVar result = ref().intVar(name, index.stream().map(v->table[v-offset]).toArray());
+		IntVar result = ref().intVar(name, index.stream()
+				.filter(v-> v>=offset && v<table.length+offset)
+				.map(v->table[v-offset]).toArray());
 		if (!result.isInstantiated()) {
 			ref().element(result, table, index, offset).post();
+		} else if(index.getLB()<offset || index.getUB()>offset+table.length-1){
+			ref().member(index, offset, offset+table.length-1).post();
 		}
 		return result;
 	}
@@ -110,11 +114,17 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	 * @return a variable equal to table[index-offser]
 	 */
 	default IntVar element(String name, IntVar[] table, IntVar index, int offset) {
-		int lb = index.stream().map(v->table[v-offset].getLB()).min().getAsInt();
-		int ub = index.stream().map(v->table[v-offset].getUB()).max().getAsInt();
+		int lb = index.stream()
+				.filter(v-> v>=offset && v<table.length+offset)
+				.map(v->table[v-offset].getLB()).min().getAsInt();
+		int ub = index.stream()
+				.filter(v-> v>=offset && v<table.length+offset)
+				.map(v->table[v-offset].getUB()).max().getAsInt();
 		IntVar result = ref().intVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().element(result, table, index, offset).post();
+		} else if(index.getLB()<offset || index.getUB()>offset+table.length-1){
+			ref().member(index, offset, offset+table.length-1).post();
 		}
 		return result;
 	}
@@ -279,10 +289,14 @@ public interface IResultVariableFactory extends ISelf<Model> {
 	 */
 	default SetVar element(String name, IntVar index, SetVar[] sets, int offset) {
 		int[] lb = new int[0];
-		int[] ub = Arrays.stream(sets).flatMapToInt(s-> Arrays.stream(s.getUB().toArray())).distinct().toArray();
+		int[] ub = index.stream()
+				.filter(i -> i>= offset && i<sets.length+offset)
+				.flatMap(i-> Arrays.stream(sets[i].getUB().toArray())).distinct().toArray();
 		SetVar result = ref().setVar(name, lb, ub);
 		if (!result.isInstantiated()) {
 			ref().element(index, sets, offset, result).post();
+		} else if(index.getLB()<offset || index.getUB()>offset+sets.length-1){
+			ref().member(index, offset, offset+sets.length-1).post();
 		}
 		return result;
 	}
