@@ -1111,7 +1111,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param om the objective manager to use instead of the declared one (if any).
      */
-    public void setObjectiveManager(IObjectiveManager om) {
+    public void setObjectiveManager(IObjectiveManager<?> om) {
         this.objectivemanager = om;
         mMeasures.setBoundsManager(om);
     }
@@ -1228,7 +1228,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Empties the list of stop criteria declared.
-     * This is not automatically called on {@link #reset()}.
+     * This is automatically called on {@link #reset()}.
      */
     @SuppressWarnings("WeakerAccess")
     public void removeAllStopCriteria() {
