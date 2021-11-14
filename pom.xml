@@ -262,6 +262,8 @@
                             <version>9</version>
                         </jdkToolchain>
                         <release>8</release>
+                    	<fork>true</fork>
+                    	<useIncrementalCompilation>true</useIncrementalCompilation>
                     </configuration>
                 </plugin>
                 <plugin>
