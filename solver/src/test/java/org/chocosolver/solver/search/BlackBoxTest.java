@@ -38,6 +38,8 @@ public class BlackBoxTest {
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::domOverWDegSearch},
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::conflictHistorySearch},
 				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::domOverWDegRefSearch},
+				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureRateBasedSearch},
+				{(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureLengthBasedSearch},
 		};
 	}
 
@@ -47,7 +49,7 @@ public class BlackBoxTest {
 		IntVar[] vars = model.retrieveIntVars(true);
 		Solver solver = model.getSolver();
 		solver.setSearch(strat.apply(vars));
-		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
+		solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findAllSolutions();
 		solver.printShortStatistics();
@@ -60,7 +62,7 @@ public class BlackBoxTest {
 		IntVar[] vars = model.retrieveIntVars(true);
 		Solver solver = model.getSolver();
 		solver.setSearch(strat.apply(vars));
-		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
+		solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findOptimalSolution((IntVar) model.getHook("objective"), false);
 		solver.printShortStatistics();
@@ -73,7 +75,7 @@ public class BlackBoxTest {
 		IntVar[] vars = model.retrieveIntVars(true);
 		Solver solver = model.getSolver();
 		solver.setSearch(strat.apply(vars));
-		solver.setGeometricalRestart(vars.length * 3, 1.1d, new FailCounter(model, 0), 1000);
+		solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
 		solver.setNoGoodRecordingFromSolutions(vars);
 		solver.findAllSolutions();
 		solver.printShortStatistics();

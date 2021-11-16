@@ -12,7 +12,7 @@ NEXT MILESTONE
 Consequently, it is now possible to profil the propagation by calling `solver.profilePropagation()`. 
 See Javadoc for details and usages (#832).
 - Release 4.10.7 introduces a bug related to delta monitors, which is now fixed (#837).
-
+- Add new black-box strategy: failure based variable ordering heuristics (@lihb905)
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
@@ -20,6 +20,7 @@ See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Hongbo Li](https://github.com/lihb905) (@lihb905)
 
 4.10.7 - 11 Oct 2021
 -------------------

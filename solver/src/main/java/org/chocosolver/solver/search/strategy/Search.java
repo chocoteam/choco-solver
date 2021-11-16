@@ -165,12 +165,12 @@ public class Search {
     /**
      * Generic strategy to branch on graph variables
      *
-     * @param varS          Variable selection strategy
-     * @param nodeOrEdgeS   Node or edge selection (defines if whenever a decision must be on nodes or edges)
-     * @param nodeS         Node selector (defines which node to enforce/remove if decision is on nodes)
-     * @param edgeS         Edge selector (defines which edge to enforce/remove if decision is on edges)
-     * @param enforceFirst  branching order true = enforce first; false = remove first
-     * @param graphs        GraphVar array to branch on
+     * @param varS         Variable selection strategy
+     * @param nodeOrEdgeS  Node or edge selection (defines if whenever a decision must be on nodes or edges)
+     * @param nodeS        Node selector (defines which node to enforce/remove if decision is on nodes)
+     * @param edgeS        Edge selector (defines which edge to enforce/remove if decision is on edges)
+     * @param enforceFirst branching order true = enforce first; false = remove first
+     * @param graphs       GraphVar array to branch on
      * @return
      */
     public static GraphStrategy graphVarSearch(VariableSelector<GraphVar> varS, GraphNodeOrEdgeSelector nodeOrEdgeS,
@@ -181,7 +181,7 @@ public class Search {
 
     /**
      * Default graph var search.
-     *
+     * <p>
      * Variable selection: input order.
      * Node or edges selection: nodes first then edges.
      * Node selection: lexicographic order.
@@ -216,14 +216,14 @@ public class Search {
 
     /**
      * Random graph var search.
-     *
+     * <p>
      * Variable selection: random.
      * Node or edges selection: nodes first then edges.
      * Node selection: random.
      * Edge selection random.
      * Enforce first.
      *
-     * @param seed the seed for random selection
+     * @param seed   the seed for random selection
      * @param graphs graph variables to branch on
      * @return a randomized graph variables search strategy
      */
@@ -438,6 +438,33 @@ public class Search {
         return new IntStrategy(vars, new ConflictHistorySearch(vars, 0), new IntDomainMin());
     }
 
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure rate based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<IntVar> failureRateBasedSearch(IntVar... vars) {
+        return new FailureBased(vars, 0, 2, new IntDomainMin());
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure length based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<IntVar> failureLengthBasedSearch(IntVar... vars) {
+        return new FailureBased(vars, 0, 4, new IntDomainMin());
+    }
 
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in - the domain in case
@@ -698,7 +725,7 @@ public class Search {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new ConflictHistorySearch(vars,solver.getModel().getSeed(), flushThs),
+                        new ConflictHistorySearch(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -750,6 +777,30 @@ public class Search {
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 //noinspection unchecked
                 return defaultSearch(solver.getModel());
+            }
+        },
+        /**
+         * To select variables according to Failure rate based variable ordering with decaying factor.
+         */
+        FRBA {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return new FailureBased(vars,
+                        solver.getModel().getSeed(),
+                        2,
+                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last));
+            }
+        },
+        /**
+         * To select variables according to Failure length based variable ordering with decaying factor.
+         */
+        FLBA {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return new FailureBased(vars,
+                        solver.getModel().getSeed(),
+                        4,
+                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last));
             }
         },
         /**
@@ -859,7 +910,7 @@ public class Search {
          * @param solver        target solver
          * @param vars          array of integer variables
          * @param valueSelector the value selector enum
-         * @param flushThs flush threshold, when reached, it flushes scores
+         * @param flushThs      flush threshold, when reached, it flushes scores
          * @param last          set to {@code true} to use {@link IntDomainLast} meta value strategy.
          * @return a search strategy on {@code IntVar[]}
          */
