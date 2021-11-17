@@ -25,7 +25,7 @@
 2018,rotating-workforce+ex1479.fzn,1,_,128979,128877
 2018,steiner-tree+es10fst03.stp.fzn,2,26003678,90342,90339
 2018,test-scheduling+t30m10r3-15.fzn,1,2785,7684,7683
-2017,group+u12g1pref0.fzn,13,297,819,794
+2017,group+u12g1pref0.fzn,13,207,819,794
 2017,tcgc2+k10_34.fzn,2,433,429538,429535
 2016,tpp+6_3_20_1.fzn,65,131,2813028,2812899
 2012,amaze+amaze+2012-03-15.fzn,1,1429,139638,139637
@@ -47,6 +47,6 @@
 2012,ship-schedule+ship-schedule.cp+6ShipsMixed.fzn,237,301650,16089,15616
 2012,solbat+sb+sb_12_12_5_1.fzn,1,_,1315,1284
 2012,solbat+sb+sb_14_14_6_0.fzn,1,_,383,352
-2012,still-life-wastage+still-life+09.fzn,5,46,109471,109462
+2012,still-life-wastage+still-life+09.fzn,5,43,109471,109462
 2012,still-life-wastage+still-life+10.fzn,7,54,164574,164561
 2012,tpp+tpp+tpp_5_5_20_1.fzn,54,115,3215963,3215856
