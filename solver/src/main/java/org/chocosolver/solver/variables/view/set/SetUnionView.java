@@ -12,13 +12,19 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
+import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * Set view over set variables representing the union of these variables.
@@ -119,5 +125,41 @@ public class SetUnionView extends SetView<SetVar> {
             enforce.add(element);
         }
         return false;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetUnionView does not support getDelta()");
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        ISetDeltaMonitor[] deltaMonitors = new ISetDeltaMonitor[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            deltaMonitors[i] = variables[i].monitorDelta(propagator);
+        }
+        return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
+            ISet remove = new SetUnion(removedValues);
+            ISet added = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            ISet add = new SetDifference(new SetUnion(addedValues), added);
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                fillValues();
+                if (evt == SetEventType.ADD_TO_KER) {
+                    for (int v : add) {
+                        proc.execute(v);
+                    }
+                    for (int v : add) {
+                        added.add(v);
+                    }
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    for (int v : remove) {
+                        if (!getUB().contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                }
+            }
+        };
     }
 }

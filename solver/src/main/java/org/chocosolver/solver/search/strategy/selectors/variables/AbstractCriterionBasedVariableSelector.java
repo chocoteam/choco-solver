@@ -18,14 +18,19 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -35,7 +40,7 @@ import java.util.function.BiFunction;
  * @since 26/02/2020.
  */
 public abstract class AbstractCriterionBasedVariableSelector implements VariableSelector<IntVar>,
-        IVariableMonitor<Variable>, IMonitorContradiction {
+        IVariableMonitor<Variable>, IMonitorContradiction, IMonitorRestart {
 
     /**
      * An element helps to keep 2 things up to date:
@@ -64,6 +69,13 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
                 }
                 return w;
             };
+
+    protected static final int FLUSH_TOPS = 20;
+    protected static final double FLUSH_RATIO = .9 * FLUSH_TOPS;
+    protected int flushThs;
+
+    protected final HashSet<Object> tops = new HashSet<>();
+    protected int loop = 0;
 
     /**
      * Randomness to break ties
@@ -108,18 +120,19 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
     final HashMap<Propagator<?>, double[]> refinedWeights = new HashMap<>();
     static final double[] rw = {0.};
 
-    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed) {
+    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed, int flush) {
         this.random = new java.util.Random(seed);
         this.solver = vars[0].getModel().getSolver();
         this.environment = vars[0].getModel().getEnvironment();
         this.last = environment.makeInt(vars.length - 1);
+        this.flushThs = flush;
     }
 
     @Override
     public final IntVar getVariable(IntVar[] vars) {
         IntVar best = null;
         bests.resetQuick();
-        double w = 0.;
+        double w = Double.NEGATIVE_INFINITY;
         int to = last.get();
         for (int idx = 0; idx <= to; idx++) {
             int domSize = vars[idx].getDomainSize();
@@ -215,6 +228,34 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
         return 0;
     }
 
+    /**
+     * This method sorts elements wrt to their weight.
+     * If 90% of the top 20 elements remain unchanged, then weights are flushed
+     *
+     * @return <i>true</i> if the weights should be flushed
+     */
+    protected boolean flushWeights(TObjectDoubleMap<?> q) {
+        //if(true)return false;
+        List<Variable> temp = weights.keySet().stream()
+                .sorted(Comparator.comparingDouble(q::get))
+                .limit(FLUSH_TOPS)
+                .collect(Collectors.toList());
+        long cnt = temp.stream().filter(tops::contains).count();
+        if (cnt >= FLUSH_RATIO) {
+            loop++;
+        } else {
+            loop = 0;
+        }
+        tops.clear();
+        if (loop == flushThs) {
+            loop = 0;
+            return true;
+        } else {
+            tops.addAll(temp);
+            return false;
+        }
+    }
+
     //////////////////////////////////////////////////////////////////////
     ////////////////// THIS IS RELATED TO INCREMENTAL FUTVARS ////////////
     //////////////////////////////////////////////////////////////////////
@@ -276,19 +317,24 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
             elt.ws[i] = w;
         } else {
             // It means that futvars <= 1
-            Variable other = p.getVar(elt.ws[1 - i]);
+            int k = 1 - i;
+            Variable other = p.getVar(elt.ws[k]);
             if (!other.isInstantiated()) {
                 // 'var' is the last one not instantiated,
                 // so this counter will not be taken into account
                 double[] delta = {0.};
                 double[] ws = refinedWeights.get(p);
-                if (elt.ws[i] < ws.length) {
+                if (elt.ws[k] < ws.length) {
                     // may happen propagators (like PropSat) with dynamic variable addition
-                    delta[0] = ws[elt.ws[i]];
+                    delta[0] = ws[elt.ws[k]];
                 }
                 weights.adjustValue(other, -delta[0]);
                 // but it should be restored upon backtrack
-                environment.save(() -> weights.adjustValue(other, +delta[0]));
+                environment.save(() -> {
+                    double ww = weights.get(other) + delta[0];
+                    ww = Math.max(ww, 0.);
+                    weights.put(other, ww);
+                });
             }
         }
     }

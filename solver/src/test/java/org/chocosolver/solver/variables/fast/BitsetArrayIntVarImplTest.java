@@ -669,6 +669,7 @@ public class BitsetArrayIntVarImplTest {
 		Model s = new Model();
 		IntVar i = s.intVar("i", new int[]{0, 98, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+		d.startMonitoring();
 		i.updateUpperBound(98, Cause.Null);
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
@@ -681,6 +682,7 @@ public class BitsetArrayIntVarImplTest {
 		Model s = new Model();
 		IntVar i = s.intVar("i", new int[]{0, 98, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+		d.startMonitoring();
 		i.updateBounds(0,98, Cause.Null);
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
@@ -693,6 +695,7 @@ public class BitsetArrayIntVarImplTest {
 		Model s = new Model();
 		IntVar i = s.intVar("i", new int[]{2, 3, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+		d.startMonitoring();
 		i.updateLowerBound(3, Cause.Null);
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);
@@ -705,6 +708,7 @@ public class BitsetArrayIntVarImplTest {
 		Model s = new Model();
 		IntVar i = s.intVar("i", new int[]{2, 3, 99});
 		IIntDeltaMonitor d= i.monitorDelta(Cause.Null);
+		d.startMonitoring();
 		i.updateBounds(3,99, Cause.Null);
 		TIntArrayList remvals= new TIntArrayList(1);
 		d.forEachRemVal((IntProcedure) remvals::add);

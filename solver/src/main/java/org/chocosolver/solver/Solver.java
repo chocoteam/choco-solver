@@ -421,8 +421,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
-            logger.white().println("No search strategies defined.");
-            logger.white().println("Set to default ones.");
+            if(getModel().getSettings().warnUser()) {
+                logger.white().println("No search strategies defined.");
+                logger.white().println("Set to default ones.");
+            }
             defaultSearch = true;
             setSearch(mModel.getSettings().makeDefaultSearch(mModel));
         }
@@ -1035,7 +1037,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             if (c.isEnabled()) {
                 ESat satC = c.isSatisfied();
                 if (FALSE == satC) {
-                    logger.bold().red().printf("FAILURE >> %s (%s)%n", c, satC);
+                    if (getModel().getSettings().warnUser()) {
+                        logger.bold().red().printf("FAILURE >> %s (%s)%n", c, satC);
+                    }
                     return FALSE;
                 } else if (TRUE == satC) {
                     OK++;
@@ -1107,7 +1111,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param om the objective manager to use instead of the declared one (if any).
      */
-    public void setObjectiveManager(IObjectiveManager om) {
+    public void setObjectiveManager(IObjectiveManager<?> om) {
         this.objectivemanager = om;
         mMeasures.setBoundsManager(om);
     }
@@ -1224,7 +1228,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Empties the list of stop criteria declared.
-     * This is not automatically called on {@link #reset()}.
+     * This is automatically called on {@link #reset()}.
      */
     @SuppressWarnings("WeakerAccess")
     public void removeAllStopCriteria() {

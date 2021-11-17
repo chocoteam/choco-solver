@@ -42,17 +42,13 @@ public class PropagationEngine {
     public static boolean CHECK_SCOPE = false;
 
     /**
-     * Mask to deal with emptiness (see {@link #notEmpty})
-     */
-    private static final int WORD_MASK = 0xffffffff;
-    /**
      * The model declaring this engine
      */
-    private final Model model;
+    final Model model;
     /**
      * The array of propagators to execute
      */
-    private final List<Propagator> propagators;
+    final List<Propagator<?>> propagators;
     /**
      * To deal with propagators added dynamically
      */
@@ -61,15 +57,15 @@ public class PropagationEngine {
      * The main structure of this engine: seven circular queues,
      * each of them is dedicated to store propagator to execute wrt their priority.
      */
-    private final CircularQueue<Propagator>[] pro_queue;
+    private final CircularQueue<Propagator<?>>[] pro_queue;
 
     private final CircularQueue<Variable> var_queue;
 
-    private final CircularQueue<Propagator> awake_queue;
+    private final CircularQueue<Propagator<?>> awake_queue;
     /**
      * The last propagator executed
      */
-    private Propagator lastProp;
+    Propagator<?> lastProp;
     /**
      * One bit per queue: true if the queue is not empty.
      */
@@ -92,7 +88,8 @@ public class PropagationEngine {
     /**
      * For dynamyc addition, avoid creating a new lambda at each call
      */
-    private final Consumer<Propagator> consumer = new Consumer<Propagator>() {
+    @SuppressWarnings("Convert2Diamond")
+    private final Consumer<Propagator<?>> consumer = new Consumer<Propagator<?>>() {
         @Override
         public void accept(Propagator propagator) {
             awake_queue.addLast(propagator);
@@ -134,7 +131,7 @@ public class PropagationEngine {
             init = true;
             Constraint[] constraints = model.getCstrs();
             for (int c = 0; c < constraints.length; c++) {
-                Propagator[] cprops = constraints[c].getPropagators();
+                Propagator<?>[] cprops = constraints[c].getPropagators();
                 Collections.addAll(propagators, cprops);
             }
             if (model.getSettings().sortPropagatorActivationWRTPriority()) {
@@ -168,7 +165,6 @@ public class PropagationEngine {
      *
      * @throws ContradictionException if a contradiction occurs
      */
-    @SuppressWarnings({"NullableProblems"})
     public void propagate() throws ContradictionException {
         activatePropagators();
         do {
@@ -182,20 +178,24 @@ public class PropagationEngine {
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
-                if (lastProp.reactToFineEvent()) {
-                    lastProp.doFinePropagation();
-                    // now we can check whether a delayed propagation has been scheduled
-                    if (delayedPropagationType > 0) {
-                        lastProp.propagate(delayedPropagationType);
-                    }
-                } else if (lastProp.isActive()) { // need to be checked due to views
-                    lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
-                }
+                propagateEvents();
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
             }
         } while (!var_queue.isEmpty());
+    }
+
+    protected void propagateEvents() throws ContradictionException {
+        if (lastProp.reactToFineEvent()) {
+            lastProp.doFinePropagation();
+            // now we can check whether a delayed propagation has been scheduled
+            if (delayedPropagationType > 0) {
+                lastProp.propagate(delayedPropagationType);
+            }
+        } else if (lastProp.isActive()) { // need to be checked due to views
+            lastProp.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
+        }
     }
 
     /**
@@ -217,7 +217,7 @@ public class PropagationEngine {
      * @param propagator a propagator to propagate
      * @throws ContradictionException if propagation fails
      */
-    public void execute(Propagator propagator) throws ContradictionException {
+    public void execute(Propagator<?> propagator) throws ContradictionException {
         if (propagator.isStateLess()) {
             propagator.setActive();
         }
@@ -272,14 +272,17 @@ public class PropagationEngine {
     public void onVariableUpdate(Variable variable, IEventType type, ICause cause) {
         if (CHECK_SCOPE && Propagator.class.isAssignableFrom(cause.getClass())) {
             // make sure the variable appears in prop scope
-            Propagator p = (Propagator) cause;
+            Propagator<?> p = (Propagator<?>) cause;
             boolean found = false;
             for (int i = 0; i < p.getNbVars() && !found; i++) {
                 found = (p.getVar(i) == variable);
             }
             assert found : variable + " not in scope of " + cause;
         }
-        var_queue.addLast(variable);
+        if (!variable.isScheduled()) {
+            var_queue.addLast(variable);
+            variable.schedule();
+        }
         variable.storeEvents(type.getMask(), cause);
     }
 
@@ -287,11 +290,10 @@ public class PropagationEngine {
         int mask = variable.getMask();
         if (mask > 0) {
             ICause cause = variable.getCause();
-            Propagator[] vpropagators = variable.getPropagators();
+            Propagator<?>[] vpropagators = variable.getPropagators();
             int[] vindices = variable.getPIndices();
-            Propagator prop;
-            EvtScheduler si = variable.getEvtScheduler();
-            //noinspection unchecked
+            Propagator<?> prop;
+            EvtScheduler<?> si = variable.getEvtScheduler();
             si.init(mask);
             while (si.hasNext()) {
                 int p = variable.getDindex(si.next());
@@ -307,7 +309,7 @@ public class PropagationEngine {
         variable.clearEvents();
     }
 
-    public void schedule(Propagator prop, int pindice, int mask) {
+    public void schedule(Propagator<?> prop, int pindice, int mask) {
         prop.doScheduleEvent(pindice, mask);
         notEmpty |= (1 << prop.doSchedule(pro_queue));
     }
@@ -318,10 +320,17 @@ public class PropagationEngine {
      * @param propagator propagator to execute
      * @param type       type of event to execute
      */
-    public void delayedPropagation(Propagator propagator, PropagatorEventType type) {
+    public void delayedPropagation(Propagator<?> propagator, PropagatorEventType type) {
         assert propagator == lastProp;
         assert delayedPropagationType == 0 || delayedPropagationType == type.getMask();
         delayedPropagationType = type.getMask();
+    }
+
+    /**
+     * @return the propagator Event Type's mask for delayed propagation
+     */
+    int getDelayedPropagation(){
+        return delayedPropagationType;
     }
 
     /**
@@ -329,7 +338,7 @@ public class PropagationEngine {
      *
      * @param propagator propagator to execute
      */
-    public void onPropagatorExecution(Propagator propagator) {
+    public void onPropagatorExecution(Propagator<?> propagator) {
         desactivatePropagator(propagator);
     }
 
@@ -338,7 +347,7 @@ public class PropagationEngine {
      *
      * @param propagator propagator to desactivate
      */
-    public void desactivatePropagator(Propagator propagator) {
+    public void desactivatePropagator(Propagator<?> propagator) {
         if (propagator.reactToFineEvent()) {
             propagator.doFlush();
         }
@@ -377,7 +386,7 @@ public class PropagationEngine {
      * @param ps        propagators to add
      *                  * @throws SolverException if a constraint is declared more than once in this propagation engine
      */
-    public void dynamicAddition(boolean permanent, Propagator... ps) throws SolverException {
+    public void dynamicAddition(boolean permanent, Propagator<?>... ps) throws SolverException {
         int nbp = ps.length;
         for (int i = 0; i < nbp; i++) {
             if (permanent) {
@@ -394,7 +403,7 @@ public class PropagationEngine {
      *
      * @param p a propagator
      */
-    public void updateInvolvedVariables(Propagator p) {
+    public void updateInvolvedVariables(Propagator<?> p) {
         propagateOnBacktrack(p); // TODO: when p is not permanent AND a new var is added ... well, one looks for trouble!
     }
 
@@ -403,7 +412,7 @@ public class PropagationEngine {
      *
      * @param propagator a propagator
      */
-    public void propagateOnBacktrack(Propagator propagator) {
+    public void propagateOnBacktrack(Propagator<?> propagator) {
         int idx = propagator.getPosition();
         assert propagators.get(idx) == propagator : "Try to remove the wrong propagator";
         shift(idx);
@@ -417,8 +426,8 @@ public class PropagationEngine {
      *
      * @param ps a list of propagators
      */
-    public void dynamicDeletion(Propagator... ps) {
-        for (Propagator toDelete : ps) {
+    public void dynamicDeletion(Propagator<?>... ps) {
+        for (Propagator<?> toDelete : ps) {
             if (lastProp == toDelete) {
                 lastProp = null;
             }
@@ -429,7 +438,7 @@ public class PropagationEngine {
         }
     }
 
-    private void remove(Propagator propagator) {
+    private void remove(Propagator<?> propagator) {
         int idx = propagator.getPosition();
         if (idx > -1) {
             assert propagators.get(idx) == propagator : "Try to remove the wrong propagator";
@@ -447,9 +456,9 @@ public class PropagationEngine {
         }
     }
 
-    private class DynPropagators {
+    private static class DynPropagators {
 
-        private Propagator[] elements;
+        private Propagator<?>[] elements;
         private int[] keys;
         private int size;
 
@@ -463,7 +472,7 @@ public class PropagationEngine {
             size = 0;
         }
 
-        public void add(Propagator e) {
+        public void add(Propagator<?> e) {
             ensureCapacity();
             elements[size] = e;
             keys[size++] = Integer.MAX_VALUE;
@@ -471,7 +480,7 @@ public class PropagationEngine {
 
         private void ensureCapacity() {
             if (size >= elements.length - 1) {
-                Propagator[] tmp = elements;
+                Propagator<?>[] tmp = elements;
                 elements = new Propagator[elements.length * 3 / 2];
                 System.arraycopy(tmp, 0, elements, 0, size);
                 int[] itmp = keys;
@@ -480,12 +489,12 @@ public class PropagationEngine {
             }
         }
 
-        void addOrUpdate(Propagator e) {
+        void addOrUpdate(Propagator<?> e) {
             remove(e);
             add(e);
         }
 
-        public void remove(Propagator e) {
+        public void remove(Propagator<?> e) {
             int p = indexOf(e);
             if (p > -1) {
                 removeAt(p);
@@ -501,7 +510,7 @@ public class PropagationEngine {
             keys[size] = 0;
         }
 
-        private int indexOf(Propagator e) {
+        private int indexOf(Propagator<?> e) {
             for (int i = 0; i < size; i++) {
                 if (e.equals(elements[i])) {
                     return i;
@@ -510,7 +519,7 @@ public class PropagationEngine {
             return -1;
         }
 
-        void descending(int w, Consumer<Propagator> cons) {
+        void descending(int w, Consumer<Propagator<?>> cons) {
             int i = size - 1;
             while (i >= 0 && keys[i] >= w) {
                 cons.accept(elements[i]);

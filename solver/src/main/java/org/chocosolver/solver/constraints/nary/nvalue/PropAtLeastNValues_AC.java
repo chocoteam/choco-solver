@@ -46,18 +46,19 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private DirectedGraph digraph;
+    private final int n;
+    private final int n2;
+    private final DirectedGraph digraph;
     private int[] nodeSCC;
-    private BitSet free;
-    private UnaryIntProcedure<Integer> remProc;
+    private final BitSet free;
+    private final UnaryIntProcedure<Integer> remProc;
     private final IIntDeltaMonitor[] idms;
-    private StrongConnectivityFinder SCCfinder;
+    private final StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
-    private int[] father;
-    private BitSet in;
-    private TIntIntHashMap map;
-    private int[] fifo;
+    private final int[] father;
+    private final BitSet in;
+    private final TIntIntHashMap map;
+    private final int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -133,7 +134,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
     // MATCHING
     //***********************************************************************************
 
-    private int repairMatching() throws ContradictionException {
+    private int repairMatching() {
         for (int i = free.nextSetBit(0); i >= 0 && i < n; i = free.nextSetBit(i + 1)) {
             tryToMatch(i);
         }
@@ -146,7 +147,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         return card;
     }
 
-    private void tryToMatch(int i) throws ContradictionException {
+    private void tryToMatch(int i) {
         int mate = augmentPath_BFS(i);
         if (mate != -1) {
             free.clear(mate);
@@ -285,6 +286,9 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         if (vars[n].getLB() == card) {
             filter();
         }
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].startMonitoring();
+        }
     }
 
     @Override
@@ -334,7 +338,7 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer integer) {
+        public UnaryIntProcedure<Integer> set(Integer integer) {
             this.idx = integer;
             return this;
         }

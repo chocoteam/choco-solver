@@ -1,15 +1,14 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/solver/src/resources/png/ChocoLogo-160x135.png)
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
-[![Build Status](https://travis-ci.org/chocoteam/choco-solver.svg?branch=master)](https://travis-ci.org/chocoteam/choco-solver)
-
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2GHMNLTP4MCL8)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/chocoteam/choco-solver?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) 
 [![javadoc.io](https://javadoc.io/badge2/org.choco-solver/choco-solver/javadoc.io.svg)](https://javadoc.io/doc/org.choco-solver/choco-solver)
 
+![Build](https://github.com/chocoteam/choco-solver/actions/workflows/maven-test.yml/badge.svg)
 [![codecov.io](https://codecov.io/github/chocoteam/choco-solver/coverage.svg?branch=master)](https://codecov.io/github/chocoteam/choco-solver?branch=master)
 [![Total alerts](https://img.shields.io/lgtm/alerts/g/chocoteam/choco-solver.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/chocoteam/choco-solver/alerts/)
-[![Codacy Badge](https://api.codacy.com/project/badge/grade/b0ab28bdd7fd4da095ad72c2c46bce57)](https://www.codacy.com/app/cprudhom/choco-solver)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f1bafa113f94486b96343d63782c0f7a)](https://www.codacy.com/gh/chocoteam/choco-solver/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=chocoteam/choco-solver&amp;utm_campaign=Badge_Grade)
+
 
 * [Documentation, Support and Issues](#doc)
 * [Contributing](#con)
@@ -17,7 +16,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.10.6 (11 Dec 2020).
+Current stable version is 4.10.7 (11 Oct 2021).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -27,7 +26,7 @@ Choco-solver comes with:
 
 But also, facilities to interact with the search loop, factories to help modelling, many samples, etc.
 
-Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2020, IMT Atlantique).
+Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2021, IMT Atlantique).
 
 Contact: [Choco-solver on Gitter](https://gitter.im/chocoteam/choco-solver#)
 
@@ -56,9 +55,7 @@ solver.printStatistics();
 <a name="doc"></a>
 ## Documentation, Support and Issues
 
-The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to a 
-[tarball](https://github.com/chocoteam/choco-solver/releases/download/4.10.6/choco-4.10.6.zip) which contains
-the binary, the source code, the user guide (pdf) and the apidocs (zip).
+The [latest release](https://github.com/chocoteam/choco-solver/releases/latest) points to binaries and source code.
 
 You can get help on our [google group](https://groups.google.com/forum/#!forum/choco-solver).
 Most support requests are answered very fast.
@@ -105,9 +102,11 @@ In the following, we distinguish two usages of Choco:
 - as a standalone library: the jar file includes all required dependencies,
 - as a library: the jar file excludes all dependencies.
 
-The name of the jar file terms the packaging:- `choco-solver-4.10.4-jar-with-dependencies.jar` or - `choco-solver-4.10.4.jar`.
-- `choco-solver-4.10.4-jar-with-dependencies.jar` or
-- `choco-solver-4.10.4.jar`.
+The name of the jar file terms the packaging:
+- `choco-solver-4.XX.Y-jar-with-dependencies.jar` or 
+- `choco-solver-4.XX.Y.jar`.
+- `choco-solver-4.XX.Y-jar-with-dependencies.jar` or
+- `choco-solver-4.XX.Y.jar`.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -120,7 +119,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.10.6</version>
+   <version>4.10.7</version>
 </dependency>
 ```
 

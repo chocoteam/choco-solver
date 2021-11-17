@@ -96,6 +96,9 @@ public class PropIntersectionFilterSets extends Propagator<SetVar> {
                 }
             }
         }
+        for (int i = 0; i <= k; i++) {
+            sdm[i].startMonitoring();
+        }
     }
 
     private SetVar findUniqueSetThatDoesNotContainJInLB(int j) {

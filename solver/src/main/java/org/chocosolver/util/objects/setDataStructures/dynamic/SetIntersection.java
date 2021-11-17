@@ -25,15 +25,35 @@ public class SetIntersection extends AbstractSet {
     public ISet[] sets;
     protected ISet values;
 
+    /**
+     * Constructor for unstored SetIntersection. Internal storage is RANGESET by default.
+     */
     public SetIntersection(ISet... sets) {
+        this(SetType.RANGESET, 0, sets);
+    }
+
+    /**
+     * Constructor for unstored SetIntersection with manual specification of set type for internal storage.
+     */
+    public SetIntersection(SetType setType, int offset, ISet... sets) {
         this.sets = sets;
-        this.values = SetFactory.makeRangeSet();
+        this.values = SetFactory.makeSet(setType, offset);
         init();
     }
 
+    /**
+     * Constructor for stored SetIntersection. Internal storage is RANGESET by default.
+     */
     public SetIntersection(Model model, ISet... sets) {
+        this(model, SetType.RANGESET, 0, sets);
+    }
+
+    /**
+     * Constructor for stored SetIntersection with manual specification of set type for internal storage.
+     */
+    public SetIntersection(Model model, SetType setType, int offset, ISet... sets) {
         this.sets = sets;
-        this.values = SetFactory.makeStoredSet(SetType.RANGESET, 0, model);
+        this.values = SetFactory.makeStoredSet(setType, offset, model);
         init();
     }
 
@@ -111,8 +131,9 @@ public class SetIntersection extends AbstractSet {
 
     @Override
     public void notifyElementRemoved(int element, int idx) {
-        values.remove(element);
-        notifyObservingElementRemoved(element);
+        if (values.remove(element)) {
+            notifyObservingElementRemoved(element);
+        }
     }
 
     @Override
@@ -132,9 +153,7 @@ public class SetIntersection extends AbstractSet {
 
     @Override
     public void notifyCleared(int idx) {
-        for (int v : sets[idx]) {
-            values.remove(v);
-            notifyObservingElementRemoved(v);
-        }
+        values.clear();
+        notifyObservingCleared();
     }
 }

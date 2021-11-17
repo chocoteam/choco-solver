@@ -9,14 +9,19 @@
  */
 package org.chocosolver.solver.variables.view.graph.directed;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.delta.GraphViewDeltaMonitor;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.PairProcedure;
 
 /**
  * NODE INDUCED DIRECTED SUBGRAPH VIEWS:
@@ -35,6 +40,7 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
 
     protected DirectedGraphVar graphVar;
     protected boolean exclude;
+    protected ISet nodes;
 
     /**
      * Creates a node induced directed subgraph view.
@@ -47,8 +53,9 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
         super(name, new DirectedGraphVar[] {graphVar});
         this.exclude = exclude;
         this.graphVar = graphVar;
-        this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), nodes, exclude);
-        this.ub = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getUB(), nodes, exclude);
+        this.nodes = nodes;
+        this.lb = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getLB(), graphVar.getUB(), nodes, exclude);
+        this.ub = GraphFactory.makeNodeInducedSubgraph(getModel(), graphVar.getUB(), graphVar.getUB(),  nodes, exclude);
     }
 
     @Override
@@ -98,5 +105,33 @@ public class DirectedNodeInducedSubgraphView extends DirectedGraphView<DirectedG
             notifyPropagators(GraphEventType.ADD_EDGE, this);
         }
         notifyPropagators(event, this);
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        return new GraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
+            @Override
+            public void forEachNode(IntProcedure proc, GraphEventType evt) throws ContradictionException {
+                IntProcedure filter = i -> {
+                    if (exclude && !nodes.contains(i)) {
+                        proc.execute(i);
+                    } else if (!exclude && nodes.contains(i)) {
+                        proc.execute(i);
+                    }
+                };
+                deltaMonitors[0].forEachNode(filter, evt);
+            }
+            @Override
+            public void forEachEdge(PairProcedure proc, GraphEventType evt) throws ContradictionException {
+                PairProcedure filter = (from, to) -> {
+                    if (exclude && !nodes.contains(from) && !nodes.contains(to)) {
+                        proc.execute(from, to);
+                    } else if (!exclude && nodes.contains(from) && nodes.contains(to)) {
+                        proc.execute(from, to);
+                    }
+                };
+                deltaMonitors[0].forEachEdge(filter, evt);
+            }
+        };
     }
 }

@@ -19,6 +19,7 @@ import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetList;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.variables.BoolVar;
@@ -200,6 +201,14 @@ public class Datas {
                         solver.getObjectiveManager().getBestSolutionValue().intValue(),
                         solver.getTimeCount());
             }
+            if (level.is(Level.IRACE)) {
+                solver.log().printf(Locale.US, "%d %.2f\n",
+                        solver.getObjectiveManager().isOptimization() ?
+                                (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                        * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                                -solver.getSolutionCount(),
+                        solver.getTimeCount());
+            }
             if (level.is(Level.JSON)) {
                 solver.log().printf(Locale.US, "%s{\"bound\":%d,\"time\":%.1f}",
                         solver.getSolutionCount() > 1 ? "," : "",
@@ -261,10 +270,29 @@ public class Datas {
             solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
                     solver.getTimeCount(), complete ? "terminated" : "stopped");
         }
+        if (level.is(Level.IRACE)) {
+            /*long obj = solver.getObjectiveManager().isOptimization() ?
+                    (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                            * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                    -solver.getSolutionCount();
+            long tim = complete ?
+                    (int) Math.ceil(solver.getTimeCount()) :
+                    999_999; // arbitrary value
+            double value = obj + 1e-6*tim;
+            solver.log().printf(Locale.US, "%.6f",value);*/
+            solver.log().printf(Locale.US, "%d %.2f\n",
+                    solver.getObjectiveManager().isOptimization() ?
+                            (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                    * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            -solver.getSolutionCount(),
+                    complete ?
+                            solver.getTimeCount() :
+                            86_399.99); // 24h
+        }
         if (level.isLoggable(Level.INFO)) {
             solver.log().bold().white().printf("%s \n", solver.getMeasures().toOneLineString());
         }
-        if(oss){
+        if (oss) {
             solver.log().printf(Locale.US, "%%%%%%mzn-stat: initTime=%.3f%n", solver.getReadingTimeCount());
             solver.log().printf(Locale.US, "%%%%%%mzn-stat: solveTime=%.3f%n", solver.getTimeCount());
             solver.log().printf("%%%%%%mzn-stat: solutions=%d%n", solver.getSolutionCount());

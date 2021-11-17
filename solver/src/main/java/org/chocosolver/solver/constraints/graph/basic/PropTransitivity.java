@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints.graph.basic;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -26,16 +25,20 @@ import org.chocosolver.util.procedure.PairProcedure;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
+public class PropTransitivity<V extends GraphVar<?>> extends Propagator<V> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private V g;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure arcEnforced, arcRemoved;
-    private TIntArrayList eF, eT, rF, rT;
+    private final V g;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure arcEnforced;
+    private final PairProcedure arcRemoved;
+    private final TIntArrayList eF;
+    private final TIntArrayList eT;
+    private final TIntArrayList rF;
+    private final TIntArrayList rT;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -71,6 +74,7 @@ public class PropTransitivity<V extends GraphVar> extends Propagator<V> {
             }
         }
         filter();
+        gdm.startMonitoring();
     }
 
     @Override

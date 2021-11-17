@@ -36,6 +36,8 @@ public class Settings {
 
     private Predicate<Solver> modelChecker = s -> !ESat.FALSE.equals(s.isSatisfied());
 
+    private boolean cloneVariableArrayInPropagator = true;
+
     private boolean enableViews = true;
 
     private int maxDomSizeForEnumerated = 1 << 16;
@@ -48,7 +50,7 @@ public class Settings {
 
     private boolean sortPropagatorActivationWRTPriority = true;
 
-    private Function<Model, AbstractStrategy> defaultSearch = Search::defaultSearch;
+    private Function<Model, AbstractStrategy<?>> defaultSearch = Search::defaultSearch;
 
     private boolean warnUser = false;
 
@@ -61,6 +63,10 @@ public class Settings {
     private boolean swapOnPassivate = false;
 
     private boolean checkDeclaredConstraints = true;
+
+    private boolean checkDeclaredViews = true;
+
+    private boolean checkDeclaredMonitors = true;
 
     private boolean printAllUndeclaredConstraints = false;
 
@@ -82,13 +88,52 @@ public class Settings {
 
     private Function<Model, Solver> initSolver = Solver::new;
 
-    private HashMap<String, Object> additionalSettings = new HashMap<>();
+    private final HashMap<String, Object> additionalSettings = new HashMap<>();
 
-    private Settings(){
+    private Settings() {
     }
 
-    public static Settings init(){
+    /**
+     * Create a new instance of `Settings` which can then be adapted to requirements.
+     *
+     * @return a Settings with default values
+     * @see #dev()
+     * @see #prod()
+     */
+    public static Settings init() {
         return new Settings();
+    }
+
+    /**
+     * Define and returns settings adapted to production environment.
+     * All checks and warnings are turned off.
+     *
+     * @return a settings adapted to production environment.
+     */
+    public static Settings prod() {
+        return Settings.init()
+                .setModelChecker(s -> true)
+                .setWarnUser(false)
+                .setCheckDeclaredConstraints(false)
+                .setCheckDeclaredViews(false)
+                .setCheckDeclaredMonitors(false)
+                .setPrintAllUndeclaredConstraints(false);
+    }
+
+    /**
+     * Define and returns settings adapted to development environment.
+     * All checks and warnings are turned on.
+     *
+     * @return a settings adapted to development environment.
+     */
+    public static Settings dev() {
+        return Settings.init()
+                .setModelChecker(s -> !ESat.FALSE.equals(s.isSatisfied()))
+                .setWarnUser(true)
+                .setCheckDeclaredConstraints(true)
+                .setCheckDeclaredViews(true)
+                .setCheckDeclaredMonitors(true)
+                .setPrintAllUndeclaredConstraints(true);
     }
 
     /**
@@ -121,6 +166,25 @@ public class Settings {
         return this;
     }
 
+    /**
+     * @return true if all propagators should clone the input variable array instead of simply referencing it.
+     */
+    public boolean cloneVariableArrayInPropagator() {
+        return cloneVariableArrayInPropagator;
+    }
+
+    /**
+     * If this setting is set to true (default value), a clone of the input variable array is made in any propagator constructors.
+     * This prevents, for instance, wrong behavior when permutations occurred on the input array (e.g., sorting variables).
+     * Setting this to false may limit the memory consumption during modelling.
+     *
+     * @param cloneVariableArrayInPropagator {@code true} to clone variables array on constructor
+     * @return the current instance
+     */
+    public Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator) {
+        this.cloneVariableArrayInPropagator = cloneVariableArrayInPropagator;
+        return this;
+    }
 
     /**
      * @return <tt>true</tt> if views are enabled.
@@ -249,7 +313,7 @@ public class Settings {
      * @return a default search strategy for model
      * @see Search#defaultSearch(Model)
      */
-    public AbstractStrategy makeDefaultSearch(Model model) {
+    public AbstractStrategy<?> makeDefaultSearch(Model model) {
         return defaultSearch.apply(model);
     }
 
@@ -259,7 +323,7 @@ public class Settings {
      * @param defaultSearch what default search strategy should be
      * @return the current instance
      */
-    public Settings setDefaultSearch(Function<Model, AbstractStrategy> defaultSearch) {
+    public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
     }
@@ -414,6 +478,35 @@ public class Settings {
     public Settings setPrintAllUndeclaredConstraints(boolean printAllUndeclaredConstraints) {
         this.printAllUndeclaredConstraints = printAllUndeclaredConstraints;
         return this;
+    }
+
+    /**
+     * @return <i>true</i> (default value) to check prior to creation
+     * if a view already semantically exists.
+     */
+    public boolean checkDeclaredViews() {
+        return checkDeclaredViews;
+    }
+
+
+    /**
+     * Check if a view already semantically exists before creating it.
+     *
+     * @param checkDeclaredViews {@code true} to check views before creation
+     * @return the current instance
+     */
+    public Settings setCheckDeclaredViews(boolean checkDeclaredViews) {
+        this.checkDeclaredViews = checkDeclaredViews;
+        return this;
+    }
+
+    public Settings setCheckDeclaredMonitors(boolean check) {
+        this.checkDeclaredMonitors = check;
+        return this;
+    }
+
+    public boolean checkDeclaredMonitors() {
+        return this.checkDeclaredMonitors;
     }
 
     /**
@@ -628,7 +721,7 @@ public class Settings {
      * it leads to different results in calculations like `Math.pow(10, 6)`.
      * See issue #740.
      *
-     * @param ibexRestoreRounding
+     * @param ibexRestoreRounding either Java or ibex rounding method
      * @implNote Supported since ibex-java version 1.2.0
      */
     public Settings setIbexRestoreRounding(boolean ibexRestoreRounding) {
@@ -643,11 +736,11 @@ public class Settings {
         return ibexRestoreRounding;
     }
 
-    public Object get(String key){
+    public Object get(String key) {
         return additionalSettings.get(key);
     }
 
-    public Settings set(String key, Object value){
+    public Settings set(String key, Object value) {
         this.additionalSettings.put(key, value);
         return this;
     }

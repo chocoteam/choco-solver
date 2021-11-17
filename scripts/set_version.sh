@@ -36,7 +36,6 @@ then
     sedInPlace "s%The name of the jar file terms the packaging: .*%The name of the jar file terms the packaging:- \`choco-solver-$VERSION-jar-with-dependencies.jar\` or - \`choco-solver-$VERSION.jar\`.%" README.md
     sedInPlace "s%<version>.*</version>%<version>$VERSION</version>%"  README.md
     sedInPlace "s%Choco-solver is distributed.*.%Choco-solver is distributed under BSD 4-Clause License \(Copyright \(c\) 1999-$YEAR, IMT Atlantique).%"  README.md
-    sedInPlace "s%\[tarball\].*%[tarball](https://github.com/chocoteam/choco-solver/releases/download/$VERSION/choco-$VERSION.zip) which contains%" README.md
 
     ## The LICENSE
     sedInPlace "s%Copyright.*.%Copyright (c) $YEAR, IMT Atlantique%"  LICENSE
@@ -45,9 +44,9 @@ then
     sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
     ## For MiniZinc
-    sedInPlace "s%COPY --from=builder /choco-solver/parsers/target/choco-parsers-.*%COPY --from=builder /choco-solver/parsers/target/choco-parsers-$VERSION-jar-with-dependencies.jar /entry_data/choco-parsers.jar%"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
+    sedInPlace "s%    git fetch -q && git checkout -q master && \.*%    git fetch -q && git checkout -q $VERSION && \%"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
-    sedInPlace "s%CHOCO_JAR=.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minzinc/fzn-choco
+    sedInPlace "s%CHOCO_JAR=~/.m2/.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minizinc/fzn-choco
 
     ## The CHANGES.md
     # replace the 'NEXT MILESTONE' version by VERSION

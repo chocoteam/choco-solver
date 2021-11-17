@@ -11,7 +11,6 @@ package org.chocosolver.solver.constraints.checker;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.THashMap;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
@@ -237,6 +236,26 @@ public interface Modeler {
                 if (map != null) map.put(domains[i], vars[i]);
             }
             s.absolute(vars[0], vars[1]).post();
+            s.getSolver().setSearch(randomSearch(vars, 0));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "modelAbsolute";
+        }
+    };
+
+    Modeler modelSquare = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("Square" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = s.intVar("v_" + i, domains[i]);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+            s.square(vars[0], vars[1]).post();
             s.getSolver().setSearch(randomSearch(vars, 0));
             return s;
         }

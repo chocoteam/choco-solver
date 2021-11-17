@@ -67,6 +67,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
                 }
             }
         }
+        idm.startMonitoring();
     }
 
     @Override

@@ -42,7 +42,7 @@ public class PropCompactTable extends Propagator<IntVar> {
     int[][] residues;
     protected int[] offset;
     protected IIntDeltaMonitor[] monitors;
-    private UnaryIntProcedure<Integer> onValRem;
+    private final UnaryIntProcedure<Integer> onValRem;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -71,18 +71,19 @@ public class PropCompactTable extends Propagator<IntVar> {
     //***********************************************************************************
 
     protected UnaryIntProcedure<Integer> makeProcedure() {
+        //noinspection Convert2Diamond
         return new UnaryIntProcedure<Integer>() {
             int var, off;
 
             @Override
-            public UnaryIntProcedure set(Integer o) {
+            public UnaryIntProcedure<Integer> set(Integer o) {
                 var = o;
                 off = offset[var];
                 return this;
             }
 
             @Override
-            public void execute(int i) throws ContradictionException {
+            public void execute(int i) {
                 currTable.addToMask((supports[var][i - off]));
             }
         };
@@ -136,6 +137,9 @@ public class PropCompactTable extends Propagator<IntVar> {
                     currTable.addToMask(supports[i][v - offset[i]]);
                 }
                 currTable.intersectWithMask();
+            }
+            for (int i = 0; i < vars.length; i++) {
+                monitors[i].startMonitoring();
             }
         }
         filterDomains();
@@ -233,11 +237,11 @@ public class PropCompactTable extends Propagator<IntVar> {
 // RSparseBitSet
 //***********************************************************************************
 
-    protected class RSparseBitSet {
+    protected static class RSparseBitSet {
         protected IStateLong[] words;
-        private int[] index;
-        private IStateInt limit;
-        private long[] mask;
+        private final int[] index;
+        private final IStateInt limit;
+        private final long[] mask;
 
         protected RSparseBitSet(IEnvironment environment, int nbBits) {
             int nw = nbBits / 64;

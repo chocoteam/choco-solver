@@ -9,10 +9,10 @@
  */
 package org.chocosolver.solver.constraints.graph.basic;
 
-import org.chocosolver.solver.constraints.PropagatorPriority;
-import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.ESat;
@@ -32,9 +32,9 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private DirectedGraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure remove;
+    private final DirectedGraphVar g;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure remove;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -67,6 +67,7 @@ public class PropAntiSymmetric extends Propagator<DirectedGraphVar> {
                 }
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

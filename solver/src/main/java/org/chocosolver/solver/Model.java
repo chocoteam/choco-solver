@@ -917,6 +917,9 @@ public class Model implements IModel {
         if (constraints != null) {
             for (Constraint c : constraints) {
                 // 1. look for the constraint c
+                if(c.getStatus() != Constraint.Status.POSTED){
+                    throw new SolverException("The constraint "+c+" was not posted to the model and cannot be unposted");
+                }
                 int idx = c.getCidxInModel();
                 c.declareAs(Constraint.Status.FREE, -1);
                 c.ignore();

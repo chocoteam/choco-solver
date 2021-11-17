@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * These constraints will automatically be removed on backtrack.
  *
  * @author Charles Prud'homme
- * @since 06/02/2014
+ * @since 31/08/2020
  */
 public class PropConditional extends Propagator<Variable> {
 

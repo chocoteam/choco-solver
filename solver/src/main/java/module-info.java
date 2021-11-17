@@ -123,6 +123,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.procedure;
     exports org.chocosolver.util.sort;
     exports org.chocosolver.util.tools;
+    exports org.chocosolver.util.bandit;
 
     requires trove4j;
     requires org.jgrapht.core;
@@ -147,8 +148,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.element to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers;
-    exports org.chocosolver.util.bandit;
+    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, tesng;
 
 
 }

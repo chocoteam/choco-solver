@@ -22,6 +22,7 @@ public abstract class AbstractView<V extends Variable> extends AbstractVariable 
      * @param name name of the view
      * @param variables observed variables
      */
+    @SuppressWarnings("unchecked")
     protected AbstractView(String name, V... variables) {
         super(name, variables[0].getModel());
         this.variables = variables;

@@ -93,6 +93,19 @@ public class TestConsistency {
         }
     }
 
+    @Test(groups="checker", timeOut=60000)
+    public void testSQUARE() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 1; i++) {
+            checkConsistency(Modeler.modelSquare, 2, 2, 50, null, seed + i, "bc");
+            checkConsistency(Modeler.modelSquare, 2, -25, 25, null, seed + i, "bc");
+            checkConsistency(Modeler.modelSquare, 2, -50, 50, null, seed + i, "bc");
+            checkConsistency(Modeler.modelSquare, 2, 2, 50, null, seed + i, "ac");
+            checkConsistency(Modeler.modelSquare, 2, -25, 25, null, seed + i, "ac");
+            checkConsistency(Modeler.modelSquare, 2, -50, 50, null, seed + i, "ac");
+        }
+    }
+
     // Count *******************************************************
 
     @Test(groups="checker", timeOut=60000)
@@ -243,7 +256,7 @@ public class TestConsistency {
     public void testPLUSAC() {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
-            checkConsistency(Modeler.modelplusac, 3, -15, 15, null, seed + i, "ac");
+            checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
         }
     }
 

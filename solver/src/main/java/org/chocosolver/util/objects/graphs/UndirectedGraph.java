@@ -171,6 +171,80 @@ public class UndirectedGraph implements IGraph {
     }
 
     /**
+     * CONSTRUCTOR FOR BACKTRACKABLE NODE INDUCED SUBGRAPHS:
+     *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param nodes the set of nodes to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, UndirectedGraph UB, ISet nodes, boolean exclude) {
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        boolean needDynamic = false;
+        ISet neighNeeded = UB.nodes;
+        if (exclude) {
+            for (int i : nodes) {
+                if (UB.getNodes().contains(i)) {
+                    needDynamic = true;
+                    this.nodes = new SetDifference(model, g.getNodes(), nodes);
+                    neighNeeded = new SetDifference(model, UB.getNodes(), nodes);
+                    break;
+                }
+            }
+        } else {
+            for (int i : UB.getNodes()) {
+                if (!nodes.contains(i)) {
+                    needDynamic = true;
+                    SetType nodeSetType = g.getNodeSetType();
+                    this.nodes = new SetIntersection(model, nodeSetType, 0, g.getNodes(), nodes);
+                    neighNeeded = new SetIntersection(model, nodeSetType, 0, UB.getNodes(), nodes);
+                    break;
+                }
+            }
+        }
+        if (!needDynamic) {
+            this.nodes = g.nodes;
+        }
+        neighbors = new ISet[n];
+        for (int i : neighNeeded) {
+            needDynamic = false;
+            if (exclude) {
+                for (int j : nodes) {
+                    if (UB.getNeighborsOf(i).contains(j)) {
+                        needDynamic = true;
+                        neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), nodes);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getNeighborsOf(i)) {
+                    if (!nodes.contains(j)) {
+                        needDynamic = true;
+                        SetType edgeSetType = g.getEdgeSetType();
+                        neighbors[i] = new SetIntersection(model, edgeSetType, 0, g.getNeighborsOf(i), nodes);
+                        break;
+                    }
+                }
+            }
+            if (!needDynamic) {
+                neighbors[i] = g.neighbors[i];
+            }
+        }
+    }
+
+    /**
      * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
      *
      * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
@@ -203,6 +277,63 @@ public class UndirectedGraph implements IGraph {
     /**
      * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
      *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param g the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param edges the set of edges to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public UndirectedGraph(Model model, UndirectedGraph g, UndirectedGraph UB, ISet[] edges, boolean exclude) {
+        assert edges.length == g.getNbMaxNodes();
+        this.nodeSetType = SetType.DYNAMIC;
+        this.edgeSetType = SetType.DYNAMIC;
+        this.n = g.getNbMaxNodes();
+        neighbors = new ISet[n];
+        boolean nodeNeedDynamic = false;
+        for (int i = 0; i < n; i++) {
+            boolean needDynamic = false;
+            if (exclude) {
+                for (int j : edges[i]) {
+                    if (UB.getNeighborsOf(i).contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        neighbors[i] = new SetDifference(model, g.getNeighborsOf(i), edges[i]);
+                        break;
+                    }
+                }
+            } else {
+                for (int j : UB.getNeighborsOf(i)) {
+                    if (!edges[i].contains(j)) {
+                        needDynamic = true;
+                        nodeNeedDynamic = true;
+                        neighbors[i] = new SetIntersection(model, g.getEdgeSetType(), 0, g.getNeighborsOf(i), edges[i]);
+                        break;
+                    }
+                }
+            }
+            if (!needDynamic) {
+                neighbors[i] = g.neighbors[i];
+            }
+        }
+        if (nodeNeedDynamic) {
+            this.nodes = new SetUnion(model, g.nodeSetType, 0, neighbors);
+        } else {
+            this.nodes = g.nodes;
+        }
+    }
+
+    /**
+     * GENERIC CONSTRUCTOR FOR BACKTRACKABLE EDGE INDUCED SUBGRAPHS:
+     *
      * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
      *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
      *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
@@ -216,6 +347,10 @@ public class UndirectedGraph implements IGraph {
      */
     public UndirectedGraph(Model model, UndirectedGraph g, int[][] edges, boolean exclude) {
         this(model, g, edgesArrayToEdgesSets(g.getNbMaxNodes(), edges), exclude);
+    }
+
+    public UndirectedGraph(Model model, UndirectedGraph g, UndirectedGraph UB, int[][] edges, boolean exclude) {
+        this(model, g, UB, edgesArrayToEdgesSets(g.getNbMaxNodes(), edges), exclude);
     }
 
     // Graph arithmetic constructors
@@ -375,14 +510,12 @@ public class UndirectedGraph implements IGraph {
     public boolean addEdge(int x, int y) {
         addNode(x);
         addNode(y);
-        if (x == y && !neighbors[x].contains(y)) {
-            neighbors[x].add(y);
-            return true;
+        if (x == y) {
+            return neighbors[x].add(y);
         }
-        if (!neighbors[x].contains(y)) {
-            assert (!neighbors[y].contains(x)) : "asymmetric adjacency matrix in an undirected graph";
-            neighbors[x].add(y);
-            neighbors[y].add(x);
+        if (neighbors[x].add(y)) {
+            boolean b = neighbors[y].add(x);
+            assert b : "asymmetric adjacency matrix in an undirected graph";
             return true;
         }
         return false;
@@ -411,14 +544,12 @@ public class UndirectedGraph implements IGraph {
      * @return true iff (x,y) was in the graph
      */
     public boolean removeEdge(int x, int y) {
-        if (x == y && neighbors[x].contains(y)) {
-            neighbors[y].remove(x);
-            return true;
+        if (x == y) {
+            return neighbors[y].remove(x);
         }
-        if (neighbors[x].contains(y)) {
-            assert (neighbors[y].contains(x)) : "asymmetric adjacency matrix in an undirected graph";
-            neighbors[x].remove(y);
-            neighbors[y].remove(x);
+        if (neighbors[x].remove(y)) {
+            boolean b = neighbors[y].remove(x);
+            assert b : "asymmetric adjacency matrix in an undirected graph";
             return true;
         }
         return false;

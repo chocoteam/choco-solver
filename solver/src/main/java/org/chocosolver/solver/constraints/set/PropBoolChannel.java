@@ -7,12 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
 
 package org.chocosolver.solver.constraints.set;
 
@@ -31,7 +25,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * Channeling between a set variable and boolean variables
- *
+ * @since 14/01/13
  * @author Jean-Guillaume Fages
  */
 public class PropBoolChannel extends Propagator<Variable> {
@@ -40,12 +34,13 @@ public class PropBoolChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private int offSet;
-    private BoolVar[] bools;
-    private SetVar set;
-    private ISetDeltaMonitor sdm;
-    private IntProcedure setForced, setRemoved;
+    private final int n;
+    private final int offSet;
+    private final BoolVar[] bools;
+    private final SetVar set;
+    private final ISetDeltaMonitor sdm;
+    private final IntProcedure setForced;
+    private final IntProcedure setRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -102,6 +97,7 @@ public class PropBoolChannel extends Propagator<Variable> {
             int j = iter.nextInt();
             bools[j - offSet].setToTrue(this);
         }
+        sdm.startMonitoring();
     }
 
     @Override

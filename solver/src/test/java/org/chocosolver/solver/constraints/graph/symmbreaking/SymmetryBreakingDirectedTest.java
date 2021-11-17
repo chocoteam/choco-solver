@@ -37,8 +37,8 @@ public class SymmetryBreakingDirectedTest {
 
     private static Constraint containsDirectedTree(DirectedGraphVar graph) {
         return new Constraint("subTree", new Propagator<DirectedGraphVar>(new DirectedGraphVar[] {graph}, PropagatorPriority.LINEAR, false) {
-            DirectedGraphVar graph = vars[0];
-            int n = graph.getNbMaxNodes();
+            final DirectedGraphVar graph = vars[0];
+            final int n = graph.getNbMaxNodes();
 
             void dfs(boolean[] used, int u) {
                 used[u] = true;
@@ -128,7 +128,7 @@ public class SymmetryBreakingDirectedTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public static void testAll() {
-        for (int n = 0; n < 5; n++) {
+        for (int n = 0; n < 7; n++) {
             System.out.println(n);
             for (int m = 0; m < n * n; m++) {
                 test(n, m);

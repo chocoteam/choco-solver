@@ -51,9 +51,9 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
             alive = true;
             try {
                 Thread.sleep(duration);
-                //noinspection InfiniteLoopStatement
                 do {
                     body(false);
+                    //noinspection BusyWait
                     Thread.sleep(duration);
                 } while (alive);
             } catch (InterruptedException ignored) {

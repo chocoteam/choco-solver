@@ -82,7 +82,7 @@ public class UGVarConnectivityHelper {
 
         visited.clear();
         Arrays.fill(num, 0);
-        for(int root : mNodes.toArray()) { // uses to array because default iterator may be used within the algorithm
+        for(int root : mNodes) {
             if(!visited.get(root)) {
                 // root node init
                 visited.set(root);

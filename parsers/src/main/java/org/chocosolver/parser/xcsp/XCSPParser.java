@@ -34,6 +34,7 @@ import org.xcsp.common.Condition;
 import org.xcsp.common.Types;
 import org.xcsp.common.predicates.XNode;
 import org.xcsp.common.predicates.XNodeParent;
+import org.xcsp.common.structures.Transition;
 import org.xcsp.parser.callbacks.XCallbacks2;
 import org.xcsp.parser.entries.XConstraints;
 import org.xcsp.parser.entries.XVariables;
@@ -900,20 +901,20 @@ public class XCSPParser implements XCallbacks2 {
 
 
     @Override
-    public void buildCtrRegular(String id, XVariables.XVarInteger[] list, Object[][] transitions, String startState, String[] finalStates) {
+    public void buildCtrRegular(String id, XVariables.XVarInteger[] list, Transition[] transitions, String startState, String[] finalStates) {
         FiniteAutomaton auto = new FiniteAutomaton();
         TObjectIntHashMap<String> s2s = new TObjectIntHashMap<>(16, 1.5f, -1);
-        for (Object[] tr : transitions) {
-            int f = s2s.get(tr[0]);
-            int v = ((Long)tr[1]).intValue();
+        for (Transition tr : transitions) {
+            int f = s2s.get(tr.start);
+            int v = ((Long)tr.value).intValue();
             if (f == -1) {
                 f = auto.addState();
-                s2s.put((String) tr[0], f);
+                s2s.put(tr.start, f);
             }
-            int t = s2s.get(tr[2]);
+            int t = s2s.get(tr.end);
             if (t == -1) {
                 t = auto.addState();
-                s2s.put((String) tr[2], t);
+                s2s.put(tr.end, t);
             }
             auto.addTransition(f, t, v);
         }
@@ -923,12 +924,12 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
-    public void buildCtrMDD(String id, XVariables.XVarInteger[] list, Object[][] transitions) {
-        HashMap<String, List<Object[]>>  layers = new HashMap<>();
+    public void buildCtrMDD(String id, XVariables.XVarInteger[] list, Transition[] transitions) {
+        HashMap<String, List<Transition>>  layers = new HashMap<>();
         HashSet<String> possibleRoots = new HashSet<>(), notRoots = new HashSet<>();
         Set<String> possibleWells = new HashSet<>(), notWells = new HashSet<>();
         for (int t = 0; t < transitions.length; t++) {
-            String src = (String) transitions[t][0], tgt = (String) transitions[t][2];
+            String src = transitions[t].start, tgt = transitions[t].end;
             notWells.add(src);
             notRoots.add(tgt);
             if (!notRoots.contains(src)){
@@ -939,7 +940,7 @@ public class XCSPParser implements XCallbacks2 {
             }
             possibleRoots.remove(tgt);
             possibleWells.remove(src);
-            List<Object[]> succs = layers.computeIfAbsent(src, k -> new ArrayList<>());
+            List<Transition> succs = layers.computeIfAbsent(src, k -> new ArrayList<>());
             succs.add(transitions[t]);
         }
 
@@ -957,16 +958,16 @@ public class XCSPParser implements XCallbacks2 {
         queue.addLast(first);
         while(!queue.isEmpty()){
             String src = queue.pollFirst();
-            List<Object[]> succs = layers.get(src);
+            List<Transition> succs = layers.get(src);
             if(succs == null) continue;
-            for(Object[] t : succs){
-                String tgt = (String)t[2];
+            for(Transition t : succs){
+                String tgt = t.end;
                 if(!possibleRoots.contains(tgt)){
                     queue.addLast(tgt);
                     possibleRoots.add(tgt);
                     map.put(tgt, n++);
                 }
-                mtransitions[k++] = new int[]{map.get(src), ((Long) t[1]).intValue(),map.get(tgt)};
+                mtransitions[k++] = new int[]{map.get(src), ((Long) t.value).intValue(),map.get(tgt)};
             }
         }
         IntVar[] mVars = vars(list);

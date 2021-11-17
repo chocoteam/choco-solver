@@ -48,6 +48,17 @@ public class TestCorrectness {
         }
     }
 
+    // ABSOLUTE
+    @Test(groups = "checker", timeOut = 60000)
+    public void testSQUARE() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelSquare, 2, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
     // EQ
     @Test(groups="checker", timeOut=60000)
     public void testEQ() {

@@ -1,0 +1,4 @@
+var bool: x:: output_var;
+var bool: y:: output_var;
+constraint bool_xor(x,y,true);
+solve :: bool_search([x,y],input_order,indomain_max,complete) satisfy;

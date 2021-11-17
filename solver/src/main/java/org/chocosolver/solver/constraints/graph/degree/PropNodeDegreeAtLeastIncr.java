@@ -109,6 +109,7 @@ public class PropNodeDegreeAtLeastIncr extends Propagator<GraphVar<?>> {
             for (int node : act) {
                 stack.push(node);
             }
+            gdm.startMonitoring();
         }
         try {
             while (stack.size() > 0) {

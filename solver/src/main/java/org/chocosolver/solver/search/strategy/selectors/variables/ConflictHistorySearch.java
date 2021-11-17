@@ -59,7 +59,11 @@ public class ConflictHistorySearch
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
     public ConflictHistorySearch(IntVar[] vars, long seed) {
-        super(vars, seed);
+        this(vars, seed, Integer.MAX_VALUE);
+    }
+
+    public ConflictHistorySearch(IntVar[] vars, long seed, int flushThs) {
+        super(vars, seed, flushThs);
     }
 
     @Override
@@ -108,10 +112,18 @@ public class ConflictHistorySearch
 
     @Override
     public void afterRestart() {
-        for (Propagator p : q.keySet()) {
-            double qj = q.get(p);
-            q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+        if (flushWeights(q)) {
+            q.clear();
+            conflict.forEachEntry((a1, b) -> {
+                conflict.put(a1, conflicts);
+                return true;
+            });
+        } else {
+            for (Propagator p : q.keySet()) {
+                double qj = q.get(p);
+                q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+            }
+            alpha = .4d;
         }
-        alpha = .4d;
     }
 }
