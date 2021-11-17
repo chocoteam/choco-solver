@@ -125,10 +125,6 @@ public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 		return offset+values.nextSetBit(val);
 	}
 
-	public int getOffset() {
-		return offset;
-	}
-
 	@Override
 	public boolean contains(int element) {
 		return element >= offset && values.get(element - offset);
