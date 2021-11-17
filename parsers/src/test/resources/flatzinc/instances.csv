@@ -1,5 +1,5 @@
 #year,name,solutions,best,nodes,fails
-2021,feistel.fzn,1,17,174,160
+2021,feistel.fzn,1,_,174,160
 2020,bnn+inventory_4_8s.fzn,1,17,16,15
 #2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
 2020,is+v1HjuSBQMb.fzn,18,454656,13938,13903
