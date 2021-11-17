@@ -153,40 +153,6 @@ public class AllDiffPrec extends FilterAllDiffPrec {
         }
         return hasFiltered;
     }
-    //*/
-
-//    private boolean filter(boolean filterUb) {
-//        boolean hasFiltered = false;
-//        for (int i = 0; i < variables.length; i++) {
-//            list.sort(comparator);
-//            unionFind.init();
-//            int b;
-//            int nbSucc = 0;
-//            for (int k = 0; k < list.size(); k++) {
-//                int j = list.get(k);
-//                if(j != i) {// && ub[j] >= ub[i]) {
-//                    if (!isBefore(filterUb, i, j)) {
-//                        int idxSet = unionFind.find(lb[j]);
-//                        if(unionFind.find(unionFind.getMax(idxSet) + 1) >= 0) {
-//                            unionFind.union(unionFind.getMin(idxSet), unionFind.getMax(idxSet) + 1);
-//                        }
-//                    } else {
-//                        nbSucc++;
-//                    }
-//                    b = ub[j];
-//                    for(int n = 1; n <= nbSucc && b >= lb[i]; n++) {
-//                        int idxSet = unionFind.find(b);
-//                        b = (idxSet == -1 ? lb[i] : unionFind.getMin(idxSet)) - 1;
-//                    }
-//                    if(nbSucc > 0 && ub[i] > b) {
-//                        hasFiltered = true;
-//                        ub[i] = b;
-//                    }
-//                }
-//            }
-//        }
-//        return hasFiltered;
-//    }
 
     private boolean propagateBounds(boolean filterUb, ICause aCause) throws ContradictionException {
         boolean hasFiltered;
