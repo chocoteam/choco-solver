@@ -132,8 +132,5 @@ public interface SetVar extends Variable {
      * @param propagator observer
      * @return a new SetDeltaMonitor
      */
-	default ISetDeltaMonitor monitorDelta(ICause propagator) {
-		createDelta();
-		return new SetDeltaMonitor(getDelta(), propagator);
-	}
+	ISetDeltaMonitor monitorDelta(ICause propagator);
 }

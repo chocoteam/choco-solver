@@ -39,7 +39,7 @@ import java.util.HashSet;
  */
 public class PropRegular extends Propagator<IntVar> {
 
-    private StoredDirectedMultiGraph graph;
+    private final StoredDirectedMultiGraph graph;
     private final IAutomaton automaton;
     private final RemProc rem_proc;
     private final IIntDeltaMonitor[] idms;
@@ -49,6 +49,7 @@ public class PropRegular extends Propagator<IntVar> {
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
+            idms[i].startMonitoring();
         }
         rem_proc = new RemProc(this);
         this.automaton = automaton;
@@ -97,7 +98,7 @@ public class PropRegular extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idxVar) {
+        public UnaryIntProcedure<Integer> set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

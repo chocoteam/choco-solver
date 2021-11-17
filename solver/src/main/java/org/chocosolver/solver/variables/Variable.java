@@ -354,6 +354,21 @@ public interface Variable extends Identity, Comparable<Variable> {
     EvtScheduler<?> getEvtScheduler();
 
     /**
+     * @return true if related propagators are scheduled for propagation
+     */
+    boolean isScheduled();
+
+    /**
+     * Set this as scheduled
+     */
+    void schedule();
+
+    /**
+     * Set this as unscheduled
+     */
+    void unschedule();
+
+    /**
      * @return this cast into an IntVar.
      * @throws ClassCastException if type is not compatible
      */

@@ -93,6 +93,9 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         } else {
             filterNeq();
         }
+        for (int i = 0; i < idms.length; i++) {
+            idms[i].startMonitoring();
+        }
     }
 
     @Override
@@ -131,7 +134,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     filterLTonVar(vars[varIdx], vars[idx2]);
                 }
                 break;
-            default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+            default:
+                throw new SolverException("Invalid PropDistanceXYC operator " + operator);
         }
     }
 
@@ -147,7 +151,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
                     return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) < cste);
                 case NQ:
                     return ESat.eval(Math.abs(vars[0].getValue() - vars[1].getValue()) != cste);
-                default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+                default:
+                    throw new SolverException("Invalid PropDistanceXYC operator " + operator);
             }
         }
         return ESat.UNDEFINED;
@@ -170,7 +175,8 @@ public class PropDistanceXYC extends Propagator<IntVar> {
             case NQ:
                 st.append("=/=");
                 break;
-            default: throw new SolverException("Invalid PropDistanceXYC operator "+operator);
+            default:
+                throw new SolverException("Invalid PropDistanceXYC operator " + operator);
         }
         st.append(cste);
         return st.toString();
@@ -185,7 +191,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
     /**
      * Initial propagation in case of EQ and enumerated domains
      *
-     * @throws ContradictionException
+     * @throws ContradictionException when a failure occurs
      */
     public void filterFromVarToVar(IntVar var1, IntVar var2) throws ContradictionException {
         DisposableRangeIterator it = var1.getRangeIterator(true);
@@ -346,7 +352,7 @@ public class PropDistanceXYC extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer integer) {
+        public UnaryIntProcedure<Integer> set(Integer integer) {
             this.idx = integer;
             return this;
         }

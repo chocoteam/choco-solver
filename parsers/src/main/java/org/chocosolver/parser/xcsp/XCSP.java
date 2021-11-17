@@ -12,9 +12,9 @@ package org.chocosolver.parser.xcsp;
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
@@ -55,9 +55,7 @@ public class XCSP extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setEnableSAT(true)
-                .setModelChecker(solver -> true);
+        defaultSettings = Settings.prod();
     }
 
     @Override
@@ -230,6 +228,16 @@ public class XCSP extends RegParser {
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
                     solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.is(Level.IRACE)) {
+            solver.log().printf(Locale.US, "%d %d",
+                    solver.getObjectiveManager().isOptimization() ?
+                            (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                    * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            -solver.getSolutionCount(),
+                    complete ?
+                            (int) Math.ceil(solver.getTimeCount()) :
+                            Integer.MAX_VALUE);
         }
         if (level.isLoggable(Level.INFO)) {
             solver.getMeasures().toOneLineString();

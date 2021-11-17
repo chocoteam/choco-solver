@@ -7,12 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 10/05/13
- * Time: 01:32
- */
 
 package org.chocosolver.solver.constraints.nary.element;
 
@@ -80,7 +74,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         }
     }
 
-    private void filter()  throws ContradictionException {
+    private void filter() throws ContradictionException {
         boolean filter;
         do {
             filter = index.updateBounds(offset, vars.length + offset - 3, this);
@@ -148,21 +142,35 @@ public class PropElementV_fast extends Propagator<IntVar> {
     }
 
     private boolean disjoint(IntVar a, IntVar b) {
-        if (a.getLB() > b.getUB() || b.getLB() > a.getUB()) {
+        int la, ua, lb, ub;
+        if ((la = a.getLB()) > (ub = b.getUB()) || (lb = b.getLB()) > (ua = a.getUB())) {
             return true;
         }
         if (fast) {
             return false;
         }
-        int lb = a.getLB();
-        int ub = a.getUB();
-        for (int i = lb; i <= ub; i = a.nextValue(i)) {
-            if (b.contains(i)) {
+        if (a.getDomainSize() <= b.getDomainSize()) {
+            if (intersect(a, la, ua, b, lb, ub)) {
+                return false;
+            }
+        } else {
+            if (intersect(b, lb, ub, a, la, ua)) {
                 return false;
             }
         }
         rem = true;
         return true;
+    }
+
+    private boolean intersect(IntVar v1, int l1, int u1, IntVar v2, int l2, int u2) {
+        int low = Math.max(l1, l2);
+        int upp = Math.min(u1, u2);
+        for (int i = v1.nextValue(low -1); i <= upp; i = v1.nextValue(i)) {
+            if (v2.contains(i)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

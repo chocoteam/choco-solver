@@ -12,10 +12,13 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.solver.variables.view.delta.SetGraphViewDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.procedure.IntProcedure;
 
 import java.util.Arrays;
 
@@ -25,7 +28,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class SetNodeGraphView<E extends GraphVar> extends SetGraphView<E> {
+public class SetNodeGraphView<E extends GraphVar<?>> extends SetGraphView<E> {
 
     /**
      * Create a set view over the set of nodes of a graph variable.
@@ -96,5 +99,18 @@ public class SetNodeGraphView<E extends GraphVar> extends SetGraphView<E> {
     @Override
     public boolean isInstantiated() {
         return getLB().size() == getUB().size();
+    }
+
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        return new SetGraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                if (evt == SetEventType.ADD_TO_KER) {
+                    deltaMonitor.forEachNode(proc, GraphEventType.ADD_NODE);
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    deltaMonitor.forEachNode(proc, GraphEventType.REMOVE_NODE);
+                }
+            }
+        };
     }
 }

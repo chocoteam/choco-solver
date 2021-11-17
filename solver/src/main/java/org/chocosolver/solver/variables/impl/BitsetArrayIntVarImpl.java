@@ -102,7 +102,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     /**
      * Signed Literal
      */
-    protected SignedLiteral.Set literal;
+    private SignedLiteral.Set literal;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -118,7 +118,7 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         super(name, model);
         IEnvironment env = this.model.getEnvironment();
         this.LENGTH = sortedValues.length;
-        this.VALUES = sortedValues.clone();
+        this.VALUES = sortedValues;
         this.V2I = new TIntIntHashMap(VALUES.length, .5f, Integer.MIN_VALUE, -1);
         this.INDICES = env.makeBitSet(LENGTH);
         this.INDICES.set(0, LENGTH);
@@ -752,7 +752,6 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();

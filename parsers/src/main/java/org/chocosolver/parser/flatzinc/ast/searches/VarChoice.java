@@ -23,5 +23,6 @@ public enum VarChoice {
     largest,
     occurrence,
     most_constrained,
-    max_regret
+    max_regret,
+    dom_w_deg
 }

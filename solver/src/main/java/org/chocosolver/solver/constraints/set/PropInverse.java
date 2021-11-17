@@ -7,13 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -33,7 +26,9 @@ import java.util.Arrays;
  * Inverse set propagator
  * x in sets[y-offSet1] <=> y in inverses[x-offSet2]
  *
+ * @since 14/01/13
  * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
  */
 public class PropInverse extends Propagator<SetVar> {
 
@@ -41,11 +36,18 @@ public class PropInverse extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2, idx;
-    private SetVar[] sets, invsets, toFilter;
-    private int offSet1, offSet2, offSet;
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure elementForced, elementRemoved;
+    private final int n;
+    private final int n2;
+    private int idx;
+    private final SetVar[] sets;
+    private final SetVar[] invsets;
+    private SetVar[] toFilter;
+    private final int offSet1;
+    private final int offSet2;
+    private int offSet;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure elementForced;
+    private final IntProcedure elementRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -104,6 +106,9 @@ public class PropInverse extends Propagator<SetVar> {
             while (iter.hasNext()){
                 sets[iter.nextInt() - offSet1].force(i + offSet2, this);
             }
+        }
+        for (int i = 0; i < n + n2; i++) {
+            sdm[i].startMonitoring();
         }
     }
 

@@ -23,7 +23,7 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  *
  * @author : chameau, Jean-Guillaume Fages
  */
-public class Set_Std_BitSet extends AbstractSet {
+public class Set_Std_BitSet extends AbstractSet implements ISet.WithOffset {
 
 	//***********************************************************************************
 	// VARIABLE
@@ -53,6 +53,10 @@ public class Set_Std_BitSet extends AbstractSet {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	public int getOffset() {
+		return offset;
+	}
 
 	@Override
 	public boolean add(int element) {

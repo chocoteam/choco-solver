@@ -30,12 +30,8 @@ public class SetSearch {
     private SetSearch() {
     }
 
-    public static AbstractStrategy build(SetVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
+    public static AbstractStrategy<SetVar> build(SetVar[] variables, VarChoice varChoice, Assignment assignment, Model solver) {
         VariableSelector<SetVar> varsel = variableSelector(varChoice, solver);
-        if (varsel == null) { // free search
-            System.err.println("% No free search defined for SetVar");
-            return null;
-        }
         return valueSelector(variables, varsel, assignment);
     }
 
@@ -51,6 +47,7 @@ public class SetSearch {
             case largest:
             case most_constrained:
             case max_regret:
+            case dom_w_deg:
             default:
                 System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return new InputOrder<>(solver);

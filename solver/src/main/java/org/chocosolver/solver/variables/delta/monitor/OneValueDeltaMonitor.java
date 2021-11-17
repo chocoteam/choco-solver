@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.delta.monitor;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
 import org.chocosolver.solver.variables.delta.IEnumDelta;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -37,11 +38,27 @@ public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDelta
         this.propagator = propagator;
     }
 
+    @Override
+    public void startMonitoring() {
+        delta.lazyClear();    // fix 27/07/12
+        resetStamp();
+        this.used = false;
+    }
+
     private void freeze() {
+        if (getTimeStamp() == -1) {
+            throw new SolverException("If a propagator `p` declares delta monitors (for instance, `IIntDeltaMonitor monitor  = var.monitorDelta(this);`),\n" +
+                    "then a call to `monitor.activate()` is required as final instruction of on `p.propagate(int)`");
+        }
         if (needReset()) {
             delta.lazyClear();
             used = false;
             resetStamp();
+        }
+        if (getTimeStamp() != ((TimeStampedObject) delta).getTimeStamp()) {
+            throw new SolverException("Delta and monitor are not synchronized. " +
+                    "\ndeltamonitor.freeze() is called " +
+                    "but no value has been removed since the last call.");
         }
         used = delta.size() == 1;
     }

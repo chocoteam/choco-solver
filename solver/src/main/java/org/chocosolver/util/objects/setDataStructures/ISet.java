@@ -151,4 +151,8 @@ public interface ISet extends Iterable<Integer>{
         }
         return a;
     }
+
+    interface WithOffset {
+        int getOffset();
+    }
 }

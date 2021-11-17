@@ -45,7 +45,6 @@ public class PropNeighBoolChannel extends Propagator<Variable> {
         this.bools = neigh;
         this.g = gV;
         this.inc = incSet;
-        super.linkVariables();
     }
 
     //***********************************************************************************

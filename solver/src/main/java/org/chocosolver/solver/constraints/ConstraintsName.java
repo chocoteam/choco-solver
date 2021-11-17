@@ -41,6 +41,8 @@ public class ConstraintsName {
 
     public static final String DIVISION = "DIVISION";
 
+    public static final String ARGMAX = "ARGMAX";
+
     public static final String MAX = "MAX";
 
     public static final String MIN = "MIN";

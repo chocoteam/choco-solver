@@ -149,7 +149,7 @@ public class Solution implements ICause {
                 }
             }
         }
-        if (warn) {
+        if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
             model.getSolver().log().red().println("Some non decision variables are not instantiated in the current solution.");
         }
         return this;
