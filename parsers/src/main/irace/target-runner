@@ -1,0 +1,82 @@
+#!/bin/bash
+###############################################################################
+# This script is the command that is executed every run.
+# Check the examples in examples/
+#
+# This script is run in the execution directory (execDir, --exec-dir),
+# the same directory where target-evaluator is executed. Hence, you may
+# need to copy extra files needed by the executable to this directory.
+#
+#
+# PARAMETERS:
+# $1 is the candidate number
+# $2 is the instance id
+# $3 is the seed
+# $4 is the instance name
+# The rest ($* after `shift 4') are parameters to the run
+#
+# RETURN VALUE:
+# This script should print nothing.
+# Exit with 0 if no error, with 1 in case of error
+###############################################################################
+error() {
+    echo "`TZ=UTC date`: $0: error: $@"
+    cat $tmpfile
+    rm -f $tmpfile
+    exit 1
+}
+
+tmpfile=$(mktemp)
+
+
+CANDIDATE=$1
+INSTANCEID=$2
+SEED=$3
+INSTANCE=$4
+shift 4 || error "Not enough parameters"
+
+EXE=/usr/bin/java
+JAR=/home/cprudhom/tuning2020/Jars/choco-parsers-4.10.7a.jar
+COMMAND=" -XX:+UseSerialGC -server -Xmx4G -Xss64M -cp .:${JAR} org.chocosolver.parser.flatzinc.ChocoFZN "
+FIXED_PARAMS="-f -lvl IRACE -limit \"[20m,-1sols]\""
+
+CONFIG_PARAMS=$*
+
+# -varh DOMWDEG -valh BMIN -restarts [luby,100,50000] -flush 24
+
+STDOUT=c${CANDIDATE}-${INSTANCEID}-${SEED}.stdout
+STDERR=c${CANDIDATE}-${INSTANCEID}-${SEED}.stderr
+
+#tmpfile=tmp-${CANDIDATE}-${INSTANCEID}-${SEED}.txt
+
+# modify with the SLURM submission template
+sbatch --output=/dev/null --error=/dev/null 1> $tmpfile << EOF
+#!/bin/bash
+#SBATCH --job-name=irace-$PPID-$CANDIDATE-${INSTANCEID}-${SEED}
+###SBATCH --output=test-$CANDIDATE-${INSTANCEID}-${SEED}.out
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=4086
+#SBATCH --partition=ls2n
+module purge
+
+# TODO: Use /tmp for all temporary files, i.e., put target-data under /tmp
+mkdir -p target-data
+cd target-data || error "cannot change to directory \'target-data\'"
+srun -N1 -n1 $EXE ${COMMAND} $INSTANCE ${CONFIG_PARAMS} ${FIXED_PARAMS} 1> $STDOUT 2> $STDERR
+# We do this to make sure this target-runner terminated correctly in target-evaluator
+echo "OK" >> $STDERR
+exit 0
+EOF
+rc=$?
+if [[ $rc == 0 ]]; then
+    JOBID=$(grep -o -e "Submitted batch job [^ ]\+" $tmpfile | cut -f4 -d ' ')
+    #if ! [[ "$JOBID" =~ ^[_-.@0-9A-Za-z]+$ ]] ; then
+    #    error "$0: cannot parse jobID from the output of sbatch!"
+    #fi
+    echo "$JOBID"
+    rm -f $tmpfile
+    exit $rc
+else
+    error "$0: sbatch failed!"
+fi

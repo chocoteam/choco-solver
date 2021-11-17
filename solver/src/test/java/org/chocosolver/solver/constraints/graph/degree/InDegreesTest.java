@@ -352,7 +352,7 @@ public class InDegreesTest {
         Assert.assertEquals(test.solver.getSolutionCount(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void minInDegrees_constrainedSuccessTest() {
         int n = 5;
         int[] minInDegrees = new int[] {3, 1, 1, 2, 0, 1};

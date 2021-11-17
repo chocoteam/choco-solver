@@ -31,7 +31,8 @@ import org.chocosolver.util.procedure.IntProcedure;
 
 public final class PropEqualXY_C extends Propagator<IntVar> {
 
-    private IntVar x, y;
+    private final IntVar x;
+    private final IntVar y;
     private final int cste;
     // incremental filtering of enumerated domains
     private boolean bothEnumerated;
@@ -39,7 +40,6 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     private IntProcedure rem_proc;
     private int indexToFilter;
 
-    @SuppressWarnings({"unchecked"})
     public PropEqualXY_C(IntVar[] vars, int c) {
         super(vars, PropagatorPriority.BINARY, true);
         this.x = vars[0];
@@ -79,6 +79,8 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
                     y.removeValue(val, this);
                 }
             }
+            idms[0].startMonitoring();
+            idms[1].startMonitoring();
         }
         if (x.isInstantiated()) {
             assert (y.isInstantiated());

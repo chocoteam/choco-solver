@@ -9,10 +9,13 @@
  */
 package org.chocosolver.solver.variables.view.graph.directed;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.view.delta.GraphUnionViewDeltaMonitor;
 import org.chocosolver.solver.variables.view.graph.DirectedGraphView;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.graphs.GraphFactory;
@@ -159,5 +162,14 @@ public class DirectedGraphUnionView extends DirectedGraphView<DirectedGraphVar> 
     @Override
     public int getNbMaxNodes() {
         return ub.getNbMaxNodes();
+    }
+
+    @Override
+    public IGraphDeltaMonitor monitorDelta(ICause propagator) {
+        IGraphDeltaMonitor[] deltaMonitors = new IGraphDeltaMonitor[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            deltaMonitors[i] = variables[i].monitorDelta(propagator);
+        }
+        return new GraphUnionViewDeltaMonitor(this, deltaMonitors);
     }
 }

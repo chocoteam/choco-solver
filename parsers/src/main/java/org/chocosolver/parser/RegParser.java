@@ -104,6 +104,9 @@ public abstract class RegParser implements IParser {
             usage = "Tell the solver to use use progress (or phase) saving.")
     protected boolean last = false;
 
+    @Option(name = "-flush", usage = "Autoflush weights on black-box strategies (default: 32).")
+    protected int flush = 5000;
+
     @Option(name = "-a", aliases = {"--all"}, usage = "Search for all solutions (default: false).")
     public boolean all = false;
 
@@ -156,7 +159,7 @@ public abstract class RegParser implements IParser {
     }
 
     public void createSettings(){
-        defaultSettings = Settings.init();
+        defaultSettings = Settings.prod();
     }
 
     public final Settings getSettings() {
@@ -261,13 +264,24 @@ public abstract class RegParser implements IParser {
                     if (level.isLoggable(Level.INFO)) solver.log().white().print("\n");
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
-                IntVar[] dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
-                        .map(Variable::asIntVar)
-                        .filter(v -> v != obj)
-                        .toArray(IntVar[]::new);
+                IntVar[] dvars;
+                if(solver.getMove().getStrategy()!=null) {
+                    dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
+                                .map(Variable::asIntVar)
+                                .filter(v -> v != obj)
+                                .toArray(IntVar[]::new);
+                }else{
+                    dvars = Arrays.stream(solver.getModel().retrieveIntVars(true))
+                            .map(Variable::asIntVar)
+                            .filter(v -> v != obj)
+                            .toArray(IntVar[]::new);
+                }
+                if(dvars.length == 0){
+                    dvars = new IntVar[]{solver.getModel().intVar(0)};
+                }
                 solver.getMove().removeStrategy();
                 solver.setMove(new MoveBinaryDFS());
-                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, last);
+                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, flush, last);
 
                 if (obj != null) {
                     boolean max = solver.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;

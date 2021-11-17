@@ -1,0 +1,41 @@
+###################################################### -*- mode: r -*- #####
+## Scenario setup for Iterated Race (irace).
+############################################################################
+
+## Maximum number of runs (invocations of targetRunner) that will be
+## performed. It determines the maximum budget of experiments for the
+## tuning.
+maxExperiments = 10000
+
+## Maximum number of decimal places that are significant for numerical
+## (real) parameters.
+digits = 2
+
+## Number of iterations.
+nbIterations = 1
+
+## Randomly sample the training instances or use them in the order given.
+sampleInstances = 1
+
+## Number of configurations to be sampled and evaluated at each iteration.
+## This should be adapter wrt to combinations in configurations.txt
+# nbConfigurations = 240
+
+## If the target algorithm is deterministic, configurations will be
+## evaluated only once per instance.
+deterministic = 1
+
+## Number of calls to targetRunner to execute in parallel. Values 0 or 1
+## mean no parallelization.
+parallel = 20
+
+## Specify how irace waits for jobs to finish when targetRunner submits
+## jobs to a batch cluster: sge, pbs, torque or slurm. targetRunner must
+## submit jobs to the cluster using, for example, qsub.
+batchmode = "slurm"
+
+## Enable/disable elitist irace.
+elitist = 0
+
+## END of scenario file
+##########################################################################

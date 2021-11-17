@@ -23,23 +23,24 @@ import org.chocosolver.util.procedure.PairProcedure;
 /**
  * @author Jean-Guillaume Fages
  */
-public class PropInclusion extends Propagator<GraphVar> {
+public class PropInclusion extends Propagator<GraphVar<?>> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar[] g; // g[0] in g[1]
-    private IGraphDeltaMonitor[] gdm;
-    private IntProcedure[] prNode;
-    private PairProcedure[] prArc;
-    private GraphEventType[] etNode, etArcs;
+    private final GraphVar<?>[] g; // g[0] in g[1]
+    private final IGraphDeltaMonitor[] gdm;
+    private final IntProcedure[] prNode;
+    private final PairProcedure[] prArc;
+    private final GraphEventType[] etNode;
+    private final GraphEventType[] etArcs;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropInclusion(GraphVar g1, GraphVar g2) {
+    public PropInclusion(GraphVar<?> g1, GraphVar<?> g2) {
         super(new GraphVar[]{g1, g2}, PropagatorPriority.LINEAR, true);
         g = new GraphVar[]{g1, g2};
         gdm = new IGraphDeltaMonitor[]{g1.monitorDelta(this), g2.monitorDelta(this)};
@@ -95,6 +96,8 @@ public class PropInclusion extends Propagator<GraphVar> {
                 }
             }
         }
+        gdm[0].startMonitoring();
+        gdm[1].startMonitoring();
     }
 
     @Override

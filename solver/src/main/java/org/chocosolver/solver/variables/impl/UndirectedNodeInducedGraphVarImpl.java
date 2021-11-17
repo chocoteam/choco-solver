@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Undirected Graph variable guaranteeing that any instantiation is a node-induced subgraph of the envelope
@@ -51,6 +50,7 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
         if (!nodeEnforced) {
             return false;
         }
+        boolean edgeAdded = false;
         for (int y : originalUB.getNeighborsOf(x)) {
             if (LB.containsNode(y)) {
                 if (!UB.containsEdge(x, y)) {
@@ -61,13 +61,15 @@ public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl im
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, this);
                         delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, this);
                     }
-                    notifyPropagators(GraphEventType.ADD_EDGE, this);
+                    edgeAdded = true;
                 }
             } else if (UB.containsNode(y) && !UB.containsEdge(x, y)) {
                 removeNode(y, this);
             }
         }
-        notifyPropagators(GraphEventType.ADD_NODE, cause);
+        if (edgeAdded) {
+            notifyPropagators(GraphEventType.ADD_EDGE, this);
+        }
         return true;
     }
 

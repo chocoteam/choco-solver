@@ -12,13 +12,17 @@ package org.chocosolver.solver.variables.view.graph;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.util.objects.graphs.GraphFactory;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
+import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+import org.chocosolver.util.procedure.IntProcedure;
+import org.chocosolver.util.procedure.PairProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -115,5 +119,72 @@ public class TestDirectedNodeInducedSubgraphView {
                 }
             }
         }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testDelta() throws ContradictionException {
+        Model m = new Model();
+        int n = 10;
+        DirectedGraph LB = GraphFactory.makeStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET);
+        DirectedGraph UB = GraphFactory.makeCompleteStoredDirectedGraph(m, n, SetType.BITSET, SetType.BITSET, false);
+        DirectedGraphVar g = m.digraphVar("g", LB, UB);
+        ISet nodes = SetFactory.makeConstantSet(new int[] {3, 4, 5, 6, 7});
+        DirectedGraphVar g2 = m.nodeInducedSubgraphView(g, nodes, false);
+        ICause fakeCauseA = new ICause() {};
+        ICause fakeCauseB = new ICause() {};
+        IGraphDeltaMonitor monitor = g2.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
+        ISet delta = SetFactory.makeBitSet(0);
+        IntProcedure nodeProc = delta::add;
+        // Test add nodes
+        g.enforceNode(0, fakeCauseB);
+        g.enforceNode(1, fakeCauseB);
+        monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
+        Assert.assertEquals(delta.size(), 0);
+        g.enforceNode(4, fakeCauseB);
+        g.enforceNode(6, fakeCauseB);
+        monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
+        Assert.assertEquals(delta.size(), 2);
+        Assert.assertTrue(delta.contains(4));
+        Assert.assertTrue(delta.contains(6));
+        delta.clear();
+        monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
+        Assert.assertEquals(delta.size(), 0);
+        // Test remove node
+        g.removeNode(8, fakeCauseB);
+        monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
+        Assert.assertEquals(delta.size(), 0);
+        g.removeNode(7, fakeCauseB);
+        monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
+        Assert.assertTrue(delta.contains(7));
+        Assert.assertEquals(delta.size(), 1);
+        delta.clear();
+        // Test add edges
+        // First clear monitor from node operations that can cause edge operations
+        monitor.forEachEdge((i, j) -> {}, GraphEventType.ADD_EDGE);
+        monitor.forEachEdge((i, j) -> {}, GraphEventType.REMOVE_EDGE);
+        PairProcedure edgeProc = (i, j) -> {
+            if (i == 4) {
+                delta.add(j);
+            } else if (j == 4) {
+                delta.add(i);
+            }
+        };
+        g.enforceEdge(0, 4, fakeCauseB);
+        monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
+        Assert.assertEquals(delta.size(), 0);
+        g.enforceEdge(4, 3, fakeCauseB);
+        monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
+        Assert.assertEquals(delta.size(), 1);
+        Assert.assertTrue(delta.contains(3));
+        delta.clear();
+        // Test remove edges
+        g.removeEdge(4, 1, fakeCauseB);
+        monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
+        Assert.assertEquals(delta.size(), 0);
+        g.removeEdge(5, 4, fakeCauseB);
+        monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
+        Assert.assertEquals(delta.size(), 1);
+        Assert.assertTrue(delta.contains(5));
     }
 }

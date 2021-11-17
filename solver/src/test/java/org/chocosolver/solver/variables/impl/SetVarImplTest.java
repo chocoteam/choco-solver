@@ -17,6 +17,9 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -24,10 +27,18 @@ import org.testng.annotations.Test;
  */
 public class SetVarImplTest {
 
+	static final boolean originalHardCoded = SetFactory.HARD_CODED;
+
+	@AfterClass
+	public void tearDown() {
+		SetFactory.HARD_CODED = originalHardCoded;
+	}
+
 	@Test(groups="1s", timeOut=60000)
 	public void testStructures(){
 		for(SetType type:SetType.values()) {
 			if(!type.name().contains("FIXED") && !type.name().contains("DYNAMIC")) {
+				boolean hardCodedDefault = SetFactory.HARD_CODED;
 				for (boolean b : new boolean[]{true, false}) {
 					SetFactory.HARD_CODED = b;
 					Model m = new Model();
@@ -36,6 +47,7 @@ public class SetVarImplTest {
 					while (m.getSolver().solve()) ;
 					Assert.assertEquals(64, m.getSolver().getSolutionCount());
 				}
+				SetFactory.HARD_CODED = hardCodedDefault;
 			}
 		}
 	}

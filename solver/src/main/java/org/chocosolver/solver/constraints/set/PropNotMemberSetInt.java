@@ -30,11 +30,11 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private IntVar iv;
-	private SetVar sv;
+	private final IntVar iv;
+	private final SetVar sv;
 
-	private ISetDeltaMonitor sdm;
-	private IntProcedure elemRem;
+	private final ISetDeltaMonitor sdm;
+	private final IntProcedure elemRem;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -64,6 +64,7 @@ public class PropNotMemberSetInt extends Propagator<SetVar> {
 			iv.removeValue(iter.nextInt(), this);
 		}
 		if(sv.isInstantiated()) setPassive();
+        sdm.startMonitoring();
 	}
 
 	@Override

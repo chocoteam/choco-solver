@@ -12,6 +12,9 @@ package org.chocosolver.solver.trace;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.propagation.PropagationEngineObserver;
+import org.chocosolver.solver.propagation.PropagationProfiler;
+import org.chocosolver.solver.propagation.PropagationObserver;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.trace.frames.StatisticsPanel;
 import org.chocosolver.solver.variables.IntVar;
@@ -20,6 +23,8 @@ import org.chocosolver.util.tools.StringUtils;
 
 import javax.swing.*;
 import java.io.Closeable;
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -37,7 +42,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-            "** Choco 4.10.6 (2020-12) : Constraint Programming Solver, Copyright (c) 2010-2020";
+        "** Choco 4.10.7 (2021-10) : Constraint Programming Solver, Copyright (c) 2010-2021";
     
     /**
      * Print the version message.
@@ -277,6 +282,43 @@ public interface IOutputFactory extends ISelf<Solver> {
         frame.pack();
 //        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    /**
+      * <p>
+      * Plug a propagation observer.
+      * It observes activities of propagators and modifications of variables.
+      * Note, that this may impact the resolution statistics, since very fine events recording is done.
+      * </p>
+     * @see #profilePropagation() 
+      */
+     default void observePropagation(PropagationObserver po){
+         ref().setEngine(new PropagationEngineObserver(ref().getModel(), po));
+     }
+
+    /**
+     * <p>
+     * Plug a propagation profiler.
+     * It records activities of propagators and modifications of variables.
+     * Note, that this may impact the resolution statistics, since very fine events recording is done.
+     * </p>
+     * <p>
+     * Once plugged, calls to {@link PropagationProfiler#writeTo(File, boolean)}
+     * or {@link PropagationProfiler#writeTo(PrintWriter, boolean)} will
+     * outuput the profiling data to a file (or a writer).
+     * </p>
+     * <pre> {@code
+     * Solver s = m.getSolver();
+     * PropagationProfiler profiler = s.profilePropagation();
+     * s.findSolution();
+     * profiler.writeTo(new File("profiling.txt"));
+     * }</pre>
+     * @return a propagation profiler
+     */
+    default PropagationProfiler profilePropagation(){
+        PropagationProfiler po = new PropagationProfiler(ref().getModel());
+        ref().observePropagation(po);
+        return po;
     }
 
     /**

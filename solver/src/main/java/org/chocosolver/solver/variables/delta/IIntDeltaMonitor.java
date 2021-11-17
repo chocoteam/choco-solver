@@ -19,7 +19,7 @@ import org.chocosolver.util.procedure.SafeIntProcedure;
  * @author Charles Prud'homme
  * @since 25/05/12
  */
-public interface IIntDeltaMonitor {
+public interface IIntDeltaMonitor extends IDeltaMonitor{
 
     /**
      * Apply 'proc' on each value removed. No filtering allowed.
@@ -49,6 +49,11 @@ public interface IIntDeltaMonitor {
             @Override
             public int sizeApproximation() {
                 return 0;
+            }
+
+            @Override
+            public void startMonitoring() {
+                
             }
 
             @Override

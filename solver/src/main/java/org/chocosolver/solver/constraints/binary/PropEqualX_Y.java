@@ -31,7 +31,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
-    private IntVar x, y;
+    private final IntVar x;
+    private final IntVar y;
     // enumerated domains
     private boolean bothEnumerated;
     private IIntDeltaMonitor[] idms;
@@ -82,6 +83,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
                     y.removeValue(val, this);
                 }
             }
+            idms[0].startMonitoring();
+            idms[1].startMonitoring();
         }
         if (x.isInstantiated()) {
             assert (y.isInstantiated());

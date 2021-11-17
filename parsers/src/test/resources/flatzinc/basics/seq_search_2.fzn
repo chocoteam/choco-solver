@@ -1,0 +1,9 @@
+array [1..2] of int: X_INTRODUCED_0_ = [1,-1];
+var 1..10: x:: output_var;
+var 1..10: y:: output_var;
+var bool: p:: is_defined_var:: output_var;
+var bool: q:: is_defined_var:: output_var;
+constraint int_lin_ne(X_INTRODUCED_0_,[x,y],0);
+constraint int_le_reif(6,x,p):: defines_var(p);
+constraint int_le_reif(6,y,q):: defines_var(q);
+solve :: seq_search([bool_search([p,q],input_order,indomain_min,complete),int_search([x,y],input_order,indomain_max,complete)]) satisfy;

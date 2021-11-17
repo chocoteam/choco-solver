@@ -201,6 +201,6 @@ public class PropSumFullBool extends PropSum {
         BoolVar[] bvars = new BoolVar[vars.length];
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
-        return new PropSumFullBool(bvars, pos, nop(o), b, reactToFineEvt);
+        return new PropSumFullBool(bvars, pos, nop(o), b + nb(o), reactToFineEvt);
     }
 }
