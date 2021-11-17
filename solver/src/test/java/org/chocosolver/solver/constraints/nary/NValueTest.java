@@ -141,20 +141,20 @@ public class NValueTest {
         IntVar n = model.intVar("n", 1, nVars, true);
         model.nValues(x, n).post();
         model.getSolver().setSearch(Search.inputOrderLBSearch(ArrayUtils.append(new IntVar[]{n}, x)));
-        while (model.getSolver().solve()) ;
+        while(model.getSolver().solve());
 
         Model model2 = new Model();
         IntVar[] x2 = model2.intVarArray("x2", nVars, 0, domainSize, false);
         IntVar n2 = model2.intVar("n2", 1, nVars, true);
         model2.nValues(x2, n2).post();
         model2.getSolver().setSearch(Search.inputOrderLBSearch(ArrayUtils.concat(x2, n2)));
-        while (model2.getSolver().solve()) ;
+        while(model2.getSolver().solve());
 
         Model model3 = new Model();
         IntVar[] x3 = model3.intVarArray("x3", nVars, 0, domainSize, false);
         IntVar n3 = model3.intVar("n3", 1, nVars, true);
         model3.nValues(x3, n3).post();
-        while (model3.getSolver().solve()) ;
+        while(model3.getSolver().solve());
 
         Assert.assertEquals(model.getSolver().getSolutionCount(), model2.getSolver().getSolutionCount());
         Assert.assertEquals(model.getSolver().getSolutionCount(), model3.getSolver().getSolutionCount());

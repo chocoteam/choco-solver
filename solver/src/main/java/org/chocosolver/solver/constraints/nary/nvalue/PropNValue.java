@@ -24,7 +24,6 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
