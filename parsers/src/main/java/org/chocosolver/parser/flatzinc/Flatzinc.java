@@ -85,16 +85,14 @@ public class Flatzinc extends RegParser {
 
     @Override
     public Thread actionOnKill() {
-        return new Thread() {
-            public void run() {
-                if (userinterruption) {
-                    datas[bestModelID()].doFinalOutPut(false);
-                    if (level.isLoggable(Level.COMPET)) {
-                        getModel().getSolver().log().bold().red().print("%% Unexpected resolution interruption!");
-                    }
+        return new Thread(() -> {
+            if (userinterruption) {
+                datas[bestModelID()].doFinalOutPut(false);
+                if (level.isLoggable(Level.COMPET)) {
+                    getModel().getSolver().log().bold().red().print("%% Unexpected resolution interruption!");
                 }
             }
-        };
+        });
     }
 
     //***********************************************************************************
@@ -120,7 +118,7 @@ public class Flatzinc extends RegParser {
         for (int i = 0; i < models.size(); i++) {
             try {
                 long ptime = -System.currentTimeMillis();
-                FileInputStream fileInputStream = new FileInputStream(new File(instance));
+                FileInputStream fileInputStream = new FileInputStream(instance);
                 parse(models.get(i), datas[i], fileInputStream);
                 fileInputStream.close();
                 models.get(i).getSolver().logWithANSI(ansi);
