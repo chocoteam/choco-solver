@@ -216,4 +216,18 @@ public class ExplPropXplusYeqZTest {
             Assert.fail();
         }
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPropXplusYeqZFailure2() {
+        Model m = new Model();
+        IntVar a = m.intVar("a", 0, 9);
+        IntVar b = m.intVar("b", 0, 9);
+        IntVar c = m.intVar("c", 0, 9);
+        // 100a + 10b + c >= a * b * c
+        a.mul(100).add(b.mul(10)).add(c).ge(a.mul(b).mul(c)).post();
+        m.allDifferent(a, b, c).post();
+        boolean answer = m.getSolver().solve();
+        m.getSolver().printStatistics();
+        Assert.assertTrue(answer);
+    }
 }
