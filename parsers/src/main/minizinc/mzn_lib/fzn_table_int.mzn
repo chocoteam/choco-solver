@@ -3,6 +3,6 @@
 % consider each row in t to be a tuple and t as a set of tuples.
 %-----------------------------------------------------------------------------%
 
-predicate choco_fzn_table(array[int] of var int: x, array[int, int] of int: t);
+predicate choco_fzn_table(array[int] of var int: x, array[int] of int: t);
 
-predicate fzn_table_int(array[int] of var int: x, array[int, int] of int: t) = choco_fzn_table(x,t);
+predicate fzn_table_int(array[int] of var int: x, array[int, int] of int: t) = choco_fzn_table(x,array1d(t));

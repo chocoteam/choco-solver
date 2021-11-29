@@ -1474,6 +1474,16 @@ public enum FConstraint {
 
         }
     },
+    fzn_value_precede_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int s = exps.get(0).intValue();
+            int t = exps.get(1).intValue();
+            IntVar[] x = exps.get(2).toIntVarArray(model);
+            model.intValuePrecedeChain(x, s, t).post();
+
+        }
+    },
     count_eq_reif_choco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1609,6 +1619,25 @@ public enum FConstraint {
                 model.reifyXneY(value, valVar, b);
             }
             cstr.post();
+
+        }
+    },
+    array_set_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            array_var_set_element.build(model, datas, id, exps, annotations);
+
+        }
+    },
+    array_var_set_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar b = exps.get(0).intVarValue(model);
+            SetVar[] as = exps.get(1).toSetVarArray(model);
+            SetVar c = exps.get(2).setVarValue(model);
+            model.element(b, as, 1, c).post();
 
         }
     },
@@ -2298,6 +2327,17 @@ public enum FConstraint {
             IntVar[] x = exps.get(2).toIntVarArray(model);
             IntVar c = exps.get(3).intVarValue(model);
             model.element(c, x, idx, os).post();
+        }
+    },
+    choco_array_var_set_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx = exps.get(0).intVarValue(model);
+            int os = exps.get(1).intValue();
+            SetVar[] x = exps.get(2).toSetVarArray(model);
+            SetVar c = exps.get(3).setVarValue(model);
+            model.element(idx, x, os, c).post();
         }
     },
     // redefinitions-2.2.1.mzn
