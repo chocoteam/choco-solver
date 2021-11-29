@@ -64,6 +64,15 @@ public final class EArray extends Expression {
     }
 
     @Override
+    public int[][] toSetArray() {
+        int[][] arr = new int[what.size()][];
+        for (int i = 0; i < what.size(); i++) {
+            arr[i] = what.get(i).setValue();
+        }
+        return arr;
+    }
+
+    @Override
     public boolean[] toBoolArray() {
         boolean[] arr = new boolean[what.size()];
         for (int i = 0; i < what.size(); i++) {

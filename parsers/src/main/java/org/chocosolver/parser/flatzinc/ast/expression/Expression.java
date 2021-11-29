@@ -35,6 +35,8 @@ public abstract class Expression {
     protected static final Class int_arr = new int[0].getClass();
     @SuppressWarnings({"InstantiatingObjectToGetClassObject"})
     protected static final Class bool_arr = new boolean[0].getClass();
+    @SuppressWarnings({"InstantiatingObjectToGetClassObject"})
+    protected static final Class set_arr = new int[0][0].getClass();
 
     final EType typeOf;
 
@@ -92,6 +94,27 @@ public abstract class Expression {
      * @return int[]
      */
     public boolean[] toBoolArray() {
+        Exit.log();
+        return null;
+    }
+
+
+    /**
+     * Get the set value of the {@link Expression}
+     *
+     * @return int
+     */
+    public int[] setValue() {
+        Exit.log();
+        return null;
+    }
+
+    /**
+     * Get array of set of the {@link Expression}
+     *
+     * @return int[][]
+     */
+    public int[][] toSetArray() {
         Exit.log();
         return null;
     }
