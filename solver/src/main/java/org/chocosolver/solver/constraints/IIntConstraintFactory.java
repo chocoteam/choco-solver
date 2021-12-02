@@ -28,6 +28,7 @@ import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
+import org.chocosolver.solver.constraints.nary.alldifferentprec.PropAllDiffPrec;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
@@ -49,10 +50,7 @@ import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinali
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
 import org.chocosolver.solver.constraints.nary.min_max.*;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.*;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -418,13 +416,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Create a table constraint over a couple of variables var1 and var2
      * <p>
-     * Uses AC3rm algorithm by default
+     * Uses AC3rm algorithm by default, except if one variable has a bounded domain.
+     * In that case, "CT+" is chosen.
      *
      * @param var1 first variable
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        return table(var1, var2, tuples, "AC3bit+rm");
+        if (var1.hasEnumeratedDomain() || var2.hasEnumeratedDomain()) {
+            return table(var1, var2, tuples, "CT+");
+        } else {
+            return table(var1, var2, tuples, "AC3bit+rm");
+        }
     }
 
     /**
@@ -768,6 +771,68 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
+     * Creates an AllDiffPrec constraint. The predecessors and successors matrix are built as following:
+     * with n = |variables|, for all i in [0,n-1], if there is k such that predecessors[i][k] = j then variables[j] is a predecessor of variables[i].
+     * Similarly, with n = |variables|, for all i in [0,n-1], if there is k such that successors[i][k] = j then variables[j] is a successor of variables[i].
+     * The matrix should be built such that, if variables[i] is a predecessor of variables[j], then i is in successors[j] and vice versa.
+     *
+     * filter should be one of the following (depending on the wanted filtering algorithm): BESSIERE, GREEDY, GREEDY_RC, GODET_RC, GODET_BC or DEFAULT (which is GODET_BC).
+     *
+     * @param variables the variables
+     * @param predecessors the predecessors matrix
+     * @param successors the successors matrix
+     * @param filter the name of the filtering scheme
+     */
+    default Constraint allDiffPrec(IntVar[] variables, int[][] predecessors, int[][] successors, String filter) {
+        return new Constraint(
+            ConstraintsName.ALLDIFFPREC,
+            new PropAllDiffPrec(variables, predecessors, successors, filter)
+        );
+    }
+
+    /**
+     * Creates an AllDiffPrec constraint. The predecessors and successors matrix are built as following:
+     * with n = |variables|, for all i in [0,n-1], if there is k such that predecessors[i][k] = j then variables[j] is a predecessor of variables[i].
+     * Similarly, with n = |variables|, for all i in [0,n-1], if there is k such that successors[i][k] = j then variables[j] is a successor of variables[i].
+     * The matrix should be built such that, if variables[i] is a predecessor of variables[j], then i is in successors[j] and vice versa.
+     *
+     * @param variables    the variables
+     * @param predecessors the predecessors matrix
+     * @param successors   the successors matrix
+     */
+    default Constraint allDiffPrec(IntVar[] variables, int[][] predecessors, int[][] successors) {
+        return allDiffPrec(variables, predecessors, successors, "GODET_BC");
+    }
+
+    /**
+     * Creates an AllDiffPrec constraint. The precedence matrix is built as following:
+     * with n = |variables|, for all i,j in [0,n-1], precedence[i][j] = true iff precedence[j][i] = false iff variables[i] precedes variables[j].
+     *
+     * filter should be one of the following (depending on the wanted filtering algorithm): BESSIERE, GREEDY, GREEDY_RC, GODET_RC, GODET_BC or DEFAULT (which is GODET_BC).
+     *
+     * @param variables the variables
+     * @param precedence the precedence matrix
+     * @param filter the name of the filtering scheme
+     */
+    default Constraint allDiffPrec(IntVar[] variables, boolean[][] precedence, String filter) {
+        return new Constraint(
+            ConstraintsName.ALLDIFFPREC,
+            new PropAllDiffPrec(variables, precedence, filter)
+        );
+    }
+
+    /**
+     * Creates an AllDiffPrec constraint. The precedence matrix is built as following:
+     * with n = |variables|, for all i,j in [0,n-1], precedence[i][j] = true iff precedence[j][i] = false iff variables[i] precedes variables[j].
+     *
+     * @param variables  the variables
+     * @param precedence the precedence matrix
+     */
+    default Constraint allDiffPrec(IntVar[] variables, boolean[][] precedence) {
+        return allDiffPrec(variables, precedence, "GODET_BC");
+    }
+
+    /**
      * Creates an allEqual constraint.
      * Ensures that all variables from vars take the same value.
      *
@@ -1054,7 +1119,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a circuit constraint
      */
     default Constraint circuit(IntVar[] vars, int offset, CircuitConf conf) {
-        Propagator[] props;
+        Propagator<?>[] props;
         if (conf == CircuitConf.LIGHT) {
             props = new Propagator[]{new PropNoSubtour(vars, offset)};
         } else {
@@ -1771,13 +1836,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         int[] vals = getDomainUnion(vars);
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
-        return new Constraint(ConstraintsName.NVALUES,
-                //ew PropNValue(vars, nValues),
-                // at least
-                new PropAtLeastNValues(vars, vals, nValues),
-                // at most
-                new PropAtMostNValues(vars, vals, nValues),
-                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+        return new Constraint(
+            ConstraintsName.NVALUES,
+            new PropNValue(vars, nValues),
+            // at least
+//            new PropAtLeastNValues(vars, vals, nValues),
+            // at most
+//            new PropAtMostNValues(vars, vals, nValues),
+            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
         );
     }
 
@@ -2175,6 +2241,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "GAC3rm";
         if (tuples.isFeasible()) {
+            //noinspection OptionalGetWithoutIsPresent
             if (tuples.nbTuples() > 512 &&
                     (IntStream.range(0, vars.length)
                             .map(i -> tuples.max(i) - tuples.min(i))

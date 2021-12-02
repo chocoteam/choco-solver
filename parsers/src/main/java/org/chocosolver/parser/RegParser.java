@@ -23,6 +23,7 @@ import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * A regular parser with default and common services
@@ -203,14 +204,16 @@ public abstract class RegParser implements IParser {
      *
      * @param m a Model
      */
-    private void makeComplementarySearch(Model m) {
+    protected void makeComplementarySearch(Model m, int i) {
         Solver solver = m.getSolver();
         if (solver.getSearch() != null) {
             IntVar[] ovars = new IntVar[m.getNbVars()];
             THashSet<Variable> dvars = new THashSet<>();
             dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
             int k = 0;
-            for (IntVar iv : m.retrieveIntVars(true)) {
+            IntVar[] ivars = m.retrieveIntVars(true);
+            Arrays.sort(ivars, Comparator.comparingInt(IntVar::getDomainSize));
+            for (IntVar iv : ivars) {
                 if (!dvars.contains(iv)) {
                     ovars[k++] = iv;
                 }
@@ -312,7 +315,7 @@ public abstract class RegParser implements IParser {
             if (limits.runs > -1) {
                 portfolio.getModels().get(i).getSolver().limitRestart(limits.runs);
             }
-            makeComplementarySearch(portfolio.getModels().get(i));
+            makeComplementarySearch(portfolio.getModels().get(i), i);
         }
     }
 

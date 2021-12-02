@@ -31,7 +31,7 @@ public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 	protected int card;
 	protected int offset;  // allow using negative numbers
 	protected BitSet values = new BitSet();
-	private ISetIterator iter = newIterator();
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// ITERATOR
@@ -109,6 +109,20 @@ public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 		}else{
 			return false;
 		}
+	}
+
+	public int previousValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.previousSetBit(val);
+	}
+
+	public int nextValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.nextSetBit(val);
 	}
 
 	@Override
