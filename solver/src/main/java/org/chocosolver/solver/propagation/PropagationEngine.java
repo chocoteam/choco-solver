@@ -11,7 +11,6 @@ package org.chocosolver.solver.propagation;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -58,7 +57,7 @@ public class PropagationEngine {
      * The main structure of this engine: seven circular queues,
      * each of them is dedicated to store propagator to execute wrt their priority.
      */
-    private CircularQueue<Propagator<?>>[] pro_queue;
+    private final CircularQueue<Propagator<?>>[] pro_queue;
 
     private final CircularQueue<Variable> var_queue;
 
@@ -107,10 +106,10 @@ public class PropagationEngine {
      */
     public PropagationEngine(Model model) {
         this.model = model;
-        AddedPropagatorPriority.initPriorityCounter();
+        int nbQueues = model.getSettings().getMaxPropagatorPriority() + 1;
         //noinspection unchecked
-        this.pro_queue = new CircularQueue[AddedPropagatorPriority.NEW_PRIORITY];
-        for (int i = 0; i < AddedPropagatorPriority.NEW_PRIORITY; i++) {
+        this.pro_queue = new CircularQueue[nbQueues];
+        for (int i = 0; i < nbQueues; i++) {
             pro_queue[i] = new CircularQueue<>(16);
         }
         this.var_queue = new CircularQueue<>(16);
@@ -118,32 +117,6 @@ public class PropagationEngine {
         this.dynPropagators = new DynPropagators();
         this.propagators = new ArrayList<>();
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
-    }
-
-    public AddedPropagatorPriority addPropagationPriority() {
-        CircularQueue[] addedQueue = new CircularQueue[pro_queue.length + 1];
-        System.arraycopy(pro_queue, 0, addedQueue, 0, pro_queue.length);
-        addedQueue[addedQueue.length - 1] = new CircularQueue<>(16);
-        this.pro_queue = addedQueue;
-        return new AddedPropagatorPriority();
-    }
-
-    public static class AddedPropagatorPriority implements Priority {
-        private static int NEW_PRIORITY = 8;
-
-        private static void initPriorityCounter() {
-            NEW_PRIORITY = 8;
-        }
-
-        private final int priority;
-
-        public AddedPropagatorPriority() {
-            priority = NEW_PRIORITY++;
-        }
-
-        public int getPriority() {
-            return priority;
-        }
     }
 
     /**
@@ -158,14 +131,14 @@ public class PropagationEngine {
             notEmpty = 0;
             init = true;
             Constraint[] constraints = model.getCstrs();
-            for (int c = 0; c < constraints.length; c++) {
-                Propagator<?>[] cprops = constraints[c].getPropagators();
+            for (Constraint constraint : constraints) {
+                Propagator<?>[] cprops = constraint.getPropagators();
                 Collections.addAll(propagators, cprops);
             }
             if (model.getSettings().sortPropagatorActivationWRTPriority()) {
                 propagators.sort(
                     (p1, p2) -> {
-                        int p = p1.getPriority().getPriority() - p2.getPriority().getPriority();
+                        int p = p1.getPriority().getValue() - p2.getPriority().getValue();
                         if (p == 0) {
                             return p1.getNbVars() - p2.getNbVars();
                         } else {
@@ -174,8 +147,22 @@ public class PropagationEngine {
                     });
             }
             for (int i = 0; i < propagators.size(); i++) {
-                propagators.get(i).setPosition(i);
-                awake_queue.addLast(propagators.get(i));
+                Propagator<?> propagator = propagators.get(i);
+                if (propagator.getPriority().getValue() >= pro_queue.length) {
+                    throw new SolverException(
+                            propagator+
+                            "\nThis propagator declares a priority (" +
+                            propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
+                            ") is greater than the maximum allowed priority (" +
+                            model.getSettings().getMaxPropagatorPriority() +
+                            ").\n" +
+                            "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
+                            (propagator.getPriority().getValue() + 1) +
+                            "));`)  " +
+                            "or decrease the propagator priority.");
+                }
+                propagator.setPosition(i);
+                awake_queue.addLast(propagator);
             }
         }
     }

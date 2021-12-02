@@ -42,13 +42,12 @@ public enum PropagatorPriority implements Priority {
             case 6:
                 return CUBIC;
             case 7:
-                return VERY_SLOW;
             default:
                 return VERY_SLOW;
         }
     }
 
-    public int getPriority() {
+    public final int getValue() {
         return priority;
     }
 

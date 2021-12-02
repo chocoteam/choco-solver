@@ -59,7 +59,7 @@ public class Constraint {
     /**
      * Propagators of the constraint (they will filter domains and eventually check solutions)
      */
-    final protected Propagator[] propagators;
+    final protected Propagator<?>[] propagators;
 
     /**
      * BoolVar that reifies this constraint, unique.
@@ -101,7 +101,7 @@ public class Constraint {
      * @param name        name of the constraint
      * @param propagators set of propagators defining the constraint
      */
-    public Constraint(String name, Propagator... propagators) {
+    public Constraint(String name, Propagator<?>... propagators) {
         if (propagators == null || propagators.length == 0) {
             throw new UnsupportedOperationException("cannot create a constraint without propagators ");
         }
@@ -133,11 +133,11 @@ public class Constraint {
      *
      * @return an array of {@link Propagator}.
      */
-    public Propagator[] getPropagators() {
+    public Propagator<?>[] getPropagators() {
         return propagators;
     }
 
-    public Propagator getPropagator(int i) {
+    public Propagator<?> getPropagator(int i) {
         return propagators[i];
     }
 
@@ -423,7 +423,7 @@ public class Constraint {
     public PropagatorPriority computeMaxPriority() {
         int priority = 1;
         for (Propagator<?> p : propagators) {
-            priority = Math.max(priority, p.getPriority().getPriority());
+            priority = Math.max(priority, p.getPriority().getValue());
         }
         return PropagatorPriority.get(priority);
     }
@@ -436,7 +436,7 @@ public class Constraint {
      * @return a new constraint with all propagators of toMerge
      */
     public static Constraint merge(String name, Constraint... toMerge) {
-        ArrayList<Propagator> props = new ArrayList<>();
+        ArrayList<Propagator<?>> props = new ArrayList<>();
         for (Constraint c : toMerge) {
             c.ignore();
             Collections.addAll(props, c.getPropagators());

@@ -12,6 +12,7 @@ package org.chocosolver.solver;
 import org.chocosolver.memory.ICondition;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -49,6 +50,8 @@ public class Settings {
     private int maxTupleSizeForSubstitution = 10_000;
 
     private boolean sortPropagatorActivationWRTPriority = true;
+
+    private int maxPropagatorPriority = PropagatorPriority.VERY_SLOW.getValue();
 
     private Function<Model, AbstractStrategy<?>> defaultSearch = Search::defaultSearch;
 
@@ -305,6 +308,27 @@ public class Settings {
         this.sortPropagatorActivationWRTPriority = sortPropagatorActivationWRTPriority;
         return this;
     }
+
+
+    /**
+     * @return the maximum priority any propagators can have (default is 7)
+     */
+    public int getMaxPropagatorPriority(){
+        return maxPropagatorPriority;
+    }
+
+    /**
+     * Increase the number of priority for propagators (default is {@link PropagatorPriority#VERY_SLOW}).
+     * This directly impacts the number of queues to schedule propagators in the propagation engine.
+     *
+     * @param maxPropagatorPriority the new maximum prioirity any propagator can declare
+     * @return the current instance
+     */
+    public Settings setMaxPropagatorPriority(int maxPropagatorPriority){
+        this.maxPropagatorPriority = maxPropagatorPriority;
+        return this;
+    }
+
 
     /**
      * Creates a default search strategy for the input model

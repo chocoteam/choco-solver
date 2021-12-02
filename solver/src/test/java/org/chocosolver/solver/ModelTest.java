@@ -693,4 +693,21 @@ public class ModelTest {
         model.unpost(ifCst);
         model.unpost(thenCst);
     }
+
+    @Test(groups = "1s", expectedExceptions = SolverException.class)
+    public void testMaxPriority1() {
+        Model model = new Model(Settings.init().setMaxPropagatorPriority(4));
+        IntVar[] vars = model.intVarArray("X", 3, 0, 2);
+        model.allDifferent(vars).post();
+        model.getSolver().findAllSolutions();
+    }
+
+    @Test(groups = "1s")
+    public void testMaxPriority2() {
+        Model model = new Model(Settings.init().setMaxPropagatorPriority(9));
+        IntVar[] vars = model.intVarArray("X", 3, 0, 2);
+        model.allDifferent(vars).post();
+        model.getSolver().findAllSolutions();
+    }
+
 }

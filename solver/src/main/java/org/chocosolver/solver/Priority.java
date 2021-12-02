@@ -16,5 +16,5 @@ package org.chocosolver.solver;
  * @since 04/12/2020
 */
 public interface Priority {
-    int getPriority();
+    int getValue();
 }

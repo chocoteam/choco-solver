@@ -614,7 +614,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             arity += vars[i].isInstantiated() ? 0 : 1;
         }
         if (arity > 3) {
-            return priority.getPriority();
+            return priority.getValue();
         } else return arity;
     }
 
@@ -904,7 +904,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @return propagator priority
      */
     public int doSchedule(CircularQueue<Propagator<?>>[] queues){
-        int prio = priority.getPriority();
+        int prio = priority.getValue();
         if(!scheduled) {
             queues[prio].addLast(this);
             schedule();
