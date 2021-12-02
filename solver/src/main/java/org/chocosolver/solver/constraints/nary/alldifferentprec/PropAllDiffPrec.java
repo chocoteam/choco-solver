@@ -5,21 +5,20 @@
 
 package org.chocosolver.solver.constraints.nary.alldifferentprec;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.stream.IntStream;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffBC;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.stream.IntStream;
 
 /**
  * Propagator for the AllDiffPrec constraint.
@@ -366,36 +365,6 @@ public class PropAllDiffPrec extends Propagator<IntVar> {
                         .sorted(Comparator.comparingInt(i -> depth[i]))
                         .mapToInt(i -> i)
                         .toArray();
-    }
-
-    /**
-     * Returns the precedence variables matrix, such that precedence[v][w] = true iff v is a predecessor of w.
-     * The precedence variables are not instantiated if the precedence relation is not known.
-     *
-     * @param model the model
-     * @param predecessors the predecessors matrix
-     * @param successors the successors matrix
-     * @return the precedence matrix
-     */
-    public static BoolVar[][] buildPrecedenceVars(Model model, int[][] predecessors, int[][] successors) {
-        int[][] ancestors = buildAncestors(predecessors, successors);
-        int[][] descendants = buildDescendants(predecessors, successors);
-        int n = predecessors.length;
-        BoolVar[][] precedence = new BoolVar[n][n];
-        for(int i = 0; i < n; i++) {
-            precedence[i][i] = model.boolVar(false);
-            for(int j = i + 1; j < n; j++) {
-                if(contains(ancestors[i], j)) {
-                    precedence[i][j] = model.boolVar(false);
-                } else if(contains(descendants[i], j)) {
-                    precedence[i][j] = model.boolVar(true);
-                } else {
-                    precedence[i][j] = model.boolVar("precedence["+i+"]["+j+"]");
-                }
-                precedence[j][i] = precedence[i][j].not();
-            }
-        }
-        return precedence;
     }
 
     /**

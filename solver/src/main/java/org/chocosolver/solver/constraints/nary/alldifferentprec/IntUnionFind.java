@@ -96,11 +96,9 @@ public class IntUnionFind {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder(sets.toString());
-        sb.append("\n");
-        sb.append("mins : ").append(Arrays.toString(mins)).append("\n");
-        sb.append("maxs : ").append(Arrays.toString(maxs)).append("\n");
-        sb.append("id : ").append(Arrays.toString(id));
-        return sb.toString();
+        return sets.toString() + "\n" +
+                "mins : " + Arrays.toString(mins) + "\n" +
+                "maxs : " + Arrays.toString(maxs) + "\n" +
+                "id : " + Arrays.toString(id);
     }
 }

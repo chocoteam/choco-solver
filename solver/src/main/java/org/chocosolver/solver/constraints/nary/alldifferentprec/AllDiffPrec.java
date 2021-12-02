@@ -6,14 +6,15 @@
 package org.chocosolver.solver.constraints.nary.alldifferentprec;
 
 import gnu.trove.set.hash.TIntHashSet;
-import java.util.ArrayList;
-import java.util.Comparator;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
+
+import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Filtering algorithm for the AllDiffPrec constraint introduced in the following paper :
@@ -91,11 +92,11 @@ public class AllDiffPrec extends FilterAllDiffPrec {
         }
     }
 
-    private final Comparator<Integer> comparator = new Comparator<Integer>() {
+    private final Comparator<Integer> comparator = new Comparator<>() {
         @Override
         public int compare(Integer o1, Integer o2) {
-            if(ub[o1] == ub[o2]) {
-                if(lb[o1] == lb[o2]) {
+            if (ub[o1] == ub[o2]) {
+                if (lb[o1] == lb[o2]) {
                     return o1 - o2;
                 }
                 return lb[o1] - lb[o2];

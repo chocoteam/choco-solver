@@ -50,11 +50,7 @@ import org.chocosolver.solver.constraints.nary.globalcardinality.GlobalCardinali
 import org.chocosolver.solver.constraints.nary.lex.PropLex;
 import org.chocosolver.solver.constraints.nary.lex.PropLexChain;
 import org.chocosolver.solver.constraints.nary.min_max.*;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
-import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
-import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
+import org.chocosolver.solver.constraints.nary.nvalue.*;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -795,6 +791,20 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
+     * Creates an AllDiffPrec constraint. The predecessors and successors matrix are built as following:
+     * with n = |variables|, for all i in [0,n-1], if there is k such that predecessors[i][k] = j then variables[j] is a predecessor of variables[i].
+     * Similarly, with n = |variables|, for all i in [0,n-1], if there is k such that successors[i][k] = j then variables[j] is a successor of variables[i].
+     * The matrix should be built such that, if variables[i] is a predecessor of variables[j], then i is in successors[j] and vice versa.
+     *
+     * @param variables    the variables
+     * @param predecessors the predecessors matrix
+     * @param successors   the successors matrix
+     */
+    default Constraint allDiffPrec(IntVar[] variables, int[][] predecessors, int[][] successors) {
+        return allDiffPrec(variables, predecessors, successors, "GODET_BC");
+    }
+
+    /**
      * Creates an AllDiffPrec constraint. The precedence matrix is built as following:
      * with n = |variables|, for all i,j in [0,n-1], precedence[i][j] = true iff precedence[j][i] = false iff variables[i] precedes variables[j].
      *
@@ -809,6 +819,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             ConstraintsName.ALLDIFFPREC,
             new PropAllDiffPrec(variables, precedence, filter)
         );
+    }
+
+    /**
+     * Creates an AllDiffPrec constraint. The precedence matrix is built as following:
+     * with n = |variables|, for all i,j in [0,n-1], precedence[i][j] = true iff precedence[j][i] = false iff variables[i] precedes variables[j].
+     *
+     * @param variables  the variables
+     * @param precedence the precedence matrix
+     */
+    default Constraint allDiffPrec(IntVar[] variables, boolean[][] precedence) {
+        return allDiffPrec(variables, precedence, "GODET_BC");
     }
 
     /**

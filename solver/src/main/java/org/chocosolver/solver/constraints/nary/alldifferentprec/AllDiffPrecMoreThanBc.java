@@ -7,8 +7,6 @@ package org.chocosolver.solver.constraints.nary.alldifferentprec;
 
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
-import java.util.Arrays;
-import java.util.BitSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -18,6 +16,9 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.bitset.Set_BitSet;
+
+import java.util.Arrays;
+import java.util.BitSet;
 
 /**
  * Filtering algorithm for the AllDiffPrec constraint introduced in the following thesis :
@@ -38,7 +39,6 @@ public class AllDiffPrecMoreThanBc extends FilterAllDiffPrec {
     private final int nbNodes;
     private final boolean[] matched;
     private final BitSet free;
-    private final int[] values;
     private final TIntIntHashMap mapValIdx;
     private final int[] mins, maxs;
 
@@ -60,7 +60,7 @@ public class AllDiffPrecMoreThanBc extends FilterAllDiffPrec {
             }
         }
         list.sort();
-        values = list.toArray();
+        int[] values = list.toArray();
         m = values.length;
         mapValIdx = new TIntIntHashMap();
         for(int j = 0; j < m; j++) {
