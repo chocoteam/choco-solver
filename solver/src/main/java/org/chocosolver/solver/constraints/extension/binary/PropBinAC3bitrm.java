@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.extension.binary;
 
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -36,12 +37,14 @@ public class PropBinAC3bitrm extends PropBinCSP {
 
     public PropBinAC3bitrm(IntVar x, IntVar y, Tuples tuples) {
         this(x, y, new CouplesBitSetTable(tuples, x, y));
+        if(!x.hasEnumeratedDomain() || !y.hasEnumeratedDomain()) {
+            throw new SolverException("PropBinAC3bitrm (\"AC3bit+rm\")may produce incorrect filtering with bounded variables");
+        }
         offset0 = v0.getLB();
         offset1 = v1.getLB();
 
         initDomSize0 = v0.getUB() - offset0 + 1;
         initDomSize1 = v1.getUB() - offset1 + 1;
-        assert v0.hasEnumeratedDomain() && v1.hasEnumeratedDomain() : "PropBinAC3bitrm may produce incorrect filtering with bounded variables";
     }
 
     private PropBinAC3bitrm(IntVar x, IntVar y, CouplesBitSetTable table) {

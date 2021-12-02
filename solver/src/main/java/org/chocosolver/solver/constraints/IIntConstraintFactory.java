@@ -54,6 +54,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -419,13 +420,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Create a table constraint over a couple of variables var1 and var2
      * <p>
-     * Uses AC3rm algorithm by default
+     * Uses AC3rm algorithm by default, except if one variable has a bounded domain.
+     * In that case, "CT+" is chosen.
      *
      * @param var1 first variable
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        return table(var1, var2, tuples, "AC3bit+rm");
+        if (var1.hasEnumeratedDomain() || var2.hasEnumeratedDomain()) {
+            return table(var1, var2, tuples, "CT+");
+        } else {
+            return table(var1, var2, tuples, "AC3bit+rm");
+        }
     }
 
     /**
@@ -1092,7 +1098,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return a circuit constraint
      */
     default Constraint circuit(IntVar[] vars, int offset, CircuitConf conf) {
-        Propagator[] props;
+        Propagator<?>[] props;
         if (conf == CircuitConf.LIGHT) {
             props = new Propagator[]{new PropNoSubtour(vars, offset)};
         } else {
@@ -1809,13 +1815,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         int[] vals = getDomainUnion(vars);
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
-        return new Constraint(ConstraintsName.NVALUES,
-                //ew PropNValue(vars, nValues),
-                // at least
-                new PropAtLeastNValues(vars, vals, nValues),
-                // at most
-                new PropAtMostNValues(vars, vals, nValues),
-                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+        return new Constraint(
+            ConstraintsName.NVALUES,
+            new PropNValue(vars, nValues),
+            // at least
+//            new PropAtLeastNValues(vars, vals, nValues),
+            // at most
+//            new PropAtMostNValues(vars, vals, nValues),
+            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
         );
     }
 
@@ -2213,6 +2220,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint table(IntVar[] vars, Tuples tuples) {
         String algo = "GAC3rm";
         if (tuples.isFeasible()) {
+            //noinspection OptionalGetWithoutIsPresent
             if (tuples.nbTuples() > 512 &&
                     (IntStream.range(0, vars.length)
                             .map(i -> tuples.max(i) - tuples.min(i))
