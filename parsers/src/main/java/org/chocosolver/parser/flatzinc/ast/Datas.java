@@ -154,11 +154,11 @@ public class Datas {
                 return new int[]{idx};
             case SET_B:
                 ESetBounds esb = (ESetBounds) exp;
-                st.append(esb.toString());
+                st.append(esb);
                 return esb.enumVal();
             case SET_L:
                 ESetList esl = (ESetList) exp;
-                st.append(esl.toString());
+                st.append(esl);
                 return esl.enumVal();
             default:
                 return new int[0];
@@ -232,7 +232,7 @@ public class Datas {
         printSolution();
     }
 
-    private Variable[] allOutPutVars() {
+    public Variable[] allOutPutVars() {
         ArrayList<Variable> vars = new ArrayList<>(output_vars);
         for (Variable[] vs : output_arrays_vars) {
             Collections.addAll(vars, vs);

@@ -18,15 +18,21 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * A Flatzinc to Choco parser.
@@ -39,6 +45,10 @@ public class Flatzinc extends RegParser {
 
     @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
     protected boolean oss = false;
+
+    @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem " +
+            "(default: false, i.e., restricted to the variables declared in output).")
+    protected boolean ocs = false;
 
     //***********************************************************************************
     // VARIABLES
@@ -144,6 +154,35 @@ public class Flatzinc extends RegParser {
             String ruleName = Flatzinc4Parser.ruleNames[ds.ruleIndex];
             System.out.println(ruleName +" -> " + di.toString());
         }*/
+    }
+
+    /**
+     * Create a complementary search on non-decision variables
+     *
+     * @param m a Model
+     */
+    protected void makeComplementarySearch(Model m, int i) {
+        if (ocs) {
+            super.makeComplementarySearch(m, i);
+        } else {
+            Solver solver = m.getSolver();
+            if (solver.getSearch() != null) {
+                IntVar[] ivars = Stream.of(datas[i].allOutPutVars())
+                        .filter(VariableUtils::isInt)
+                        .map(Variable::asIntVar)
+                        .sorted(Comparator.comparingInt(IntVar::getDomainSize))
+                        .toArray(IntVar[]::new);
+                SetVar[] svars = Stream.of(datas[i].allOutPutVars())
+                        .filter(VariableUtils::isSet)
+                        .map(Variable::asSetVar)
+                        .sorted(Comparator.comparingInt(s -> s.getUB().size()))
+                        .toArray(SetVar[]::new);
+                solver.setSearch(solver.getSearch(),
+                        Search.lastConflict(Search.minDomLBSearch(ivars)),
+                        Search.setVarSearch(svars)
+                );
+            }
+        }
     }
 
     protected void singleThread() {
