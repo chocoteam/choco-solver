@@ -53,6 +53,7 @@ import org.chocosolver.solver.constraints.nary.nvalue.PropAMNV;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues;
+import org.chocosolver.solver.constraints.nary.nvalue.PropNValue;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.graph.Gci;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.mis.MDRk;
 import org.chocosolver.solver.constraints.nary.nvalue.amnv.rules.R;
@@ -1776,13 +1777,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         int[] vals = getDomainUnion(vars);
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
-        return new Constraint(ConstraintsName.NVALUES,
-                //ew PropNValue(vars, nValues),
-                // at least
-                new PropAtLeastNValues(vars, vals, nValues),
-                // at most
-                new PropAtMostNValues(vars, vals, nValues),
-                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+        return new Constraint(
+            ConstraintsName.NVALUES,
+            new PropNValue(vars, nValues),
+            // at least
+//            new PropAtLeastNValues(vars, vals, nValues),
+            // at most
+//            new PropAtMostNValues(vars, vals, nValues),
+            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
         );
     }
 

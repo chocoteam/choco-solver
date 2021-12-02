@@ -25,6 +25,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
