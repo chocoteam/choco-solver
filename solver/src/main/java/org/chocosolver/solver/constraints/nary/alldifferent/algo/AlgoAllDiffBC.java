@@ -80,13 +80,17 @@ public class AlgoAllDiffBC {
         },;
     }
 
-    public void filter() throws ContradictionException {
+    // returns true iff at least one bound update has been done
+    public boolean filter() throws ContradictionException {
         boolean again;
+        boolean hasFiltered = false;
         do {
             sortIt();
             again = filterLower();
             again |= filterUpper();
+            hasFiltered |= again;
         } while (again);
+        return hasFiltered;
     }
 
     private void sortIt() {

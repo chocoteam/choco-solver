@@ -14,6 +14,7 @@ import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
@@ -86,7 +87,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     private static final short NEW = 0;
 
     /**
-     * Status of this propagagator when reified.
+     * Status of this propagator when reified.
      */
     private static final short REIFIED = 1;
 
@@ -149,7 +150,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Priority of this propagator.
      * Mix between arity and compexity.
      */
-    protected final PropagatorPriority priority;
+    protected final Priority priority;
 
     /**
      * Set to <tt>true</tt> to indidates that this propagator reacts to fine event.
@@ -232,7 +233,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param swapOnPassivate indicates if, on propagator passivation, the propagator should be
      *                        ignored in its variables' propagators list.
      */
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt, boolean swapOnPassivate) {
+    protected Propagator(V[] vars, Priority priority, boolean reactToFineEvt, boolean swapOnPassivate) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
@@ -293,7 +294,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param reactToFineEvt indicates whether or not this propagator must be informed of every
      *                       variable modification, i.e. if it should be incremental or not
      */
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+    protected Propagator(V[] vars, Priority priority, boolean reactToFineEvt) {
         this(vars, priority, reactToFineEvt, false);
     }
 
@@ -613,7 +614,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             arity += vars[i].isInstantiated() ? 0 : 1;
         }
         if (arity > 3) {
-            return priority.priority;
+            return priority.getValue();
         } else return arity;
     }
 
@@ -736,7 +737,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * @return the priority of this propagator (may influence the order in which propagators are called)
      */
-    public final PropagatorPriority getPriority() {
+    public final Priority getPriority() {
         return priority;
     }
 
@@ -903,7 +904,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @return propagator priority
      */
     public int doSchedule(CircularQueue<Propagator<?>>[] queues){
-        int prio = priority.priority;
+        int prio = priority.getValue();
         if(!scheduled) {
             queues[prio].addLast(this);
             schedule();
