@@ -133,7 +133,8 @@ public class Constraint {
      *
      * @return an array of {@link Propagator}.
      */
-    public Propagator<?>[] getPropagators() {
+    @SuppressWarnings("rawtypes")
+    public Propagator[] getPropagators() {
         return propagators;
     }
 
@@ -436,7 +437,7 @@ public class Constraint {
      * @return a new constraint with all propagators of toMerge
      */
     public static Constraint merge(String name, Constraint... toMerge) {
-        ArrayList<Propagator<?>> props = new ArrayList<>();
+        ArrayList<Propagator> props = new ArrayList<>();
         for (Constraint c : toMerge) {
             c.ignore();
             Collections.addAll(props, c.getPropagators());

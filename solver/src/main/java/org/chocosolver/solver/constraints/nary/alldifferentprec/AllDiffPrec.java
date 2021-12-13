@@ -1,4 +1,13 @@
 /*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
+/*
 @author Arthur Godet <arth.godet@gmail.com>
 @since 05/02/2021
 */
@@ -92,7 +101,7 @@ public class AllDiffPrec extends FilterAllDiffPrec {
         }
     }
 
-    private final Comparator<Integer> comparator = new Comparator<>() {
+    private final Comparator<Integer> comparator = new Comparator<Integer>() {
         @Override
         public int compare(Integer o1, Integer o2) {
             if (ub[o1] == ub[o2]) {
