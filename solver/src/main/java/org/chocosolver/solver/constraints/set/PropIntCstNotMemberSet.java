@@ -57,6 +57,7 @@ public class PropIntCstNotMemberSet extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		vars[0].remove(cst,this);
+		setPassive();
     }
 
     @Override
