@@ -8,6 +8,24 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Propagation is now observable, `solver.observePropagation(PropagationObserver)`. 
+Consequently, it is now possible to profil the propagation by calling `solver.profilePropagation()`. 
+See Javadoc for details and usages (#832).
+- Release 4.10.7 introduces a bug related to delta monitors, which is now fixed (#837).
+- Add new black-box strategy: failure based variable ordering heuristics (@lihb905)
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Hongbo Li](https://github.com/lihb905) (@lihb905)
+
+4.10.7 - 11 Oct 2021
+-------------------
+
+### Major features:
 - Simplify the way deltamonitors work. There is no need to `freeze` and `unfreeze` 
 them before calling `forEach...` methods. But, a call to `forEach...` consumes all values stored.
 - Fix a bug related to incremental propagators, views and missing events.
@@ -40,9 +58,10 @@ This is helpful when a Solution object is required in many places.
 See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
-- [Charles Vernerey](https://github.com/ChaVer) (chaver) 
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
+- [Charles Vernerey](https://github.com/ChaVer) (@chaver)
 
 4.10.6 - 11 Dec 2020
 -------------------             
@@ -69,8 +88,8 @@ Fixes for issues #653 and #740.
 See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 
 #### Contributors to this release:
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro) 
 
 4.10.5 - 02 Oct 2020
 -------------------
@@ -86,9 +105,9 @@ See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 See [milestone 4.10.5](https://github.com/chocoteam/choco-solver/milestone/29) 
 
 #### Contributors to this release:
-- [Guillaume Le Louët](https://github.com/glelouet) (glelouet)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
+- [Guillaume Le Louët](https://github.com/glelouet) (@glelouet)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro) 
 
 4.10.4 - 08 Sep 2020
 --------------------
@@ -111,9 +130,9 @@ See [milestone 4.10.5](https://github.com/chocoteam/choco-solver/milestone/29)
 \#692, #698, #700, #702, #703, #704, #705
 
 #### Contributors to this release:
-- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
 
 4.10.3 - 03 Jul 2020
 --------------------

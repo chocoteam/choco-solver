@@ -25,7 +25,7 @@ import org.chocosolver.util.procedure.PairProcedure;
 
 public class GraphUnionViewDeltaMonitor extends GraphViewDeltaMonitor {
 
-    GraphView g;
+    GraphView<?,?> g;
     ISet[] nodesAdded;
     ISet[][] edgesAdded;
     ISet[] nodesRemoved;
@@ -37,7 +37,7 @@ public class GraphUnionViewDeltaMonitor extends GraphViewDeltaMonitor {
     ISet[] addEdge;
     ISet[] removeEdge;
 
-    public GraphUnionViewDeltaMonitor(GraphView graphUnionView, IGraphDeltaMonitor... deltaMonitors) {
+    public GraphUnionViewDeltaMonitor(GraphView<?,?> graphUnionView, IGraphDeltaMonitor... deltaMonitors) {
         super(deltaMonitors);
         assert graphUnionView instanceof UndirectedGraphUnionView || graphUnionView instanceof DirectedGraphUnionView;
         g = graphUnionView;

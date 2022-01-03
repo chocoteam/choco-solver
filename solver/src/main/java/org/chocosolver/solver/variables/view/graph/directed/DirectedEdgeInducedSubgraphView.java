@@ -165,7 +165,7 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
         return new DirectedEdgeInducedSubgraphMonitor(this, graphVar.monitorDelta(propagator));
     }
 
-    class DirectedEdgeInducedSubgraphMonitor extends GraphViewDeltaMonitor {
+    static class DirectedEdgeInducedSubgraphMonitor extends GraphViewDeltaMonitor {
 
         TIntIntHashMap nodes;
         DirectedEdgeInducedSubgraphView g;
@@ -219,5 +219,5 @@ public class DirectedEdgeInducedSubgraphView extends DirectedGraphView<DirectedG
                 }
             }, evt);
         }
-    };
+    }
 }

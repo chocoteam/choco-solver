@@ -1,5 +1,5 @@
 #year,name,solutions,best,nodes,fails
-2021,feistel.fzn,1,17,174,160
+2021,feistel.fzn,1,_,174,160
 2020,bnn+inventory_4_8s.fzn,1,17,16,15
 #2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
 2020,is+v1HjuSBQMb.fzn,18,454656,13938,13903
@@ -25,9 +25,10 @@
 2018,rotating-workforce+ex1479.fzn,1,_,128979,128877
 2018,steiner-tree+es10fst03.stp.fzn,2,26003678,90342,90339
 2018,test-scheduling+t30m10r3-15.fzn,1,2785,7684,7683
-2017,group+u12g1pref0.fzn,13,297,819,794
+2017,group+u12g1pref0.fzn,13,207,819,794
 2017,tcgc2+k10_34.fzn,2,433,429538,429535
 2016,tpp+6_3_20_1.fzn,65,131,2813028,2812899
+2015,gfd-schedule+n120f5d50m50k20.fzn,1,1,30419,30418
 2012,amaze+amaze+2012-03-15.fzn,1,1429,139638,139637
 2012,amaze+amaze+2012-03-19.fzn,1,447,58182,58181
 2012,amaze+amaze+2012-06-22.fzn,1,928,5009,5008
@@ -47,6 +48,6 @@
 2012,ship-schedule+ship-schedule.cp+6ShipsMixed.fzn,237,301650,16089,15616
 2012,solbat+sb+sb_12_12_5_1.fzn,1,_,1315,1284
 2012,solbat+sb+sb_14_14_6_0.fzn,1,_,383,352
-2012,still-life-wastage+still-life+09.fzn,5,46,109471,109462
+2012,still-life-wastage+still-life+09.fzn,5,43,109471,109462
 2012,still-life-wastage+still-life+10.fzn,7,54,164574,164561
 2012,tpp+tpp+tpp_5_5_20_1.fzn,54,115,3215963,3215856

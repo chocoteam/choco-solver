@@ -134,6 +134,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param automaton a deterministic finite automaton defining the regular language
      * @return array of variables that encodes the states, which can optionally be constrained too.
      */
+    @SuppressWarnings("UnusedReturnValue")
     default IntVar[] regularDec(IntVar[] vars, IAutomaton automaton) {
         int n = vars.length;
         IntVar[] states = new IntVar[n + 1];
@@ -162,7 +163,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
                     }
                 }
             }
-            states[i + 1] = ref().intVar("Q_" + +ref().nextId(), layer[i + 1].toArray());
+            states[i + 1] = ref().intVar("Q_" + ref().nextId(), layer[i + 1].toArray());
             ref().table(new IntVar[]{states[i], states[i + 1], vars[i]}, tuples, "CT+").post();
         }
         return states;
@@ -229,6 +230,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      */
     default void argmaxDec(IntVar z, int offset, IntVar[] vars) {
         int n = vars.length;
+        //noinspection OptionalGetWithoutIsPresent
         int min = Stream.of(vars).mapToInt(IntVar::getLB).min().getAsInt();
         int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
         IntVar[] q = new IntVar[n];
@@ -252,6 +254,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      */
     default void argminDec(IntVar z, int offset, IntVar[] vars) {
         int n = vars.length;
+        //noinspection OptionalGetWithoutIsPresent
         int min = Stream.of(vars).mapToInt(IntVar::getLB).min().getAsInt();
         int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
         IntVar[] q = new IntVar[n];
@@ -344,4 +347,56 @@ public interface IDecompositionFactory extends ISelf<Model> {
         ref().element(y, ArrayUtils.append(x, new IntVar[]{y}), idx, 0).post();
         //*/
     }
+
+    /**
+     * Matrix multiplication A x B = C.
+     * @param A a m x n matrix
+     * @param B a n x p matrix
+     * @param C a m x p matrix
+     */
+    default void product(IntVar[][] A, IntVar[][] B, IntVar[][] C) {
+        assert A.length > 0 && B.length > 0 && C.length > 0;
+        assert A[0].length > 0 && B[0].length > 0 && C[0].length > 0;
+        assert A[0].length == B[0].length;
+        assert A.length == C.length;
+        assert B[0].length == C[0].length;
+        int n = B.length;
+        int m = C.length;
+        int p = C[0].length;
+        Model model = C[0][0].getModel();
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < p; j++){
+                int finalI = i;
+                int finalJ = j;
+                model.sum(IntStream.range(0, n)
+                                .mapToObj(k -> A[finalI][k].mul(B[k][finalJ]).intVar())
+                                .toArray(IntVar[]::new),
+                        "=", C[i][j]).post();
+            }
+        }
+    }
+
+    default void product(BoolVar[][] A, BoolVar[][] B, BoolVar[][] C) {
+        assert A.length > 0 && B.length > 0 && C.length > 0;
+        assert A[0].length > 0 && B[0].length > 0 && C[0].length > 0;
+        assert A[0].length == B[0].length;
+        assert A.length == C.length;
+        assert B[0].length == C[0].length;
+        int n = B.length;
+        int m = C.length;
+        int p = C[0].length;
+        Model model = C[0][0].getModel();
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < p; j++) {
+                int finalI = i;
+                int finalJ = j;
+                model.addClausesBoolOrArrayEqVar(
+                        IntStream.range(0, n)
+                                .mapToObj(k -> A[finalI][k].and(B[k][finalJ]).boolVar())
+                                .toArray(BoolVar[]::new)
+                        , C[i][j]);
+            }
+        }
+    }
+
 }

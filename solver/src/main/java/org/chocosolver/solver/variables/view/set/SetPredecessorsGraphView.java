@@ -32,7 +32,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E> {
+public class SetPredecessorsGraphView<E extends GraphVar<?>> extends SetGraphView<E> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -49,6 +49,7 @@ public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
+        this.gdm.startMonitoring();
         if (!graphVar.isDirected()) {
             this.arcRemoved = (from, to) -> {
                 if (from == node || to == node) {

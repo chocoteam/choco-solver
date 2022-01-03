@@ -33,9 +33,9 @@ public class PropSymmetric extends Propagator<DirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private DirectedGraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure enf;
+    private final DirectedGraphVar g;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure enf;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -66,6 +66,7 @@ public class PropSymmetric extends Propagator<DirectedGraphVar> {
                 g.enforceEdge(j, i, this);
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

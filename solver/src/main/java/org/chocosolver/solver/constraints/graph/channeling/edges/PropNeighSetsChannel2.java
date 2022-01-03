@@ -29,11 +29,13 @@ public class PropNeighSetsChannel2 extends Propagator<SetVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int n, currentSet;
-	private ISetDeltaMonitor[] sdm;
-	private SetVar[] sets;
-	private GraphVar g;
-	private IntProcedure elementForced, elementRemoved;
+	private final int n;
+	private int currentSet;
+	private final ISetDeltaMonitor[] sdm;
+	private final SetVar[] sets;
+	private final GraphVar<?> g;
+	private final IntProcedure elementForced;
+	private final IntProcedure elementRemoved;
 
 	//***********************************************************************************
 	// CONSTRUCTORS
@@ -43,7 +45,7 @@ public class PropNeighSetsChannel2 extends Propagator<SetVar> {
 	 * Channeling between a graph variable and set variables
 	 * representing either node neighbors or node successors
 	 */
-	public PropNeighSetsChannel2(SetVar[] setsV, GraphVar gV) {
+	public PropNeighSetsChannel2(SetVar[] setsV, GraphVar<?> gV) {
 		super(setsV, PropagatorPriority.LINEAR, true);
 		this.sets = new SetVar[setsV.length];
 		System.arraycopy(vars, 0, this.sets, 0, setsV.length);
@@ -74,6 +76,9 @@ public class PropNeighSetsChannel2 extends Propagator<SetVar> {
 					g.removeEdge(i, j, this);
 				}
 			}
+		}
+		for (int i = 0; i < n; i++) {
+			sdm[i].startMonitoring();
 		}
 	}
 

@@ -19,29 +19,31 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.Arrays;
 import java.util.Random;
 
 /**
  * @author Arthur Godet <arth.godet@gmail.com>
  * @since 13/03/2020
-*/
+ */
 public class PropNValue extends Propagator<IntVar> {
-    private IntVar nValue;
+    private static final int NO_WITNESS = -1;
+
+    private final IntVar nValue;
     private final int n;
-    private int[] concernedValues;
-    private int[] witness;
-    private ISet mandatoryValues;
-    private ISet possibleValues;
-    private TIntArrayList listForRandomPick;
-    private Random rnd = new Random(vars[0].getModel().getSeed());
+    private final int[] concernedValues;
+    private final int[] witness;
+    private final ISet mandatoryValues;
+    private final ISet possibleValues;
+    private final TIntArrayList listForRandomPick;
+    private final Random rnd = new Random(vars[0].getModel().getSeed());
 
     public PropNValue(IntVar[] vars, IntVar nvalue) {
-        super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, false);
+        super(ArrayUtils.concat(vars, nvalue), PropagatorPriority.LINEAR, true);
         this.nValue = nvalue;
         n = vars.length;
         TIntHashSet set = new TIntHashSet();
@@ -55,11 +57,11 @@ public class PropNValue extends Propagator<IntVar> {
         concernedValues = set.toArray();
         possibleValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
-        witness = new int[concernedValues.length];
-        Arrays.fill(witness, -1);
         listForRandomPick = new TIntArrayList();
+        witness = new int[concernedValues.length];
         for(int j = 0; j<witness.length; j++) {
             possibleValues.add(concernedValues[j]);
+            witness[j] = NO_WITNESS;
             selectRandomWitness(j);
         }
     }
@@ -73,25 +75,30 @@ public class PropNValue extends Propagator<IntVar> {
         }
     }
 
-    @Override
-    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
-        if(idxVarInProp < n) {
-            for(int j = 0; j<concernedValues.length; j++) {
-                if(witness[j] == idxVarInProp && !vars[idxVarInProp].contains(concernedValues[j])) {
-                    selectRandomWitness(j);
-                }
-            }
-            if(vars[idxVarInProp].isInstantiated()) {
-                mandatoryValues.add(vars[idxVarInProp].getValue());
+    private int contains(int v) {
+        for(int i = 0; i < concernedValues.length; i++) {
+            if(concernedValues[i] == v) {
+                return i;
             }
         }
-        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+        return -1;
+    }
+
+    private void instantiateTo(int idxVar, int value) {
+        int idxConcernedValue = contains(value);
+        mandatoryValues.add(vars[idxVar].getValue());
+        witness[idxConcernedValue] = idxVar;
+        for(int i = 0; i < concernedValues.length; i++) {
+            if(witness[i] == idxVar && concernedValues[i] != value) {
+                selectRandomWitness(i);
+            }
+        }
     }
 
     private void selectRandomWitness(int idxConcernedValue) {
         int value = concernedValues[idxConcernedValue];
         listForRandomPick.clear();
-        for(int i = 0; i<n; i++) {
+        for(int i = 0; i < n; i++) {
             if(vars[i].isInstantiatedTo(value)) {
                 mandatoryValues.add(value);
                 witness[idxConcernedValue] = i;
@@ -102,22 +109,50 @@ public class PropNValue extends Propagator<IntVar> {
         }
         if(listForRandomPick.size() == 0) {
             possibleValues.remove(value);
+            witness[idxConcernedValue] = NO_WITNESS;
         } else {
             witness[idxConcernedValue] = listForRandomPick.getQuick(rnd.nextInt(listForRandomPick.size()));
         }
     }
 
     @Override
+    public void propagate(int idxVarInProp, int mask) throws ContradictionException {
+        if(idxVarInProp < n) {
+            for(int j = 0; j < concernedValues.length; j++) {
+                if(witness[j] == idxVarInProp && !vars[idxVarInProp].contains(concernedValues[j])) {
+                    selectRandomWitness(j);
+                }
+            }
+            if(vars[idxVarInProp].isInstantiated()) {
+                instantiateTo(idxVarInProp, vars[idxVarInProp].getValue());
+            }
+        }
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+    }
+
+    @Override
     public void propagate(int evtmask) throws ContradictionException {
         if(PropagatorEventType.isFullPropagation(evtmask)) {
-            nValue.updateUpperBound(Math.max(vars.length-1, concernedValues.length), this);
-            for(int j = 0; j<witness.length; j++) {
+            nValue.updateUpperBound(Math.min(vars.length-1, concernedValues.length), this);
+            for(int j = 0; j < witness.length; j++) {
                 selectRandomWitness(j);
+            }
+        } else if(PropagatorEventType.isCustomPropagation(evtmask)) {
+            ISetIterator iterator = possibleValues.iterator();
+            while(iterator.hasNext()) {
+                int value = iterator.nextInt();
+                int idxConcernedValue = contains(value);
+                if(
+                    witness[idxConcernedValue] == NO_WITNESS
+                        || !vars[witness[idxConcernedValue]].contains(concernedValues[idxConcernedValue])
+                ) { // because witness not backtrackable
+                    selectRandomWitness(idxConcernedValue);
+                }
             }
         }
         nValue.updateBounds(mandatoryValues.size(), possibleValues.size(), this);
-        if(nValue.isInstantiated() && mandatoryValues.size() == nValue.getValue()) {
-            for(int i = 0; i<n; i++) {
+        if(nValue.isInstantiatedTo(mandatoryValues.size())) {
+            for(int i = 0; i < n; i++) {
                 for(int value = vars[i].getLB(); value <= vars[i].getUB(); value = vars[i].nextValue(value)) {
                     if(!mandatoryValues.contains(value)) {
                         vars[i].removeValue(value, this);
@@ -125,22 +160,20 @@ public class PropNValue extends Propagator<IntVar> {
                 }
             }
             setPassive();
-        } else if(nValue.isInstantiated() && mandatoryValues.size() > nValue.getValue()) {
-            fails();
-        } else if(nValue.isInstantiated() && nValue.getValue() == concernedValues.length) {
-            boolean hasFiltered;
-            do {
-                hasFiltered = false;
-                for(int i = 0; i < n; i++) {
-                    if(vars[i].isInstantiated()) {
-                        for(int j = 0; j < n; j++) {
-                            if(i != j) {
-                                hasFiltered |= vars[j].removeValue(vars[i].getValue(), this);
+        } else if(nValue.isInstantiatedTo(n)) {
+            for(int i = 0; i < witness.length; i++) {
+                if(witness[i] != NO_WITNESS && vars[witness[i]].isInstantiatedTo(concernedValues[i])) {
+                    for(int j = 0; j < n; j++) {
+                        if(j != witness[i]) {
+                            vars[j].removeValue(concernedValues[i], this);
+                            if(vars[j].isInstantiated()) {
+                                instantiateTo(j, vars[j].getValue());
                             }
                         }
                     }
                 }
-            } while(hasFiltered);
+            }
+            nValue.updateBounds(mandatoryValues.size(), possibleValues.size(), this);
         }
     }
 

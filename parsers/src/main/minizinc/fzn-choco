@@ -10,7 +10,7 @@ SEED=0
 NB_NODES=1
 TIME_LIMIT=-1
 DIR=`dirname "$0"`
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.7-SNAPSHOT/choco-parsers-4.10.7-SNAPSHOT-jar-with-dependencies.jar
+CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.7/choco-parsers-4.10.7-jar-with-dependencies.jar
 #${DIR}/${JAR_NAME}
 usage="\
 

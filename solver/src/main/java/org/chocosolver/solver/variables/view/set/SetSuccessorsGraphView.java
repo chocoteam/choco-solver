@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
@@ -33,7 +32,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class SetSuccessorsGraphView<E extends GraphVar> extends SetGraphView<E> {
+public class SetSuccessorsGraphView<E extends GraphVar<?>> extends SetGraphView<E> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -50,6 +49,7 @@ public class SetSuccessorsGraphView<E extends GraphVar> extends SetGraphView<E> 
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
+        this.gdm.startMonitoring();
         if (!graphVar.isDirected()) {
             this.arcRemoved = (from, to) -> {
                 if (from == node || to == node) {

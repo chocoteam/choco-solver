@@ -32,14 +32,19 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
         }
     }
 
-    private IIntDeltaMonitor deltamonitor;
-    private TIntArrayList values;
-    private Filler filler;
+    private final IIntDeltaMonitor deltamonitor;
+    private final TIntArrayList values;
+    private final Filler filler;
 
     public ViewDeltaMonitor(IIntDeltaMonitor deltamonitor) {
         this.deltamonitor = deltamonitor;
         values = new TIntArrayList(8);
         filler = new Filler();
+    }
+
+    @Override
+    public void startMonitoring() {
+        this.deltamonitor.startMonitoring();
     }
 
     @Override
@@ -61,9 +66,9 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
     }
 
     @Override
-   	public int sizeApproximation(){
-   		return deltamonitor.sizeApproximation();
-   	}
+    public int sizeApproximation() {
+        return deltamonitor.sizeApproximation();
+    }
 
     protected abstract int transform(int value);
 }

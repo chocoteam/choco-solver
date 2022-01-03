@@ -46,4 +46,11 @@ public abstract class SetViewOnSetsDeltaMonitor implements ISetDeltaMonitor {
             deltaMonitors[i].forEach(e -> removedValues[finalI].add(e), SetEventType.REMOVE_FROM_ENVELOPE);
         }
     }
+
+    @Override
+    public void startMonitoring() {
+        for (int i = 0; i < deltaMonitors.length; i++) {
+            deltaMonitors[i].startMonitoring();
+        }
+    }
 }

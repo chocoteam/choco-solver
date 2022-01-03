@@ -79,6 +79,7 @@ public class PropArgmax extends Propagator<IntVar> {
         if (vars[n].isInstantiated()) {
             filterLb(vars[n].getValue() - o);
         }
+        delta.startMonitoring();
     }
 
     @Override
@@ -149,6 +150,7 @@ public class PropArgmax extends Propagator<IntVar> {
         lbi.set(j);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     @Override
     public ESat isEntailed() {
         if (isCompletelyInstantiated()) {

@@ -38,13 +38,13 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
     /**
      * Offset between boolVars array indices and set elements
      */
-    private int offset;
+    private final int offset;
 
     /**
      * Internal bounds only updated by the view.
      */
-    private ISet lb;
-    private ISet ub;
+    private final ISet lb;
+    private final ISet ub;
 
     protected boolean reactOnModification;
     private ISetDelta delta;
@@ -80,6 +80,7 @@ public class SetBoolsView<B extends BoolVar> extends SetView<B> {
      * @param offset Offset between boolVars array indices and set elements
      * @param variables observed variables
      */
+    @SuppressWarnings("unchecked")
     public SetBoolsView(int offset, B... variables) {
         this("BOOLS_SET_VIEW["
                     + String.join(",", Arrays.stream(variables)

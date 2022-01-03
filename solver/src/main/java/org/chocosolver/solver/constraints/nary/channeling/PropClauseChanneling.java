@@ -31,12 +31,15 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropClauseChanneling extends Propagator<IntVar> {
 
-    private IntVar iv;
-    private boolean bounded;
-    private IIntDeltaMonitor dm;
-    private BoolVar[] eqs, lqs; // EQ bool vars and LQ bool vars
-    private IStateInt LB, UB; // keep trace of lb and ub of iv to ease propagation
-    private int OFFSET, LENGTH;
+    private final IntVar iv;
+    private final boolean bounded;
+    private final IIntDeltaMonitor dm;
+    private final BoolVar[] eqs; // EQ bool vars
+    private final BoolVar[] lqs; // LQ bool vars
+    private final IStateInt LB;
+    private final IStateInt UB; // keep trace of lb and ub of iv to ease propagation
+    private final int OFFSET;
+    private final int LENGTH;
 
     public PropClauseChanneling(IntVar iv, BoolVar[] eb, BoolVar[] lb) {
         super(ArrayUtils.append(new IntVar[]{iv}, eb, lb), PropagatorPriority.LINEAR, true);
@@ -117,6 +120,9 @@ public class PropClauseChanneling extends Propagator<IntVar> {
 
         LB.set(lb);
         UB.set(ub);
+
+        // finally delta monitor
+        dm.startMonitoring();
     }
 
     @Override
@@ -200,7 +206,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
      * Actions to apply on int var instantiation
      *
      * @param value instantiated value (offsetted)
-     * @throws ContradictionException
+     * @throws ContradictionException when failure is detected
      */
     private void _inst(int value) throws ContradictionException {
         _ulb(value, LB.get());
@@ -215,7 +221,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
      *
      * @param nlb new lower bound value (offsetted)
      * @param olb old lower bound (offsetted)
-     * @throws ContradictionException
+     * @throws ContradictionException when failure is detected
      */
     private void _ulb(int nlb, int olb) throws ContradictionException {
         for (int i = olb; i < nlb; i++) {
@@ -242,7 +248,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
      *
      * @param nub new upper bound value (offsetted)
      * @param oub old upper bound (offsetted)
-     * @throws ContradictionException
+     * @throws ContradictionException when failure is detected
      */
     private void _uub(int nub, int oub) throws ContradictionException {
         for (int i = oub; i > nub; i--) {
@@ -269,7 +275,7 @@ public class PropClauseChanneling extends Propagator<IntVar> {
      * Actions to apply on value removal from int var
      *
      * @param value removed value (offsetted)
-     * @throws ContradictionException
+     * @throws ContradictionException when failure is detected
      */
     private void _rem(int value) throws ContradictionException {
         eqs[value].instantiateTo(0, this);

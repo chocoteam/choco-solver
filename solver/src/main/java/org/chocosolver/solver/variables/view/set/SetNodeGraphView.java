@@ -28,7 +28,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 02/03/2021
  */
-public class SetNodeGraphView<E extends GraphVar> extends SetGraphView<E> {
+public class SetNodeGraphView<E extends GraphVar<?>> extends SetGraphView<E> {
 
     /**
      * Create a set view over the set of nodes of a graph variable.

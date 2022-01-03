@@ -37,7 +37,7 @@ public class SetUnion extends AbstractSet {
      */
     public SetUnion(SetType setType, int offset, ISet... sets) {
         this.sets = sets;
-        this.values = SetFactory.makeSet(setType, 0);
+        this.values = SetFactory.makeSet(setType, offset);
         init();
     }
 

@@ -84,7 +84,7 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
     /**
      * Signed Literal
      */
@@ -231,7 +231,7 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    protected final EvtScheduler createScheduler() {
+    protected final BoolEvtScheduler createScheduler() {
         return new BoolEvtScheduler();
     }
 
@@ -245,7 +245,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
         setVar.createDelta();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public final IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();

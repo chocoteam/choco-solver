@@ -12,6 +12,7 @@ package org.chocosolver.solver;
 import org.chocosolver.memory.ICondition;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
+import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.real.Ibex;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -50,7 +51,9 @@ public class Settings {
 
     private boolean sortPropagatorActivationWRTPriority = true;
 
-    private Function<Model, AbstractStrategy> defaultSearch = Search::defaultSearch;
+    private int maxPropagatorPriority = PropagatorPriority.VERY_SLOW.getValue();
+
+    private Function<Model, AbstractStrategy<?>> defaultSearch = Search::defaultSearch;
 
     private boolean warnUser = false;
 
@@ -65,6 +68,8 @@ public class Settings {
     private boolean checkDeclaredConstraints = true;
 
     private boolean checkDeclaredViews = true;
+
+    private boolean checkDeclaredMonitors = true;
 
     private boolean printAllUndeclaredConstraints = false;
 
@@ -86,7 +91,7 @@ public class Settings {
 
     private Function<Model, Solver> initSolver = Solver::new;
 
-    private HashMap<String, Object> additionalSettings = new HashMap<>();
+    private final HashMap<String, Object> additionalSettings = new HashMap<>();
 
     private Settings() {
     }
@@ -114,6 +119,7 @@ public class Settings {
                 .setWarnUser(false)
                 .setCheckDeclaredConstraints(false)
                 .setCheckDeclaredViews(false)
+                .setCheckDeclaredMonitors(false)
                 .setPrintAllUndeclaredConstraints(false);
     }
 
@@ -129,6 +135,7 @@ public class Settings {
                 .setWarnUser(true)
                 .setCheckDeclaredConstraints(true)
                 .setCheckDeclaredViews(true)
+                .setCheckDeclaredMonitors(true)
                 .setPrintAllUndeclaredConstraints(true);
     }
 
@@ -177,7 +184,7 @@ public class Settings {
      * @param cloneVariableArrayInPropagator {@code true} to clone variables array on constructor
      * @return the current instance
      */
-    Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator) {
+    public Settings setCloneVariableArrayInPropagator(boolean cloneVariableArrayInPropagator) {
         this.cloneVariableArrayInPropagator = cloneVariableArrayInPropagator;
         return this;
     }
@@ -302,6 +309,27 @@ public class Settings {
         return this;
     }
 
+
+    /**
+     * @return the maximum priority any propagators can have (default is 7)
+     */
+    public int getMaxPropagatorPriority(){
+        return maxPropagatorPriority;
+    }
+
+    /**
+     * Increase the number of priority for propagators (default is {@link PropagatorPriority#VERY_SLOW}).
+     * This directly impacts the number of queues to schedule propagators in the propagation engine.
+     *
+     * @param maxPropagatorPriority the new maximum prioirity any propagator can declare
+     * @return the current instance
+     */
+    public Settings setMaxPropagatorPriority(int maxPropagatorPriority){
+        this.maxPropagatorPriority = maxPropagatorPriority;
+        return this;
+    }
+
+
     /**
      * Creates a default search strategy for the input model
      *
@@ -309,7 +337,7 @@ public class Settings {
      * @return a default search strategy for model
      * @see Search#defaultSearch(Model)
      */
-    public AbstractStrategy makeDefaultSearch(Model model) {
+    public AbstractStrategy<?> makeDefaultSearch(Model model) {
         return defaultSearch.apply(model);
     }
 
@@ -319,7 +347,7 @@ public class Settings {
      * @param defaultSearch what default search strategy should be
      * @return the current instance
      */
-    public Settings setDefaultSearch(Function<Model, AbstractStrategy> defaultSearch) {
+    public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
     }
@@ -494,6 +522,15 @@ public class Settings {
     public Settings setCheckDeclaredViews(boolean checkDeclaredViews) {
         this.checkDeclaredViews = checkDeclaredViews;
         return this;
+    }
+
+    public Settings setCheckDeclaredMonitors(boolean check) {
+        this.checkDeclaredMonitors = check;
+        return this;
+    }
+
+    public boolean checkDeclaredMonitors() {
+        return this.checkDeclaredMonitors;
     }
 
     /**
@@ -708,7 +745,7 @@ public class Settings {
      * it leads to different results in calculations like `Math.pow(10, 6)`.
      * See issue #740.
      *
-     * @param ibexRestoreRounding
+     * @param ibexRestoreRounding either Java or ibex rounding method
      * @implNote Supported since ibex-java version 1.2.0
      */
     public Settings setIbexRestoreRounding(boolean ibexRestoreRounding) {

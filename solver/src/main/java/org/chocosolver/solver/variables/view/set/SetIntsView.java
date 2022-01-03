@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
@@ -20,7 +21,9 @@ import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
-import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.procedure.IntProcedure;
 
 import java.util.Arrays;
@@ -37,22 +40,22 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
     /**
      * Integer value array such that intVariables[x - offset] = v[x - offset] <=> x in set
      */
-    private int[] v;
+    private final int[] v;
 
     /**
      * Integer value such that intVariables[x - offset] = v[x - offset] <=> x in set
      */
-    private int offset;
+    private final int offset;
 
-    private IIntDeltaMonitor[] idm;
+    private final IIntDeltaMonitor[] idm;
 
-    private IntProcedure[] valRemoved;
+    private final IntProcedure[] valRemoved;
 
     /**
      * Internal bounds only updated by the view.
      */
-    private ISet lb;
-    private ISet ub;
+    private final ISet lb;
+    private final ISet ub;
 
     protected boolean reactOnModification;
     private ISetDelta delta;
@@ -67,6 +70,7 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
      * @param offset offset such that if intVariables[x - offset] = v[x - offset] <=> x in set view.
      * @param variables observed variables
      */
+    @SafeVarargs
     protected SetIntsView(String name, int[] v, int offset, I... variables) {
         super(name, variables);
         assert v.length == variables.length;
@@ -74,8 +78,11 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
         this.offset = offset;
         this.idm = new IIntDeltaMonitor[getNbObservedVariables()];
         this.valRemoved = new IntProcedure[getNbObservedVariables()];
+        this.lb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
+        this.ub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
         for (int i = 0; i < getNbObservedVariables(); i++) {
             this.idm[i] = getVariables()[i].monitorDelta(this);
+            this.idm[i].startMonitoring();
             int finalI = i;
             this.valRemoved[i] = val -> {
                 if (val == this.v[finalI]) {
@@ -87,8 +94,6 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
                 }
             };
         }
-        this.lb = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
-        this.ub = SetFactory.makeStoredSet(SetType.BITSET, 0, variables[0].getModel());
         // init
         for (int i = 0; i < variables.length; i++) {
             if (variables[i].isInstantiatedTo(v[i])) {
@@ -108,10 +113,11 @@ public class SetIntsView<I extends IntVar> extends SetView<I> {
      * @param offset offset between integer variables indices and set elements.
      * @param variables observed variables
      */
+    @SafeVarargs
     public SetIntsView(int[] v, int offset, I... variables) {
         this("INTS_SET_VIEW["
                     + String.join(",", Arrays.stream(variables)
-                        .map(i -> i.getName())
+                        .map(Variable::getName)
                         .toArray(String[]::new))
                     + "]",
                 v, offset, variables);

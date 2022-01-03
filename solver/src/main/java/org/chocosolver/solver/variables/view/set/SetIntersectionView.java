@@ -106,8 +106,7 @@ public class SetIntersectionView extends SetView<SetVar> {
             }
         }
         if (nb == 1) {
-            variables[idx].remove(element, this);
-            return true;
+            return variables[idx].remove(element, this);
         } else {
             remove.add(element);
         }
@@ -117,9 +116,9 @@ public class SetIntersectionView extends SetView<SetVar> {
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
         // Force the element in every set
-        boolean b = true;
+        boolean b = false;
         for (SetVar set : variables) {
-            b = b && set.force(element, this);
+            b |= set.force(element, this);
         }
         return b;
     }
@@ -136,9 +135,9 @@ public class SetIntersectionView extends SetView<SetVar> {
             deltaMonitors[i] = variables[i].monitorDelta(propagator);
         }
         return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
-            ISet removed = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
-            ISet remove = new SetDifference(new SetUnion(removedValues), removed);
-            ISet add = new SetUnion(addedValues);
+            final ISet removed = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            final ISet remove = new SetDifference(new SetUnion(removedValues), removed);
+            final ISet add = new SetUnion(addedValues);
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
                 fillValues();

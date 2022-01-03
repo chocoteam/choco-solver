@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.delta.monitor;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
 import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
@@ -29,24 +30,40 @@ public class SetDeltaMonitor extends TimeStampedObject implements ISetDeltaMonit
     private final ICause propagator;
 
     public SetDeltaMonitor(ISetDelta delta, ICause propagator) {
-		super(delta.getEnvironment());
+        super(delta.getEnvironment());
         this.delta = delta;
         this.first = new int[2];
         this.last = new int[2];
         this.propagator = propagator;
     }
 
+    @Override
+    public void startMonitoring() {
+        delta.lazyClear();    // fix 27/07/12
+        resetStamp();
+        for (int i = 0; i < 2; i++) {
+            this.first[i] = this.last[i] = delta.getSize(i);
+        }
+    }
+
     private void freeze() {
-		if (needReset()) {
+        if (getTimeStamp() == -1) {
+            throw new SolverException("Delta Monitor created in this is not activated. " +
+                    "This should be the last instruction of this.propagate(int) " +
+                    "by calling `monitor.startMonitoring()`");
+        }
+        if (needReset()) {
             delta.lazyClear();
-			for (int i = 0; i < 2; i++) {
-				this.first[i] = 0;
-			}
-			resetStamp();
-		}
-        assert this.getTimeStamp() == ((TimeStampedObject)delta).getTimeStamp()
-                        :"Delta and monitor desynchronized. deltamonitor.freeze() is called " +
-                        "but no value has been removed since the last call.";
+            for (int i = 0; i < 2; i++) {
+                this.first[i] = 0;
+            }
+            resetStamp();
+        }
+        if (getTimeStamp() != ((TimeStampedObject) delta).getTimeStamp()) {
+            throw new SolverException("Delta and monitor are not synchronized. " +
+                    "\ndeltamonitor.freeze() is called " +
+                    "but no value has been removed since the last call.");
+        }
         for (int i = 0; i < 2; i++) {
             this.last[i] = delta.getSize(i);
         }

@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>4.10.7-SNAPSHOT</version>
+        <version>4.10.8-SNAPSHOT</version>
     </parent>
     <artifactId>choco-parsers</artifactId>
     <packaging>jar</packaging>
@@ -44,22 +44,22 @@
         <dependency>
             <groupId>org.xcsp</groupId>
             <artifactId>xcsp3-tools</artifactId>
-            <version>1.2.4</version>
+            <version>2.0</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.2</version>
+            <version>4.9.3</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>4.9.2</version>
+            <version>4.9.3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>5.0.0</version>
+            <version>5.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -106,7 +106,7 @@
                 <!--version 4.5 is the last one that generates
                 in the right ouptut directory
                 without specific configurations -->
-                <version>4.9.2</version>
+                <version>4.9.3</version>
                 <configuration>
                     <listener>false</listener>
                     <visitor>false</visitor>

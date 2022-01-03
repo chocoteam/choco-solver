@@ -11,10 +11,10 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.view.*;
-import org.chocosolver.solver.variables.view.bool.BoolNotView;
+import org.chocosolver.solver.variables.view.RealView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
+import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.solver.variables.view.bool.BoolSetView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedEdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.directed.DirectedGraphUnionView;
@@ -22,7 +22,9 @@ import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedS
 import org.chocosolver.solver.variables.view.graph.undirected.EdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.NodeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.UndirectedGraphUnionView;
-import org.chocosolver.solver.variables.view.integer.*;
+import org.chocosolver.solver.variables.view.integer.IntMinusView;
+import org.chocosolver.solver.variables.view.integer.IntOffsetView;
+import org.chocosolver.solver.variables.view.integer.IntScaleView;
 import org.chocosolver.solver.variables.view.set.*;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -81,7 +83,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @return A boolvar equals to S.contains(v).
      */
     default BoolVar setBoolView(SetVar setVar, int v) {
-        return new BoolSetView(v, setVar);
+        return new BoolSetView<>(v, setVar);
     }
 
     /**
@@ -154,6 +156,7 @@ public interface IViewFactory extends ISelf<Model> {
         }
         if (ref().getSettings().enableViews()) {
             if (var instanceof IntMinusView) {
+                //noinspection rawtypes
                 return ((IntMinusView) var).getVariable();
             } else {
                 int p = checkDeclaredView(var, -1, IntMinusView.class, ref().getSettings().checkDeclaredViews());
@@ -402,6 +405,7 @@ public interface IViewFactory extends ISelf<Model> {
         }
     }
 
+    @SuppressWarnings("rawtypes")
     static int checkDeclaredView(IntVar x, int c, Class clazz, boolean check){
         for(int i = 0; check && i < x.getNbViews(); i++)
             if (clazz.isInstance(x.getView(i))) {

@@ -22,7 +22,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
-import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
 import org.chocosolver.util.procedure.IntProcedure;
 
@@ -119,8 +118,7 @@ public class SetUnionView extends SetView<SetVar> {
             }
         }
         if (nb == 1) {
-            variables[idx].force(element, this);
-            return true;
+            return variables[idx].force(element, this);
         } else {
             enforce.add(element);
         }
@@ -139,9 +137,9 @@ public class SetUnionView extends SetView<SetVar> {
             deltaMonitors[i] = variables[i].monitorDelta(propagator);
         }
         return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
-            ISet remove = new SetUnion(removedValues);
-            ISet added = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
-            ISet add = new SetDifference(new SetUnion(addedValues), added);
+            final ISet remove = new SetUnion(removedValues);
+            final ISet added = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            final ISet add = new SetDifference(new SetUnion(addedValues), added);
             @Override
             public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
                 fillValues();

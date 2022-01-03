@@ -93,8 +93,7 @@ public class SetDifferenceView extends SetView<SetVar> {
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
         // Force element to x and remove it from y
-        boolean b = x.force(element, this) || y.remove(element, this);
-        return b;
+        return x.force(element, this) | y.remove(element, this);
     }
 
     @Override
