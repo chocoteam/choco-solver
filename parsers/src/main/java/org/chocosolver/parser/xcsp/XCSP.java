@@ -38,11 +38,13 @@ public class XCSP extends RegParser {
     // Contains mapping with variables and output prints
     public XCSPParser[] parsers;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-cs", usage = "set to true to check solution with org.xcsp.checker.SolutionChecker")
     private boolean cs = false;
 
-    @Option(name = "-cst")
-    private boolean cst = false;
+    @SuppressWarnings("FieldMayBeFinal")
+    @Option(name = "-flt")
+    private boolean flatten = false;
 
     /**
      * Needed to print the last solution found
@@ -167,8 +169,10 @@ public class XCSP extends RegParser {
 
 
     private void onSolution(Solver solver, XCSPParser parser) {
+        output.setLength(0);
+        output.append(parser.printSolution(!flatten));
         if (solver.getObjectiveManager().isOptimization()) {
-            if (level.is(Level.RESANA)) {
+            if (level.isLoggable(Level.COMPET) || level.is(Level.RESANA)) {
                 solver.log().printf(java.util.Locale.US, "o %d %.1f\n",
                         solver.getObjectiveManager().getBestSolutionValue().intValue(),
                         solver.getTimeCount());
@@ -180,13 +184,15 @@ public class XCSP extends RegParser {
                         solver.getTimeCount());
             }
         } else {
+            if (level.isLoggable(Level.COMPET)) {
+                solver.log().println(output.toString());
+            }
             if (level.is(Level.JSON)) {
                 solver.log().printf("{\"time\":%.1f},",
                         solver.getTimeCount());
             }
         }
-        output.setLength(0);
-        output.append(parser.printSolution());
+        
         if (level.isLoggable(Level.INFO)) {
             solver.log().white().printf("%s %n", solver.getMeasures().toOneLineString());
         }
@@ -217,6 +223,7 @@ public class XCSP extends RegParser {
             log = log.black();
         }
         if (level.isLoggable(Level.COMPET)) {
+            output.append("d FOUND SOLUTIONS ").append(solver.getSolutionCount()).append("\n");
             log.println(output.toString());
         }
         log.reset();
