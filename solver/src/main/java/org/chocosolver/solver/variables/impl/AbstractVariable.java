@@ -42,7 +42,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with double instantiation exception.
      */
-    protected static final String MSG_INST = "already instantiated";
+    protected static final String MSG_INST = "the variable is already instantiated to another value";
 
     /**
      * Default exception message.
@@ -52,12 +52,12 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with wrong upper bound exception.
      */
-    static final String MSG_UPP = "new lower bound is greater than upper bound";
+    static final String MSG_UPP = "the new upper bound is lesser than the current lower bound";
 
     /**
      * Message associated with wrong lower bound exception.
      */
-    static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    static final String MSG_LOW = "the new lower bound is greater than the current upper bound";
 
     /**
      * Message associated with wrong bounds exception.
