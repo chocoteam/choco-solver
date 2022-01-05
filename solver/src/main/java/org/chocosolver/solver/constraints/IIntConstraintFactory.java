@@ -423,7 +423,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        if (var1.hasEnumeratedDomain() || var2.hasEnumeratedDomain()) {
+        if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
             return table(var1, var2, tuples, "CT+");
         } else {
             return table(var1, var2, tuples, "AC3bit+rm");

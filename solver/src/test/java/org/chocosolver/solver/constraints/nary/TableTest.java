@@ -45,7 +45,7 @@ public class TableTest {
 
     private static final String[] ALGOS = {"CT+", "FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+", "MDD+"};
 
-    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
+    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT+"};
 
     @DataProvider(name = "algos")
     public Object[][] algos() {
@@ -627,6 +627,21 @@ public class TableTest {
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMVAV0(String a) {
+        if ("AC3bit+rm".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 3, true);
+        IntVar bar = model.intVar("bar", 0, 1_000_000, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 1_000_000);
+        allowed.add(2, 1_000_000);
+        allowed.add(3, 1);
+        Constraint table = model.table(foo, bar, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
     public void testMVAV1() {
         Model model = new Model("Table MWE");
@@ -657,8 +672,24 @@ public class TableTest {
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testMVAV3(String a) {
+        if ("GAC2001".equals(a) || "MDD+".equals(a) || "GAC3rm+".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 500_000, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2, 500_000);
+        allowed.add(2, 2, 500_000);
+        allowed.add(3, 2, 1);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
-    public void testMVAV3() {
+    public void testMVAV4() {
         //if (.equals(a)) return;
         Model model = new Model("Table MWE");
         IntVar foo = model.intVar("foo", 0, 7, true);
