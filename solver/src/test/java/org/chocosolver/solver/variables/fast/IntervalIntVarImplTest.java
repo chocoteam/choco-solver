@@ -447,4 +447,52 @@ public class IntervalIntVarImplTest {
         Assert.assertEquals(x.previousValueOut(2), 0);
         Assert.assertEquals(x.previousValueOut(0), -1);
     }
+
+    @Test(groups = "1s")
+       public void testErrorLB1() {
+           Model model = new Model();
+           IntVar x = model.intVar(1, 4, true);
+           try {
+               x.updateLowerBound(5, Cause.Null);
+               Assert.fail();
+           } catch (ContradictionException e) {
+               Assert.assertEquals(e.s, "the new lower bound is greater than the current upper bound");
+           }
+       }
+
+       @Test(groups = "1s")
+       public void testErrorLB2() {
+           Model model = new Model();
+           IntVar x = model.intVar(1, 4, true);
+           try {
+               x.updateBounds(5, 6, Cause.Null);
+               Assert.fail();
+           } catch (ContradictionException e) {
+               Assert.assertEquals(e.s, "the new lower bound is greater than the current upper bound");
+           }
+       }
+
+       @Test(groups = "1s")
+       public void testErrorUB1() {
+           Model model = new Model();
+           IntVar x = model.intVar(1, 4, true);
+           try {
+               x.updateUpperBound(0, Cause.Null);
+               Assert.fail();
+           } catch (ContradictionException e) {
+               Assert.assertEquals(e.s, "the new upper bound is lesser than the current lower bound");
+           }
+       }
+
+       @Test(groups = "1s")
+       public void testErrorUB2() {
+           Model model = new Model();
+           IntVar x = model.intVar(1, 4, true);
+           try {
+               x.updateBounds(-1, 0, Cause.Null);
+               Assert.fail();
+           } catch (ContradictionException e) {
+               Assert.assertEquals(e.s, "the new upper bound is lesser than the current lower bound");
+           }
+       }
 }

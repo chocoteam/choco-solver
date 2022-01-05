@@ -99,6 +99,7 @@ module org.chocosolver.solver {
     //exports org.chocosolver.solver.variables.delta.monitor;
     exports org.chocosolver.solver.variables.events;
     exports org.chocosolver.solver.variables.impl;
+    exports org.chocosolver.solver.variables.impl.siglit;
     //exports org.chocosolver.solver.variables.impl.scheduler;
     exports org.chocosolver.solver.variables.view;
     exports org.chocosolver.solver.trace;

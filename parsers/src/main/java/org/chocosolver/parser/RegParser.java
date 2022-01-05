@@ -214,7 +214,7 @@ public abstract class RegParser implements IParser {
             IntVar[] ivars = m.retrieveIntVars(true);
             Arrays.sort(ivars, Comparator.comparingInt(IntVar::getDomainSize));
             for (IntVar iv : ivars) {
-                if (!dvars.contains(iv)) {
+                if (!dvars.contains(iv) && !iv.isAConstant()) {
                     ovars[k++] = iv;
                 }
             }

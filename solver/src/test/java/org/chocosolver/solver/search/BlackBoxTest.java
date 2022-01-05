@@ -45,7 +45,7 @@ public class BlackBoxTest {
 
     @Test(groups = "10s", timeOut = 60000, dataProvider = "strategies")
     public void testCostas(Function<IntVar[], AbstractStrategy<IntVar>> strat) {
-        Model model = ProblemMaker.makeCostasArrays(7);
+        Model model = ProblemMaker.makeCostasArrays(6);
         IntVar[] vars = model.retrieveIntVars(true);
         Solver solver = model.getSolver();
         solver.setSearch(strat.apply(vars));
@@ -53,7 +53,7 @@ public class BlackBoxTest {
         solver.setNoGoodRecordingFromSolutions(vars);
         solver.findAllSolutions();
         solver.printShortStatistics();
-        Assert.assertEquals(solver.getSolutionCount(), 100);
+        Assert.assertEquals(solver.getSolutionCount(), 58);
     }
 
     @Test(groups = "10s", timeOut = 60000, dataProvider = "strategies")
