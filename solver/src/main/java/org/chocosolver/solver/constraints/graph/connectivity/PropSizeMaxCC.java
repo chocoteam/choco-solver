@@ -36,9 +36,10 @@ public class PropSizeMaxCC extends Propagator<Variable> {
 
     /* Variables */
 
-    private UndirectedGraphVar g;
-    private IntVar sizeMaxCC;
-    private ConnectivityFinder GLBCCFinder, GUBCCFinder;
+    private final UndirectedGraphVar g;
+    private final IntVar sizeMaxCC;
+    private final ConnectivityFinder GLBCCFinder;
+    private final ConnectivityFinder GUBCCFinder;
 
     /* Constructor */
 

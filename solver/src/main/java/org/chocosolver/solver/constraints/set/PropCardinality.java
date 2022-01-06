@@ -38,8 +38,8 @@ public class PropCardinality extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar card;
-    private SetVar set;
+    private final IntVar card;
+    private final SetVar set;
 
     //***********************************************************************************
     // CONSTRUCTORS

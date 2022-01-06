@@ -31,9 +31,10 @@ public class PropNbSCC extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private DirectedGraphVar g;
-    private IntVar k;
-    private StrongConnectivityFinder envCCFinder, kerCCFinder;
+    private final DirectedGraphVar g;
+    private final IntVar k;
+    private final StrongConnectivityFinder envCCFinder;
+    private final StrongConnectivityFinder kerCCFinder;
 
     //***********************************************************************************
     // CONSTRUCTORS

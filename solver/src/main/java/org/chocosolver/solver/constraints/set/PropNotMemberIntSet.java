@@ -30,8 +30,8 @@ public class PropNotMemberIntSet extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar iv;
-    private SetVar sv;
+    private final IntVar iv;
+    private final SetVar sv;
 
     //***********************************************************************************
     // CONSTRUCTORS

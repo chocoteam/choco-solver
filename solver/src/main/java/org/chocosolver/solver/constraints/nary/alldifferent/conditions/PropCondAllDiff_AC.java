@@ -25,7 +25,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
-    private Condition condition;
+    private final Condition condition;
 
     //***********************************************************************************
     // CONSTRUCTORS

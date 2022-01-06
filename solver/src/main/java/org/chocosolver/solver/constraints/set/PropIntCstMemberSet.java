@@ -33,7 +33,7 @@ public class PropIntCstMemberSet extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int cst;
+    private final int cst;
 
     //***********************************************************************************
     // CONSTRUCTORS

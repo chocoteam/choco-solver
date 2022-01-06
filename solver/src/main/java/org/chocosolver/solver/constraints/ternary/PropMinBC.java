@@ -26,7 +26,9 @@ import org.chocosolver.util.ESat;
  */
 public class PropMinBC extends Propagator<IntVar> {
 
-    private IntVar BST, v1, v2;
+    private final IntVar BST;
+    private final IntVar v1;
+    private final IntVar v2;
 
     public PropMinBC(IntVar X, IntVar Y, IntVar Z) {
         super(new IntVar[]{X, Y, Z}, PropagatorPriority.TERNARY, false);

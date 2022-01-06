@@ -35,16 +35,17 @@ public class PropCircuitSCC extends Propagator<IntVar> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int n,n2;
-	private DirectedGraph support;
-	private StrongConnectivityFinder SCCfinder;
-	private DirectedGraph G_R;
+	private final int n;
+    private final int n2;
+	private final DirectedGraph support;
+	private final StrongConnectivityFinder SCCfinder;
+	private final DirectedGraph G_R;
 	private int[] sccOf;
-	private ISet[] mates;
+	private final ISet[] mates;
 	// proba
 	private Random rd;
-	private int offSet;
-	private CircuitConf conf;
+	private final int offSet;
+	private final CircuitConf conf;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

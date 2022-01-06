@@ -37,7 +37,7 @@ public class KruskalMSTGAC extends AbstractTreeFinder {
     private final double[] costs;             // cost of the lex arc
     private final int[] p, rank;
     // CCtree
-    private int ccN;
+    private final int ccN;
     private final DirectedGraph ccTree;
     private final int[] ccTp;
     private final double[] ccTEdgeCost;

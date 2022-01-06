@@ -152,7 +152,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         sb.append(vars[n]).append(" = max(");
         sb.append(vars[0]);
         for (int i = 1; i < n; i++) {

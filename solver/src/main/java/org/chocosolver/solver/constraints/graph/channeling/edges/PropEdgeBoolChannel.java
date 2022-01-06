@@ -28,9 +28,10 @@ public class PropEdgeBoolChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private BoolVar bool;
-    private int from, to;
-    private GraphVar g;
+    private final BoolVar bool;
+    private final int from;
+    private final int to;
+    private final GraphVar g;
 
     //***********************************************************************************
     // CONSTRUCTORS

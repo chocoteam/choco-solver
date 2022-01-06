@@ -35,7 +35,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
      * The 'distinction' set is used to hold variables belonging to Γ(A)
      * and values belonging to A in the paper.
      */
-    private BitSet distinction;
+    private final BitSet distinction;
 
     //***********************************************************************************
     // CONSTRUCTORS

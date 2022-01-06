@@ -31,38 +31,38 @@ public class PropLargeGACSTRPos extends PropLargeCSP<TuplesList> {
     // check if none of the tuple is trivially outside
     // the domains and if yes use a fast valid check
     // by avoiding checking the bounds
-    private ValidityChecker valcheck;
+    private final ValidityChecker valcheck;
 
     /**
      * size of the scope
      */
-    private int arity;
+    private final int arity;
 
     /**
      * original lower bounds
      */
-    private int[] offsets;
+    private final int[] offsets;
 
     /**
      * Variables that are not proved to be GAC yet
      */
-    private BitSet futureVars;
+    private final BitSet futureVars;
 
     /**
      * Values that have found a support for each variable
      */
-    private BitSet[] gacValues;
+    private final BitSet[] gacValues;
 
-    private int[] nbGacValues;
+    private final int[] nbGacValues;
 
     /**
      * The backtrackable list of tuples representing the current
      * allowed tuples of the constraint
      */
-    private IStateInt last;
-    private int[] listuples;
+    private final IStateInt last;
+    private final int[] listuples;
 
-    private IntIterableBitSet vrms;
+    private final IntIterableBitSet vrms;
 
     private PropLargeGACSTRPos(IntVar[] vs, TuplesList relation) {
         super(vs, relation, false);

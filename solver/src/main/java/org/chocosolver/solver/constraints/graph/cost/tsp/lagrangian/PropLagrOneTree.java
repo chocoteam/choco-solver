@@ -51,7 +51,7 @@ public class PropLagrOneTree extends Propagator<Variable> implements GraphLagran
     private UndirectedGraph mst;
     private double step;
     private final AbstractTreeFinder HKfilter, HK;
-    private int nbSprints;
+    private final int nbSprints;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -32,12 +32,12 @@ public class PropSumBoolIncr extends PropSumBool {
      * Sum of lower bounds maintained incrementally.
      * Main reason this version exists.
      */
-    private IStateInt bLB;
+    private final IStateInt bLB;
     /**
      * Sum of upper bounds maintained incrementally.
      * Main reason this version exists.
      */
-    private IStateInt bUB;
+    private final IStateInt bUB;
 
     /**
      * The filtering algorithm is triggered on some particular events.

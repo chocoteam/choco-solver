@@ -124,7 +124,7 @@ public class PropReif extends Propagator<Variable> {
 
     @Override
     public String toString() {
-        return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar.toString() + "=>" + falseCons.toString();
+        return bVar.toString() + "=>" + trueCons.toString() + ", !" + bVar + "=>" + falseCons.toString();
     }
 
 }

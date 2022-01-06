@@ -17,7 +17,7 @@ package org.chocosolver.solver.constraints.nary.automata.FA.utils;
  */
 public class Counter implements ICounter {
 
-    private int[][] costs;
+    private final int[][] costs;
     private Bounds bounds;
 
     public Counter(int[][] layer_value, int min, int max) {

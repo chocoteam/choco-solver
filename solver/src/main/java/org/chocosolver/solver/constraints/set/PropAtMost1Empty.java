@@ -31,7 +31,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropAtMost1Empty extends Propagator<SetVar> {
 
-    private IStateInt emptySetIndex;
+    private final IStateInt emptySetIndex;
 
     //***********************************************************************************
     // CONSTRUCTORS

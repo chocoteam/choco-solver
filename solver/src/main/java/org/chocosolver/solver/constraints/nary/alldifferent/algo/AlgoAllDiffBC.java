@@ -28,7 +28,7 @@ public class AlgoAllDiffBC {
 
     private Interval[] intervals, minsorted, maxsorted;
 
-    private Propagator aCause;
+    private final Propagator aCause;
     private IntVar[] vars;
 
     private ArraySort<Interval> sorter;
@@ -77,7 +77,7 @@ public class AlgoAllDiffBC {
             public final int compare(Interval o1, Interval o2) {
                 return MathUtils.safeSubstract(o1.lb,o2.lb);
             }
-        },;
+        },
     }
 
     // returns true iff at least one bound update has been done

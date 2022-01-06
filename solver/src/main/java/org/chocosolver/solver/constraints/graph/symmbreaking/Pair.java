@@ -13,8 +13,8 @@ package org.chocosolver.solver.constraints.graph.symmbreaking;
  * @author Моклев Вячеслав
  */
 public class Pair<T, V> {
-    private T a;
-    private V b;
+    private final T a;
+    private final V b;
 
     public Pair(T a, V b) {
         this.a = a;

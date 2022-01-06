@@ -55,19 +55,19 @@ public class IbexHandler {
      * Store for each function declared, the index of the corresponding contractor in Ibex. Since
      * Ibex instance is lazily created, the mapping can be dynamically updated.
      */
-    private TObjectIntHashMap<RealPropagator> ibexCtr = new TObjectIntHashMap<>(16, 0.5f, -1);
+    private final TObjectIntHashMap<RealPropagator> ibexCtr = new TObjectIntHashMap<>(16, 0.5f, -1);
     /**
      * Store, for each function declared, indices of the associated variables.
      */
-    private TObjectIntHashMap<Variable> ibexVar = new TObjectIntHashMap<>(16, 0.5f, -1);
+    private final TObjectIntHashMap<Variable> ibexVar = new TObjectIntHashMap<>(16, 0.5f, -1);
     /**
      * List of all variables known by Ibex
      */
-    private List<Variable> vars = new ArrayList<>();
+    private final List<Variable> vars = new ArrayList<>();
     /**
      * Each boolean indicates whether a variable is integral or not.
      */
-    private TDoubleList precisions = new TDoubleArrayList();
+    private final TDoubleList precisions = new TDoubleArrayList();
     /**
      * Each boolean indicates whether a variable is integral or not.
      */

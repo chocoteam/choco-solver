@@ -38,13 +38,13 @@ public class PropAntiArborescences extends Propagator<IntVar> {
     //***********************************************************************************
 
     // flow graph
-    private DirectedGraph connectedGraph;
+    private final DirectedGraph connectedGraph;
     // number of nodes
-    private int n;
+    private final int n;
     // dominators finder that contains the dominator tree
-    private AbstractLengauerTarjanDominatorsFinder domFinder;
+    private final AbstractLengauerTarjanDominatorsFinder domFinder;
     // offset (usually 0 but 1 with MiniZinc)
-    private int offSet;
+    private final int offSet;
 
     //***********************************************************************************
     // CONSTRUCTORS

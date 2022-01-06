@@ -20,8 +20,8 @@ import org.chocosolver.util.ESat;
  */
 public class PropSymmetryBreaking extends Propagator<BoolVar> {
 
-    private int n;
-    private BoolVar[] t;
+    private final int n;
+    private final BoolVar[] t;
 
     public PropSymmetryBreaking(BoolVar[] t) {
         super(t, PropagatorPriority.QUADRATIC, false);

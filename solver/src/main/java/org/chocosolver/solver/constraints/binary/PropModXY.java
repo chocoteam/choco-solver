@@ -26,9 +26,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  * @since 29/03/2019
  */
 public class PropModXY extends Propagator<IntVar> {
-    private IntVar x;
-    private IntVar y;
-    private int mod;
+    private final IntVar x;
+    private final IntVar y;
+    private final int mod;
     private IntIterableBitSet usedValues;
 
     public PropModXY(IntVar x, int mod, IntVar y) {

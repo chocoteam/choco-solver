@@ -21,7 +21,7 @@ public enum Operator {
 
     NONE(), EQ(), LT(), GT(), NQ(), LE(), GE(), PL(), MN();
 
-	private static THashMap<String, Operator> operators = new THashMap<>();
+	private static final THashMap<String, Operator> operators = new THashMap<>();
 
     static {
         operators.put("@", Operator.NONE);

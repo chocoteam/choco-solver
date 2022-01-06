@@ -29,8 +29,8 @@ public class PropLoopSet extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
-    private SetVar loops;
+    private final GraphVar g;
+    private final SetVar loops;
 
     //***********************************************************************************
     // CONSTRUCTORS

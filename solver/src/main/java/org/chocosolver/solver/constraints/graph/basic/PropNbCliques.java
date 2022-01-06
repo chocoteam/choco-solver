@@ -36,11 +36,11 @@ public class PropNbCliques extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private UndirectedGraphVar g;
-    private UndirectedGraph support;
-    private IntVar[] nb;
-    private R[] rules;
-    private F heur;
+    private final UndirectedGraphVar g;
+    private final UndirectedGraph support;
+    private final IntVar[] nb;
+    private final R[] rules;
+    private final F heur;
     private int delta;
 
     //***********************************************************************************

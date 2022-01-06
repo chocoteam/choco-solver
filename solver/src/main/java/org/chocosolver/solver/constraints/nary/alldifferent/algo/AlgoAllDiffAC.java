@@ -45,8 +45,8 @@ public class AlgoAllDiffAC {
     BitSet free;
     StrongConnectivityFinder SCCfinder;
     // for augmenting matching (BFS)
-    private int[] father;
-    private BitSet in;
+    private final int[] father;
+    private final BitSet in;
     TIntIntHashMap map;
     int[] fifo;
     protected IntVar[] vars;

@@ -35,9 +35,9 @@ public class R3 implements R {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
+    private final int n;
     private int[] valToRem;
-    private ISet[] learntEqualities;
+    private final ISet[] learntEqualities;
 
     //***********************************************************************************
     // CONSTRUCTORS

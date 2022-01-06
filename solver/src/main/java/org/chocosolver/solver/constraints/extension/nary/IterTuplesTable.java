@@ -35,7 +35,7 @@ class IterTuplesTable extends TuplesList {
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i
      */
-    private int[][][] table;
+    private final int[][][] table;
 
     public IterTuplesTable(Tuples tuples, IntVar[] vars) {
         super(tuples, vars);

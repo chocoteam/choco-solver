@@ -29,7 +29,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
-    private AlgoAllDiffBC filter;
+    private final AlgoAllDiffBC filter;
 
     public PropAllDiffBC(IntVar[] variables) {
         super(variables, PropagatorPriority.LINEAR, false);

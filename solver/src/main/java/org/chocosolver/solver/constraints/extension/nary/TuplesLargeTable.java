@@ -51,7 +51,7 @@ public class TuplesLargeTable extends LargeRelation {
      * in order to speed up the computation of the index of a tuple in the table, blocks[i] stores
      * the product of the size of variables j with j < i.
      */
-    private long[] blocks;
+    private final long[] blocks;
 
     public TuplesLargeTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;

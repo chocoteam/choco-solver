@@ -35,19 +35,19 @@ public class PropSubcircuitDominatorFilter extends Propagator<IntVar> {
 	//***********************************************************************************
 
 	// flow graph
-	private DirectedGraph connectedGraph;
+	private final DirectedGraph connectedGraph;
 	// number of nodes
-	private int n;
+	private final int n;
 	// dominators finder that contains the dominator tree
-	private AbstractLengauerTarjanDominatorsFinder domFinder;
+	private final AbstractLengauerTarjanDominatorsFinder domFinder;
 	// offset (usually 0 but 1 with MiniZinc)
-	private int offSet;
+	private final int offSet;
 	// random function
-	private Random rd = new Random(vars[0].getModel().getSeed());
+	private final Random rd = new Random(vars[0].getModel().getSeed());
 	// random function
-	private int[] rootCandidates;
+	private final int[] rootCandidates;
 	// auto adapt whether to propagate or not
-	private boolean adaptable;
+	private final boolean adaptable;
 	// counter for adaptive scheme
 	private final static int MIN_COUNTER = 10;
 	private final static int MAX_COUNTER = 1000;

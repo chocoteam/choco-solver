@@ -40,11 +40,11 @@ public class PropElement extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private TIntArrayList constructiveDisjunction;
-    private IntVar index;
-    private SetVar set;
-    private SetVar[] array;
-    private int offSet;
+    private final TIntArrayList constructiveDisjunction;
+    private final IntVar index;
+    private final SetVar set;
+    private final SetVar[] array;
+    private final int offSet;
 
     //***********************************************************************************
     // CONSTRUCTORS
