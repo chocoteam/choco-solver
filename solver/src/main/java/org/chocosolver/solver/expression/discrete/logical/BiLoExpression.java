@@ -32,12 +32,12 @@ public class BiLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private ReExpression e1;
+    private final ReExpression e1;
 
     /**
      * The second expression this expression relies on
      */
-    private ReExpression e2;
+    private final ReExpression e2;
     /**
      * Builds a n-ary expression
      *

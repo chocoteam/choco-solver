@@ -231,10 +231,7 @@ public class PropCondAllDiffTest {
         IntVar[] vars = model.intVarArray(5, 0, 2);
 
         model.allDifferentUnderCondition(vars, v -> v.getLB() > 1, false).post();
-        boolean solutionFound = false;
-        if (model.getSolver().solve()) {
-            solutionFound = true;
-        }
+        boolean solutionFound = model.getSolver().solve();
         assertTrue(solutionFound);
     }
 

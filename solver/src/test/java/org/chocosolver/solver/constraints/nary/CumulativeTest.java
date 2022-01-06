@@ -190,7 +190,7 @@ public class CumulativeTest {
     public void testADelsol1(){
 		int[] height = new int[]{0, 1, 3, 5, 1, 4, 4, 3, 4, 3, 0};
 		int capaMax = 10;
-		int duration[] = new int[11];
+		int[] duration = new int[11];
 		Arrays.fill(duration, 1);
 		// dÃ©claration du modÃ¨le
 		Model model = new Model("test");

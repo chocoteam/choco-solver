@@ -69,7 +69,7 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Signed Literal

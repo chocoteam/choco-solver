@@ -23,10 +23,10 @@ import java.util.Random;
 public class RandomVar<T extends Variable> implements VariableSelector<T>, VariableEvaluator<T> {
 
 	/** To store index of variable to select randomly */
-	private Set_Std_Swap sets;
+	private final Set_Std_Swap sets;
 
 	/** Random number generator */
-	private java.util.Random random;
+	private final java.util.Random random;
 
 	/**
 	 * Random variable selector & evaluator more efficient with fast restart

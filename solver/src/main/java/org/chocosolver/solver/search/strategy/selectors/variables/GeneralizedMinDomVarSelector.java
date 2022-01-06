@@ -23,7 +23,7 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class GeneralizedMinDomVarSelector<V extends Variable> implements VariableSelector<V> {
 
-    private boolean least;
+    private final boolean least;
 
     /**
      * Chooses the non-instantiated variable with the smallest domain

@@ -45,15 +45,15 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
     /**
      * Stacks of 'Parent Id'  used when backtrack
      */
-    private TIntStack pid_stack = new TIntArrayStack();
+    private final TIntStack pid_stack = new TIntArrayStack();
     /**
      * Stacks of 'Alternative' used when backtrack
      */
-    private TIntStack alt_stack = new TIntArrayStack();
+    private final TIntStack alt_stack = new TIntArrayStack();
     /**
      * Stacks of current node, to deal with jumps
      */
-    private TIntStack last_stack = new TIntArrayStack();
+    private final TIntStack last_stack = new TIntArrayStack();
     /**
      * Node count: different from measures.getNodeCount() as we count failure nodes as well
      */
@@ -74,12 +74,12 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
     /**
      * set to <i>true</i> to send domain into 'info' field
      */
-    private boolean sendDomain;
+    private final boolean sendDomain;
 
     /**
      * Format for solution output
      */
-    private IMessage solutionMessage = new IMessage() {
+    private final IMessage solutionMessage = new IMessage() {
         @Override
         public String print() {
             StringBuilder s = new StringBuilder(32);
@@ -94,7 +94,7 @@ public abstract class SearchViz implements IMonitorDownBranch, IMonitorUpBranch,
      * Format for domain output
      * "{ "domains": {"VarA": "1..10, 12, 14..19", "VarB": "4"} }"
      */
-    private IMessage domainMessage = new IMessage() {
+    private final IMessage domainMessage = new IMessage() {
         @Override
         public String print() {
             StringBuilder s = new StringBuilder(32);

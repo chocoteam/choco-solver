@@ -45,7 +45,7 @@ public class NogoodFromRestarts implements IMonitorRestart {
      * Stores the decision path before
      */
     @SuppressWarnings("rawtypes")
-    private ArrayDeque<Decision> decisions;
+    private final ArrayDeque<Decision> decisions;
 
     /**
      * The (unique) no-good store

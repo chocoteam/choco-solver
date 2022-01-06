@@ -31,16 +31,16 @@ public final class IntDomainImpact implements IntValueSelector {
      * Maximum enumerated domain size this selector falls into.
      * Otherwise, only bounds are considered.
      */
-    private int maxdom;
+    private final int maxdom;
 
     /**
      * The decision operator used to make the decision
      */
-    private DecisionOperator<IntVar> dop;
+    private final DecisionOperator<IntVar> dop;
 
     private IntVar[] allVars;
 
-    private int coeff;
+    private final int coeff;
 
     /**
 	 * Create a value selector that returns the best value wrt to its impact on domains cardinality.

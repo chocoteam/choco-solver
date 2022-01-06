@@ -65,7 +65,7 @@ public class MoveLNS implements Move {
     /**
      * For restart strategy
      */
-    private long frequency;
+    private final long frequency;
 
     protected PropLNS prop;
 

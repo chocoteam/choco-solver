@@ -36,7 +36,7 @@ public class IntVarValueIterator implements Iterator<Integer> {
 	/**
 	 * Variable to iterate on
 	 */
-	private IntVar var;
+	private final IntVar var;
     /**
      * current returned value
      */

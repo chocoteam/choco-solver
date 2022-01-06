@@ -29,7 +29,7 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
 
     protected VariableSelector<GraphVar> varSelector;
 
-    private GraphNodeOrEdgeSelector nodeOrEdgeSelector;
+    private final GraphNodeOrEdgeSelector nodeOrEdgeSelector;
 
     protected GraphNodeSelector nodeSelector;
 

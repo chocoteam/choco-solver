@@ -62,7 +62,7 @@ public final class ContradictionException extends Exception {
      */
     @Override
     public String toString() {
-        return "CONTRADICTION (" + (c == null ? "" : c.toString() + ", ") + v + ") : " + s;
+        return "CONTRADICTION (" + (c == null ? "" : c + ", ") + v + ") : " + s;
     }
 
     /**

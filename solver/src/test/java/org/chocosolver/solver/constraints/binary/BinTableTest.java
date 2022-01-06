@@ -27,7 +27,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class BinTableTest {
 
-    private static String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
+    private static final String[] ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
 
     private Model s;
     private IntVar v1, v2;

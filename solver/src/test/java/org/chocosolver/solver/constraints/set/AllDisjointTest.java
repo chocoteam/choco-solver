@@ -38,9 +38,9 @@ public class AllDisjointTest {
     public void testTrivialTrue() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[3];
-        setVars[0] = model.setVar(new int[]{1, 3});
-        setVars[1] = model.setVar(new int[]{2});
-        setVars[2] = model.setVar(new int[]{4, 5});
+        setVars[0] = model.setVar(1, 3);
+        setVars[1] = model.setVar(2);
+        setVars[2] = model.setVar(4, 5);
         model.allDisjoint(setVars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);

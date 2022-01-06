@@ -14,7 +14,7 @@ import org.chocosolver.solver.variables.Variable;
 
 public class GreedyBranching extends AbstractStrategy {
 
-    private AbstractStrategy mainSearch;
+    private final AbstractStrategy mainSearch;
 
     public GreedyBranching(AbstractStrategy mainSearch){
         //noinspection unchecked

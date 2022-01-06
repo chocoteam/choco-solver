@@ -52,7 +52,7 @@ public class AtMost1EmptyTest {
         Model model = new Model();
 
         SetVar[] vars = new SetVar[5];
-        vars[0] = model.setVar(new int[]{});
+        vars[0] = model.setVar();
         for (int i = 0; i <= 4; i++) {
             vars[i] = model.setVar(new int[]{1}, new int[]{1, 2, 3, 4});
         }
@@ -66,8 +66,8 @@ public class AtMost1EmptyTest {
         Model model = new Model();
 
         SetVar[] vars = new SetVar[5];
-        vars[0] = model.setVar(new int[]{});
-        vars[1] = model.setVar(new int[]{});
+        vars[0] = model.setVar();
+        vars[1] = model.setVar();
         for (int i = 2; i <= 4; i++) {
             vars[i] = model.setVar(new int[]{1}, new int[]{1, 2, 3, 4});
         }

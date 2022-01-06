@@ -236,9 +236,9 @@ public class ViewMinusTest {
         IntVar v_1 = model.intVar("v_1",-4);
         IntVar v_2 = model.intVar("v_2",new int[]{-3,-2,-1,0,4});
         model.times(v_0, v_1, v_2).post();
-        System.out.println(model.toString());
+        System.out.println(model);
         model.getSolver().propagate();
-        System.out.println(model.toString());
+        System.out.println(model);
         while(model.getSolver().solve());
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }

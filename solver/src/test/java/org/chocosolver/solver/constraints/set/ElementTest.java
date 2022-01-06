@@ -31,7 +31,7 @@ public class ElementTest {
     public void testNominal() {
         model = new Model();
         sets = model.setVarArray(3, new int[]{}, new int[]{1, 2, 3});
-        element = model.setVar(new int[]{1, 3});
+        element = model.setVar(1, 3);
         index = model.intVar(0, 100);
         model.element(index, sets, element).post();
 
@@ -43,10 +43,10 @@ public class ElementTest {
     public void testFixedValues() {
         Model model = new Model();
         SetVar[] sets = new SetVar[3];
-        sets[0] = model.setVar(new int[]{1, 3});
-        sets[1] = model.setVar(new int[]{3, 4});
-        sets[2] = model.setVar(new int[]{4, 5});
-        element = model.setVar(new int[]{4, 5});
+        sets[0] = model.setVar(1, 3);
+        sets[1] = model.setVar(3, 4);
+        sets[2] = model.setVar(4, 5);
+        element = model.setVar(4, 5);
         index = model.intVar(0, sets.length - 1);
         model.element(index, sets, element).post();
 

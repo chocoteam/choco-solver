@@ -22,7 +22,7 @@ public class DisposableValueBoundIterator extends DisposableValueIterator {
     private int value;
     private int bound;
 
-    private IntVar var;
+    private final IntVar var;
 
     public DisposableValueBoundIterator(IntVar var) {
         this.var = var;

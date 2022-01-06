@@ -21,7 +21,7 @@ import java.util.Deque;
  */
 public class PoolManager<E>  {
 
-    private Deque<E> elements;
+    private final Deque<E> elements;
 
     public PoolManager() {
         this(16);

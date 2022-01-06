@@ -21,7 +21,8 @@ public class AlphaDominatorsFinder extends AbstractLengauerTarjanDominatorsFinde
     // VARIABLES
     //***********************************************************************************
 
-    private int[] size, child;
+    private final int[] size;
+    private final int[] child;
 
     //***********************************************************************************
     // CONSTRUCTORS

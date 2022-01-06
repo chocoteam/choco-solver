@@ -44,11 +44,11 @@ public class UnCArExpression implements ArExpression {
     /**
      * The first expression this expression relies on
      */
-    private ArExpression e1;
+    private final ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private int e2;
+    private final int e2;
 
     /**
      * Builds a binary expression

@@ -24,8 +24,8 @@ import org.chocosolver.solver.variables.Variable;
 public class IbexDecision extends Decision<Variable> {
 
     private static final long serialVersionUID = -4723411613242027369L;
-    private IbexHandler handler;
-    private Model model;
+    private final IbexHandler handler;
+    private final Model model;
     /**
      * Create an decision based on an {@link RealVar}
      */

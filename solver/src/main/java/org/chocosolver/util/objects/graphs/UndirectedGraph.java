@@ -28,11 +28,11 @@ public class UndirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-    private ISet[] neighbors;
+    private final ISet[] neighbors;
     private ISet nodes;
-    private int n;
-    private SetType edgeSetType;
-    private SetType nodeSetType;
+    private final int n;
+    private final SetType edgeSetType;
+    private final SetType nodeSetType;
 
     //***********************************************************************************
     // CONSTRUCTORS

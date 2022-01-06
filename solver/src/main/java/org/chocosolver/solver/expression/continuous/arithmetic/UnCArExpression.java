@@ -48,7 +48,7 @@ public class UnCArExpression implements CArExpression {
     /**
      * The expression this expression relies on
      */
-    private CArExpression e;
+    private final CArExpression e;
 
     IStateDouble l;
     IStateDouble u;

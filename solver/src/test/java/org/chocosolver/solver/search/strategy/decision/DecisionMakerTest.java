@@ -55,9 +55,9 @@ public class DecisionMakerTest {
 
     @Test(groups = "1s", timeOut=60000)
     public void testMakeSetDecision() throws Exception {
-        SetDecision d = dm.makeSetDecision(model.setVar(new int[]{2,3,4}), DecisionOperatorFactory.makeSetForce(), 3);
+        SetDecision d = dm.makeSetDecision(model.setVar(2,3,4), DecisionOperatorFactory.makeSetForce(), 3);
         d.free();
-        d = dm.makeSetDecision(model.setVar(new int[]{3,4, 5}), DecisionOperatorFactory.makeSetRemove(), 4);
+        d = dm.makeSetDecision(model.setVar(3,4, 5), DecisionOperatorFactory.makeSetRemove(), 4);
         d.free();
     }
 

@@ -61,7 +61,7 @@ public class IntersectionTest {
     public void testVarsToIntersect() {
         Model model = new Model();
         SetVar[] setVars = model.setVarArray(5, new int[]{}, new int[]{1, 2, 3, 4, 5, 6});
-        SetVar intersect = model.setVar(new int[]{1, 2, 3, 4});
+        SetVar intersect = model.setVar(1, 2, 3, 4);
         model.intersection(setVars, intersect).post();
 
         assertEquals(961, checkSolutions(model, setVars, intersect));
@@ -71,7 +71,7 @@ public class IntersectionTest {
     public void testVarsToIntersectBoundConsistent() {
         Model model = new Model();
         SetVar[] setVars = model.setVarArray(5, new int[]{}, new int[]{1, 2, 3, 4, 5, 6});
-        SetVar intersect = model.setVar(new int[]{1, 2, 3, 4});
+        SetVar intersect = model.setVar(1, 2, 3, 4);
         model.intersection(setVars, intersect, true).post();
 
         assertEquals(961, checkSolutions(model, setVars, intersect));
@@ -81,9 +81,9 @@ public class IntersectionTest {
     public void testIntersectToVars() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[3];
-        setVars[0] = model.setVar(new int[]{0, 1, 2});
-        setVars[1] = model.setVar(new int[]{1, 2, 3});
-        setVars[2] = model.setVar(new int[]{2, 4, 5});
+        setVars[0] = model.setVar(0, 1, 2);
+        setVars[1] = model.setVar(1, 2, 3);
+        setVars[2] = model.setVar(2, 4, 5);
         SetVar intersect = model.setVar(new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         model.intersection(setVars, intersect).post();
 
@@ -94,9 +94,9 @@ public class IntersectionTest {
     public void testIntersectToVarsBoundConsistent() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[3];
-        setVars[0] = model.setVar(new int[]{0, 1, 2});
-        setVars[1] = model.setVar(new int[]{1, 2, 3});
-        setVars[2] = model.setVar(new int[]{2, 4, 5});
+        setVars[0] = model.setVar(0, 1, 2);
+        setVars[1] = model.setVar(1, 2, 3);
+        setVars[2] = model.setVar(2, 4, 5);
         SetVar intersect = model.setVar(new int[]{}, new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
         model.intersection(setVars, intersect, true).post();
 
@@ -110,7 +110,7 @@ public class IntersectionTest {
         setVars[0] = model.setVar(new int[]{}, new int[]{1, 2, 4, 5});
         setVars[1] = model.setVar(new int[]{}, new int[]{3, 5});
         setVars[2] = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5});
-        SetVar intersect = model.setVar(new int[]{1, 2, 3, 4, 5});
+        SetVar intersect = model.setVar(1, 2, 3, 4, 5);
         model.intersection(setVars, intersect).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);

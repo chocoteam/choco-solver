@@ -16,7 +16,7 @@ import java.util.Random;
 
 public class GraphRandomNode implements GraphNodeSelector {
 
-    private Random rd;
+    private final Random rd;
 
     public GraphRandomNode(long seed) {
         this.rd = new Random(seed);

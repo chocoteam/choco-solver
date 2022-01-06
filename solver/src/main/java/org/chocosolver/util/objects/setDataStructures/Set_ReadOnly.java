@@ -21,7 +21,7 @@ public class Set_ReadOnly extends AbstractSet {
 	// VARIABLES
 	//***********************************************************************************
 
-    private ISet set;
+    private final ISet set;
 
 	//***********************************************************************************
 	// CONSTRUCTOR

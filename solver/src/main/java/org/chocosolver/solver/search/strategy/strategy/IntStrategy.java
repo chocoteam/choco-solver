@@ -29,7 +29,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
 	/**
 	 * How a variable is selected
 	 */
-	private VariableSelector<IntVar> variableSelector;
+	private final VariableSelector<IntVar> variableSelector;
     /**
      * How a value is selected
      */
@@ -37,7 +37,7 @@ public class IntStrategy extends AbstractStrategy<IntVar> {
     /**
      * The decision operator
      */
-	private DecisionOperator<IntVar> decisionOperator;
+	private final DecisionOperator<IntVar> decisionOperator;
 
 	/**
 	 * Creates a search strategy which selects a variable X and a value V to perform

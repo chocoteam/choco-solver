@@ -60,7 +60,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Signed Literal

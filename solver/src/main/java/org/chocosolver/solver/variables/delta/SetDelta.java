@@ -23,7 +23,7 @@ public class SetDelta extends TimeStampedObject implements ISetDelta {
     // VARIABLES
     //***********************************************************************************
 
-	private IEnumDelta[] delta;
+	private final IEnumDelta[] delta;
 
     //***********************************************************************************
     // CONSTRUCTORS

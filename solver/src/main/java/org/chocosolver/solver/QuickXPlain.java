@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class QuickXPlain {
 
-    private Model model;
+    private final Model model;
 
     public QuickXPlain(Model model) {
         this.model = model;

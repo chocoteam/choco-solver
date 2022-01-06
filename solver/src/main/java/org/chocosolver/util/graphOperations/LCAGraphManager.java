@@ -29,15 +29,20 @@ public class LCAGraphManager {
 	//
 	private int root;
 	private DirectedGraph graph;
-	private int nbNodes, nbActives;
+	private final int nbNodes;
+    private int nbActives;
 	//
-	private int[] father;
-	private int[] nodeOfDfsNumber;
-	private int[] dfsNumberOfNode;
+	private final int[] father;
+	private final int[] nodeOfDfsNumber;
+	private final int[] dfsNumberOfNode;
 	//
-	private int[] I, L, h, A, htmp;
-	private ISet[] successors;
-	private Iterator<Integer>[] iterator;
+	private final int[] I;
+    private final int[] L;
+    private final int[] h;
+    private final int[] A;
+    private final int[] htmp;
+	private final ISet[] successors;
+	private final Iterator<Integer>[] iterator;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

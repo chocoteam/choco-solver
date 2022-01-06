@@ -91,7 +91,7 @@ public class ModelTest {
                     while (s.getSolver().solve()) ;
                     break;
                 case OPT:
-                    s.setObjective(Model.MAXIMIZE, (IntVar) s.getVar(0));
+                    s.setObjective(Model.MAXIMIZE, s.getVar(0));
                     s.getSolver().solve();
                     break;
                 default:

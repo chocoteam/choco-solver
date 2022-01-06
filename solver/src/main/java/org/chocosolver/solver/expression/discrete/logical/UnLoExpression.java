@@ -32,7 +32,7 @@ public class UnLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private ReExpression e;
+    private final ReExpression e;
     /**
      * Builds a n-ary expression
      *

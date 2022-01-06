@@ -31,9 +31,10 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int size, mapOffset;
+	private int size;
+    private final int mapOffset;
 	private int[] values, map;
-	private ISetIterator iter = newIterator();
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR

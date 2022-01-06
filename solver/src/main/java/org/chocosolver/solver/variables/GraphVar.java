@@ -200,5 +200,5 @@ public interface GraphVar<E extends IGraph> extends Variable {
      * @param propagator A propagator involving this graph variable
      * @return A new instance of GraphDeltaMonitor to make incremental propagators
      */
-    public IGraphDeltaMonitor monitorDelta(ICause propagator);
+    IGraphDeltaMonitor monitorDelta(ICause propagator);
 }

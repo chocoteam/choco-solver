@@ -57,7 +57,7 @@ public class IntEnumMemberSet {
     @Test(groups = "1s", timeOut=60000)
     public void testEmptySet() {
         Model model = new Model();
-        SetVar set = model.setVar(new int[]{});
+        SetVar set = model.setVar();
         IntVar member = model.intVar(0, 7, false);
         model.member(member, set).post();
 

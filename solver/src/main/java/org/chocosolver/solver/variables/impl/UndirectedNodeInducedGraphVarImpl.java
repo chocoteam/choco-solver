@@ -29,7 +29,7 @@ import org.chocosolver.util.objects.graphs.UndirectedGraph;
  */
 public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl implements ICause {
 
-    private UndirectedGraph originalUB;
+    private final UndirectedGraph originalUB;
 
     /**
      * Creates an undirected node-induced (from the envelope) graph variable

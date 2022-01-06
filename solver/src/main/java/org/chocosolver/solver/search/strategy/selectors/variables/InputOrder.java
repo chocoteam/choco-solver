@@ -23,7 +23,7 @@ import org.chocosolver.solver.variables.Variable;
  */
 public class InputOrder<V extends Variable> implements VariableSelector<V> {
 
-    private IStateInt lastIdx; // index of the last non-instantiated variable
+    private final IStateInt lastIdx; // index of the last non-instantiated variable
 
 	/**
      * <b>Input order</b> variable selector.
