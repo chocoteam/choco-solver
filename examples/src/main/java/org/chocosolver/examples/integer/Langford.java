@@ -40,10 +40,10 @@ import org.kohsuke.args4j.Option;
 public class Langford extends AbstractProblem {
 
     @Option(name = "-k", usage = "Number of sets.", required = false)
-    private int k = 3;
+    private final int k = 3;
 
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private int n = 9;
+    private final int n = 9;
 
     IntVar[] position;
 
@@ -87,7 +87,7 @@ public class Langford extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

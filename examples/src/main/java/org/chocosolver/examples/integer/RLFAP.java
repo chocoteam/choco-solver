@@ -46,9 +46,9 @@ import static org.chocosolver.solver.search.strategy.Search.domOverWDegSearch;
  */
 public class RLFAP extends AbstractProblem {
 
-    private static String DOM = "dom.txt";
-    private static String VAR = "var.txt";
-    private static String CTR = "ctr.txt";
+    private static final String DOM = "dom.txt";
+    private static final String VAR = "var.txt";
+    private static final String CTR = "ctr.txt";
 
     @Option(name = "-d", aliases = "--directory", usage = "RLFAP instance directory (see http://www.inra.fr/mia/T/schiex/Export/FullRLFAP.tgz).", required = true)
     String dir;
@@ -176,7 +176,7 @@ public class RLFAP extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

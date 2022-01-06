@@ -35,7 +35,7 @@ public class Takuzu extends AbstractProblem {
     @Option(name = "-g", aliases = "--grid", usage = "Takuzu grid ID.")
     Takuzu.Data data = Takuzu.Data.g10x10;
     @Option(name = "-r3", aliases = "--rule3", usage = "How to encode rule 3 (1*: keySort, 2: allDifferent.", required = false)
-    private int r3 = 1;
+    private final int r3 = 1;
 
     /**
      * Cells of the grid, some may be known in advanced

@@ -33,6 +33,7 @@ public class DIMACS extends RegParser {
     // Contains mapping with variables and output prints
     public DIMACSParser[] parsers;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).")
     private boolean cp = false;
 

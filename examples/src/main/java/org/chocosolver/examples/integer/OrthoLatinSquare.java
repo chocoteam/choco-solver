@@ -130,7 +130,7 @@ public class OrthoLatinSquare extends AbstractProblem {
             }
             st.append("\n\t");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

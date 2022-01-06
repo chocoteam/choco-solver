@@ -89,7 +89,7 @@ public class SchurLemma extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

@@ -48,7 +48,7 @@ public class AirPlaneLanding extends AbstractProblem {
     private static final String groupSeparator = "\\,";
     private static final String decimalSeparator = "\\.";
     private static final String non0Digit = "[\\p{javaDigit}&&[^0]]";
-    private static Pattern decimalPattern;
+    private static final Pattern decimalPattern;
 
     static {
         // \\p{javaDigit} may not be perfect, see above

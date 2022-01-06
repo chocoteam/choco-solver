@@ -28,7 +28,7 @@ public class MySQLAccess {
 
     private static final String SAT = "SAT", MIN = "MIN", MAX = "MAX";
 
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
 
     private final String url, dbname, user, pwd;
 

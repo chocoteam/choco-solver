@@ -116,7 +116,7 @@ public class Knapsack extends AbstractProblem {
             st.append(String.format("\t#%d: %d\n", i, objects[i].getValue()));
         }
         st.append(String.format("\n\tPower: %d", power.getValue()));
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {
