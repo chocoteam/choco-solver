@@ -72,7 +72,8 @@ public class PerformanceTest {
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
                 "-lvl", "SILENT",
                 "-p", "1",
-                "-stasol"
+                "-stasol",
+                "-ocs"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -128,7 +129,8 @@ public class PerformanceTest {
                 "-limit", "[100s]", // but, problems are expected to end within 30s max
                 "-lvl", "SILENT",
                 "-p", "1",
-                "-stasol"
+                "-stasol",
+                "-ocs"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);

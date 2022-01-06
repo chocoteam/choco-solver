@@ -13,6 +13,7 @@ Consequently, it is now possible to profil the propagation by calling `solver.pr
 See Javadoc for details and usages (#832).
 - Release 4.10.7 introduces a bug related to delta monitors, which is now fixed (#837).
 - Add new black-box strategy: failure based variable ordering heuristics (@lihb905)
+- Add `model.streamVars()` and `model.streamCstrs()`
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:

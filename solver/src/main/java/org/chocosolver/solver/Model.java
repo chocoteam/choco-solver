@@ -29,10 +29,10 @@ import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.tools.VariableUtils;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * The <code>Model</code> is the header component of Constraint Programming.
@@ -183,7 +183,7 @@ public class Model implements IModel {
      *
      * @param environment a backtracking environment to allow search
      * @param name        The name of the model (for logging purpose)
-     * @param settings settings to use
+     * @param settings    settings to use
      */
     public Model(IEnvironment environment, String name, Settings settings) {
         this.name = name;
@@ -215,7 +215,7 @@ public class Model implements IModel {
      * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
      * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
      *
-     * @param name        The name of the model (for logging purpose)
+     * @param name     The name of the model (for logging purpose)
      * @param settings settings to use
      */
     public Model(String name, Settings settings) {
@@ -333,6 +333,19 @@ public class Model implements IModel {
      */
     public Variable[] getVars() {
         return Arrays.copyOf(vars, vIdx);
+    }
+
+    /**
+     * Returns a sequential {@code Stream} with this model's variables as its source.
+     *
+     * @return a sequential {@code Stream} over this model's variables
+     */
+    public Stream<Variable> streamVars() {
+        Spliterator<Variable> it =
+                Spliterators.spliterator(vars, 0, vIdx,
+                        Spliterator.DISTINCT | Spliterator.NONNULL
+                                | Spliterator.CONCURRENT | Spliterator.SIZED);
+        return StreamSupport.stream(it, true);
     }
 
     /**
@@ -491,6 +504,19 @@ public class Model implements IModel {
      */
     public int getNbCstrs() {
         return cIdx;
+    }
+
+    /**
+     * Returns a sequential {@code Stream} with this model's constraints as its source.
+     *
+     * @return a sequential {@code Stream} over this model's constraints
+     */
+    public Stream<Constraint> streamCstrs() {
+        Spliterator<Constraint> it =
+                Spliterators.spliterator(cstrs, 0, cIdx,
+                        Spliterator.DISTINCT | Spliterator.NONNULL
+                                | Spliterator.CONCURRENT | Spliterator.SIZED);
+        return StreamSupport.stream(it, true);
     }
 
     /**
@@ -683,9 +709,8 @@ public class Model implements IModel {
      * Sets the seed used for random number generator using a single
      * {@code long} seed.
      *
-     * @see java.util.Random#setSeed(long)
-     *
      * @param seed the initial seed
+     * @see java.util.Random#setSeed(long)
      */
     public void setSeed(long seed) {
         this.seed = seed;
@@ -693,6 +718,7 @@ public class Model implements IModel {
 
     /**
      * Gets the seed used random number generator.
+     *
      * @return the seed
      */
     public long getSeed() {
@@ -836,7 +862,7 @@ public class Model implements IModel {
      * @throws SolverException if the constraint is posted twice, posted although reified or reified twice.
      */
     public void post(Constraint... cs) throws SolverException {
-        if(cs != null) {
+        if (cs != null) {
             _post(true, cs);
         }
     }
@@ -865,7 +891,7 @@ public class Model implements IModel {
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
             for (Propagator<?> p : c.getPropagators()) {
-                if(p.isPassive()){
+                if (p.isPassive()) {
                     throw new SolverException("Try to add a constraint with a passive propagator");
                 }
                 p.getConstraint().checkNewStatus(Constraint.Status.POSTED);
@@ -881,7 +907,7 @@ public class Model implements IModel {
 
     /**
      * Posts constraints <code>cs</code> temporary, that is, they will be unposted upon backtrack.
-     *
+     * <p>
      * The unpost instruction is defined by an {@link org.chocosolver.memory.structure.IOperation}
      * saved in the {@link IEnvironment}
      *
@@ -917,8 +943,8 @@ public class Model implements IModel {
         if (constraints != null) {
             for (Constraint c : constraints) {
                 // 1. look for the constraint c
-                if(c.getStatus() != Constraint.Status.POSTED){
-                    throw new SolverException("The constraint "+c+" was not posted to the model and cannot be unposted");
+                if (c.getStatus() != Constraint.Status.POSTED) {
+                    throw new SolverException("The constraint " + c + " was not posted to the model and cannot be unposted");
                 }
                 int idx = c.getCidxInModel();
                 c.declareAs(Constraint.Status.FREE, -1);
@@ -980,16 +1006,15 @@ public class Model implements IModel {
         int cnt = 0;
         for (Variable v : this.getVars()) {
             cnt++;
-            if(v.isAConstant()){
+            if (v.isAConstant()) {
                 l.compute("constants", (n, k) -> k == null ? 1 : k + 1);
-            }else{
-                if(VariableUtils.isView(v)){
+            } else {
+                if (VariableUtils.isView(v)) {
                     l.compute("views", (n, k) -> k == null ? 1 : k + 1);
-                }else
-                if(VariableUtils.isInt(v)){
+                } else if (VariableUtils.isInt(v)) {
                     IntVar iv = v.asIntVar();
                     l.compute(String.format("[%d,%d]", iv.getLB(), iv.getUB()), (n, k) -> k == null ? 1 : k + 1);
-                }else{
+                } else {
                     l.compute(v.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
                 }
             }
