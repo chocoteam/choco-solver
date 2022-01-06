@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,12 +32,12 @@ public class BiLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private ReExpression e1;
+    private final ReExpression e1;
 
     /**
      * The second expression this expression relies on
      */
-    private ReExpression e2;
+    private final ReExpression e2;
     /**
      * Builds a n-ary expression
      *

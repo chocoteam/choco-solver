@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -30,8 +30,8 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private UndirectedGraphVar g;
-    private ConnectivityFinder env_CC_finder;
+    private final UndirectedGraphVar g;
+    private final ConnectivityFinder env_CC_finder;
 
     //***********************************************************************************
     // CONSTRUCTORS

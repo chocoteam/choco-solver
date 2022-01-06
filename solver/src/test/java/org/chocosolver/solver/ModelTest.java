@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -91,7 +91,7 @@ public class ModelTest {
                     while (s.getSolver().solve()) ;
                     break;
                 case OPT:
-                    s.setObjective(Model.MAXIMIZE, (IntVar) s.getVar(0));
+                    s.setObjective(Model.MAXIMIZE, s.getVar(0));
                     s.getSolver().solve();
                     break;
                 default:

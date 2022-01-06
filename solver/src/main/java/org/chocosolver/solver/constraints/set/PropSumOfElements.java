@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,10 +38,10 @@ public class PropSumOfElements extends Propagator<Variable> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private IntVar sum;
-	private SetVar set;
-	private int offSet;
-	private int[] weights;
+	private final IntVar sum;
+	private final SetVar set;
+	private final int offSet;
+	private final int[] weights;
 
 	//***********************************************************************************
 	// CONSTRUCTOR

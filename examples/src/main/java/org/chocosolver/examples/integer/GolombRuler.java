@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,7 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 public class GolombRuler extends AbstractProblem {
 
     @Option(name = "-m", usage = "Golomb ruler order.", required = false)
-    private int m = 10;
+    private final int m = 10;
 
     IntVar[] ticks;
     IntVar[] diffs;
@@ -78,7 +78,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.setObjective(false, (IntVar) model.getVars()[m - 1]);
+        model.setObjective(false, model.getVars()[m - 1]);
         while (model.getSolver().solve()) {
             out.println("New solution found : " + model.getVars()[m - 1]);
         }

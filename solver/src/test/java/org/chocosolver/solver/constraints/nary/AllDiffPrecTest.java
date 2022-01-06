@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,21 +9,10 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
-
 import gnu.trove.list.array.TIntArrayList;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Random;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffBC;
 import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
 import org.chocosolver.solver.constraints.nary.alldifferentprec.PropAllDiffPrec;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -31,6 +20,12 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Random;
+
+import static org.testng.Assert.fail;
 
 /**
  * <br/>

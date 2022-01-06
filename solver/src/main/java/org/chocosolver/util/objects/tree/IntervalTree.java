@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 public class IntervalTree<T extends Interval> implements Iterable<T> {
 
     private Node root;  // The root Node.
-    private Node nil;   // The sentinel Node to represent the absence of a node.
+    private final Node nil;   // The sentinel Node to represent the absence of a node.
     private int size;   // Size of the tree. Updated by insert() and Node#delete()
 
     /**
@@ -1040,7 +1040,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
      */
     private class TreeIterator implements Iterator<T> {
 
-        private TreeNodeIterator nodeIter;
+        private final TreeNodeIterator nodeIter;
 
         private TreeIterator(Node root) {
             nodeIter = new TreeNodeIterator(root);
@@ -1064,8 +1064,8 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
     private class OverlappingNodeIteratorBound implements Iterator<Node> {
 
         private Node next;
-        private int start;
-        private int end;
+        private final int start;
+        private final int end;
 
         private OverlappingNodeIteratorBound(Node root, int start, int end) {
             this.start = start;
@@ -1096,7 +1096,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
     private class OverlappingNodeIterator implements Iterator<Node> {
 
         private Node next;
-        private T interval;
+        private final T interval;
 
         private OverlappingNodeIterator(Node root, T t) {
             interval = t;
@@ -1126,7 +1126,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
      */
     private class OverlapperIterator implements Iterator<T> {
 
-        private Iterator<Node> nodeIter;
+        private final Iterator<Node> nodeIter;
 
         private OverlapperIterator(Node root, T t) {
             nodeIter = new OverlappingNodeIterator(root, t);

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,8 +34,9 @@ import java.util.TreeSet;
  */
 public class RealVarImpl extends AbstractVariable implements RealVar {
 
-    private IStateDouble LB, UB;
-    private double precision;
+    private final IStateDouble LB;
+    private final IStateDouble UB;
+    private final double precision;
 
     public RealVarImpl(String name, double lb, double ub, double precision, Model model) {
         super(name, model);

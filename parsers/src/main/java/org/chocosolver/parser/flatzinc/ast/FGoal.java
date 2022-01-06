@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -101,7 +101,7 @@ public class FGoal {
             return org.chocosolver.solver.search.strategy.Search.sequencer(strats);
         }
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
-        description.append(vchoice.toString()).append(";");
+        description.append(vchoice).append(";");
         Assignment assignment = Assignment.valueOf(((EIdentifier) exps[2]).value);
 
         switch (search) {
@@ -115,7 +115,7 @@ public class FGoal {
                 return SetSearch.build(scope, vchoice, assignment, solver);
             }
             default:
-                System.err.println("Unknown search annotation " + e.toString());
+                System.err.println("Unknown search annotation " + e);
                 throw new ParserException();
         }
     }

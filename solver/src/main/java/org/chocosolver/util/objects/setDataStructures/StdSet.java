@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,7 +33,7 @@ public class StdSet extends AbstractSet {
     private final static boolean ADD = true;
     private final static boolean REMOVE = false;
     // set (decorator design pattern)
-    private ISet set;
+    private final ISet set;
 
 	//***********************************************************************************
 	// CONSTRUCTOR

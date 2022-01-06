@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -79,7 +79,7 @@ public class ReifiedTest {
 
         s.sum(new IntVar[]{a, b, c}, "=", s.boolVar("sum")).post();
 
-        s.getSolver().setSearch(inputOrderLBSearch(new IntVar[]{x, y, z}));
+        s.getSolver().setSearch(inputOrderLBSearch(x, y, z));
         while (s.getSolver().solve()) ;
         long sol = s.getSolver().getSolutionCount();
         assertEquals(sol, 2, "nb sol incorrect");
@@ -291,12 +291,12 @@ public class ReifiedTest {
     public void test_wellaweg1() {
         Model s = new Model();
 
-        IntVar row[] = new IntVar[3];
+        IntVar[] row = new IntVar[3];
         row[0] = s.intVar(2);
         row[1] = s.intVar("R", 0, 100, true);
         row[2] = s.intVar(16);
 
-        IntVar calc[] = new IntVar[2];
+        IntVar[] calc = new IntVar[2];
         calc[0] = s.intOffsetView(row[0], 2);
         calc[1] = s.intVar("C", 0, 80, true);
         s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]).post();
@@ -327,12 +327,12 @@ public class ReifiedTest {
     public void test_wellaweg3() {
         Model s = new Model();
 
-        IntVar row[] = new IntVar[3];
+        IntVar[] row = new IntVar[3];
         row[0] = s.intVar(2);
         row[1] = s.intVar("R", 0, 100, true);
         row[2] = s.intVar(16);
 
-        IntVar calc[] = new IntVar[2];
+        IntVar[] calc = new IntVar[2];
         calc[0] = s.intScaleView(row[0], 2);
         calc[1] = s.intVar("C", 0, 1600, true);
         s.times(row[0], row[1], calc[1]).post();
@@ -363,12 +363,12 @@ public class ReifiedTest {
     public void test_wellaweg4() {
         Model s = new Model();
 
-        IntVar row[] = new IntVar[3];
+        IntVar[] row = new IntVar[3];
         row[0] = s.intVar(20);
         row[1] = s.intVar("R", 0, 100, true);
         row[2] = s.intVar(5);
 
-        IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
+        IntVar[] calc = s.intVarArray("C", 2, 0, 100, true);
 
         s.div(row[0], s.intVar(2), calc[0]).post();
         s.div(row[0], row[1], calc[1]).post();
@@ -400,12 +400,12 @@ public class ReifiedTest {
     public void test_wellaweg5() {
         Model s = new Model();
 
-        IntVar row[] = new IntVar[3];
+        IntVar[] row = new IntVar[3];
         row[0] = s.intVar(100);
         row[1] = s.intVar("R1", 0, 100, true);
         row[2] = s.intVar(5);
 
-        IntVar calc[] = s.intVarArray("C", 2, 0, 100, true);
+        IntVar[] calc = s.intVarArray("C", 2, 0, 100, true);
 
         s.div(row[0], s.intVar(25), calc[0]).post();
         s.div(row[0], row[1], calc[1]).post();
@@ -452,7 +452,7 @@ public class ReifiedTest {
     @Test(groups = "1s", timeOut = 60000, dataProvider = "reif")
     public void test_reif(int b1, int b2) {
         Model m = new Model();
-        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        IntVar[] row = m.intVarArray("r", 3, 0, 5);
         BoolVar a1 = b1 == 2 ? m.boolVar() : b1 == 1 ? m.boolVar(true) : m.boolVar(false);
         m.sum(row, "=", 5).reifyWith(a1);
         BoolVar a2 = b2 == 2 ? m.boolVar() : b2 == 1 ? m.boolVar(true) : m.boolVar(false);
@@ -462,7 +462,7 @@ public class ReifiedTest {
     @Test(groups = "1s", timeOut = 60000, dataProvider = "reif")
     public void test_reif2(int b1, int b2) {
         Model m = new Model();
-        IntVar row[] = m.intVarArray("r", 3, 0, 5);
+        IntVar[] row = m.intVarArray("r", 3, 0, 5);
         BoolVar a1 = b1 == 2 ? m.boolVar("b1") : b1 == 1 ? m.boolVar("b1", true) : m.boolVar("b1", false);
         m.sum(row, "=", 5).reifyWith(a1);
         BoolVar a2 = b2 == 2 ? m.boolVar("b2") : b2 == 1 ? m.boolVar("b2", true) : m.boolVar("b2", false);

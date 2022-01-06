@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,13 +9,14 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.algo;
 
-import java.util.BitSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
+
+import java.util.BitSet;
 
 /**
  * Algorithm of Alldifferent with AC
@@ -35,7 +36,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
      * The 'distinction' set is used to hold variables belonging to Γ(A)
      * and values belonging to A in the paper.
      */
-    private BitSet distinction;
+    private final BitSet distinction;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,19 +29,19 @@ public class DecisionMaker {
     /**
      * object recycling management
      */
-    private PoolManager<IntDecision> intDecisionPool;
+    private final PoolManager<IntDecision> intDecisionPool;
 
     /**
      * object recycling management
      */
-    private PoolManager<RealDecision> realDecisionPool;
+    private final PoolManager<RealDecision> realDecisionPool;
 
     /**
      * object recycling management
      */
-    private PoolManager<SetDecision> setDecisionPool;
+    private final PoolManager<SetDecision> setDecisionPool;
 
-    private PoolManager<GraphDecision> graphDecisionPool;
+    private final PoolManager<GraphDecision> graphDecisionPool;
 
     /**
      * Create a decision maker, that eases decision creation.

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,8 +18,6 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -55,8 +53,8 @@ public class SetVarImplTest {
 	@Test(groups="1s", timeOut=60000)
 	public void testSetVarInstantiated() {
 		Model m = new Model();
-		Assert.assertTrue(m.setVar("var", new int[] { -1, -2, 3, 18 }).getCard().isInstantiatedTo(4));
-		Assert.assertTrue(m.setVar("var", new int[] { -1, -1, -1, 0 }).getCard().isInstantiatedTo(2));
+		Assert.assertTrue(m.setVar("var", -1, -2, 3, 18).getCard().isInstantiatedTo(4));
+		Assert.assertTrue(m.setVar("var", -1, -1, -1, 0).getCard().isInstantiatedTo(2));
 		Assert.assertTrue(m.setVar("var").getCard().isInstantiatedTo(0));
 	}
 

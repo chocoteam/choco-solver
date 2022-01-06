@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -35,12 +35,14 @@ public class PropFastGCC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private int[] values;
-    private ISet[] possibles, mandatories;
-    private ISet valueToCompute;
-    private TIntIntHashMap map;
-    private TIntArrayList boundVar;
+    private final int n;
+    private final int n2;
+    private final int[] values;
+    private final ISet[] possibles;
+    private final ISet[] mandatories;
+    private final ISet valueToCompute;
+    private final TIntIntHashMap map;
+    private final TIntArrayList boundVar;
 
     //***********************************************************************************
     // CONSTRUCTORS

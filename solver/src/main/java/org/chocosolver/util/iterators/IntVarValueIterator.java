@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,10 +9,10 @@
  */
 package org.chocosolver.util.iterators;
 
-import java.util.NoSuchElementException;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * Object to iterate over an IntVar values using
@@ -36,7 +36,7 @@ public class IntVarValueIterator implements Iterator<Integer> {
 	/**
 	 * Variable to iterate on
 	 */
-	private IntVar var;
+	private final IntVar var;
     /**
      * current returned value
      */

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -101,7 +101,7 @@ public class NotMemberTest {
         Model model = new Model();
 
         IntVar var = model.intVar(1, 10);
-        SetVar setVar = model.setVar(new int[]{});
+        SetVar setVar = model.setVar();
         model.notMember(var, setVar).post();
 
        checkSolutions(model, setVar, var);

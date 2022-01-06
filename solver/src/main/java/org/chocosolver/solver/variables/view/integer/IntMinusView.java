@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,10 +23,7 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 
-import static org.chocosolver.solver.variables.events.IntEventType.BOUND;
-import static org.chocosolver.solver.variables.events.IntEventType.DECUPP;
-import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
-import static org.chocosolver.solver.variables.events.IntEventType.INSTANTIATE;
+import static org.chocosolver.solver.variables.events.IntEventType.*;
 
 /**
  * View for -V, where V is a IntVar or view

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -69,7 +69,7 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     /**
      * Value iterator allowing for(int i:this) loops
      */
-    private IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
+    private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
 
     /**
      * Signed Literal

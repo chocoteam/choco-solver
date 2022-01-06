@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -62,7 +62,7 @@ public final class ContradictionException extends Exception {
      */
     @Override
     public String toString() {
-        return "CONTRADICTION (" + (c == null ? "" : c.toString() + ", ") + v + ") : " + s;
+        return "CONTRADICTION (" + (c == null ? "" : c + ", ") + v + ") : " + s;
     }
 
     /**

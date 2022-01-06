@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,13 +31,18 @@ public class ConnectivityFinder {
     // CONNECTED COMPONENTS ONLY
     //***********************************************************************************
 
-    private int n;
-    private IGraph graph;
-    private int[] CCFirstNode, CCNextNode, nodeCC, p, fifo, sizeCC;
+    private final int n;
+    private final IGraph graph;
+    private int[] CCFirstNode;
+    private int[] CCNextNode;
+    private int[] nodeCC;
+    private final int[] p;
+    private final int[] fifo;
+    private int[] sizeCC;
     private int nbCC, sizeMinCC, sizeMaxCC;
     // biconnection
     private int[] numOfNode, nodeOfNum, inf;
-    private Iterator<Integer>[] iterators;
+    private final Iterator<Integer>[] iterators;
     TIntArrayList articulations;
 
     /**

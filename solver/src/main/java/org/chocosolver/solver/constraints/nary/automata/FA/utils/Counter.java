@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,7 +17,7 @@ package org.chocosolver.solver.constraints.nary.automata.FA.utils;
  */
 public class Counter implements ICounter {
 
-    private int[][] costs;
+    private final int[][] costs;
     private Bounds bounds;
 
     public Counter(int[][] layer_value, int min, int max) {

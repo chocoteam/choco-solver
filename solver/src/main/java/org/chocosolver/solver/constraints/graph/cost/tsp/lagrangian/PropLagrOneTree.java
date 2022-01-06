@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints.graph.cost.tsp.lagrangian;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.graph.cost.GraphLagrangianRelaxation;
@@ -51,7 +50,7 @@ public class PropLagrOneTree extends Propagator<Variable> implements GraphLagran
     private UndirectedGraph mst;
     private double step;
     private final AbstractTreeFinder HKfilter, HK;
-    private int nbSprints;
+    private final int nbSprints;
 
     //***********************************************************************************
     // CONSTRUCTORS

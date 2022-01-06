@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -41,13 +41,14 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     private int globalLB, globalUB;
-    private int coefLB, coefUB;
-    private IntVar obj;
+    private final int coefLB;
+    private final int coefUB;
+    private final IntVar obj;
     private long nbSols;
-    private Model model;
+    private final Model model;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
-    private OptimizationPolicy optPolicy;
+    private final OptimizationPolicy optPolicy;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -175,7 +176,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         return dec;
     }
 
-    private DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
+    private final DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
         //FIXME can not serialize decision 
 
         @Override
@@ -201,7 +202,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
     };
 
-    private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
+    private final DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
         //FIXME can not serialize decision 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {

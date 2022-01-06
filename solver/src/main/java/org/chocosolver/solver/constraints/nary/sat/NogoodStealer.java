@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,12 +10,13 @@
 package org.chocosolver.solver.constraints.nary.sat;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.loop.monitors.NogoodFromRestarts;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * This class manages no-goods sharing among models involved in a {@link

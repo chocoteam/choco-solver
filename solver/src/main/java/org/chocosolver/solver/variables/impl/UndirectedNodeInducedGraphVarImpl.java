@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,7 +29,7 @@ import org.chocosolver.util.objects.graphs.UndirectedGraph;
  */
 public class UndirectedNodeInducedGraphVarImpl extends UndirectedGraphVarImpl implements ICause {
 
-    private UndirectedGraph originalUB;
+    private final UndirectedGraph originalUB;
 
     /**
      * Creates an undirected node-induced (from the envelope) graph variable

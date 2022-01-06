@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,7 +28,7 @@ public class MySQLAccess {
 
     private static final String SAT = "SAT", MIN = "MIN", MAX = "MAX";
 
-    private Properties properties = new Properties();
+    private final Properties properties = new Properties();
 
     private final String url, dbname, user, pwd;
 

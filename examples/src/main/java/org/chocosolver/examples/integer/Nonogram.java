@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -98,7 +98,7 @@ public class Nonogram extends AbstractProblem {
             }
             st.append("\n");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
         if (frame) {
             JFrame frame = new JFrame();
             frame.setTitle("NonoGram");
@@ -373,7 +373,7 @@ public class Nonogram extends AbstractProblem {
 
     private static class GetImage {
         public int[][] data;
-        private int px = 6;
+        private final int px = 6;
 
         GetImage(String path) throws InterruptedException, IOException {
             Image image = new ImageIcon(path).getImage();
@@ -423,7 +423,7 @@ public class Nonogram extends AbstractProblem {
             st.append("},\n{");
             oneDimension(data, st);
             st.append("}\n");
-            System.out.printf("%s\n", st.toString());
+            System.out.printf("%s\n", st);
         }
 
         private void oneDimension(int[][] rdata, StringBuilder st) {

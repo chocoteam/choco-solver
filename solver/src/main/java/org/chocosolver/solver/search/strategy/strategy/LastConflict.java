@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -43,7 +43,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     /**
      * The main strategy declared in the solver
      */
-    private AbstractStrategy<V> mainStrategy;
+    private final AbstractStrategy<V> mainStrategy;
 
     /**
      * Set to <tt>true</tt> when this strategy is active
@@ -58,7 +58,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     /**
      * Variables related to decision in conflicts
      */
-    private V[] conflictingVariables;
+    private final V[] conflictingVariables;
 
     protected Set<Variable> scope;
 

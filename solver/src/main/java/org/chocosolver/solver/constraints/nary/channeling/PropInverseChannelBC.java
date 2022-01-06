@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -39,10 +39,12 @@ import java.util.BitSet;
  */
 public class PropInverseChannelBC extends Propagator<IntVar> {
 
-    private int minX, minY;
-    private int n;
-    private IntVar[] X, Y;
-    private BitSet toCompute;
+    private final int minX;
+    private final int minY;
+    private final int n;
+    private final IntVar[] X;
+    private final IntVar[] Y;
+    private final BitSet toCompute;
 
     public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);

@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,10 +32,10 @@ import org.kohsuke.args4j.Option;
  */
 public class AllIntervalSeries extends AbstractProblem {
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private int m = 1000;
+    private final int m = 1000;
 
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
-    private boolean use_views = false;
+    private final boolean use_views = false;
 
     IntVar[] vars;
     IntVar[] dist;
@@ -86,7 +86,7 @@ public class AllIntervalSeries extends AbstractProblem {
             }
         }
         st.append(String.format("%d", vars[m - 1].getValue()));
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

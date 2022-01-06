@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,7 +28,7 @@ public class UnionTest {
     public void testUnionFixed() {
         Model model = new Model();
         SetVar[] setVars = model.setVarArray(3, new int[]{}, new int[]{1, 2, 3, 4, 5, 6});
-        SetVar union = model.setVar(new int[]{1, 2, 3, 4, 5});
+        SetVar union = model.setVar(1, 2, 3, 4, 5);
         model.union(setVars, union).post();
 
         checkSolutions(model, setVars, union);
@@ -38,9 +38,9 @@ public class UnionTest {
     public void testSetVarsFixed() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[3];
-        setVars[0] = model.setVar(new int[]{1, 2});
+        setVars[0] = model.setVar(1, 2);
         setVars[1] = model.setVar(new int[]{}, new int[]{3});
-        setVars[2] = model.setVar(new int[]{4, 5});
+        setVars[2] = model.setVar(4, 5);
         SetVar union = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 5, 6, 7});
         model.union(setVars, union).post();
 
@@ -51,7 +51,7 @@ public class UnionTest {
     public void testImpossible() {
         Model model = new Model();
         SetVar[] setVars = model.setVarArray(3, new int[]{1}, new int[]{1, 2, 3, 4});
-        SetVar union = model.setVar(new int[]{2, 3, 4}); // different domains
+        SetVar union = model.setVar(2, 3, 4); // different domains
         model.union(setVars, union).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,15 +42,16 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private int nbMaxValues;
+    private final int n;
+    private final int nbMaxValues;
     private int minValue;
     private int minIndex, maxIndex;
-    private TIntArrayList[] bound;
-    private TIntArrayList stamp;
-    private int[] minVal, maxVal;
-    private BitSet kerRepresentant;
-    private int[] orderedNodes;
+    private final TIntArrayList[] bound;
+    private final TIntArrayList stamp;
+    private final int[] minVal;
+    private final int[] maxVal;
+    private final BitSet kerRepresentant;
+    private final int[] orderedNodes;
 
     //***********************************************************************************
     // CONSTRUCTORS

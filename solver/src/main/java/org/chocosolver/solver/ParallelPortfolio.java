@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -113,7 +113,7 @@ public class ParallelPortfolio {
     /**
      * whether or not to use default search configurations for the different threads
      **/
-    private boolean searchAutoConf;
+    private final boolean searchAutoConf;
 
     /**
      * This manager is used to synchronize nogood sharing.
@@ -130,9 +130,9 @@ public class ParallelPortfolio {
      */
     private final HashMap<Model, Boolean> reliableness;
 
-    private AtomicBoolean solverTerminated = new AtomicBoolean(false);
-    private AtomicBoolean solutionFound = new AtomicBoolean(false);
-    private AtomicInteger solverRunning = new AtomicInteger(0);
+    private final AtomicBoolean solverTerminated = new AtomicBoolean(false);
+    private final AtomicBoolean solutionFound = new AtomicBoolean(false);
+    private final AtomicInteger solverRunning = new AtomicInteger(0);
 
     /**
      * Point to (one of) the solver(s) which found a solution

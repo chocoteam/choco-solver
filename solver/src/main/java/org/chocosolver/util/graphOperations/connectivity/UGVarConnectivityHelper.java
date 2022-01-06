@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,12 +33,12 @@ public class UGVarConnectivityHelper {
 
     // internal variables for Articulation Points and Bridge detection
     private int numOrder;
-    private int[] num;
-    private BitSet visited;
+    private final int[] num;
+    private final BitSet visited;
 
     // output data
-    private ISet articulationPoints = SetFactory.makeBipartiteSet(0);
-    private List<int[]> bridges = new ArrayList<>();
+    private final ISet articulationPoints = SetFactory.makeBipartiteSet(0);
+    private final List<int[]> bridges = new ArrayList<>();
 
     // --- constructor
     public UGVarConnectivityHelper(UndirectedGraphVar g){

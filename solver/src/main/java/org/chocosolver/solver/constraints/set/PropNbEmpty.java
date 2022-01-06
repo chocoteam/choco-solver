@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,11 +34,13 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropNbEmpty extends Propagator<Variable> {
 
-    private SetVar[] sets;
-    private IntVar nbEmpty;
-    private int n;
-    private ISet canBeEmpty, isEmpty;
-    private IStateInt nbAlreadyEmpty, nbMaybeEmpty;
+    private final SetVar[] sets;
+    private final IntVar nbEmpty;
+    private final int n;
+    private final ISet canBeEmpty;
+    private final ISet isEmpty;
+    private final IStateInt nbAlreadyEmpty;
+    private final IStateInt nbMaybeEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS

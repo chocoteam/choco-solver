@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,9 +10,9 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.IConstraintFactory;
+import org.chocosolver.solver.constraints.IDecompositionFactory;
 import org.chocosolver.solver.constraints.IReificationFactory;
 import org.chocosolver.solver.constraints.ISatFactory;
-import org.chocosolver.solver.constraints.IDecompositionFactory;
 import org.chocosolver.solver.variables.IResultVariableFactory;
 import org.chocosolver.solver.variables.IVariableFactory;
 import org.chocosolver.solver.variables.IViewFactory;

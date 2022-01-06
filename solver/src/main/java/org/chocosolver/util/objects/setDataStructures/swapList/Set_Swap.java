@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,9 +31,10 @@ public class Set_Swap extends AbstractSet implements ISet.WithOffset {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int size, mapOffset;
+	private int size;
+    private final int mapOffset;
 	private int[] values, map;
-	private ISetIterator iter = newIterator();
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR

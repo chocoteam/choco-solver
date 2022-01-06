@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -27,13 +27,29 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 public final class PropKeysorting extends Propagator<IntVar> {
 
-    private int n; // size of X, and obviously Y
-    private int m;
+    private final int n; // size of X, and obviously Y
+    private final int m;
     private int k; // number of keys
 
-    private IntVar[][] X, Y; // ref to X and Y, instead of vars
-    private int[][] XLB, XUB, YLB, YUB;
-    private int[] CHUNK, SORTMIN, SORTMAX, XMATE, YMATE, NODE, ROOT, RIGHTMOST, MAXX, SCC, SORTY, ARRAY, CUR;
+    private final IntVar[][] X;
+    private final IntVar[][] Y; // ref to X and Y, instead of vars
+    private int[][] XLB;
+    private int[][] XUB;
+    private final int[][] YLB;
+    private final int[][] YUB;
+    private final int[] CHUNK;
+    private final int[] SORTMIN;
+    private final int[] SORTMAX;
+    private int[] XMATE;
+    private final int[] YMATE;
+    private final int[] NODE;
+    private final int[] ROOT;
+    private final int[] RIGHTMOST;
+    private final int[] MAXX;
+    private int[] SCC;
+    private final int[] SORTY;
+    private final int[] ARRAY;
+    private final int[] CUR;
     private boolean prune;
 
     protected final ArraySort sorter;

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -24,8 +24,8 @@ import org.chocosolver.solver.variables.Variable;
 public class IbexDecision extends Decision<Variable> {
 
     private static final long serialVersionUID = -4723411613242027369L;
-    private IbexHandler handler;
-    private Model model;
+    private final IbexHandler handler;
+    private final Model model;
     /**
      * Create an decision based on an {@link RealVar}
      */

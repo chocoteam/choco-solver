@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -47,7 +47,7 @@ public class EdgeChannelingTest {
         while (model.getSolver().solve()) {
             Assert.assertEquals(
                     g.getValue().containsNode(3) && g.getValue().getNeighborsOf(3).contains(0),
-                    bool.getValue() == 1 ? true : false
+                    bool.getValue() == 1
             );
         }
         long nbSolutions = model.getSolver().getSolutionCount();
@@ -114,7 +114,7 @@ public class EdgeChannelingTest {
         while (model.getSolver().solve()) {
             Assert.assertEquals(
                     g.getValue().containsNode(3) && g.getValue().getPredecessorsOf(3).contains(0),
-                    bool.getValue() == 1 ? true : false
+                    bool.getValue() == 1
             );
         }
         long nbSolutions = model.getSolver().getSolutionCount();

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 
 public class DirectedGraphVarImpl extends AbstractGraphVar<DirectedGraph> implements DirectedGraphVar {

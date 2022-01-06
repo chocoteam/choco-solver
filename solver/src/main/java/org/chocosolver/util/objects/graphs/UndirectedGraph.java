@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,10 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
@@ -28,11 +31,11 @@ public class UndirectedGraph implements IGraph {
     // VARIABLES
     //***********************************************************************************
 
-    private ISet[] neighbors;
+    private final ISet[] neighbors;
     private ISet nodes;
-    private int n;
-    private SetType edgeSetType;
-    private SetType nodeSetType;
+    private final int n;
+    private final SetType edgeSetType;
+    private final SetType nodeSetType;
 
     //***********************************************************************************
     // CONSTRUCTORS

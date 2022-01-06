@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,10 +33,10 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-	private int[] starts;
-	private int[] offsets;
-	private TIntStack stack = new TIntArrayStack();
-	private StoredIndexedBipartiteSetWithOffset[] supports;
+	private final int[] starts;
+	private final int[] offsets;
+	private final TIntStack stack = new TIntArrayStack();
+	private final StoredIndexedBipartiteSetWithOffset[] supports;
 
 	private class Nodes {
 		private int[] states;
@@ -51,8 +51,8 @@ public class StoredDirectedMultiGraph {
 		private int[] origs;
 	}
 
-	private Nodes GNodes;
-	private Arcs GArcs;
+	private final Nodes GNodes;
+	private final Arcs GArcs;
 
 	public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
 									int[] starts, int[] offsets, int supportLength) {

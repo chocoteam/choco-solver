@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,7 +26,7 @@ public final class EInt extends Expression {
 
     public final int value;
 
-    private static EInt[] cache;
+    private static final EInt[] cache;
     final static int low = -128;
 
     // high value may be configured by property

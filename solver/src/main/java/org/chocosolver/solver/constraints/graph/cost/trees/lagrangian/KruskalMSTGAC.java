@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints.graph.cost.trees.lagrangian;
 
 import gnu.trove.list.array.TIntArrayList;
-
 import org.chocosolver.solver.constraints.graph.cost.GraphLagrangianRelaxation;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.graphOperations.LCAGraphManager;
@@ -37,7 +36,7 @@ public class KruskalMSTGAC extends AbstractTreeFinder {
     private final double[] costs;             // cost of the lex arc
     private final int[] p, rank;
     // CCtree
-    private int ccN;
+    private final int ccN;
     private final DirectedGraph ccTree;
     private final int[] ccTp;
     private final double[] ccTEdgeCost;

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,9 +26,9 @@ public class PropNeighBoolsChannel2 extends Propagator<BoolVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private BoolVar[][] matrix;
-    private GraphVar g;
+    private final int n;
+    private final BoolVar[][] matrix;
+    private final GraphVar g;
 
     //***********************************************************************************
     // CONSTRUCTORS

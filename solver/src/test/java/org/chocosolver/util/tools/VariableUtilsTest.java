@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,14 +9,15 @@
  */
 package org.chocosolver.util.tools;
 
-import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
-
-import java.util.ArrayList;
-import java.util.List;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 
 /**
  * <p> Project: choco-solver.

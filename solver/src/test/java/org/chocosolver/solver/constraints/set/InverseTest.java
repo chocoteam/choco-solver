@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -73,8 +73,8 @@ public class InverseTest {
     public void testBuildInverse() {
         Model model = new Model();
         SetVar[] setVars = new SetVar[2];
-        setVars[0] = model.setVar(new int[]{0, 1});
-        setVars[1] = model.setVar(new int[]{0});
+        setVars[0] = model.setVar(0, 1);
+        setVars[1] = model.setVar(0);
         SetVar[] inverseSetVars = model.setVarArray(2, new int[]{}, new int[]{0, 1});
 
         model.inverseSet(setVars, inverseSetVars, 0, 0).post();

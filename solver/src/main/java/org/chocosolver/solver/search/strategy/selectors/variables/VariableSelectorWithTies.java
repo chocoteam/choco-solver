@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
 
     private final VariableEvaluator<V>[] heuristics;
-    private ArrayList<V> oldv = new ArrayList<>();
-    private ArrayList<V> newv = new ArrayList<>();
+    private final ArrayList<V> oldv = new ArrayList<>();
+    private final ArrayList<V> newv = new ArrayList<>();
     private Predicate<V> predicate = (v -> !v.isInstantiated());
 
 

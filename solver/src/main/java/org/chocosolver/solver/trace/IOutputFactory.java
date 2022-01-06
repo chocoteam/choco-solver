@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,8 +13,8 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.propagation.PropagationEngineObserver;
-import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.propagation.PropagationObserver;
+import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.search.loop.monitors.*;
 import org.chocosolver.solver.trace.frames.StatisticsPanel;
 import org.chocosolver.solver.variables.IntVar;

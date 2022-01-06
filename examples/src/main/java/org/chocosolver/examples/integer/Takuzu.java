@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,8 +10,8 @@
 package org.chocosolver.examples.integer;
 
 import org.chocosolver.examples.AbstractProblem;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.variables.BoolVar;
@@ -35,7 +35,7 @@ public class Takuzu extends AbstractProblem {
     @Option(name = "-g", aliases = "--grid", usage = "Takuzu grid ID.")
     Takuzu.Data data = Takuzu.Data.g10x10;
     @Option(name = "-r3", aliases = "--rule3", usage = "How to encode rule 3 (1*: keySort, 2: allDifferent.", required = false)
-    private int r3 = 1;
+    private final int r3 = 1;
 
     /**
      * Cells of the grid, some may be known in advanced
