@@ -28,11 +28,11 @@ package org.chocosolver.examples.integer;
 
 import org.chocosolver.examples.AbstractProblem;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.kohsuke.args4j.Option;
+import org.chocosolver.solver.search.strategy.Search;
 
 public class MagicSequence extends AbstractProblem {
 
@@ -81,7 +81,7 @@ public class MagicSequence extends AbstractProblem {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String args[]) {
         new MagicSequence().execute(args);
     }
 }

@@ -142,7 +142,7 @@ public class OpenStacks extends AbstractProblem {
             st.append("INFEASIBLE");
         }
         //st.append(solver.toString());
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.graph.cost.trees.lagrangian;
 
 import gnu.trove.list.array.TIntArrayList;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.graph.cost.GraphLagrangianRelaxation;

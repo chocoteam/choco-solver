@@ -617,7 +617,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
             m += g.getPotentialNeighborsOf(i).size();
         }
         m /= 2;
-        Propagator pMaxDeg = new PropNodeDegreeAtMostIncr(g, 2);
+        Propagator pMaxDeg = (m < 20 * n) ? new PropNodeDegreeAtMostIncr(g, 2) : new PropNodeDegreeAtMostIncr(g, 2);
         if (g.getMandatoryNodes().size() <= 1) {
             // Graphs with one node and a loop must be accepted
             IntVar nbNodes = g.getModel().intVar(g.getMandatoryNodes().size(), g.getPotentialNodes().size());

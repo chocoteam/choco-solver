@@ -11,6 +11,9 @@ package org.chocosolver.solver.constraints.nary.automata.structure.multicostregu
 
 import gnu.trove.set.hash.TIntHashSet;
 import gnu.trove.stack.TIntStack;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Set;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.automata.FA.ICostAutomaton;
@@ -22,10 +25,6 @@ import org.chocosolver.util.iterators.DisposableIntIterator;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSetWithOffset;
 import org.jgrapht.graph.DirectedMultigraph;
 
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.Set;
-
 /**
  * Created by IntelliJ IDEA.
  * User: julien
@@ -35,19 +34,19 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-    private final int[] starts;
-    private final int[] offsets;
+    private int[] starts;
+    private int[] offsets;
 
     public int sourceIndex;
     public int tinIndex;
     public int nbR;
 
 
-    private final StoredIndexedBipartiteSetWithOffset[] supports;
+    private StoredIndexedBipartiteSetWithOffset[] supports;
     public StoredIndexedBipartiteSetWithOffset[] layers;
     private FastPathFinder pf;
     public BitSet inStack;
-    private final IntVar[] z;
+    private IntVar[] z;
 
     public Nodes GNodes;
     public Arcs GArcs;
@@ -582,7 +581,7 @@ public class StoredDirectedMultiGraph {
         return result;
     }
 
-    private final int[] minmax = new int[2];
+    private int[] minmax = new int[2];
 
     public int[] getMinMaxPathCostForAssignment(int layer, int value, int... resources) {
         minmax[0] = Integer.MAX_VALUE;

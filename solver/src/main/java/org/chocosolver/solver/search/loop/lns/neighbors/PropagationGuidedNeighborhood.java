@@ -13,11 +13,16 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.tools.MathUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import org.chocosolver.util.tools.MathUtils;
 
 /**
  * A Propagation Guided LNS
@@ -140,7 +145,7 @@ public class PropagationGuidedNeighborhood extends IntNeighbor {
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
-                        .sorted(Comparator.comparingInt(i -> -all[i]))
+                        .sorted(Comparator.comparingInt(i -> -all[(int)i]))
                         .limit(listSize)
                         .collect(Collectors.toList());
             } else {

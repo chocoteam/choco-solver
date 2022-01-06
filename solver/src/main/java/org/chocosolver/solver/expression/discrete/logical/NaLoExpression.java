@@ -33,7 +33,7 @@ public class NaLoExpression extends LoExpression {
     /**
      * The expressions this expression relies on
      */
-    private final ReExpression[] es;
+    private ReExpression[] es;
 
     /**
      * Builds a n-ary expression

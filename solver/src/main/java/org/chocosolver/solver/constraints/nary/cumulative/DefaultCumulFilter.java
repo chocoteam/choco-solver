@@ -25,11 +25,7 @@ public class DefaultCumulFilter extends CumulFilter {
 	// VARIABLES
 	//***********************************************************************************
 
-	private CumulFilter time;
-    private CumulFilter sweep;
-    private final CumulFilter nrj;
-    private CumulFilter heights;
-    private CumulFilter disjTaskInter;
+	private CumulFilter time, sweep, nrj, heights, disjTaskInter;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

@@ -42,7 +42,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * Current decision path.
      */
-    private final List<Decision> decisions;
+    private List<Decision> decisions;
 
     IStateInt last;
 
@@ -178,7 +178,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         if (lst < decisions.size()) {
             Decision decision = decisions.get(lst);
             st.append(String.format("[%d/%d] %s",
-                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision)
+                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
             );
         } else {
             st.append(String.format("[1/1] d_0: %s", decisions.get(0).toString()));

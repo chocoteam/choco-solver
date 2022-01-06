@@ -35,14 +35,12 @@ public class PropFastGCC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final int n2;
-    private final int[] values;
-    private final ISet[] possibles;
-    private final ISet[] mandatories;
-    private final ISet valueToCompute;
-    private final TIntIntHashMap map;
-    private final TIntArrayList boundVar;
+    private int n, n2;
+    private int[] values;
+    private ISet[] possibles, mandatories;
+    private ISet valueToCompute;
+    private TIntIntHashMap map;
+    private TIntArrayList boundVar;
 
     //***********************************************************************************
     // CONSTRUCTORS

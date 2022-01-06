@@ -9,10 +9,10 @@
  */
 package org.chocosolver.solver.constraints.nary.cnf;
 
+import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
-import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.util.ESat;
 
 /**

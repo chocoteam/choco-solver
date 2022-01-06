@@ -25,9 +25,8 @@ public class Set_CstInterval implements ISet {
 	// VARIABLES
 	//***********************************************************************************
 
-	private final int lb;
-    private final int ub;
-	private final ISetIterator iter = newIterator();
+	private int lb, ub;
+	private ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTORS

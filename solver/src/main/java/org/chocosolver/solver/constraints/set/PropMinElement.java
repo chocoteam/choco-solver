@@ -39,10 +39,10 @@ public class PropMinElement extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final IntVar min;
-    private final SetVar set;
-    private final int offSet;
-    private final int[] weights;
+    private IntVar min;
+    private SetVar set;
+    private int offSet;
+    private int[] weights;
     private final boolean notEmpty;
 
     //***********************************************************************************

@@ -23,7 +23,7 @@ public class GraphDelta extends TimeStampedObject implements IGraphDelta {
     // VARIABLES
     //***********************************************************************************
 
-    private final IEnumDelta[] deltaOfType;
+    private IEnumDelta[] deltaOfType;
 
     //***********************************************************************************
     // CONSTRUCTORS

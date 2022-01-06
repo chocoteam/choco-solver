@@ -22,9 +22,9 @@ public class KruskalOneTreeGAC extends KruskalMSTFinder {
     //***********************************************************************************
 
     private int min1, min2;
-    private final int[][] map;
-    private final double[][] marginalCosts;
-    private final int[] fifo;
+    private int[][] map;
+    private double[][] marginalCosts;
+    private int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS

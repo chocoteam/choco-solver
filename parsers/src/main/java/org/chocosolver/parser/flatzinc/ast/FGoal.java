@@ -101,7 +101,7 @@ public class FGoal {
             return org.chocosolver.solver.search.strategy.Search.sequencer(strats);
         }
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
-        description.append(vchoice).append(";");
+        description.append(vchoice.toString()).append(";");
         Assignment assignment = Assignment.valueOf(((EIdentifier) exps[2]).value);
 
         switch (search) {
@@ -115,7 +115,7 @@ public class FGoal {
                 return SetSearch.build(scope, vchoice, assignment, solver);
             }
             default:
-                System.err.println("Unknown search annotation " + e);
+                System.err.println("Unknown search annotation " + e.toString());
                 throw new ParserException();
         }
     }

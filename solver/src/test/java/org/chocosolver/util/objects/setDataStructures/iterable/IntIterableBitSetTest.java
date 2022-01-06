@@ -12,6 +12,8 @@ package org.chocosolver.util.objects.setDataStructures.iterable;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import static org.testng.Assert.*;
+
 /**
  * <p>
  * Project: choco-solver.

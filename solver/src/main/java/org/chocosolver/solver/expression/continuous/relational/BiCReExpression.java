@@ -30,16 +30,16 @@ public class BiCReExpression implements CReExpression {
     /**
      * Operator of the arithmetic expression
      */
-    private final Operator op;
+    private Operator op;
 
     /**
      * The first expression this expression relies on
      */
-    private final CArExpression e1;
+    private CArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private final CArExpression e2;
+    private CArExpression e2;
 
     /**
      * Builds a binary expression

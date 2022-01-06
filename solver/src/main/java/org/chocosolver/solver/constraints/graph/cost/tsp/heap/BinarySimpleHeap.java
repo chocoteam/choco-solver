@@ -27,9 +27,8 @@ public class BinarySimpleHeap implements ISimpleHeap {
     // VARIABLES
     //***********************************************************************************
 
-    private final int[] elements;
-    private final int[] positions;
-    private final double[] values;
+    private int[] elements, positions;
+    private double[] values;
     private int firstEmpty;
 
     //***********************************************************************************

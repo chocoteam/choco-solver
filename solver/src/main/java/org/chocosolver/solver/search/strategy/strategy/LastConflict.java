@@ -43,7 +43,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     /**
      * The main strategy declared in the solver
      */
-    private final AbstractStrategy<V> mainStrategy;
+    private AbstractStrategy<V> mainStrategy;
 
     /**
      * Set to <tt>true</tt> when this strategy is active
@@ -58,7 +58,7 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
     /**
      * Variables related to decision in conflicts
      */
-    private final V[] conflictingVariables;
+    private V[] conflictingVariables;
 
     protected Set<Variable> scope;
 

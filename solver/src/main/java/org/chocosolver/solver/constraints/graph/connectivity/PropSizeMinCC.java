@@ -36,10 +36,9 @@ public class PropSizeMinCC extends Propagator<Variable> {
 
     /* Variables */
 
-    private final UndirectedGraphVar g;
-    private final IntVar sizeMinCC;
-    private final ConnectivityFinder GLBCCFinder;
-    private final ConnectivityFinder GUBCCFinder;
+    private UndirectedGraphVar g;
+    private IntVar sizeMinCC;
+    private ConnectivityFinder GLBCCFinder, GUBCCFinder;
 
     /* Constructor */
 

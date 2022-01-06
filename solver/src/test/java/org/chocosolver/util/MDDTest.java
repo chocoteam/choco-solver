@@ -17,6 +17,8 @@ import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+
 /**
  * Created by cprudhom on 04/11/14.
  * Project: Choco3

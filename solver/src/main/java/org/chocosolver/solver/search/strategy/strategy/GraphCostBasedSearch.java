@@ -42,15 +42,15 @@ public class GraphCostBasedSearch extends GraphStrategy {
     public static final int MAX_COST = 8;
 
     // variables
-    private final int n;
+    private int n;
     private int mode;
-    private final int[][] costs;
+    private int[][] costs;
     private GraphDecisionOperator decisionType;
     private int from, to;
     private int value;
     private boolean useLC;
     private int lastFrom = -1;
-    private final GraphVar g;
+    private GraphVar g;
 
     /**
      * Search strategy for graphs

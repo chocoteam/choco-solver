@@ -28,12 +28,8 @@ import org.chocosolver.util.ESat;
  */
 public class PropIntValuePrecedeChain extends Propagator<IntVar> {
 
-    private final int s;
-    private final int t;
-    private final int n;
-    private final IStateInt a;
-    private final IStateInt b;
-    private final IStateInt g;
+    private int s, t, n;
+    private IStateInt a, b, g;
 
     public PropIntValuePrecedeChain(IntVar[] vars, int s, int t) {
         super(vars, PropagatorPriority.LINEAR, true);

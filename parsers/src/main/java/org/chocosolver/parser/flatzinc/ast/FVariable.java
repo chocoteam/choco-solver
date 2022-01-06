@@ -13,10 +13,7 @@ import org.chocosolver.parser.Exit;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 
 import java.util.List;
 

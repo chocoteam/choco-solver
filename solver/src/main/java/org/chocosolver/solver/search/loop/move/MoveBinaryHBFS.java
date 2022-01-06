@@ -43,7 +43,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * limited number of backtracks for each DFS try
      */
-    private final BacktrackCounter dfslimit;
+    private BacktrackCounter dfslimit;
 
     /**
      * limit of bracktracks for the next DFS try.
@@ -57,7 +57,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * maximum number of backtracks to not exceed when updating node recomputation parameters.
      */
-    private final long N;
+    private long N;
 
     /**
      * for node recomputation.
@@ -67,11 +67,11 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * lower bound to limit the rate of redundantly propagated decisions.
      */
-    private final double a;
+    private double a;
     /**
      * upper bound to limit the rate of redundantly propagated decisions.
      */
-    private final double b;
+    private double b;
 
     /**
      * The current objective manager, to deal with best bounds.
@@ -86,7 +86,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * list of open right branches.
      */
-    private final PriorityQueue<Open> opens;
+    private PriorityQueue<Open> opens;
 
     /**
      * Current open right branch.
@@ -96,7 +96,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * Used to find the first unknown open right branch
      */
-    private final List<Decision> _unkopen;
+    private List<Decision> _unkopen;
 
     /**
      * Current decision in copen
@@ -106,7 +106,7 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
     /**
      * The owner model.
      */
-    private final Model mModel;
+    private Model mModel;
 
     /**
      * Create a move dedicated to run an Hybrid Best-First Search[1] (HBFS) with binary decisions.
@@ -279,15 +279,15 @@ public class MoveBinaryHBFS extends MoveBinaryDFS {
         /**
          * List of open decisions
          */
-        private final List<Decision> path;
+        private List<Decision> path;
         /**
          * store the current lower bound of the decision path for minimization
          */
-        private final int currentBound;
+        private int currentBound;
         /**
          * 1 for minimization, -1 for maximization
          */
-        private final byte minimization;
+        private byte minimization;
 
         /**
          * Create an open right branch for HBFS

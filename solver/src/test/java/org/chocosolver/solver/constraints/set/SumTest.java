@@ -35,7 +35,7 @@ public class SumTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSum() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(1, 5, 7, 8);
+		SetVar setVar = model.setVar(new int[]{1, 5, 7, 8});
 		IntVar sum = model.intVar(0, 100);
 		model.sum(setVar, sum).post();
 		checkSolutions(model, setVar, sum);
@@ -62,7 +62,7 @@ public class SumTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSumNegWrong() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(-10, -5, -8);
+		SetVar setVar = model.setVar(new int[]{-10, -5, -8});
 		IntVar sum = model.intVar(0, 100);
 		model.sum(setVar, sum).post();
 
@@ -73,7 +73,7 @@ public class SumTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testEmptySetKo() {
 		Model model = new Model();
-		SetVar setVar = model.setVar();
+		SetVar setVar = model.setVar(new int[]{});
 		IntVar sum = model.intVar(1, 100);
 		model.sum(setVar, sum).post();
 
@@ -84,7 +84,7 @@ public class SumTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testEmptySetOk() {
 		Model model = new Model();
-		SetVar setVar = model.setVar();
+		SetVar setVar = model.setVar(new int[]{});
 		IntVar sum = model.intVar(0);
 		model.sum(setVar, sum).post();
 

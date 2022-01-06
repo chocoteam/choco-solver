@@ -9,10 +9,9 @@
  */
 package org.chocosolver.solver.search.strategy.selectors.values;
 
+import java.util.function.BiPredicate;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.function.BiPredicate;
 
 /**
  * Value selector for optimization problems: Branches on the value in the last solution, if still in
@@ -25,13 +24,13 @@ public final class IntDomainLast implements IntValueSelector {
     /**
      * The last solution found
      */
-    private final Solution lastSolution;
+    private Solution lastSolution;
     /**
      * The default value selector
      */
-    private final IntValueSelector mainSelector;
+    private IntValueSelector mainSelector;
 
-    private final BiPredicate<IntVar, Integer> condition;
+    private BiPredicate<IntVar, Integer> condition;
 
 
     /**

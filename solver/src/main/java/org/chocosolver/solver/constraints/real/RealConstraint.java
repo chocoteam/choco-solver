@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.real;
 
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.variables.BoolVar;

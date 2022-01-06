@@ -57,21 +57,21 @@ public class MarioKart extends AbstractProblem {
 	// CONSTANTS
 
 	/** The seed of the generation of the problem */
-	private static final int SEED = 1789;
+	private static int SEED = 1789;
 	/** The number of house in the neighborhood of Mario : Size of the graph : Number of nodes */
-	private static final int HOUSE_NUMBER = 15;
+	private static int HOUSE_NUMBER = 15;
 	/** The distance of the city in meters : Max length of the edges in the graph */
-	private static final int CITY_SIZE = 5000;
+	private static int CITY_SIZE = 5000;
 	/** The maximum amount of gold that Mario has ever founded in a house plumbing */
-	private static final int MAX_GOLD = 100;
+	private static int MAX_GOLD = 100;
 	/** The Mario's house id. Random generation if equals to Integer.MAX_VALUE */
 	private static int MARIO_HOUSE_ID = 0;//Integer.MAX_VALUE;
 	/** The Luigi's house id. Random generation if equals to Integer.MAX_VALUE */
 	private static int LUIGI_HOUSE_ID = 1;//Integer.MAX_VALUE;
 	/** The amount of fuel of the kart in mini-litres */
-	private static final int FUEL = 2000;
+	private static int FUEL = 2000;
 	/** The kart of mario */
-	private static final KART MARIOS_KART = KART.ECOLO;
+	private static KART MARIOS_KART = KART.ECOLO;
 
 	// INSTANCES VARIABLES
 
@@ -312,7 +312,7 @@ public class MarioKart extends AbstractProblem {
 		ECOLO(2);
 
 		/** The consumption of the kart in litre / 100km */
-		private final double conso;
+		private double conso;
 
 		/**
 		 * @param conso the consumption of the kart in litre / 100km

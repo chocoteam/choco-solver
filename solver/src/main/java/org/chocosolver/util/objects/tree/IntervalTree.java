@@ -28,7 +28,7 @@ import java.util.function.Consumer;
 public class IntervalTree<T extends Interval> implements Iterable<T> {
 
     private Node root;  // The root Node.
-    private final Node nil;   // The sentinel Node to represent the absence of a node.
+    private Node nil;   // The sentinel Node to represent the absence of a node.
     private int size;   // Size of the tree. Updated by insert() and Node#delete()
 
     /**
@@ -1040,7 +1040,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
      */
     private class TreeIterator implements Iterator<T> {
 
-        private final TreeNodeIterator nodeIter;
+        private TreeNodeIterator nodeIter;
 
         private TreeIterator(Node root) {
             nodeIter = new TreeNodeIterator(root);
@@ -1064,8 +1064,8 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
     private class OverlappingNodeIteratorBound implements Iterator<Node> {
 
         private Node next;
-        private final int start;
-        private final int end;
+        private int start;
+        private int end;
 
         private OverlappingNodeIteratorBound(Node root, int start, int end) {
             this.start = start;
@@ -1096,7 +1096,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
     private class OverlappingNodeIterator implements Iterator<Node> {
 
         private Node next;
-        private final T interval;
+        private T interval;
 
         private OverlappingNodeIterator(Node root, T t) {
             interval = t;
@@ -1126,7 +1126,7 @@ public class IntervalTree<T extends Interval> implements Iterable<T> {
      */
     private class OverlapperIterator implements Iterator<T> {
 
-        private final Iterator<Node> nodeIter;
+        private Iterator<Node> nodeIter;
 
         private OverlapperIterator(Node root, T t) {
             nodeIter = new OverlappingNodeIterator(root, t);

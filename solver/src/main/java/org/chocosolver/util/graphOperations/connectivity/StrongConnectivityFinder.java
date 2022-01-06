@@ -22,23 +22,17 @@ public class StrongConnectivityFinder  {
     //***********************************************************************************
 
     // input
-    private final DirectedGraph graph;
-    private final BitSet restriction;
-    private final int n;
+    private DirectedGraph graph;
+    private BitSet restriction;
+    private int n;
     // output
-    private final int[] sccFirstNode;
-    private final int[] nextNode;
-    private final int[] nodeSCC;
+    private int[] sccFirstNode, nextNode, nodeSCC;
     private int nbSCC;
 
     // util
-    private final int[] stack;
-    private final int[] p;
-    private final int[] inf;
-    private final int[] nodeOfDfsNum;
-    private final int[] dfsNumOfNode;
-    private final Iterator<Integer>[] iterator;
-    private final BitSet inStack;
+    private int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
+    private Iterator<Integer>[] iterator;
+    private BitSet inStack;
 
     //***********************************************************************************
     // CONSTRUCTOR

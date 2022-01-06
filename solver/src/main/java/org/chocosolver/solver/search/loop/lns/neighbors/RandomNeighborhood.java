@@ -32,7 +32,7 @@ public class RandomNeighborhood extends IntNeighbor {
     /**
      * For randomness
      */
-    private final Random rd;
+    private Random rd;
     /**
      * Size of the fragment
      */

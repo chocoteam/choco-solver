@@ -9,13 +9,18 @@
  */
 package org.chocosolver.util.tools;
 
+import static java.lang.reflect.Array.newInstance;
+
 import gnu.trove.list.array.TIntArrayList;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-
-import java.util.*;
-
-import static java.lang.reflect.Array.newInstance;
 
 /**
  * This class contains various methods for manipulating arrays.

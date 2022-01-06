@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -18,6 +19,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.BitSet;
 

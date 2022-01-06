@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.variables.view;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Stream;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
@@ -23,10 +26,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.Stream;
 
 /**
  * <p>

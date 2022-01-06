@@ -45,7 +45,7 @@ public class NaArExpression implements ArExpression {
     /**
      * The expressions this expression relies on
      */
-    private final ArExpression[] es;
+    private ArExpression[] es;
 
     /**
      * Builds a n-ary expression

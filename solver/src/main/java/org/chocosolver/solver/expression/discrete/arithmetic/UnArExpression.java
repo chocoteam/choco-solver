@@ -43,7 +43,7 @@ public class UnArExpression implements ArExpression {
     /**
      * The expression this expression relies on
      */
-    private final ArExpression e;
+    private ArExpression e;
 
     /**
      * Builds a unary expression

@@ -207,5 +207,5 @@ public class EdgeInducedSubgraphView extends UndirectedGraphView<UndirectedGraph
                 }
             }, evt);
         }
-    }
+    };
 }

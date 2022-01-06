@@ -38,8 +38,8 @@ public class PropIntBoundedMemberSet extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final IntVar iv;
-    private final SetVar set;
+    private IntVar iv;
+    private SetVar set;
 
     //***********************************************************************************
     // CONSTRUCTORS

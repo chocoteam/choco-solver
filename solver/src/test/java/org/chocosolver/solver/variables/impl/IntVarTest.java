@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -17,9 +19,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import static org.testng.Assert.*;
 

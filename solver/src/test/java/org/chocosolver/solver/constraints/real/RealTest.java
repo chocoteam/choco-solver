@@ -54,7 +54,7 @@ public class RealTest {
 
             ibex.add_ctr("{0}+{1}=3");
             ibex.build();
-            double[] domains = {1.0, 10.0, 1.0, 10.0};
+            double domains[] = {1.0, 10.0, 1.0, 10.0};
             System.out.println("Before contract:");
             System.out.println("([" + domains[0] + "," + domains[1] + "] ; [" + domains[2] + "," + domains[3] + "])");
 
@@ -77,7 +77,7 @@ public class RealTest {
             Ibex ibex = new Ibex(new double[]{0.1});
             ibex.add_ctr("{0}=59.5");
             ibex.build();
-            double[] domains = {59.5, 59.5};
+            double domains[] = {59.5, 59.5};
             // see: https://github.com/ibex-team/ibex-java/issues/2
             Assert.assertEquals(ibex.contract(0, domains, 0), Ibex.NOTHING);
             Assert.assertEquals(ibex.contract(0, domains, 1), Ibex.NOTHING);
@@ -180,7 +180,7 @@ public class RealTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        out.printf("%s\n", model);
+        out.printf("%s\n", model.toString());
 
     }
 
@@ -198,7 +198,7 @@ public class RealTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        out.printf("%s\n", model);
+        out.printf("%s\n", model.toString());
 
     }
 
@@ -216,7 +216,7 @@ public class RealTest {
         } catch (ContradictionException e) {
             e.printStackTrace();
         }
-        out.printf("%s\n", model);
+        out.printf("%s\n", model.toString());
 
     }
 
@@ -344,6 +344,7 @@ public class RealTest {
                 Search.inputOrderLBSearch(bv),
                 Search.realVarSearch(4.E-2, rv));
         while (solver.solve()) ;
+        ;
         assertEquals(model.getSolver().getSolutionCount(), 63);
     }
 
@@ -351,7 +352,7 @@ public class RealTest {
     public void testJJ35() {
         Ibex ibex = new Ibex(new double[]{1.0E-1});
         ibex.add_ctr("{0} = 4");
-        double[] domains = {0., 5.};
+        double domains[] = {0., 5.};
         ibex.build();
         Assert.assertEquals(ibex.contract(0, domains, Ibex.FALSE), Ibex.NOTHING);
     }
@@ -675,7 +676,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}<=200.0");
         ibex.build();
-        double[] domains = {150., 470.};
+        double domains[] = {150., 470.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.CONTRACT);
         Assert.assertEquals(domains[0], 150.);
         Assert.assertEquals(domains[1], 200.);
@@ -714,7 +715,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0}=150.0");
         ibex.build();
-        double[] domains = {150., 150.};
+        double domains[] = {150., 150.};
         Assert.assertEquals(ibex.contract(0, domains, Ibex.TRUE), Ibex.NOTHING);
         Assert.assertEquals(domains[0], 150.);
         Assert.assertEquals(domains[1], 150.);
@@ -725,7 +726,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.0E-5});
         ibex.add_ctr("{0} < 150.0");
         ibex.build();
-        double[] domains = {140., 151.};
+        double domains[] = {140., 151.};
         Assert.assertEquals(ibex.start_solve(domains), Ibex.STARTED);
         while (ibex.next_solution(domains) != Ibex.SEARCH_OVER) { }
     }
@@ -772,7 +773,7 @@ public class RealTest {
         ibex.add_ctr("({0} + {1} + {2}) / 3 = {3}");
         ibex.add_ctr("{3} + {4} < 4.5");
         ibex.build();
-        double[] domains = {0., 5., 0., 5., 0., 5., 0., 5., 0., 5.};
+        double domains[] = {0., 5., 0., 5., 0., 5., 0., 5., 0., 5.};
         Assert.assertEquals(ibex.contract(1, domains, Ibex.TRUE), Ibex.CONTRACT);
     }
 
@@ -977,7 +978,7 @@ public class RealTest {
         ibex.add_ctr("3*{7}*(20-2*{7}+{6})+(20-{6})^2/4=0");
         build(ibex);
         double L=1e8;
-        double[] domains ={-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L};
+        double domains[]={-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L,-L,L};
         ibex.start_solve(domains);
         for (int i=0; i<256; i++) {
             if (ibex.next_solution(domains)!=Ibex.SOLUTION) {
@@ -1074,7 +1075,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
         ibex.add_ctr("{0}+{1}={2}");
         ibex.build();
-        double[] domains = {0.1, 0.1, 0.2, 0.2, -5.0, 5.0};
+        double domains[] = {0.1, 0.1, 0.2, 0.2, -5.0, 5.0};
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
     }
@@ -1084,7 +1085,7 @@ public class RealTest {
         Ibex ibex = new Ibex(new double[]{1.e-1, 1.e-1, 1.e-4});
         ibex.add_ctr("{0}+{1}=pi*{2}");
         Assert.assertTrue(ibex.build());
-        double[] domains = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
+        double domains[] = {0.1, 0.1, 0.2, .2, -5.0, 5.0};
         Assert.assertEquals(ibex.contract(0, domains), Ibex.CONTRACT);
         ibex.release();
     }
@@ -1197,12 +1198,12 @@ public class RealTest {
         ibex.add_ctr("{0}>{1}");
         ibex.build();
         // When domain contraction is less than the contraction ratio of 1%
-        double[] domains1 = {0.0, 100.0, 0.5, 0.5};
+        double domains1[] = {0.0, 100.0, 0.5, 0.5};
         int result1 = ibex.contract(0, domains1, Ibex.TRUE, 0.01);
         Assert.assertEquals(Ibex.NOTHING, result1);
         Assert.assertEquals(domains1, new double[]{0.0, 100.0, 0.5, 0.5});
         // When domain contraction is greater than the contraction of 0.1%
-        double[] domains2 = {0.0, 100.0, 0.5, 0.5};
+        double domains2[] = {0.0, 100.0, 0.5, 0.5};
         int result2 = ibex.contract(0, domains2, Ibex.TRUE, 0.001);
         Assert.assertEquals(Ibex.CONTRACT, result2);
         Assert.assertEquals(domains2, new double[]{0.5, 100.0, 0.5, 0.5});

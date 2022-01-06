@@ -27,13 +27,10 @@ public class NRJCumulFilter extends CumulFilter{
 	// VARIABLES
 	//***********************************************************************************
 
-	private final int[] sor_array;
-	private final ArraySort sorter;
-	private final IntComparator comparator;
-	private final int[] slb;
-	private final int[] dlb;
-	private final int[] eub;
-	private final int[] hlb;
+	private int[] sor_array;
+	private ArraySort sorter;
+	private IntComparator comparator;
+	private int[] slb, dlb, eub, hlb;
 
 	//***********************************************************************************
 	// CONSTRUCTORS

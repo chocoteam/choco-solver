@@ -55,11 +55,11 @@ public class UnCReExpression implements ReExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private final int e2;
+    private int e2;
 
     /**
      * Builds a binary expression

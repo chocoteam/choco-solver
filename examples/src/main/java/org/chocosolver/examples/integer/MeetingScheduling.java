@@ -112,7 +112,7 @@ public class MeetingScheduling extends AbstractProblem {
                 st.append("Meeting ").append(i).append(" scheduled at time ").append(meetingTime[i].getValue()).append("\n");
             }
         }
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

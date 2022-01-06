@@ -146,7 +146,7 @@ public class Partition extends AbstractProblem {
         } else {
             st.append("INFEASIBLE");
         }
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

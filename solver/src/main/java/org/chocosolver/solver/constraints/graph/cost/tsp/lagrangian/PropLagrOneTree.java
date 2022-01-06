@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.graph.cost.tsp.lagrangian;
 
 import gnu.trove.list.array.TIntArrayList;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.graph.cost.GraphLagrangianRelaxation;
@@ -50,7 +51,7 @@ public class PropLagrOneTree extends Propagator<Variable> implements GraphLagran
     private UndirectedGraph mst;
     private double step;
     private final AbstractTreeFinder HKfilter, HK;
-    private final int nbSprints;
+    private int nbSprints;
 
     //***********************************************************************************
     // CONSTRUCTORS

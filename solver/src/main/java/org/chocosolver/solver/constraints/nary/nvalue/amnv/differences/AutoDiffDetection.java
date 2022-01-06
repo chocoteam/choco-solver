@@ -29,7 +29,7 @@ public class AutoDiffDetection implements D {
     /** whether or not disequality constraints may be added during search **/
     public static boolean dynamicAdditions = false;
 
-    private final Variable[] scope;
+    private Variable[] scope;
 
     //***********************************************************************************
     // CONSTRUCTORS

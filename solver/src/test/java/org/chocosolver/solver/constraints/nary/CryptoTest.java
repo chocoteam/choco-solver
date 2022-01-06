@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.strategy.Search;

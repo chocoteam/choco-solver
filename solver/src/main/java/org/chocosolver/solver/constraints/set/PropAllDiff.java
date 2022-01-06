@@ -34,7 +34,7 @@ public class PropAllDiff extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
+    private int n;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -34,7 +34,7 @@ public class DIMACS extends RegParser {
     public DIMACSParser[] parsers;
 
     @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).")
-    private final boolean cp = false;
+    private boolean cp = false;
 
     /**
      * Needed to print the last solution found

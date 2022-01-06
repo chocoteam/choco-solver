@@ -39,7 +39,7 @@ import java.util.function.Function;
  */
 public class StatisticsPanel extends JPanel {
 
-    private static final String[] fieldnames = {
+    private static String[] fieldnames = {
             "Variables",
             "Constraints",
             "Objective",
@@ -58,7 +58,7 @@ public class StatisticsPanel extends JPanel {
             "Mem. usage (MB)",
     };
     @SuppressWarnings("unchecked")
-    private static final Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
+    private static Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbVars()),
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbCstrs()),
             (Function<Solver, String>) solver ->

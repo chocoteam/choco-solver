@@ -72,7 +72,7 @@ public class CycloHexan extends AbstractProblem {
                 st.append(format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
             }
             out.println("CycloHexan");
-            out.println(st);
+            out.println(st.toString());
         });
         while (model.getSolver().solve()) ;
     }

@@ -82,7 +82,7 @@ public class Grocery extends AbstractProblem {
         for (int i = 0; i < 4; i++) {
             st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
         }
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {
@@ -94,7 +94,7 @@ public class Grocery extends AbstractProblem {
      * It has been designed to handle large values (by using longs)
      */
     private class PropLargeProduct extends Propagator<IntVar> {
-        private final long target;
+        private long target;
 
         /**
          * Large product propagator

@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.DirectedGraphVar;
+import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 
 public class DirectedGraphVarImpl extends AbstractGraphVar<DirectedGraph> implements DirectedGraphVar {

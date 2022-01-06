@@ -41,7 +41,7 @@ public class DCMST {
     private int[] dMax;
     private int[][] dist;
     private int lb, ub;
-    private final String instance;
+    private String instance;
 
     //***********************************************************************************
     // CONSTRUCTOR

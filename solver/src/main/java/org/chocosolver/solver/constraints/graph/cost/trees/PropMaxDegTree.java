@@ -36,8 +36,8 @@ public class PropMaxDegTree extends Propagator<UndirectedGraphVar> {
 
     protected int n;
     protected int[] dMax;
-    private final int[] counter;
-    private final BitSet oneNode;
+    private int[] counter;
+    private BitSet oneNode;
     private int[] list;
 
     //***********************************************************************************

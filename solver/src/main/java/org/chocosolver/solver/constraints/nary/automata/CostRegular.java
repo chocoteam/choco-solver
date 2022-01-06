@@ -9,8 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.automata;
 
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 import gnu.trove.iterator.TIntIterator;
 import gnu.trove.set.hash.TIntHashSet;
+import java.util.ArrayList;
+import java.util.BitSet;
+import java.util.HashSet;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
@@ -22,12 +27,6 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.jgrapht.graph.DirectedMultigraph;
-
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.HashSet;
-
-import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * COST_REGULAR constraint

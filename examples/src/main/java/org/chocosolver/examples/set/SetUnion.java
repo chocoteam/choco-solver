@@ -32,7 +32,7 @@ import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
 public class SetUnion extends AbstractProblem {
 
     private SetVar x, y, z;
-    private final boolean noEmptySet = true;
+    private boolean noEmptySet = true;
 
     @Override
     public void buildModel() {

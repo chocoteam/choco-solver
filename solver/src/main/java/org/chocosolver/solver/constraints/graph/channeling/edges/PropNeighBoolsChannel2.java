@@ -26,9 +26,9 @@ public class PropNeighBoolsChannel2 extends Propagator<BoolVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final BoolVar[][] matrix;
-    private final GraphVar g;
+    private int n;
+    private BoolVar[][] matrix;
+    private GraphVar g;
 
     //***********************************************************************************
     // CONSTRUCTORS

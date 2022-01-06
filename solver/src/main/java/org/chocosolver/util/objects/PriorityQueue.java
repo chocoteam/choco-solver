@@ -17,10 +17,10 @@ package org.chocosolver.util.objects;
  */
 public class PriorityQueue {
 
-    private final int n;
-    private final int[] indices;
-    private final int[] values;
-    private final int[] pointers;
+    private int n;
+    private int[] indices;
+    private int[] values;
+    private int[] pointers;
     private int first, lastElt;
 
     public PriorityQueue(int _n) {

@@ -29,9 +29,7 @@ public class PropTimesNaive extends Propagator<IntVar> {
 
     protected static final int MAX = Integer.MAX_VALUE - 1, MIN = Integer.MIN_VALUE + 1;
 
-    private final IntVar v0;
-    private final IntVar v1;
-    private final IntVar v2;
+    private IntVar v0, v1, v2;
 
     public PropTimesNaive(IntVar v1, IntVar v2, IntVar result) {
         super(new IntVar[]{v1, v2, result}, PropagatorPriority.TERNARY, false);

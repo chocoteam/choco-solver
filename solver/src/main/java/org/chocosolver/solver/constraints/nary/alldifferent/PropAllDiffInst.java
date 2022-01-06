@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.nary.alldifferent;
 
 import gnu.trove.stack.array.TIntArrayStack;
+
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;

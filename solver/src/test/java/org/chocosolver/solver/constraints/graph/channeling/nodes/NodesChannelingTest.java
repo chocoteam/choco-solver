@@ -184,7 +184,7 @@ public class NodesChannelingTest {
         BoolVar bool = model.boolVar();
         model.nodeChanneling(g, bool, 3).post();
         while (model.getSolver().solve()) {
-            Assert.assertEquals(g.getValue().containsNode(3), bool.getValue() == 1);
+            Assert.assertEquals(g.getValue().containsNode(3), bool.getValue() == 1 ? true : false);
         }
         long nbSolutions = model.getSolver().getSolutionCount();
         // Generate without constraint and check

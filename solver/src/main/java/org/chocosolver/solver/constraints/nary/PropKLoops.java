@@ -36,12 +36,12 @@ public class PropKLoops extends Propagator<IntVar> {
     //***********************************************************************************
 
     // number of nodes
-    private final int n;
+    private int n;
     // offset (usually 0 but 1 with MiniZinc)
-    private final int offSet;
+    private int offSet;
     // uninstantiated variables that can be loops
-    private final ISet possibleLoops;
-    private final IStateInt nbMinLoops;
+    private ISet possibleLoops;
+    private IStateInt nbMinLoops;
 
     //***********************************************************************************
     // CONSTRUCTORS

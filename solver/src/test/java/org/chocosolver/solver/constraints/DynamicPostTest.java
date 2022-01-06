@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.reification.PropConditional;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;

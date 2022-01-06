@@ -174,22 +174,22 @@ public class Ibex {
      *
      *   NOT_BUILT       - Object not built (build() must be called before)
      */
-    public native int contract(int i, double[] bounds, int reif, double rel_eps);
+    public native int contract(int i, double bounds[], int reif, double rel_eps);
 
     /**
      * Same as contract(int, double bounds[], int reif) with reif=TRUE.
      */
-    public native int contract(int i, double[] bounds, double ratio);
+    public native int contract(int i, double bounds[], double ratio);
 
     /**
      * Same as contract(int, double bounds[], int reif, double rel_eps) with rel_eps=RATIO.
      */
-    public native int contract(int i, double[] bounds, int reify);
+    public native int contract(int i, double bounds[], int reify);
 
     /**
      * Same as contract(int, double bounds[], int reif, double rel_eps) with reif=TRUE and rel_eps=RATIO.
      */
-    public native int contract(int i, double[] bounds);
+    public native int contract(int i, double bounds[]);
 
     /**
      * Inflate a point to a box with respect to a constraint or its negation.
@@ -239,7 +239,7 @@ public class Ibex {
      *
      *   NOT_BUILT       - Object not built (build() must be called before)
      */
-    public native int inflate(int i, double[] p, double[] bounds, boolean in);
+    public native int inflate(int i, double p[], double bounds[], boolean in);
 
     /**
      * Let IBEX terminates the solving process for the CSP, once all the integer
@@ -261,7 +261,7 @@ public class Ibex {
      *
      *   NOT_BUILT                  - Object not built (build() must be called before))
      */
-    public native int start_solve(double[] bounds);
+    public native int start_solve(double bounds[]);
 
     /**
      * Look up for the next solution.
@@ -283,7 +283,7 @@ public class Ibex {
      *
      *   NOT_BUILT   - Object not built (build() must be called before))
      */
-    public native int next_solution(double[] sol);
+    public native int next_solution(double sol[]);
 
     /**
      * Free IBEX structures from memory

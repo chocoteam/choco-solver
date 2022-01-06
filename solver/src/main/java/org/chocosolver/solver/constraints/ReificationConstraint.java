@@ -45,7 +45,7 @@ public class ReificationConstraint extends Constraint {
     @SuppressWarnings("WeakerAccess") // required visibility to allow exportation
     protected final Constraint falseCons;
     // indices of propagators
-    private final int[] indices;
+    private int[] indices;
     // reification propagator;
     private final PropReif propReif;
 
@@ -119,7 +119,7 @@ public class ReificationConstraint extends Constraint {
 
     @Override
     public String toString() {
-        return bool.toString() + "=>" + trueCons.toString() + ", !" + bool + "=>" + falseCons.toString();
+        return bool.toString() + "=>" + trueCons.toString() + ", !" + bool.toString() + "=>" + falseCons.toString();
     }
 
 }

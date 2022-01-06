@@ -9,19 +9,18 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
+import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.util.Random;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
-
-import java.util.Random;
-
-import static org.chocosolver.solver.constraints.checker.DomainBuilder.buildFullDomains;
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 /**
  * <br/>

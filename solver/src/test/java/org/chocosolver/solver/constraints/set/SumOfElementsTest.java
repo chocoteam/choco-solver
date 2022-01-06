@@ -35,7 +35,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSum() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(0,1,2,4);
+		SetVar setVar = model.setVar(new int[]{0,1,2,4});
 		IntVar sum = model.intVar(0, 100);
 		int[] weights = new int[]{2,2,2,3,2};
 		model.sumElements(setVar, weights, sum).post();
@@ -45,7 +45,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSumOffset() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(-1,0,1,3);
+		SetVar setVar = model.setVar(new int[]{-1,0,1,3});
 		IntVar sum = model.intVar(8);
 		int[] weights = new int[]{2,2,2,3,2};
 		model.sumElements(setVar, weights, -1, sum).post();
@@ -55,7 +55,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSumOffsetKo() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(-1,0,1,3);
+		SetVar setVar = model.setVar(new int[]{-1,0,1,3});
 		IntVar sum = model.intVar(8);
 		int[] weights = new int[]{2,2,2,3,2};
 		model.sumElements(setVar, weights, sum).post();
@@ -67,7 +67,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSumOffsetKo2() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(-1,0,1,2,4);
+		SetVar setVar = model.setVar(new int[]{-1,0,1,2,4});
 		IntVar sum = model.intVar(8);
 		int[] weights = new int[]{2,2,2,3,2};
 		model.sumElements(setVar, weights, -1, sum).post();
@@ -89,7 +89,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testFixedSumNegWrong() {
 		Model model = new Model();
-		SetVar setVar = model.setVar(0,1);
+		SetVar setVar = model.setVar(new int[]{0,1});
 		IntVar sum = model.intVar(0, 100);
 		int[] weights = new int[]{-2,-3};
 		model.sumElements(setVar, weights, sum).post();
@@ -101,7 +101,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testEmptySetKo() {
 		Model model = new Model();
-		SetVar setVar = model.setVar();
+		SetVar setVar = model.setVar(new int[]{});
 		IntVar sum = model.intVar(1, 100);
 		int[] weights = new int[]{2,-2};
 		model.sumElements(setVar, weights, sum).post();
@@ -113,7 +113,7 @@ public class SumOfElementsTest {
 	@Test(groups = "1s", timeOut=60000)
 	public void testEmptySetOk() {
 		Model model = new Model();
-		SetVar setVar = model.setVar();
+		SetVar setVar = model.setVar(new int[]{});
 		IntVar sum = model.intVar(0);
 		int[] weights = new int[]{0, 10, 20, 3, 12, 9};
 		model.sumElements(setVar, weights, sum).post();

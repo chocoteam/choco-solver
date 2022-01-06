@@ -25,7 +25,7 @@ public class StoredSparseSet {
 
     private int[] sparse;
     private int[] dense;
-    private final IStateInt members;
+    private IStateInt members;
 
 
     public StoredSparseSet(IEnvironment environment) {

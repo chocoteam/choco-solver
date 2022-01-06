@@ -66,9 +66,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private boolean learnsAndFails; // does the learning pahse leads to a failure
 
-    private final long initTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private long initTimeLimit = Integer.MAX_VALUE; // a time limit for init()
 
-    private final long reevalTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private long reevalTimeLimit = Integer.MAX_VALUE; // a time limit for init()
 
     private int idx = 0;
 

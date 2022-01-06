@@ -48,7 +48,7 @@ public class IntBoundedMemberTest {
     @Test(groups = "1s", timeOut=60000)
     public void testEmptySet() {
         Model model = new Model();
-        SetVar set = model.setVar();
+        SetVar set = model.setVar(new int[]{});
         IntVar member = model.intVar(0, 7, true);
         model.member(member, set).post();
 

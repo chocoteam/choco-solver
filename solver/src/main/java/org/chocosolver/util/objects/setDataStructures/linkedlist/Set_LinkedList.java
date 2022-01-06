@@ -10,6 +10,7 @@
 package org.chocosolver.util.objects.setDataStructures.linkedlist;
 
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -32,7 +33,7 @@ public class Set_LinkedList extends AbstractSet {
 	private IntCell first, last;
 	private int size;
 	private IntCell poolGC;
-	private final ISetIterator iter = newIterator();
+	private ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// METHODS

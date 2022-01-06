@@ -9,14 +9,13 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.algo;
 
+import java.util.BitSet;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-
-import java.util.BitSet;
 
 /**
  * Algorithm of Alldifferent with AC
@@ -36,7 +35,7 @@ public class AlgoAllDiffACFast extends AlgoAllDiffAC{
      * The 'distinction' set is used to hold variables belonging to Γ(A)
      * and values belonging to A in the paper.
      */
-    private final BitSet distinction;
+    private BitSet distinction;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -87,7 +87,7 @@ public class NbEmptyTest {
         Model model = new Model();
 
         SetVar[] vars = new SetVar[]{
-                model.setVar(), // always empty
+                model.setVar(new int[]{}), // always empty
                 model.setVar(new int[]{}, new int[]{5, 7, 5}),
                 model.setVar(new int[]{1, 5}, new int[]{1, 5, 8})
         };

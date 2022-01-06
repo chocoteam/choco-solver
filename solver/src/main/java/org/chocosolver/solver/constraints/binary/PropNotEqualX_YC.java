@@ -38,9 +38,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  */
 public class PropNotEqualX_YC extends Propagator<IntVar> {
 
-    private final IntVar x;
-    private final IntVar y;
-    private final int cste;
+    private IntVar x;
+    private IntVar y;
+    private int cste;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_YC(IntVar[] vars, int c) {

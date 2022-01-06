@@ -34,9 +34,8 @@ import java.util.TreeSet;
  */
 public class RealVarImpl extends AbstractVariable implements RealVar {
 
-    private final IStateDouble LB;
-    private final IStateDouble UB;
-    private final double precision;
+    private IStateDouble LB, UB;
+    private double precision;
 
     public RealVarImpl(String name, double lb, double ub, double precision, Model model) {
         super(name, model);

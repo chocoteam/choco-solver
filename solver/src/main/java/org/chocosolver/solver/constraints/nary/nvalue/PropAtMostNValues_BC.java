@@ -42,16 +42,15 @@ public class PropAtMostNValues_BC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final int nbMaxValues;
+    private int n;
+    private int nbMaxValues;
     private int minValue;
     private int minIndex, maxIndex;
-    private final TIntArrayList[] bound;
-    private final TIntArrayList stamp;
-    private final int[] minVal;
-    private final int[] maxVal;
-    private final BitSet kerRepresentant;
-    private final int[] orderedNodes;
+    private TIntArrayList[] bound;
+    private TIntArrayList stamp;
+    private int[] minVal, maxVal;
+    private BitSet kerRepresentant;
+    private int[] orderedNodes;
 
     //***********************************************************************************
     // CONSTRUCTORS

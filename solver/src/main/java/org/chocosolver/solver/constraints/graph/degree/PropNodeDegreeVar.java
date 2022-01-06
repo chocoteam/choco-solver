@@ -32,10 +32,10 @@ public class PropNodeDegreeVar extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final GraphVar g;
-    private final IntVar[] degrees;
-    private final IncidentSet target;
+    private int n;
+    private GraphVar g;
+    private IntVar[] degrees;
+    private IncidentSet target;
     private BitSet toDo;
 
     //***********************************************************************************

@@ -9,15 +9,14 @@
  */
 package org.chocosolver.util.tools;
 
+import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
+
+import java.util.ArrayList;
+import java.util.List;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.chocosolver.solver.constraints.extension.TuplesFactory.generateTuples;
 
 /**
  * <p> Project: choco-solver.

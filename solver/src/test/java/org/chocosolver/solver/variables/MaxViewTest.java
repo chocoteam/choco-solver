@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.testng.annotations.Test;
 

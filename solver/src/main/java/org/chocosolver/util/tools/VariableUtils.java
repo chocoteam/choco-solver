@@ -249,7 +249,7 @@ public class VariableUtils {
                     Math.pow(x.getUB(), y));
         } else {
             // bounds for 1/x^y when x < 0
-            double[] bounds = bound(0,
+            double bounds[] = bound(0,
                     Math.pow(x.getLB(), Math.abs(y)),
                     Math.pow(x.getUB(), Math.abs(y)));
             RealInterval boundsDiv = RealUtils.odiv(new RealIntervalConstant(1.0, 1.0), new RealIntervalConstant(bounds[0], bounds[1]));

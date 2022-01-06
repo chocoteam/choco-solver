@@ -39,12 +39,10 @@ import java.util.BitSet;
  */
 public class PropInverseChannelBC extends Propagator<IntVar> {
 
-    private final int minX;
-    private final int minY;
-    private final int n;
-    private final IntVar[] X;
-    private final IntVar[] Y;
-    private final BitSet toCompute;
+    private int minX, minY;
+    private int n;
+    private IntVar[] X, Y;
+    private BitSet toCompute;
 
     public PropInverseChannelBC(IntVar[] X, IntVar[] Y, int minX, int minY) {
         super(ArrayUtils.append(X, Y), PropagatorPriority.LINEAR, true);

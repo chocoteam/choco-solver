@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.extension.nary;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 

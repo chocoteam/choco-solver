@@ -34,13 +34,11 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropNbEmpty extends Propagator<Variable> {
 
-    private final SetVar[] sets;
-    private final IntVar nbEmpty;
-    private final int n;
-    private final ISet canBeEmpty;
-    private final ISet isEmpty;
-    private final IStateInt nbAlreadyEmpty;
-    private final IStateInt nbMaybeEmpty;
+    private SetVar[] sets;
+    private IntVar nbEmpty;
+    private int n;
+    private ISet canBeEmpty, isEmpty;
+    private IStateInt nbAlreadyEmpty, nbMaybeEmpty;
 
     //***********************************************************************************
     // CONSTRUCTORS

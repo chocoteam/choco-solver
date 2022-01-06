@@ -19,6 +19,7 @@ import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import static java.lang.System.currentTimeMillis;

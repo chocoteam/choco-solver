@@ -21,7 +21,7 @@ import java.util.Random;
  */
 public class AdaptiveNeighborhood extends SequenceNeighborhood {
 
-    private final Random random;
+    private Random random;
     private int sum;
 
     public AdaptiveNeighborhood(long seed, INeighbor... neighbors) {

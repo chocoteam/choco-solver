@@ -10,6 +10,7 @@
 package org.chocosolver.solver.trace;
 
 import com.github.cpprofiler.Connector;
+
 import org.chocosolver.solver.Solver;
 
 import java.io.Closeable;

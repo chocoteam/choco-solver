@@ -36,15 +36,14 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int[] concernedValues;
-    private final int n;
-    private final int[] unusedValues;
-    private final int[] mate;
+    private int[] concernedValues;
+    private int n;
+    private int[] unusedValues, mate;
     private boolean allEnum; // all variables are enumerated
-    private final int[] instVals; // for K1
-    private final TIntArrayList dVar;
+    private int[] instVals; // for K1
+    private TIntArrayList dVar;
     private int minVal, nbInst;
-    private final BitSet valSet;
+    private BitSet valSet;
 
     //***********************************************************************************
     // CONSTRUCTORS

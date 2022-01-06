@@ -33,10 +33,10 @@ public class PropDiffN extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final UndirectedGraph overlappingBoxes;
-    private final TIntArrayList boxesToCompute;
-    private final TIntArrayList pruneList;
+    private int n;
+    private UndirectedGraph overlappingBoxes;
+    private TIntArrayList boxesToCompute;
+    private TIntArrayList pruneList;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -259,6 +259,7 @@ public class PropDiffN extends Propagator<IntVar> {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("DIFFN(");
+        sb.append("");
         for (int i = 0; i < n; i++) {
             if (i > 0) sb.append(",");
             sb.append("[").append(vars[i].toString());

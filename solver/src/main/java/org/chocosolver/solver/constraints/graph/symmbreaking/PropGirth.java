@@ -24,9 +24,9 @@ import java.util.HashSet;
  */
 public class PropGirth extends Propagator<Variable> {
 
-    private final UndirectedGraphVar graph;
-    private final int n;
-    private final IntVar girth;
+    private UndirectedGraphVar graph;
+    private int n;
+    private IntVar girth;
 
     public PropGirth(UndirectedGraphVar graphVar, IntVar girth) {
         super(new Variable[]{girth, graphVar}, PropagatorPriority.LINEAR, false);

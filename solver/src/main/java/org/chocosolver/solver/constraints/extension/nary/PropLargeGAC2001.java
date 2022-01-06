@@ -29,20 +29,20 @@ public class PropLargeGAC2001 extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
 
-    private final IStateInt[] supports;
+    private IStateInt[] supports;
 
-    private final int[] blocks;
+    private int[] blocks;
 
     // Cardinality
-    private final int size;
+    private int size;
 
     // offsets(i) = Min(x_i)
-    private final int[] offsets;
+    private int[] offsets;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    private final ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
     private final IntIterableBitSet vrms;
 

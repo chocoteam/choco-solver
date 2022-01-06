@@ -10,13 +10,12 @@
 package org.chocosolver.solver.constraints.nary.sat;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.search.loop.monitors.NogoodFromRestarts;
-import org.chocosolver.solver.variables.Variable;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.loop.monitors.NogoodFromRestarts;
+import org.chocosolver.solver.variables.Variable;
 
 /**
  * This class manages no-goods sharing among models involved in a {@link

@@ -12,7 +12,7 @@ package org.chocosolver.solver.constraints.ternary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet;
@@ -26,9 +26,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  * @since 29/03/2019
  */
 public class PropModXYZ extends Propagator<IntVar> {
-    private final IntVar x;
-    private final IntVar y;
-    private final IntVar z;
+    private IntVar x;
+    private IntVar y;
+    private IntVar z;
     private IntIterableBitSet usedValues;
 
     public PropModXYZ(IntVar x, IntVar y, IntVar z) {

@@ -9,11 +9,11 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.solver.variables.UndirectedGraphVar;
+import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.variables.UndirectedGraphVar;
-import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
 

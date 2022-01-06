@@ -31,17 +31,17 @@ public final class IntDomainBest implements IntValueSelector {
      * Maximum enumerated domain size this selector falls into.
      * Otherwise, only bounds are considered.
      */
-    private final int maxdom;
+    private int maxdom;
 
     /**
      * The decision operator used to make the decision
      */
-    private final DecisionOperator<IntVar> dop;
+    private DecisionOperator<IntVar> dop;
 
     /**
      * Condition for tie breaking
      */
-    private final BiPredicate<IntVar, Integer> condition;
+    private BiPredicate<IntVar, Integer> condition;
 
     /**
      * Create a value selector that returns the best value wrt to the objective to optimize.

@@ -23,7 +23,7 @@ public class DisposableRangeBoundIterator extends DisposableRangeIterator {
     private int to;
     private boolean _next = true;
 
-    private final IntVar var;
+    private IntVar var;
 
     public DisposableRangeBoundIterator(IntVar var) {
         this.var = var;

@@ -41,11 +41,11 @@ public class StoredValuedDirectedMultiGraph {
    	// VARIABLES
    	//***********************************************************************************
 
-    private final int[] starts;
-    private final int[] offsets;
+    private int[] starts;
+    private int[] offsets;
     public int sourceIndex;
     public int tinkIndex;
-    private final StoredIndexedBipartiteSetWithOffset[] supports;
+    private StoredIndexedBipartiteSetWithOffset[] supports;
     public int[][] layers;
     public BitSet inStack;
     public StoredIndexedBipartiteSet inGraph;

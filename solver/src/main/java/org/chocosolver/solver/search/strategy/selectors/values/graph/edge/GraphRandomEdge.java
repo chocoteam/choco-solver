@@ -17,9 +17,8 @@ import java.util.Random;
 
 public class GraphRandomEdge implements GraphEdgeSelector {
 
-    private final Random rd;
-    private final TIntArrayList pFrom;
-    private final TIntArrayList pTo;
+    private Random rd;
+    private TIntArrayList pFrom, pTo;
 
     public GraphRandomEdge(long seed) {
         rd = new Random(seed);

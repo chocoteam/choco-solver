@@ -27,17 +27,17 @@ import java.util.Arrays;
 public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
-    private final int[] supports;
+    private int[] supports;
 
-    private final int[] blocks;
+    private int[] blocks;
 
     // Cardinality
-    private final int size;
+    private int size;
 
     // offsets(i) = Min(x_i)
-    private final int[] offsets;
+    private int[] offsets;
 
-    private final DisposableValueIterator[] seekIter;
+    private DisposableValueIterator[] seekIter;
 
     private final IntIterableBitSet vrms;
 

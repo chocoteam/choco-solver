@@ -12,6 +12,7 @@ package org.chocosolver.solver.search.strategy.strategy;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntIntHashMap;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
@@ -44,7 +45,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     /**
      * The main strategy declared in the solver
      */
-    private final AbstractStrategy<V> mainStrategy;
+    private AbstractStrategy<V> mainStrategy;
     /**
      * Store the variables in conflict
      */
@@ -52,7 +53,7 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
     /**
      * Get the position of a variable (thanks to its ID) in {@code #vars}
      */
-    private final TIntIntHashMap var2pos;
+    private TIntIntHashMap var2pos;
     /**
      * Get the position of the variable just before the variable 'i' wrt the stamp
      */

@@ -33,10 +33,10 @@ import java.util.Set;
  */
 public class StoredDirectedMultiGraph {
 
-	private final int[] starts;
-	private final int[] offsets;
-	private final TIntStack stack = new TIntArrayStack();
-	private final StoredIndexedBipartiteSetWithOffset[] supports;
+	private int[] starts;
+	private int[] offsets;
+	private TIntStack stack = new TIntArrayStack();
+	private StoredIndexedBipartiteSetWithOffset[] supports;
 
 	private class Nodes {
 		private int[] states;
@@ -51,8 +51,8 @@ public class StoredDirectedMultiGraph {
 		private int[] origs;
 	}
 
-	private final Nodes GNodes;
-	private final Arcs GArcs;
+	private Nodes GNodes;
+	private Arcs GArcs;
 
 	public StoredDirectedMultiGraph(IEnvironment environment, DirectedMultigraph<Node, Arc> graph,
 									int[] starts, int[] offsets, int supportLength) {

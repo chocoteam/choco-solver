@@ -30,22 +30,22 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropLexChain extends Propagator<IntVar> {
 
     // the number of variables in each vector of the chain - v1 <= lexChainEq/lexChain <= v2 .....
-    private final int N;
+    private int N;
 
     // total number of vector in the  lex chain constraint
-    private final int M;
+    private int M;
 
     // array for holding lexicographically largest feasible  upper bound of each vector
-    private final int[][] UB;
+    private int[][] UB;
 
     // array for holding lexicographically smallest  feasible  lower bound of each vector
-    private final int[][] LB;
+    private int[][] LB;
 
     // If strict's value is true then  lexChain  is implemented  , if false lexChainEq
-    private final boolean strict;
+    private boolean strict;
 
     // array of vectors in the lex chain constraint
-    private final IntVar[][] x;
+    private IntVar[][] x;
 
     public PropLexChain(IntVar[][] variables, boolean strict) {
         super(ArrayUtils.flatten(variables), PropagatorPriority.LINEAR, true);

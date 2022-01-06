@@ -61,7 +61,7 @@ public class Solution implements ICause {
     /**
      * Model to store
      */
-    private final Model model;
+    private Model model;
     /**
      * Variables to store;
      */

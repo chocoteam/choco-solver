@@ -35,11 +35,10 @@ public class PropDiameter extends Propagator<GraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final GraphVar g;
-    private final IntVar diameter;
-    private final BitSet visited;
-    private final TIntArrayList set;
-    private final TIntArrayList nextSet;
+    private GraphVar g;
+    private IntVar diameter;
+    private BitSet visited;
+    private TIntArrayList set, nextSet;
 
 
     //***********************************************************************************

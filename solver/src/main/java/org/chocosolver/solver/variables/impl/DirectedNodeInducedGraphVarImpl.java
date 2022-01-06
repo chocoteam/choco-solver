@@ -29,7 +29,7 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
  */
 public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implements ICause {
 
-    private final DirectedGraph originalUB;
+    private DirectedGraph originalUB;
 
     /**
      * Creates an directed node-induced (from the envelope) graph variable

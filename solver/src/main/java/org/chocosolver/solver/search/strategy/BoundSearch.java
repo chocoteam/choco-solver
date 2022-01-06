@@ -35,10 +35,10 @@ public class BoundSearch extends AbstractStrategy<IntVar> {
 
     private final Model model;
     private final DecisionPath decisionPath;
-    private final AbstractStrategy<IntVar> definedSearch; // int search into which this is plugged
-    private final TIntIntHashMap vb = new TIntIntHashMap(); // value-bound map
+    private AbstractStrategy<IntVar> definedSearch; // int search into which this is plugged
+    private TIntIntHashMap vb = new TIntIntHashMap(); // value-bound map
     private IntVar variable; // current variable, on which this branches
-    private final Random rd = new Random(0); // only to alternate between LB and UB for bounded domain filtering
+    private Random rd = new Random(0); // only to alternate between LB and UB for bounded domain filtering
     @SuppressWarnings("WeakerAccess")
     public int MAX_DOM_SIZE = 100; // maximum size of an enumerated domain to apply strong consistency on it
 

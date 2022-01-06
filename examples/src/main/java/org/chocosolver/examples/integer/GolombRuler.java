@@ -32,7 +32,7 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 public class GolombRuler extends AbstractProblem {
 
     @Option(name = "-m", usage = "Golomb ruler order.", required = false)
-    private final int m = 10;
+    private int m = 10;
 
     IntVar[] ticks;
     IntVar[] diffs;
@@ -78,7 +78,7 @@ public class GolombRuler extends AbstractProblem {
 
     @Override
     public void solve() {
-        model.setObjective(false, model.getVars()[m - 1]);
+        model.setObjective(false, (IntVar) model.getVars()[m - 1]);
         while (model.getSolver().solve()) {
             out.println("New solution found : " + model.getVars()[m - 1]);
         }

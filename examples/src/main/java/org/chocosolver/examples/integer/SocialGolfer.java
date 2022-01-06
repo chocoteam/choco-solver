@@ -165,7 +165,7 @@ public class SocialGolfer extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -385,7 +385,7 @@ public final class LogOp implements ILogical {
             if (child.isLit()) {
                 st.append(((BoolVar) child).getName());
             } else {
-                st.append(child);
+                st.append(child.toString());
             }
             st.append(" ").append(op);
 

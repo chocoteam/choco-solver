@@ -561,10 +561,10 @@ public class IntIterableRangeSetTest {
     public static IntIterableRangeSet intersect1(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t;
         if (set1.size() < set2.size()) {
-            t = set1.duplicate();
+            t = (IntIterableRangeSet) set1.duplicate();
             t.retainAll(set2);
         } else {
-            t = set2.duplicate();
+            t = (IntIterableRangeSet) set2.duplicate();
             t.retainAll(set1);
         }
         return t;
@@ -659,10 +659,10 @@ public class IntIterableRangeSetTest {
     public static IntIterableRangeSet union1(IntIterableRangeSet set1, IntIterableRangeSet set2) {
         IntIterableRangeSet t;
         if (set1.size() < set2.size()) {
-            t = set1.duplicate();
+            t = (IntIterableRangeSet) set1.duplicate();
             t.addAll(set2);
         } else {
-            t = set2.duplicate();
+            t = (IntIterableRangeSet) set2.duplicate();
             t.addAll(set1);
         }
         return t;
@@ -827,8 +827,8 @@ public class IntIterableRangeSetTest {
 
     class PassiveCopySet extends AbstractSet {
 
-        private final ISet set;
-        private final ISet values;
+        private ISet set;
+        private ISet values;
 
         public PassiveCopySet(ISet set) {
             super();

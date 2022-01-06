@@ -54,7 +54,7 @@ public class BoolChannelTest {
         Model model = new Model();
         BoolVar[] boolVars = model.boolVarArray(5);
         // the booleans of index {1, 3, 4} must be set to 1, the others to 0
-        SetVar setVar = model.setVar(1, 3, 4);
+        SetVar setVar = model.setVar(new int[]{1, 3, 4});
         model.setBoolsChanneling(boolVars, setVar).post();
 
         checkSolutions(model, setVar, boolVars);

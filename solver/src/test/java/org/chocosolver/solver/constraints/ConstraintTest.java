@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints;
 
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -47,7 +47,7 @@ public class ConstraintTest {
         BoolVar[] bs = model.boolVarArray("bs", 3);
         SetVar s1 = model.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
-        model.or(model.allEqual(s1, s2), model.setBoolsChanneling(bs, s1, 0)).post();
+        model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
         while (model.getSolver().solve()) ;
         assertEquals(2040, model.getSolver().getSolutionCount());
     }

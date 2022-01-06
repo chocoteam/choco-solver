@@ -128,7 +128,7 @@ public class DistanceTest {
         IntVar Z = model.intVar("Z", 0, 10, true);
         model.distance(X, Y, "=", Z).post();
         Solver r = model.getSolver();
-        r.setSearch(inputOrderLBSearch(Z, X, Y, Z));
+        r.setSearch(inputOrderLBSearch(new IntVar[]{Z, X, Y, Z}));
         while (model.getSolver().solve()) ;
     }
 

@@ -39,7 +39,7 @@ public class SubcircuitTest {
 				{2,3},//3
 				{2,4,5}};//4
 		Model m = new Model();
-		IntVar[] nodes = new IntVar[5];
+		IntVar nodes[]= new IntVar[5];
 		for (int i = 0; i < listAdj.length; i++) {
 			nodes[i]=m.intVar(listAdj[i]);
 		}

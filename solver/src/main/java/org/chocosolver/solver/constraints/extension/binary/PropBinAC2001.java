@@ -26,11 +26,11 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  */
 public class PropBinAC2001 extends PropBinCSP {
 
-    private final IStateInt[] currentSupport0;
-    private final IStateInt[] currentSupport1;
+    private IStateInt[] currentSupport0;
+    private IStateInt[] currentSupport1;
 
-    private final int offset0;
-    private final int offset1;
+    private int offset0;
+    private int offset1;
 
     private final IntIterableBitSet vrms;
 

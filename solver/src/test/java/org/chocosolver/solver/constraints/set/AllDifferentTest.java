@@ -54,9 +54,9 @@ public class AllDifferentTest {
     public void alreadyDifferent() {
         Model model = new Model();
         SetVar[] vars = new SetVar[3];
-        vars[0] = model.setVar(1, 2);
-        vars[1] = model.setVar(3, 4);
-        vars[2] = model.setVar(4, 5);
+        vars[0] = model.setVar(new int[]{1, 2});
+        vars[1] = model.setVar(new int[]{3, 4});
+        vars[2] = model.setVar(new int[]{4, 5});
         model.allDifferent(vars).post();
 
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);

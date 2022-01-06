@@ -30,8 +30,8 @@ public class PropBiconnected extends Propagator<UndirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final UndirectedGraphVar g;
-    private final ConnectivityFinder env_CC_finder;
+    private UndirectedGraphVar g;
+    private ConnectivityFinder env_CC_finder;
 
     //***********************************************************************************
     // CONSTRUCTORS

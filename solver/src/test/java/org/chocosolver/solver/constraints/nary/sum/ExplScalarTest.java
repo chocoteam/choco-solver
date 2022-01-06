@@ -10,8 +10,8 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.Cause;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseStore;

@@ -39,10 +39,10 @@ public class PropMaxElement extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final IntVar max;
-    private final SetVar set;
-    private final int offSet;
-    private final int[] weights;
+    private IntVar max;
+    private SetVar set;
+    private int offSet;
+    private int[] weights;
     private final boolean notEmpty;
 
     //***********************************************************************************

@@ -33,12 +33,12 @@ public class UGVarConnectivityHelper {
 
     // internal variables for Articulation Points and Bridge detection
     private int numOrder;
-    private final int[] num;
-    private final BitSet visited;
+    private int[] num;
+    private BitSet visited;
 
     // output data
-    private final ISet articulationPoints = SetFactory.makeBipartiteSet(0);
-    private final List<int[]> bridges = new ArrayList<>();
+    private ISet articulationPoints = SetFactory.makeBipartiteSet(0);
+    private List<int[]> bridges = new ArrayList<>();
 
     // --- constructor
     public UGVarConnectivityHelper(UndirectedGraphVar g){

@@ -10,8 +10,8 @@
 package org.chocosolver.solver.constraints.ternary;
 
 import org.chocosolver.memory.EnvironmentBuilder;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;

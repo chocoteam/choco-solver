@@ -9,13 +9,13 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import static org.chocosolver.solver.constraints.ternary.DistanceEQTest.assertDomainIn;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.Test;
-
-import static org.chocosolver.solver.constraints.ternary.DistanceEQTest.assertDomainIn;
 
 /**
  * @author Arnaud Malapert

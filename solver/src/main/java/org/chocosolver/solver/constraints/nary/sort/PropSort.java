@@ -35,23 +35,21 @@ import java.util.Arrays;
 
 public final class PropSort extends Propagator<IntVar> {
 
-    private final int n; // size of X, and obviously Y
+    private int n; // size of X, and obviously Y
 
-    private final PriorityQueue pQueue; // a priority queue
-    private final IntVar[] x;
-    private final IntVar[] y; // ref to X and Y, instead of vars
-    private final int[] f;
-    private final int[] fPrime;
-    private final int[][] xyGraph;
-    private final int[] dfsNodes;
-    private final int[] sccNumbers;
+    private PriorityQueue pQueue; // a priority queue
+    private IntVar[] x, y; // ref to X and Y, instead of vars
+    private int[] f, fPrime;
+    private int[][] xyGraph;
+    private int[] dfsNodes;
+    private int[] sccNumbers;
     private int currentSccNumber;
-    private final int[] tmpArray;
-    private final int[][] sccSequences;
-    private final TIntStack s1;
-    private final Stack2 s2;
-    private final int[] recupStack = new int[3];
-    private final int[] recupStack2 = new int[3];
+    private int[] tmpArray;
+    private int[][] sccSequences;
+    private TIntStack s1;
+    private Stack2 s2;
+    private int[] recupStack = new int[3];
+    private int[] recupStack2 = new int[3];
 
     /**
      * Creates a new <code>PropSort</code> instance.
@@ -372,10 +370,10 @@ public final class PropSort extends Propagator<IntVar> {
 
 
     private static class Stack2  {
-        private final int[] roots;
-        private final int[] rightMosts;
-        private final int[] maxXs;
-        private final int n;
+        private int[] roots;
+        private int[] rightMosts;
+        private int[] maxXs;
+        private int n;
         private int nbElts = 0;
 
         public Stack2(int _n) {

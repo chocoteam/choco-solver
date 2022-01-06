@@ -11,12 +11,11 @@ package org.chocosolver.solver.constraints.nary.automata.structure.multicostregu
 
 
 import gnu.trove.stack.TIntStack;
+import java.util.Arrays;
 import org.chocosolver.solver.constraints.nary.automata.PropMultiCostRegular;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.StoredIndexedBipartiteSet;
-
-import java.util.Arrays;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,21 +30,18 @@ public class FastPathFinder {
    	// VARIABLES
    	//***********************************************************************************
 
-    private final StoredDirectedMultiGraph graph;
-    private final int[] sp;
-    private final int nbLayer;
-    private final int nbR;
+    private StoredDirectedMultiGraph graph;
+    private int[] sp;
+    private int nbLayer;
+    private int nbR;
     public double[][] spfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
     public double[][] spft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    private final double[][] lpfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    private final double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
-    private final boolean[] modified = new boolean[2];
+    private double[][] lpfs;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
+    private double[][] lpft;// = new double[graph.GNodes.spfs.length][graph.nbR+1];
+    private boolean[] modified = new boolean[2];
     // prevSP is a shortcut to graph.GNodes.prevSPI
-    private final int[][] prevSP;
-    private final int[][] nextSP;
-    private final int[][] prevLP;
-    private final int[][] nextLP;
-    private final double[] tmpU;
+    private int[][] prevSP,nextSP,prevLP,nextLP;
+    private double[] tmpU;
 
     //***********************************************************************************
    	// CONSTRUCTOR

@@ -10,15 +10,15 @@
 package org.chocosolver.solver.constraints.checker.correctness;
 
 import gnu.trove.map.hash.THashMap;
+import java.util.Arrays;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.constraints.checker.Modeler;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.testng.Assert;
 
-import java.util.Arrays;
 import java.util.Random;
+import org.testng.Assert;
 
 /**
  * <br/>

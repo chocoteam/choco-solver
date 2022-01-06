@@ -101,7 +101,7 @@ public class NotMemberTest {
         Model model = new Model();
 
         IntVar var = model.intVar(1, 10);
-        SetVar setVar = model.setVar();
+        SetVar setVar = model.setVar(new int[]{});
         model.notMember(var, setVar).post();
 
        checkSolutions(model, setVar, var);

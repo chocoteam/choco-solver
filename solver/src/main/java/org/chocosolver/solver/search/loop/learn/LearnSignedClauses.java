@@ -71,7 +71,7 @@ public class LearnSignedClauses<E extends ExplanationForSignedClause> implements
     }
 
     public E getExplanation() {
-        return lastExplanation;
+        return (E) lastExplanation;
     }
 
     @Override

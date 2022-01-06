@@ -28,8 +28,7 @@ import org.chocosolver.util.ESat;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
-import static org.chocosolver.solver.variables.events.IntEventType.INSTANTIATE;
+import static org.chocosolver.solver.variables.events.IntEventType.*;
 
 public class SetTimes extends Propagator<IntVar> implements VariableSelector<IntVar>, IMonitorUpBranch {
     private final Task[] tasks;

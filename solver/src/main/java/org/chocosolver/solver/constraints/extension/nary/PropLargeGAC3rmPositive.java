@@ -41,12 +41,12 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     private static final int NO_SUPPORT = -2;
 
     //a reference on the lists of supports per variable value pair
-    private final int[][][] tab;
+    private int[][][] tab;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    private final ValidityChecker valcheck;
+    private ValidityChecker valcheck;
 
     private final IntIterableBitSet vrms;
 

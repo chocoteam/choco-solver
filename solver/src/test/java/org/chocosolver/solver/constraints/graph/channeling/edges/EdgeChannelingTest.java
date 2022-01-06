@@ -47,7 +47,7 @@ public class EdgeChannelingTest {
         while (model.getSolver().solve()) {
             Assert.assertEquals(
                     g.getValue().containsNode(3) && g.getValue().getNeighborsOf(3).contains(0),
-                    bool.getValue() == 1
+                    bool.getValue() == 1 ? true : false
             );
         }
         long nbSolutions = model.getSolver().getSolutionCount();
@@ -114,7 +114,7 @@ public class EdgeChannelingTest {
         while (model.getSolver().solve()) {
             Assert.assertEquals(
                     g.getValue().containsNode(3) && g.getValue().getPredecessorsOf(3).contains(0),
-                    bool.getValue() == 1
+                    bool.getValue() == 1 ? true : false
             );
         }
         long nbSolutions = model.getSolver().getSolutionCount();

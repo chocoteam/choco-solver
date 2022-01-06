@@ -34,9 +34,9 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int[] concernedValues;
-    private final int n;
-    private final int[] mate;
+    private int[] concernedValues;
+    private int n;
+    private int[] mate;
 
     //***********************************************************************************
     // CONSTRUCTORS

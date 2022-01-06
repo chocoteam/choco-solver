@@ -44,11 +44,11 @@ public class BiArExpression implements ArExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private final ArExpression e2;
+    private ArExpression e2;
 
     /**
      * Builds a binary expression

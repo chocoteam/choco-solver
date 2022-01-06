@@ -80,7 +80,7 @@ public class LatinSquare extends AbstractProblem {
             st.append(MessageFormat.format("\n{0}", line));
         }
         st.append("\n\n\n");
-        System.out.println(st);
+        System.out.println(st.toString());
     }
 
     public static void main(String[] args) {

@@ -9,9 +9,9 @@
  */
 package org.chocosolver.solver.search.strategy.decision;
 
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.assignments.GraphDecisionOperator;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.PoolManager;
 
 public class GraphDecision extends Decision<GraphVar> {

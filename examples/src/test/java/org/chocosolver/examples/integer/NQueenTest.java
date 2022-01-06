@@ -32,13 +32,13 @@ public class NQueenTest {
     public final static int[] NB_QUEENS_SOLUTION = {0, 0, 0, 0, 2, 10, 4, 40, 92, 352, 724, 2680, 14200, 73712, 365596};
 
 
-    private final int peType; // propagation type default value
+    private int peType; // propagation type default value
 
-    private final int piType; // pilot type default value
+    private int piType; // pilot type default value
 
-    private final int slType; // search loop type default value
+    private int slType; // search loop type default value
 
-    private final int size;
+    private int size;
 
     public NQueenTest() {
         this.peType = 0;

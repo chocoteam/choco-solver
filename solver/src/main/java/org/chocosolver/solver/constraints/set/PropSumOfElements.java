@@ -38,10 +38,10 @@ public class PropSumOfElements extends Propagator<Variable> {
 	// VARIABLES
 	//***********************************************************************************
 
-	private final IntVar sum;
-	private final SetVar set;
-	private final int offSet;
-	private final int[] weights;
+	private IntVar sum;
+	private SetVar set;
+	private int offSet;
+	private int[] weights;
 
 	//***********************************************************************************
 	// CONSTRUCTOR

@@ -11,6 +11,7 @@ package org.chocosolver.util.objects.setDataStructures.swapList;
 
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
+import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -28,7 +29,7 @@ public class Set_Swap2 extends AbstractSet {
 
     protected int size;
     protected TIntArrayList values;
-    private final ISetIterator iter = newIterator();
+    private ISetIterator iter = newIterator();
 
 
     //***********************************************************************************

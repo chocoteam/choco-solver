@@ -39,7 +39,7 @@ public class MinElementTest {
         Model model = new Model();
 
         // empty set
-        SetVar setVar = model.setVar();
+        SetVar setVar = model.setVar(new int[]{});
         IntVar var = model.intVar(1, 5);
         model.min(setVar, var, false).post();
 
@@ -56,7 +56,7 @@ public class MinElementTest {
         Model model = new Model();
 
         // empty set
-        SetVar setVar = model.setVar();
+        SetVar setVar = model.setVar(new int[]{});
         IntVar var = model.intVar(1, 5);
         model.min(setVar, var, true).post();
 
@@ -80,7 +80,7 @@ public class MinElementTest {
     public void testTrivialFalse() {
         Model model = new Model();
 
-        SetVar setVar = model.setVar(6, 8, 7);
+        SetVar setVar = model.setVar(new int[]{6, 8, 7});
         IntVar var = model.intVar(8);
         model.min(setVar, var, true).post();
 
@@ -92,7 +92,7 @@ public class MinElementTest {
     public void testTrivialTrue() {
         Model model = new Model();
 
-        SetVar setVar = model.setVar(6, 8, 7);
+        SetVar setVar = model.setVar(new int[]{6, 8, 7});
         IntVar var = model.intVar(6);
         model.min(setVar, var, true).post();
 

@@ -17,8 +17,8 @@ package org.chocosolver.solver.constraints.nary.automata.FA.utils;
  */
 public class CounterState implements ICounter {
 
-    private final int[][][] costs;
-    private final Bounds bounds;
+    private int[][][] costs;
+    private Bounds bounds;
 
     public CounterState(int[][][] layer_value_state, int min, int max) {
         this.costs = layer_value_state;

@@ -37,9 +37,8 @@ public class PropCountVar extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final IntVar val;
-    private final IntVar card;
+    private int n;
+    private IntVar val, card;
 
     //***********************************************************************************
     // CONSTRUCTORS

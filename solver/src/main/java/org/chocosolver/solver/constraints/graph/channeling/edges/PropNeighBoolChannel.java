@@ -30,10 +30,10 @@ public class PropNeighBoolChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final BoolVar[] bools;
-    private final GraphVar g;
-    private final int vertex;
-    private final IncidentSet inc;
+    private BoolVar[] bools;
+    private GraphVar g;
+    private int vertex;
+    private IncidentSet inc;
 
     //***********************************************************************************
     // CONSTRUCTORS

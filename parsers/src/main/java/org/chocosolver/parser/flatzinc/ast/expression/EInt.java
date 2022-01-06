@@ -26,7 +26,7 @@ public final class EInt extends Expression {
 
     public final int value;
 
-    private static final EInt[] cache;
+    private static EInt[] cache;
     final static int low = -128;
 
     // high value may be configured by property

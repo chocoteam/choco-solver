@@ -38,11 +38,9 @@ public class PropGraphCumulative extends PropCumulative {
     //***********************************************************************************
 
     private final UndirectedGraph g;
-    private final ISet tasks;
-    private final ISet toCompute;
+    private ISet tasks, toCompute;
     private long timestamp;
-    private boolean full;
-    private final boolean fast;
+    private boolean full, fast;
 
     //***********************************************************************************
     // CONSTRUCTOR

@@ -27,9 +27,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropAbsolute extends Propagator<IntVar> {
 
-    private final IntVar X;
-    private final IntVar Y;
-    private final boolean bothEnumerated;
+    private IntVar X, Y;
+    private boolean bothEnumerated;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);

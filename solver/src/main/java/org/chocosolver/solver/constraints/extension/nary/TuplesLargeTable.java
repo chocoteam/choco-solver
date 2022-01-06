@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -50,7 +51,7 @@ public class TuplesLargeTable extends LargeRelation {
      * in order to speed up the computation of the index of a tuple in the table, blocks[i] stores
      * the product of the size of variables j with j < i.
      */
-    private final long[] blocks;
+    private long[] blocks;
 
     public TuplesLargeTable(Tuples tuples, IntVar[] vars) {
         n = vars.length;

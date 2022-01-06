@@ -31,9 +31,9 @@ public class PropNodeBoolChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final BoolVar bool;
-    private final int vertex;
-    private final GraphVar g;
+    private BoolVar bool;
+    private int vertex;
+    private GraphVar g;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -9,6 +9,7 @@
  */
 package org.chocosolver.util.objects.setDataStructures.dynamic;
 
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Model;
 import org.chocosolver.util.objects.setDataStructures.*;
 

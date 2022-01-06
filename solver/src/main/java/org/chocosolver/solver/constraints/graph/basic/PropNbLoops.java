@@ -31,8 +31,8 @@ public class PropNbLoops extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private final GraphVar g;
-    private final IntVar k;
+    private GraphVar g;
+    private IntVar k;
 
     //***********************************************************************************
     // CONSTRUCTORS

@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.learn.EventRecorder;

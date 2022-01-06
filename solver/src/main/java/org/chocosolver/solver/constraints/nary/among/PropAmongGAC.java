@@ -45,9 +45,9 @@ public class PropAmongGAC extends Propagator<IntVar> {
 
     private final int nb_vars;        // number of decision variables (excludes the cardinality variable)
     private final int[] values;        // value set (array)
-    private final TIntHashSet setValues;    // value set (set)
-    private final ISet poss;                // variable set possibly assigned to a value in the value set
-    private final IStateInt nbSure;        // number of variables that are assigned to such value for sure
+    private TIntHashSet setValues;    // value set (set)
+    private ISet poss;                // variable set possibly assigned to a value in the value set
+    private IStateInt nbSure;        // number of variables that are assigned to such value for sure
 
     //***********************************************************************************
     // CONSTRUCTOR

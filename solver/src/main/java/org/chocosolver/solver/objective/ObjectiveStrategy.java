@@ -41,14 +41,13 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
     //***********************************************************************************
 
     private int globalLB, globalUB;
-    private final int coefLB;
-    private final int coefUB;
-    private final IntVar obj;
+    private int coefLB, coefUB;
+    private IntVar obj;
     private long nbSols;
-    private final Model model;
+    private Model model;
     private boolean firstCall;
     private DecisionOperator<IntVar> decOperator;
-    private final OptimizationPolicy optPolicy;
+    private OptimizationPolicy optPolicy;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -176,7 +175,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         return dec;
     }
 
-    private final DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
+    private DecisionOperator<IntVar> decUB = new DecisionOperator<IntVar>() {
         //FIXME can not serialize decision 
 
         @Override
@@ -202,7 +201,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
         }
     };
 
-    private final DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
+    private DecisionOperator<IntVar> incLB = new DecisionOperator<IntVar>() {
         //FIXME can not serialize decision 
         @Override
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {

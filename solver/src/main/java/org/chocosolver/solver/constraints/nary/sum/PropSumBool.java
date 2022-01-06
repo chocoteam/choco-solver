@@ -9,14 +9,14 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
+import static org.chocosolver.util.tools.ArrayUtils.concat;
+
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
-
-import static org.chocosolver.solver.constraints.PropagatorPriority.BINARY;
-import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
  * A propagator for SUM(x_i) = y + b, where x_i are boolean variables

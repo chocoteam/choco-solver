@@ -33,7 +33,7 @@ public class StdSet extends AbstractSet {
     private final static boolean ADD = true;
     private final static boolean REMOVE = false;
     // set (decorator design pattern)
-    private final ISet set;
+    private ISet set;
 
 	//***********************************************************************************
 	// CONSTRUCTOR

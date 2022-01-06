@@ -35,22 +35,22 @@ public class MPS extends RegParser {
     public MPSParser[] parsers;
 
     @Option(name = "-max", usage = "define to maximize (default: to minimize).")
-    private final boolean maximize = false;
+    private boolean maximize = false;
 
     @Option(name = "-prec", usage = "set to the precision (default: 1.0E-4D).")
-    private final double precision = 1.0E-4D;
+    private double precision = 1.0E-4D;
 
     @Option(name = "-ibex", usage = "Use Ibex for non-full integer equations (default: false).")
-    private final boolean ibex = false;
+    private boolean ibex = false;
 
     @Option(name = "-ninf", usage = "define negative infinity (default: " + IntVar.MIN_INT_BOUND + ").")
-    private final double ninf = IntVar.MIN_INT_BOUND;
+    private double ninf = IntVar.MIN_INT_BOUND;
 
     @Option(name = "-pinf", usage = "define positive infinity (default: " + IntVar.MAX_INT_BOUND + ").")
-    private final double pinf = IntVar.MAX_INT_BOUND;
+    private double pinf = IntVar.MAX_INT_BOUND;
 
     @Option(name = "-noeq", usage = "Split EQ constraints into a LQ and a GQ constraint.")
-    private final boolean noeq = false;
+    private boolean noeq = false;
 
     @Option(name = "-split", usage = "Split any contraints of cardinality greater than this value (default: 100).")
     int split = 100;

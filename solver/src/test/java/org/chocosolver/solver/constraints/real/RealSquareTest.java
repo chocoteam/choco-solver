@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.real;
 
+import org.chocosolver.solver.constraints.real.RealBase;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;

@@ -39,8 +39,8 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropNotEqualX_Y extends Propagator<IntVar> {
 
-    private final IntVar x;
-    private final IntVar y;
+    private IntVar x;
+    private IntVar y;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualX_Y(IntVar x, IntVar y) {

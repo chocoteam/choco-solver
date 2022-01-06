@@ -40,9 +40,9 @@ public class LongWorld implements World{
 
     private int now;
 
-    private final int defaultSize;
+    private int defaultSize;
 
-    private final double loadfactor;
+    private double loadfactor;
 
     /**
      * Make a new world.

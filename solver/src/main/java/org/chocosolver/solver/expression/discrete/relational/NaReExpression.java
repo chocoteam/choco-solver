@@ -49,7 +49,7 @@ public class NaReExpression implements ReExpression {
     /**
      * The expressions this expression relies on
      */
-    private final ArExpression[] es;
+    private ArExpression[] es;
 
     /**
      * Builds a nary expression

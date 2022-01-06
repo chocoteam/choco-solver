@@ -25,8 +25,8 @@ import java.util.stream.Collectors;
 public class VariableSelectorWithTies<V extends Variable> implements VariableSelector<V> {
 
     private final VariableEvaluator<V>[] heuristics;
-    private final ArrayList<V> oldv = new ArrayList<>();
-    private final ArrayList<V> newv = new ArrayList<>();
+    private ArrayList<V> oldv = new ArrayList<>();
+    private ArrayList<V> newv = new ArrayList<>();
     private Predicate<V> predicate = (v -> !v.isInstantiated());
 
 

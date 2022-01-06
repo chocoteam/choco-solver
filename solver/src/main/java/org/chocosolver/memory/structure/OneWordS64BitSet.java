@@ -30,7 +30,7 @@ public class OneWordS64BitSet implements IStateBitSet {
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    private final IStateLong word;
+    private IStateLong word;
 
     /**
      * Creates a bit set whose initial size is large enough to explicitly

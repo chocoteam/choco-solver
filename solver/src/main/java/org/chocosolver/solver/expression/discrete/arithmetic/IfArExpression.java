@@ -37,10 +37,9 @@ public class IfArExpression implements ArExpression {
     /**
      * The expressions this expression relies on
      */
-    private final ArExpression e1;
-    private final ArExpression e2;
+    private ArExpression e1, e2;
 
-    private final ReExpression b0;
+    private ReExpression b0;
 
 
     public IfArExpression(ReExpression b, ArExpression y1, ArExpression y2) {

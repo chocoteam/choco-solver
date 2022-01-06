@@ -10,9 +10,9 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.solver.constraints.IConstraintFactory;
-import org.chocosolver.solver.constraints.IDecompositionFactory;
 import org.chocosolver.solver.constraints.IReificationFactory;
 import org.chocosolver.solver.constraints.ISatFactory;
+import org.chocosolver.solver.constraints.IDecompositionFactory;
 import org.chocosolver.solver.variables.IResultVariableFactory;
 import org.chocosolver.solver.variables.IVariableFactory;
 import org.chocosolver.solver.variables.IViewFactory;

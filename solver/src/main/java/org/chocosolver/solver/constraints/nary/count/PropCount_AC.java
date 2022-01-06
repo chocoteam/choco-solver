@@ -39,10 +39,9 @@ public class PropCount_AC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int n;
-    private final int value;
-    private final ISet possibles;
-    private final ISet mandatories;
+    private int n;
+    private int value;
+    private ISet possibles, mandatories;
 
     //***********************************************************************************
     // CONSTRUCTORS

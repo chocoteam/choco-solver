@@ -9,13 +9,24 @@
  */
 package org.chocosolver.solver.trace;
 
-import gnu.trove.set.hash.TIntHashSet;
-import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.view.IView;
+import static org.chocosolver.solver.trace.GephiConstants.BLUE;
+import static org.chocosolver.solver.trace.GephiConstants.DIAM;
+import static org.chocosolver.solver.trace.GephiConstants.DISC;
+import static org.chocosolver.solver.trace.GephiConstants.EDGETAG;
+import static org.chocosolver.solver.trace.GephiConstants.EEDGESTAG;
+import static org.chocosolver.solver.trace.GephiConstants.EGRAPGTAG;
+import static org.chocosolver.solver.trace.GephiConstants.ENODESTAG;
+import static org.chocosolver.solver.trace.GephiConstants.EXMLTAG;
+import static org.chocosolver.solver.trace.GephiConstants.NODETAG;
+import static org.chocosolver.solver.trace.GephiConstants.OEDGESTAG;
+import static org.chocosolver.solver.trace.GephiConstants.OGRAPGTAG;
+import static org.chocosolver.solver.trace.GephiConstants.ONODESTAG;
+import static org.chocosolver.solver.trace.GephiConstants.ORANGE;
+import static org.chocosolver.solver.trace.GephiConstants.OXMLTAG;
+import static org.chocosolver.solver.trace.GephiConstants.RED;
+import static org.chocosolver.solver.trace.GephiConstants.SQUARE;
 
+import gnu.trove.set.hash.TIntHashSet;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,8 +34,11 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.chocosolver.solver.trace.GephiConstants.*;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.view.IView;
 
 /**
  * <p> Project: choco-solver.

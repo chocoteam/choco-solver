@@ -23,7 +23,7 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class AntiFirstFail implements VariableSelector<IntVar>,VariableEvaluator<IntVar> {
 
-    private final IStateInt lastIdx; // index of the last non-instantiated variable
+    private IStateInt lastIdx; // index of the last non-instantiated variable
 
     /**
      * <b>First fail</b> variable selector.
