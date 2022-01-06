@@ -34,7 +34,7 @@ public final class BasicIndexedBipartiteSet {
     /**
      * The first element of the list
      */
-    private IStateInt first;
+    private final IStateInt first;
 
     /**
      * The size of the valid list

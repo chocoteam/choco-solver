@@ -27,7 +27,7 @@ public class OperationWorld implements World{
 
     private int now;
 
-    private double loadfactor;
+    private final double loadfactor;
 
     public OperationWorld(int defaultSize, double loadfactor) {
         now = 0;
