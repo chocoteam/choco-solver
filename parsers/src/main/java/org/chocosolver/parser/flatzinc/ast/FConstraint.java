@@ -46,17 +46,14 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] as = exps.get(0).toBoolVarArray(model);
             BoolVar r = exps.get(1).boolVarValue(model);
-            switch (as.length) {
-                case 0:
-                    r.eq(1).post();
-                    break;
-                default:
-                    if (r.isInstantiatedTo(0)) {
-                        model.addClausesBoolAndArrayEqualFalse(as);
-                    } else {
-                        model.addClausesBoolAndArrayEqVar(as, r);
-                    }
-                    break;
+            if (as.length == 0) {
+                r.eq(1).post();
+            } else {
+                if (r.isInstantiatedTo(0)) {
+                    model.addClausesBoolAndArrayEqualFalse(as);
+                } else {
+                    model.addClausesBoolAndArrayEqVar(as, r);
+                }
             }
         }
     },
@@ -78,17 +75,14 @@ public enum FConstraint {
             BoolVar[] as = exps.get(0).toBoolVarArray(model);
             BoolVar r = exps.get(1).boolVarValue(model);
 
-            switch (as.length) {
-                case 0:
-                    r.eq(1).post();
-                    break;
-                default:
-                    if (r.isInstantiatedTo(1)) {
-                        model.addClausesBoolOrArrayEqualTrue(as);
-                    } else {
-                        model.addClausesBoolOrArrayEqVar(as, r);
-                    }
-                    break;
+            if (as.length == 0) {
+                r.eq(1).post();
+            } else {
+                if (r.isInstantiatedTo(1)) {
+                    model.addClausesBoolOrArrayEqualTrue(as);
+                } else {
+                    model.addClausesBoolOrArrayEqVar(as, r);
+                }
             }
 
         }
@@ -1314,7 +1308,7 @@ public enum FConstraint {
             if (eqs.size() == 0) {
                 model.arithm(b, "=", 0).post();
             } else {
-                model.addClausesBoolOrArrayEqVar(eqs.toArray(new BoolVar[eqs.size()]), b);
+                model.addClausesBoolOrArrayEqVar(eqs.toArray(new BoolVar[0]), b);
             }
         }
     },
