@@ -24,6 +24,7 @@ See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 - [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Fabien Hermenier](https://github.com/fhermeni) (@fhermeni)
 - [Hongbo Li](https://github.com/lihb905) (@lihb905)
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 
