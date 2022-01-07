@@ -32,8 +32,9 @@ import org.kohsuke.args4j.Option;
  */
 public class CostasArrays extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-o", usage = "Costas array size.", required = false)
-    private static final int n = 14;  // should be <15 to be solved quickly
+    private static int n = 14;  // should be <15 to be solved quickly
 
     IntVar[] vars, vectors;
 

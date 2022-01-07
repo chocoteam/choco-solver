@@ -31,8 +31,9 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
  */
 public class GolombRuler extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-m", usage = "Golomb ruler order.", required = false)
-    private final int m = 10;
+    private int m = 10;
 
     IntVar[] ticks;
     IntVar[] diffs;

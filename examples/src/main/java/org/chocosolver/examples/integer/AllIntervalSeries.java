@@ -31,11 +31,13 @@ import org.kohsuke.args4j.Option;
  * @since 02/08/11
  */
 public class AllIntervalSeries extends AbstractProblem {
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-o", usage = "All interval series size.", required = false)
-    private final int m = 1000;
+    private int m = 1000;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-v", usage = " use views instead of constraints.", required = false)
-    private final boolean use_views = false;
+    private boolean use_views = false;
 
     IntVar[] vars;
     IntVar[] dist;

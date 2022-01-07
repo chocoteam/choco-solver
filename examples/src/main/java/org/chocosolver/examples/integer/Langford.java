@@ -39,11 +39,13 @@ import org.kohsuke.args4j.Option;
  */
 public class Langford extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-k", usage = "Number of sets.", required = false)
-    private final int k = 3;
+    private int k = 3;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-n", usage = "Upper bound.", required = false)
-    private final int n = 9;
+    private int n = 9;
 
     IntVar[] position;
 

@@ -40,14 +40,17 @@ import static org.chocosolver.util.tools.ArrayUtils.flatten;
  */
 public class BIBD extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-v", usage = "matrix first dimension.", required = false)
-    private final int v = 7;
+    private int v = 7;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-k", usage = "ones per column.", required = false)
-    private final int k = 3;
+    private int k = 3;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-p", usage = "scalar product.", required = false)
-    private final int l = 20;
+    private int l = 20;
 
     @Option(name = "-b", usage = "matrix second dimension.", required = false)
     private int b = -1;
