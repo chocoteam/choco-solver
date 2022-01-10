@@ -16,5 +16,5 @@ else
 fi
 
 # manual launching:
-# mvn -P release  javadoc:jar source:jar deploy -DskipTests -B -U
-mvn -s scripts/settings.xml -P release ${SETTINGS} deploy -DskipTests -B -U
+# mvn -P ossrhDeploy  javadoc:jar source:jar deploy -DskipTests -B -U
+mvn -s scripts/settings.xml -P ossrhDeploy ${SETTINGS} deploy -DskipTests -B -U
