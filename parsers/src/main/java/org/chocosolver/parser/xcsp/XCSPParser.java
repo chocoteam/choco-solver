@@ -746,8 +746,22 @@ public class XCSPParser implements XCallbacks2 {
             sum = var((XVariables.XVarInteger) ((Condition.ConditionVar) condition).x);
         else if (condition instanceof Condition.ConditionVal)
             sum = model.intVar((int) ((Condition.ConditionVal) condition).k);
+        else if (condition instanceof Condition.ConditionSet){
+            Condition.ConditionSet condS = (Condition.ConditionIntset) condition;
+            switch (condS.operator){
+                case IN:
+                    sum = model.intVar(((Condition.ConditionIntset) condition).t);
+                    break;
+                case NOTIN:
+                    sum = model.intVar(IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
+                    model.notMember(sum, ((Condition.ConditionIntset) condition).t);
+                    break;
+                default:
+                    throw new ParserException("unknow result for condV"+condition);
+            }
+        }
         else
-            throw new ParserException("unknow result for scalar constraint");
+            throw new ParserException("unknow result for condV"+condition);
         return sum;
     }
 
@@ -1134,6 +1148,14 @@ public class XCSPParser implements XCallbacks2 {
                 model.lexChainLessEq(vars(ArrayUtils.transpose(rmatrix))).post();
             }
             break;
+        }
+    }
+
+    @Override
+    public void buildCtrPrecedence(String id, XVariables.XVarInteger[] list, int[] values, boolean covered) {
+        model.intValuePrecedeChain(vars(list), values).post();
+        if(covered){
+            buildCtrAtLeast(id, list, values[values.length-1], 1);
         }
     }
 
