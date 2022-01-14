@@ -7,11 +7,6 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * @author Jean-Guillaume Fages
- * @since 03/04/14
- * Created by IntelliJ IDEA.
- */
 package org.chocosolver.solver.constraints.nary.nvalue.amnv.differences;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -22,6 +17,10 @@ import org.chocosolver.solver.variables.Variable;
 
 /**
  * automatic detection of binary disequalities and allDifferent constraints
+ *
+ * @author Jean-Guillaume Fages
+ * @since 03/04/14
+ * Created by IntelliJ IDEA.
  */
 public class AutoDiffDetection implements D {
 
