@@ -718,6 +718,9 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @param criterion          optional criterion to stop the searches early
      * @return a randomly selected solution
      * @implNote Even if there are no strict controls, this method is designed to sample on satisfaction problems.
+     * @implSpec
+     * Based on <a href="https://dblp.org/rec/conf/cp/VavrilleTP21">"Solution Sampling with Random Table Constraints".
+     * M. Vavrille, C. Truchet, C. Prud'homme: CP 2021</a>
      */
     default Stream<Solution> tableSampling(int pivot, int nbVariablesInTable, double probaTuple, final Random random,
                                            Criterion... criterion) {
