@@ -718,8 +718,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @param criterion          optional criterion to stop the searches early
      * @return a randomly selected solution
      * @implNote Even if there are no strict controls, this method is designed to sample on satisfaction problems.
-     * @implSpec
-     * Based on <a href="https://dblp.org/rec/conf/cp/VavrilleTP21">"Solution Sampling with Random Table Constraints".
+     * @implSpec Based on <a href="https://dblp.org/rec/conf/cp/VavrilleTP21">"Solution Sampling with Random Table Constraints".
      * M. Vavrille, C. Truchet, C. Prud'homme: CP 2021</a>
      */
     default Stream<Solution> tableSampling(int pivot, int nbVariablesInTable, double probaTuple, final Random random,
@@ -731,6 +730,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         if (solver.getSearchState() == SearchState.STOPPED && solutions.size() < pivot) // Timeout
             return Stream.empty();
         final List<Constraint> added = new LinkedList<>();
+        final HashSet<IntVar> selectedVariables = new HashSet<>();
         /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
         Spliterator<Solution> it = new Spliterator<Solution>() {
             @Override
@@ -757,11 +757,12 @@ public interface IResolutionHelper extends ISelf<Solver> {
                     if (uninstantiatedVars.size() == 0)
                         continue;
                     // Pick randomly at most 'nbVariablesInTable' variables
-                    IntVar[] chosenVars =
-                            pickNAmongM(Math.min(nbVariablesInTable, uninstantiatedVars.size()), uninstantiatedVars.size(),
-                                    new HashSet<>(), random).stream()
-                                    .map(uninstantiatedVars::get)
-                                    .toArray(IntVar[]::new);
+                    selectedVariables.clear();
+                    int m = Math.min(nbVariablesInTable, uninstantiatedVars.size());
+                    while (selectedVariables.size() < m) {
+                        selectedVariables.add(uninstantiatedVars.get(random.nextInt(uninstantiatedVars.size())));
+                    }
+                    IntVar[] chosenVars = selectedVariables.toArray(new IntVar[0]);
                     Tuples tuples = TuplesFactory.randomTuples(probaTuple, random, chosenVars);
                     model.getEnvironment().worldPop(); // undo initial propagation
                     solver.getEngine().reset(); // prepare the addition of the new constraint
@@ -808,17 +809,5 @@ public interface IResolutionHelper extends ISelf<Solver> {
         return StreamSupport.stream(it, false);
     }
 
-
-    /**
-     * Picks randomly nbSampled distinct integers from [0, totalNumber-1].
-     * There are better ways to do this, but it will be enough for our applications
-     */
-    private static Set<Integer> pickNAmongM(final int nbSampled, final int totalNumber,
-                                            final Set<Integer> currentIntegers, final Random random) {
-        while (currentIntegers.size() < nbSampled) {
-            currentIntegers.add(random.nextInt(totalNumber));
-        }
-        return currentIntegers;
-    }
 
 }
