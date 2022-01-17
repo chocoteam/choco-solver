@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.limits;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.util.tools.TimeUtils;
 
 /**
  * A limit over run time.
@@ -23,7 +24,16 @@ import org.chocosolver.solver.search.measure.IMeasures;
 public class TimeCounter extends ACounter {
 
     /**
-     * @param model the model to instrument
+     * @param model    the model to instrument
+     * @param duration a String which states the duration like "WWd XXh YYm ZZs".
+     * @see TimeUtils#convertInMilliseconds(String)
+     */
+    public TimeCounter(Model model, String duration) {
+        this(model.getSolver().getMeasures(), TimeUtils.convertInMilliseconds(duration)* TimeUtils.MILLISECONDS_IN_NANOSECONDS);
+    }
+
+    /**
+     * @param model           the model to instrument
      * @param timeLimitInNano in nanosecond
      */
     public TimeCounter(Model model, long timeLimitInNano) {
@@ -31,7 +41,7 @@ public class TimeCounter extends ACounter {
     }
 
     /**
-     * @param measures the measures recorder to check
+     * @param measures        the measures recorder to check
      * @param timeLimitInNano in nanosecond
      */
     public TimeCounter(IMeasures measures, long timeLimitInNano) {

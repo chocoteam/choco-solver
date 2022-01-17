@@ -10,28 +10,33 @@
 package org.chocosolver.solver.search;
 
 import org.chocosolver.solver.ISelf;
+import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.UpdatablePropagator;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.nary.lex.PropLexInt;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
+import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.ParetoMaximizer;
 import org.chocosolver.solver.search.limits.ACounter;
+import org.chocosolver.solver.search.limits.SolutionCounter;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.criteria.Criterion;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Spliterator;
+import java.util.*;
 import java.util.function.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -483,7 +488,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
         ParetoMaximizer pareto = new ParetoMaximizer(
-                Stream.of(objectives).map(o -> maximize?o:ref().getModel().intMinusView(o)).toArray(IntVar[]::new)
+                Stream.of(objectives).map(o -> maximize ? o : ref().getModel().intMinusView(o)).toArray(IntVar[]::new)
         );
         Constraint c = new Constraint("PARETO", pareto);
         c.post();
@@ -580,7 +585,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * </p>
      * <p>
      *     To make sure the solving loop ends, it is possible to declare a {@code stopCriterion} which gives as
-     *     parameter the current number of attempts done so far. 
+     *     parameter the current number of attempts done so far.
      * </p>
      * <p>{@code onSolution} makes possible to do something on a solution, for instance recording it.</p>
      *
@@ -611,7 +616,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      *
      * @param bounded       the variable to bound, may be different from the declared objective variable
      * @param bounder       the value to bound the variable with
-     * @param boundsRelaxer    relaxation function, take init bounds and last bounds found as parameters and return relaxed bounds
+     * @param boundsRelaxer relaxation function, take init bounds and last bounds found as parameters and return relaxed bounds
      * @param stopCriterion function that {@code true} when conditions are met to stop this strategy.
      * @param onSolution    instruction to execute when a solution is found (for instance, solution recording)
      * @return {@code true} if at least one solution has been found, {@code false} otherwise.
@@ -695,4 +700,122 @@ public interface IResolutionHelper extends ISelf<Solver> {
         }
         ref().removeStopCriterion(stop);
     }
+
+    /**
+     * <p>
+     * The sampling algorithm works in the following manner: table constraints are added to the problem to reduce the number of solutions.
+     * When there are less solutions than a given <i>pivot</i> value, a solution is randomly returned among the remaining solutions.
+     * </p>
+     * <p>
+     * Each table constraint is posted on randomly selected <i>nbVariablesInTable</i variables
+     * and the probability <i>probaTuple</i> to add a tuple in the table.
+     * </p>
+     *
+     * @param pivot              the pivot value
+     * @param nbVariablesInTable number of variables in tables constraints
+     * @param probaTuple         probability to add a tuple in each table
+     * @param random             an instance of pseudorandom numbers streamer
+     * @param criterion          optional criterion to stop the searches early
+     * @return a randomly selected solution
+     * @implNote Even if there are no strict controls, this method is designed to sample on satisfaction problems.
+     */
+    default Stream<Solution> tableSampling(int pivot, int nbVariablesInTable, double probaTuple, final Random random,
+                                           Criterion... criterion) {
+        final Model model = ref().getModel();
+        final Solver solver = ref();
+        final List<Solution> solutions = solver.findAllSolutions(
+                ArrayUtils.append(criterion, new Criterion[]{new SolutionCounter(model, pivot)}));
+        if (solver.getSearchState() == SearchState.STOPPED && solutions.size() < pivot) // Timeout
+            return Stream.empty();
+        final List<Constraint> added = new LinkedList<>();
+        /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
+        Spliterator<Solution> it = new Spliterator<Solution>() {
+            @Override
+            public boolean tryAdvance(Consumer<? super Solution> action) {
+                solutions.clear(); // to force entering the loop in general case
+                added.clear();
+                while (solutions.size() == 0 || solutions.size() == pivot) {
+                    solver.reset();
+                    model.getEnvironment().worldPush(); // required to make sure initial propagation can be undone
+                    try {
+                        solver.propagate();
+                    } catch (ContradictionException e) {
+                        throw new SolverException("If there is an error here, it means that the previous tables were not consistent, " +
+                                "and thus should not have been added\n" +
+                                e.getMessage());
+                    }
+                    // Add new table
+                    final List<IntVar> vars = Arrays.asList(model.retrieveIntVars(true));
+                    // Get all uninstantiated variables
+                    List<IntVar> uninstantiatedVars = vars.stream()
+                            .filter(v -> !v.isInstantiated())
+                            .collect(Collectors.toList());
+                    // if there are no more uninstantiated variables, then do not return anything
+                    if (uninstantiatedVars.size() == 0)
+                        continue;
+                    // Pick randomly at most 'nbVariablesInTable' variables
+                    IntVar[] chosenVars =
+                            pickNAmongM(Math.min(nbVariablesInTable, uninstantiatedVars.size()), uninstantiatedVars.size(),
+                                    new HashSet<>(), random).stream()
+                                    .map(uninstantiatedVars::get)
+                                    .toArray(IntVar[]::new);
+                    Tuples tuples = TuplesFactory.randomTuples(probaTuple, random, chosenVars);
+                    model.getEnvironment().worldPop(); // undo initial propagation
+                    solver.getEngine().reset(); // prepare the addition of the new constraint
+                    Constraint currentConstraint = model.table(chosenVars, tuples);
+                    currentConstraint.post();
+                    // Solve
+                    solutions.clear();
+                    solutions.addAll(solver.findAllSolutions(ArrayUtils.append(criterion, new Criterion[]{new SolutionCounter(model, pivot)})));
+                    if (solver.getSearchState() == SearchState.STOPPED && solutions.size() < pivot) { // Timeout
+                        for (Constraint c : added) {
+                            model.unpost(c);
+                        }
+                        return false;
+                    }
+                    if (solutions.size() == 0) {
+                        model.unpost(currentConstraint);
+                    } else {
+                        added.add(currentConstraint);
+                    }
+                }
+                action.accept(solutions.get(random.nextInt(solutions.size())));
+                for (Constraint c : added) {
+                    model.unpost(c);
+                }
+                return true;
+            }
+
+            @Override
+            public Spliterator<Solution> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return Long.MAX_VALUE;
+            }
+
+            @Override
+            public int characteristics() {
+                return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+            }
+
+        };
+        return StreamSupport.stream(it, false);
+    }
+
+
+    /**
+     * Picks randomly nbSampled distinct integers from [0, totalNumber-1].
+     * There are better ways to do this, but it will be enough for our applications
+     */
+    private static Set<Integer> pickNAmongM(final int nbSampled, final int totalNumber,
+                                            final Set<Integer> currentIntegers, final Random random) {
+        while (currentIntegers.size() < nbSampled) {
+            currentIntegers.add(random.nextInt(totalNumber));
+        }
+        return currentIntegers;
+    }
+
 }
