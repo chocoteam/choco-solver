@@ -10,7 +10,10 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
@@ -586,6 +589,15 @@ public class UndirectedGraph implements IGraph {
     @Override
     public boolean isDirected() {
         return false;
+    }
+
+    @Override
+    public int getDomainSize() {
+        int size = 0;
+        for (int n : getNodes()) {
+            size += getNeighborsOf(n).size() + 1; // +1 to count the node
+        }
+        return size;
     }
 
     /**

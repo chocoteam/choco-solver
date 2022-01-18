@@ -86,6 +86,11 @@ public interface RealVar extends Variable, CArExpression {
     double getPrecision();
 
     @Override
+    default int getDomainSize() {
+        throw new UnsupportedOperationException("No domain size for RealVar");
+    }
+
+    @Override
     default RealVar realVar(double p){
         return this;
     }
