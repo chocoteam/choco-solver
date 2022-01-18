@@ -93,6 +93,9 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.search.strategy.decision;
     exports org.chocosolver.solver.search.strategy.selectors.values;
     exports org.chocosolver.solver.search.strategy.selectors.variables;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.edge;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.node;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.priority;
     exports org.chocosolver.solver.search.strategy.strategy;
     exports org.chocosolver.solver.variables;
     exports org.chocosolver.solver.variables.delta;

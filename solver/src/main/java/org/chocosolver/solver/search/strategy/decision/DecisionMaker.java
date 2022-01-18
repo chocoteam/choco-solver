@@ -104,19 +104,19 @@ public class DecisionMaker {
         return d;
     }
 
-    public GraphDecision makeGraphNodeDecision(GraphVar var, GraphDecisionOperator dop, int node) {
-        GraphDecision d = graphDecisionPool.getE();
+    public <G extends GraphVar<?>> GraphDecision<G> makeGraphNodeDecision(G var, GraphDecisionOperator dop, int node) {
+        GraphDecision<G> d = graphDecisionPool.getE();
         if (d == null) {
-            d = new GraphDecision(graphDecisionPool);
+            d = new GraphDecision<>(graphDecisionPool);
         }
         d.setNode(var, node, dop);
         return d;
     }
 
-    public GraphDecision makeGraphEdgeDecision(GraphVar var, GraphDecisionOperator dop, int from, int to) {
-        GraphDecision d = graphDecisionPool.getE();
+    public <G extends GraphVar<?>> GraphDecision<G> makeGraphEdgeDecision(G var, GraphDecisionOperator dop, int from, int to) {
+        GraphDecision<G> d = graphDecisionPool.getE();
         if (d == null) {
-            d = new GraphDecision(graphDecisionPool);
+            d = new GraphDecision<>(graphDecisionPool);
         }
         d.setEdge(var, from, to, dop);
         return d;

@@ -14,7 +14,7 @@ import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.util.PoolManager;
 
-public class GraphDecision extends Decision<GraphVar> {
+public class GraphDecision<G extends GraphVar<?>> extends Decision<G> {
 
     //***********************************************************************************
     // VARIABLES
@@ -42,14 +42,14 @@ public class GraphDecision extends Decision<GraphVar> {
         }
     }
 
-    public void setNode(GraphVar variable, int node, GraphDecisionOperator operator) {
+    public void setNode(G variable, int node, GraphDecisionOperator operator) {
         super.set(variable);
         this.from = node;
         this.to = -1;
         this.operator = operator;
     }
 
-    public void setEdge(GraphVar variable, int from, int to, GraphDecisionOperator operator) {
+    public void setEdge(G variable, int from, int to, GraphDecisionOperator operator) {
         super.set(variable);
         this.from = from;
         this.to = to;
