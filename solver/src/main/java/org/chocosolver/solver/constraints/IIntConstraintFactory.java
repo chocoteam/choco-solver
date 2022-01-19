@@ -1833,7 +1833,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
-        int[] vals = getDomainUnion(vars);
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
