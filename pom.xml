@@ -217,6 +217,8 @@
                         <version>3.0.0-M5</version>
                         <configuration>
                             <groups>1s,10s,checker</groups>
+                            <disableXmlReport>true</disableXmlReport>
+                            <statelessTestsetReporter>disable</statelessTestsetReporter>
                         </configuration>
                     </plugin>
                 </plugins>
