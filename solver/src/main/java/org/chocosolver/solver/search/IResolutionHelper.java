@@ -710,13 +710,17 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * Each table constraint is posted on randomly selected <i>nbVariablesInTable</i variables
      * and the probability <i>probaTuple</i> to add a tuple in the table.
      * </p>
+     * <p>
+     *     This methods returns an infinite stream of randomly selected solutions.
+     *     One should use {@code .limit(n)} to prevent infinite loop.
+     * </p>
      *
      * @param pivot              the pivot value
      * @param nbVariablesInTable number of variables in tables constraints
      * @param probaTuple         probability to add a tuple in each table
      * @param random             an instance of pseudorandom numbers streamer
      * @param criterion          optional criterion to stop the searches early
-     * @return a randomly selected solution
+     * @return a, infinite stream of randomly selected solutions
      * @implNote Even if there are no strict controls, this method is designed to sample on satisfaction problems.
      * @implSpec Based on <a href="https://dblp.org/rec/conf/cp/VavrilleTP21">"Solution Sampling with Random Table Constraints".
      * M. Vavrille, C. Truchet, C. Prud'homme: CP 2021</a>
@@ -772,6 +776,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                     solutions.clear();
                     solutions.addAll(solver.findAllSolutions(ArrayUtils.append(criterion, new Criterion[]{new SolutionCounter(model, pivot)})));
                     if (solver.getSearchState() == SearchState.STOPPED && solutions.size() < pivot) { // Timeout
+                        model.unpost(currentConstraint);
                         for (Constraint c : added) {
                             model.unpost(c);
                         }
