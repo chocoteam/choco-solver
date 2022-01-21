@@ -8,15 +8,17 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
 - Extend some black-box strategies to `SetVar` and `GraphVar`
-- 
+ 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
 See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-    
+- [Mathieu Vavrille](https://github.com/MathieuVavrille) (@MathieuVavrille)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)    
     
 4.10.8 - 07 Jan 2022
 -------------------

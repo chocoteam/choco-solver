@@ -107,7 +107,7 @@ public class TuplesFactory {
      *
      * @param proba  probability to keep a tuple in Tuples (0 < proba < 1)
      * @param random an instance of pseudorandom numbers streamer
-     * @param vars   concernet variables
+     * @param vars   concerned variables
      * @return the set of retain tuples, which can be empty
      * @implNote <p>
      * If <i>proba</i> <= 0, then the tuple list will be empty
