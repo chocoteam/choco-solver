@@ -9,7 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 - Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
-
+- Extend some black-box strategies to `SetVar` and `GraphVar`
+ 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:

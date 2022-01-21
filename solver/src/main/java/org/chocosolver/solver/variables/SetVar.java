@@ -13,7 +13,6 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
-import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
@@ -133,4 +132,9 @@ public interface SetVar extends Variable {
      * @return a new SetDeltaMonitor
      */
 	ISetDeltaMonitor monitorDelta(ICause propagator);
+
+	@Override
+	default int getDomainSize() {
+		return getUB().size() + 1 - getLB().size();
+	}
 }

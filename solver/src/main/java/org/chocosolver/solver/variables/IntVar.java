@@ -248,13 +248,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      */
     int getUB();
 
-    /**
-     * Returns the size of this domain, that is the number of elements in this domain.
-     *
-     * @return size of the domain
-     */
-    int getDomainSize();
-
 
     /**
      * Returns the range of this domain, that is, the difference between the upper bound and the lower bound.

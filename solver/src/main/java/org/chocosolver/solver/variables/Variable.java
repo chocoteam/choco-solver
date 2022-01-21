@@ -88,6 +88,13 @@ public interface Variable extends Identity, Comparable<Variable> {
     boolean isInstantiated();
 
     /**
+     * Returns the size of this domain, that is the number of elements in this domain.
+     *
+     * @return size of the domain
+     */
+    int getDomainSize();
+
+    /**
      * Return the world index at which this variable has been instantiated is returned.
      * If the variable is not instantiated, then it returns {@link Integer#MAX_VALUE}, that
      * is a value greater than the current world index.

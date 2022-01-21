@@ -201,4 +201,9 @@ public interface GraphVar<E extends IGraph> extends Variable {
      * @return A new instance of GraphDeltaMonitor to make incremental propagators
      */
     IGraphDeltaMonitor monitorDelta(ICause propagator);
+
+    @Override
+    default int getDomainSize() {
+        return getUB().getDomainSize() + 1 - getLB().getDomainSize();
+    }
 }

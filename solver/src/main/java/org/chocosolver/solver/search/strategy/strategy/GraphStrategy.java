@@ -25,19 +25,20 @@ import org.chocosolver.solver.variables.GraphVar;
  * Strategy for branching on graph variables, replacement of choco-graph's original
  * implementation for a consistent design with other variables' kinds strategies.
  */
-public class GraphStrategy extends AbstractStrategy<GraphVar> {
+public class GraphStrategy<G extends GraphVar<?>> extends AbstractStrategy<G> {
 
-    protected VariableSelector<GraphVar> varSelector;
+    protected VariableSelector<G> varSelector;
 
-    private final GraphNodeOrEdgeSelector nodeOrEdgeSelector;
+    private final GraphNodeOrEdgeSelector<G> nodeOrEdgeSelector;
 
-    protected GraphNodeSelector nodeSelector;
+    protected GraphNodeSelector<G> nodeSelector;
 
-    protected GraphEdgeSelector edgeSelector;
+    protected GraphEdgeSelector<G> edgeSelector;
 
     protected GraphDecisionOperator operator;
 
-    public GraphStrategy(GraphVar[] scope, VariableSelector<GraphVar> varSelector, GraphNodeOrEdgeSelector nodeOrEdgeSelector, GraphNodeSelector nodeSelector, GraphEdgeSelector edgeSelector, boolean enforceFirst) {
+    public GraphStrategy(G[] scope, VariableSelector<G> varSelector, GraphNodeOrEdgeSelector<G> nodeOrEdgeSelector,
+                         GraphNodeSelector<G> nodeSelector, GraphEdgeSelector<G> edgeSelector, boolean enforceFirst) {
         super(scope);
         this.varSelector = varSelector;
         this.nodeOrEdgeSelector = nodeOrEdgeSelector;
@@ -47,13 +48,13 @@ public class GraphStrategy extends AbstractStrategy<GraphVar> {
     }
 
     @Override
-    public Decision<GraphVar> getDecision() {
-        GraphVar variable = varSelector.getVariable(vars);
+    public Decision<G> getDecision() {
+        G variable = varSelector.getVariable(vars);
         return computeDecision(variable);
     }
 
     @Override
-    public Decision<GraphVar> computeDecision(GraphVar g) {
+    public Decision<G> computeDecision(G g) {
         if (g == null) {
             return null;
         }
