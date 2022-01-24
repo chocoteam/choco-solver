@@ -41,7 +41,6 @@ import org.xcsp.parser.entries.XVariables;
 
 import java.io.File;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -740,81 +739,55 @@ public class XCSPParser implements XCallbacks2 {
         model.subCircuit(vars(list), startIndex, var(size)).post();
     }
 
-    private IntVar condV(Condition condition) {
-        IntVar sum;
-        if (condition instanceof Condition.ConditionVar)
-            sum = var((XVariables.XVarInteger) ((Condition.ConditionVar) condition).x);
-        else if (condition instanceof Condition.ConditionVal)
-            sum = model.intVar((int) ((Condition.ConditionVal) condition).k);
-        else if (condition instanceof Condition.ConditionSet){
-            Condition.ConditionSet condS = (Condition.ConditionIntset) condition;
-            switch (condS.operator){
-                case IN:
-                    sum = model.intVar(((Condition.ConditionIntset) condition).t);
-                    break;
-                case NOTIN:
-                    sum = model.intVar(IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
-                    model.notMember(sum, ((Condition.ConditionIntset) condition).t);
-                    break;
-                default:
-                    throw new ParserException("unknow result for condV"+condition);
-            }
-        }
-        else
-            throw new ParserException("unknow result for condV"+condition);
-        return sum;
-    }
-
-    private void notin(IntVar var, Condition condition) {
-        if (condition instanceof Condition.ConditionIntvl) {
-            model.notMember(var, (int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-        } else if (condition instanceof Condition.ConditionVal) {
-            var.ne((int) ((Condition.ConditionVal) condition).k).post();
-        } else {
-            throw new ParserException("unknow result for scalar constraint");
-        }
-    }
-
     private void buildSum(IntVar[] res, int[] coeffs, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
             Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
+            IntVar resu = null;
+            if (conditionRel instanceof Condition.ConditionVal) {
+                resu = model.intVar((int) ((Condition.ConditionVal) condition).k);
+            } else if (conditionRel instanceof Condition.ConditionVar) {
+                resu = var(((XVariables.XVarInteger) ((Condition.ConditionVar) conditionRel).x));
+            }
             switch (conditionRel.operator) {
                 case LT:
-                    model.scalar(res, coeffs, "<", condV(condition)).post();
+                    model.scalar(res, coeffs, "<", resu).post();
                     break;
                 case LE:
-                    model.scalar(res, coeffs, "<=", condV(condition)).post();
+                    model.scalar(res, coeffs, "<=", resu).post();
                     break;
                 case GE:
-                    model.scalar(res, coeffs, ">=", condV(condition)).post();
+                    model.scalar(res, coeffs, ">=", resu).post();
                     break;
                 case GT:
-                    model.scalar(res, coeffs, ">", condV(condition)).post();
+                    model.scalar(res, coeffs, ">", resu).post();
                     break;
                 case NE:
-                    model.scalar(res, coeffs, "!=", condV(condition)).post();
+                    model.scalar(res, coeffs, "!=", resu).post();
                     break;
                 case EQ:
-                    model.scalar(res, coeffs, "=", condV(condition)).post();
+                    model.scalar(res, coeffs, "=", resu).post();
                     break;
             }
         } else if (condition instanceof Condition.ConditionSet) {
             Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
+            IntVar resu = null;
+            if (conditionSet instanceof Condition.ConditionIntset) {
+                int[] values = ((Condition.ConditionIntset) condition).t;
+                resu = model.intVar(values);
+            } else if (conditionSet instanceof Condition.ConditionIntvl) {
+                int lb = (int) ((Condition.ConditionIntvl) condition).min;
+                int ub = (int) ((Condition.ConditionIntvl) condition).max;
+                resu = model.intVar(lb, ub);
+            }
             switch (conditionSet.operator) {
                 case IN: {
-                    IntVar sum;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        sum = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        sum = condV(condition);
-                    }
-                    model.scalar(res, coeffs, "=", sum).post();
+                    model.scalar(res, coeffs, "=", resu).post();
                 }
                 break;
                 case NOTIN: {
                     int[] bounds = VariableUtils.boundsForScalar(res, coeffs);
                     IntVar sum = model.intVar(bounds[0], bounds[1]);
-                    notin(sum, condition);
+                    resu.ne(sum).post();
                     model.scalar(res, coeffs, "=", sum).post();
                 }
                 break;
@@ -877,15 +850,15 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrCount(String id, XVariables.XVarInteger[] list, int[] values, Condition condition) {
-        dealWithCondition(condition, 0, list.length,
-                x -> model.among(x, vars(list), values).post());
+        IntVar x = condToVar(condition,0, list.length);
+        model.among(x, vars(list), values).post();
     }
 
 
     @Override
     public void buildCtrCount(String id, XNode<XVariables.XVarInteger>[] trees, int[] values, Condition condition) {
-        dealWithCondition(condition, 0, trees.length,
-                x -> model.among(x, vars(trees), values).post());
+        IntVar x = condToVar(condition,0, trees.length);
+        model.among(x, vars(trees), values).post();
     }
 
 
@@ -893,34 +866,24 @@ public class XCSPParser implements XCallbacks2 {
         if (condition instanceof Condition.ConditionRel) {
             Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
             switch (conditionRel.operator) {
-                case LT: {
+                case LT:
+                case LE:
+                    model.atMostNValues(vars, condToVar(condition, 0, vars.length), false).post();
+                    return;
+                case GE:
+                case GT:
                     //TODO
-                    model.atMostNValues(vars, model.intOffsetView(condV(condition), -1), false).post();
-                }
-                return;
-                case LE: {
-                    model.atMostNValues(vars, condV(condition), false).post();
-                }
-                return;
-                case GE: {
-                    //TODO
-                    model.atLeastNValues(vars, condV(condition), false).post();
-                }
-                return;
-                case GT: {
-                    //TODO
-                    model.atLeastNValues(vars, model.intOffsetView(condV(condition), 1), false).post();
-                }
-                return;
+                    model.atLeastNValues(vars, condToVar(condition, 0, vars.length), false).post();
+                    return;
                 case NE: {
                     IntVar count = model.intVar(0, vars.length);
                     model.nValues(vars, count).post();
-                    IntVar limit = condV(condition);
+                    IntVar limit = condToVar(condition, 0, vars.length);
                     model.arithm(count, "!=", limit).post();
                 }
                 return;
                 case EQ:
-                    model.nValues(vars, condV(condition)).post();
+                    model.nValues(vars, condToVar(condition, 0, vars.length)).post();
                     return;
             }
         }
@@ -1043,7 +1006,8 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMin(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        dealWithCondition(condition, min, max, x -> model.min(x, vars).post());
+        IntVar x = condToVar(condition, min, max);
+        model.min(x, vars).post();
     }
 
 
@@ -1052,8 +1016,8 @@ public class XCSPParser implements XCallbacks2 {
         IntVar[] vars = vars(list);
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        dealWithCondition(condition, min, max,
-                x -> model.element(x, vars(list), model.intVar(0, list.length), 0).post());
+        IntVar x = condToVar(condition, min, max);
+        model.element(x, vars(list), model.intVar(0, list.length), 0).post();
     }
 
     @Override
@@ -1064,8 +1028,8 @@ public class XCSPParser implements XCallbacks2 {
             IntVar[] vars = vars(list);
             int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
             int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-            dealWithCondition(condition, min, max,
-                    x -> model.element(x, vars(list), var(index), startIndex).post());
+            IntVar x = condToVar(condition, min, max);
+            model.element(x, vars(list), var(index), startIndex).post();
         } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, condition);
     }
 
@@ -1075,8 +1039,8 @@ public class XCSPParser implements XCallbacks2 {
         if (rank == Types.TypeRank.ANY) {
             int min = Arrays.stream(list).min().getAsInt();
             int max = Arrays.stream(list).max().getAsInt();
-            dealWithCondition(condition, min, max,
-                    x -> model.element(x, list, var(index), startIndex).post());
+            IntVar x = condToVar(condition, min, max);
+            model.element(x, list, var(index), startIndex).post();
         } else XCallbacks2.super.buildCtrElement(id, list, startIndex, index, rank, condition);
     }
 
@@ -1085,8 +1049,8 @@ public class XCSPParser implements XCallbacks2 {
                                 int startColIndex, XVariables.XVarInteger colIndex, Condition condition) {
         int min = Arrays.stream(matrix).mapToInt(r -> Arrays.stream(r).min().getAsInt()).min().getAsInt();
         int max = Arrays.stream(matrix).mapToInt(r -> Arrays.stream(r).max().getAsInt()).max().getAsInt();
-        dealWithCondition(condition, min, max,
-                x -> model.element(x, matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex));
+        IntVar x = condToVar(condition, min, max);
+        model.element(x, matrix, var(rowIndex), startColIndex, var(colIndex), startColIndex);
     }
 
     @Override
@@ -1098,8 +1062,8 @@ public class XCSPParser implements XCallbacks2 {
                 .min().getAsInt()).min().getAsInt();
         int max = Arrays.stream(vars).mapToInt(r -> Arrays.stream(r).mapToInt(IntVar::getLB)
                 .max().getAsInt()).max().getAsInt();
-        dealWithCondition(condition, min, max,
-                x -> model.element(x, vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex));
+        IntVar x = condToVar(condition, min, max);
+        model.element(x, vars(matrix), var(rowIndex), startColIndex, var(colIndex), startColIndex);
     }
 
     @Override
@@ -1115,8 +1079,8 @@ public class XCSPParser implements XCallbacks2 {
     private void buildMax(IntVar[] vars, Condition condition) {
         int min = Arrays.stream(vars).min(Comparator.comparingInt(IntVar::getLB)).get().getLB();
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
-        dealWithCondition(condition, min, max,
-                x -> model.max(x, vars).post());
+        IntVar x = condToVar(condition, min, max);
+        model.max(x, vars).post();
     }
 
     @Override
@@ -1154,8 +1118,8 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrPrecedence(String id, XVariables.XVarInteger[] list, int[] values, boolean covered) {
         model.intValuePrecedeChain(vars(list), values).post();
-        if(covered){
-            buildCtrAtLeast(id, list, values[values.length-1], 1);
+        if (covered) {
+            buildCtrAtLeast(id, list, values[values.length - 1], 1);
         }
     }
 
@@ -1300,33 +1264,17 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
-                                    .toArray(Task[]::new),
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.intVar(heights[i]))
-                                    .toArray(IntVar[]::new),
-                            model.intOffsetView(condV(condition), -1)
-                    ).post();
-                }
-                return;
-                case LE: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
-                                    .toArray(Task[]::new),
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.intVar(heights[i]))
-                                    .toArray(IntVar[]::new),
-                            condV(condition)
-                    ).post();
-                }
-                return;
-            }
+            int sumLe = Arrays.stream(heights).sum();
+            model.cumulative(
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
+                            .toArray(Task[]::new),
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.intVar(heights[i]))
+                            .toArray(IntVar[]::new),
+                    condToVar(condition, 0, sumLe)
+            ).post();
+            return;
         }
         XCallbacks2.super.buildCtrCumulative(id, origins, lengths, heights, condition);
     }
@@ -1334,29 +1282,15 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, int[] lengths, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
-                                    .toArray(Task[]::new),
-                            vars(heights),
-                            model.intOffsetView(condV(condition), -1)
-                    ).post();
-                }
-                return;
-                case LE: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
-                                    .toArray(Task[]::new),
-                            vars(heights),
-                            condV(condition)
-                    ).post();
-                }
-                return;
-            }
+            int sumLe = (int)Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            model.cumulative(
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.taskVar(var(origins[i]), lengths[i]))
+                            .toArray(Task[]::new),
+                    vars(heights),
+                    condToVar(condition, 0, sumLe)
+            ).post();
+            return;
         }
         XCallbacks2.super.buildCtrCumulative(id, origins, lengths, heights, condition);
     }
@@ -1364,33 +1298,17 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, int[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
-                                    .toArray(Task[]::new),
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.intVar(heights[i]))
-                                    .toArray(IntVar[]::new),
-                            model.intOffsetView(condV(condition), -1)
-                    ).post();
-                }
-                return;
-                case LE: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
-                                    .toArray(Task[]::new),
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.intVar(heights[i]))
-                                    .toArray(IntVar[]::new),
-                            condV(condition)
-                    ).post();
-                }
-                return;
-            }
+            int sumLe = Arrays.stream(heights).sum();
+            model.cumulative(
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
+                            .toArray(Task[]::new),
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.intVar(heights[i]))
+                            .toArray(IntVar[]::new),
+                    condToVar(condition, 0, sumLe)
+            ).post();
+            return;
         }
         XCallbacks2.super.buildCtrCumulative(id, origins, lengths, heights, condition);
     }
@@ -1398,45 +1316,37 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrCumulative(String id, XVariables.XVarInteger[] origins, XVariables.XVarInteger[] lengths, XVariables.XVarInteger[] heights, Condition condition) {
         if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
-                                    .toArray(Task[]::new),
-                            vars(heights),
-                            model.intOffsetView(condV(condition), -1)
-                    ).post();
-                }
-                return;
-                case LE: {
-                    model.cumulative(
-                            IntStream.range(0, origins.length)
-                                    .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
-                                    .toArray(Task[]::new),
-                            vars(heights),
-                            condV(condition)
-                    ).post();
-                }
-                return;
-            }
+            int sumLe = (int)Arrays.stream(heights).mapToLong(XVariables.XVarInteger::lastValue).sum();
+            model.cumulative(
+                    IntStream.range(0, origins.length)
+                            .mapToObj(i -> model.taskVar(var(origins[i]), var(lengths[i])))
+                            .toArray(Task[]::new),
+                    vars(heights),
+                    condToVar(condition, 0, sumLe)
+            ).post();
+            return;
         }
         XCallbacks2.super.buildCtrCumulative(id, origins, lengths, heights, condition);
     }
 
     @Override
     public void buildCtrBinPacking(String id, XVariables.XVarInteger[] list, int[] sizes, Condition condition) {
-        model.binPacking(vars(list), sizes, new IntVar[]{condV(condition)}, 0);
+        int sumSiz = Arrays.stream(sizes).sum();
+        IntVar[] cds = new IntVar[list.length];
+        for (int i = 0; i < cds.length; i++) {
+            cds[i] = condToVar(condition, 0,  sumSiz);
+        }
+        model.binPacking(vars(list), sizes, cds, 0).post();
     }
 
     @Override
     public void buildCtrBinPacking(String id, XVariables.XVarInteger[] list, int[] sizes, Condition[] conditions, int startIndex) {
-        IntVar[] cds = new IntVar[list.length];
+        int sumSiz = Arrays.stream(sizes).sum();
+        IntVar[] cds = new IntVar[conditions.length];
         for (int i = 0; i < cds.length; i++) {
-            cds[i] = condV(conditions[i]);
+            cds[i] = condToVar(conditions[i],0, sumSiz);
         }
-        model.binPacking(vars(list), sizes, cds, startIndex);
+        model.binPacking(vars(list), sizes, cds, startIndex).post();
     }
 
     @Override
@@ -1446,66 +1356,97 @@ public class XCSPParser implements XCallbacks2 {
         model.table(vars(list), tuples).post();
     }
 
-    private void dealWithCondition(Condition condition, int min, int max, Consumer<IntVar> postCtr) {
-        if (condition instanceof Condition.ConditionRel) {
-            Condition.ConditionRel conditionRel = (Condition.ConditionRel) condition;
-            switch (conditionRel.operator) {
-                case LT: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.lt(condV(condition)).post();
-                }
-                break;
-                case LE: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.le(condV(condition)).post();
-                }
-                break;
-                case GE: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.ge(condV(condition)).post();
-                }
-                break;
-                case GT: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.gt(condV(condition)).post();
-                }
-                break;
-                case NE: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.ne(condV(condition)).post();
-                }
-                break;
-                case EQ:
-                    postCtr.accept(condV(condition));
-                    break;
-            }
-        } else if (condition instanceof Condition.ConditionSet) {
-            Condition.ConditionSet conditionSet = (Condition.ConditionSet) condition;
-            switch (conditionSet.operator) {
-                case IN: {
-                    IntVar res;
-                    if (condition instanceof Condition.ConditionIntvl) {
-                        res = model.intVar((int) ((Condition.ConditionIntvl) condition).min, (int) ((Condition.ConditionIntvl) condition).max);
-                    } else {
-                        res = condV(condition);
-                    }
-                    postCtr.accept(res);
-                }
-                break;
-                case NOTIN: {
-                    IntVar res = model.intVar(min, max);
-                    postCtr.accept(res);
-                    res.ne(condV(condition)).post();
-                    notin(res, condition);
-                }
-                break;
-            }
+    /**
+     * This method ignore the operator
+     * @param condition
+     * @return
+     */
+    private IntVar condToVar(Condition condition, int min, int max) {
+        if (condition instanceof Condition.ConditionVal) {
+            return dealWithConditionVal((Condition.ConditionVal) condition, min, max);
+        } else if (condition instanceof Condition.ConditionVar) {
+            return dealWithConditionVar((Condition.ConditionVar) condition, min, max);
+        } else if (condition instanceof Condition.ConditionIntvl) {
+            return dealWithConditionIntvl((Condition.ConditionIntvl) condition, min, max);
+        } else if (condition instanceof Condition.ConditionIntset) {
+            return dealWithConditionIntset((Condition.ConditionIntset) condition, min, max);
+        } else {
+            throw new ParserException("unknow result for condV" + condition);
         }
+    }
+
+    private IntVar dealWithConditionVal(Condition.ConditionVal condition, int min, int max) {
+        int k = (int) condition.k;
+        switch (condition.operator) {
+            case LT:
+                return model.intVar(Math.min(min, k -1), Math.min(max, k -1));
+            case LE:
+                return model.intVar(Math.min(min, k), Math.min(max, k));
+            case GT:
+                return model.intVar(Math.max(min, k + 1), Math.max(max, k + 1));
+            case GE:
+                return model.intVar(Math.max(min, k), Math.max(max, k));
+            case NE:
+                IntVar r = model.intVar(min, max);
+                r.ne(k).post();
+                return r;
+            case EQ:
+                return model.intVar(k);
+        }
+        throw new ParserException("dealWithConditionVal " + condition);
+    }
+
+    private IntVar dealWithConditionVar(Condition.ConditionVar condition, int min, int max) {
+        IntVar k = var((XVariables.XVarInteger) condition.x);
+        IntVar res = model.intVar(min, max);
+        switch (condition.operator) {
+            case LT:
+                res.lt(k).post();
+                break;
+            case LE:
+                res.le(k).post();
+                break;
+            case GE:
+                res.ge(k).post();
+                break;
+            case GT:
+                res.gt(k).post();
+                break;
+            case NE:
+                res.ne(k).post();
+                break;
+            case EQ:
+                res.eq(k).post();
+                break;
+        }
+        return res;
+    }
+
+    private IntVar dealWithConditionIntset(Condition.ConditionIntset condition, int min, int max) {
+        int[] values = condition.t;
+        switch (condition.operator) {
+            case IN:
+                return model.intVar(values);
+            case NOTIN:
+                IntVar r = model.intVar(min, max);
+                model.notMember(r, values).post();
+                return r;
+        }
+        throw new ParserException("dealWithConditionVal " + condition);
+    }
+
+    private IntVar dealWithConditionIntvl(Condition.ConditionIntvl condition, int min, int max) {
+        int mi = (int) condition.min;
+        int ma = (int) condition.max;
+        switch (condition.operator) {
+            case IN:
+                return model.intVar(Math.min(mi, min), Math.max(ma, max));
+            case NOTIN:
+                IntVar r = model.intVar(min, max);
+                model.notMember(r, min, max).post();
+                return r;
+        }
+        throw new ParserException("dealWithConditionVal " + condition);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
