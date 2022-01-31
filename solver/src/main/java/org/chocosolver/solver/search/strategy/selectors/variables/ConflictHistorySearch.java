@@ -40,8 +40,8 @@ public class ConflictHistorySearch<V extends Variable>
     /**
      * Decreasing step for {@link #alpha}.
      */
-    private static final double STEP = 10e-6;
-    private static final double D = 10e-4;
+    private static final double STEP = 1e-6;
+    private static final double D = 1e-4;
     private static final double DECAY = .995;
 
     /**
