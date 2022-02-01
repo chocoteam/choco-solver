@@ -13,6 +13,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.Arrays;
+
 /**
  * Base class for conditional AllDifferent propagators.
  *
@@ -31,19 +33,6 @@ public abstract class PropCondAllDiffBase extends Propagator<IntVar> {
      * @return The variables respecting the condition.
      */
     protected IntVar[] filterVariables() {
-        int nb = 0;
-        for (IntVar v : vars) {
-            if (condition.holdOnVar(v)) {
-                nb++;
-            }
-        }
-        IntVar[] vs = new IntVar[nb];
-        for (IntVar v : vars) {
-            if (condition.holdOnVar(v)) {
-                nb--;
-                vs[nb] = v;
-            }
-        }
-        return vs;
+        return Arrays.stream(vars).filter(v -> condition.holdOnVar(v)).toArray(IntVar[]::new);
     }
 }
