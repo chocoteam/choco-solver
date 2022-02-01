@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -36,17 +36,17 @@ import java.util.zip.GZIPInputStream;
  */
 public class MPSParser {
 
-    private static Pattern twopart = Pattern.compile("");
+    private static final Pattern twopart = Pattern.compile("");
 
-    private static String TAG_NAME = "NAME";
-    private static String TAG_ROWS = "ROWS";
-    private static String TAG_COLUMNS = "COLUMNS";
-    private static String TAG_RHS = "RHS";
-    private static String TAG_BOUNDS = "BOUNDS"; // optional
-    private static String TAG_RANGES = "RANGES"; // optional
-    private static String TAG_ENDATA = "ENDATA";
-    private static String TAG_MARKER = "'MARKER'";
-    private static String TAG_INTORG = "'INTORG'";
+    private static final String TAG_NAME = "NAME";
+    private static final String TAG_ROWS = "ROWS";
+    private static final String TAG_COLUMNS = "COLUMNS";
+    private static final String TAG_RHS = "RHS";
+    private static final String TAG_BOUNDS = "BOUNDS"; // optional
+    private static final String TAG_RANGES = "RANGES"; // optional
+    private static final String TAG_ENDATA = "ENDATA";
+    private static final String TAG_MARKER = "'MARKER'";
+    private static final String TAG_INTORG = "'INTORG'";
 
     private static final int CACHING = 12 * 5;
 
@@ -656,15 +656,15 @@ public class MPSParser {
                             .toArray(Variable[]::new)).post();
                 } else {
                     if (rng.intValue() > 0) {
-                        model.realIbexGenericConstraint(fct.toString() + ">=" + rhs.doubleValue(),
+                        model.realIbexGenericConstraint(fct + ">=" + rhs.doubleValue(),
                                 vars.stream().map(s -> decVars.get(s)).toArray(Variable[]::new)).post();
-                        model.realIbexGenericConstraint(fct.toString() + "<=" +
+                        model.realIbexGenericConstraint(fct + "<=" +
                                         rhs.doubleValue() + rng.doubleValue(),
                                 vars.stream().map(s -> decVars.get(s)).toArray(Variable[]::new)).post();
                     } else {
-                        model.realIbexGenericConstraint(fct.toString() + "<=" + rhs.doubleValue(),
+                        model.realIbexGenericConstraint(fct + "<=" + rhs.doubleValue(),
                                 vars.stream().map(s -> decVars.get(s)).toArray(Variable[]::new)).post();
-                        model.realIbexGenericConstraint(fct.toString() + ">=" +
+                        model.realIbexGenericConstraint(fct + ">=" +
                                         rhs.doubleValue() + rng.doubleValue(),
                                 vars.stream().map(s -> decVars.get(s)).toArray(Variable[]::new)).post();
                     }

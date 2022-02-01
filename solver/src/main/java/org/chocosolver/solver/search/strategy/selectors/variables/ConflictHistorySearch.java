@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,7 +15,6 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.stream.Stream;
@@ -29,8 +28,8 @@ import java.util.stream.Stream;
  * @since 25/02/2020.
  */
 @SuppressWarnings("rawtypes")
-public class ConflictHistorySearch
-        extends AbstractCriterionBasedVariableSelector
+public class ConflictHistorySearch<V extends Variable>
+        extends AbstractCriterionBasedVariableSelector<V>
         implements IMonitorRestart {
 
     /**
@@ -41,8 +40,8 @@ public class ConflictHistorySearch
     /**
      * Decreasing step for {@link #alpha}.
      */
-    private static final double STEP = 10e-6;
-    private static final double D = 10e-4;
+    private static final double STEP = 1e-6;
+    private static final double D = 1e-4;
     private static final double DECAY = .995;
 
     /**
@@ -58,11 +57,11 @@ public class ConflictHistorySearch
      */
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
-    public ConflictHistorySearch(IntVar[] vars, long seed) {
+    public ConflictHistorySearch(V[] vars, long seed) {
         this(vars, seed, Integer.MAX_VALUE);
     }
 
-    public ConflictHistorySearch(IntVar[] vars, long seed, int flushThs) {
+    public ConflictHistorySearch(V[] vars, long seed, int flushThs) {
         super(vars, seed, flushThs);
     }
 
@@ -82,7 +81,7 @@ public class ConflictHistorySearch
     }
 
     @Override
-    protected double weight(IntVar v) {
+    protected double weight(Variable v) {
         double w = 0.;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {

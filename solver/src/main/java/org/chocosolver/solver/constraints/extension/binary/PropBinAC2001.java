@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,11 +26,11 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  */
 public class PropBinAC2001 extends PropBinCSP {
 
-    private IStateInt[] currentSupport0;
-    private IStateInt[] currentSupport1;
+    private final IStateInt[] currentSupport0;
+    private final IStateInt[] currentSupport1;
 
-    private int offset0;
-    private int offset1;
+    private final int offset0;
+    private final int offset1;
 
     private final IntIterableBitSet vrms;
 

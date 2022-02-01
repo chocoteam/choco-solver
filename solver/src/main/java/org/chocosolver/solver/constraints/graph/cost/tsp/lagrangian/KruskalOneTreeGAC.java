@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,9 +22,9 @@ public class KruskalOneTreeGAC extends KruskalMSTFinder {
     //***********************************************************************************
 
     private int min1, min2;
-    private int[][] map;
-    private double[][] marginalCosts;
-    private int[] fifo;
+    private final int[][] map;
+    private final double[][] marginalCosts;
+    private final int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS

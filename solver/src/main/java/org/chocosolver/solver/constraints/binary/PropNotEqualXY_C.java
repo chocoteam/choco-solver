@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,9 +38,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  */
 public class PropNotEqualXY_C extends Propagator<IntVar> {
 
-    private IntVar x;
-    private IntVar y;
-    private int cste;
+    private final IntVar x;
+    private final IntVar y;
+    private final int cste;
 
     @SuppressWarnings({"unchecked"})
     public PropNotEqualXY_C(IntVar[] vars, int c) {

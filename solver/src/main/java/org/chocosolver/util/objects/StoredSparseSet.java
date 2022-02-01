@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,7 +25,7 @@ public class StoredSparseSet {
 
     private int[] sparse;
     private int[] dense;
-    private IStateInt members;
+    private final IStateInt members;
 
 
     public StoredSparseSet(IEnvironment environment) {

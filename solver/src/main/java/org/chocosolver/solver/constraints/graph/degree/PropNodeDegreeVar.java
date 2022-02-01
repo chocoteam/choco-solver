@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,10 +32,10 @@ public class PropNodeDegreeVar extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private GraphVar g;
-    private IntVar[] degrees;
-    private IncidentSet target;
+    private final int n;
+    private final GraphVar g;
+    private final IntVar[] degrees;
+    private final IncidentSet target;
     private BitSet toDo;
 
     //***********************************************************************************

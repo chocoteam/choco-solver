@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,8 +20,8 @@ import org.chocosolver.util.ESat;
  */
 public class PropSymmetryBreakingEx extends Propagator<BoolVar> {
 
-    private int n;
-    private BoolVar[] t;
+    private final int n;
+    private final BoolVar[] t;
 
     public PropSymmetryBreakingEx(BoolVar[] t) {
         super(t, PropagatorPriority.CUBIC, false);

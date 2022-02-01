@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -41,12 +41,12 @@ public class PropLargeGAC3rmPositive extends PropLargeCSP<IterTuplesTable> {
     private static final int NO_SUPPORT = -2;
 
     //a reference on the lists of supports per variable value pair
-    private int[][][] tab;
+    private final int[][][] tab;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    private ValidityChecker valcheck;
+    private final ValidityChecker valcheck;
 
     private final IntIterableBitSet vrms;
 

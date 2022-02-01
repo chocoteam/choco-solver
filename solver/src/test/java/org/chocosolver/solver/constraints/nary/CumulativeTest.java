@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -190,7 +190,7 @@ public class CumulativeTest {
     public void testADelsol1(){
 		int[] height = new int[]{0, 1, 3, 5, 1, 4, 4, 3, 4, 3, 0};
 		int capaMax = 10;
-		int duration[] = new int[11];
+		int[] duration = new int[11];
 		Arrays.fill(duration, 1);
 		// dÃ©claration du modÃ¨le
 		Model model = new Model("test");

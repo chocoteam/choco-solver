@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -86,6 +86,13 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @return <code>true</code> if <code>this</code> is instantiated
      */
     boolean isInstantiated();
+
+    /**
+     * Returns the size of this domain, that is the number of elements in this domain.
+     *
+     * @return size of the domain
+     */
+    int getDomainSize();
 
     /**
      * Return the world index at which this variable has been instantiated is returned.

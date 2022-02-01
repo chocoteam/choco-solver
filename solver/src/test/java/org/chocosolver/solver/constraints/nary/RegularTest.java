@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -224,10 +224,10 @@ public class RegularTest {
         }
 
         assertEquals(1, solutions.size());
-        assertEquals(-9, (int) solutions.get(0).getIntVal(CS[0]));
-        assertEquals(1, (int) solutions.get(0).getIntVal(CS[1]));
-        assertEquals(1, (int) solutions.get(0).getIntVal(CS[2]));
-        assertEquals(-5, (int) solutions.get(0).getIntVal(CS[3]));
+        assertEquals(-9, solutions.get(0).getIntVal(CS[0]));
+        assertEquals(1, solutions.get(0).getIntVal(CS[1]));
+        assertEquals(1, solutions.get(0).getIntVal(CS[2]));
+        assertEquals(-5, solutions.get(0).getIntVal(CS[3]));
     }
 
     @Test(groups="1s", timeOut=60000)

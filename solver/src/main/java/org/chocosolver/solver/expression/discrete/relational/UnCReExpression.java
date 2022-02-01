@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -55,11 +55,11 @@ public class UnCReExpression implements ReExpression {
     /**
      * The first expression this expression relies on
      */
-    private ArExpression e1;
+    private final ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private int e2;
+    private final int e2;
 
     /**
      * Builds a binary expression

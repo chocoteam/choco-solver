@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,6 +17,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -207,22 +208,20 @@ public abstract class RegParser implements IParser {
     protected void makeComplementarySearch(Model m, int i) {
         Solver solver = m.getSolver();
         if (solver.getSearch() != null) {
-            IntVar[] ovars = new IntVar[m.getNbVars()];
             THashSet<Variable> dvars = new THashSet<>();
             dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
             int k = 0;
-            IntVar[] ivars = m.retrieveIntVars(true);
-            Arrays.sort(ivars, Comparator.comparingInt(IntVar::getDomainSize));
-            for (IntVar iv : ivars) {
-                if (!dvars.contains(iv) && !iv.isAConstant()) {
-                    ovars[k++] = iv;
-                }
-            }
+            IntVar[] ivars = m.streamVars()
+                    .filter(VariableUtils::isInt)
+                    .filter(v -> !VariableUtils.isConstant(v))
+                    .filter(v -> !dvars.contains(v))
+                    .map(Variable::asIntVar)
+                    .sorted(Comparator.comparingInt(IntVar::getDomainSize))
+                    .toArray(IntVar[]::new);
             // do not enumerate on the complementary search (greedy assignment)
-            if (k > 0) {
+            if (ivars.length > 0) {
                 solver.setSearch(solver.getSearch(),
-                        //Search.lastConflict(Search.domOverWDegSearch(Arrays.copyOf(ovars, k))));
-                        Search.inputOrderLBSearch(Arrays.copyOf(ovars, k)));
+                        Search.lastConflict(Search.inputOrderLBSearch(ivars)));
             }
         }
     }

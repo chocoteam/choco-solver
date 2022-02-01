@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -39,9 +39,10 @@ public class PropCount_AC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private int value;
-    private ISet possibles, mandatories;
+    private final int n;
+    private final int value;
+    private final ISet possibles;
+    private final ISet mandatories;
 
     //***********************************************************************************
     // CONSTRUCTORS

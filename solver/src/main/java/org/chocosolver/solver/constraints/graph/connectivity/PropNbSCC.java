@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,9 +31,10 @@ public class PropNbSCC extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private DirectedGraphVar g;
-    private IntVar k;
-    private StrongConnectivityFinder envCCFinder, kerCCFinder;
+    private final DirectedGraphVar g;
+    private final IntVar k;
+    private final StrongConnectivityFinder envCCFinder;
+    private final StrongConnectivityFinder kerCCFinder;
 
     //***********************************************************************************
     // CONSTRUCTORS

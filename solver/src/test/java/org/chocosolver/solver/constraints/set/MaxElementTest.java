@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,7 +38,7 @@ public class MaxElementTest {
         Model model = new Model();
 
         // empty set
-        SetVar setVar = model.setVar(new int[]{});
+        SetVar setVar = model.setVar();
         IntVar var = model.intVar(1, 5);
         model.max(setVar, var, false).post();
 
@@ -55,7 +55,7 @@ public class MaxElementTest {
         Model model = new Model();
 
         // empty set
-        SetVar setVar = model.setVar(new int[]{});
+        SetVar setVar = model.setVar();
         IntVar var = model.intVar(1, 5);
         model.max(setVar, var, true).post();
 
@@ -79,7 +79,7 @@ public class MaxElementTest {
     public void testTrivialTrue() {
         Model model = new Model();
 
-        SetVar setVar = model.setVar(new int[]{6, 8, 7});
+        SetVar setVar = model.setVar(6, 8, 7);
         IntVar var = model.intVar(8);
         model.max(setVar, var, true).post();
 
@@ -91,7 +91,7 @@ public class MaxElementTest {
     public void testTrivialFalse() {
         Model model = new Model();
 
-        SetVar setVar = model.setVar(new int[]{6, 8, 7});
+        SetVar setVar = model.setVar(6, 8, 7);
         IntVar var = model.intVar(7);
         model.max(setVar, var, true).post();
 

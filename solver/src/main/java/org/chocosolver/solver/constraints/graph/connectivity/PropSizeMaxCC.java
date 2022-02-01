@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -36,9 +36,10 @@ public class PropSizeMaxCC extends Propagator<Variable> {
 
     /* Variables */
 
-    private UndirectedGraphVar g;
-    private IntVar sizeMaxCC;
-    private ConnectivityFinder GLBCCFinder, GUBCCFinder;
+    private final UndirectedGraphVar g;
+    private final IntVar sizeMaxCC;
+    private final ConnectivityFinder GLBCCFinder;
+    private final ConnectivityFinder GUBCCFinder;
 
     /* Constructor */
 

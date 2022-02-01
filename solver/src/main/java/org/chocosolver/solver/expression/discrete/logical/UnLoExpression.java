@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,7 @@ public class UnLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private ReExpression e;
+    private final ReExpression e;
     /**
      * Builds a n-ary expression
      *

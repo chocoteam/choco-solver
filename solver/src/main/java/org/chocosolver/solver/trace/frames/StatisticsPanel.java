@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -39,7 +39,7 @@ import java.util.function.Function;
  */
 public class StatisticsPanel extends JPanel {
 
-    private static String[] fieldnames = {
+    private static final String[] fieldnames = {
             "Variables",
             "Constraints",
             "Objective",
@@ -58,7 +58,7 @@ public class StatisticsPanel extends JPanel {
             "Mem. usage (MB)",
     };
     @SuppressWarnings("unchecked")
-    private static Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
+    private static final Function<Solver, String>[] fieldvalues = (Function<Solver, String>[]) new Function[]{
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbVars()),
             (Function<Solver, String>) solver -> Long.toString(solver.getModel().getNbCstrs()),
             (Function<Solver, String>) solver ->

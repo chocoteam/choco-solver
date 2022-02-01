@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,6 +32,7 @@ import org.kohsuke.args4j.Option;
  */
 public class CostasArrays extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-o", usage = "Costas array size.", required = false)
     private static int n = 14;  // should be <15 to be solved quickly
 

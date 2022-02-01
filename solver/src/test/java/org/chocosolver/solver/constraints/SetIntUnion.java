@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,7 +29,7 @@ public class SetIntUnion {
 	public void test1() {
         Model s = new Model();
         IntVar[] x = s.intVarArray("ints", 4, 0, 5, false);
-        SetVar values = s.setVar("values", new int[]{0, 1, 4});
+        SetVar values = s.setVar("values", 0, 1, 4);
         s.union(x, values).post();
 
 
@@ -47,7 +47,7 @@ public class SetIntUnion {
                 , s.intVar(0)
                 , s.intVar(2)
         };
-        SetVar values = s.setVar("values", new int[]{0, 1, 4});
+        SetVar values = s.setVar("values", 0, 1, 4);
         s.union(x, values).post();
 
 

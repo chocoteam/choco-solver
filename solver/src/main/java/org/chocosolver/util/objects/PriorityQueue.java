@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,10 +17,10 @@ package org.chocosolver.util.objects;
  */
 public class PriorityQueue {
 
-    private int n;
-    private int[] indices;
-    private int[] values;
-    private int[] pointers;
+    private final int n;
+    private final int[] indices;
+    private final int[] values;
+    private final int[] pointers;
     private int first, lastElt;
 
     public PriorityQueue(int _n) {

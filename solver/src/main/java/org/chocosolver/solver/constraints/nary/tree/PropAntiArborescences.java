@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,13 +38,13 @@ public class PropAntiArborescences extends Propagator<IntVar> {
     //***********************************************************************************
 
     // flow graph
-    private DirectedGraph connectedGraph;
+    private final DirectedGraph connectedGraph;
     // number of nodes
-    private int n;
+    private final int n;
     // dominators finder that contains the dominator tree
-    private AbstractLengauerTarjanDominatorsFinder domFinder;
+    private final AbstractLengauerTarjanDominatorsFinder domFinder;
     // offset (usually 0 but 1 with MiniZinc)
-    private int offSet;
+    private final int offSet;
 
     //***********************************************************************************
     // CONSTRUCTORS

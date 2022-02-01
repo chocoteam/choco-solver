@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,6 +33,7 @@ public class DIMACS extends RegParser {
     // Contains mapping with variables and output prints
     public DIMACSParser[] parsers;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).")
     private boolean cp = false;
 

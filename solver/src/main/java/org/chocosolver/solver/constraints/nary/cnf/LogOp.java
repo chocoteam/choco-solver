@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -385,7 +385,7 @@ public final class LogOp implements ILogical {
             if (child.isLit()) {
                 st.append(((BoolVar) child).getName());
             } else {
-                st.append(child.toString());
+                st.append(child);
             }
             st.append(" ").append(op);
 

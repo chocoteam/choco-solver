@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,7 +29,7 @@ import org.chocosolver.util.objects.graphs.DirectedGraph;
  */
 public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implements ICause {
 
-    private DirectedGraph originalUB;
+    private final DirectedGraph originalUB;
 
     /**
      * Creates an directed node-induced (from the envelope) graph variable

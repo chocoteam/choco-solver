@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -41,11 +41,11 @@ public class StoredValuedDirectedMultiGraph {
    	// VARIABLES
    	//***********************************************************************************
 
-    private int[] starts;
-    private int[] offsets;
+    private final int[] starts;
+    private final int[] offsets;
     public int sourceIndex;
     public int tinkIndex;
-    private StoredIndexedBipartiteSetWithOffset[] supports;
+    private final StoredIndexedBipartiteSetWithOffset[] supports;
     public int[][] layers;
     public BitSet inStack;
     public StoredIndexedBipartiteSet inGraph;

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,10 @@
 package org.chocosolver.util.objects.graphs;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.util.objects.setDataStructures.*;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.ISetIterator;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
@@ -611,6 +614,17 @@ public class DirectedGraph implements IGraph {
     @Override
     public boolean isDirected() {
         return true;
+    }
+
+    @Override
+    public int getDomainSize() {
+        int size = 0;
+        for (int n : getNodes()) {
+            size += 1; // +1 to count the node
+            size += getSuccessorsOf(n).size();
+            size += getPredecessorsOf(n).size();
+        }
+        return size;
     }
 
     /**

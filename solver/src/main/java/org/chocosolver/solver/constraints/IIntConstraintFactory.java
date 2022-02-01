@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -423,7 +423,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param var2 second variable
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples) {
-        if (var1.hasEnumeratedDomain() || var2.hasEnumeratedDomain()) {
+        if (!var1.hasEnumeratedDomain() || !var2.hasEnumeratedDomain()) {
             return table(var1, var2, tuples, "CT+");
         } else {
             return table(var1, var2, tuples, "AC3bit+rm");
@@ -1833,7 +1833,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
-        int[] vals = getDomainUnion(vars);
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(

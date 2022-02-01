@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -100,7 +100,7 @@ public class Sudoku extends AbstractProblem {
             st.append("\n\t");
         }
 
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

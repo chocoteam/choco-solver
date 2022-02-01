@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -21,8 +21,8 @@ import org.chocosolver.util.ESat;
  */
 public class PropCondAllDiffInst extends PropAllDiffInst {
 
-	private Condition condition;
-	private boolean mode;
+	private final Condition condition;
+	private final boolean mode;
 
     //***********************************************************************************
     // CONSTRUCTORS

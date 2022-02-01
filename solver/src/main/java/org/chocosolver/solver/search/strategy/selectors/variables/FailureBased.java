@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,11 +13,7 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 
 import java.util.Random;
 
@@ -31,13 +27,12 @@ import java.util.Random;
  */
 
 
-public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorContradiction {
+public class FailureBased<V extends Variable> implements IMonitorContradiction, VariableSelector<V> {
 
     private double currenFixNum;
     private final int varNum;
     private final Random ran;
     private final Solver solver;
-    private final IntValueSelector valueSelector;
     private final TIntArrayList bests = new TIntArrayList();
     private int currentVarIndex = -1;
 
@@ -58,14 +53,11 @@ public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorCo
      * @param vars:  the decision variables.
      * @param seed:  a random seed.
      * @param sType: the score type. 1->FRB; 2->FRBA; 3->FLB; 4->FLBA.
-     * @param vs:    a value selector.
      */
-    public FailureBased(IntVar[] vars, long seed, int sType, IntValueSelector vs) {
-        super(vars);
+    public FailureBased(V[] vars, long seed, int sType) {
         ran = new Random(seed);
         solver = vars[0].getModel().getSolver();
         solver.plugMonitor(this);
-        valueSelector = vs;
         varNum = vars.length;
         if (sType > 4 || sType < 1) {
             if (solver.getModel().getSettings().warnUser()) {
@@ -94,15 +86,15 @@ public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorCo
     }
 
     @Override
-    public Decision<IntVar> getDecision() {
+    public V getVariable(V[] vars) {
         currenFixNum = 0;
-        IntVar best = null;
+        V best = null;
         bests.resetQuick();
         double w = Double.NEGATIVE_INFINITY;
         for (int idx = 0; idx < varNum; idx++) {
             int dsize = vars[idx].getDomainSize();
             if (dsize > 1) {
-                double weight = weight(idx);
+                double weight = weight(idx, dsize);
                 if (w < weight) {
                     bests.resetQuick();
                     bests.add(idx);
@@ -119,19 +111,8 @@ public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorCo
             best = vars[currentVarIndex];
             assignTimes[currentVarIndex]++;
         }
-        return computeDecision(best);
-
+        return best;
     }
-
-    protected Decision<IntVar> computeDecision(IntVar variable) {
-        if (variable == null || variable.isInstantiated()) {
-            return null;
-        }
-        int currentVal = valueSelector.selectValue(variable);
-        return variable.getModel().getSolver().getDecisionPath().makeIntDecision(variable,
-                DecisionOperatorFactory.makeIntEq(), currentVal);
-    }
-
 
     public void onContradiction(ContradictionException cex) {
         if (currentVarIndex != -1) {
@@ -144,8 +125,7 @@ public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorCo
         }
     }
 
-    protected double weight(int id) {
-        double ds = vars[id].getDomainSize();
+    protected double weight(int id, int ds) {
         double finalScore = 0;
         switch (scoreType) {
             case 1:
@@ -169,4 +149,18 @@ public class FailureBased extends AbstractStrategy<IntVar> implements IMonitorCo
         return finalScore;
     }
 
+    @Override
+    public boolean init() {
+        if (!solver.getSearchMonitors().contains(this)) {
+            solver.plugMonitor(this);
+        }
+        return true;
+    }
+
+    @Override
+    public void remove() {
+        if (solver.getSearchMonitors().contains(this)) {
+            solver.unplugMonitor(this);
+        }
+    }
 }

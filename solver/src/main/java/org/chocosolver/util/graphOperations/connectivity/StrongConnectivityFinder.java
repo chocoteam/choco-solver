@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,17 +22,23 @@ public class StrongConnectivityFinder  {
     //***********************************************************************************
 
     // input
-    private DirectedGraph graph;
-    private BitSet restriction;
-    private int n;
+    private final DirectedGraph graph;
+    private final BitSet restriction;
+    private final int n;
     // output
-    private int[] sccFirstNode, nextNode, nodeSCC;
+    private final int[] sccFirstNode;
+    private final int[] nextNode;
+    private final int[] nodeSCC;
     private int nbSCC;
 
     // util
-    private int[] stack, p, inf, nodeOfDfsNum, dfsNumOfNode;
-    private Iterator<Integer>[] iterator;
-    private BitSet inStack;
+    private final int[] stack;
+    private final int[] p;
+    private final int[] inf;
+    private final int[] nodeOfDfsNum;
+    private final int[] dfsNumOfNode;
+    private final Iterator<Integer>[] iterator;
+    private final BitSet inStack;
 
     //***********************************************************************************
     // CONSTRUCTOR

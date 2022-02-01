@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -35,9 +35,9 @@ public class R3 implements R {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
+    private final int n;
     private int[] valToRem;
-    private ISet[] learntEqualities;
+    private final ISet[] learntEqualities;
 
     //***********************************************************************************
     // CONSTRUCTORS

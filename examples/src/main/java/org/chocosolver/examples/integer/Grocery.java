@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -82,7 +82,7 @@ public class Grocery extends AbstractProblem {
         for (int i = 0; i < 4; i++) {
             st.append(String.format("\titem %d : %d$\n", (i + 1), itemCost[i].getValue()));
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {
@@ -94,7 +94,7 @@ public class Grocery extends AbstractProblem {
      * It has been designed to handle large values (by using longs)
      */
     private class PropLargeProduct extends Propagator<IntVar> {
-        private long target;
+        private final long target;
 
         /**
          * Large product propagator

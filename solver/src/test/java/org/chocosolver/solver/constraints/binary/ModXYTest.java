@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,7 +29,7 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
  * @since 29/03/2019
  */
 public class ModXYTest extends AbstractBinaryTest {
-    private static int TEST_VALUE = 3; // TODO How to change this dependency to use AbstractBinaryTest
+    private static final int TEST_VALUE = 3; // TODO How to change this dependency to use AbstractBinaryTest
 
     @Override
     protected int validTuple(int vx, int vy) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -72,7 +72,7 @@ public class CycloHexan extends AbstractProblem {
                 st.append(format("%s : [%f, %f]\n\t", vars[i].getName(), vars[i].getLB(), vars[i].getUB()));
             }
             out.println("CycloHexan");
-            out.println(st.toString());
+            out.println(st);
         });
         while (model.getSolver().solve()) ;
     }

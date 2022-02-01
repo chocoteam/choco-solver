@@ -46,7 +46,7 @@ basics,PrizeCollecting-15-3-5-0.xml.lzma,6,20,1674,1627
 basics,qcp-15-120-00_X2.xml.lzma,1,_,484,458
 basics,QuadraticAssignment-qap.xml.lzma,13,4776,905,878
 basics,QuasiGroup-3-04.xml.lzma,1,_,2,0
-basics,QuasiGroup-7-09.xml.lzma,1,_,1889,1864
+basics,QuasiGroup-7-09.xml.lzma,1,_,479,468
 basics,QueenAttacking-06.xml.lzma,4,0,13140,12884
 basics,Queens-0008-m1.xml.lzma,1,_,106,102
 basics,RadarSurveillance-8-24-3-2-00.xml.lzma,1,_,75,4
@@ -59,7 +59,7 @@ basics,StillLife-wastage-03.xml.lzma,3,6,22,17
 basics,StripPacking-C1P1.xml.lzma,1,_,132389,130474
 basics,Subisomorphism-A-10.xml.lzma,1,_,18,16
 basics,Sudoku-s01a-alldiff.xml.lzma,1,_,1,0
-basics,Taillard-os-04-04-0.xml.lzma,17,193,14127,13951
+basics,Taillard-os-04-04-0.xml.lzma,21,193,11050,10908
 basics,testExtension1.xml.lzma,1,_,4,0
 basics,testExtension2.xml.lzma,1,_,4,0
 basics,testExtension3.xml.lzma,0,_,15,16
@@ -85,8 +85,8 @@ basics,SumColoring-myciel4_c18.xml.lzma,5,22,22978,22869
 basics,Rlfap-graph-04-opt_c18.xml.lzma,1,394,236,235
 basics,PeacableArmies-m1-05_c18.xml.lzma,3,4,2792,2745
 basics,PeacableArmies-m2-05_c18.xml.lzma,5,4,2058,2017
-basics,TravelingTournament-a3-galaxy04_c18.xml.lzma,11,416,3944,3890
-basics,Rcpsp-j30-01-01_c18.xml.lzma,4,43,81,74
+basics,TravelingTournament-a3-galaxy04_c18.xml.lzma,4,416,4107,4068
+basics,Rcpsp-j30-01-01_c18.xml.lzma,5,43,155,146
 basics,QuadraticAssignment-qap_c18.xml.lzma,13,4776,905,878
 basics,Auction-sum-example_c18.xml.lzma,2,54,6,3
 basics,Auction-cnt-example_c18.xml.lzma,2,54,7,4

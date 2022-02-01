@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -30,7 +30,7 @@ public class OneWordS64BitSet implements IStateBitSet {
     /**
      * The internal field corresponding to the serialField "bits".
      */
-    private IStateLong word;
+    private final IStateLong word;
 
     /**
      * Creates a bit set whose initial size is large enough to explicitly

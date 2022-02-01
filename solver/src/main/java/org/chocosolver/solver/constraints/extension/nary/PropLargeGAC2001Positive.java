@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,20 +29,20 @@ public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
      * supports[i][j stores the index of the tuple that currently support
      * the variable-value pair (i,j)
      */
-    private IStateInt[][] supports;
+    private final IStateInt[][] supports;
 
-    private int arity;
+    private final int arity;
 
-    private int[] offsets;
+    private final int[] offsets;
 
     private static final int NO_SUPPORT = -2;
 
-    private int[][][] tab;
+    private final int[][][] tab;
 
     // check if none of the tuple is trivially outside
     //the domains and if yes use a fast valid check
     //by avoiding checking the bounds
-    private ValidityChecker valcheck;
+    private final ValidityChecker valcheck;
 
     private final IntIterableBitSet vrms;
 

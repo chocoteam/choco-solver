@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -37,9 +37,10 @@ public class IfArExpression implements ArExpression {
     /**
      * The expressions this expression relies on
      */
-    private ArExpression e1, e2;
+    private final ArExpression e1;
+    private final ArExpression e2;
 
-    private ReExpression b0;
+    private final ReExpression b0;
 
 
     public IfArExpression(ReExpression b, ArExpression y1, ArExpression y2) {

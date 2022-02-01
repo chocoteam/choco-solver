@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,18 +19,19 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -165,21 +166,27 @@ public class Flatzinc extends RegParser {
             super.makeComplementarySearch(m, i);
         } else {
             Solver solver = m.getSolver();
+            List<AbstractStrategy<?>> strats = new LinkedList<>();
+            strats.add(solver.getSearch());
             if (solver.getSearch() != null) {
                 IntVar[] ivars = Stream.of(datas[i].allOutPutVars())
                         .filter(VariableUtils::isInt)
+                        .filter(v -> !VariableUtils.isConstant(v))
                         .map(Variable::asIntVar)
                         .sorted(Comparator.comparingInt(IntVar::getDomainSize))
                         .toArray(IntVar[]::new);
+                if (ivars.length > 0) {
+                    strats.add(Search.lastConflict(Search.minDomLBSearch(ivars)));
+                }
                 SetVar[] svars = Stream.of(datas[i].allOutPutVars())
                         .filter(VariableUtils::isSet)
                         .map(Variable::asSetVar)
                         .sorted(Comparator.comparingInt(s -> s.getUB().size()))
                         .toArray(SetVar[]::new);
-                solver.setSearch(solver.getSearch(),
-                        Search.lastConflict(Search.minDomLBSearch(ivars)),
-                        Search.setVarSearch(svars)
-                );
+                if (svars.length > 0) {
+                    strats.add(Search.setVarSearch(svars));
+                }
+                solver.setSearch(strats.toArray(new AbstractStrategy[0]));
             }
         }
     }
@@ -188,6 +195,17 @@ public class Flatzinc extends RegParser {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
+        /*solver.plugMonitor(new IMonitorDownBranch() {
+            @Override
+            public void beforeDownBranch(boolean left) {
+                solver.log().printf("[%d] %s %s %s %n",
+                        solver.getEnvironment().getWorldIndex() - 2,
+                        solver.getDecisionPath().getLastDecision().getDecisionVariable().getName(),
+                        left ? "=" : "!=",
+                        solver.getDecisionPath().getLastDecision().getDecisionValue().toString());
+            }
+        });*/
+        //solver.showShortStatistics();
         if (level.isLoggable(Level.INFO)) {
             solver.log().bold().printf("== %d flatzinc ==%n", datas[0].cstrCounter().values().stream().mapToInt(i -> i).sum());
             datas[0].cstrCounter().entrySet().stream()
