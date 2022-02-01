@@ -50,11 +50,15 @@ public class PropCondAllDiffAC extends PropCondAllDiffBase {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        IntVar[] vars = filterVariables();
+        if (vars.length == 0) {
+            return;
+        }
         if (fast) {
-            AlgoAllDiffACFast filter = new AlgoAllDiffACFast(filterVariables(), this);
+            AlgoAllDiffACFast filter = new AlgoAllDiffACFast(vars, this);
             filter.propagate();
         } else {
-            AlgoAllDiffAC filter = new AlgoAllDiffAC(filterVariables(), this);
+            AlgoAllDiffAC filter = new AlgoAllDiffAC(vars, this);
             filter.propagate();
         }
     }

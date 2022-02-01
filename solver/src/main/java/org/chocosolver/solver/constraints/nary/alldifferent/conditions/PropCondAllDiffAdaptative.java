@@ -34,15 +34,19 @@ public class PropCondAllDiffAdaptative extends PropCondAllDiffAC {
     }
 
     public void propagate(int evtmask) throws ContradictionException {
+        IntVar[] vars = filterVariables();
+        if (vars.length == 0) {
+            return;
+        }
         double p = (success * 1.d) / (calls * 1.d);
         if (rd.nextFloat() < p) {
             boolean rem = true;
             try {
                 if (fast) {
-                    AlgoAllDiffACFast filter = new AlgoAllDiffACFast(filterVariables(), this);
+                    AlgoAllDiffACFast filter = new AlgoAllDiffACFast(vars, this);
                     rem = filter.propagate();
                 } else {
-                    AlgoAllDiffAC filter = new AlgoAllDiffAC(filterVariables(), this);
+                    AlgoAllDiffAC filter = new AlgoAllDiffAC(vars, this);
                     rem = filter.propagate();
                 }
             } finally {

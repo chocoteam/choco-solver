@@ -32,7 +32,11 @@ public class PropCondAllDiffBC extends PropCondAllDiffBase {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        filter.reset(filterVariables());
+        IntVar[] vars = filterVariables();
+        if (vars.length == 0) {
+            return;
+        }
+        filter.reset(vars);
         filter.filter();
     }
 
