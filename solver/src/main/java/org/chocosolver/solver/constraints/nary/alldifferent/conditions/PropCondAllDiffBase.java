@@ -23,7 +23,7 @@ public abstract class PropCondAllDiffBase extends Propagator<IntVar> {
     protected final Condition condition;
 
     public PropCondAllDiffBase(IntVar[] variables, Condition condition, PropagatorPriority priority) {
-        super(variables, priority, true);
+        super(variables, priority, false);
         this.condition = condition;
     }
 
