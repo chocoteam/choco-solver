@@ -25,9 +25,10 @@ import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
 import org.chocosolver.solver.constraints.nary.PropKLoops;
 import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
+import org.chocosolver.solver.constraints.nary.alldifferent.conditions.CondAllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiff_AC;
+import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferentprec.PropAllDiffPrec;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
@@ -749,15 +750,42 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars            collection of variables
      * @param condition       condition defining which variables should be constrained
      * @param singleCondition specifies how to apply filtering
+     * @param consistency consistency level, among {"BC", "AC_REGIN", "AC", "AC_ZHANG", "DEFAULT"}
+     *                    <p>
+     *                    <b>BC</b>:
+     *                    Based on: "A Fast and Simple Algorithm for Bounds Consistency of the AllDifferent Constraint"</br>
+     *                    A. Lopez-Ortiz, CG. Quimper, J. Tromp, P.van Beek
+     *                    <br/>
+     *                    <b>AC_REGIN</b>:
+     *                    Uses Regin algorithm
+     *                    Runs in O(m.n) worst case time for the initial propagation and then in O(n+m) on average.
+     *                    <p>
+     *                    <b>AC, AC_ZHANG</b>:
+     *                    Uses Zhang improvement of Regin algorithm
+     *                    <p>
+     *                    <b>DEFAULT</b>:
+     *                    <br/>
+     *                    Uses BC plus a probabilistic AC_ZHANG propagator to get a compromise between BC and AC_ZHANG
+     *
+     */
+    default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean singleCondition, String consistency) {
+        return new CondAllDifferent(vars, condition, consistency, singleCondition);
+    }
+
+    /**
+     * Creates an allDifferent constraint subject to the given condition. More precisely:
+     * <p>
+     * IF <code>singleCondition</code>
+     * for all X,Y in vars, condition(X) => X != Y
+     * ELSE
+     * for all X,Y in vars, condition(X) AND condition(Y) => X != Y
+     *
+     * @param vars            collection of variables
+     * @param condition       condition defining which variables should be constrained
+     * @param singleCondition specifies how to apply filtering
      */
     default Constraint allDifferentUnderCondition(IntVar[] vars, Condition condition, boolean singleCondition) {
-        if (singleCondition) {
-            return new Constraint(ConstraintsName.ALLDIFFERENT,
-                    new PropCondAllDiffInst(vars, condition, singleCondition),
-                    new PropCondAllDiff_AC(vars, condition)
-            );
-        }
-        return new Constraint(ConstraintsName.ALLDIFFERENT, new PropCondAllDiffInst(vars, condition, singleCondition));
+        return allDifferentUnderCondition(vars, condition, singleCondition, CondAllDifferent.DEFAULT);
     }
 
     /**
