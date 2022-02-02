@@ -9,9 +9,9 @@
  */
 package org.chocosolver.solver.constraints.nary.alldifferent.conditions;
 
-import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffAC;
+import org.chocosolver.solver.constraints.nary.alldifferent.algo.AlgoAllDiffACFast;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -23,9 +23,9 @@ import org.chocosolver.util.ESat;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropCondAllDiff_AC extends Propagator<IntVar> {
+public class PropCondAllDiffAC extends PropCondAllDiffBase {
 
-    private final Condition condition;
+    protected final boolean fast;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -39,9 +39,9 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
      * @param condition defines the subset of variables which is considered by the
      *                  allDifferent constraint
      */
-    public PropCondAllDiff_AC(IntVar[] variables, Condition condition) {
-        super(variables, PropagatorPriority.QUADRATIC, false);
-        this.condition = condition;
+    public PropCondAllDiffAC(IntVar[] variables, Condition condition, boolean fast) {
+        super(variables, condition, PropagatorPriority.QUADRATIC);
+        this.fast = fast;
     }
 
     //***********************************************************************************
@@ -50,46 +50,27 @@ public class PropCondAllDiff_AC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        int nb = 0;
-        for (IntVar v : vars) {
-            if (condition.holdOnVar(v)) {
-                nb++;
-            }
+        IntVar[] vars = filterVariables();
+        if (vars.length == 0) {
+            return;
         }
-        IntVar[] vs = new IntVar[nb];
-        for (IntVar v : vars) {
-            if (condition.holdOnVar(v)) {
-                nb--;
-                vs[nb] = v;
-            }
+        if (fast) {
+            AlgoAllDiffACFast filter = new AlgoAllDiffACFast(vars, this);
+            filter.propagate();
+        } else {
+            AlgoAllDiffAC filter = new AlgoAllDiffAC(vars, this);
+            filter.propagate();
         }
-        AlgoAllDiffAC filter = new AlgoAllDiffAC(vs, this);
-        filter.propagate();
     }
 
     //***********************************************************************************
     // INFO
     //***********************************************************************************
+
     @Override
     public ESat isEntailed() {
-        int nbInst = 0;
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i].isInstantiated()) {
-                nbInst++;
-                if (condition.holdOnVar(vars[i])) {
-                    for (int j = i + 1; j < vars.length; j++) {
-                        if (condition.holdOnVar(vars[j]))
-                            if (vars[j].isInstantiated() && vars[i].getValue() == vars[j].getValue()) {
-                                return ESat.FALSE;
-                            }
-                    }
-                }
-            }
-        }
-        if (nbInst == vars.length) {
-            return ESat.TRUE;
-        }
-        return ESat.UNDEFINED;
+        return ESat.TRUE; // redundant propagator (used with PropCondAllDiffInst)
     }
+
 
 }
