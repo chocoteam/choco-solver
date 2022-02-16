@@ -612,6 +612,15 @@ public class TableTest {
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPow(String a) {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 2, 60);
+        IntVar foo1 = model.intVar("foo1", 0, 999_999);
+        model.table(new IntVar[]{foo1, foo}, TuplesFactory.power(foo1, foo, 7), a).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
+    }
+
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
     public void testMVAV(String a) {
         if ("AC3bit+rm".equals(a)) return;
