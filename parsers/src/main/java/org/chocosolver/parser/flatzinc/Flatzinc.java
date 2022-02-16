@@ -18,6 +18,8 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -30,10 +32,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -205,6 +204,15 @@ public class Flatzinc extends RegParser {
                         solver.getDecisionPath().getLastDecision().getDecisionValue().toString());
             }
         });*/
+        int cnt = 0;
+        for(Constraint c : model.getCstrs()){
+            for(Propagator<?> p : c.getPropagators()){
+                if(p.isReified()){
+                    cnt++;
+                }
+            }
+        }
+        System.out.printf("%d reified cstrs%n", cnt);
         //solver.showShortStatistics();
         if (level.isLoggable(Level.INFO)) {
             solver.log().bold().printf("== %d flatzinc ==%n", datas[0].cstrCounter().values().stream().mapToInt(i -> i).sum());

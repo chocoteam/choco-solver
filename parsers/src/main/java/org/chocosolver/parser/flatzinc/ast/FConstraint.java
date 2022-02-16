@@ -2342,14 +2342,7 @@ public enum FConstraint {
             IntVar x = exps.get(0).intVarValue(model);
             int y = exps.get(1).intValue();
             IntVar z = exps.get(2).intVarValue(model);
-            Tuples tuples = new Tuples(true);
-            for (int val1 : x) {
-                int res = (int) Math.pow(val1, y);
-                if (z.contains(res)) {
-                    tuples.add(val1, res);
-                }
-            }
-            model.table(x, z, tuples).post();
+            model.pow(x, y, z).post();
         }
     },
 
