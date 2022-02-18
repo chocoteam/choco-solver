@@ -536,7 +536,7 @@ public class TableTest {
         model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
-        solver.showDecisions();
+        //solver.showDecisions();
         solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);

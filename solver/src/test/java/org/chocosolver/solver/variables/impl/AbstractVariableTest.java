@@ -392,6 +392,7 @@ public class AbstractVariableTest {
         Assert.assertEquals(props[1].getVIndice(0), 8);
         int k = x.swapOnPassivate(props[8], 0);
         Assert.assertEquals(k, 8);
+        props[8].setVIndices(0, k);
         Assert.assertEquals(x.getPropagators(),
                 new Propagator[]{props[7], props[3], props[4], props[5], props[6],
                         props[1], props[2], props[0], props[8], null, null, null, null});
@@ -407,6 +408,7 @@ public class AbstractVariableTest {
 
         k = x.swapOnActivate(props[8], 0);
         Assert.assertEquals(k, 0);
+        props[8].setVIndices(0, k);
         Assert.assertEquals(x.getPropagators(),
                 new Propagator[]{props[8], props[3], props[4], props[5], props[6], props[7],
                         props[2], props[0], props[1], null, null, null, null});
