@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -147,7 +147,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     private int lastWorld = -1;
     private long lastNbOfBacktracks = -1;
     private long lastNbOfRestarts = -1;
-    private TIntHashSet boundUpdate;
+    private final TIntHashSet boundUpdate;
     private boolean computed;
 
     private final IIntDeltaMonitor[] idms;
@@ -211,7 +211,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      *
      * @throws org.chocosolver.solver.exception.ContradictionException if initialisation encounters a contradiction
      */
-    protected void initialize() throws ContradictionException {
+    private void initialize() throws ContradictionException {
         checkBounds();
         initGraph();
         this.slp = graph.getPathFinder();
@@ -233,6 +233,9 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         if (PropagatorEventType.isFullPropagation(evtmask)) {
             initialize();
+            for (int i = 0; i < idms.length; i++) {
+                idms[i].startMonitoring();
+            }
         }
         filter();
     }
@@ -305,7 +308,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
                     nexts.clear();
                     pi.delta(k, j, nexts);
                     TIntIterator it = nexts.iterator();
-                    for (; it.hasNext(); ) {
+                    while (it.hasNext()) {
                         int succ = it.next();
                         layer.get(i + 1).add(succ);
                     }
@@ -444,7 +447,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      *
      * @throws ContradictionException if a domain becomes empty
      */
-    protected void updateUpperBound() throws ContradictionException {
+    private void updateUpperBound() throws ContradictionException {
         int k = 0;
         double uk;
         double lp;
@@ -524,7 +527,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      *
      * @throws ContradictionException if a domain becomes empty
      */
-    protected void updateLowerBound() throws ContradictionException {
+    private void updateLowerBound() throws ContradictionException {
 
 
         int k = 0;
@@ -610,7 +613,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      *
      * @throws ContradictionException if a domain is emptied
      */
-    protected boolean prefilter() throws ContradictionException {
+    private boolean prefilter() throws ContradictionException {
         FastPathFinder p = this.graph.getPathFinder();
 
         boolean cont = true;
@@ -633,7 +636,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param realsp a given lower bound
      * @throws ContradictionException if the cost variable domain is emptied
      */
-    protected void filterDown(final double realsp) throws ContradictionException {
+    private void filterDown(final double realsp) throws ContradictionException {
 
         if (realsp - z[0].getUB() >= _MCR_DECIMAL_PREC) {
             // "cost variable domain is emptied"
@@ -653,7 +656,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      * @param reallp a given upper bound
      * @throws ContradictionException if the cost variable domain is emptied
      */
-    protected void filterUp(final double reallp) throws ContradictionException {
+    private void filterUp(final double reallp) throws ContradictionException {
         if (reallp - z[0].getLB() <= -_MCR_DECIMAL_PREC) {
             // "cost variable domain is emptied"
             fails();
@@ -666,7 +669,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
-    protected void checkWorld() throws ContradictionException {
+    private void checkWorld() throws ContradictionException {
         int currentworld = model.getEnvironment().getWorldIndex();
         long currentbt = model.getSolver().getBackTrackCount();
         long currentrestart = model.getSolver().getRestartCount();
@@ -700,7 +703,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
      *
      * @throws ContradictionException if removing an edge causes a domain to be emptied
      */
-    protected void delayedGraphUpdate() throws ContradictionException {
+    private void delayedGraphUpdate() throws ContradictionException {
 
         try {
             do
@@ -775,7 +778,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
     }
 
-    private void delayedBoundUpdate() throws ContradictionException {
+    private void delayedBoundUpdate() {
         if (!computed && boundUpdate.size() > 0) {
             this.getGraph().delayedBoundUpdate(toRemove, z, boundUpdate.toArray());
             boundUpdate.clear();
@@ -786,7 +789,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         checkWorld();
     }
 
-    public final boolean needPropagation() {
+    public boolean needPropagation() {
         int currentworld = model.getEnvironment().getWorldIndex();
         long currentbt = model.getSolver().getBackTrackCount();
         long currentrestart = model.getSolver().getRestartCount();
@@ -817,11 +820,11 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
     }
 
 
-    public final StoredDirectedMultiGraph getGraph() {
+    public StoredDirectedMultiGraph getGraph() {
         return graph;
     }
 
-    public final int getRegret(int layer, int value, int... resources) {
+    public int getRegret(int layer, int value, int... resources) {
         return this.graph.getRegret(layer, value, resources);
     }
 
@@ -933,7 +936,7 @@ public final class PropMultiCostRegular extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idxVar) {
+        public UnaryIntProcedure<Integer> set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

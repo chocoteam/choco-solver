@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,11 +40,11 @@ public class MoveSeq implements Move {
     /**
      * Index of the current move
      */
-    private IStateInt index;
+    private final IStateInt index;
     /**
      * Sequence of strategies in use
      */
-    private AbstractStrategy seqStrat;
+    private final AbstractStrategy seqStrat;
 
     /**
      * Create a move which sequentially apply a move. When a move can not be extended, the next one is used.

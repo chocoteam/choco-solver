@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -37,7 +37,7 @@ import java.util.stream.IntStream;
  * @author Arthur Godet <arth.godet@gmail.com>, Jean-Guillaume Fages
  */
 public class PropBinPacking extends Propagator<IntVar> {
-    private IntVar[] itemBin;
+    private final IntVar[] itemBin;
     protected int[] itemSize;
     protected IntVar[] binLoad;
     protected final int offset;
@@ -49,31 +49,34 @@ public class PropBinPacking extends Propagator<IntVar> {
     protected ISet[] P;
     protected ISet[] R;
     protected IStateInt[] sumR;
-    private IStateInt[] sumP;
-    private BitSet binsToProcess;
+    private final IStateInt[] sumP;
+    private final BitSet binsToProcess;
 
     // NoSum parameters and Java variables
-    private boolean useNoSumFiltering;
+    private final boolean useNoSumFiltering;
     private int sumA;
     private int sumB;
     private int sumC;
     private int k;
     private int kPrime;
-    private int[] indexSortedBySize;
-    private int[] X;
+    private final int[] indexSortedBySize;
+    private final int[] X;
     private int xSize;
 
-    private UnaryIntProcedure<Integer> procedure = new UnaryIntProcedure<Integer>() {
+    @SuppressWarnings("Convert2Diamond")
+    private final UnaryIntProcedure<Integer> procedure = new UnaryIntProcedure<Integer>() {
         int item;
+
         @Override
         public UnaryIntProcedure<Integer> set(Integer itemIdx) {
             item = itemIdx;
             return this;
         }
+
         @Override
         public void execute(int bin) throws ContradictionException {
             bin -= offset;
-            if(bin >= 0 && bin < nbAvailableBins && P[bin].contains(item)) {
+            if (bin >= 0 && bin < nbAvailableBins && P[bin].contains(item)) {
                 P[bin].remove(item);
                 binLoad[bin].updateUpperBound(sumP[bin].add(-itemSize[item]), PropBinPacking.this);
             }
@@ -359,6 +362,9 @@ public class PropBinPacking extends Propagator<IntVar> {
                 }
             }
             binsToProcess.set(0, nbAvailableBins);
+            for(int i=0; i<nbItems; i++){
+                monitors[i].startMonitoring();
+            }
         }
         while(!binsToProcess.isEmpty()) {
             processBin(binsToProcess.nextSetBit(0));

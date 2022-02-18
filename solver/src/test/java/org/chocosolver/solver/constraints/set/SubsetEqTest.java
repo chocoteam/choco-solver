@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -37,8 +37,8 @@ public class SubsetEqTest {
     public void testOneToFill() {
         Model model = new Model();
         SetVar[] vars = new SetVar[3];
-        vars[0] = model.setVar(new int[]{0});
-        vars[1] = model.setVar(new int[]{0, 1});
+        vars[0] = model.setVar(0);
+        vars[1] = model.setVar(0, 1);
         vars[2] = model.setVar(new int[]{}, new int[]{0, 1, 2});
         model.subsetEq(vars).post();
 
@@ -55,8 +55,8 @@ public class SubsetEqTest {
     public void testNoSolution() {
         Model model = new Model();
         SetVar[] vars = new SetVar[3];
-        vars[0] = model.setVar(new int[]{0});
-        vars[1] = model.setVar(new int[]{0, 1});
+        vars[0] = model.setVar(0);
+        vars[1] = model.setVar(0, 1);
         vars[2] = model.setVar(new int[]{}, new int[]{0, 2});
         model.subsetEq(vars).post();
 
@@ -68,8 +68,8 @@ public class SubsetEqTest {
     public void testNoSolutionBadData() {
         Model model = new Model();
         SetVar[] vars = new SetVar[3];
-        vars[0] = model.setVar(new int[]{0});
-        vars[1] = model.setVar(new int[]{1});
+        vars[0] = model.setVar(0);
+        vars[1] = model.setVar(1);
         vars[2] = model.setVar(new int[]{}, new int[]{0, 1, 2});
 
         model.subsetEq(vars).post();

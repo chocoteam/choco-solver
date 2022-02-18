@@ -1,0 +1,1 @@
+predicate fzn_if_then_else_var_bool(array[int] of var bool: c, array[int] of var bool: x, var bool: y);

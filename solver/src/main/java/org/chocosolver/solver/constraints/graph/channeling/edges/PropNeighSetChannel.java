@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,18 +31,19 @@ public class PropNeighSetChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private SetVar set;
-    private GraphVar g;
-    private int vertex;
-    private IncidentSet inc;
-    private ISetDeltaMonitor sdm;
-    private IntProcedure forceS, remS;
+    private final SetVar set;
+    private final GraphVar<?> g;
+    private final int vertex;
+    private final IncidentSet inc;
+    private final ISetDeltaMonitor sdm;
+    private final IntProcedure forceS;
+    private final IntProcedure remS;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNeighSetChannel(SetVar neigh, final int vertex, GraphVar gV, IncidentSet incSet) {
+    public PropNeighSetChannel(SetVar neigh, final int vertex, GraphVar<?> gV, IncidentSet incSet) {
         super(new Variable[]{neigh, gV}, PropagatorPriority.LINEAR, true);
         this.vertex = vertex;
         this.set = neigh;
@@ -82,6 +83,7 @@ public class PropNeighSetChannel extends Propagator<Variable> {
                 set.force(i, this);
             }
         }
+        sdm.startMonitoring();
     }
 
     @Override

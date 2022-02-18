@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -27,8 +27,9 @@ import org.chocosolver.util.tools.ArrayUtils;
  */
 public class PropAbsolute extends Propagator<IntVar> {
 
-    private IntVar X, Y;
-    private boolean bothEnumerated;
+    private final IntVar X;
+    private final IntVar Y;
+    private final boolean bothEnumerated;
 
     public PropAbsolute(IntVar X, IntVar Y) {
         super(ArrayUtils.toArray(X, Y), PropagatorPriority.BINARY, true);

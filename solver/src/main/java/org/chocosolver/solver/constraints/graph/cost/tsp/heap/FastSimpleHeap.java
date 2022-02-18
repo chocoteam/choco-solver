@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,11 +25,11 @@ public class FastSimpleHeap implements ISimpleHeap {
     // VARIABLES
     //***********************************************************************************
 
-    private BitSet inBest;
-    private BitSet obsolete;
-    private int[] stack;
+    private final BitSet inBest;
+    private final BitSet obsolete;
+    private final int[] stack;
     private int k;
-    private ISimpleHeap heap_rest;
+    private final ISimpleHeap heap_rest;
 
     //***********************************************************************************
     // CONSTRUCTORS

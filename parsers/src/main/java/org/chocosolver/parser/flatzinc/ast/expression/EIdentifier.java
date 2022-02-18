@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,13 +18,13 @@ import org.chocosolver.solver.variables.SetVar;
 
 
 /*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 11 janv. 2010
-* Since : Choco 2.1.1
-*
-* Class for identifier expressions definition based on flatzinc-like objects.
-*/
+ * User : CPRUDHOM
+ * Mail : cprudhom(a)emn.fr
+ * Date : 11 janv. 2010
+ * Since : Choco 2.1.1
+ *
+ * Class for identifier expressions definition based on flatzinc-like objects.
+ */
 public final class EIdentifier extends Expression {
 
     public final String value;
@@ -64,8 +64,18 @@ public final class EIdentifier extends Expression {
     }
 
     @Override
+    public int[] setValue() {
+        return (int[]) object;
+    }
+
+    @Override
+    public int[][] toSetArray() {
+        return (int[][]) object;
+    }
+
+    @Override
     public IntVar intVarValue(Model model) {
-        if(Integer.class.isInstance(object)){
+        if (object instanceof Integer) {
             return model.intVar(intValue());
         }
         return (IntVar) object;
@@ -108,9 +118,9 @@ public final class EIdentifier extends Expression {
 
     @Override
     public BoolVar boolVarValue(Model model) {
-        if (Integer.class.isInstance(object)) {
+        if (object instanceof Integer) {
             return ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
-        } else if (Boolean.class.isInstance(object)) {
+        } else if (object instanceof Boolean) {
             return ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
         }
         return (BoolVar) object;
@@ -154,7 +164,7 @@ public final class EIdentifier extends Expression {
         final int[][] values = new int[bar.length][];
         for (int i = 0; i < bar.length; i++) {
             values[i] = new int[bar[i].length];
-            for(int j = 0; j < bar[i].length; j++){
+            for (int j = 0; j < bar[i].length; j++) {
                 values[i][j] = bar[i][j] ? 1 : 0;
             }
         }
@@ -167,8 +177,17 @@ public final class EIdentifier extends Expression {
     }
 
     @Override
-    public SetVar[] toSetVarArray(Model solver) {
+    public SetVar[] toSetVarArray(Model model) {
         if (object.getClass().isArray()) {
+            //Can be array of int => array of IntegerConstantVariable
+            if (set_arr.isInstance(object)) {
+                int[][] values = (int[][]) object;
+                SetVar[] vars = new SetVar[values.length];
+                for (int i = 0; i < values.length; i++) {
+                    vars[i] = model.setVar(values[i]);
+                }
+                return vars;
+            }
             return (SetVar[]) object;
         }
         Exit.log();

@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,12 +40,15 @@ import static org.chocosolver.util.tools.ArrayUtils.flatten;
  */
 public class BIBD extends AbstractProblem {
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-v", usage = "matrix first dimension.", required = false)
     private int v = 7;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-k", usage = "ones per column.", required = false)
     private int k = 3;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-p", usage = "scalar product.", required = false)
     private int l = 20;
 
@@ -130,7 +133,7 @@ public class BIBD extends AbstractProblem {
         } else {
             st.append("\tINFEASIBLE");
         }
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

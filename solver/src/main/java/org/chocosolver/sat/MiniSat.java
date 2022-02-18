@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -58,7 +58,8 @@ public class MiniSat implements SatFactory, Dimacs {
     // there if literal becomes true).
     private final TIntObjectHashMap<ArrayList<Watcher>> watches_ = new TIntObjectHashMap<>();
     // The current assignments.
-    TIntObjectHashMap<Boolean> assignment_ = new TIntObjectHashMap<>();
+    //TIntObjectHashMap<Boolean> assignment_ = new TIntObjectHashMap<>();
+    List<Boolean> assignment_ = new ArrayList<>();
     // Assignment stack; stores all assignments made in the order they
     // were made.
     TIntArrayList trail_ = new TIntArrayList();
@@ -121,6 +122,7 @@ public class MiniSat implements SatFactory, Dimacs {
         this.qhead_ = 0;
         num_vars_ = 0;
         rand = new Random(random_seed);
+        assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
     }
 
     @Override
@@ -135,7 +137,7 @@ public class MiniSat implements SatFactory, Dimacs {
      */
     public int newVariable() {
         int v = incrementVariableCounter();
-        assignment_.put(v, Boolean.lUndef);
+        assignment_.add(v, Boolean.lUndef);
         vardata.add(new VarData(CR_Undef, 0));
         //activity .push(0);
         activity.add(rnd_init_act ? rand.nextDouble() * 0.00001 : 0);
@@ -250,7 +252,7 @@ public class MiniSat implements SatFactory, Dimacs {
         if (trailMarker() > level) {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
-                assignment_.put(x, Boolean.lUndef);
+                assignment_.set(x, Boolean.lUndef);
                 if (phase_saving > 1 || (phase_saving == 1) && c > trail_markers_.get(trail_markers_.size() - 1))
                     polarity.set(x, sgn(trail_.get(c)));
                 insertVarOrder(x);
@@ -302,7 +304,7 @@ public class MiniSat implements SatFactory, Dimacs {
         if (assignment_.get(var(l)) == Boolean.lUndef) {
             touched_variables_.add(l);
         }
-        assignment_.put(var(l), makeBoolean(sgn(l)));
+        assignment_.set(var(l), makeBoolean(sgn(l)));
         //vardata.ensureCapacity(var(l));
         while (vardata.size() < var(l)) {
             vardata.add(VD_Undef);
@@ -767,7 +769,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
 
     void claBumpActivity(Clause c) {
-        if ((c.activity += cla_inc) > 1e20) {
+        if ((c.activity += cla_inc) > 1e20d) {
             // Rescale:
             for (int i = 0; i < learnts.size(); i++) {
                 learnts.get(i).activity *= 1e-20d;
@@ -808,8 +810,12 @@ public class MiniSat implements SatFactory, Dimacs {
 
         // Find the finite subsequence that contains index 'x', and the
         // size of that subsequence:
-        int size, seq;
-        for (size = 1, seq = 0; size < x + 1; seq++, size = 2 * size + 1) ;
+        int size = 1;
+        int seq = 0;
+        while (size < x + 1) {
+            seq++;
+            size = 2 * size + 1;
+        }
 
         while (size - 1 != x) {
             size = (size - 1) >> 1;
@@ -898,7 +904,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
         private final int[] literals_;
         private final boolean learnt;
-        private float activity;
+        private double activity;
 
         Clause(int[] ps, boolean learnt) {
             literals_ = ps.clone();

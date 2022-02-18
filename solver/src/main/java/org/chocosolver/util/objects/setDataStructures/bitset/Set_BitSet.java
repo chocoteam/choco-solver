@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,7 +22,7 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages, Xavier Lorca
  */
-public class Set_BitSet extends AbstractSet {
+public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 
 	//***********************************************************************************
 	// VARIABLES
@@ -31,7 +31,7 @@ public class Set_BitSet extends AbstractSet {
 	protected int card;
 	protected int offset;  // allow using negative numbers
 	protected BitSet values = new BitSet();
-	private ISetIterator iter = newIterator();
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// ITERATOR
@@ -82,6 +82,10 @@ public class Set_BitSet extends AbstractSet {
 	// METHODS
 	//***********************************************************************************
 
+	public int getOffset() {
+		return offset;
+	}
+
 	@Override
 	public boolean add(int element) {
 		if(element < offset) throw new IllegalStateException("Cannot add "+element+" to set of offset "+offset);
@@ -105,6 +109,20 @@ public class Set_BitSet extends AbstractSet {
 		}else{
 			return false;
 		}
+	}
+
+	public int previousValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.previousSetBit(val);
+	}
+
+	public int nextValue(int val) {
+		if(isEmpty()) {
+			return offset - 1;
+		}
+		return offset+values.nextSetBit(val);
 	}
 
 	@Override

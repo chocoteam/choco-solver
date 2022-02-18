@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,7 +25,7 @@ public class OffsetTest {
     public void testNominal() {
         Model model = new Model();
         SetVar setVar = model.setVar(new int[]{1, 2}, new int[]{1, 2, 3, 4, 5, 6});
-        SetVar offsetted = model.setVar(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 10});
+        SetVar offsetted = model.setVar(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
         model.offSet(setVar, offsetted, 1).post();
 
         checkSolutions(model, setVar, offsetted, 1);
@@ -54,8 +54,8 @@ public class OffsetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testEqualityFalse() {
         Model model = new Model();
-        SetVar setVar = model.setVar(new int[]{1, 2, 3});
-        SetVar offsetted = model.setVar(new int[]{0, 2, 3});
+        SetVar setVar = model.setVar(1, 2, 3);
+        SetVar offsetted = model.setVar(0, 2, 3);
         model.offSet(setVar, offsetted, 0).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.getSolver().solve());
@@ -64,8 +64,8 @@ public class OffsetTest {
     @Test(groups = "1s", timeOut=60000)
     public void testEqualityTrue() {
         Model model = new Model();
-        SetVar setVar = model.setVar(new int[]{1, 2, 3});
-        SetVar offsetted = model.setVar(new int[]{1, 2, 3});
+        SetVar setVar = model.setVar(1, 2, 3);
+        SetVar offsetted = model.setVar(1, 2, 3);
         model.offSet(setVar, offsetted, 0).post();
         assertEquals(model.getSolver().isSatisfied(), ESat.TRUE);
         checkSolutions(model, setVar, offsetted, 0);
@@ -85,7 +85,7 @@ public class OffsetTest {
     @Test(groups = "1s", timeOut=60000)
     public void wrongUpperBound() {
         Model model = new Model();
-        SetVar setVar = model.setVar(new int[]{2, 3, 4});
+        SetVar setVar = model.setVar(2, 3, 4);
         SetVar offsetted = model.setVar(new int[]{}, new int[]{1, 2, 3, 4, 6, 7});
         model.offSet(setVar, offsetted, 1).post();
 

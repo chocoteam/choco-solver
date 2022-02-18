@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,8 @@ import org.chocosolver.util.procedure.IntProcedure;
 public final class PropEqualX_YC extends Propagator<IntVar> {
 
 
-    private IntVar x, y;
+    private final IntVar x;
+    private final IntVar y;
     private final int cste;
     // incremental filtering of enumerated domains
     private boolean bothEnumerated;
@@ -41,7 +42,6 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
     private int indexToFilter;
     private int offSet;
 
-    @SuppressWarnings({"unchecked"})
     public PropEqualX_YC(IntVar[] vars, int c) {
         super(vars, PropagatorPriority.BINARY, true);
         this.x = vars[0];
@@ -81,6 +81,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
                     y.removeValue(val, this);
                 }
             }
+            idms[0].startMonitoring();
+            idms[1].startMonitoring();
         }
         if (x.isInstantiated()) {
             assert (y.isInstantiated());

@@ -3,8 +3,48 @@ Choco Solver ChangeLog
 
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
-
+    
 NEXT MILESTONE
+-------------------
+
+### Major features:
+- Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
+- Extend some black-box strategies to `SetVar` and `GraphVar`
+ 
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Mathieu Vavrille](https://github.com/MathieuVavrille) (@MathieuVavrille)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)    
+    
+4.10.8 - 07 Jan 2022
+-------------------
+
+### Major features:
+- Propagation is now observable, `solver.observePropagation(PropagationObserver)`. 
+Consequently, it is now possible to profil the propagation by calling `solver.profilePropagation()`. 
+See Javadoc for details and usages (#832).
+- Release 4.10.7 introduces a bug related to delta monitors, which is now fixed (#837).
+- Add new black-box strategy: failure based variable ordering heuristics (@lihb905)
+- Add `model.streamVars()` and `model.streamCstrs()`
+- Bounded domains checking for table constraints
+- Change complementary search in FlatZincParser
+- Bump XCSP3
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Fabien Hermenier](https://github.com/fhermeni) (@fhermeni)
+- [Hongbo Li](https://github.com/lihb905) (@lihb905)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+
+4.10.7 - 11 Oct 2021
 -------------------
 
 ### Major features:
@@ -21,10 +61,17 @@ This is helpful when a Solution object is required in many places.
 - Modification of the management of expressions in order to reduce the number of created variables (WIP).
 - Add `IntVar.stream()` that streams a variable's values (in increasing order)
 - Add `Search.ValH.BMIN` and `Search.ValH.BLAST`
-- Change some default settings 
 - Add DIMACS CNF parser (`org.chocosolver.parser.mps.ChocoDIMACS`)
-- Add Logger (Solver.log()) to trace Model/Solver.
-- Revamp `Settings`, now is defined as a factory pattern
+- Add Logger (`solver.log()`) to trace from Model/Solver.
+- Change some default settings
+- Revamp `Settings`, now is defined as a factory pattern + add `Settings.dev()` and `Settings.prod()` profiles.
+- Make *half reification* possible. Seed `c.implies(b)` or `c.impliedBy(b)` 
+  where `c` is a Constraint and `b` a BoolVar.
+- Update MiniZinc constraints definition + flatzinc files (for testing).
+- Update `choco.msc` (for MiniZinc IDE) + `./minizinc/README.md`   
+- Add `Argmax` and `Argmin` constraints
+- Add `IfThenElse` as a decomposed constraint
+- Improvement of `solver.findParetoFront()`
 
 ### Deprecated API (to be removed in next release):
 
@@ -33,7 +80,10 @@ This is helpful when a Solution object is required in many places.
 See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
+- [Charles Vernerey](https://github.com/ChaVer) (@chaver)
 
 4.10.6 - 11 Dec 2020
 -------------------             
@@ -60,8 +110,8 @@ Fixes for issues #653 and #740.
 See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 
 #### Contributors to this release:
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro) 
 
 4.10.5 - 02 Oct 2020
 -------------------
@@ -77,9 +127,9 @@ See [milestone 4.10.6](https://github.com/chocoteam/choco-solver/milestone/30)
 See [milestone 4.10.5](https://github.com/chocoteam/choco-solver/milestone/29) 
 
 #### Contributors to this release:
-- [Guillaume Le Louët](https://github.com/glelouet) (glelouet)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro) 
+- [Guillaume Le Louët](https://github.com/glelouet) (@glelouet)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro) 
 
 4.10.4 - 08 Sep 2020
 --------------------
@@ -102,9 +152,9 @@ See [milestone 4.10.5](https://github.com/chocoteam/choco-solver/milestone/29)
 \#692, #698, #700, #702, #703, #704, #705
 
 #### Contributors to this release:
-- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (dimitri-justeau)
-- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (schmittjoaopedro)
-- [Charles Prud'homme](https://github.com/cprudhom) (cprudhom) 
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [João Pedro Schmitt](https://github.com/schmittjoaopedro) (@schmittjoaopedro)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
 
 4.10.3 - 03 Jul 2020
 --------------------

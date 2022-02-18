@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,15 +18,23 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * A Flatzinc to Choco parser.
@@ -39,6 +47,10 @@ public class Flatzinc extends RegParser {
 
     @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
     protected boolean oss = false;
+
+    @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem " +
+            "(default: false, i.e., restricted to the variables declared in output).")
+    protected boolean ocs = false;
 
     //***********************************************************************************
     // VARIABLES
@@ -65,9 +77,7 @@ public class Flatzinc extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true)
+        defaultSettings = Settings.prod()
                 .setMinCardinalityForSumDecomposition(256)
                 .setLearntClausesDominancePerimeter(0)
                 .setNbMaxLearntClauses(Integer.MAX_VALUE)
@@ -77,16 +87,14 @@ public class Flatzinc extends RegParser {
 
     @Override
     public Thread actionOnKill() {
-        return new Thread() {
-            public void run() {
-                if (userinterruption) {
-                    datas[bestModelID()].doFinalOutPut(false);
-                    if (level.isLoggable(Level.COMPET)) {
-                        getModel().getSolver().log().bold().red().print("%% Unexpected resolution interruption!");
-                    }
+        return new Thread(() -> {
+            if (userinterruption) {
+                datas[bestModelID()].doFinalOutPut(false);
+                if (level.isLoggable(Level.COMPET)) {
+                    getModel().getSolver().log().bold().red().print("%% Unexpected resolution interruption!");
                 }
             }
-        };
+        });
     }
 
     //***********************************************************************************
@@ -112,9 +120,10 @@ public class Flatzinc extends RegParser {
         for (int i = 0; i < models.size(); i++) {
             try {
                 long ptime = -System.currentTimeMillis();
-                FileInputStream fileInputStream = new FileInputStream(new File(instance));
+                FileInputStream fileInputStream = new FileInputStream(instance);
                 parse(models.get(i), datas[i], fileInputStream);
                 fileInputStream.close();
+                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
                 }
@@ -147,10 +156,56 @@ public class Flatzinc extends RegParser {
         }*/
     }
 
+    /**
+     * Create a complementary search on non-decision variables
+     *
+     * @param m a Model
+     */
+    protected void makeComplementarySearch(Model m, int i) {
+        if (ocs) {
+            super.makeComplementarySearch(m, i);
+        } else {
+            Solver solver = m.getSolver();
+            List<AbstractStrategy<?>> strats = new LinkedList<>();
+            strats.add(solver.getSearch());
+            if (solver.getSearch() != null) {
+                IntVar[] ivars = Stream.of(datas[i].allOutPutVars())
+                        .filter(VariableUtils::isInt)
+                        .filter(v -> !VariableUtils.isConstant(v))
+                        .map(Variable::asIntVar)
+                        .sorted(Comparator.comparingInt(IntVar::getDomainSize))
+                        .toArray(IntVar[]::new);
+                if (ivars.length > 0) {
+                    strats.add(Search.lastConflict(Search.minDomLBSearch(ivars)));
+                }
+                SetVar[] svars = Stream.of(datas[i].allOutPutVars())
+                        .filter(VariableUtils::isSet)
+                        .map(Variable::asSetVar)
+                        .sorted(Comparator.comparingInt(s -> s.getUB().size()))
+                        .toArray(SetVar[]::new);
+                if (svars.length > 0) {
+                    strats.add(Search.setVarSearch(svars));
+                }
+                solver.setSearch(strats.toArray(new AbstractStrategy[0]));
+            }
+        }
+    }
+
     protected void singleThread() {
         Model model = portfolio.getModels().get(0);
         boolean enumerate = model.getResolutionPolicy() != ResolutionPolicy.SATISFACTION || all;
         Solver solver = model.getSolver();
+        /*solver.plugMonitor(new IMonitorDownBranch() {
+            @Override
+            public void beforeDownBranch(boolean left) {
+                solver.log().printf("[%d] %s %s %s %n",
+                        solver.getEnvironment().getWorldIndex() - 2,
+                        solver.getDecisionPath().getLastDecision().getDecisionVariable().getName(),
+                        left ? "=" : "!=",
+                        solver.getDecisionPath().getLastDecision().getDecisionValue().toString());
+            }
+        });*/
+        //solver.showShortStatistics();
         if (level.isLoggable(Level.INFO)) {
             solver.log().bold().printf("== %d flatzinc ==%n", datas[0].cstrCounter().values().stream().mapToInt(i -> i).sum());
             datas[0].cstrCounter().entrySet().stream()

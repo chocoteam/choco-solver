@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -27,17 +27,17 @@ import java.util.Arrays;
 public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
-    private int[] supports;
+    private final int[] supports;
 
-    private int[] blocks;
+    private final int[] blocks;
 
     // Cardinality
-    private int size;
+    private final int size;
 
     // offsets(i) = Min(x_i)
-    private int[] offsets;
+    private final int[] offsets;
 
-    private DisposableValueIterator[] seekIter;
+    private final DisposableValueIterator[] seekIter;
 
     private final IntIterableBitSet vrms;
 

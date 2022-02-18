@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,7 +20,6 @@ import org.chocosolver.solver.variables.view.IntView;
 import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.tools.MathUtils;
 
 /**
@@ -39,7 +38,8 @@ public final class IntScaleView<I extends IntVar> extends IntView<I> {
 
     /**
      * Create a <i>cste<i/> &times; <i>var<i/> view
-     * @param var a variable
+     *
+     * @param var  a variable
      * @param cste a positive integer
      */
     public IntScaleView(final I var, final int cste) {
@@ -128,7 +128,13 @@ public final class IntScaleView<I extends IntVar> extends IntView<I> {
 
     @Override
     public int nextValueOut(int v) {
-        return var.nextValueOut(MathUtils.divFloor(v, cste)) * cste;
+        if (++v % cste == 0) {
+            // might belong to var
+            if (var.contains(v / cste)) {
+                v++;
+            }
+        }
+        return v;
     }
 
     @Override
@@ -142,11 +148,17 @@ public final class IntScaleView<I extends IntVar> extends IntView<I> {
 
     @Override
     public int previousValueOut(int v) {
-        return var.previousValueOut(MathUtils.divCeil(v, cste)) * cste;
+        if (--v % cste == 0) {
+            // might belong to var
+            if (var.contains(v / cste)) {
+                v--;
+            }
+        }
+        return v;
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected IntEvtScheduler createScheduler() {
         return new IntEvtScheduler();
     }
 

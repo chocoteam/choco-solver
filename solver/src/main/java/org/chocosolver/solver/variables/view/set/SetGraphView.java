@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view.set;
 
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
 import org.chocosolver.solver.variables.view.SetView;
 
 /**
@@ -54,4 +55,8 @@ public abstract class SetGraphView<E extends GraphVar> extends SetView<E> {
         return graphVar;
     }
 
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetGraphView does not support getDelta()");
+    }
 }

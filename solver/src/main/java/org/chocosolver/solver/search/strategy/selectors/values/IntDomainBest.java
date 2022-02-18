@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,17 +31,17 @@ public final class IntDomainBest implements IntValueSelector {
      * Maximum enumerated domain size this selector falls into.
      * Otherwise, only bounds are considered.
      */
-    private int maxdom;
+    private final int maxdom;
 
     /**
      * The decision operator used to make the decision
      */
-    private DecisionOperator<IntVar> dop;
+    private final DecisionOperator<IntVar> dop;
 
     /**
      * Condition for tie breaking
      */
-    private BiPredicate<IntVar, Integer> condition;
+    private final BiPredicate<IntVar, Integer> condition;
 
     /**
      * Create a value selector that returns the best value wrt to the objective to optimize.

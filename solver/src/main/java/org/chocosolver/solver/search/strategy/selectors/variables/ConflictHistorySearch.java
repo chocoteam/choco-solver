@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,7 +15,6 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.stream.Stream;
@@ -29,8 +28,8 @@ import java.util.stream.Stream;
  * @since 25/02/2020.
  */
 @SuppressWarnings("rawtypes")
-public class ConflictHistorySearch
-        extends AbstractCriterionBasedVariableSelector
+public class ConflictHistorySearch<V extends Variable>
+        extends AbstractCriterionBasedVariableSelector<V>
         implements IMonitorRestart {
 
     /**
@@ -41,8 +40,8 @@ public class ConflictHistorySearch
     /**
      * Decreasing step for {@link #alpha}.
      */
-    private static final double STEP = 10e-6;
-    private static final double D = 10e-4;
+    private static final double STEP = 1e-6;
+    private static final double D = 1e-4;
     private static final double DECAY = .995;
 
     /**
@@ -58,8 +57,12 @@ public class ConflictHistorySearch
      */
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
-    public ConflictHistorySearch(IntVar[] vars, long seed) {
-        super(vars, seed);
+    public ConflictHistorySearch(V[] vars, long seed) {
+        this(vars, seed, Integer.MAX_VALUE);
+    }
+
+    public ConflictHistorySearch(V[] vars, long seed, int flushThs) {
+        super(vars, seed, flushThs);
     }
 
     @Override
@@ -78,7 +81,7 @@ public class ConflictHistorySearch
     }
 
     @Override
-    protected double weight(IntVar v) {
+    protected double weight(Variable v) {
         double w = 0.;
         int nbp = v.getNbProps();
         for (int i = 0; i < nbp; i++) {
@@ -108,10 +111,18 @@ public class ConflictHistorySearch
 
     @Override
     public void afterRestart() {
-        for (Propagator p : q.keySet()) {
-            double qj = q.get(p);
-            q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+        if (flushWeights(q)) {
+            q.clear();
+            conflict.forEachEntry((a1, b) -> {
+                conflict.put(a1, conflicts);
+                return true;
+            });
+        } else {
+            for (Propagator p : q.keySet()) {
+                double qj = q.get(p);
+                q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+            }
+            alpha = .4d;
         }
-        alpha = .4d;
     }
 }

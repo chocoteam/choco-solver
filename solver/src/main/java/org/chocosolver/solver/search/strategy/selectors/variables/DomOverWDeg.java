@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -10,7 +10,9 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 
 /**
@@ -22,7 +24,7 @@ import org.chocosolver.util.tools.VariableUtils;
  * @author Charles Prud'homme
  * @since 12/07/12
  */
-public class DomOverWDeg extends AbstractCriterionBasedVariableSelector {
+public class DomOverWDeg<V extends Variable> extends AbstractCriterionBasedVariableSelector<V> implements IMonitorRestart {
 
     /**
      * Creates a DomOverWDeg variable selector
@@ -30,8 +32,19 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector {
      * @param variables decision variables
      * @param seed      seed for breaking ties randomly
      */
-    public DomOverWDeg(IntVar[] variables, long seed) {
-        super(variables, seed);
+    public DomOverWDeg(V[] variables, long seed) {
+        this(variables, seed, Integer.MAX_VALUE);
+    }
+
+    /**
+     * Creates a DomOverWDeg variable selector
+     *
+     * @param variables decision variables
+     * @param seed      seed for breaking ties randomly
+     * @param flushThs flush threshold, when reached, it flushes scores
+     */
+    public DomOverWDeg(V[] variables, long seed,int flushThs) {
+        super(variables, seed, flushThs);
     }
 
 
@@ -51,7 +64,7 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector {
     }
 
     @Override
-    protected final double weight(IntVar v) {
+    protected final double weight(Variable v) {
         //assert weightW(v) == weights.get(v) : "wrong weight for " + v + ", expected " + weightW(v) + ", but found " + weights.get(v);
         return 1 + weights.get(v);
     }
@@ -84,6 +97,19 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector {
         return 1;
     }
 
+    @Override
+    public void afterRestart() {
+        /*if (vars[0].getModel().getSolver().getSolutionCount() > solution) {
+            solution = vars[0].getModel().getSolver().getSolutionCount();
+        }
+        if (solution > 0 && top(20)) {*/
+        if (flushWeights(weights)) {
+            weights.forEachEntry((a1, b) -> {
+                weights.put(a1, 0.);
+                return true;
+            });
+        }
+    }
 
     // <-- FOR DEBUGGING PURPOSE ONLY
     /*double weightW(IntVar v) {

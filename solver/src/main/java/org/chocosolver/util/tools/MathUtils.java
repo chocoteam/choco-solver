@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -69,9 +69,9 @@ public final class MathUtils {
     /**
      * Returns the value of the first argument raised to the power of the
      * second argument. See {@link Math#pow(double, double)} for special cases.
-     * @param value
-     * @param exp
-     * @return
+     * @param value value
+     * @param exp exponent
+     * @return the power result
      */
     public static int pow(int value, int exp) {
         return value == 2 ? 1 << exp : (int) Math.pow(value, exp);
@@ -314,6 +314,26 @@ public final class MathUtils {
 
     public static double log2(double a){
         return Math.log10(a) / LOG10_2;
+    }
+
+    /**
+     * @param n a long value
+     * @return <code>true</code> if <code>n</code> is a perfect square, <code>false</code> otherwise.
+     */
+    public static boolean isPerfectSquare(long n) {
+        if (n < 0) {
+            return false;
+        }
+        switch ((int) (n & 0xF)) {
+            case 0:
+            case 1:
+            case 4:
+            case 9:
+                long tst = (long) Math.sqrt(n);
+                return tst * tst == n;
+            default:
+                return false;
+        }
     }
 
 }

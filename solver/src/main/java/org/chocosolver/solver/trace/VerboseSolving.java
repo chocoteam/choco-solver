@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -51,9 +51,9 @@ public class VerboseSolving implements IMonitorInitialize, IMonitorSolution, IMo
             alive = true;
             try {
                 Thread.sleep(duration);
-                //noinspection InfiniteLoopStatement
                 do {
                     body(false);
+                    //noinspection BusyWait
                     Thread.sleep(duration);
                 } while (alive);
             } catch (InterruptedException ignored) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -35,7 +35,7 @@ class IterTuplesTable extends TuplesList {
     /**
      * table[i][j] gives the table of supports as an int[] for value j of variable i
      */
-    private int[][][] table;
+    private final int[][][] table;
 
     public IterTuplesTable(Tuples tuples, IntVar[] vars) {
         super(tuples, vars);

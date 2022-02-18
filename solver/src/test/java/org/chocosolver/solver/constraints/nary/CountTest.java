@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -93,9 +93,8 @@ public class CountTest {
             Model model = new Model();
             IntVar[] vars = model.intVarArray("o", n, 0, n, true);
             int value = 1;
-            IntVar occ = model.intVar("oc", 0, n, true);
+            IntVar occ = model.count("oc", value, vars);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.count(value, vars, occ).post();
 
             Solver r = model.getSolver();
             r.setSearch(randomSearch(allvars,i));
@@ -114,9 +113,8 @@ public class CountTest {
             Model model = new Model();
             IntVar[] vars = model.intVarArray("o", n, 0, n, true);
             IntVar value = model.intVar(new int[]{-5,1,3});
-            IntVar occ = model.intVar("oc", 0, n, true);
+            IntVar occ = model.count("oc", value, vars);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.count(value, vars, occ).post();
             model.arithm(value,"=",1).post();
             Solver r = model.getSolver();
             r.setSearch(randomSearch(allvars,i));
@@ -132,9 +130,8 @@ public class CountTest {
             Model model = new Model();
             IntVar[] vars = model.intVarArray("o", n, 0, n, true);
             IntVar value = model.intVar(-5,5);
-            IntVar occ = model.intVar("oc", 0, n, true);
+            IntVar occ = model.count("oc", value, vars);
             IntVar[] allvars = append(vars, new IntVar[]{occ});
-            model.count(value, vars, occ).post();
             model.arithm(value,"=",1).post();
             Solver r = model.getSolver();
             r.setSearch(randomSearch(allvars,i));

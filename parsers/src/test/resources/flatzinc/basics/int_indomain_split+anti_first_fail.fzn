@@ -1,0 +1,5 @@
+array [1..2] of int: X_INTRODUCED_0_ = [1,-1];
+var 1..5: x:: output_var;
+var 1..2: y:: output_var;
+constraint int_lin_ne(X_INTRODUCED_0_,[x,y],0);
+solve :: int_search([x,y],anti_first_fail,indomain_split,complete) satisfy;

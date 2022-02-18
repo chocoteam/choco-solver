@@ -7,7 +7,6 @@
 
 predicate fzn_bin_packing_load(array[int] of var int: load,
                            array[int] of var int: bin,
-                           array[int] of int: w) =
-    bin_packing_loadChoco(load,bin,w);
+                           array[int] of int: w);
 
 %-----------------------------------------------------------------------------%

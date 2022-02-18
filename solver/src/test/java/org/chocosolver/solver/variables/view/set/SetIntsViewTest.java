@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,7 +14,11 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.view.set.SetIntsView;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -33,7 +37,7 @@ public class SetIntsViewTest {
         IntVar[] intVars = m.intVarArray(8, 0, 2);
         int[] vals = new int[intVars.length];
         Arrays.fill(vals, 1);
-        SetVar setView = new SetIntsView(vals, 0, intVars);
+        SetVar setView = new SetIntsView<>(vals, 0, intVars);
         Assert.assertEquals(setView.getLB().size(), 0);
         Assert.assertEquals(setView.getUB().size(), 8);
         while (m.getSolver().solve()) {
@@ -76,7 +80,7 @@ public class SetIntsViewTest {
         IntVar[] intVars = m.intVarArray(8, 0, 2);
         int[] vals = new int[intVars.length];
         Arrays.fill(vals, 1);
-        SetVar setView = new SetIntsView(vals, 2, intVars);
+        SetVar setView = new SetIntsView<>(vals, 2, intVars);
         try {
             setView.instantiateTo(new int[] {2, 3, 4}, (ICause) setView);
             Assert.assertTrue(setView.isInstantiated());
@@ -135,5 +139,43 @@ public class SetIntsViewTest {
                 Assert.assertTrue(setViews[val].getValue().contains(i));
             }
         }
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testDelta() throws ContradictionException {
+        Model m = new Model();
+        IntVar[] intVars = m.intVarArray(20, 0, 2);
+        SetVar setView = m.intsSetView(intVars, 0, 0);
+        ICause fakeCauseA = new ICause() {};
+        ICause fakeCauseB = new ICause() {};
+        ISetDeltaMonitor monitor = setView.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
+        // Test add elements
+        intVars[1].instantiateTo(0, fakeCauseB);
+        intVars[5].instantiateTo(0, fakeCauseB);
+        intVars[7].instantiateTo(0, fakeCauseB);
+        intVars[9].instantiateTo(0, fakeCauseB);
+        ISet delta = SetFactory.makeBitSet(0);
+        IntProcedure addToDelta = delta::add;
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.contains(1));
+        Assert.assertTrue(delta.contains(5));
+        Assert.assertTrue(delta.contains(7));
+        Assert.assertTrue(delta.contains(9));
+        Assert.assertEquals(delta.size(), 4);
+        // Test remove elements
+        intVars[0].instantiateTo(1, fakeCauseB);
+        intVars[4].instantiateTo(1, fakeCauseB);
+        intVars[6].instantiateTo(1, fakeCauseB);
+        intVars[8].removeValue(0, fakeCauseB);
+        intVars[10].instantiateTo(2, fakeCauseB);
+        delta.clear();
+        monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
+        Assert.assertTrue(delta.contains(0));
+        Assert.assertTrue(delta.contains(4));
+        Assert.assertTrue(delta.contains(6));
+        Assert.assertTrue(delta.contains(8));
+        Assert.assertTrue(delta.contains(10));
+        Assert.assertEquals(delta.size(), 5);
     }
 }

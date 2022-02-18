@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -44,7 +44,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     /**
      * To roll back mValue to its initial value
      */
-    private IOperation status = () -> mValue = kUNDEF;
+    private final IOperation status = () -> mValue = kUNDEF;
     /**
      * To iterate over removed values
      */
@@ -183,7 +183,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         assert cause != null;
         if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)) {
             model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
-            this.contradiction(cause, MSG_INST);
+            this.contradiction(cause, mValue < kUNDEF ? MSG_INST : (value > kTRUE ? MSG_LOW : MSG_UPP));
         } else if (mValue == kUNDEF) {
             IntEventType e = IntEventType.INSTANTIATE;
             this.getModel().getEnvironment().save(status);
@@ -249,7 +249,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
             model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
-            this.contradiction(cause, MSG_UNKNOWN);
+            this.contradiction(cause, lb > kTRUE ? MSG_LOW : MSG_UPP);
         } else {
             if (lb == kTRUE) {
                 hasChanged = instantiateTo(kTRUE, cause);
@@ -421,7 +421,6 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
@@ -434,7 +433,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected EvtScheduler<?> createScheduler() {
         return new BoolEvtScheduler();
     }
 

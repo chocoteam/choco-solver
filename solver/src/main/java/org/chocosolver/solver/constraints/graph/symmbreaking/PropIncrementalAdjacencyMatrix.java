@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,12 +31,12 @@ import java.util.Set;
  */
 public class PropIncrementalAdjacencyMatrix extends Propagator<Variable> {
 
-    private DirectedGraphVar graph;
-    private IGraphDeltaMonitor gdm;
-    private PairProcedure enforce;
-    private PairProcedure remove;
+    private final DirectedGraphVar graph;
+    private final IGraphDeltaMonitor gdm;
+    private final PairProcedure enforce;
+    private final PairProcedure remove;
     private int n;
-    private BoolVar[] t;
+    private final BoolVar[] t;
 
     public PropIncrementalAdjacencyMatrix(DirectedGraphVar graphVar, BoolVar[] t) {
         super(ArrayUtils.append(new Variable[]{graphVar}, t), PropagatorPriority.LINEAR, true);
@@ -54,6 +54,7 @@ public class PropIncrementalAdjacencyMatrix extends Propagator<Variable> {
         propagateGraphChanged();
         propagateTChanged();
         // initializing incremental data-structures
+        gdm.startMonitoring();
     }
 
     private void propagateGraphChanged() throws ContradictionException {

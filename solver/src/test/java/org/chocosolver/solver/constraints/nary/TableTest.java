@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,6 +22,7 @@ import org.chocosolver.solver.constraints.extension.nary.TuplesLargeTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -42,14 +43,23 @@ import static org.testng.Assert.assertEquals;
 
 public class TableTest {
 
-    private static String[] ALGOS = {"CT+", "FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+", "MDD+"};
+    private static final String[] ALGOS = {"CT+", "FC", "GAC2001", "GACSTR+", "GAC2001+", "GAC3rm+", "GAC3rm", "STR2+", "MDD+"};
 
-    private static String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm"};
+    private static final String[] BIN_ALGOS = {"FC", "AC2001", "AC3", "AC3rm", "AC3bit+rm", "CT+"};
 
     @DataProvider(name = "algos")
     public Object[][] algos() {
         List<Object[]> params = new ArrayList<>();
         for (String st : ALGOS) {
+            params.add(new Object[]{st});
+        }
+        return params.toArray(new Object[0][0]);
+    }
+
+    @DataProvider(name = "balgos")
+    public Object[][] balgos() {
+        List<Object[]> params = new ArrayList<>();
+        for (String st : BIN_ALGOS) {
             params.add(new Object[]{st});
         }
         return params.toArray(new Object[0][0]);
@@ -63,22 +73,20 @@ public class TableTest {
         return params.toArray(new Object[0][0]);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void test1() {
-        for (String a : ALGOS) {
-            Tuples tuples = new Tuples(true);
-            tuples.add(0, 0, 0);
-            tuples.add(1, 1, 1);
-            tuples.add(2, 2, 2);
-            tuples.add(3, 3, 3);
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void test1(String a) {
+        Tuples tuples = new Tuples(true);
+        tuples.add(0, 0, 0);
+        tuples.add(1, 1, 1);
+        tuples.add(2, 2, 2);
+        tuples.add(3, 3, 3);
 
-            Model model = new Model();
-            IntVar[] vars = model.intVarArray("X", 3, 1, 2, false);
-            Constraint tableConstraint = model.table(vars, tuples, a);
-            tableConstraint.post();
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("X", 3, 1, 2, false);
+        Constraint tableConstraint = model.table(vars, tuples, a);
+        tableConstraint.post();
 
-            model.getSolver().solve();
-        }
+        model.getSolver().solve();
     }
 
     @Test(groups = "1s", timeOut = 300000)
@@ -212,7 +220,7 @@ public class TableTest {
             for (int i = 0; i < vars.length; i++) {
                 out.print(sol.getIntVal(vars[i]) + "\t");
             }
-            out.println("");
+            out.println();
             for (int i = 0; i < reified.length; i++) {
                 out.print(sol.getIntVal(reified[i]) + "\t");
             }
@@ -221,11 +229,9 @@ public class TableTest {
         assertEquals(sol.getIntVal(sum), 5);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testtpetit() {
-        for (String s : BIN_ALGOS) {
-            test(s);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testtpetit(String s) {
+        test(s);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -416,93 +422,81 @@ public class TableTest {
         Assert.assertTrue(tt.isConsistent(new int[]{1, 2, 1, 1}));
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPDav() {
-        for (String a : ALGOS) {
-            Model model = new Model();
-            IntVar x, y, z;
-            x = model.intVar("x", 1, 3, false);
-            y = model.intVar("y", 0, 3, false);
-            z = model.intVar("z", 0, 1, false);
-            Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
-            model.table(new IntVar[]{x, z, z, y}, ts, a).post();
-            while (model.getSolver().solve()) ;
-            assertEquals(1, model.getSolver().getSolutionCount());
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPDav(String a) {
+        Model model = new Model();
+        IntVar x, y, z;
+        x = model.intVar("x", 1, 3, false);
+        y = model.intVar("y", 0, 3, false);
+        z = model.intVar("z", 0, 1, false);
+        Tuples ts = scalar(new IntVar[]{x, z, z}, new int[]{2, -1, -10}, y, 1);
+        model.table(new IntVar[]{x, z, z, y}, ts, a).post();
+        while (model.getSolver().solve()) ;
+        assertEquals(1, model.getSolver().getSolutionCount());
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPosTrue() {
-        for (String a : ALGOS) {
-            System.out.println(a);
-            Model model = new Model();
-            IntVar x = model.intVar(1);
-            IntVar y = model.intVar(3);
-            IntVar z = model.intVar(1);
-            Tuples ts = new Tuples(true);
-            ts.add(1, 3, 1);
-            Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.TRUE);
-            Assert.assertEquals(ts.check(x, y, z), ESat.TRUE);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPosTrue(String a) {
+        Model model = new Model();
+        IntVar x = model.intVar(1);
+        IntVar y = model.intVar(3);
+        IntVar z = model.intVar(1);
+        Tuples ts = new Tuples(true);
+        ts.add(1, 3, 1);
+        Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.TRUE);
+        Assert.assertEquals(ts.check(x, y, z), ESat.TRUE);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPosUndef() {
-        for (String a : ALGOS) {
-            System.out.println(a);
-            Model model = new Model();
-            IntVar x = model.intVar(1);
-            IntVar y = model.intVar(2, 3);
-            IntVar z = model.intVar(1);
-            Tuples ts = new Tuples(true);
-            ts.add(1, 3, 1);
-            Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.UNDEFINED);
-            Assert.assertEquals(ts.check(x, y, z), ESat.UNDEFINED);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPosUndef(String a) {
+        Model model = new Model();
+        IntVar x = model.intVar(1);
+        IntVar y = model.intVar(2, 3);
+        IntVar z = model.intVar(1);
+        Tuples ts = new Tuples(true);
+        ts.add(1, 3, 1);
+        Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.UNDEFINED);
+        Assert.assertEquals(ts.check(x, y, z), ESat.UNDEFINED);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPosFalse() {
-        for (String a : ALGOS) {
-            System.out.println(a);
-            Model model = new Model();
-            IntVar x = model.intVar(1);
-            IntVar y = model.intVar(3);
-            IntVar z = model.intVar(4);
-            Tuples ts = new Tuples(true);
-            ts.add(1, 3, 1);
-            Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.FALSE);
-            Assert.assertEquals(ts.check(x, y, z), ESat.FALSE);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPosFalse(String a) {
+        System.out.println(a);
+        Model model = new Model();
+        IntVar x = model.intVar(1);
+        IntVar y = model.intVar(3);
+        IntVar z = model.intVar(4);
+        Tuples ts = new Tuples(true);
+        ts.add(1, 3, 1);
+        Assert.assertEquals(model.table(new IntVar[]{x, y, z}, ts, a).isSatisfied(), ESat.FALSE);
+        Assert.assertEquals(ts.check(x, y, z), ESat.FALSE);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testPosFalse2() {
-        for (String a : ALGOS) {
-            System.out.println(a);
-            Model model = new Model();
-            IntVar x = model.intVar(1, 3);
-            IntVar y = model.intVar(1, 3);
-            IntVar z = model.intVar(1, 3);
-            Tuples ts = new Tuples(true);
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPosFalse2(String a) {
+        System.out.println(a);
+        Model model = new Model();
+        IntVar x = model.intVar(1, 3);
+        IntVar y = model.intVar(1, 3);
+        IntVar z = model.intVar(1, 3);
+        Tuples ts = new Tuples(true);
 //			ts.add(1,2,3);
-            ts.add(1, 3, 2);
-            ts.add(2, 3, 1);
-            ts.add(2, 1, 3);
-            ts.add(3, 2, 1);
-            ts.add(3, 1, 2);
-            Constraint table = model.table(new IntVar[]{x, y, z}, ts, a);
-            model.arithm(x, "<", y).post();
-            model.arithm(y, "<", z).post();
-            try {
-                model.getSolver().propagate();
-            } catch (ContradictionException e) {
-                e.printStackTrace();
-                Assert.assertTrue(false);
-            }
-            Assert.assertEquals(table.isSatisfied(), ESat.FALSE);
-            Assert.assertEquals(ts.check(x, y, z), ESat.FALSE);
+        ts.add(1, 3, 2);
+        ts.add(2, 3, 1);
+        ts.add(2, 1, 3);
+        ts.add(3, 2, 1);
+        ts.add(3, 1, 2);
+        Constraint table = model.table(new IntVar[]{x, y, z}, ts, a);
+        model.arithm(x, "<", y).post();
+        model.arithm(y, "<", z).post();
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            e.printStackTrace();
+            Assert.assertTrue(false);
         }
+        Assert.assertEquals(table.isSatisfied(), ESat.FALSE);
+        Assert.assertEquals(ts.check(x, y, z), ESat.FALSE);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -567,12 +561,12 @@ public class TableTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
-        public void testST3(String staralgo) {
+    public void testST3(String staralgo) {
         Model model = new Model();
         //IntVar w = model.intVar("w", 0, 1);
-        IntVar x = model.intVar("x",0, 1);
-        IntVar y = model.intVar("y",0, 1);
-        IntVar z = model.intVar("z",0, 1);
+        IntVar x = model.intVar("x", 0, 1);
+        IntVar y = model.intVar("y", 0, 1);
+        IntVar z = model.intVar("z", 0, 1);
         Tuples ts = new Tuples(true);
         int ST = 99;
         ts.setUniversalValue(ST);
@@ -587,39 +581,127 @@ public class TableTest {
         Assert.assertEquals(solver.getSolutionCount(), 7);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testJuha1() {
-        for (String a : BIN_ALGOS) {
-            Model model = new Model("Table MWE");
-            IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
-            IntVar bar = model.intVar("bar", 1, 2, false);
-            Tuples allowed = new Tuples(true);
-            allowed.add(1, 2);
-            allowed.add(2, 2);
-            allowed.add(3, 2);
-            BoolVar b = model.boolVar("b");
-            Constraint table = model.table(foo, bar, allowed, a);
-            table.reifyWith(b);
-            Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testJuha1(String a) {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
+        IntVar bar = model.intVar("bar", 1, 2, false);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2);
+        allowed.add(2, 2);
+        allowed.add(3, 2);
+        BoolVar b = model.boolVar("b");
+        Constraint table = model.table(foo, bar, allowed, a);
+        table.reifyWith(b);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
     }
 
-    @Test(groups = "1s", timeOut = 60000)
-    public void testJuha2() {
-        for (String a : ALGOS) {
-            Model model = new Model("Table MWE");
-            IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
-            IntVar foo1 = model.intVar("foo1", new int[]{1, 3, 7});
-            IntVar bar = model.intVar("bar", 1, 2, false);
-            Tuples allowed = new Tuples(true);
-            allowed.add(1, 1, 2);
-            allowed.add(2, 2, 2);
-            allowed.add(3, 7, 2);
-            BoolVar b = model.boolVar("b");
-            Constraint table = model.table(new IntVar[]{foo, foo1, bar}, allowed, a);
-            table.reifyWith(b);
-            Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
-        }
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testJuha2(String a) {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
+        IntVar foo1 = model.intVar("foo1", new int[]{1, 3, 7});
+        IntVar bar = model.intVar("bar", 1, 2, false);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 1, 2);
+        allowed.add(2, 2, 2);
+        allowed.add(3, 7, 2);
+        BoolVar b = model.boolVar("b");
+        Constraint table = model.table(new IntVar[]{foo, foo1, bar}, allowed, a);
+        table.reifyWith(b);
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMVAV(String a) {
+        if ("AC3bit+rm".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2);
+        allowed.add(2, 2);
+        allowed.add(3, 2);
+        Constraint table = model.table(foo, bar, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMVAV0(String a) {
+        if ("AC3bit+rm".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 3, true);
+        IntVar bar = model.intVar("bar", 0, 1_000_000, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 1_000_000);
+        allowed.add(2, 1_000_000);
+        allowed.add(3, 1);
+        Constraint table = model.table(foo, bar, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void testMVAV1() {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2);
+        allowed.add(2, 2);
+        allowed.add(3, 2);
+        Constraint table = model.table(foo, bar, allowed, "AC3bit+rm");
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testMVAV2(String a) {
+        if ("GAC2001".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 7, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2, 3);
+        allowed.add(2, 2, 2);
+        allowed.add(3, 2, 1);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testMVAV3(String a) {
+        if ("GAC2001".equals(a) || "MDD+".equals(a) || "GAC3rm+".equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 500_000, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2, 500_000);
+        allowed.add(2, 2, 500_000);
+        allowed.add(3, 2, 1);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, allowed, a);
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void testMVAV4() {
+        //if (.equals(a)) return;
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 7, true);
+        Tuples allowed = new Tuples(true);
+        allowed.add(1, 2, 3);
+        allowed.add(2, 2, 2);
+        allowed.add(3, 2, 1);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, allowed, "GAC2001");
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
     }
 
     /**
@@ -663,7 +745,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT1(String a) {
-        if(a.equals("FC"))return;
+        if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
         IntVar x1 = cp.intOffsetView(x0, 10);
@@ -690,7 +772,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT2(String a) {
-        if(a.equals("FC"))return;
+        if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
         IntVar x1 = cp.intOffsetView(x0, 10);
@@ -707,6 +789,17 @@ public class TableTest {
             cp.getSolver().propagate(); // should trigger an inconsistency
         } catch (ContradictionException c) {
         }
-
     }
+
+    @Test(groups = "1s")
+    public void testRnd() {
+        Model model = new Model();
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 7, true);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, TuplesFactory.randomTuples(.5, new Random(13), foo, bar, far));
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 255);
+    }
+
 }

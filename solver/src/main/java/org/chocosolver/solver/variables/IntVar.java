@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -247,13 +247,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return the upper bound
      */
     int getUB();
-
-    /**
-     * Returns the size of this domain, that is the number of elements in this domain.
-     *
-     * @return size of the domain
-     */
-    int getDomainSize();
 
 
     /**

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,10 +12,15 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
+import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
+import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * Set view representing the set difference of two set variables: z = x \ y.
@@ -42,7 +47,7 @@ public class SetDifferenceView extends SetView<SetVar> {
         this.x = x;
         this.y = y;
         this.lb = new SetDifference(getModel(), x.getLB(), y.getLB());
-        this.ub = new SetDifference(getModel(), x.getUB(), y.getUB());
+        this.ub = new SetDifference(getModel(), x.getUB(), y.getLB());
     }
 
     @Override
@@ -88,7 +93,44 @@ public class SetDifferenceView extends SetView<SetVar> {
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
         // Force element to x and remove it from y
-        boolean b = x.force(element, this) || y.remove(element, this);
-        return b;
+        return x.force(element, this) | y.remove(element, this);
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetDifferenceView does not support getDelta()");
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        return new SetViewOnSetsDeltaMonitor(x.monitorDelta(propagator), y.monitorDelta(propagator)) {
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                fillValues();
+                if (evt == SetEventType.ADD_TO_KER) {
+                    for (int v : addedValues[0]) {
+                        if (lb.contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                    for (int v : removedValues[1]) {
+                        if (lb.contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    for (int v : removedValues[0]) {
+                        if (!y.getLB().contains(v) && !removedValues[1].contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                    for (int v : addedValues[1]) {
+                        if (x.getUB().contains(v) && !addedValues[0].contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                }
+            }
+        };
     }
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,7 +42,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with double instantiation exception.
      */
-    protected static final String MSG_INST = "already instantiated";
+    protected static final String MSG_INST = "the variable is already instantiated to another value";
 
     /**
      * Default exception message.
@@ -52,12 +52,12 @@ public abstract class AbstractVariable implements Variable {
     /**
      * Message associated with wrong upper bound exception.
      */
-    static final String MSG_UPP = "new lower bound is greater than upper bound";
+    static final String MSG_UPP = "the new upper bound is lesser than the current lower bound";
 
     /**
      * Message associated with wrong lower bound exception.
      */
-    static final String MSG_LOW = "new upper bound is lesser than lower bound";
+    static final String MSG_LOW = "the new lower bound is greater than the current upper bound";
 
     /**
      * Message associated with wrong bounds exception.
@@ -146,6 +146,11 @@ public abstract class AbstractVariable implements Variable {
      */
     private ICause cause;
 
+    /**
+     * True if related propagators are scheduled for propagation
+     */
+    public boolean scheduled;
+
     //////////////////////////////////////////////////////////////////////////////////////
 
     /**
@@ -168,9 +173,25 @@ public abstract class AbstractVariable implements Variable {
         this.dsize = this.scheduler.select(0) + 1;
         this.dindices = new int[dsize + 1];
         this.instWI = 0; // set to 0 to capture constant automatically
+        this.scheduled = false;
     }
 
     protected abstract EvtScheduler<?> createScheduler();
+
+    @Override
+    public boolean isScheduled() {
+        return scheduled;
+    }
+
+    @Override
+    public void schedule() {
+        this.scheduled = true;
+    }
+
+    @Override
+    public void unschedule() {
+        this.scheduled = false;
+    }
 
     @Override
     public final int getId() {
@@ -375,9 +396,11 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void addMonitor(IVariableMonitor<?> monitor) {
-        // 1. check the non redundancy of a monitor
-        for (int i = 0; i < mIdx; i++) {
-            if (monitors[i] == monitor) return;
+        // 1. check the non redundancy of a monitor if expected.
+        if (model.getSettings().checkDeclaredMonitors()) {
+            for (int i = 0; i < mIdx; i++) {
+                if (monitors[i] == monitor) return;
+            }
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {
@@ -501,6 +524,7 @@ public abstract class AbstractVariable implements Variable {
     public void clearEvents() {
         this.cause = null;
         mask = 0;
+        this.unschedule();
     }
 
     @Override

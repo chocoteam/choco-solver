@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -40,7 +40,7 @@ public class FiniteAutomaton implements IAutomaton {
     private ArrayList<State> states;
     private TIntHashSet alphabet;
     private int nbStates;
-    private HashSet<State> nexts = new HashSet<>();
+    private final HashSet<State> nexts = new HashSet<>();
     private int min = Character.MIN_VALUE;
     private int max = Character.MAX_VALUE;
 

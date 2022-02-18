@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,7 +20,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -35,12 +34,14 @@ public class PropFastGCC extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, n2;
-    private int[] values;
-    private ISet[] possibles, mandatories;
-    private ISet valueToCompute;
-    private TIntIntHashMap map;
-    private TIntArrayList boundVar;
+    private final int n;
+    private final int n2;
+    private final int[] values;
+    private final ISet[] possibles;
+    private final ISet[] mandatories;
+    private final ISet valueToCompute;
+    private final TIntIntHashMap map;
+    private final TIntArrayList boundVar;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -67,10 +68,10 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.mandatories = new ISet[n2];
         this.map = map;
         for (int idx = 0; idx < n2; idx++) {
-            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
-            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+            mandatories[idx] = SetFactory.makeBitSet(0);
+            possibles[idx] = SetFactory.makeBitSet(0);
         }
-        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+        this.valueToCompute = SetFactory.makeBitSet(0);
         this.boundVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             if (!vars[i].hasEnumeratedDomain()) {
@@ -95,8 +96,8 @@ public class PropFastGCC extends Propagator<IntVar> {
             IntVar v = vars[i];
             int ub = v.getUB();
             if (v.isInstantiated()) {
-                if (map.containsKey(v.getValue())) {
-                    int j = map.get(v.getValue());
+                if (map.containsKey(ub)) {
+                    int j = map.get(ub);
                     mandatories[j].add(i);
                 }
             } else {

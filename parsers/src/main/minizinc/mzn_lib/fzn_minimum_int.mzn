@@ -3,6 +3,5 @@
 % Assumptions: |x| > 0.
 %-----------------------------------------------------------------------------%
 
-predicate fzn_minimum_int(var int: m, array[int] of var int: x) =
-    minimumChoco(m,x);
+predicate fzn_minimum_int(var int: m, array[int] of var int: x);
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,23 +25,24 @@ import org.chocosolver.util.procedure.PairProcedure;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropNeighBoolsChannel1 extends Propagator<GraphVar> {
+public class PropNeighBoolsChannel1 extends Propagator<GraphVar<?>> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private BoolVar[][] matrix;
-    private IGraphDeltaMonitor gdm;
-    private GraphVar g;
-    private PairProcedure arcForced, arcRemoved;
+    private final int n;
+    private final BoolVar[][] matrix;
+    private final IGraphDeltaMonitor gdm;
+    private final GraphVar<?> g;
+    private final PairProcedure arcForced;
+    private final PairProcedure arcRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNeighBoolsChannel1(BoolVar[][] adjacencyMatrix, GraphVar gV) {
+    public PropNeighBoolsChannel1(BoolVar[][] adjacencyMatrix, GraphVar<?> gV) {
         super(new GraphVar[]{gV}, PropagatorPriority.LINEAR, true);
         this.matrix = adjacencyMatrix;
         n = matrix.length;
@@ -78,6 +79,7 @@ public class PropNeighBoolsChannel1 extends Propagator<GraphVar> {
                 }
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

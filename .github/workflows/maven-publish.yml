@@ -1,0 +1,171 @@
+name: Maven Package
+on:
+  release:
+    types: [created]
+
+jobs:
+  publish:
+
+    runs-on: ubuntu-latest
+    env:
+      artifact_name: choco-solver
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get the release version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
+
+    - name: Set up JDK 11 for deploy to OSSRH
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        server-id: ossrh 
+        server-username: MAVEN_USERNAME
+        server-password: MAVEN_CENTRAL_TOKEN
+        gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
+        gpg-passphrase: MAVEN_GPG_PASSPHRASE
+
+    - name: Build with Maven
+      run: mvn -B --file pom.xml package -Dgroups="1s,10s,checker"
+
+    - name: Update package version
+      run: mvn versions:set -DnewVersion=${{ steps.get_version.outputs.VERSION }}
+
+    - name: Publish to Apache Maven Central
+      run: mvn deploy -PossrhDeploy
+      env:
+        MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+        MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
+        MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}   
+
+    - name: Set up JDK 11 for deploy to github packages
+      uses: actions/setup-java@v2
+      with:
+        distribution: 'adopt'
+        java-version: '11'
+        server-id: github 
+
+    - name: Publish to GitHub Packages Apache Maven
+      run: mvn deploy -PgithubDeploy
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+        
+    - name: Get the upload URL for a release
+      id: get
+      uses: bruceadams/get-release@v1.2.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    # CHOCO-SOLVER    
+    - name: Upload Release Asset jar
+      id: upload-release-asset-jar 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: solver/target/choco-solver-${{ steps.get_version.outputs.VERSION }}.jar
+        asset_name: choco-solver-${{ steps.get_version.outputs.VERSION }}.jar
+        asset_content_type: application/java-archive
+        
+    - name: Upload Release Asset sources
+      id: upload-release-asset-src 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: solver/target/choco-solver-${{ steps.get_version.outputs.VERSION }}-sources.jar
+        asset_name: choco-solver-${{ steps.get_version.outputs.VERSION }}-sources.jar
+        asset_content_type: application/java-archive
+        
+    - name: Upload Release Asset docs
+      id: upload-release-asset-docs 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: solver/target/choco-solver-${{ steps.get_version.outputs.VERSION }}-javadoc.jar
+        asset_name: choco-solver-${{ steps.get_version.outputs.VERSION }}-javadoc.jar
+        asset_content_type: application/java-archive
+
+    - name: Upload Release Asset fat jar
+      id: upload-release-asset-fat 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: solver/target/choco-solver-${{ steps.get_version.outputs.VERSION }}-jar-with-dependencies.jar
+        asset_name: choco-solver-${{ steps.get_version.outputs.VERSION }}-jar-with-dependencies.jar
+        asset_content_type: application/java-archive
+    # CHOCO-PARSERS
+    - name: Upload Release Asset jar
+      id: upload-release-asset-jar 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: parsers/target/choco-parsers-${{ steps.get_version.outputs.VERSION }}.jar
+        asset_name: choco-parsers-${{ steps.get_version.outputs.VERSION }}.jar
+        asset_content_type: application/java-archive
+        
+    - name: Upload Release Asset sources
+      id: upload-release-asset-src 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: parsers/target/choco-parsers-${{ steps.get_version.outputs.VERSION }}-sources.jar
+        asset_name: choco-parsers-${{ steps.get_version.outputs.VERSION }}-sources.jar
+        asset_content_type: application/java-archive
+        
+    - name: Upload Release Asset fat jar
+      id: upload-release-asset-fat 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: parsers/target/choco-parsers-${{ steps.get_version.outputs.VERSION }}-jar-with-dependencies.jar
+        asset_name: choco-parsers-${{ steps.get_version.outputs.VERSION }}-jar-with-dependencies.jar
+        asset_content_type: application/java-archive
+    # EXAMPLES
+    - name: Upload Release Asset Examples tar.bz2
+      id: upload-release-asset-fat 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: examples/target/examples-${{ steps.get_version.outputs.VERSION }}-src.tar.bz2
+        asset_name: examples-${{ steps.get_version.outputs.VERSION }}-src.tar.bz2
+        asset_content_type: application/x-gtar
+
+    - name: Upload Release Asset Examples tar.gz
+      id: upload-release-asset-fat 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: examples/target/examples-${{ steps.get_version.outputs.VERSION }}-src.tar.gz
+        asset_name: examples-${{ steps.get_version.outputs.VERSION }}-src.tar.gz
+        asset_content_type: application/x-gtar
+
+    - name: Upload Release Asset Examples zip
+      id: upload-release-asset-fat 
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.get.outputs.upload_url }} 
+        asset_path: examples/target/examples-${{ steps.get_version.outputs.VERSION }}-src.zip
+        asset_name: examples-${{ steps.get_version.outputs.VERSION }}-src.zip
+        asset_content_type: application/zip

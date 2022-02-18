@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -18,7 +18,7 @@ import org.chocosolver.util.procedure.PairProcedure;
  * Interface for Graph Delta Monitor.
  * Adapted from choco-graph. Original authors: Jean-Guillaume Fages and Charles Prud'homme.
  */
-public interface IGraphDeltaMonitor {
+public interface IGraphDeltaMonitor extends IDeltaMonitor{
 
     /**
      * Applies proc to every vertex which has just been removed or enforced, depending on evt.

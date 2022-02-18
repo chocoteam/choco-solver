@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -201,6 +201,6 @@ public class PropSumFullBool extends PropSum {
         BoolVar[] bvars = new BoolVar[vars.length];
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(vars, 0, bvars, 0, bvars.length);
-        return new PropSumFullBool(bvars, pos, nop(o), b, reactToFineEvt);
+        return new PropSumFullBool(bvars, pos, nop(o), b + nb(o), reactToFineEvt);
     }
 }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,31 +19,35 @@ public enum Level {
     /**
      * No log.
      */
-    SILENT(0b000_0000),
+    SILENT(0b000_00000),
     /**
      * Required level for competitions
      */
-    COMPET(0b000_0001),
+    COMPET(0b000_00001),
     /**
      * Required level for 'results-analyser'
      */
-    RESANA(0b000_0010),
+    RESANA(0b000_00010),
     /**
      * Required level to print verbose solving
      */
-    VERBOSE(0b000_0100),
+    VERBOSE(0b000_00100),
     /**
      * Required level to print verbose solving
      */
-    JSON(0b000_1000),
+    JSON(0b000_01000),
+    /**
+     * Required level to print verbose solving
+     */
+    IRACE(0b000_10000),
     /**
      * Higher log level
      */
-    INFO(0b001_0000),
+    INFO(0b001_00000),
     /**
      * Highest log level
      */
-    FINE(0b011_0000);
+    FINE(0b011_00000);
 
     final int value;
 

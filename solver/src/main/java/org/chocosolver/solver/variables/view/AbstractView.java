@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,6 +22,7 @@ public abstract class AbstractView<V extends Variable> extends AbstractVariable 
      * @param name name of the view
      * @param variables observed variables
      */
+    @SuppressWarnings("unchecked")
     protected AbstractView(String name, V... variables) {
         super(name, variables[0].getModel());
         this.variables = variables;

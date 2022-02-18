@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -41,11 +41,17 @@ public class ConstraintsName {
 
     public static final String DIVISION = "DIVISION";
 
+    public static final String ARGMAX = "ARGMAX";
+
     public static final String MAX = "MAX";
 
     public static final String MIN = "MIN";
 
     public static final String ALLDIFFERENT = "ALLDIFFERENT";
+
+    public static final String ALLDIFFPREC = "ALLDIFFPREC";
+
+    public static final String CONDALLDIFFERENT = "CONDALLDIFFERENT";
 
     public static final String AMONG = "AMONG";
 
@@ -148,6 +154,10 @@ public class ConstraintsName {
     public static final String SETNOTMEMBER = "SETNOTMEMBER";
 
     public static final String REIFICATIONCONSTRAINT = "REIFICATIONCONSTRAINT";
+
+    public static final String IMPLYCONSTRAINT = "IMPLYCONSTRAINT";
+
+    public static final String IMPLIEDCONSTRAINT = "IMPLIEDCONSTRAINT";
 
     public static final String SATCONSTRAINT = "SATCONSTRAINT";
 

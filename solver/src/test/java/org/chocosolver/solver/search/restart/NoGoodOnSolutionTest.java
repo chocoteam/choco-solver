@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -97,7 +97,7 @@ public class NoGoodOnSolutionTest {
         r.setSearch(activityBasedSearch(s.retrieveIntVars(true)));
         while (s.getSolver().solve()) ;
 
-        assertTrue(r.getMeasures().getSolutionCount() == MAX_NB_SOLS);
+        assertEquals(r.getMeasures().getSolutionCount(), NB_SOLS);
     }
 
     @Test(groups="10s", timeOut=60000)

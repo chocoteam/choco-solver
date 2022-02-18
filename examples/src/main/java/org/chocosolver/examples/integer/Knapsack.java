@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -116,7 +116,7 @@ public class Knapsack extends AbstractProblem {
             st.append(String.format("\t#%d: %d\n", i, objects[i].getValue()));
         }
         st.append(String.format("\n\tPower: %d", power.getValue()));
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

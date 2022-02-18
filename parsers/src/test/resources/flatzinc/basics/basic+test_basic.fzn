@@ -1,0 +1,2 @@
+var 1..10: objective:: output_var;
+solve :: int_search([objective],input_order,indomain_max,complete) minimize objective;

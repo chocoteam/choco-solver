@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -44,6 +44,17 @@ public class TestCorrectness {
             long seed = System.currentTimeMillis();
             for (int n = 2; n < (1 << 5) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelAbsolute, 2, -n / 2, 2 * n, seed, null);
+            }
+        }
+    }
+
+    // ABSOLUTE
+    @Test(groups = "checker", timeOut = 60000)
+    public void testSQUARE() {
+        for (int i = 0; i < 10; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 5) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelSquare, 2, -n / 2, 2 * n, seed, null);
             }
         }
     }

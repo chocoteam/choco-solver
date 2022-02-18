@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -119,7 +119,7 @@ public class WarehouseLocation extends AbstractProblem {
 //        solver.setCBJLearning(false, false);
         solver.plugMonitor((IMonitorSolution) () -> prettyPrint());
         solver.showShortStatistics();
-        solver.getObjectiveManager().<Integer>setCutComputer(obj -> obj);
+        solver.getObjectiveManager().setCutComputer(obj -> obj);
         solver.findOptimalSolution(tot_cost, false);
 //        model.setObjective(ResolutionPolicy.MINIMIZE, tot_cost);
 //        while (solver.solve()) {
@@ -152,7 +152,7 @@ public class WarehouseLocation extends AbstractProblem {
             }
         }
         st.append("\tTotal C: ").append(tot_cost.getValue());
-        System.out.println(st.toString());
+        System.out.println(st);
     }
 
     public static void main(String[] args) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,9 +11,9 @@ package org.chocosolver.parser.dimacs;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -33,6 +33,7 @@ public class DIMACS extends RegParser {
     // Contains mapping with variables and output prints
     public DIMACSParser[] parsers;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-cp", usage = "Pure CP approach (does not rely on the underlying SAT solver).")
     private boolean cp = false;
 
@@ -47,10 +48,7 @@ public class DIMACS extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setWarnUser(false)
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true)
+        defaultSettings = Settings.prod()
                 .setEnableSAT(!cp);
     }
 
@@ -85,6 +83,7 @@ public class DIMACS extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(models.get(i), parsers[i], i);
+                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
                 }
@@ -214,6 +213,16 @@ public class DIMACS extends RegParser {
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
                     solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.is(Level.IRACE)) {
+            solver.log().printf(Locale.US, "%d %d",
+                    solver.getObjectiveManager().isOptimization() ?
+                            (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                    * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            -solver.getSolutionCount(),
+                    complete ?
+                            (int) Math.ceil(solver.getTimeCount()) :
+                            Integer.MAX_VALUE);
         }
         if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -427,6 +427,27 @@ public class GraphFactory {
     }
 
     /**
+     * Construct a backtrackable graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param nodes
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public static UndirectedGraph makeNodeInducedSubgraph(Model model, UndirectedGraph graph, UndirectedGraph UB, ISet nodes, boolean exclude) {
+        return new UndirectedGraph(model, graph, UB, nodes, exclude);
+    }
+
+
+    /**
      * Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
      *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
      *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
@@ -440,6 +461,26 @@ public class GraphFactory {
      */
     public static DirectedGraph makeNodeInducedSubgraph(Model model, DirectedGraph graph, ISet nodes, boolean exclude) {
         return new DirectedGraph(model, graph, nodes, exclude);
+    }
+
+    /**
+     * Construct a backtrackable directed graph G' = (V', E') from another graph G = (V, E) such that:
+     *          V' = E \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     *          E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     *
+     * with nodes a fixed set of nodes.
+     *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param nodes
+     * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
+     */
+    public static DirectedGraph makeNodeInducedSubgraph(Model model, DirectedGraph graph, DirectedGraph UB, ISet nodes, boolean exclude) {
+        return new DirectedGraph(model, graph, UB, nodes, exclude);
     }
 
     /**
@@ -468,10 +509,46 @@ public class GraphFactory {
      * @param model the model
      * @param graph the graph to construct a subgraph from
      * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude the type of subgraph to construct
+     */
+    public static UndirectedGraph makeEdgeInducedSubgraph(Model model, UndirectedGraph graph, UndirectedGraph UB, int[][] edges, boolean exclude) {
+        return new UndirectedGraph(model, graph, UB, edges, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
      * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
      */
     public static DirectedGraph makeEdgeInducedSubgraph(Model model, DirectedGraph graph, int[][] edges, boolean exclude) {
         return new DirectedGraph(model, graph, edges, exclude);
+    }
+
+    /**
+     * Construct a backtrackable graph G = (V', E') from G = (V, E) such that:
+     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     *
+     * with edges a fixed set of edges.
+     *
+     * /!\ Optimized for graph views instantiation: avoids unnecessary dynamic data structures /!\
+     *
+     * @param model the model
+     * @param graph the graph to construct a subgraph from
+     * @param UB If used to instantiate a graph view: the observed graph variable upper bound, used to detect whether
+     *           a dynamic data structure is necessary for node and neighbors sets.
+     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
+     */
+    public static DirectedGraph makeEdgeInducedSubgraph(Model model, DirectedGraph graph, DirectedGraph UB, int[][] edges, boolean exclude) {
+        return new DirectedGraph(model, graph, UB, edges, exclude);
     }
 
     //***********************************************************************************

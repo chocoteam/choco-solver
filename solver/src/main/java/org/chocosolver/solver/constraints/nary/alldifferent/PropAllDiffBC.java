@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -29,7 +29,7 @@ import org.chocosolver.util.ESat;
  */
 public class PropAllDiffBC extends Propagator<IntVar> {
 
-    private AlgoAllDiffBC filter;
+    private final AlgoAllDiffBC filter;
 
     public PropAllDiffBC(IntVar[] variables) {
         super(variables, PropagatorPriority.LINEAR, false);

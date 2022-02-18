@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,11 +11,11 @@ package org.chocosolver.solver.constraints.graph.channeling.edges;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.DirectedGraphVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.solver.variables.DirectedGraphVar;
-import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
+import org.chocosolver.util.objects.graphs.GraphFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -34,7 +34,7 @@ public class SuccessorsChannelingTest {
 
     // NodeSetsChanneling
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testSuccessorsSetsChannelingGenerate() {
         // Generate all solutions
         Model model = new Model();
@@ -117,7 +117,7 @@ public class SuccessorsChannelingTest {
 
     // BoolsSetChanneling
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testSuccessorsBoolsChannelingGenerate() {
         // Generate all solutions
         Model model = new Model();
@@ -277,7 +277,7 @@ public class SuccessorsChannelingTest {
 
     // NodeBoolChanneling
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testSuccessorsBoolChannelingGenerate() {
         // Generate all solutions
         Model model = new Model();

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,14 +12,19 @@ package org.chocosolver.solver.variables.view.set;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDelta;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.view.SetView;
+import org.chocosolver.solver.variables.view.delta.SetViewOnSetsDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetDifference;
 import org.chocosolver.util.objects.setDataStructures.dynamic.SetIntersection;
+import org.chocosolver.util.objects.setDataStructures.dynamic.SetUnion;
+import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * Set view over set variables representing the intersection of these variables.
@@ -101,8 +106,7 @@ public class SetIntersectionView extends SetView<SetVar> {
             }
         }
         if (nb == 1) {
-            variables[idx].remove(element, this);
-            return true;
+            return variables[idx].remove(element, this);
         } else {
             remove.add(element);
         }
@@ -112,10 +116,46 @@ public class SetIntersectionView extends SetView<SetVar> {
     @Override
     protected boolean doForceSetElement(int element) throws ContradictionException {
         // Force the element in every set
-        boolean b = true;
+        boolean b = false;
         for (SetVar set : variables) {
-            b = b && set.force(element, this);
+            b |= set.force(element, this);
         }
         return b;
+    }
+
+    @Override
+    public ISetDelta getDelta() {
+        throw new UnsupportedOperationException("SetIntersectionView does not support getDelta()");
+    }
+
+    @Override
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        ISetDeltaMonitor[] deltaMonitors = new ISetDeltaMonitor[variables.length];
+        for (int i = 0; i < variables.length; i++) {
+            deltaMonitors[i] = variables[i].monitorDelta(propagator);
+        }
+        return new SetViewOnSetsDeltaMonitor(deltaMonitors) {
+            final ISet removed = SetFactory.makeStoredSet(SetType.RANGESET, 0, getModel());
+            final ISet remove = new SetDifference(new SetUnion(removedValues), removed);
+            final ISet add = new SetUnion(addedValues);
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                fillValues();
+                if (evt == SetEventType.ADD_TO_KER) {
+                    for (int v : add) {
+                        if (getLB().contains(v)) {
+                            proc.execute(v);
+                        }
+                    }
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    for (int v : remove) {
+                        proc.execute(v);
+                    }
+                    for (int v : remove) {
+                        removed.add(v);
+                    }
+                }
+            }
+        };
     }
 }

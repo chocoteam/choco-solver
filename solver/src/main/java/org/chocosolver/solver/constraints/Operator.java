@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -21,7 +21,7 @@ public enum Operator {
 
     NONE(), EQ(), LT(), GT(), NQ(), LE(), GE(), PL(), MN();
 
-	private static THashMap<String, Operator> operators = new THashMap<>();
+	private static final THashMap<String, Operator> operators = new THashMap<>();
 
     static {
         operators.put("@", Operator.NONE);

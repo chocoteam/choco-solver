@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -50,7 +50,7 @@ public class PortFolioTest {
         ParallelPortfolio pares = new ParallelPortfolio();
         int n = 6; // number of solvers to use
         for (int i = 0; i < n; i++) {
-            pares.addModel(ProblemMaker.makeGolombRuler(10));
+            pares.addModel(ProblemMaker.makeGolombRuler(9));
         }
         pares.stealNogoodsOnRestarts();
         int nbSols = 0;
@@ -60,7 +60,7 @@ public class PortFolioTest {
         Model finder = pares.getBestModel();
         Assert.assertTrue(nbSols > 0);
         Assert.assertNotNull(finder);
-        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 55);
+        Assert.assertEquals(finder.getSolver().getObjectiveManager().getBestSolutionValue(), 44);
     }
 
     @Test(groups = "10s", timeOut = 60000)

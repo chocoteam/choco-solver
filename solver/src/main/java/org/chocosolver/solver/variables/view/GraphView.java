@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -16,6 +16,7 @@ import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
+import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.GraphEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -29,9 +30,6 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  * @since 31/03/2021
  */
 public abstract class GraphView<V extends Variable, E extends IGraph> extends AbstractView<V> implements GraphVar<E> {
-
-    protected GraphDelta delta;
-    protected boolean reactOnModification;
 
     /**
      * Creates a graph view.
@@ -61,11 +59,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (!getMandatoryNodes().contains(node) && doEnforceNode(node)) {
-            if (reactOnModification) {
-                delta.add(node, GraphDelta.NODE_ENFORCED, cause);
-            }
-            GraphEventType e = GraphEventType.ADD_NODE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.ADD_NODE, cause);
             return true;
         }
         return false;
@@ -81,20 +75,13 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
         } else if (!getPotentialNodes().contains(node)) {
             return false;
         }
-        ISet nei = getPotentialSuccessorsOf(node);
-        for (int i : nei) {
-            removeEdge(node, i, cause);
-        }
-        nei = getPotentialPredecessorOf(node);
-        for (int i : nei) {
-            removeEdge(i, node, cause);
-        }
+        int succSize = getPotentialSuccessorsOf(node).size();
+        int predSize= getPotentialPredecessorOf(node).size();
         if (doRemoveNode(node)) {
-            if (reactOnModification) {
-                delta.add(node, GraphDelta.NODE_REMOVED, cause);
+            if (succSize + predSize > 0) {
+                notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             }
-            GraphEventType e = GraphEventType.REMOVE_NODE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_NODE, cause);
             return true;
         }
         return false;
@@ -103,19 +90,17 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
     @Override
     public boolean enforceEdge(int x, int y, ICause cause) throws ContradictionException {
         assert cause != null;
-        enforceNode(x, cause);
-        enforceNode(y, cause);
+        boolean addX = !getMandatoryNodes().contains(x);
+        boolean addY = !getMandatoryNodes().contains(y);
         if (!getPotentialSuccessorsOf(x).contains(y)) {
             this.contradiction(cause, "enforce edge which is not in the domain");
             return false;
         }
         if (doEnforceEdge(x, y)) {
-            if (reactOnModification) {
-                delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
-                delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
+            if (addX || addY) {
+                notifyPropagators(GraphEventType.ADD_NODE, cause);
             }
-            GraphEventType e = GraphEventType.ADD_EDGE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.ADD_EDGE, cause);
             return true;
         }
         return false;
@@ -129,12 +114,7 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
             return false;
         }
         if (doRemoveEdge(x, y)) {
-            if (reactOnModification) {
-                delta.add(x, GraphDelta.EDGE_REMOVED_TAIL, cause);
-                delta.add(y, GraphDelta.EDGE_REMOVED_HEAD, cause);
-            }
-            GraphEventType e = GraphEventType.REMOVE_EDGE;
-            notifyPropagators(e, cause);
+            notifyPropagators(GraphEventType.REMOVE_EDGE, cause);
             return true;
         }
         return false;
@@ -164,15 +144,22 @@ public abstract class GraphView<V extends Variable, E extends IGraph> extends Ab
 
     @Override
     public GraphDelta getDelta() {
-        return delta;
+        throw new UnsupportedOperationException("GraphView does not support getDelta()");
     }
 
     @Override
     public void createDelta() {
-        if (!reactOnModification) {
-            reactOnModification = true;
-            delta = new GraphDelta(getEnvironment());
+        for (Variable v : getVariables()) {
+            v.createDelta();
         }
+    }
+
+    @Override
+    public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
+        assert cause != null;
+        model.getSolver().getEngine().onVariableUpdate(this, event, cause);
+        notifyMonitors(event);
+        notifyViews(event, cause);
     }
 
     @Override

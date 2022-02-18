@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -83,8 +83,10 @@ public class PropNbCC extends Propagator<Variable> {
 
                 // 1 --- remove unreachable nodes
                 int n = g.getNbMaxNodes();
-                for (int o = visitedMin.nextClearBit(0); o < n; o = visitedMin.nextClearBit(o + 1)) {
-                    g.removeNode(o, this);
+                for (int o : g.getPotentialNodes()) {
+                    if (!visitedMin.get(o)) {
+                        g.removeNode(o, this);
+                    }
                 }
 
                 // 2 --- enforce articulation points and bridges that link two mandatory nodes
@@ -125,7 +127,7 @@ public class PropNbCC extends Propagator<Variable> {
     private int minCC() {
         int min = 0;
         visitedMin.clear();
-        for (int i : g.getMandatoryNodes().toArray()) {
+        for (int i : g.getMandatoryNodes()) {
             if (!visitedMin.get(i)) {
                 helper.exploreFrom(i, visitedMin);
                 min++;
@@ -137,7 +139,7 @@ public class PropNbCC extends Propagator<Variable> {
     private int maxCC() {
         int nbK = 0;
         visitedMax.clear();
-        for(int i:g.getMandatoryNodes().toArray()) {
+        for(int i:g.getMandatoryNodes()) {
             if(!visitedMax.get(i)) {
                 exploreLBFrom(i, visitedMax);
                 nbK++;

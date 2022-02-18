@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -66,9 +66,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 
     private boolean learnsAndFails; // does the learning pahse leads to a failure
 
-    private long initTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private final long initTimeLimit = Integer.MAX_VALUE; // a time limit for init()
 
-    private long reevalTimeLimit = Integer.MAX_VALUE; // a time limit for init()
+    private final long reevalTimeLimit = Integer.MAX_VALUE; // a time limit for init()
 
     private int idx = 0;
 
@@ -231,7 +231,9 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
 //            solver.getEngine().fails(this, lAfVar, "Impact::init:: detect failures");
             return false;
         } else if (System.currentTimeMillis() > tl) {
-            model.getSolver().log().println("impact Search stops its init phase -- reach time limit!");
+            if (model.getSettings().warnUser()) {
+                model.getSolver().log().println("impact Search stops its init phase -- reach time limit!");
+            }
             for (int i = 0; i < vars.length; i++) {  // create arrays to avoid null pointer errors
                 IntVar v = vars[i];
                 int offset = v.getLB();

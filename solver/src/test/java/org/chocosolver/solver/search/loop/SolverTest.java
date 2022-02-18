@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,8 +11,10 @@ package org.chocosolver.solver.search.loop;
 
 import org.chocosolver.cutoffseq.LubyCutoffStrategy;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
@@ -20,6 +22,7 @@ import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -28,6 +31,7 @@ import org.testng.annotations.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
@@ -112,7 +116,7 @@ public class SolverTest {
         r.setHBFS(.05, .1, 32);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 7);
-        assertEquals(model.getSolver().getNodeCount(), 5155);
+        assertEquals(model.getSolver().getNodeCount(), 4542);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -321,7 +325,7 @@ public class SolverTest {
 
     @Test(groups = "1s")
     public void testMessage() {
-        Model choco = new Model();
+        Model choco = new Model(Settings.init().setWarnUser(true));
         Constraint expr = choco.arithm(choco.intVar(1, 2), "<", 2);
         expr.getOpposite().post();
         ByteArrayOutputStream errContent = new ByteArrayOutputStream();
@@ -339,5 +343,66 @@ public class SolverTest {
         Assert.assertEquals("No search strategies defined.\n" +
                 "Set to default ones.\n", errContent.toString());
 
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testProfiler() {
+        Model model = new Model();
+        int[] itemSize = new int[]{4096, 4096, 4096, 4096, 4096, 4096};
+        IntVar[] itemBin = new IntVar[6];
+        itemBin[0] = model.intVar("VGU0", 0, 1);
+        itemBin[1] = model.intVar("VGU1", new int[]{0, 2});
+        itemBin[2] = model.intVar("VGU2", 1, 2);
+        itemBin[3] = model.intVar("VGU3", 1, 2);
+        itemBin[4] = model.intVar("VGU4", 0);
+        itemBin[5] = model.intVar("VGU5", 0);
+        IntVar[] binLoad = model.intVarArray("binLoad", 3, 0, 8192);
+        model.binPacking(itemBin, itemSize, binLoad, 0).post();
+        Solver solver = model.getSolver();
+        PropagationProfiler p = solver.profilePropagation();
+        solver.setSearch(new FullyRandom(model.retrieveIntVars(true), 0));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        PrintWriter pw = new PrintWriter(baos);
+        p.writeTo(pw, true);
+        pw.flush();
+        Assert.assertEquals(baos.toString(), "Propagators\n" +
+                " \n" +
+                "* id      : row id\n" +
+                "* coarse  : for a given propagator, number of coarse propagations, i.e., calls to `propagate(int)`\n" +
+                "* fine    : for a given propagator, number of fine propagations, i.e., calls to `propagate(int,int)`\n" +
+                "* filter  : for a given propagator, number of times a call to propagation removes a value from a variable's domain\n" +
+                "* fails   : for a given propagator, number of times it throws a failure\n" +
+                "* name    : name of the given propagator \n" +
+                " \n" +
+                " id        coarse      fine    filter     fails  name\n" +
+                " 0              3         2         2         0  \"PropBinPacking(VGU0, VGU1, VGU2, ..., binLoad[2])\"\n" +
+                " 1              1         0         0         0  \"binLoad[0] + binLoad[1] + binLoad[2] = 24576\"\n" +
+                " 2              1         0         0         0  \"true\"\n" +
+                "Total           5         2         2         0\n" +
+                "\n" +
+                "Integer variables\n" +
+                " \n" +
+                "* id      : row id\n" +
+                "* inst    : for a given integer variable, number of instantiation events\n" +
+                "* lower   : for a given integer variable, number of lower bound increasing events\n" +
+                "* upper   : for a given integer variable, number of upper bound decreasing events\n" +
+                "* bounds  : for a given integer variable, number of bounds modification events\n" +
+                "* remove  : for a given integer variable, number of value removal events\n" +
+                "* name    : name of the given variable \n" +
+                " \n" +
+                " id          inst     lower     upper    bounds    remove  name\n" +
+                " 0              1         0         0         0         0  \"VGU0\"\n" +
+                " 1              1         0         0         0         0  \"VGU1\"\n" +
+                " 2              2         0         0         0         0  \"VGU2\"\n" +
+                " 3              2         0         0         0         0  \"VGU3\"\n" +
+                " 4              0         0         0         0         0  \"VGU4\"\n" +
+                " 5              0         0         0         0         0  \"VGU5\"\n" +
+                " 6              1         0         0         0         0  \"binLoad[0]\"\n" +
+                " 7              1         0         0         0         0  \"binLoad[1]\"\n" +
+                " 8              1         0         0         0         0  \"binLoad[2]\"\n" +
+                " 9              0         0         0         0         0  \"cste -- 24576\"\n" +
+                " 10             0         0         0         0         0  \"cste -- 1\"\n\n");
     }
 }

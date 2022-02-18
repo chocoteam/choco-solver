@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -113,7 +113,7 @@ public class ParallelPortfolio {
     /**
      * whether or not to use default search configurations for the different threads
      **/
-    private boolean searchAutoConf;
+    private final boolean searchAutoConf;
 
     /**
      * This manager is used to synchronize nogood sharing.
@@ -130,9 +130,9 @@ public class ParallelPortfolio {
      */
     private final HashMap<Model, Boolean> reliableness;
 
-    private AtomicBoolean solverTerminated = new AtomicBoolean(false);
-    private AtomicBoolean solutionFound = new AtomicBoolean(false);
-    private AtomicInteger solverRunning = new AtomicInteger(0);
+    private final AtomicBoolean solverTerminated = new AtomicBoolean(false);
+    private final AtomicBoolean solutionFound = new AtomicBoolean(false);
+    private final AtomicInteger solverRunning = new AtomicInteger(0);
 
     /**
      * Point to (one of) the solver(s) which found a solution
@@ -457,7 +457,7 @@ public class ParallelPortfolio {
                 // DWD  + fast restart + LC (+ B2V)
                 solver.setSearch(
                         lastConflict(
-                                VarH.DOMWDEG.make(solver, ivars, ValH.BEST, opt)
+                                VarH.DOMWDEG.make(solver, ivars, ValH.BEST, Integer.MAX_VALUE, opt)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -468,7 +468,7 @@ public class ParallelPortfolio {
             case 1:
                 solver.setSearch(
                         lastConflict(
-                                VarH.CHS.make(solver, ivars, ValH.MIN, opt)
+                                VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -480,7 +480,7 @@ public class ParallelPortfolio {
                 // input order + LC
                 solver.setSearch(
                         lastConflict(
-                                VarH.INPUT.make(solver, ivars, ValH.MIN, opt)
+                                VarH.INPUT.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                         )
                 );
                 if (reliableness.containsKey(worker)) {
@@ -491,7 +491,7 @@ public class ParallelPortfolio {
                 if (!opt) {
                     solver.setSearch(
                             lastConflict(
-                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, opt)
+                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                             )
                     );
                     Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -500,7 +500,7 @@ public class ParallelPortfolio {
                     // input order + LC + LNS
                     solver.setSearch(
                             lastConflict(
-                                    VarH.INPUT.make(solver, ivars, ValH.MIN, opt)
+                                    VarH.INPUT.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                             )
                     );
                     solver.setLNS(INeighborFactory.blackBox(ivars), new FailCounter(solver.getModel(), 1000));
@@ -513,7 +513,7 @@ public class ParallelPortfolio {
                 // ABS  + fast restart + LC
                 solver.setSearch(
                         lastConflict(
-                                VarH.ABS.make(solver, ivars, ValH.DEFAULT, opt)
+                                VarH.ABS.make(solver, ivars, ValH.DEFAULT, Integer.MAX_VALUE, opt)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -522,7 +522,7 @@ public class ParallelPortfolio {
                 // DWD  + fast restart + COS
                 solver.setSearch(
                         Search.conflictOrderingSearch(
-                                VarH.DOMWDEG.make(solver, ivars, ValH.MIN, opt)
+                                VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -531,11 +531,11 @@ public class ParallelPortfolio {
             case 6:
                 // DWD  + fast restart + LC (+ B2V)
                 if (!opt) {
-                    solver.setSearch(VarH.DOMWDEG.make(solver, ivars, ValH.MIN, false));
+                    solver.setSearch(VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, false));
                 } else {
                     solver.setSearch(
                             lastConflict(
-                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, opt)
+                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                             )
                     );
                     Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -544,7 +544,7 @@ public class ParallelPortfolio {
             case 7:
                 solver.setSearch(
                         lastConflict(
-                                VarH.CHS.make(solver, ivars, ValH.MIN, opt)
+                                VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
                         )
                 );
                 Restarts.LUBY.declare(solver, 40, 0.d, 5000);

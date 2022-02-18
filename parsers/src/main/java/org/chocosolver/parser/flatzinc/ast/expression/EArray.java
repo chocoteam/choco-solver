@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -59,6 +59,15 @@ public final class EArray extends Expression {
         int[] arr = new int[what.size()];
         for (int i = 0; i < what.size(); i++) {
             arr[i] = what.get(i).intValue();
+        }
+        return arr;
+    }
+
+    @Override
+    public int[][] toSetArray() {
+        int[][] arr = new int[what.size()][];
+        for (int i = 0; i < what.size(); i++) {
+            arr[i] = what.get(i).setValue();
         }
         return arr;
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,8 +38,8 @@ public class PropCardinality extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar card;
-    private SetVar set;
+    private final IntVar card;
+    private final SetVar set;
 
     //***********************************************************************************
     // CONSTRUCTORS

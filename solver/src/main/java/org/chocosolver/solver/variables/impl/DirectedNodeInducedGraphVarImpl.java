@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,7 +15,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.delta.GraphDelta;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.util.objects.graphs.DirectedGraph;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 
 /**
  * Directed graph variable guaranteeing that any instantiation is a node-induced subgraph of the envelope
@@ -30,7 +29,7 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
  */
 public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implements ICause {
 
-    private DirectedGraph originalUB;
+    private final DirectedGraph originalUB;
 
     /**
      * Creates an directed node-induced (from the envelope) graph variable
@@ -51,6 +50,7 @@ public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implem
         if (!nodeEnforced) {
             return false;
         }
+        boolean edgeAdded = false;
         for (int y : originalUB.getSuccessorsOf(x)) {
             if (LB.containsNode(y)) {
                 if (!UB.containsEdge(x, y)) {
@@ -61,7 +61,7 @@ public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implem
                         delta.add(x, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                         delta.add(y, GraphDelta.EDGE_ENFORCED_HEAD, cause);
                     }
-                    notifyPropagators(GraphEventType.ADD_EDGE, this);
+                    edgeAdded = true;
                 }
             } else if (UB.containsNode(y) && !UB.containsEdge(x, y)) {
                 removeNode(y, this);
@@ -77,13 +77,15 @@ public class DirectedNodeInducedGraphVarImpl extends DirectedGraphVarImpl implem
                         delta.add(y, GraphDelta.EDGE_ENFORCED_TAIL, cause);
                         delta.add(x, GraphDelta.EDGE_ENFORCED_HEAD, cause);
                     }
-                    notifyPropagators(GraphEventType.ADD_EDGE, this);
+                    edgeAdded = true;
                 }
             } else if (UB.containsNode(y) && !UB.containsEdge(y, x)) {
                 removeNode(y, this);
             }
         }
-        notifyPropagators(GraphEventType.ADD_NODE, cause);
+        if (edgeAdded) {
+            notifyPropagators(GraphEventType.ADD_EDGE, this);
+        }
         return true;
     }
 

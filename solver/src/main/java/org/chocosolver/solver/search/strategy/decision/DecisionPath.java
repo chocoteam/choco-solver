@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,7 +42,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     /**
      * Current decision path.
      */
-    private List<Decision> decisions;
+    private final List<Decision> decisions;
 
     IStateInt last;
 
@@ -178,7 +178,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         if (lst < decisions.size()) {
             Decision decision = decisions.get(lst);
             st.append(String.format("[%d/%d] %s",
-                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision.toString())
+                    decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision)
             );
         } else {
             st.append(String.format("[1/1] d_0: %s", decisions.get(0).toString()));

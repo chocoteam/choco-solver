@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,10 +9,17 @@
  */
 package org.chocosolver.solver.variables.view.set;
 
+import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
+import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.objects.setDataStructures.SetFactory;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -114,5 +121,46 @@ public class SetUnionViewTest {
         m.arithm(card, ">=", 3).post();
         while (m.getSolver().solve()) {}
         Assert.assertEquals(nbSols, m.getSolver().getSolutionCount());
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testDelta() throws ContradictionException {
+        Model m = new Model();
+        SetVar setA = m.setVar(new int[] {}, IntStream.range(0, 10).toArray());
+        SetVar setB = m.setVar(new int[] {}, IntStream.range(0, 10).toArray());
+        SetVar setC = m.setVar(new int[] {}, IntStream.range(0, 10).toArray());
+        SetVar union = m.setUnionView(setA, setB, setC);
+        ICause fakeCauseA = new ICause() {};
+        ICause fakeCauseB = new ICause() {};
+        ISetDeltaMonitor monitor = union.monitorDelta(fakeCauseA);
+        monitor.startMonitoring();
+        ISet delta = SetFactory.makeBitSet(0);
+        IntProcedure addToDelta = i -> delta.add(i);
+        // Test add elements
+        setA.force(0, fakeCauseB);
+        setB.force(1, fakeCauseB);
+        setC.force(2, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.contains(0));
+        Assert.assertTrue(delta.contains(1));
+        Assert.assertTrue(delta.contains(2));
+        Assert.assertTrue(delta.size() == 3);
+        delta.clear();
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.size() == 0);
+        setB.force(0, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
+        Assert.assertTrue(delta.size() == 0);
+        // Test remove elements
+        delta.clear();
+        setA.remove(8, fakeCauseB);
+        setB.remove(8, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
+        Assert.assertEquals(delta.size(), 0);
+        delta.clear();
+        setC.remove(8, fakeCauseB);
+        monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
+        Assert.assertTrue(delta.contains(8));
+        Assert.assertTrue(delta.size() == 1);
     }
 }

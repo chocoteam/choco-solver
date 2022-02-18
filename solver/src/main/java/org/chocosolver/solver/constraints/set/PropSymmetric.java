@@ -1,19 +1,12 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -30,7 +23,9 @@ import org.chocosolver.util.procedure.IntProcedure;
  * Propagator for symmetric sets
  * x in set[y-offSet] <=> y in set[x-offSet]
  *
+ * @since 14/01/13
  * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
  */
 public class PropSymmetric extends Propagator<SetVar> {
 
@@ -38,9 +33,12 @@ public class PropSymmetric extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, currentSet, offSet;
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure elementForced, elementRemoved;
+    private final int n;
+    private int currentSet;
+    private final int offSet;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure elementForced;
+    private final IntProcedure elementRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -80,6 +78,9 @@ public class PropSymmetric extends Propagator<SetVar> {
             while (iter.hasNext()){
                 vars[iter.nextInt() - offSet].force(i + offSet, this);
             }
+        }
+        for (int i = 0; i < n; i++) {
+            sdm[i].startMonitoring();
         }
     }
 

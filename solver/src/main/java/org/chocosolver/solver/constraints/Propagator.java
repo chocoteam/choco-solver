@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,6 +14,7 @@ import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
@@ -78,7 +79,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @since 0.01
  * @param <V> type of variables involved in this propagator
  */
-public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator> {
+public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>> {
 
     /**
      * Status of this propagator on creation.
@@ -86,7 +87,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     private static final short NEW = 0;
 
     /**
-     * Status of this propagagator when reified.
+     * Status of this propagator when reified.
      */
     private static final short REIFIED = 1;
 
@@ -149,7 +150,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Priority of this propagator.
      * Mix between arity and compexity.
      */
-    protected final PropagatorPriority priority;
+    protected final Priority priority;
 
     /**
      * Set to <tt>true</tt> to indidates that this propagator reacts to fine event.
@@ -232,12 +233,18 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param swapOnPassivate indicates if, on propagator passivation, the propagator should be
      *                        ignored in its variables' propagators list.
      */
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt, boolean swapOnPassivate) {
+    protected Propagator(V[] vars, Priority priority, boolean reactToFineEvt, boolean swapOnPassivate) {
         assert vars != null && vars.length > 0 && vars[0] != null : "wrong variable set in propagator constructor";
         this.model = vars[0].getModel();
         this.reactToFineEvt = reactToFineEvt;
         this.priority = priority;
-        this.vars = vars.clone();
+        // To avoid too much memory consumption, the array of variables is referenced directly, no clone anymore.
+        // This is the responsibility of the propagator's developer to take care of that point.
+        if (model.getSettings().cloneVariableArrayInPropagator()) {
+            this.vars = vars.clone();
+        } else {
+            this.vars = vars;
+        }
         this.vindices = new int[vars.length];
         Arrays.fill(vindices, -1);
         ID = model.nextId();
@@ -287,7 +294,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param reactToFineEvt indicates whether or not this propagator must be informed of every
      *                       variable modification, i.e. if it should be incremental or not
      */
-    protected Propagator(V[] vars, PropagatorPriority priority, boolean reactToFineEvt) {
+    protected Propagator(V[] vars, Priority priority, boolean reactToFineEvt) {
         this(vars, priority, reactToFineEvt, false);
     }
 
@@ -521,7 +528,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * so it is useless to propagate it. Should not be called by the user.
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
-    @SuppressWarnings({"unchecked"})
     public void setPassive() throws SolverException {
         // Note: calling isCompletelyInstantiated() to avoid next steps may lead to error when
         // dealing with reification and dynamic addition.
@@ -608,7 +614,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             arity += vars[i].isInstantiated() ? 0 : 1;
         }
         if (arity > 3) {
-            return priority.priority;
+            return priority.getValue();
         } else return arity;
     }
 
@@ -664,7 +670,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof Propagator && ((Propagator) o).ID == ID;
+        return o instanceof Propagator<?> && ((Propagator<?>) o).ID == ID;
     }
 
     /**
@@ -731,7 +737,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * @return the priority of this propagator (may influence the order in which propagators are called)
      */
-    public final PropagatorPriority getPriority() {
+    public final Priority getPriority() {
         return priority;
     }
 
@@ -897,8 +903,8 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @param queues array of queues in which this can be scheduled
      * @return propagator priority
      */
-    public int doSchedule(CircularQueue<Propagator>[] queues){
-        int prio = priority.priority;
+    public int doSchedule(CircularQueue<Propagator<?>>[] queues){
+        int prio = priority.getValue();
         if(!scheduled) {
             queues[prio].addLast(this);
             schedule();
@@ -949,7 +955,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * undo filtering it has done at n-1).
      * See {@link Constraint#setEnabled(boolean)}
      *
-     * @param enabled
+     * @param enabled is this propagator enabled?
      */
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;

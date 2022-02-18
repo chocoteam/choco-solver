@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,6 @@ import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphN
 import org.chocosolver.solver.search.strategy.selectors.values.graph.node.GraphRandomNode;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeOrEdgeSelector;
 import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenEdges;
-import org.chocosolver.solver.search.strategy.selectors.values.graph.priority.GraphNodeThenNeighbors;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.*;
 import org.chocosolver.solver.variables.*;
@@ -115,7 +114,7 @@ public class Search {
      * @param search a search heuristic building branching decisions
      * @return a greedy form of search
      */
-    public static AbstractStrategy greedySearch(AbstractStrategy search) {
+    public static AbstractStrategy<?> greedySearch(AbstractStrategy<?> search) {
         return new GreedyBranching(search);
     }
 
@@ -156,7 +155,76 @@ public class Search {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
-        return setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), true, sets);
+        return setVarSearch(new GeneralizedMinDomVarSelector<>(), new SetDomainMin(), true, sets);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
+     * it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
+     * Boussemart et al. ECAI 2004.
+     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
+     */
+    public static AbstractStrategy<SetVar> domOverWDegSearch(SetVar... vars) {
+        return new SetStrategy(vars, new DomOverWDeg<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
+     * it to its lower bound, where the weight incrementer is "ca.cd".
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
+     */
+    public static AbstractStrategy<SetVar> domOverWDegRefSearch(SetVar... vars) {
+        return new SetStrategy(vars, new DomOverWDegRef<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Conflict History</code>
+     * and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
+     * Habet et al. SAC 2019.
+     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
+     */
+    public static AbstractStrategy<SetVar> conflictHistorySearch(SetVar... vars) {
+        return new SetStrategy(vars, new ConflictHistorySearch<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure rate based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<SetVar> failureRateBasedSearch(SetVar... vars) {
+        return new SetStrategy(vars, new FailureBased<>(vars, 0, 2), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure length based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<SetVar> failureLengthBasedSearch(SetVar... vars) {
+        return new SetStrategy(vars, new FailureBased<>(vars, 0, 4), new SetDomainMin(), true);
     }
 
     // ************************************************************************************
@@ -166,12 +234,12 @@ public class Search {
     /**
      * Generic strategy to branch on graph variables
      *
-     * @param varS          Variable selection strategy
-     * @param nodeOrEdgeS   Node or edge selection (defines if whenever a decision must be on nodes or edges)
-     * @param nodeS         Node selector (defines which node to enforce/remove if decision is on nodes)
-     * @param edgeS         Edge selector (defines which edge to enforce/remove if decision is on edges)
-     * @param enforceFirst  branching order true = enforce first; false = remove first
-     * @param graphs        GraphVar array to branch on
+     * @param varS         Variable selection strategy
+     * @param nodeOrEdgeS  Node or edge selection (defines if whenever a decision must be on nodes or edges)
+     * @param nodeS        Node selector (defines which node to enforce/remove if decision is on nodes)
+     * @param edgeS        Edge selector (defines which edge to enforce/remove if decision is on edges)
+     * @param enforceFirst branching order true = enforce first; false = remove first
+     * @param graphs       GraphVar array to branch on
      * @return
      */
     public static GraphStrategy graphVarSearch(VariableSelector<GraphVar> varS, GraphNodeOrEdgeSelector nodeOrEdgeS,
@@ -182,7 +250,7 @@ public class Search {
 
     /**
      * Default graph var search.
-     *
+     * <p>
      * Variable selection: input order.
      * Node or edges selection: nodes first then edges.
      * Node selection: lexicographic order.
@@ -217,14 +285,14 @@ public class Search {
 
     /**
      * Random graph var search.
-     *
+     * <p>
      * Variable selection: random.
      * Node or edges selection: nodes first then edges.
      * Node selection: random.
      * Edge selection random.
      * Enforce first.
      *
-     * @param seed the seed for random selection
+     * @param seed   the seed for random selection
      * @param graphs graph variables to branch on
      * @return a randomized graph variables search strategy
      */
@@ -237,6 +305,59 @@ public class Search {
                 true,
                 graphs
         );
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
+     * it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
+     * Boussemart et al. ECAI 2004.
+     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
+     */
+    public static AbstractStrategy<IntVar> domOverWDegSearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new DomOverWDeg<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
+     * it to its lower bound, where the weight incrementer is "ca.cd".
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
+     */
+    public static AbstractStrategy<IntVar> domOverWDegRefSearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new DomOverWDegRef<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Conflict History</code>
+     * and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
+     * Habet et al. SAC 2019.
+     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
+     */
+    public static AbstractStrategy<IntVar> conflictHistorySearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new ConflictHistorySearch<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
     }
 
     // ************************************************************************************
@@ -379,7 +500,7 @@ public class Search {
             model.getSolver().attach(model.getSolver().defaultSolution());
             valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
         }
-        return new IntStrategy(vars, new DomOverWDeg(vars, 0), valueSelector);
+        return new IntStrategy(vars, new DomOverWDeg<>(vars, 0), valueSelector);
     }
 
     /**
@@ -393,7 +514,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return new IntStrategy(vars, new DomOverWDeg(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDeg<>(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -406,7 +527,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
-        return new IntStrategy(vars, new DomOverWDegRef(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDegRef<>(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -436,9 +557,36 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
-        return new IntStrategy(vars, new ConflictHistorySearch(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new ConflictHistorySearch<>(vars, 0), new IntDomainMin());
     }
 
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure rate based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<IntVar> failureRateBasedSearch(IntVar... vars) {
+        return new IntStrategy(vars, new FailureBased<>(vars, 0, 2), new IntDomainMin());
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure length based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<IntVar> failureLengthBasedSearch(IntVar... vars) {
+        return new IntStrategy(vars, new FailureBased<>(vars, 0, 4), new IntDomainMin());
+    }
 
     /**
      * Randomly selects a variable and assigns it to a value randomly taken in - the domain in case
@@ -535,7 +683,7 @@ public class Search {
         // 1. retrieve variables, keeping the declaration order, and put them in four groups:
         List<IntVar> livars = new ArrayList<>(); // integer and boolean variables
         List<SetVar> lsvars = new ArrayList<>(); // set variables
-        List<GraphVar> lgvars = new ArrayList<>(); // graph variables
+        List<GraphVar<?>> lgvars = new ArrayList<>(); // graph variables
         List<RealVar> lrvars = new ArrayList<>();// real variables.
         Variable[] variables = model.getVars();
         Variable objective = null;
@@ -552,7 +700,7 @@ public class Search {
                         lsvars.add((SetVar) var);
                         break;
                     case Variable.GRAPH:
-                        lgvars.add((GraphVar) var);
+                        lgvars.add((GraphVar<?>) var);
                         break;
                     case Variable.REAL:
                         lrvars.add((RealVar) var);
@@ -631,9 +779,10 @@ public class Search {
      * @param model declaring model
      * @return a strategy that lets Ibex terminates the solving process.
      */
-    public static AbstractStrategy ibexSolving(Model model) {
-        return new AbstractStrategy<Variable>(model.getVars()) {
-            IbexDecision dec = new IbexDecision(model);
+    public static AbstractStrategy<Variable> ibexSolving(Model model) {
+        //noinspection unchecked
+        return new AbstractStrategy(model.getVars()) {
+            final IbexDecision dec = new IbexDecision(model);
 
             @Override
             public Decision<Variable> getDecision() {
@@ -666,8 +815,8 @@ public class Search {
          */
         ABS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return ACTIVITY.make(solver, vars, Search.ValH.DEFAULT, last);
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return ACTIVITY.make(solver, vars, Search.ValH.DEFAULT, flushThs, last);
             }
         },
         /**
@@ -678,7 +827,7 @@ public class Search {
          */
         ACTIVITY {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 Model model = solver.getModel();
                 return new ActivityBased(model,
                         vars,
@@ -697,9 +846,9 @@ public class Search {
          */
         CHS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new ConflictHistorySearch(vars,solver.getModel().getSeed()),
+                        new ConflictHistorySearch<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -710,7 +859,7 @@ public class Search {
          */
         DOM {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new FirstFail(solver.getModel()),
                         valueSelector.make(solver, last),
@@ -724,9 +873,9 @@ public class Search {
          */
         DOMWDEG {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDeg(vars, solver.getModel().getSeed()),
+                        new DomOverWDeg<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -737,9 +886,9 @@ public class Search {
          */
         DOMWDEGR {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDegRef(vars, solver.getModel().getSeed()),
+                        new DomOverWDegRef<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -748,9 +897,31 @@ public class Search {
          */
         DEFAULT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 //noinspection unchecked
                 return defaultSearch(solver.getModel());
+            }
+        },
+        /**
+         * To select variables according to Failure rate based variable ordering with decaying factor.
+         */
+        FRBA {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return new IntStrategy(vars,
+                        new FailureBased<>(vars, solver.getModel().getSeed(), 2),
+                        valueSelector.make(solver, last));
+            }
+        },
+        /**
+         * To select variables according to Failure length based variable ordering with decaying factor.
+         */
+        FLBA {
+            @Override
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return new IntStrategy(vars,
+                        new FailureBased<>(vars, solver.getModel().getSeed(), 4),
+                        valueSelector.make(solver, last));
             }
         },
         /**
@@ -761,8 +932,8 @@ public class Search {
          */
         IBS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
-                return IMPACT.make(solver, vars, Search.ValH.DEFAULT, last);
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
+                return IMPACT.make(solver, vars, Search.ValH.DEFAULT, flushThs, last);
             }
         },
         /**
@@ -773,7 +944,7 @@ public class Search {
          */
         IMPACT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new ImpactBased(vars,
                         valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last),
                         2,
@@ -788,7 +959,7 @@ public class Search {
          */
         INPUT {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new InputOrder<>(solver.getModel()),
                         valueSelector.make(solver, last),
@@ -800,7 +971,7 @@ public class Search {
          */
         RAND {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return Search.intVarSearch(
                         new Random<>(solver.getModel().getSeed()),
                         valueSelector.make(solver, last),
@@ -809,12 +980,12 @@ public class Search {
         },
         MAB_CHS_DWDEG_STATIC {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 //noinspection unchecked
                 return new MultiArmedBanditSequencer<IntVar>(
                         new AbstractStrategy[]{
-                                CHS.make(solver, vars, valueSelector, last),
-                                DOMWDEG.make(solver, vars, valueSelector, last)
+                                CHS.make(solver, vars, valueSelector, flushThs, last),
+                                DOMWDEG.make(solver, vars, valueSelector, flushThs, last)
                         },
                         new Static(new double[]{.7, .3}, new java.util.Random(solver.getModel().getSeed())),
                         (a, t) -> 0.d
@@ -823,7 +994,7 @@ public class Search {
         },
         MAB_CHS_DWDEG_MOSS {
             @Override
-            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last) {
+            public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 final long[] pat = {0, 0};
                 final HashSet<IntVar> selected = new HashSet<>();
                 ToDoubleBiFunction<Integer, Integer> reward = (a, t) -> {
@@ -845,8 +1016,8 @@ public class Search {
                 //noinspection unchecked
                 return new MultiArmedBanditSequencer<IntVar>(
                         new AbstractStrategy[]{
-                                CHS.make(solver, vars, valueSelector, last),
-                                DOMWDEG.make(solver, vars, valueSelector, last)
+                                CHS.make(solver, vars, valueSelector, flushThs, last),
+                                DOMWDEG.make(solver, vars, valueSelector, flushThs, last)
                         },
                         new MOSS(2),
                         reward
@@ -860,10 +1031,11 @@ public class Search {
          * @param solver        target solver
          * @param vars          array of integer variables
          * @param valueSelector the value selector enum
+         * @param flushThs      flush threshold, when reached, it flushes scores
          * @param last          set to {@code true} to use {@link IntDomainLast} meta value strategy.
          * @return a search strategy on {@code IntVar[]}
          */
-        public abstract AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, boolean last);
+        public abstract AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last);
     }
 
     /**
@@ -1036,7 +1208,6 @@ public class Search {
                 if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
                     return selector;
                 }
-                final IntVar[] vars = model.retrieveIntVars(true);
                 model.getSolver().attach(model.getSolver().defaultSolution());
                 return new IntDomainLast(model.getSolver().defaultSolution(), selector, null);
             } else {

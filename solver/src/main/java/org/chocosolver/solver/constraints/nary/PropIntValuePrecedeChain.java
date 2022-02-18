@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,8 +28,12 @@ import org.chocosolver.util.ESat;
  */
 public class PropIntValuePrecedeChain extends Propagator<IntVar> {
 
-    private int s, t, n;
-    private IStateInt a, b, g;
+    private final int s;
+    private final int t;
+    private final int n;
+    private final IStateInt a;
+    private final IStateInt b;
+    private final IStateInt g;
 
     public PropIntValuePrecedeChain(IntVar[] vars, int s, int t) {
         super(vars, PropagatorPriority.LINEAR, true);

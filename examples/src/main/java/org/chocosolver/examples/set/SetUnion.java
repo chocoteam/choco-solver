@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,7 @@ import static org.chocosolver.solver.search.strategy.Search.setVarSearch;
 public class SetUnion extends AbstractProblem {
 
     private SetVar x, y, z;
-    private boolean noEmptySet = true;
+    private final boolean noEmptySet = true;
 
     @Override
     public void buildModel() {

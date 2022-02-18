@@ -1,19 +1,12 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -28,15 +21,23 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.tools.ArrayUtils;
 
+/**
+ * @since 14/01/13
+ * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
+ */
 public class PropUnion extends Propagator<SetVar> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private int k;
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure unionForced, unionRemoved, setForced, setRemoved;
+    private final int k;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure unionForced;
+    private final IntProcedure unionRemoved;
+    private final IntProcedure setForced;
+    private final IntProcedure setRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -148,6 +149,9 @@ public class PropUnion extends Propagator<SetVar> {
                     }
                     if (mate == -1) union.remove(j, this);
                 }
+            }
+            for (int i = 0; i <= k; i++) {
+                sdm[i].startMonitoring();
             }
         }
     }

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,10 +26,12 @@ import org.chocosolver.util.procedure.IntProcedure;
  */
 public class PropOffSet extends Propagator<SetVar> {
 
-    private int offSet, tmp;
+    private final int offSet;
+    private int tmp;
     private SetVar tmpSet;
-    private IntProcedure forced, removed;
-    private ISetDeltaMonitor[] sdm;
+    private final IntProcedure forced;
+    private final IntProcedure removed;
+    private final ISetDeltaMonitor[] sdm;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -73,6 +75,8 @@ public class PropOffSet extends Propagator<SetVar> {
                 vars[1].remove(j, this);
             }
         }
+        sdm[0].startMonitoring();
+        sdm[1].startMonitoring();
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,9 +32,10 @@ public class PropAllDisjoint extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n, currentSet;
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure elementForced;
+    private final int n;
+    private int currentSet;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure elementForced;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -83,6 +84,9 @@ public class PropAllDisjoint extends Propagator<SetVar> {
                         }
                     }
                 }
+            }
+            for (int i = 0; i < n; i++) {
+                sdm[i].startMonitoring();
             }
         }
     }

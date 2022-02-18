@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,7 +19,9 @@ import org.chocosolver.solver.constraints.set.PropCardinality;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.delta.SetDelta;
+import org.chocosolver.solver.variables.delta.monitor.SetDeltaMonitor;
 import org.chocosolver.solver.variables.events.SetEventType;
 import org.chocosolver.solver.variables.impl.scheduler.SetEvtScheduler;
 import org.chocosolver.util.iterators.EvtScheduler;
@@ -242,6 +244,12 @@ public class SetVarImpl extends AbstractVariable implements SetVar {
         }
         return changed;
     }
+
+    @Override
+	public ISetDeltaMonitor monitorDelta(ICause propagator) {
+		createDelta();
+		return new SetDeltaMonitor(getDelta(), propagator);
+	}
 
     @Override
     public SetDelta getDelta() {

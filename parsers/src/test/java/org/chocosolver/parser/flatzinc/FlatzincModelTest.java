@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -84,6 +84,24 @@ public class FlatzincModelTest {
                 "array[1 .. 3] of var 1 .. 10: vars;\n" +
                 "constraint globalCardinalityLowUpChoco(vars, covers, lbound, ubound,false);\n" +
                 "solve satisfy;").getBytes());
+
+        Flatzinc fzn = new Flatzinc(false, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        model.getSolver().solve();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void test12() {
+
+        InputStream in = new ByteArrayInputStream(("var set of 1..10: x:: output_var;\n" +
+                "var 0..10: X_INTRODUCED_1_ ::var_is_introduced ;\n" +
+                "constraint set_card(x,X_INTRODUCED_1_);\n" +
+                "solve  maximize X_INTRODUCED_1_;").getBytes());
 
         Flatzinc fzn = new Flatzinc(false, false, 1);
         fzn.createSettings();

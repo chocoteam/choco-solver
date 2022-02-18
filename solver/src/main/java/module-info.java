@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -93,12 +93,16 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.search.strategy.decision;
     exports org.chocosolver.solver.search.strategy.selectors.values;
     exports org.chocosolver.solver.search.strategy.selectors.variables;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.edge;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.node;
+    exports org.chocosolver.solver.search.strategy.selectors.values.graph.priority;
     exports org.chocosolver.solver.search.strategy.strategy;
     exports org.chocosolver.solver.variables;
     exports org.chocosolver.solver.variables.delta;
     //exports org.chocosolver.solver.variables.delta.monitor;
     exports org.chocosolver.solver.variables.events;
     exports org.chocosolver.solver.variables.impl;
+    exports org.chocosolver.solver.variables.impl.siglit;
     //exports org.chocosolver.solver.variables.impl.scheduler;
     exports org.chocosolver.solver.variables.view;
     exports org.chocosolver.solver.trace;
@@ -123,6 +127,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.util.procedure;
     exports org.chocosolver.util.sort;
     exports org.chocosolver.util.tools;
+    exports org.chocosolver.util.bandit;
 
     requires trove4j;
     requires org.jgrapht.core;
@@ -147,8 +152,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.element to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers;
-    exports org.chocosolver.util.bandit;
+    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, tesng;
 
 
 }

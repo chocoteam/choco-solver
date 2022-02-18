@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,9 +28,10 @@ public class PropEdgeBoolChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private BoolVar bool;
-    private int from, to;
-    private GraphVar g;
+    private final BoolVar bool;
+    private final int from;
+    private final int to;
+    private final GraphVar g;
 
     //***********************************************************************************
     // CONSTRUCTORS

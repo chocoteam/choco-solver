@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,23 +28,24 @@ import java.util.BitSet;
  *
  * @author Jean-Guillaume Fages
  */
-public class PropAcyclic extends Propagator<GraphVar> {
+public class PropAcyclic extends Propagator<GraphVar<?>> {
 
     //***********************************************************************************
     // VARIABLES
     //***********************************************************************************
 
-    private GraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private int n;
-    private BitSet rfFrom, rfTo;
-    private int[] fifo;
+    private final GraphVar<?> g;
+    private final IGraphDeltaMonitor gdm;
+    private final int n;
+    private final BitSet rfFrom;
+    private final BitSet rfTo;
+    private final int[] fifo;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropAcyclic(GraphVar g) {
+    public PropAcyclic(GraphVar<?> g) {
         super(new GraphVar[]{g}, PropagatorPriority.LINEAR, true);
         this.g = g;
         this.n = g.getNbMaxNodes();
@@ -75,6 +76,7 @@ public class PropAcyclic extends Propagator<GraphVar> {
                 }
             }
         }
+        gdm.startMonitoring();
     }
 
     @Override

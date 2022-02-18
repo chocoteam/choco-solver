@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,9 +11,9 @@ package org.chocosolver.parser.mps;
 
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.Search;
@@ -34,21 +34,27 @@ public class MPS extends RegParser {
     // Contains mapping with variables and output prints
     public MPSParser[] parsers;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-max", usage = "define to maximize (default: to minimize).")
     private boolean maximize = false;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-prec", usage = "set to the precision (default: 1.0E-4D).")
     private double precision = 1.0E-4D;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-ibex", usage = "Use Ibex for non-full integer equations (default: false).")
     private boolean ibex = false;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-ninf", usage = "define negative infinity (default: " + IntVar.MIN_INT_BOUND + ").")
     private double ninf = IntVar.MIN_INT_BOUND;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-pinf", usage = "define positive infinity (default: " + IntVar.MAX_INT_BOUND + ").")
     private double pinf = IntVar.MAX_INT_BOUND;
 
+    @SuppressWarnings("FieldMayBeFinal")
     @Option(name = "-noeq", usage = "Split EQ constraints into a LQ and a GQ constraint.")
     private boolean noeq = false;
 
@@ -67,9 +73,7 @@ public class MPS extends RegParser {
 
     @Override
     public void createSettings() {
-        defaultSettings = Settings.init()
-                .setCheckDeclaredConstraints(false)
-                .setModelChecker(solver -> true);
+        defaultSettings = Settings.prod();
     }
 
     @Override
@@ -104,6 +108,7 @@ public class MPS extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(models.get(i), parsers[i], i);
+                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
                 }
@@ -237,6 +242,16 @@ public class MPS extends RegParser {
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
                     solver.getTimeCount(), complete ? "terminated" : "stopped");
+        }
+        if (level.is(Level.IRACE)) {
+            solver.log().printf(Locale.US, "%d %d",
+                    solver.getObjectiveManager().isOptimization() ?
+                            (solver.getObjectiveManager().getPolicy().equals(ResolutionPolicy.MAXIMIZE) ? -1 : 1)
+                                    * solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            -solver.getSolutionCount(),
+                    complete ?
+                            (int) Math.ceil(solver.getTimeCount()) :
+                            Integer.MAX_VALUE);
         }
         if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();

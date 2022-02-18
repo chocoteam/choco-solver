@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,19 +34,19 @@ import org.jgrapht.graph.DirectedMultigraph;
  */
 public class StoredDirectedMultiGraph {
 
-    private int[] starts;
-    private int[] offsets;
+    private final int[] starts;
+    private final int[] offsets;
 
     public int sourceIndex;
     public int tinIndex;
     public int nbR;
 
 
-    private StoredIndexedBipartiteSetWithOffset[] supports;
+    private final StoredIndexedBipartiteSetWithOffset[] supports;
     public StoredIndexedBipartiteSetWithOffset[] layers;
     private FastPathFinder pf;
     public BitSet inStack;
-    private IntVar[] z;
+    private final IntVar[] z;
 
     public Nodes GNodes;
     public Arcs GArcs;
@@ -581,7 +581,7 @@ public class StoredDirectedMultiGraph {
         return result;
     }
 
-    private int[] minmax = new int[2];
+    private final int[] minmax = new int[2];
 
     public int[] getMinMaxPathCostForAssignment(int layer, int value, int... resources) {
         minmax[0] = Integer.MAX_VALUE;

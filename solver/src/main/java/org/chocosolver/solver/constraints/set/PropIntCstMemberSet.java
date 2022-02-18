@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -33,7 +33,7 @@ public class PropIntCstMemberSet extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int cst;
+    private final int cst;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -57,6 +57,7 @@ public class PropIntCstMemberSet extends Propagator<SetVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
 		vars[0].force(cst,this);
+		setPassive();
     }
 
     @Override

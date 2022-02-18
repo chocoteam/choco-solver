@@ -1,0 +1,14 @@
+predicate fzn_all_different_int(array [int] of var int: x);
+var 1..20: X_INTRODUCED_0_;
+var 1..20: X_INTRODUCED_1_;
+var 1..20: X_INTRODUCED_2_;
+var 1..20: X_INTRODUCED_3_;
+var 1..20: X_INTRODUCED_4_;
+var 1..20: X_INTRODUCED_5_;
+var 1..20: X_INTRODUCED_6_;
+var 1..20: X_INTRODUCED_7_;
+var 1..20: X_INTRODUCED_8_;
+var 1..20: X_INTRODUCED_9_;
+array [1..10] of var int: x:: output_array([1..10]):: add_to_output = [X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_];
+constraint fzn_all_different_int(x);
+solve :: int_search(x,input_order,indomain_max,complete) minimize X_INTRODUCED_0_;

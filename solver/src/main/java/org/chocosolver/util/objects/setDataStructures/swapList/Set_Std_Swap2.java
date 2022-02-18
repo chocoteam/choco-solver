@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,7 +13,6 @@ import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
-import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
@@ -31,7 +30,7 @@ public class Set_Std_Swap2 extends AbstractSet {
 
     protected IStateInt size;
     protected TIntArrayList values;
-    private ISetIterator iter = newIterator();
+    private final ISetIterator iter = newIterator();
 
 
     //***********************************************************************************

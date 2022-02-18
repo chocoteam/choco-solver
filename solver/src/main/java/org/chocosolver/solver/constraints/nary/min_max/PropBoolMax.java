@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,7 +25,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 public class PropBoolMax extends Propagator<BoolVar> {
 
     private final int n;
-    private int[] lits;
+    private final int[] lits;
 
     public PropBoolMax(BoolVar[] variables, BoolVar maxVar) {
         super(ArrayUtils.concat(variables, maxVar), PropagatorPriority.UNARY, true);
@@ -75,6 +75,12 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == n) {
+            if(vars[lits[0]].isInstantiated()){
+                find(0);
+            }
+            if (vars[lits[1]].isInstantiated()) {
+                find(1);
+            }
             filter();
         } else {
             if (vars[idxVarInProp].isInstantiatedTo(1)) {
@@ -146,7 +152,7 @@ public class PropBoolMax extends Propagator<BoolVar> {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("");
+        StringBuilder sb = new StringBuilder();
         sb.append(vars[n]).append(" = max(");
         sb.append(vars[0]);
         for (int i = 1; i < n; i++) {

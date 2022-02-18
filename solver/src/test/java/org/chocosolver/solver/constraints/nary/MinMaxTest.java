@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,7 +9,10 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
-import org.chocosolver.solver.*;
+import org.chocosolver.solver.Cause;
+import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
@@ -168,6 +171,28 @@ public class MinMaxTest {
         }
         assertEquals(model.getSolver().isSatisfied(), ESat.FALSE);
         assertFalse(model.getSolver().solve());
+    }
+
+    @Test(groups = "1s", timeOut=60000, dataProvider = "params")
+    public void testSolutionAA(boolean min) {
+        Model model = new Model();
+        BoolVar[] vars = model.boolVarArray(6);
+        BoolVar mM = model.boolVar();
+        if (min) {
+            model.min(mM, vars).post();
+        } else {
+            model.max(mM, vars).post();
+        }
+        try{
+            model.getSolver().propagate();
+            mM.instantiateTo(min?0:1, Cause.Null);
+            vars[0].instantiateTo(min?1:0, Cause.Null);
+            vars[1].instantiateTo(min?1:0, Cause.Null);
+            vars[2].instantiateTo(min?1:0, Cause.Null);
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
     }
 
     @Test(groups = "1s", timeOut=60000, dataProvider = "params")

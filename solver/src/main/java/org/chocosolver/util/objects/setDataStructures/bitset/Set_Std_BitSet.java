@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,16 +23,16 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
  *
  * @author : chameau, Jean-Guillaume Fages
  */
-public class Set_Std_BitSet extends AbstractSet {
+public class Set_Std_BitSet extends AbstractSet implements ISet.WithOffset {
 
 	//***********************************************************************************
 	// VARIABLE
 	//***********************************************************************************
 
-	private IStateInt card;	// enables to get the cardinality in O(1)
-	private int offset;		// allow using negative numbers
-	private S64BitSet values;
-	private ISetIterator iter = newIterator();
+	private final IStateInt card;	// enables to get the cardinality in O(1)
+	private final int offset;		// allow using negative numbers
+	private final S64BitSet values;
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTOR
@@ -53,6 +53,10 @@ public class Set_Std_BitSet extends AbstractSet {
 	//***********************************************************************************
 	// METHODS
 	//***********************************************************************************
+
+	public int getOffset() {
+		return offset;
+	}
 
 	@Override
 	public boolean add(int element) {

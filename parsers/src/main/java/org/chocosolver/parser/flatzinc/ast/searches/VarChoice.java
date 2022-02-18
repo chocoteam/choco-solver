@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,5 +23,6 @@ public enum VarChoice {
     largest,
     occurrence,
     most_constrained,
-    max_regret
+    max_regret,
+    dom_w_deg
 }

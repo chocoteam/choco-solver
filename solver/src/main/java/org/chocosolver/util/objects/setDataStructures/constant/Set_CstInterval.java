@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -25,8 +25,9 @@ public class Set_CstInterval implements ISet {
 	// VARIABLES
 	//***********************************************************************************
 
-	private int lb, ub;
-	private ISetIterator iter = newIterator();
+	private final int lb;
+    private final int ub;
+	private final ISetIterator iter = newIterator();
 
 	//***********************************************************************************
 	// CONSTRUCTORS

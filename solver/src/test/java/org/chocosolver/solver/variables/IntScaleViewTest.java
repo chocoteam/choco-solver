@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.variables;
 
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.checker.DomainBuilder;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
@@ -31,7 +31,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class IntScaleViewTest {
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         Model s = new Model();
         IntVar X = s.intVar("X", 1, 3, false);
@@ -43,7 +43,7 @@ public class IntScaleViewTest {
         assertEquals(s.getSolver().getSolutionCount(), 2);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testDec1() {
         Model m = new Model();
         IntVar y = m.intVar("y", -3, 1);
@@ -51,13 +51,13 @@ public class IntScaleViewTest {
         m.arithm(m.intScaleView(y, 3), "!=", z).post();
         Solver s = m.getSolver();
         while (s.solve()) {
-            Assert.assertNotEquals(3*y.getValue(),z.getValue());
+            Assert.assertNotEquals(3 * y.getValue(), z.getValue());
         }
-        Assert.assertEquals(s.getSolutionCount(),5);
+        Assert.assertEquals(s.getSolutionCount(), 5);
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() {
         Model s = new Model();
 
@@ -104,7 +104,7 @@ public class IntScaleViewTest {
         return s;
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testRandom1() {
         Random rand = new Random();
         for (int i = 0; i < 1000; i++) {
@@ -122,7 +122,7 @@ public class IntScaleViewTest {
         }
     }
 
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void testRandom2() {
         Model sb = bijective(1, 9999, 3);
         Model sc = contraint(1, 9999, 3);
@@ -132,7 +132,7 @@ public class IntScaleViewTest {
         //Assert.assertEquals(sc.getResolver().getMeasures().getNodeCount(), sb.getResolver().getMeasures().getNodeCount());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testIt1() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -166,7 +166,7 @@ public class IntScaleViewTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testIt2() {
         Random random = new Random();
         for (int seed = 0; seed < 200; seed++) {
@@ -175,16 +175,16 @@ public class IntScaleViewTest {
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0]);
             IntVar v = model.intScaleView(o, 2);
-			if(!model.getSettings().enableViews()){
-				try {
-					// currently, the propagation is not sufficient (bound)
-					// could be fixed with an extension filtering
-					model.getSolver().propagate();
-				}catch (Exception e){
-					e.printStackTrace();
-					throw new UnsupportedOperationException();
-				}
-			}
+            if (!model.getSettings().enableViews()) {
+                try {
+                    // currently, the propagation is not sufficient (bound)
+                    // could be fixed with an extension filtering
+                    model.getSolver().propagate();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    throw new UnsupportedOperationException();
+                }
+            }
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() / 2));
@@ -210,8 +210,8 @@ public class IntScaleViewTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testJL01(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJL01() {
         Model m = new Model();
         IntVar i = m.intVar("i", 0, 4);
         m.arithm(m.intScaleView(i, 10), "=", 11).post();
@@ -221,8 +221,8 @@ public class IntScaleViewTest {
 
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testCP01(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testCP01() {
         Model m = new Model(Settings.init().setEnableViews(true));
         IntVar i = m.intVar("i", 0, 4);
         m.arithm(m.intScaleView(i, -3), "<", -7).post();
@@ -233,4 +233,49 @@ public class IntScaleViewTest {
     }
 
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNextValue() {
+        Model m = new Model(Settings.init().setEnableViews(true));
+        final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
+        Assert.assertEquals(x.nextValue(Integer.MIN_VALUE), 0);
+        Assert.assertEquals(x.nextValue(0), 4);
+        Assert.assertEquals(x.nextValue(4), 6);
+        Assert.assertEquals(x.nextValue(6), Integer.MAX_VALUE);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPrevValue() {
+        Model m = new Model(Settings.init().setEnableViews(true));
+        final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
+        Assert.assertEquals(x.previousValue(Integer.MAX_VALUE), 6);
+        Assert.assertEquals(x.previousValue(6), 4);
+        Assert.assertEquals(x.previousValue(4), 0);
+        Assert.assertEquals(x.previousValue(0), Integer.MIN_VALUE);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNextValueOut() {
+        Model m = new Model(Settings.init().setEnableViews(true));
+        final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
+        Assert.assertEquals(x.nextValueOut(-2), -1);
+        Assert.assertEquals(x.nextValueOut(-1), 1);
+        Assert.assertEquals(x.nextValueOut(1), 2);
+        Assert.assertEquals(x.nextValueOut(2), 3);
+        Assert.assertEquals(x.nextValueOut(3), 5);
+        Assert.assertEquals(x.nextValueOut(5), 7);
+        Assert.assertEquals(x.nextValueOut(7), 8);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPrevValueOut() {
+        Model m = new Model(Settings.init().setEnableViews(true));
+        final IntVar x = m.intVar(new int[]{0, 2, 3}).mul(2).intVar();
+        Assert.assertEquals(x.previousValueOut(8), 7);
+        Assert.assertEquals(x.previousValueOut(7), 5);
+        Assert.assertEquals(x.previousValueOut(5), 3);
+        Assert.assertEquals(x.previousValueOut(3), 2);
+        Assert.assertEquals(x.previousValueOut(2), 1);
+        Assert.assertEquals(x.previousValueOut(1), -1);
+        Assert.assertEquals(x.previousValueOut(-1), -2);
+    }
 }

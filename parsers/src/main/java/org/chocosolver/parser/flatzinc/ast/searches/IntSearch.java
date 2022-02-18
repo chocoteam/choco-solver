@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,13 +28,11 @@ import org.chocosolver.solver.variables.IntVar;
  */
 public class IntSearch {
 
-    private static long seed = 29091981;
-
     private IntSearch() {
     }
 
-    public static AbstractStrategy build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model model) {
-        VariableSelector<IntVar> varsel = variableSelector(varChoice, model);
+    public static AbstractStrategy<IntVar> build(IntVar[] variables, VarChoice varChoice, Assignment assignment, Model model) {
+        VariableSelector<IntVar> varsel = variableSelector(variables, varChoice, model);
         if (varsel == null) { // free search
             model.getSolver().setNoGoodRecordingFromRestarts();
             model.getSolver().setLubyRestart(500, new FailCounter(model, 0), 500);
@@ -43,7 +41,7 @@ public class IntSearch {
         return valueSelector(variables, varsel, assignment);
     }
 
-    private static VariableSelector<IntVar> variableSelector(VarChoice varChoice, Model model) {
+    private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice, Model model) {
         switch (varChoice) {
             case input_order:
                 return new InputOrder<>(model);
@@ -62,6 +60,8 @@ public class IntSearch {
                 return new VariableSelectorWithTies<>(new Smallest(), new Occurrence<>());
             case max_regret:
                 return new MaxRegret();
+            case dom_w_deg:
+                return new DomOverWDeg<>(variables, variables[0].getModel().getSeed());
             default:
                 System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;
@@ -87,7 +87,7 @@ public class IntSearch {
                 valSelector = new IntDomainMedian();
                 break;
             case indomain_random:
-                valSelector = new IntDomainRandom(seed);
+                valSelector = new IntDomainRandom(scope[0].getModel().getSeed());
                 break;
             case indomain_split:
             case indomain_interval:

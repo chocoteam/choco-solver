@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,10 +13,13 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.GraphVar;
 import org.chocosolver.solver.variables.delta.IGraphDeltaMonitor;
+import org.chocosolver.solver.variables.delta.ISetDeltaMonitor;
 import org.chocosolver.solver.variables.events.GraphEventType;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.SetEventType;
+import org.chocosolver.solver.variables.view.delta.SetGraphViewDeltaMonitor;
 import org.chocosolver.util.objects.setDataStructures.ISet;
+import org.chocosolver.util.procedure.IntProcedure;
 import org.chocosolver.util.procedure.PairProcedure;
 
 import java.util.Arrays;
@@ -29,7 +32,7 @@ import java.util.Arrays;
  * @author Dimitri Justeau-Allaire
  * @since 03/03/2021
  */
-public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E> {
+public class SetPredecessorsGraphView<E extends GraphVar<?>> extends SetGraphView<E> {
 
     protected int node;
     protected IGraphDeltaMonitor gdm;
@@ -46,16 +49,30 @@ public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E
         super(name, graphVar);
         this.node = node;
         this.gdm = graphVar.monitorDelta(this);
-        this.arcRemoved = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
-            }
-        };
-        this.arcEnforced = (from, to) -> {
-            if (from == node || to == node) {
-                notifyPropagators(SetEventType.ADD_TO_KER, this);
-            }
-        };
+        this.gdm.startMonitoring();
+        if (!graphVar.isDirected()) {
+            this.arcRemoved = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (from == node || to == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        } else {
+            this.arcRemoved = (from, to) -> {
+                if (to == node) {
+                    notifyPropagators(SetEventType.REMOVE_FROM_ENVELOPE, this);
+                }
+            };
+            this.arcEnforced = (from, to) -> {
+                if (to == node) {
+                    notifyPropagators(SetEventType.ADD_TO_KER, this);
+                }
+            };
+        }
     }
 
     /**
@@ -119,5 +136,24 @@ public class SetPredecessorsGraphView<E extends GraphVar> extends SetGraphView<E
         if (event == GraphEventType.ADD_EDGE) {
             gdm.forEachEdge(arcEnforced, GraphEventType.ADD_EDGE);
         }
+    }
+
+    public ISetDeltaMonitor monitorDelta(ICause propagator) {
+        createDelta();
+        return new SetGraphViewDeltaMonitor(graphVar.monitorDelta(propagator)) {
+            @Override
+            public void forEach(IntProcedure proc, SetEventType evt) throws ContradictionException {
+                PairProcedure filter = (from, to) -> {
+                    if (to == node) {
+                        proc.execute(from);
+                    }
+                };
+                if (evt == SetEventType.ADD_TO_KER) {
+                    deltaMonitor.forEachEdge(filter, GraphEventType.ADD_EDGE);
+                } else if (evt == SetEventType.REMOVE_FROM_ENVELOPE) {
+                    deltaMonitor.forEachEdge(filter, GraphEventType.REMOVE_EDGE);
+                }
+            }
+        };
     }
 }

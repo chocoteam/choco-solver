@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,17 +34,20 @@ public class PropNodeSetChannel extends Propagator<Variable> {
     // VARIABLES
     //***********************************************************************************
 
-    private SetVar set;
-    private GraphVar g;
-    private ISetDeltaMonitor sdm;
-    private IGraphDeltaMonitor gdm;
-    private IntProcedure forceG, forceS, remG, remS;
+    private final SetVar set;
+    private final GraphVar<?> g;
+    private final ISetDeltaMonitor sdm;
+    private final IGraphDeltaMonitor gdm;
+    private final IntProcedure forceG;
+    private final IntProcedure forceS;
+    private final IntProcedure remG;
+    private final IntProcedure remS;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropNodeSetChannel(SetVar vertexSet, GraphVar gV) {
+    public PropNodeSetChannel(SetVar vertexSet, GraphVar<?> gV) {
         super(new Variable[]{vertexSet, gV}, PropagatorPriority.LINEAR, true);
         this.set = vertexSet;
         this.g = gV;
@@ -85,6 +88,8 @@ public class PropNodeSetChannel extends Propagator<Variable> {
                 g.removeNode(i, this);
             }
         }
+        sdm.startMonitoring();
+        gdm.startMonitoring();
     }
 
     @Override

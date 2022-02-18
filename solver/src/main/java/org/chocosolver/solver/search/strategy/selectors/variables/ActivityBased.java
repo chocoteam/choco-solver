@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -14,7 +14,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.search.loop.move.Move;
@@ -118,15 +118,15 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private int nb_probes; // probing size
 
-    private int samplingIterationForced; // CPRU: add this to force sampling phase
+    private final int samplingIterationForced; // CPRU: add this to force sampling phase
 
-    private Random random; //  a random object for the sampling phase
+    private final Random random; //  a random object for the sampling phase
 
     private int currentVar = -1, currentVal = -1;
 
-    private TIntList bests = new TIntArrayList();
+    private final TIntList bests = new TIntArrayList();
 
-    private boolean restartAfterEachFail = true;
+    private boolean restartAfterEachLeaf = true;
 
     private Move rfMove;
 
@@ -156,7 +156,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
 //        idx_large = 0; // start the first variable
-        model.getSolver().setRestartOnSolutions();
 //        init(vars);
     }
 
@@ -190,11 +189,16 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
-    	if (restartAfterEachFail) {
+    	if (restartAfterEachLeaf) {
             rfMove = new MoveRestart(model.getSolver().getMove(),
-                new MonotonicRestartStrategy(1),
-                new FailCounter(model.getSolver().getModel(), 1),
-                MAX_VALUE, true);
+                    new MonotonicRestartStrategy(1),
+                    new ACounter(model.getSolver().getMeasures(), 1) {
+                        @Override
+                        public long currentValue() {
+                            return measures.getSolutionCount() + measures.getFailCount();
+                        }
+                    },
+                    MAX_VALUE, true);
             model.getSolver().setMove(rfMove);
         }
         return true;
@@ -210,7 +214,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vars[i].removeMonitor(this);
             }
         }
-    	if (restartAfterEachFail) {
+    	if (restartAfterEachLeaf) {
 		removeRFMove();
     	}
     }
@@ -348,10 +352,10 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             //BEWARE: when it fails very soon (after 1 node), it is worth forcing sampling
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
-                if(restartAfterEachFail){
+                if(restartAfterEachLeaf){
                     removeRFMove();
                 }
-                restartAfterEachFail = false;
+                restartAfterEachLeaf = false;
 
                 // then copy values estimated
                 System.arraycopy(mA, 0, A, 0, mA.length);

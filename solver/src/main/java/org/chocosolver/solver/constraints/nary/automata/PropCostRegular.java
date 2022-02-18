@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -43,7 +43,7 @@ public class PropCostRegular extends Propagator<IntVar> {
 
     private final StoredValuedDirectedMultiGraph graph;
     private final ICostAutomaton cautomaton;
-    private TIntStack toRemove;
+    private final TIntStack toRemove;
 
     private final IStateBool boundChange;
     private int lastWorld = -1;
@@ -59,6 +59,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         this.idms = new IIntDeltaMonitor[this.vars.length - 1];
         for (int i = 0; i < this.vars.length - 1; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
+            idms[i].startMonitoring();
         }
         this.zIdx = vars.length - 1;
         this.rem_proc = new RemProc(this);
@@ -270,7 +271,7 @@ public class PropCostRegular extends Propagator<IntVar> {
         }
 
         @Override
-        public UnaryIntProcedure set(Integer idxVar) {
+        public UnaryIntProcedure<Integer> set(Integer idxVar) {
             this.idxVar = idxVar;
             return this;
         }

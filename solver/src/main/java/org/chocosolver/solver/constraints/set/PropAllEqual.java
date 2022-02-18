@@ -1,19 +1,12 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 14/01/13
- * Time: 16:36
- */
-
 package org.chocosolver.solver.constraints.set;
 
 import gnu.trove.list.array.TIntArrayList;
@@ -30,7 +23,7 @@ import org.chocosolver.util.procedure.IntProcedure;
 
 /**
  * Ensures that all sets are equal
- *
+ * @since 14/01/13
  * @author Jean-Guillaume Fages
  */
 public class PropAllEqual extends Propagator<SetVar> {
@@ -39,9 +32,10 @@ public class PropAllEqual extends Propagator<SetVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private int n;
-    private ISetDeltaMonitor[] sdm;
-    private IntProcedure elementForced, elementRemoved;
+    private final int n;
+    private final ISetDeltaMonitor[] sdm;
+    private final IntProcedure elementForced;
+    private final IntProcedure elementRemoved;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -105,6 +99,9 @@ public class PropAllEqual extends Propagator<SetVar> {
                         vars[i2].force(j, this);
                     }
                 }
+            }
+            for (int i = 0; i < n; i++) {
+                sdm[i].startMonitoring();
             }
         }
     }

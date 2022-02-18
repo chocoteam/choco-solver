@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -271,6 +271,23 @@ public interface IVariableFactory extends ISelf<Model> {
             } else {
                 return new BitsetIntVarImpl(name, values, ref());
             }
+        }
+    }
+
+    /**
+     * Create an integer variable of initial domain based on <code>from</code>.
+     * @param from variable to copy values from
+     * @return a new variable whom domain is the same as the one of <code>from</code>
+     */
+    default IntVar intVar(IntVar from){
+        String name = generateName("IV_");
+        if(from.hasEnumeratedDomain()){
+            int[] values = from.stream().toArray();
+            return intVar(name, values);
+        }else{
+            int lb = from.getLB();
+            int ub = from.getUB();
+            return intVar(name, lb, ub);
         }
     }
 

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -67,6 +67,7 @@ public class PropEnumDomainChanneling extends Propagator<IntVar> {
                 }
             }
         }
+        idm.startMonitoring();
     }
 
     @Override

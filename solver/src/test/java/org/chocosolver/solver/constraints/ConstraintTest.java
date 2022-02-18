@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -47,7 +47,7 @@ public class ConstraintTest {
         BoolVar[] bs = model.boolVarArray("bs", 3);
         SetVar s1 = model.setVar("s1", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
         SetVar s2 = model.setVar("s2", new int[]{}, new int[]{-3, -2, -1, 0, 1, 2, 3});
-        model.or(model.allEqual(new SetVar[]{s1, s2}), model.setBoolsChanneling(bs, s1, 0)).post();
+        model.or(model.allEqual(s1, s2), model.setBoolsChanneling(bs, s1, 0)).post();
         while (model.getSolver().solve()) ;
         assertEquals(2040, model.getSolver().getSolutionCount());
     }

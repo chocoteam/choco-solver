@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,6 +20,8 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
+import org.chocosolver.solver.expression.discrete.logical.LoExpression;
+import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.VariableUtils;
@@ -44,17 +46,14 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] as = exps.get(0).toBoolVarArray(model);
             BoolVar r = exps.get(1).boolVarValue(model);
-            switch (as.length) {
-                case 0:
-                    r.eq(1).post();
-                    break;
-                default:
-                    if (r.isInstantiatedTo(0)) {
-                        model.addClausesBoolAndArrayEqualFalse(as);
-                    } else {
-                        model.addClausesBoolAndArrayEqVar(as, r);
-                    }
-                    break;
+            if (as.length == 0) {
+                r.eq(1).post();
+            } else {
+                if (r.isInstantiatedTo(0)) {
+                    model.addClausesBoolAndArrayEqualFalse(as);
+                } else {
+                    model.addClausesBoolAndArrayEqVar(as, r);
+                }
             }
         }
     },
@@ -76,17 +75,14 @@ public enum FConstraint {
             BoolVar[] as = exps.get(0).toBoolVarArray(model);
             BoolVar r = exps.get(1).boolVarValue(model);
 
-            switch (as.length) {
-                case 0:
-                    r.eq(1).post();
-                    break;
-                default:
-                    if (r.isInstantiatedTo(1)) {
-                        model.addClausesBoolOrArrayEqualTrue(as);
-                    } else {
-                        model.addClausesBoolOrArrayEqVar(as, r);
-                    }
-                    break;
+            if (as.length == 0) {
+                r.eq(1).post();
+            } else {
+                if (r.isInstantiatedTo(1)) {
+                    model.addClausesBoolOrArrayEqualTrue(as);
+                } else {
+                    model.addClausesBoolOrArrayEqVar(as, r);
+                }
             }
 
         }
@@ -412,7 +408,7 @@ public enum FConstraint {
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
 
-            if ((boolean)model.getSettings().get("adhocReification")) {
+            if ((boolean) model.getSettings().get("adhocReification")) {
                 if (bs.length == 1) {
                     if (bs[0].isInstantiated() || c.isInstantiated()) {
                         IntVar x;
@@ -646,7 +642,7 @@ public enum FConstraint {
             if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
             } else {
-                if ((boolean)model.getSettings().get("adhocReification")) {
+                if ((boolean) model.getSettings().get("adhocReification")) {
                     if (a.isInstantiated() || b.isInstantiated()) {
                         IntVar x;
                         int c;
@@ -704,15 +700,27 @@ public enum FConstraint {
     alldifferentChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_all_different_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_all_different_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
-                model.allDifferent(vars, AC?"AC":"").post();
+                model.allDifferent(vars, AC ? "AC" : "").post();
             }
 
         }
     },
     alldifferentBut0Choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_alldifferent_except_0.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_alldifferent_except_0 {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -732,7 +740,7 @@ public enum FConstraint {
             }
         }
     },
-    fzn_all_equal_int_reif{
+    fzn_all_equal_int_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
@@ -745,6 +753,12 @@ public enum FConstraint {
     amongChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_among.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_among {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             //var int: n, array[int] of var int: x, set of int: v
             int n = exps.get(0).intValue();
@@ -755,6 +769,12 @@ public enum FConstraint {
         }
     },
     atleastChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_at_least_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_at_least_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -770,6 +790,12 @@ public enum FConstraint {
     atmostChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_at_most_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_at_most_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             //int: n, array[int] of var int: x, int: v
             int n = exps.get(0).intValue();
@@ -781,6 +807,12 @@ public enum FConstraint {
         }
     },
     bin_packingChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_bin_packing.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_bin_packing {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -799,6 +831,12 @@ public enum FConstraint {
         }
     },
     bin_packing_capaChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_bin_packing_capa.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_bin_packing_capa {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -824,6 +862,12 @@ public enum FConstraint {
     bin_packing_loadChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_bin_packing_load.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_bin_packing_load {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] loads = exps.get(0).toIntVarArray(model);
             IntVar[] item_bin = exps.get(1).toIntVarArray(model);
@@ -843,7 +887,6 @@ public enum FConstraint {
     circuitChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 0) {
                 int min = vars[0].getLB();
@@ -852,10 +895,24 @@ public enum FConstraint {
                 }
                 model.circuit(vars, min).post();
             }
+        }
+    },
+    fzn_circuit {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
+            int offset = exps.get(0).intValue();
+            IntVar[] vars = exps.get(1).toIntVarArray(model);
+            model.circuit(vars, offset).post();
         }
     },
     count_eqchoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_count_eq.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_count_eq {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -867,6 +924,12 @@ public enum FConstraint {
         }
     },
     cumulativeChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_cumulative.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_cumulative {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -968,7 +1031,7 @@ public enum FConstraint {
                             }
                         }
                         model.scalar(
-                                sumV.toArray(new IntVar[sumV.size()]),
+                                sumV.toArray(new IntVar[0]),
                                 sumC.toArray(),
                                 "<=",
                                 -resources[i].getValue() + limit.getValue()).post();
@@ -978,6 +1041,12 @@ public enum FConstraint {
         }
     },
     diffnChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_diffn.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_diffn {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -994,6 +1063,12 @@ public enum FConstraint {
     distributeChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_distribute.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_distribute {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] card = exps.get(0).toIntVarArray(model);
             IntVar[] value = exps.get(1).toIntVarArray(model);
@@ -1005,6 +1080,12 @@ public enum FConstraint {
         }
     },
     exactlyChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_exactly_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_exactly_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1019,6 +1100,12 @@ public enum FConstraint {
     globalCardinalityChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_fzn_global_cardinality.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_fzn_global_cardinality {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             int[] values = exps.get(1).toIntArray();
@@ -1029,6 +1116,12 @@ public enum FConstraint {
         }
     },
     globalCardinalityLowUpChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_fzn_global_cardinality_low_up.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_fzn_global_cardinality_low_up {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1048,6 +1141,12 @@ public enum FConstraint {
     inverseChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_inverse.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_inverse {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] x = exps.get(0).toIntVarArray(model);
             IntVar[] y = exps.get(1).toIntVarArray(model);
@@ -1056,6 +1155,12 @@ public enum FConstraint {
         }
     },
     knapsackChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_knapsack.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_knapsack {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1069,6 +1174,12 @@ public enum FConstraint {
         }
     },
     lex2Choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_fzn_lex2.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_fzn_lex2 {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1091,6 +1202,12 @@ public enum FConstraint {
     lex_lessChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_fzn_lex_less.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_fzn_lex_less {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] xs = exps.get(0).toIntVarArray(model);
             IntVar[] ys = exps.get(1).toIntVarArray(model);
@@ -1106,6 +1223,12 @@ public enum FConstraint {
     maximumChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_maximum_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_maximum_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             // var int: m, array[int] of var int: x
             IntVar m = exps.get(0).intVarValue(model);
@@ -1115,6 +1238,12 @@ public enum FConstraint {
         }
     },
     memberChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_member_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_member_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1127,6 +1256,12 @@ public enum FConstraint {
     memberVarChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_member_int_var.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_member_int_var {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] x = exps.get(0).toIntVarArray(model);
             IntVar y = exps.get(1).intVarValue(model);
@@ -1135,6 +1270,12 @@ public enum FConstraint {
         }
     },
     memberReifChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_member_int_reif.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_member_int_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1146,6 +1287,12 @@ public enum FConstraint {
         }
     },
     memberVarReifChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_member_int_var_reif.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_member_int_var_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] xs = exps.get(0).toIntVarArray(model);
@@ -1161,11 +1308,17 @@ public enum FConstraint {
             if (eqs.size() == 0) {
                 model.arithm(b, "=", 0).post();
             } else {
-                model.addClausesBoolOrArrayEqVar(eqs.toArray(new BoolVar[eqs.size()]), b);
+                model.addClausesBoolOrArrayEqVar(eqs.toArray(new BoolVar[0]), b);
             }
         }
     },
     minimumChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_minimum_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_minimum_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1179,6 +1332,12 @@ public enum FConstraint {
     nvalueChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_nvalue.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_nvalue {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar nValues = exps.get(0).intVarValue(model);
             IntVar[] vars = exps.get(1).toIntVarArray(model);
@@ -1187,6 +1346,12 @@ public enum FConstraint {
         }
     },
     regularChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_regular.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_regular {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1222,6 +1387,12 @@ public enum FConstraint {
     sortChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_sort.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_sort {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             IntVar[] xs = exps.get(0).toIntVarArray(model);
             IntVar[] ys = exps.get(1).toIntVarArray(model);
@@ -1232,7 +1403,6 @@ public enum FConstraint {
     subcircuitChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 0) {
                 int min = vars[0].getLB();
@@ -1241,10 +1411,24 @@ public enum FConstraint {
                 }
                 model.subCircuit(vars, min, model.intVar("length", 0, vars.length, true)).post();
             }
+        }
+    },
+    fzn_subcircuit {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
+            int offset = exps.get(0).intValue();
+            IntVar[] vars = exps.get(1).toIntVarArray(model);
+            model.subCircuit(vars, offset, model.intVar("length", 0, vars.length, true)).post();
         }
     },
     tableChoco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_fzn_table.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_fzn_table {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1271,6 +1455,12 @@ public enum FConstraint {
     value_precede_chain_intChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_value_precede_chain_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_value_precede_chain_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
             int[] c = exps.get(0).toIntArray();
             IntVar[] x = exps.get(1).toIntVarArray(model);
@@ -1278,7 +1468,23 @@ public enum FConstraint {
 
         }
     },
+    fzn_value_precede_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int s = exps.get(0).intValue();
+            int t = exps.get(1).intValue();
+            IntVar[] x = exps.get(2).toIntVarArray(model);
+            model.intValuePrecedeChain(x, s, t).post();
+
+        }
+    },
     count_eq_reif_choco {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            fzn_count_eq_reif.build(model, datas, id, exps, annotations);
+        }
+    },
+    fzn_count_eq_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1297,6 +1503,135 @@ public enum FConstraint {
                 model.reifyXeqY(value, valVar, b);
             }
             cstr.post();
+
+        }
+    },
+    fzn_count_geq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] decVars = exps.get(0).toIntVarArray(model);
+            IntVar valVar = exps.get(1).intVarValue(model);
+            IntVar countVar = exps.get(2).intVarValue(model);
+            BoolVar b = exps.get(3).boolVarValue(model);
+            Constraint cstr;
+            if (valVar.isInstantiated()) {
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+                cstr = model.count(valVar.getValue(), decVars, nbOcc);
+                model.reifyXgeY(nbOcc, countVar, b);
+            } else {
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
+                cstr = model.count(value, decVars, countVar);
+                model.reifyXgeY(value, valVar, b);
+            }
+            cstr.post();
+
+        }
+    },
+    fzn_count_gt_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] decVars = exps.get(0).toIntVarArray(model);
+            IntVar valVar = exps.get(1).intVarValue(model);
+            IntVar countVar = exps.get(2).intVarValue(model);
+            BoolVar b = exps.get(3).boolVarValue(model);
+            Constraint cstr;
+            if (valVar.isInstantiated()) {
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+                cstr = model.count(valVar.getValue(), decVars, nbOcc);
+                model.reifyXgtY(nbOcc, countVar, b);
+            } else {
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
+                cstr = model.count(value, decVars, countVar);
+                model.reifyXgtY(value, valVar, b);
+            }
+            cstr.post();
+
+        }
+    },
+    fzn_count_leq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] decVars = exps.get(0).toIntVarArray(model);
+            IntVar valVar = exps.get(1).intVarValue(model);
+            IntVar countVar = exps.get(2).intVarValue(model);
+            BoolVar b = exps.get(3).boolVarValue(model);
+            Constraint cstr;
+            if (valVar.isInstantiated()) {
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+                cstr = model.count(valVar.getValue(), decVars, nbOcc);
+                model.reifyXleY(nbOcc, countVar, b);
+            } else {
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
+                cstr = model.count(value, decVars, countVar);
+                model.reifyXleY(value, valVar, b);
+            }
+            cstr.post();
+
+        }
+    },
+    fzn_count_lt_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] decVars = exps.get(0).toIntVarArray(model);
+            IntVar valVar = exps.get(1).intVarValue(model);
+            IntVar countVar = exps.get(2).intVarValue(model);
+            BoolVar b = exps.get(3).boolVarValue(model);
+            Constraint cstr;
+            if (valVar.isInstantiated()) {
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+                cstr = model.count(valVar.getValue(), decVars, nbOcc);
+                model.reifyXltY(nbOcc, countVar, b);
+            } else {
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
+                cstr = model.count(value, decVars, countVar);
+                model.reifyXltY(value, valVar, b);
+            }
+            cstr.post();
+
+        }
+    },
+    fzn_count_neq_reif {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] decVars = exps.get(0).toIntVarArray(model);
+            IntVar valVar = exps.get(1).intVarValue(model);
+            IntVar countVar = exps.get(2).intVarValue(model);
+            BoolVar b = exps.get(3).boolVarValue(model);
+            Constraint cstr;
+            if (valVar.isInstantiated()) {
+                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+                cstr = model.count(valVar.getValue(), decVars, nbOcc);
+                model.reifyXneY(nbOcc, countVar, b);
+            } else {
+                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
+                cstr = model.count(value, decVars, countVar);
+                model.reifyXneY(value, valVar, b);
+            }
+            cstr.post();
+
+        }
+    },
+    array_set_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            array_var_set_element.build(model, datas, id, exps, annotations);
+
+        }
+    },
+    array_var_set_element {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar b = exps.get(0).intVarValue(model);
+            SetVar[] as = exps.get(1).toSetVarArray(model);
+            SetVar c = exps.get(2).setVarValue(model);
+            model.element(b, as, 1, c).post();
 
         }
     },
@@ -1529,7 +1864,546 @@ public enum FConstraint {
             model.union(new SetVar[]{a, b}, c).post();
 
         }
+    },
+    fzn_if_then_else_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] c = exps.get(0).toBoolVarArray(model);
+            int[] x = exps.get(1).toIntArray();
+            BoolVar y = exps.get(2).boolVarValue(model);
+            model.ifThenElseDec(c, x, y);
+        }
+    },
+    fzn_if_then_else_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] c = exps.get(0).toBoolVarArray(model);
+            int[] x = exps.get(1).toIntArray();
+            IntVar y = exps.get(2).intVarValue(model);
+            model.ifThenElseDec(c, x, y);
+        }
+    },
+    fzn_if_then_else_var_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] c = exps.get(0).toBoolVarArray(model);
+            BoolVar[] x = exps.get(1).toBoolVarArray(model);
+            BoolVar y = exps.get(2).boolVarValue(model);
+            model.ifThenElseDec(c, x, y);
+        }
+    },
+    fzn_if_then_else_var_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] c = exps.get(0).toBoolVarArray(model);
+            IntVar[] x = exps.get(1).toIntVarArray(model);
+            IntVar y = exps.get(2).intVarValue(model);
+            model.ifThenElseDec(c, x, y);
+        }
+    },
+    fzn_maximum_arg_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] x = exps.get(0).toBoolVarArray(model);
+            IntVar z = exps.get(1).intVarValue(model);
+            model.argmaxDec(z, 1, x);
+        }
+    },
+    fzn_maximum_arg_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar z = exps.get(1).intVarValue(model);
+            model.argmaxDec(z, 1, x);
+        }
+    },
+    fzn_minimum_arg_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] x = exps.get(0).toBoolVarArray(model);
+            IntVar z = exps.get(1).intVarValue(model);
+            model.argminDec(z, 1, x);
+        }
+    },
+    fzn_minimum_arg_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar z = exps.get(1).intVarValue(model);
+            model.argminDec(z, 1, x);
+        }
+    },
+    // redefinitions.mzn
+    array_bool_and_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            BoolVar r = exps.get(1).boolVarValue(model);
+            new NaLoExpression(LoExpression.Operator.AND, as).decompose().impliedBy(r);
+        }
+    },
+    array_bool_or_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            BoolVar r = exps.get(1).boolVarValue(model);
+            new NaLoExpression(LoExpression.Operator.OR, as).decompose().impliedBy(r);
+        }
+    },
+    array_bool_xor_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            BoolVar r = exps.get(1).boolVarValue(model);
+            new NaLoExpression(LoExpression.Operator.XOR, as).decompose().impliedBy(r);
+        }
+    },
+    bool_and_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.and(b).decompose().impliedBy(r);
+        }
+    },
+    bool_clause_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            int PL = as.length;
+            int NL = bs.length;
+            BoolVar[] LITS = new BoolVar[PL + NL];
+            System.arraycopy(as, 0, LITS, 0, PL);
+            for (int i = 0; i < NL; i++) {
+                LITS[i + PL] = bs[i].not();
+            }
+            model.sum(LITS, ">", 0).impliedBy(r);
+        }
+    },
+    bool_ge_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.ge(b).decompose().impliedBy(r);
+        }
+    },
+    bool_gt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.gt(b).decompose().impliedBy(r);
+        }
+    },
+
+    bool_le_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.le(b).decompose().impliedBy(r);
+        }
+    },
+    bool_lt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.lt(b).decompose().impliedBy(r);
+        }
+    },
+    bool_eq_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.eq(b).decompose().impliedBy(r);
+        }
+    },
+    bool_ne_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.ne(b).decompose().impliedBy(r);
+        }
+    },
+    bool_or_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.or(b).decompose().impliedBy(r);
+        }
+    },
+    bool_xor_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar a = exps.get(0).boolVarValue(model);
+            BoolVar b = exps.get(1).boolVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.xor(b).decompose().impliedBy(r);
+        }
+    },
+    bool_lin_eq_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    bool_lin_ge_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, ">=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    bool_lin_gt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, ">", c, as.length + 1).impliedBy(r);
+        }
+    },
+    bool_lin_le_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "<=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    bool_lin_lt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "<", c, as.length + 1).impliedBy(r);
+        }
+    },
+    bool_lin_ne_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "!=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_eq_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.eq(b).decompose().impliedBy(r);
+        }
+    },
+    int_ge_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.ge(b).decompose().impliedBy(r);
+        }
+    },
+    int_gt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.gt(b).decompose().impliedBy(r);
+        }
+    },
+    int_le_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.le(b).decompose().impliedBy(r);
+        }
+    },
+    int_lt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.lt(b).decompose().impliedBy(r);
+        }
+    },
+    int_ne_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            IntVar b = exps.get(1).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            a.ne(b).decompose().impliedBy(r);
+        }
+    },
+    int_lin_eq_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_lin_ge_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, ">=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_lin_gt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, ">", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_lin_le_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "<=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_lin_lt_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "<", c, as.length + 1).impliedBy(r);
+        }
+    },
+    int_lin_ne_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] as = exps.get(0).toIntArray();
+            IntVar[] bs = exps.get(1).toIntVarArray(model);
+            int c = exps.get(2).intValue();
+            BoolVar r = exps.get(3).boolVarValue(model);
+            model.scalar(bs, as, "!=", c, as.length + 1).impliedBy(r);
+        }
+    },
+    set_in_imp {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar a = exps.get(0).intVarValue(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            IntIterableRangeSet set = null;
+            if (exps.get(1).getTypeOf().equals(Expression.EType.SET_L)) {
+                set = new IntIterableRangeSet(exps.get(1).toIntArray());
+            } else if (exps.get(1).getTypeOf().equals(Expression.EType.SET_B)) {
+                int low = ((ESetBounds) exps.get(1)).getLow();
+                int upp = ((ESetBounds) exps.get(1)).getUpp();
+                set = new IntIterableRangeSet(low, upp);
+            }
+            model.member(a, set).impliedBy(r);
+        }
+    },
+
+    // redefinitions-2.0.mzn
+    bool_clause_reif {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] as = exps.get(0).toBoolVarArray(model);
+            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
+            BoolVar r = exps.get(2).boolVarValue(model);
+            int PL = as.length;
+            int NL = bs.length;
+            BoolVar[] LITS = new BoolVar[PL + NL];
+            System.arraycopy(as, 0, LITS, 0, PL);
+            for (int i = 0; i < NL; i++) {
+                LITS[i + PL] = bs[i].not();
+            }
+            model.sum(LITS, ">", 0).reifyWith(r);
+        }
+    },
+
+    array_int_maximum {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar m = exps.get(0).intVarValue(model);
+            IntVar[] x = exps.get(1).toIntVarArray(model);
+            model.max(m, x).post();
+        }
+    },
+
+    array_int_minimum {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar m = exps.get(0).intVarValue(model);
+            IntVar[] x = exps.get(1).toIntVarArray(model);
+            model.min(m, x).post();
+        }
+    },
+
+    // redefinitions-2.0.2.mzn
+    choco_array_bool_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_array_int_element_nonshifted.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_array_int_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx = exps.get(0).intVarValue(model);
+            int os = exps.get(1).intValue();
+            int[] x = exps.get(2).toIntArray();
+            IntVar c = exps.get(3).intVarValue(model);
+            model.element(c, x, idx, os).post();
+        }
+    },
+    choco_array_var_bool_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_array_var_int_element_nonshifted.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_array_var_int_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx = exps.get(0).intVarValue(model);
+            int os = exps.get(1).intValue();
+            IntVar[] x = exps.get(2).toIntVarArray(model);
+            IntVar c = exps.get(3).intVarValue(model);
+            model.element(c, x, idx, os).post();
+        }
+    },
+    choco_array_var_set_element_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx = exps.get(0).intVarValue(model);
+            int os = exps.get(1).intValue();
+            SetVar[] x = exps.get(2).toSetVarArray(model);
+            SetVar c = exps.get(3).setVarValue(model);
+            model.element(idx, x, os, c).post();
+        }
+    },
+    // redefinitions-2.2.1.mzn
+    int_pow_fixed {
+        @Override
+        public void build(Model model, Datas datas, String
+                id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar x = exps.get(0).intVarValue(model);
+            int y = exps.get(1).intValue();
+            IntVar z = exps.get(2).intVarValue(model);
+            Tuples tuples = new Tuples(true);
+            for (int val1 : x) {
+                int res = (int) Math.pow(val1, y);
+                if (z.contains(res)) {
+                    tuples.add(val1, res);
+                }
+            }
+            model.table(x, z, tuples).post();
+        }
+    },
+
+    // redefinitions-2.5.2.mzn
+    choco_array_bool_element2d_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_array_int_element2d_nonshifted.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_array_int_element2d_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx1 = exps.get(0).intVarValue(model);
+            int o1 = exps.get(1).intValue();
+            IntVar idx2 = exps.get(2).intVarValue(model);
+            int o2 = exps.get(3).intValue();
+            int[] x = exps.get(4).toIntArray();
+            int d1 = exps.get(5).intValue();
+            int d2 = exps.get(6).intValue();
+            IntVar c = exps.get(7).intVarValue(model);
+
+            int[][] mx = new int[d1][d2];
+            for (int i1 = 0; i1 < d1; i1++) {
+                System.arraycopy(x, i1 * d2, mx[i1], 0, d2);
+            }
+            model.element(c, mx, idx1, o1, idx2, o2);
+        }
+    },
+    choco_array_var_bool_element2d_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_array_var_int_element2d_nonshifted.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_array_var_int_element2d_nonshifted {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar idx1 = exps.get(0).intVarValue(model);
+            int o1 = exps.get(1).intValue();
+            IntVar idx2 = exps.get(2).intVarValue(model);
+            int o2 = exps.get(3).intValue();
+            IntVar[] x = exps.get(4).toIntVarArray(model);
+            int d1 = exps.get(5).intValue();
+            int d2 = exps.get(6).intValue();
+            IntVar c = exps.get(7).intVarValue(model);
+            IntVar[][] mx = new IntVar[d1][d2];
+            for (int i1 = 0; i1 < d1; i1++) {
+                System.arraycopy(x, i1 * d2, mx[i1], 0, d2);
+            }
+            model.element(c, mx, idx1, o1, idx2, o2);
+        }
     };
+
 
     public abstract void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations);
 }

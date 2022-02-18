@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -36,12 +36,12 @@ public class PropKLoops extends Propagator<IntVar> {
     //***********************************************************************************
 
     // number of nodes
-    private int n;
+    private final int n;
     // offset (usually 0 but 1 with MiniZinc)
-    private int offSet;
+    private final int offSet;
     // uninstantiated variables that can be loops
-    private ISet possibleLoops;
-    private IStateInt nbMinLoops;
+    private final ISet possibleLoops;
+    private final IStateInt nbMinLoops;
 
     //***********************************************************************************
     // CONSTRUCTORS

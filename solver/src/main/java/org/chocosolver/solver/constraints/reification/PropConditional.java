@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
  * These constraints will automatically be removed on backtrack.
  *
  * @author Charles Prud'homme
- * @since 06/02/2014
+ * @since 31/08/2020
  */
 public class PropConditional extends Propagator<Variable> {
 

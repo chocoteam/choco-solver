@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -61,7 +61,7 @@ public class Solution implements ICause {
     /**
      * Model to store
      */
-    private Model model;
+    private final Model model;
     /**
      * Variables to store;
      */
@@ -149,7 +149,7 @@ public class Solution implements ICause {
                 }
             }
         }
-        if (warn) {
+        if (warn && varsToStore[0].getModel().getSettings().warnUser()) {
             model.getSolver().log().red().println("Some non decision variables are not instantiated in the current solution.");
         }
         return this;

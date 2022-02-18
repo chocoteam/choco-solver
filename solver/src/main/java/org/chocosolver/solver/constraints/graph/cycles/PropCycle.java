@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,10 +32,12 @@ public class PropCycle extends Propagator<UndirectedGraphVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private UndirectedGraphVar g;
-    private IGraphDeltaMonitor gdm;
-    private int n;
-    private IStateInt[] e1, e2, size;
+    private final UndirectedGraphVar g;
+    private final IGraphDeltaMonitor gdm;
+    private final int n;
+    private final IStateInt[] e1;
+    private final IStateInt[] e2;
+    private final IStateInt[] size;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -82,6 +84,7 @@ public class PropCycle extends Propagator<UndirectedGraphVar> {
                     }
                 }
             }
+            gdm.startMonitoring();
         }
     }
 

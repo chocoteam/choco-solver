@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -231,13 +231,17 @@ public class PropCondAllDiffTest {
         IntVar[] vars = model.intVarArray(5, 0, 2);
 
         model.allDifferentUnderCondition(vars, v -> v.getLB() > 1, false).post();
-        boolean solutionFound = false;
-        if (model.getSolver().solve()) {
-            solutionFound = true;
-        }
+        boolean solutionFound = model.getSolver().solve();
         assertTrue(solutionFound);
     }
 
+    @Test(groups = "1s", timeOut=60000)
+    public void testAllZeros() {
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray(10, 0, 0);
+        model.allDifferentExcept0(vars).post();
+        assertTrue(model.getSolver().solve());
+    }
 
     private Map<IntVar, Boolean> mustBeDiff(IntVar[] vars, int nDiff) {
         Map<IntVar, Boolean> mustBeDiff = new HashMap<>();

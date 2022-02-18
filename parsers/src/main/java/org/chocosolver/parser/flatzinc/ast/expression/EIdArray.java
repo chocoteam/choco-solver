@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -71,10 +71,20 @@ public final class EIdArray extends Expression {
     }
 
     @Override
+    public int[] setValue() {
+        return (int[]) object;
+    }
+
+    @Override
+    public int[][] toSetArray() {
+        return (int[][]) object;
+    }
+
+    @Override
     public BoolVar boolVarValue(Model model) {
-        if (Integer.class.isInstance(object)) {
+        if (object instanceof Integer) {
             return ((Integer) object == 1) ? model.boolVar(true) : model.boolVar(false);
-        } else if (Boolean.class.isInstance(object)) {
+        } else if (object instanceof Boolean) {
             return ((Boolean) object) ? model.boolVar(true) : model.boolVar(false);
         }
         return (BoolVar) object;
@@ -107,9 +117,9 @@ public final class EIdArray extends Expression {
 
     @Override
     public IntVar intVarValue(Model model) {
-        if (Integer.class.isInstance(object)) {
+        if (object instanceof Integer) {
             return model.intVar((Integer) object);
-        } else if (Boolean.class.isInstance(object)) {
+        } else if (object instanceof Boolean) {
             return model.intVar(((Boolean) object) ? 1 : 0);
         }
         return (IntVar) object;

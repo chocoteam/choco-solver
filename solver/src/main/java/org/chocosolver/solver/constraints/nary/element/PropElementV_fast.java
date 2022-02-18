@@ -1,19 +1,12 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * Created by IntelliJ IDEA.
- * User: Jean-Guillaume Fages
- * Date: 10/05/13
- * Time: 01:32
- */
-
 package org.chocosolver.solver.constraints.nary.element;
 
 import org.chocosolver.solver.constraints.Propagator;
@@ -22,6 +15,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Random;
 
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
@@ -40,24 +35,45 @@ public class PropElementV_fast extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private IntVar var, index;
-    private int offset;
-    private final boolean fast;
+    private final IntVar var;
+    private final IntVar index;
+    private final int offset;
+    private boolean fast;
+    private final Random rd;
+    private int calls, success;
+    private boolean rem;
 
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
 
-    public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset, boolean fast) {
+    public PropElementV_fast(IntVar value, IntVar[] values, IntVar index, int offset) {
         super(ArrayUtils.append(new IntVar[]{value, index}, values), PropagatorPriority.LINEAR, false);
         this.var = vars[0];
         this.index = vars[1];
         this.offset = offset;
-        this.fast = fast;
+        this.fast = true;
+        rd = new Random(vars[0].getModel().getSeed());
+        calls = success = 1;
     }
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
+        double p = (success * 1.d) / (calls * 1.d);
+        fast = rd.nextFloat() < p;
+        //if((calls % 1_000)==0) System.out.printf("%d\t%d\t%.3f%n", success, calls, p);
+        rem = false; // is modified in filter
+        try {
+            filter();
+        } finally {
+            calls++;
+            if (rem) {
+                success++;
+            }
+        }
+    }
+
+    private void filter() throws ContradictionException {
         boolean filter;
         do {
             filter = index.updateBounds(offset, vars.length + offset - 3, this);
@@ -101,8 +117,8 @@ public class PropElementV_fast extends Propagator<IntVar> {
         boolean filter = a.updateBounds(b.getLB(), b.getUB(), this);
         filter |= b.updateBounds(a.getLB(), a.getUB(), this);
         if (!fast) {
-            filterFrom(a, b);
-            filterFrom(b, a);
+            rem |= filterFrom(a, b);
+            rem |= filterFrom(b, a);
         }
         if (a.getDomainSize() + b.getDomainSize() != s) {
             filter |= propagateEquality(a, b);
@@ -125,20 +141,35 @@ public class PropElementV_fast extends Propagator<IntVar> {
     }
 
     private boolean disjoint(IntVar a, IntVar b) {
-        if (a.getLB() > b.getUB() || b.getLB() > a.getUB()) {
+        int la, ua, lb, ub;
+        if ((la = a.getLB()) > (ub = b.getUB()) || (lb = b.getLB()) > (ua = a.getUB())) {
             return true;
         }
         if (fast) {
             return false;
         }
-        int lb = a.getLB();
-        int ub = a.getUB();
-        for (int i = lb; i <= ub; i = a.nextValue(i)) {
-            if (b.contains(i)) {
+        if (a.getDomainSize() <= b.getDomainSize()) {
+            if (intersect(a, la, ua, b, lb, ub)) {
+                return false;
+            }
+        } else {
+            if (intersect(b, lb, ub, a, la, ua)) {
                 return false;
             }
         }
+        rem = true;
         return true;
+    }
+
+    private boolean intersect(IntVar v1, int l1, int u1, IntVar v2, int l2, int u2) {
+        int low = Math.max(l1, l2);
+        int upp = Math.min(u1, u2);
+        for (int i = v1.nextValue(low -1); i <= upp; i = v1.nextValue(i)) {
+            if (v2.contains(i)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

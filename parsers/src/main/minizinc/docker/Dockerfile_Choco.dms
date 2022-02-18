@@ -18,18 +18,19 @@ LABEL maintainer="Charles.Prudhomme@imt-atlantique.fr"
 RUN apt-get update && \
 	apt-get install -y maven git
 
+WORKDIR /src
+
 # Get and build of Choco-solver
 RUN	git clone https://github.com/chocoteam/choco-solver.git /choco-solver
 RUN	cd /choco-solver/ && \
-    git fetch -q && git checkout -q master && \
+    git fetch -q && git checkout -q 4.10.8 && \
     mvn -q clean install -DskipTests && \
     cd ..
-
 #------------------------------------------------------------------------------#
 # 2. Stage: Setup of Choco in the MiniZinc Challenge docker image
 
 # Using the MiniZinc Challenge docker image
-FROM minizinc/mznc2020:latest
+FROM minizinc/mznc2021:latest
 
 # Install Java 11
 RUN apt-get update && \
@@ -38,11 +39,16 @@ RUN apt-get update && \
 
 
 # Copy Choco's executable from the previous stage across
-COPY --from=builder /choco-solver/parsers/src/main/minizinc/fzn-choco /entry_data/fzn-exec
-COPY --from=builder /choco-solver/parsers/target/choco-parsers-4.10.6-jar-with-dependencies.jar /entry_data/choco-parsers.jar
+COPY --from=builder /choco-solver/parsers/src/main/minizinc/fzn-choco /choco/fzn-choco
+COPY --from=builder /choco-solver/parsers/src/main/minizinc/choco.msc /choco/choco.msc
+COPY --from=builder /choco-solver/parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
+COPY --from=builder /choco-solver/parsers/target/choco-parsers-*-jar-with-dependencies.jar /choco/choco-parsers.jar
 
-# Update execution script
-RUN sed -i 's&DIR=.*&DIR=/entry_data&g' /entry_data/fzn-exec
+# Update files
+RUN sed -i 's&CHOCO_JAR=.*&CHOCO_JAR=/choco/choco.jar&g' /choco/fzn-choco
+RUN sed -i 's&"mznlib".*&"mznlib":"/choco/mzn-lib/",&g' /choco/choco.msc
+RUN sed -i 's&"executable".*&"executable":"/choco/fzn-choco",&g' /choco/choco.msc
 
-# Copy Choco's MiniZinc library from the previous stage across
-COPY --from=builder /choco-solver/parsers/src/main/minizinc/mzn_lib/* /entry_data/mzn-lib/
+ENV MZN_SOLVER_PATH=/choco:${MZN_SOLVER_PATH}
+
+RUN echo '{"tagDefaults": [["", "org.choco.choco"]]}' > $HOME/.minizinc/Preferences.json

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2021, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2022, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,8 +17,9 @@ import java.util.Random;
 
 public class GraphRandomEdge implements GraphEdgeSelector {
 
-    private Random rd;
-    private TIntArrayList pFrom, pTo;
+    private final Random rd;
+    private final TIntArrayList pFrom;
+    private final TIntArrayList pTo;
 
     public GraphRandomEdge(long seed) {
         rd = new Random(seed);
