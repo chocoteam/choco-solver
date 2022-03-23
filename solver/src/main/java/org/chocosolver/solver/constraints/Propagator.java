@@ -141,12 +141,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     private final boolean swapOnPassivate;
 
     /**
-     * When a propagator is removed while being passivate with swap operation,
-     * this variable ensures that no side-effects occurs on backtrack
-     */
-    private boolean alive = true;
-
-    /**
      * Priority of this propagator.
      * Mix between arity and compexity.
      */
@@ -249,19 +243,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         Arrays.fill(vindices, -1);
         ID = model.nextId();
         this.swapOnPassivate = model.getSettings().swapOnPassivate() & swapOnPassivate;
-        if (this.swapOnPassivate) {
-            operations = new IOperation[3 + vars.length];
-            for (int i = 0; i < vars.length; i++) {
-                int i0 = i;
-                operations[3 + i] = () -> {
-                    if (alive) {
-                        doSwap(i0);
-                    }
-                };
-            }
-        } else {
-            operations = new IOperation[3];
-        }
+        operations = new IOperation[3];
 
         operations[0] = () -> state = NEW;
         operations[1] = () -> state = REIFIED;
@@ -362,7 +344,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             if (!vars[v].isAConstant()) {
                 vars[v].unlink(this, v);
                 vindices[v] = -1;
-                alive = false;
             }
         }
     }
@@ -540,8 +521,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                 for (int i = 0; i < vars.length; i++) {
                     if (!vars[i].isInstantiated()) {
                         vindices[i] = vars[i].swapOnPassivate(this, i);
-                        assert vars[i].getPropagator(vindices[i]) == this;
-                        model.getEnvironment().save(operations[3 + i]);
                     }
                 }
             }
@@ -549,10 +528,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             throw new SolverException("Try to passivate a propagator already passive or reified.\n" +
                     this + " of " + this.getConstraint());
         }
-    }
-
-    private void doSwap(int i0){
-        vindices[i0] = vars[i0].swapOnActivate(this, i0);
     }
 
     /**
@@ -924,7 +899,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     public void doFinePropagation() throws ContradictionException {
         while (eventsets.size() > 0) {
             int v = eventsets.pollFirst();
-            assert isActive() : "propagator is not active:" + this;
+            assert isActive() : "propagator is not active:" + this.getClass();
             // clear event
             int mask = eventmasks[v];
             eventmasks[v] = 0;

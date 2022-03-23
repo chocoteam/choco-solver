@@ -82,19 +82,17 @@ public class ConflictHistorySearch<V extends Variable>
 
     @Override
     protected double weight(Variable v) {
-        double w = 0.;
-        int nbp = v.getNbProps();
-        for (int i = 0; i < nbp; i++) {
-            Propagator<?> prop = v.getPropagator(i);
+        double[] w = {0.};
+        v.streamPropagators().forEach(prop ->{
             long fut = Stream.of(prop.getVars())
                     .filter(Variable::isInstantiated)
                     .limit(2)
                     .count();
             if (fut > 1) {
-                w += refinedWeights.getOrDefault(prop, rw)[0] + D;
+                w[0] += refinedWeights.getOrDefault(prop, rw)[0] + D;
             }
-        }
-        return w;
+        });
+        return w[0];
     }
 
     @Override

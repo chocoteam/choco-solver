@@ -15,10 +15,13 @@ import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.delta.IDelta;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
+
+import java.util.stream.Stream;
 
 /**
  * To developers: any constructor of variable must pass in parameter
@@ -133,7 +136,9 @@ public interface Variable extends Identity, Comparable<Variable> {
      * Return the array of propagators this
      *
      * @return the array of propagators of this
+     * @deprecated see instead
      */
+    @Deprecated
     Propagator<?>[] getPropagators();
 
     /**
@@ -141,9 +146,15 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param idx position of the propagator
      * @return a propagator
+     * @deprecated
      */
-    @SuppressWarnings("unused")
+    @Deprecated
     Propagator<?> getPropagator(int idx);
+
+    /**
+     * @return a stream of the propagators of this variable
+     */
+    Stream<Propagator<?>> streamPropagators();
 
     /**
      * Return the number of propagators
@@ -154,11 +165,14 @@ public interface Variable extends Identity, Comparable<Variable> {
 
     /**
      * @return the array of indices of this variable in its propagators.
+     * @deprecated
      */
+    @Deprecated
     int[] getPIndices();
 
     /**
-     * Update the position of the variable in the propagator at position in {@link #getPropagators()}.
+     * Update the position of the variable in the propagator.
+     * For internal usage only
      *
      * @param pos position of the propagator
      * @param val position of this variable in the propagator
@@ -172,7 +186,9 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param i dependency index
      * @return index of the first propagator associated with that dependency.
+     * @deprecated
      */
+    @Deprecated
     int getDindex(int i);
 
     /**
@@ -181,7 +197,6 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param pidx index of the propagator within the list of propagators of this
      * @return position of this in the propagator pidx
      */
-    @SuppressWarnings("unused")
     int getIndexInPropagator(int pidx);
 
     /**
@@ -245,7 +260,9 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param propagator the propagator to swap
      * @param idxInProp  index of the variable in the propagator
      * @return return the index of the propagator within the variable
+     * @deprecated
      */
+    @Deprecated
     int swapOnActivate(Propagator<?> propagator, int idxInProp);
 
     /**
@@ -374,6 +391,12 @@ public interface Variable extends Identity, Comparable<Variable> {
      * Set this as unscheduled
      */
     void unschedule();
+
+
+    /**
+     * Schedule active propagators in the engine
+     */
+    void schedulePropagators(PropagationEngine engine);
 
     /**
      * @return this cast into an IntVar.
