@@ -603,7 +603,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     @Override
-    public int compareTo(Propagator o) {
+    public int compareTo(Propagator<V> o) {
         return this.ID - o.ID;
     }
 
