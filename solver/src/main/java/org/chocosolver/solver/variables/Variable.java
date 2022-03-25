@@ -133,20 +133,13 @@ public interface Variable extends Identity, Comparable<Variable> {
     String getName();
 
     /**
-     * Return the array of propagators this
-     *
-     * @return the array of propagators of this
-     * @deprecated see instead
+     * @deprecated see {@link #streamPropagators()} instead
      */
     @Deprecated
     Propagator<?>[] getPropagators();
 
     /**
-     * Return the "idx" th propagator of this
-     *
-     * @param idx position of the propagator
-     * @return a propagator
-     * @deprecated
+     * @deprecated see {@link #streamPropagators()} instead
      */
     @Deprecated
     Propagator<?> getPropagator(int idx);
@@ -164,28 +157,18 @@ public interface Variable extends Identity, Comparable<Variable> {
     int getNbProps();
 
     /**
-     * @return the array of indices of this variable in its propagators.
      * @deprecated
      */
     @Deprecated
     int[] getPIndices();
 
     /**
-     * Update the position of the variable in the propagator.
-     * For internal usage only
-     *
-     * @param pos position of the propagator
-     * @param val position of this variable in the propagator
+     * @Deprecated
      */
+    @Deprecated
     void setPIndice(int pos, int val);
 
     /**
-     * This variable's propagators are stored in specific way which ease iteration based on propagation conditions.
-     * Any event indicates, through the <i>dependency list</i> which propagators should be executed.
-     * Thus, an event indicates a list of <code>i</code>s, passed as parameter, which help returning the right propagators.
-     *
-     * @param i dependency index
-     * @return index of the first propagator associated with that dependency.
      * @deprecated
      */
     @Deprecated
@@ -241,25 +224,18 @@ public interface Variable extends Identity, Comparable<Variable> {
      *
      * @param propagator a newly added propagator
      * @param idxInProp  index of the variable in the propagator
-     * @return return the index of the propagator within the variable
      */
-    int link(Propagator<?> propagator, int idxInProp);
+    void link(Propagator<?> propagator, int idxInProp);
 
     /**
      * The propagator will not be informed of any modification of this anymore.
      *
      * @param propagator the propagator to swap
      * @param idxInProp  index of the variable in the propagator
-     * @return return the index of the propagator within the variable
      */
-    int swapOnPassivate(Propagator<?> propagator, int idxInProp);
+    void swapOnPassivate(Propagator<?> propagator, int idxInProp);
 
     /**
-     * The propagator will be informed back of any modification of this.
-     *
-     * @param propagator the propagator to swap
-     * @param idxInProp  index of the variable in the propagator
-     * @return return the index of the propagator within the variable
      * @deprecated
      */
     @Deprecated

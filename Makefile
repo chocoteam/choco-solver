@@ -9,7 +9,7 @@ install: clean
 clean:
 	mvn -q clean
 
-tests : 1s 10s ibex checker mzn xcsp mps
+tests : 1s 10s ibex checker mzn xcsp mps dimacs expl
 
 1s 10s ibex checker mzn xcsp mps: clean install
 	mvn -q test -DtestFailureIgnore=true -Dgroups="$@"

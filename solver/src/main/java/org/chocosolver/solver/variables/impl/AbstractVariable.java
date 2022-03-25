@@ -216,23 +216,23 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public final int link(Propagator<?> propagator, int idxInProp) {
+    public final void link(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
         nbPropagators++;
-        return propagators[i].add(propagator, idxInProp);
+        propagator.setVIndices(idxInProp, propagators[i].add(propagator, idxInProp));
     }
 
     @Override
     public final void unlink(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
         nbPropagators--;
-        propagators[i].remove(propagator, idxInProp);
+        propagators[i].remove(propagator, idxInProp, this);
     }
 
     @Override
-    public int swapOnPassivate(Propagator<?> propagator, int idxInProp) {
+    public void swapOnPassivate(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
-        return propagators[i].swap(propagator, idxInProp);
+        propagators[i].swap(propagator, idxInProp, this);
     }
 
     @Override
@@ -554,8 +554,18 @@ public abstract class AbstractVariable implements Variable {
             this.pindices = new int[capacity];
         }
 
+        /**
+         * Add a propagator <i>p</i> at the end of {@link #propagators}
+         * and set at the same position in {@link #pindices} the position
+         * of the variable in <i>p</i>.
+         * @param propagator the propagator to add
+         * @param idxInVar position of the variable in the propagator
+         * @return the number of propagators stored
+         */
         public int add(Propagator<?> propagator, int idxInVar) {
-            //todo: deal with first > 0 and threshold == 0
+            if (first > 0 && splitter.get() == 0) {
+                shiftTail();
+            }
             if (last == capacity - 1) {
                 capacity = capacity + (capacity >> 1);
                 propagators = Arrays.copyOf(propagators, capacity);
@@ -566,35 +576,46 @@ public abstract class AbstractVariable implements Variable {
             return last - 1;
         }
 
-        public void remove(Propagator<?> propagator, int idxInProp) {
+        /**
+         * Remove the propagator <i>p</i> from {@link #propagators}.
+         * @param propagator
+         * @param idxInProp
+         * @param var
+         */
+        public void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
-            if (p > -1) {
-                assert propagators[p] == propagator : "Try to unlink :\n" + propagator + "but found:\n" + propagators[p];
-                // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-                if (p < splitter.get()) {
-                    // swap the propagator to remove with the fisrt one
-                    propagators[p] = propagators[first];
-                    pindices[p] = pindices[first];
-                    propagators[p].setVIndices(pindices[p], p);
-                    propagators[first] = null;
-                    pindices[first] = 0;
-                    first++;
-                } else {
-                    // swap the propagator to remove with the last one
-                    last--;
+            assert p > -1;
+            assert propagators[p] == propagator : "Try to unlink from "+var.getName() +":\n" + propagator + "but found:\n" + propagators[p];
+            assert propagators[p].getVar(idxInProp) == var;
+            // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
+            if (p < splitter.get()) {
+                // swap the propagator to remove with the first one
+                propagator.setVIndices(idxInProp, -1);
+                propagators[p] = propagators[first];
+                pindices[p] = pindices[first];
+                propagators[p].setVIndices(pindices[p], p);
+                propagators[first] = null;
+                pindices[first] = 0;
+                first++;
+            } else {
+                // swap the propagator to remove with the last one
+                last--;
+                if(p < last) {
                     propagators[p] = propagators[last];
                     pindices[p] = pindices[last];
                     propagators[p].setVIndices(pindices[p], p);
-                    propagators[last] = null;
-                    pindices[last] = 0;
                 }
-            }// else // todo deal with -1
+                propagators[last] = null;
+                pindices[last] = 0;
+                propagator.setVIndices(idxInProp, -1);
+            }
         }
 
-        public int swap(Propagator<?> propagator, int idxInProp) {
+        public void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
             assert p != -1;
-            assert propagators[p] == propagator : "Try to swap :\n" + propagator + " but found: " + propagators[p];
+            assert propagators[p] == propagator : "Try to swap from "+var.getName() +":\n" + propagator + "but found: " + propagators[p];
+            assert propagators[p].getVar(idxInProp) == var;
             int pos = splitter.add(1) - 1;
             if (first > 0) {
                 if (pos == 0) {
@@ -606,13 +627,16 @@ public abstract class AbstractVariable implements Variable {
                     throw new UnsupportedOperationException();
                 }
             }
-            propagators[p] = propagators[pos];
-            pindices[p] = pindices[pos];
-            propagators[p].setVIndices(pindices[p], p);
-            propagators[pos] = propagator;
-            pindices[pos] = idxInProp;
-            assert propagators[pos] == propagator;
-            return pos;
+            if(pos != p) {
+                propagators[p] = propagators[pos];
+                propagators[pos] = propagator;
+                int pi = pindices[p];
+                pindices[p] = pindices[pos];
+                pindices[pos] = pi;
+                propagators[p].setVIndices(pindices[p], p);
+                propagators[pos].setVIndices(pindices[pos], pos);
+                assert propagators[pos] == propagator;
+            }
         }
 
         public void schedule(ICause cause, PropagationEngine engine, int mask) {
@@ -621,7 +645,6 @@ public abstract class AbstractVariable implements Variable {
                 if (s == 0) {
                     shiftTail();
                 } else {
-                    // s = Math.min(s, first);
                     throw new UnsupportedOperationException();
                 }
             }
@@ -646,7 +669,6 @@ public abstract class AbstractVariable implements Variable {
             last -= first;
             first = 0;
         }
-
     }
 
 }

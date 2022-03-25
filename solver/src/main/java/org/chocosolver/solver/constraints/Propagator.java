@@ -277,7 +277,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *                       variable modification, i.e. if it should be incremental or not
      */
     protected Propagator(V[] vars, Priority priority, boolean reactToFineEvt) {
-        this(vars, priority, reactToFineEvt, false);
+        this(vars, priority, reactToFineEvt, true);
     }
 
     /**
@@ -312,7 +312,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         vindices = new int[vars.length];
         arraycopy(itmp, 0, vindices, 0, itmp.length);
         for (int v = tmp.length; v < vars.length; v++) {
-            vindices[v] = vars[v].link(this, v);
+            vars[v].link(this, v);
         }
         if(reactToFineEvt) {
             itmp = this.eventmasks;
@@ -331,7 +331,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     public final void linkVariables() {
         for (int v = 0; v < vars.length; v++) {
             if (!vars[v].isAConstant()) {
-                vindices[v] = vars[v].link(this, v);
+                vars[v].link(this, v);
             }
         }
     }
@@ -520,7 +520,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             if (swapOnPassivate) {
                 for (int i = 0; i < vars.length; i++) {
                     if (!vars[i].isInstantiated()) {
-                        vindices[i] = vars[i].swapOnPassivate(this, i);
+                        vars[i].swapOnPassivate(this, i);
                     }
                 }
             }
