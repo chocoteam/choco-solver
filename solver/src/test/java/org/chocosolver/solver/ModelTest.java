@@ -414,6 +414,20 @@ public class ModelTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
+    public void testFindNSolutions() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        m.getSolver().findNSolutions(1);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindNSolutionsMoreRequestedThanExisting() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(4);
+        m.getSolver().findNSolutions(10);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
     public void testFindAllSolutionsAfterReset() {
         Model m = new Model();
         IntVar i = m.intVar("i", 0, 5);
@@ -421,6 +435,16 @@ public class ModelTest {
         s.findOptimalSolution(i, false);
         s.reset();
         Assert.assertEquals(s.findAllSolutions().size(), 6);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindNSolutionsAfterReset() {
+        Model m = new Model();
+        IntVar i = m.intVar("i", 0, 5);
+        Solver s = m.getSolver();
+        s.findOptimalSolution(i, false);
+        s.reset();
+        Assert.assertEquals(s.findNSolutions(4).size(), 4);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -457,7 +481,7 @@ public class ModelTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testFindAllOptimalSolutions() {
         Model m = ProblemMaker.makeGolombRuler(6);
-        m.getSolver().findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
+        List<Solution> s = m.getSolver().findAllOptimalSolutions((IntVar) m.getHook("objective"), false);
         Assert.assertEquals(m.getSolver().getSolutionCount(), 4);
     }
 
@@ -467,6 +491,13 @@ public class ModelTest {
         int cstrs = m.getNbCstrs();
         Assert.assertEquals(m.getSolver().streamOptimalSolutions((IntVar) m.getHook("objective"), false).count(), 4);
         Assert.assertEquals(cstrs, m.getNbCstrs());
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFindNOptimalSolutions() {
+        Model m = ProblemMaker.makeGolombRuler(6);
+        List<Solution> s = m.getSolver().findNOptimalSolutions((IntVar) m.getHook("objective"), false, 3);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }
 
     @Test(groups = "1s", timeOut = 60000)

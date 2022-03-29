@@ -157,6 +157,61 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
+     * Attempts to find N solutions of the declared satisfaction problem.
+     * <ul>
+     * <li>If the method returns an empty list: </li>
+     * <ul>
+     * <li>
+     * either a stop criterion (e.g., a time limit) stops the search before any solution has been found,
+     * </li>
+     * <li>
+     * or no solution exists for the problem (i.e., over-constrained).
+     * </li>
+     * </ul>
+     * <li>if the method returns a list with at least one element in it:</li>
+     * <ul>
+     * <li>either the resolution stops eagerly du to a stop criterion before finding N solutions,</li>
+     * <li>or N solutions have been found.</li>
+     * </ul>
+     * </ul>
+     * <p>
+     * This method run the following instructions:
+     * <pre>
+     *     {@code
+     *     List<Solution> solutions = new ArrayList<>();
+     *     int i = 0;
+     *     while (i < nbSolutions && model.getSolver().solve()){
+     *          solutions.add(new Solution(model).record());
+     *          i++;
+     *     }
+     *     return solutions;
+     *     }
+     * </pre>
+     * <p>
+     * Note that all variables will be recorded
+     * <p>
+     * Note that it clears the current objective function, if any
+     *
+     * @param nbSolutions the number of solutions requested to the solver.
+     * @param stop optional criterion to stop the search before finding all solutions
+     * @return a list that contained the found solutions. Note the size of this list can be lesser than `nbSolutions`,
+     *      if such a number of solutions does not exist, or if the stop criterion are met.
+     */
+    default List<Solution> findNSolutions(int nbSolutions, Criterion... stop) {
+        Solver solver = ref().getModel().getSolver();
+        solver.getModel().clearObjective();
+        solver.addStopCriterion(stop);
+        List<Solution> solutions = new ArrayList<>();
+        int i = 0;
+        while (i < nbSolutions && solver.solve()) {
+            solutions.add(new Solution(solver.getModel()).record());
+            i++;
+        }
+        solver.removeStopCriterion(stop);
+        return solutions;
+    }
+
+    /**
      * Attempts to find all solutions of the declared problem.
      * <ul>
      * <li>If the method returns an empty list:</li>
@@ -348,6 +403,82 @@ public interface IResolutionHelper extends ISelf<Solver> {
             return solutions;
         } else {
             ref().removeStopCriterion(stop);
+            return Collections.emptyList();
+        }
+    }
+
+    /**
+     * Attempt to find the solution that optimizes the mono-objective problem defined by
+     * a unique objective variable and an optimization criteria, then finds and stores N optimal solution.
+     * Searching for N optimal solutions is only triggered if the first search is complete.
+     * This method works as follow:
+     * <ol>
+     * <li>It finds and prove the optimum</li>
+     * <li>It resets the search and enumerates all solutions of optimal cost</li>
+     * </ol>
+     * Note that the returned list can be empty.
+     * <ul>
+     * <li>If the method returns an empty list: </li>
+     * <ul>
+     * <li>
+     * either a stop criterion (e.g., a time limit) stops the search before any solution has been found,
+     * </li>
+     * <li>
+     * or no solution exists for the problem (i.e., over-constrained).
+     * </li>
+     * </ul>
+     * <li>if the method returns a list with at least one element in it:</li>
+     * <ul>
+     * <li>either the resolution stops eagerly du to a stop criterion before finding N solutions,</li>
+     * <li>or N optimal solutions have been found.</li>
+     * </ul>
+     * </ul>
+     * <p>
+     * This method runs the following instructions:
+     * <pre>
+     *     {@code
+     *     ref().findOptimalSolution(objective, maximize, stop);
+     *     if (!ref().isStopCriterionMet()  &&
+     *          model.getSolver().getMeasures().getSolutionCount() > 0) {
+     *         int opt = _model.getSolver().getObjectiveManager().getBestSolutionValue().intValue();
+     *         model.getSolver().reset();
+     *         model.clearObjective();
+     *         model.arithm(objective, "=", opt).post();
+     *         return findNSolutions(nbSolutions);
+     *     } else {
+     *          return Collections.emptyList();
+     *     }
+     *     }
+     * </pre>
+     * <p>
+     * Note that all variables will be recorded
+     *
+     * @param objective the variable to optimize
+     * @param maximize  set to <tt>true</tt> to solve a maximization problem,
+     *                  set to <tt>false</tt> to solve a minimization problem.
+     * @param nbSolutions the number of solutions requested to the solver.
+     * @param stop      optional criterion to stop the search before finding all/best solution
+     * @return a list that contained the solutions found.
+     */
+    default List<Solution> findNOptimalSolutions(IntVar objective, boolean maximize, int nbSolutions, Criterion... stop) {
+        Solver solver = ref().getModel().getSolver();
+        boolean defaultS = solver.getSearch() == null;// best bound (in default) is only for optim
+        solver.findOptimalSolution(objective, maximize);
+        if (!solver.isStopCriterionMet()
+                && solver.getSolutionCount() > 0) {
+            solver.removeStopCriterion(stop);
+            int opt = solver.getObjectiveManager().getBestSolutionValue().intValue();
+            solver.reset();
+            solver.getModel().clearObjective();
+            Constraint forceOptimal = solver.getModel().arithm(objective, "=", opt);
+            forceOptimal.post();
+            if (defaultS)
+                solver.setSearch(Search.defaultSearch(solver.getModel()));// best bound (in default) is only for optim
+            List<Solution> solutions = findNSolutions(nbSolutions, stop);
+            solver.getModel().unpost(forceOptimal);
+            return solutions;
+        } else {
+            solver.removeStopCriterion(stop);
             return Collections.emptyList();
         }
     }
