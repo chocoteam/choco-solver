@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import gnu.trove.map.hash.TIntIntHashMap;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
@@ -173,19 +172,6 @@ public class IntLinCombFactory {
                             + " (should be in {\"=\", \"!=\", \">\",\"<\",\">=\",\"<=\"})");
             }
         }
-        if(slb < Integer.MIN_VALUE || slb> Integer.MAX_VALUE){
-            throw new SolverException("Sum of lower bounds under/overflows. Consider reducing variables' domain to prevent this.");
-        }
-        if(sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE){
-            throw new SolverException("Sum of upper bounds under/overflows. Consider reducing variables' domain to prevent this.");
-        }
-        if(RESULT< Integer.MIN_VALUE || RESULT> Integer.MAX_VALUE){
-            throw new SolverException("RHS under/overflows. Consider reducing it to prevent this.");
-        }
-        if(RESULT - slb < Integer.MIN_VALUE || RESULT - slb > Integer.MAX_VALUE
-          || sub - RESULT < Integer.MIN_VALUE || sub - RESULT> Integer.MAX_VALUE){
-            throw new SolverException("Integer under/overflow detected. Consider reducing variables' domain and/or RHS to prevent this.");
-        }
         // 2. resize NVARS and NCOEFFS
         if (k < NVARS.length) {
             NVARS = Arrays.copyOf(NVARS, k, IntVar[].class);
@@ -200,10 +186,23 @@ public class IntLinCombFactory {
             NCOEFFS[k - 1] = NCOEFFS[lidx];
             NCOEFFS[lidx] = i;
         }
+        boolean isLong = slb < Integer.MIN_VALUE || slb > Integer.MAX_VALUE;
+        isLong |= sub < Integer.MIN_VALUE || sub > Integer.MAX_VALUE;
+        isLong |= RESULT < Integer.MIN_VALUE || RESULT > Integer.MAX_VALUE;
+        isLong |= RESULT - slb < Integer.MIN_VALUE || RESULT - slb > Integer.MAX_VALUE
+                || sub - RESULT < Integer.MIN_VALUE || sub - RESULT > Integer.MAX_VALUE;
         if (nones + nmones == NVARS.length) {
-            return selectSum(NVARS, NCOEFFS, OPERATOR, (int)RESULT, nbools);
+            if(isLong){
+                return selectSumWithLong(NVARS, NCOEFFS, OPERATOR, RESULT);
+            }else{
+                return selectSum(NVARS, NCOEFFS, OPERATOR, (int)RESULT, nbools);
+            }
         } else {
-            return selectScalar(NVARS, NCOEFFS, OPERATOR, (int)RESULT);
+            if(isLong){
+                return selectScalarWithLong(NVARS, NCOEFFS, OPERATOR, (int)RESULT);
+            }else {
+                return selectScalar(NVARS, NCOEFFS, OPERATOR, (int)RESULT);
+            }
         }
     }
 
@@ -306,6 +305,37 @@ public class IntLinCombFactory {
     }
 
     /**
+     * Select the most relevant Sum constraint to return
+     *
+     * @param VARS     array of integer variables
+     * @param COEFFS   array of integers
+     * @param OPERATOR on operator
+     * @param RESULT   an integer
+     * @return a constraint
+     */
+    public static Constraint selectSumWithLong(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, long RESULT) {
+        int b = 0, e = VARS.length;
+        IntVar[] tmpV = new IntVar[e];
+        // go down to 0 to ensure that the largest domain variable is on last position
+        for (int i = VARS.length - 1; i >= 0; i--) {
+            IntVar key = VARS[i];
+            if (COEFFS[i] > 0) {
+                tmpV[b++] = key;
+            } else if (COEFFS[i] < 0) {
+                tmpV[--e] = key;
+            }
+        }
+        if (OPERATOR == Operator.GT) {
+            OPERATOR = Operator.GE;
+            RESULT++;
+        } else if (OPERATOR == Operator.LT) {
+            OPERATOR = Operator.LE;
+            RESULT--;
+        }
+        return new SumWithLongConstraint(new PropSumWithLong(tmpV, b, OPERATOR, RESULT));
+    }
+
+    /**
      * Select the most relevant ScalarProduct constraint to return
      *
      * @param VARS     array of integer variables
@@ -358,6 +388,39 @@ public class IntLinCombFactory {
             RESULT--;
         }
         return new SumConstraint(new PropScalar(tmpV, tmpC, b, OPERATOR, RESULT));
+    }
+
+    /**
+     * Select the most relevant ScalarProduct constraint to return
+     *
+     * @param VARS     array of integer variables
+     * @param COEFFS   array of integers
+     * @param OPERATOR on operator
+     * @param RESULT   an integer
+     * @return a constraint
+     */
+    public static Constraint selectScalarWithLong(IntVar[] VARS, int[] COEFFS, Operator OPERATOR, long RESULT) {
+        int b = 0, e = VARS.length;
+        IntVar[] tmpV = new IntVar[e];
+        long[] tmpC = new long[e];
+        for (int i = 0; i < VARS.length; i++) {
+            IntVar key = VARS[i];
+            if (COEFFS[i] > 0) {
+                tmpV[b] = key;
+                tmpC[b++] = COEFFS[i];
+            } else if (COEFFS[i] < 0) {
+                tmpV[--e] = key;
+                tmpC[e] = COEFFS[i];
+            }
+        }
+        if (OPERATOR == Operator.GT) {
+            OPERATOR = Operator.GE;
+            RESULT++;
+        } else if (OPERATOR == Operator.LT) {
+            OPERATOR = Operator.LE;
+            RESULT--;
+        }
+        return new SumConstraint(new PropScalarWithLong(tmpV, tmpC, b, OPERATOR, RESULT));
     }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

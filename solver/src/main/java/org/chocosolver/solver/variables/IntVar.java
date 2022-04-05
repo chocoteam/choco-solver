@@ -73,6 +73,35 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     boolean removeValue(int value, ICause cause) throws ContradictionException;
 
     /**
+     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <p>
+     *     This method deals with <code>value</code> as <b>long</b>.
+     *     If such a long can be safely cast to an int, this falls back to regular case (int).
+     *     Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value value to remove from the domain (int)
+     * @param cause removal releaser
+     * @return true if the value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean removeValue(long value, ICause cause) throws ContradictionException{
+        if ((int) value != value) { // cannot be cast to an int
+            return false;
+        } else {
+            return removeValue((int) value, cause);
+        }
+    }
+
+    /**
      * Removes the value in <code>values</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
      * <ul>
      * <li>If all values are out of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -147,6 +176,35 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     boolean instantiateTo(int value, ICause cause) throws ContradictionException;
 
     /**
+     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * <p>
+     *     This method deals with <code>value</code> as <b>long</b>.
+     *     If such a long can be safely cast to an int, this falls back to regular case (int).
+     *     Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>If the domain of <code>this</code> is already instantiated to another value,
+     * then a <code>ContradictionException</code> is thrown,</li>
+     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
+     * and the return value is <code>true</code>.</li>
+     * </ul>
+     *
+     * @param value instantiation value (int)
+     * @param cause instantiation releaser
+     * @return true if the instantiation is done, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean instantiateTo(long value, ICause cause) throws ContradictionException{
+        if ((int) value != value) { // cannot be cast to an int
+            return instantiateTo(value < getLB() ? getLB() - 1 : getUB() + 1, cause);
+        } else {
+            return instantiateTo((int) value, cause);
+        }
+    }
+
+    /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
      * The instruction comes from <code>propagator</code>.
      * <ul>
@@ -164,6 +222,40 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     boolean updateLowerBound(int value, ICause cause) throws ContradictionException;
+
+    /**
+     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     *     This method deals with <code>value</code> as <b>long</b>.
+     *     If such a long can be safely cast to an int, this falls back to regular case (int).
+     *     Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value new lower bound (included)
+     * @param cause updating releaser
+     * @return true if the lower bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateLowerBound(long value, ICause cause) throws ContradictionException {
+        if ((int) value != value) { // cannot be cast to an int
+            if (value < getLB()) {
+                return false;
+            } else { // then value >> getLB, this fails
+                return updateLowerBound(getUB() + 1, cause);
+            }
+        } else {
+            return updateLowerBound((int) value, cause);
+        }
+    }
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
@@ -184,6 +276,39 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      */
     boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
 
+    /**
+     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     *     This method deals with <code>value</code> as <b>long</b>.
+     *     If such a long can be safely cast to an int, this falls back to regular case (int).
+     *     Otherwise, it can either trivially do nothing or fail.
+     * </p>
+     * <ul>
+     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value new upper bound (included)
+     * @param cause update releaser
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateUpperBound(long value, ICause cause) throws ContradictionException {
+        if ((int) value != value) { // cannot be cast to an int
+            if (value > getUB()) {
+                return false;
+            } else { // then value << getUB, this fails
+                return updateUpperBound(getLB() - 1, cause);
+            }
+        } else {
+            return updateUpperBound((int) value, cause);
+        }
+    }
 
     /**
      * Updates the lower bound and the upper bound of the domain of <code>this</code> to, resp. <code>lb</code> and <code>ub</code>.

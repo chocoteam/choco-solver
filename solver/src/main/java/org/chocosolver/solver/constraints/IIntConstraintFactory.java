@@ -27,8 +27,6 @@ import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.CondAllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferentprec.PropAllDiffPrec;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
@@ -75,10 +73,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.BitSet;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -692,7 +687,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
             return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
         } else {
-            return new Constraint(ConstraintsName.TIMES, new PropTimesNaive(X, Y, Z));
+            long a = X.getLB(), b = X.getUB(), c = Y.getLB(), d = Y.getUB();
+            long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
+            long max = Math.max(Math.max(a * c, a * d), Math.max(b * c, b * d));
+            if ((int) min != min || (int) max != max) {
+                return new Constraint(ConstraintsName.TIMES, new PropTimesNaiveWithLong(X, Y, Z));
+            } else {
+                return new Constraint(ConstraintsName.TIMES, new PropTimesNaive(X, Y, Z));
+            }
         }
     }
 
@@ -813,8 +815,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint allDiffPrec(IntVar[] variables, int[][] predecessors, int[][] successors, String filter) {
         return new Constraint(
-            ConstraintsName.ALLDIFFPREC,
-            new PropAllDiffPrec(variables, predecessors, successors, filter)
+                ConstraintsName.ALLDIFFPREC,
+                new PropAllDiffPrec(variables, predecessors, successors, filter)
         );
     }
 
@@ -844,8 +846,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint allDiffPrec(IntVar[] variables, boolean[][] precedence, String filter) {
         return new Constraint(
-            ConstraintsName.ALLDIFFPREC,
-            new PropAllDiffPrec(variables, precedence, filter)
+                ConstraintsName.ALLDIFFPREC,
+                new PropAllDiffPrec(variables, precedence, filter)
         );
     }
 
@@ -1864,13 +1866,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
-            ConstraintsName.NVALUES,
-            new PropNValue(vars, nValues),
-            // at least
+                ConstraintsName.NVALUES,
+                new PropNValue(vars, nValues),
+                // at least
 //            new PropAtLeastNValues(vars, vals, nValues),
-            // at most
+                // at most
 //            new PropAtMostNValues(vars, vals, nValues),
-            new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
+                new PropAMNV(vars, nValues, gci, new MDRk(gci), rules)
         );
     }
 
