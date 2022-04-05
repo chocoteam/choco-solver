@@ -42,8 +42,8 @@ public class PropMember extends Propagator<IntVar> implements UpdatablePropagato
      * @param var a variable
      * @param range  list of possible values
      */
-    public PropMember(IntVar var, IntIterableRangeSet range) {
-        super(new IntVar[]{var}, PropagatorPriority.UNARY, false);
+    public PropMember(IntVar var, IntIterableRangeSet range, boolean isObjectiveFunction) {
+        super(new IntVar[]{var}, PropagatorPriority.UNARY, false, !isObjectiveFunction);
         this.range = range.duplicate();
     }
 

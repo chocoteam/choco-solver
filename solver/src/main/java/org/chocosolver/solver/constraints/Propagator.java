@@ -540,7 +540,12 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     protected void forcePropagationOnBacktrack() {
         if (isPassive()) { // force activation on backtrack, because something can have changed on our back
-            state = ACTIVE;
+            if (this instanceof UpdatablePropagator<?>) {
+                state = ACTIVE;
+            } else {
+                throw new SolverException("Try to force propagation on an inactive propagator.\n" +
+                        this + " of " + this.getConstraint());
+            }
         }
         model.getSolver().getEngine().propagateOnBacktrack(this);
     }

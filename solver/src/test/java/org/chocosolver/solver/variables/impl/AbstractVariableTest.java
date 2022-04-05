@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -175,4 +176,184 @@ public class AbstractVariableTest {
         Assert.assertEquals(score.get(), 3);
     }
 
+    private static class PropFake extends Propagator<IntVar> {
+
+        private final int idx;
+
+        public PropFake(IntVar var, int i) {
+            super(new IntVar[]{var});
+            this.idx = i;
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            // void
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.UNDEFINED;
+        }
+
+        @Override
+        public String toString() {
+            return "PropFake{" +
+                    "idx=" + idx +
+                    '}';
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testSwapStd() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        v.swapOnPassivate(p2, 0);
+        v.swapOnPassivate(p0, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p2, p0, p1});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = "testSwapStd")
+    public void testSwapDyn1() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2, p3});
+        v.swapOnPassivate(p3, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 1);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1, p2, p0});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p3, p1, p2, p0});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn2() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn3() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        env.worldPop();
+        env.worldPush();
+        PropFake p4 = new PropFake(v, 4);
+        v.link(p4, 0);
+        env.save(() -> v.unlink(p4, 0));
+        v.swapOnPassivate(p4, 0);
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn4() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        PropFake p4 = new PropFake(v, 4);
+        v.link(p4, 0);
+        env.save(() -> v.unlink(p4, 0));
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 5);
+        Assert.assertEquals(list.splitter.get(), 1);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1, p2, p0, p4});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
 }

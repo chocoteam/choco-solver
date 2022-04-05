@@ -90,7 +90,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of propagators, by event type
      */
-    private final BipartiteList[] propagators;
+    final BipartiteList[] propagators;
     /**
      * Nb dependencies
      */
@@ -518,7 +518,7 @@ public abstract class AbstractVariable implements Variable {
         return cause;
     }
 
-    private static class BipartiteList {
+    static class BipartiteList {
         /**
          * The current capacity
          */
@@ -526,15 +526,15 @@ public abstract class AbstractVariable implements Variable {
         /**
          * The position of the first element (inclusive)
          */
-        private int first;
+        int first;
         /**
          * The position of the last element (exclusive)
          */
-        private int last;
+        int last;
         /**
          * The number of passive propagators, starting from first
          */
-        private final IStateInt splitter;
+        final IStateInt splitter;
 
         /**
          * List of propagators
@@ -544,7 +544,7 @@ public abstract class AbstractVariable implements Variable {
         /**
          * Store the index of each propagator.
          */
-        private int[] pindices;
+        int[] pindices;
 
         public BipartiteList(IEnvironment environment) {
             this.splitter = environment.makeInt(0);
@@ -558,8 +558,9 @@ public abstract class AbstractVariable implements Variable {
          * Add a propagator <i>p</i> at the end of {@link #propagators}
          * and set at the same position in {@link #pindices} the position
          * of the variable in <i>p</i>.
+         *
          * @param propagator the propagator to add
-         * @param idxInVar position of the variable in the propagator
+         * @param idxInVar   position of the variable in the propagator
          * @return the number of propagators stored
          */
         public int add(Propagator<?> propagator, int idxInVar) {
@@ -578,6 +579,7 @@ public abstract class AbstractVariable implements Variable {
 
         /**
          * Remove the propagator <i>p</i> from {@link #propagators}.
+         *
          * @param propagator
          * @param idxInProp
          * @param var
@@ -585,7 +587,7 @@ public abstract class AbstractVariable implements Variable {
         public void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
             assert p > -1;
-            assert propagators[p] == propagator : "Try to unlink from "+var.getName() +":\n" + propagator + "but found:\n" + propagators[p];
+            assert propagators[p] == propagator : "Try to unlink from " + var.getName() + ":\n" + propagator + "but found:\n" + propagators[p];
             assert propagators[p].getVar(idxInProp) == var;
             // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
             if (p < splitter.get()) {
@@ -600,7 +602,7 @@ public abstract class AbstractVariable implements Variable {
             } else {
                 // swap the propagator to remove with the last one
                 last--;
-                if(p < last) {
+                if (p < last) {
                     propagators[p] = propagators[last];
                     pindices[p] = pindices[last];
                     propagators[p].setVIndices(pindices[p], p);
@@ -614,7 +616,7 @@ public abstract class AbstractVariable implements Variable {
         public void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
             assert p != -1;
-            assert propagators[p] == propagator : "Try to swap from "+var.getName() +":\n" + propagator + "but found: " + propagators[p];
+            assert propagators[p] == propagator : "Try to swap from " + var.getName() + ":\n" + propagator + "but found: " + propagators[p];
             assert propagators[p].getVar(idxInProp) == var;
             int pos = splitter.add(1) - 1;
             if (first > 0) {
@@ -627,7 +629,7 @@ public abstract class AbstractVariable implements Variable {
                     throw new UnsupportedOperationException();
                 }
             }
-            if(pos != p) {
+            if (pos < p) {
                 propagators[p] = propagators[pos];
                 propagators[pos] = propagator;
                 int pi = pindices[p];
@@ -668,6 +670,44 @@ public abstract class AbstractVariable implements Variable {
             }
             last -= first;
             first = 0;
+        }
+
+        Stream<Propagator<?>> stream() {
+            int s = splitter.get();
+            if (first > 0) {
+                if (s == 0) {
+                    shiftTail();
+                }
+            }
+            Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
+                int i = s;
+                @Override
+                public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
+                    if (i < last) {
+                        action.accept(propagators[i++]);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public Spliterator<Propagator<?>> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return last - first;
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+                }
+
+            };
+            return StreamSupport.stream(it, false);
         }
     }
 
