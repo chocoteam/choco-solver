@@ -10,6 +10,7 @@ NEXT MILESTONE
 ### Major features:
 - Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
 - Extend some black-box strategies to `SetVar` and `GraphVar`
+- Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
  
 ### Deprecated API (to be removed in next release):
 
