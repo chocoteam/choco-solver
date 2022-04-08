@@ -120,17 +120,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        return instantiateTo(1, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        return instantiateTo(0, cause);
-    }
-
-
-    @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         boolean done = false;
