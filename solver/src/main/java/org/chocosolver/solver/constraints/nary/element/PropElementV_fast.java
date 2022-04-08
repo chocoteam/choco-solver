@@ -27,9 +27,12 @@ import static java.lang.Math.min;
  * Fast Element constraint
  *
  * @author Jean-Guillaume Fages
+ * @author Charles Prud'homme
  * @since 05/2013
  */
 public class PropElementV_fast extends Propagator<IntVar> {
+
+    private static final int THRESHOLD = 100;
 
     //***********************************************************************************
     // VARIABLES
@@ -116,7 +119,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         int s = a.getDomainSize() + b.getDomainSize();
         boolean filter = a.updateBounds(b.getLB(), b.getUB(), this);
         filter |= b.updateBounds(a.getLB(), a.getUB(), this);
-        if (!fast) {
+        if (!fast || a.getDomainSize() + b.getDomainSize() <= THRESHOLD) {
             rem |= filterFrom(a, b);
             rem |= filterFrom(b, a);
         }
@@ -145,7 +148,7 @@ public class PropElementV_fast extends Propagator<IntVar> {
         if ((la = a.getLB()) > (ub = b.getUB()) || (lb = b.getLB()) > (ua = a.getUB())) {
             return true;
         }
-        if (fast) {
+        if (fast && a.getDomainSize() + b.getDomainSize() > THRESHOLD) {
             return false;
         }
         if (a.getDomainSize() <= b.getDomainSize()) {
