@@ -27,8 +27,6 @@ import org.chocosolver.solver.constraints.nary.PropKnapsack;
 import org.chocosolver.solver.constraints.nary.alldifferent.AllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.CondAllDifferent;
 import org.chocosolver.solver.constraints.nary.alldifferent.conditions.Condition;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffInst;
-import org.chocosolver.solver.constraints.nary.alldifferent.conditions.PropCondAllDiffAC;
 import org.chocosolver.solver.constraints.nary.alldifferentprec.PropAllDiffPrec;
 import org.chocosolver.solver.constraints.nary.among.PropAmongGAC;
 import org.chocosolver.solver.constraints.nary.automata.CostRegular;
@@ -732,43 +730,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
     }
 
-    /**
-     * <p>Creates a power constraint: X^C = Z.</p>
-     *
-     * @implSpec The 'power' propagator does not exist.
-     * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
-     * 'times' constraints.
-     * @param X first variable
-     * @param C an integer, should be positive
-     * @param Y result variable
-     */
-    @SuppressWarnings("SuspiciousNameCombination")
-    default Constraint pow(IntVar X, int C, IntVar Y) {
-        if (C <= 0) {
-            throw new SolverException("The power parameter should be strictly greater than 0.");
-        }
-        if (TuplesFactory.canBeTupled(X, Y)) {
-            return table(new IntVar[]{Y, X}, TuplesFactory.power(Y, X, C));
-        } else {
-            final HashMap<Integer, IntVar> mm = new HashMap<>();
-            mm.put(1, X);
-            int mid = (int) Math.pow(2, Math.ceil(Math.log(C / 2.) / Math.log(2)));
-            IntVar a, b, c;
-            for (int i = 2; i <= mid; i++) {
-                int m = (int) Math.pow(2, Math.ceil(Math.log(i / 2.) / Math.log(2)));
-                a = mm.get(m);
-                b = mm.get(i - m);
-                int[] bnds = VariableUtils.boundsForMultiplication(a, b);
-                c = ref().intVar(X.getName()+"^"+i,bnds[0], bnds[1]);
-                ref().times(a, b, c).post();
-                mm.put(i, c);
-            }
-            a = mm.get(mid);
-            b = mm.get(C - mid);
-            return ref().times(a, b, Y);
-        }
-    }
-
     //##################################################################################################################
     //GLOBALS ##########################################################################################################
     //##################################################################################################################
@@ -1014,12 +975,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param AC      additional filtering algorithm, domain filtering algorithm derivated from (Soft)AllDifferent
      */
     default Constraint atLeastNValues(IntVar[] vars, IntVar nValues, boolean AC) {
-        int[] vals = getDomainUnion(vars);
         if (AC) {
-            return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, vals, nValues),
-                    new PropAtLeastNValues_AC(vars, vals, nValues));
+            return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, nValues),
+                    new PropAtLeastNValues_AC(vars, nValues));
         } else {
-            return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, vals, nValues));
+            return new Constraint(ConstraintsName.ATLEASTNVALUES, new PropAtLeastNValues(vars, nValues));
         }
     }
 
@@ -1421,6 +1381,23 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
+     * <p>
+     *     Create a decreasing constraint which ensures that the variables in {@code vars} are decreasing.
+     *     The {@code delta} parameter make possible to adjust bounds.
+     * </p>
+     * <p>That is: (X_0 &ge; X_1 +delta) &and; (X_1 &ge; X_2 + delta) &and ...</p>
+     *
+     * @param vars variables to maintain in decreasing order
+     * @param delta set to 0 for &ge;, to 1 for &gt;, and so on
+     * @return a decresing constraint
+     */
+    default Constraint decreasing(IntVar[] vars, int delta) {
+        IntVar[] rvars = vars.clone();
+        ArrayUtils.reverse(rvars);
+        return new Constraint(ConstraintsName.INCREASING, new PropIncreasing(rvars, delta));
+    }
+
+    /**
      * Creates a diffN constraint. Constrains each rectangle<sub>i</sub>, given by their origins X<sub>i</sub>,Y<sub>i</sub>
      * and sizes width<sub>i</sub>,height<sub>i</sub>, to be non-overlapping.
      *
@@ -1541,6 +1518,21 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 return new GlobalCardinality(vars, values, occurrences);
             }
         }
+    }
+
+    /**
+     * <p>
+     * Create a increasing constraint which ensures that the variables in {@code vars} are increasing.
+     * The {@code delta} parameter make possible to adjust bounds.
+     * </p>
+     * <p>That is: (X_0 &le; X_1 +delta) &and; (X_1 &le; X_2 + delta) &and ...</p>
+     *
+     * @param vars  variables to maintain in decreasing order
+     * @param delta set to 0 for &le;, to 1 for &lt;, and so on
+     * @return a decresing constraint
+     */
+    default Constraint increasing(IntVar[] vars, int delta) {
+        return new Constraint(ConstraintsName.INCREASING, new PropIncreasing(vars, delta));
     }
 
     /**
