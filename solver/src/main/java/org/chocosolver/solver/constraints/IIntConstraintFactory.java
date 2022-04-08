@@ -504,6 +504,43 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         return times(X, Y, X.getModel().intVar(Z));
     }
 
+    /**
+     * <p>Creates a power constraint: X^C = Z.</p>
+     *
+     * @param X first variable
+     * @param C an integer, should be positive
+     * @param Y result variable
+     * @implSpec The 'power' propagator does not exist.
+     * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
+     * 'times' constraints.
+     */
+    @SuppressWarnings("SuspiciousNameCombination")
+    default Constraint pow(IntVar X, int C, IntVar Y) {
+        if (C <= 0) {
+            throw new SolverException("The power parameter should be strictly greater than 0.");
+        }
+        if (TuplesFactory.canBeTupled(X, Y)) {
+            return table(new IntVar[]{Y, X}, TuplesFactory.power(Y, X, C));
+        } else {
+            final HashMap<Integer, IntVar> mm = new HashMap<>();
+            mm.put(1, X);
+            int mid = (int) Math.pow(2, Math.ceil(Math.log(C / 2.) / Math.log(2)));
+            IntVar a, b, c;
+            for (int i = 2; i <= mid; i++) {
+                int m = (int) Math.pow(2, Math.ceil(Math.log(i / 2.) / Math.log(2)));
+                a = mm.get(m);
+                b = mm.get(i - m);
+                int[] bnds = VariableUtils.boundsForMultiplication(a, b);
+                c = ref().intVar(X.getName() + "^" + i, bnds[0], bnds[1]);
+                ref().times(a, b, c).post();
+                mm.put(i, c);
+            }
+            a = mm.get(mid);
+            b = mm.get(C - mid);
+            return ref().times(a, b, Y);
+        }
+    }
+
     //##################################################################################################################
     //TERNARIES ########################################################################################################
     //##################################################################################################################
