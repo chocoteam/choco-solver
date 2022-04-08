@@ -116,9 +116,12 @@ public class ClauseBuilder {
                 switch (vars.size()) {
                     case 0:
                         model.falseConstraint().post();
+                        if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: FALSE\n");
                         break;
                     case 1:
                         model.member(_vars[0], sets.get(_vars[0].getId())).post();
+                        if (XParameters.PRINT_CLAUSE) model.getSolver().log().white().printf("learn: %s \u2208 %s\n",
+                                                        _vars[0], sets.get(_vars[0].getId()));
                         break;
                     default:
                         IntIterableRangeSet[] ranges = new IntIterableRangeSet[_vars.length];
