@@ -81,6 +81,8 @@ public class ConstraintsName {
 
     public static final String ELEMENT = "ELEMENT";
 
+    public static final String INCREASING = "INCREASING";
+
     public static final String INVERSECHANNELING = "INVERSECHANNELING";
 
     public static final String INT_VALUE_PRECEDE = "INT_VALUE_PRECEDE";

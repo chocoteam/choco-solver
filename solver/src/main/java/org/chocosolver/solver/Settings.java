@@ -83,7 +83,7 @@ public class Settings {
 
     private int dominancePerimeter = 4;
 
-    private boolean explainGlobalFailureInSum = true;
+    private boolean explainGlobalFailureInSum = false;
 
     private double ibexContractionRatio = Ibex.RATIO;
 

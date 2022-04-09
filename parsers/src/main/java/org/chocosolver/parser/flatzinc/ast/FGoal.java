@@ -25,7 +25,9 @@ import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 /*
 * User : CPRUDHOM
@@ -72,7 +74,10 @@ public class FGoal {
                     for (int i = 0; i < strategies.length; i++) {
                         strategies[i] = readSearchAnnotation((EAnnotation) earray.getWhat_i(i), aModel, description);
                     }
-                    strategy = new StrategiesSequencer(aModel.getEnvironment(), strategies);
+                    strategy = new StrategiesSequencer(aModel.getEnvironment(),
+                            Arrays.stream(strategies)
+                                    .filter(Objects::nonNull)
+                                    .toArray(AbstractStrategy[]::new));
                 } else {
                     strategy = readSearchAnnotation(annotation, aModel, description);
                 }
@@ -91,7 +96,13 @@ public class FGoal {
     private static AbstractStrategy readSearchAnnotation(EAnnotation e, Model solver, StringBuilder description) {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
-        Search search = Search.valueOf(e.id.value);
+        Search search;
+        try{
+            search = Search.valueOf(e.id.value);
+        }catch (IllegalArgumentException ex){
+            solver.getSolver().log().printf("%% ignored search annotation: %s\n", e);
+            return null;
+        }
         if(search == Search.seq_search){
             EArray eArray = (EArray)e.exps.get(0);
             AbstractStrategy[] strats = new AbstractStrategy[eArray.what.size()];

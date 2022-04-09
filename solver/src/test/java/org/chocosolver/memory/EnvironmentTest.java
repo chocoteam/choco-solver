@@ -191,7 +191,7 @@ public class EnvironmentTest {
         Solver solver = model.getSolver();
         // 2.a define a search strategy
         solver.setSearch(Search.minDomLBSearch(S));
-        solver.showDecisions();
+        //solver.showDecisions();
         solver.solve();
         model.getEnvironment().worldCommit();
         while (model.getEnvironment().getWorldIndex() > 0) {

@@ -17,8 +17,10 @@ The executable `fzn_choco` referred to in this file, together with global constr
     
 1. Edit `./parsers/src/main/minizinc/choco.msc` and 
 update the follwing fields with the right path: `"mznlib"` and `"executable"`
-                                                                             
-2. Either copy `choco.msc` to `~/.minizinc/solvers/` directory :
+      
+2. Edit `./parsers/src/main/minizinc/fzn-choco` and update line `CHOCO_JAR` with the right path to the jar file
+                                                                       
+3. Either copy `choco.msc` to `~/.minizinc/solvers/` directory :
 
 ````shell
 cp ./parsers/src/main/minizinc/choco.msc ~/.minizinc/solvers/
