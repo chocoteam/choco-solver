@@ -11,8 +11,6 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.Opposite;
-import org.chocosolver.solver.constraints.reification.PropImplied;
-import org.chocosolver.solver.constraints.reification.PropImplies;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.util.ESat;
@@ -237,7 +235,7 @@ public class Constraint {
      * @param r a boolean variable
      */
     public final void implies(BoolVar r) {
-        new Constraint(ConstraintsName.IMPLYCONSTRAINT, new PropImplies(this, r)).post();
+        this.reify().imp(r).post();
     }
 
     /**
@@ -259,7 +257,7 @@ public class Constraint {
         if (r.isInstantiatedTo(1)) {
             this.post();
         } else {
-            new Constraint(ConstraintsName.IMPLIEDCONSTRAINT, new PropImplied(r, this)).post();
+            r.le(this.reify()).post();
         }
     }
 

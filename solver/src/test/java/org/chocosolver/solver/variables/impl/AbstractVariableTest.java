@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
@@ -57,188 +58,6 @@ public class AbstractVariableTest {
         props[4] = new PropAllDiffInst(new IntVar[]{is[4], is[3], is[2], is[1], is[0]});
     }
 
-
-    @Test(groups = "1s")
-    public void testSubscribe1() {
-        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
-        Assert.assertEquals(v.propagators[0], props[0]);
-        Assert.assertEquals(v.pindices[0], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{0});
-
-        props[1].setVIndices(1, v.subscribe(props[1], 1, 4));
-        Assert.assertEquals(v.propagators[0], props[1]);
-        Assert.assertEquals(v.pindices[0], 1);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 0});
-
-
-        props[2].setVIndices(2, v.subscribe(props[2], 2, 4));
-        Assert.assertEquals(v.propagators[0], props[2]);
-        Assert.assertEquals(v.pindices[0], 2);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 0});
-
-        props[3].setVIndices(3, v.subscribe(props[3], 3, 4));
-        Assert.assertEquals(v.propagators[0], props[3]);
-        Assert.assertEquals(v.pindices[0], 3);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(v.propagators[3], props[2]);
-        Assert.assertEquals(v.pindices[3], 2);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 3});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 0});
-
-        props[4].setVIndices(4, v.subscribe(props[4], 4, 4));
-        Assert.assertEquals(v.propagators[0], props[4]);
-        Assert.assertEquals(v.pindices[0], 4);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(v.propagators[3], props[2]);
-        Assert.assertEquals(v.pindices[3], 2);
-        Assert.assertEquals(v.propagators[4], props[3]);
-        Assert.assertEquals(v.pindices[4], 3);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 3});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 4});
-        Assert.assertEquals(props[4].getVIndices(), new int[]{-1, -1, -1, -1, 0});
-    }
-
-    @Test(groups = "1s")
-    public void testSubscribe2() {
-        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
-        Assert.assertEquals(v.propagators[0], props[0]);
-        Assert.assertEquals(v.pindices[0], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{0});
-
-        props[1].setVIndices(1, v.subscribe(props[1], 1, 0));
-        Assert.assertEquals(v.propagators[0], props[1]);
-        Assert.assertEquals(v.pindices[0], 1);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 0});
-
-
-        props[2].setVIndices(2, v.subscribe(props[2], 2, 0));
-        Assert.assertEquals(v.propagators[0], props[2]);
-        Assert.assertEquals(v.pindices[0], 2);
-        Assert.assertEquals(v.propagators[1], props[1]);
-        Assert.assertEquals(v.pindices[1], 1);
-        Assert.assertEquals(v.propagators[2], props[0]);
-        Assert.assertEquals(v.pindices[2], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{2});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 1});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 0});
-
-        props[3].setVIndices(3, v.subscribe(props[3], 3, 0));
-        Assert.assertEquals(v.propagators[0], props[3]);
-        Assert.assertEquals(v.pindices[0], 3);
-        Assert.assertEquals(v.propagators[1], props[1]);
-        Assert.assertEquals(v.pindices[1], 1);
-        Assert.assertEquals(v.propagators[2], props[2]);
-        Assert.assertEquals(v.pindices[2], 2);
-        Assert.assertEquals(v.propagators[3], props[0]);
-        Assert.assertEquals(v.pindices[3], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{3});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 1});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 2});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 0});
-
-        props[4].setVIndices(4, v.subscribe(props[4], 4, 0));
-        Assert.assertEquals(v.propagators[0], props[4]);
-        Assert.assertEquals(v.pindices[0], 4);
-        Assert.assertEquals(v.propagators[1], props[1]);
-        Assert.assertEquals(v.pindices[1], 1);
-        Assert.assertEquals(v.propagators[2], props[2]);
-        Assert.assertEquals(v.pindices[2], 2);
-        Assert.assertEquals(v.propagators[3], props[3]);
-        Assert.assertEquals(v.pindices[3], 3);
-        Assert.assertEquals(v.propagators[4], props[0]);
-        Assert.assertEquals(v.pindices[4], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{4});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 1});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 2});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 3});
-        Assert.assertEquals(props[4].getVIndices(), new int[]{-1, -1, -1, -1, 0});
-    }
-
-
-    @Test(groups = "1s")
-    public void testCancel1() {
-        props[0].setVIndices(0, v.subscribe(props[0], 0, 4));
-        props[1].setVIndices(1, v.subscribe(props[1], 1, 4));
-        props[2].setVIndices(2, v.subscribe(props[2], 2, 4));
-        props[3].setVIndices(3, v.subscribe(props[3], 3, 4));
-        props[4].setVIndices(4, v.subscribe(props[4], 4, 4));
-
-        Assert.assertEquals(v.propagators[0], props[4]);
-        Assert.assertEquals(v.pindices[0], 4);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(v.propagators[3], props[2]);
-        Assert.assertEquals(v.pindices[3], 2);
-        Assert.assertEquals(v.propagators[4], props[3]);
-        Assert.assertEquals(v.pindices[4], 3);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 3});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 4});
-        Assert.assertEquals(props[4].getVIndices(), new int[]{-1, -1, -1, -1, 0});
-
-        v.cancel(0, 4);
-        Assert.assertEquals(v.propagators[0], props[3]);
-        Assert.assertEquals(v.pindices[0], 3);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(v.propagators[3], props[2]);
-        Assert.assertEquals(v.pindices[3], 2);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 3});
-        Assert.assertEquals(props[3].getVIndices(), new int[]{-1, -1, -1, 0});
-
-        v.cancel(0, 4);
-        Assert.assertEquals(v.propagators[0], props[2]);
-        Assert.assertEquals(v.pindices[0], 2);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(v.propagators[2], props[1]);
-        Assert.assertEquals(v.pindices[2], 1);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 2});
-        Assert.assertEquals(props[2].getVIndices(), new int[]{-1, -1, 0});
-
-        v.cancel(0, 4);
-        Assert.assertEquals(v.propagators[0], props[1]);
-        Assert.assertEquals(v.pindices[0], 1);
-        Assert.assertEquals(v.propagators[1], props[0]);
-        Assert.assertEquals(v.pindices[1], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{1});
-        Assert.assertEquals(props[1].getVIndices(), new int[]{-1, 0});
-
-        v.cancel(0, 4);
-        Assert.assertEquals(v.propagators[0], props[0]);
-        Assert.assertEquals(v.pindices[0], 0);
-        Assert.assertEquals(props[0].getVIndices(), new int[]{0});
-    }
 
     @Test(groups = "1s")
     public void testFixed() {
@@ -358,69 +177,184 @@ public class AbstractVariableTest {
         Assert.assertEquals(score.get(), 3);
     }
 
-    @Test(groups = "1s")
-    public void testSwap() {
-        Model m = new Model(Settings.init().setSwapOnPassivate(true));
-        IntVar x = m.intVar("X", 0, 3);
-        Propagator[] props = new Propagator[9];
-        for (int i = 0; i < 3; i++) {
-            Constraint c = m.arithm(x, "=", i);
-            c.post();
-            props[i] = c.getPropagator(0);
-        }
-        for (int i = 0; i < 3; i++) {
-            Constraint c = m.arithm(x, "<", i + 4);
-            c.post();
-            props[i + 3] = c.getPropagator(0);
-        }
-        for (int i = 0; i < 3; i++) {
-            Constraint c = m.arithm(x, ">", i + 5);
-            c.post();
-            props[i + 6] = c.getPropagator(0);
-        }
-        Assert.assertEquals(x.getPropagators(),
-                new Propagator[]{props[8], props[3], props[4], props[5], props[6], props[7],
-                        props[2], props[0], props[1], null, null, null, null});
-        Assert.assertEquals(props[8].getVIndice(0), 0);
-        Assert.assertEquals(props[3].getVIndice(0), 1);
-        Assert.assertEquals(props[4].getVIndice(0), 2);
-        Assert.assertEquals(props[5].getVIndice(0), 3);
-        Assert.assertEquals(props[6].getVIndice(0), 4);
-        Assert.assertEquals(props[7].getVIndice(0), 5);
-        Assert.assertEquals(props[2].getVIndice(0), 6);
-        Assert.assertEquals(props[0].getVIndice(0), 7);
-        Assert.assertEquals(props[1].getVIndice(0), 8);
-        int k = x.swapOnPassivate(props[8], 0);
-        Assert.assertEquals(k, 8);
-        props[8].setVIndices(0, k);
-        Assert.assertEquals(x.getPropagators(),
-                new Propagator[]{props[7], props[3], props[4], props[5], props[6],
-                        props[1], props[2], props[0], props[8], null, null, null, null});
-        Assert.assertEquals(props[7].getVIndice(0), 0);
-        Assert.assertEquals(props[3].getVIndice(0), 1);
-        Assert.assertEquals(props[4].getVIndice(0), 2);
-        Assert.assertEquals(props[5].getVIndice(0), 3);
-        Assert.assertEquals(props[6].getVIndice(0), 4);
-        Assert.assertEquals(props[1].getVIndice(0), 5);
-        Assert.assertEquals(props[2].getVIndice(0), 6);
-        Assert.assertEquals(props[0].getVIndice(0), 7);
-        Assert.assertEquals(props[8].getVIndice(0), 8);
+    private static class PropFake extends Propagator<IntVar> {
 
-        k = x.swapOnActivate(props[8], 0);
-        Assert.assertEquals(k, 0);
-        props[8].setVIndices(0, k);
-        Assert.assertEquals(x.getPropagators(),
-                new Propagator[]{props[8], props[3], props[4], props[5], props[6], props[7],
-                        props[2], props[0], props[1], null, null, null, null});
-        Assert.assertEquals(props[8].getVIndice(0), 0);
-        Assert.assertEquals(props[3].getVIndice(0), 1);
-        Assert.assertEquals(props[4].getVIndice(0), 2);
-        Assert.assertEquals(props[5].getVIndice(0), 3);
-        Assert.assertEquals(props[6].getVIndice(0), 4);
-        Assert.assertEquals(props[7].getVIndice(0), 5);
-        Assert.assertEquals(props[2].getVIndice(0), 6);
-        Assert.assertEquals(props[0].getVIndice(0), 7);
-        Assert.assertEquals(props[1].getVIndice(0), 8);
+        private final int idx;
+
+        public PropFake(IntVar var, int i) {
+            super(new IntVar[]{var});
+            this.idx = i;
+        }
+
+        @Override
+        public void propagate(int evtmask) throws ContradictionException {
+            // void
+        }
+
+        @Override
+        public ESat isEntailed() {
+            return ESat.UNDEFINED;
+        }
+
+        @Override
+        public String toString() {
+            return "PropFake{" +
+                    "idx=" + idx +
+                    '}';
+        }
     }
 
+    @Test(groups = "1s")
+    public void testSwapStd() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        v.swapOnPassivate(p2, 0);
+        v.swapOnPassivate(p0, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p2, p0, p1});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = "testSwapStd")
+    public void testSwapDyn1() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2, p3});
+        v.swapOnPassivate(p3, 0);
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 1);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1, p2, p0});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 4);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p3, p1, p2, p0});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn2() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn3() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        env.worldPop();
+        env.worldPush();
+        PropFake p4 = new PropFake(v, 4);
+        v.link(p4, 0);
+        env.save(() -> v.unlink(p4, 0));
+        v.swapOnPassivate(p4, 0);
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
+
+    @Test(groups = "1s", dependsOnMethods = {"testSwapStd"})
+    public void testSwapDyn4() {
+        Model model = new Model();
+        IEnvironment env = model.getEnvironment();
+        IntVar v = model.intVar("x", 1, 3);
+        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        PropFake p0 = new PropFake(v, 0);
+        PropFake p1 = new PropFake(v, 1);
+        PropFake p2 = new PropFake(v, 2);
+        v.link(p0, 0);
+        v.link(p1, 0);
+        v.link(p2, 0);
+        //
+        env.worldPush();
+        PropFake p3 = new PropFake(v, 3);
+        v.link(p3, 0);
+        env.save(() -> v.unlink(p3, 0));
+        v.swapOnPassivate(p3, 0);
+        PropFake p4 = new PropFake(v, 4);
+        v.link(p4, 0);
+        env.save(() -> v.unlink(p4, 0));
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 5);
+        Assert.assertEquals(list.splitter.get(), 1);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p1, p2, p0, p4});
+        env.worldPop();
+        Assert.assertEquals(list.first, 0);
+        Assert.assertEquals(list.last, 3);
+        Assert.assertEquals(list.splitter.get(), 0);
+        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+                new Propagator[]{p0, p1, p2});
+    }
 }

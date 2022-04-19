@@ -63,7 +63,7 @@ public class Settings {
 
     private boolean enableSAT = false;
 
-    private boolean swapOnPassivate = false;
+    private boolean swapOnPassivate = true;
 
     private boolean checkDeclaredConstraints = true;
 

@@ -81,7 +81,7 @@ public class EnvironmentTrailing extends AbstractEnvironment {
         timestamp++;
         //code optim.: replace loop by enumeration
         final int wi = currentWorld;
-        for (int i = trailSize - 1; i >= 0; i--) {
+        for (int i = 0; i < trailSize; i++) {
             trails[i].worldPop(wi);
         }
         currentWorld--;

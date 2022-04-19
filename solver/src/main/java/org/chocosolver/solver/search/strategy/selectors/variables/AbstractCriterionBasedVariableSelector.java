@@ -291,7 +291,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
     @Override
     public final void onUpdate(Variable var, IEventType evt) {
         if (evt == IntEventType.INSTANTIATE) {
-            for (Propagator<?> p : var.getPropagators()) {
+            var.streamPropagators().forEach(p -> {
                 Element elt = failCount.get(p);
                 if (elt != null) {
                     if (p.getVar(elt.ws[0]) == var) {
@@ -300,7 +300,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
                         updateFutvars(p, elt, 1);
                     }
                 }
-            }
+            });
         }
     }
 

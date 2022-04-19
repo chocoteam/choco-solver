@@ -41,9 +41,8 @@ public class PropLexInt extends Propagator<IntVar> implements UpdatablePropagato
     private final int[] y;
     private final boolean strict;
 
-
-    public PropLexInt(IntVar[] X, int[] Y, boolean strict) {
-        super(ArrayUtils.append(X), PropagatorPriority.LINEAR, true);
+    public PropLexInt(IntVar[] X, int[] Y, boolean strict, boolean isObjectiveFunction) {
+        super(ArrayUtils.append(X), PropagatorPriority.LINEAR, true, !isObjectiveFunction);
         this.x = Arrays.copyOfRange(vars, 0, X.length);
         this.y = Y.clone();
         this.strict = strict;
