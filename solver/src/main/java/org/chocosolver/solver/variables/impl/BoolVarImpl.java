@@ -259,19 +259,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         }
         return hasChanged;
     }
-
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(kTRUE, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(kFALSE, cause);
-    }
-
+    
     @Override
     public boolean isInstantiated() {
         return mValue < kUNDEF;

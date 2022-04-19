@@ -135,6 +135,7 @@ public class Measures implements IMeasures, Cloneable {
         solutionCount = measures.getSolutionCount();
         timeCount = measures.getTimeCountInNanoSeconds();
         readingTimeCount = measures.getReadingTimeCountInNanoSeconds();
+        timeToBestSolution = measures.getTimeToBestSolutionInNanoSeconds();
         nodeCount = measures.getNodeCount();
         backtrackCount = measures.getBackTrackCount();
         restartCount = measures.getRestartCount();

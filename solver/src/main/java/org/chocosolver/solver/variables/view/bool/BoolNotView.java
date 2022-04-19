@@ -49,16 +49,6 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        return instantiateTo(1, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        return instantiateTo(0, cause);
-    }
-
-    @Override
     public boolean removeValue(int value, ICause cause) throws ContradictionException {
         return contains(value) && instantiateTo(1 - value, cause);
     }

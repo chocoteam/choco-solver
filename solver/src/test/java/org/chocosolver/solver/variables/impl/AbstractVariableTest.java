@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -355,6 +356,71 @@ public class AbstractVariableTest {
         new Constraint("tester", new ProTester(x, i -> { /* nothing */}, 3, false)).post();
         model.getSolver().solve();
         Assert.assertEquals(score.get(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testSwap() {
+        Model m = new Model(Settings.init().setSwapOnPassivate(true));
+        IntVar x = m.intVar("X", 0, 3);
+        Propagator[] props = new Propagator[9];
+        for (int i = 0; i < 3; i++) {
+            Constraint c = m.arithm(x, "=", i);
+            c.post();
+            props[i] = c.getPropagator(0);
+        }
+        for (int i = 0; i < 3; i++) {
+            Constraint c = m.arithm(x, "<", i + 4);
+            c.post();
+            props[i + 3] = c.getPropagator(0);
+        }
+        for (int i = 0; i < 3; i++) {
+            Constraint c = m.arithm(x, ">", i + 5);
+            c.post();
+            props[i + 6] = c.getPropagator(0);
+        }
+        Assert.assertEquals(x.getPropagators(),
+                new Propagator[]{props[8], props[3], props[4], props[5], props[6], props[7],
+                        props[2], props[0], props[1], null, null, null, null});
+        Assert.assertEquals(props[8].getVIndice(0), 0);
+        Assert.assertEquals(props[3].getVIndice(0), 1);
+        Assert.assertEquals(props[4].getVIndice(0), 2);
+        Assert.assertEquals(props[5].getVIndice(0), 3);
+        Assert.assertEquals(props[6].getVIndice(0), 4);
+        Assert.assertEquals(props[7].getVIndice(0), 5);
+        Assert.assertEquals(props[2].getVIndice(0), 6);
+        Assert.assertEquals(props[0].getVIndice(0), 7);
+        Assert.assertEquals(props[1].getVIndice(0), 8);
+        int k = x.swapOnPassivate(props[8], 0);
+        Assert.assertEquals(k, 8);
+        props[8].setVIndices(0, k);
+        Assert.assertEquals(x.getPropagators(),
+                new Propagator[]{props[7], props[3], props[4], props[5], props[6],
+                        props[1], props[2], props[0], props[8], null, null, null, null});
+        Assert.assertEquals(props[7].getVIndice(0), 0);
+        Assert.assertEquals(props[3].getVIndice(0), 1);
+        Assert.assertEquals(props[4].getVIndice(0), 2);
+        Assert.assertEquals(props[5].getVIndice(0), 3);
+        Assert.assertEquals(props[6].getVIndice(0), 4);
+        Assert.assertEquals(props[1].getVIndice(0), 5);
+        Assert.assertEquals(props[2].getVIndice(0), 6);
+        Assert.assertEquals(props[0].getVIndice(0), 7);
+        Assert.assertEquals(props[8].getVIndice(0), 8);
+
+        k = x.swapOnActivate(props[8], 0);
+        Assert.assertEquals(k, 0);
+        props[8].setVIndices(0, k);
+        Assert.assertEquals(x.getPropagators(),
+                new Propagator[]{props[8], props[3], props[4], props[5], props[6], props[7],
+                        props[2], props[0], props[1], null, null, null, null});
+        Assert.assertEquals(props[8].getVIndice(0), 0);
+        Assert.assertEquals(props[3].getVIndice(0), 1);
+        Assert.assertEquals(props[4].getVIndice(0), 2);
+        Assert.assertEquals(props[5].getVIndice(0), 3);
+        Assert.assertEquals(props[6].getVIndice(0), 4);
+        Assert.assertEquals(props[7].getVIndice(0), 5);
+        Assert.assertEquals(props[2].getVIndice(0), 6);
+        Assert.assertEquals(props[0].getVIndice(0), 7);
+        Assert.assertEquals(props[1].getVIndice(0), 8);
     }
 
 }

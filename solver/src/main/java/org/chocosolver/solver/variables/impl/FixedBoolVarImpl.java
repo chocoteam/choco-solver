@@ -9,9 +9,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
@@ -51,16 +49,6 @@ public class FixedBoolVarImpl extends FixedIntVarImpl implements BoolVar {
     @Override
     public ESat getBooleanValue() {
         return ESat.eval(constante == 1);
-    }
-
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        return instantiateTo(1, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        return instantiateTo(0, cause);
     }
 
     @Override

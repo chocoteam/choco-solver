@@ -33,9 +33,13 @@ public interface BoolVar extends IntVar, ILogical, ReExpression {
 
     ESat getBooleanValue();
 
-    boolean setToTrue(ICause cause) throws ContradictionException;
+    default boolean setToTrue(ICause cause) throws ContradictionException {
+        return instantiateTo(kTRUE, cause);
+    }
 
-    boolean setToFalse(ICause cause) throws ContradictionException;
+    default boolean setToFalse(ICause cause) throws ContradictionException {
+        return instantiateTo(kFALSE, cause);
+    }
 
     BoolVar not();
 

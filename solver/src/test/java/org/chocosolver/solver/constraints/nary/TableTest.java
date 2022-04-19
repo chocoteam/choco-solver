@@ -536,7 +536,7 @@ public class TableTest {
         model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
-        solver.showDecisions();
+        //solver.showDecisions();
         solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);
@@ -610,6 +610,15 @@ public class TableTest {
         Constraint table = model.table(new IntVar[]{foo, foo1, bar}, allowed, a);
         table.reifyWith(b);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPow(String a) {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 2, 60);
+        IntVar foo1 = model.intVar("foo1", 0, 999_999);
+        model.table(new IntVar[]{foo1, foo}, TuplesFactory.power(foo1, foo, 7), a).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
