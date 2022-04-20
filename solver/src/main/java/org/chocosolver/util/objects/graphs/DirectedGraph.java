@@ -616,17 +616,6 @@ public class DirectedGraph implements IGraph {
         return true;
     }
 
-    @Override
-    public int getDomainSize() {
-        int size = 0;
-        for (int n : getNodes()) {
-            size += 1; // +1 to count the node
-            size += getSuccessorsOf(n).size();
-            size += getPredecessorsOf(n).size();
-        }
-        return size;
-    }
-
     /**
      * add directed edge (from,to) to the graph
      *

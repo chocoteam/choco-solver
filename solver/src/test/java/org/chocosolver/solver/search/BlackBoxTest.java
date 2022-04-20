@@ -16,6 +16,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.variables.ImpactBased;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -92,7 +93,32 @@ public class BlackBoxTest {
         solver.setSearch(strat.apply(xs));
         solver.findAllSolutions();
         solver.printShortStatistics();
-        Assert.assertTrue(solver.getSolutionCount()>= 2);
-		Assert.assertTrue(solver.getSolutionCount()<= 14); // for ABS only
+        Assert.assertTrue(solver.getSolutionCount() >= 2);
+        Assert.assertTrue(solver.getSolutionCount() <= 14); // for ABS only
+    }
+
+    @DataProvider
+    public Object[][] setstrategies() {
+        return new Object[][]{
+                {(Function<SetVar[], AbstractStrategy<SetVar>>) Search::domOverWDegSearch},
+                {(Function<SetVar[], AbstractStrategy<SetVar>>) Search::conflictHistorySearch},
+                {(Function<SetVar[], AbstractStrategy<SetVar>>) Search::domOverWDegRefSearch},
+                {(Function<SetVar[], AbstractStrategy<SetVar>>) Search::failureRateBasedSearch},
+                {(Function<SetVar[], AbstractStrategy<SetVar>>) Search::failureLengthBasedSearch},
+        };
+    }
+
+
+    @Test(groups = "1s", dataProvider = "setstrategies")
+    public void testSet(Function<SetVar[], AbstractStrategy<SetVar>> strat) {
+        Model model = ProblemMaker.makeSteiner(7);
+        SetVar[] vars = model.retrieveSetVars();
+        Solver solver = model.getSolver();
+        solver.setSearch(strat.apply(vars));
+        solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
+        solver.findSolution();
+        solver.printShortStatistics();
+        Assert.assertEquals(solver.getSolutionCount(), 1);
+
     }
 }

@@ -22,7 +22,6 @@ import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -290,7 +289,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
 
     @Override
     public final void onUpdate(Variable var, IEventType evt) {
-        if (evt == IntEventType.INSTANTIATE) {
+        if (var.isInstantiated()) {
             var.streamPropagators().forEach(p -> {
                 Element elt = failCount.get(p);
                 if (elt != null) {
