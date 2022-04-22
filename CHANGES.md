@@ -15,7 +15,7 @@ NEXT MILESTONE
 - revamp `pow` constraint
 - increase interval for MiniZinc unbounded intvar
 - Add threshold for Element with array of variables signature
-- 
+- Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)  
  
 ### Deprecated API (to be removed in next release):
 
@@ -24,7 +24,8 @@ See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 - [Mathieu Vavrille](https://github.com/MathieuVavrille) (@MathieuVavrille)
-- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)    
+- [Nicolas Pierre](https://github.com/PoltyPoltou) (@PoltyPoltou)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
     
 4.10.8 - 07 Jan 2022
 -------------------
