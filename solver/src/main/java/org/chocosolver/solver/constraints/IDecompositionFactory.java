@@ -15,11 +15,14 @@ import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
+import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -350,6 +353,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
 
     /**
      * Matrix multiplication A x B = C.
+     *
      * @param A a m x n matrix
      * @param B a n x p matrix
      * @param C a m x p matrix
@@ -363,12 +367,11 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int n = B.length;
         int m = C.length;
         int p = C[0].length;
-        Model model = C[0][0].getModel();
-        for(int i = 0; i < m; i++){
-            for(int j = 0; j < p; j++){
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < p; j++) {
                 int finalI = i;
                 int finalJ = j;
-                model.sum(IntStream.range(0, n)
+                ref().sum(IntStream.range(0, n)
                                 .mapToObj(k -> A[finalI][k].mul(B[k][finalJ]).intVar())
                                 .toArray(IntVar[]::new),
                         "=", C[i][j]).post();
@@ -385,18 +388,61 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int n = B.length;
         int m = C.length;
         int p = C[0].length;
-        Model model = C[0][0].getModel();
         for (int i = 0; i < m; i++) {
             for (int j = 0; j < p; j++) {
                 int finalI = i;
                 int finalJ = j;
-                model.addClausesBoolOrArrayEqVar(
+                ref().addClausesBoolOrArrayEqVar(
                         IntStream.range(0, n)
                                 .mapToObj(k -> A[finalI][k].and(B[k][finalJ]).boolVar())
                                 .toArray(BoolVar[]::new)
                         , C[i][j]);
             }
         }
+    }
+
+    /**
+     * A decomposition for the network flow constraint.
+     * <p>
+     * The network is defined by a set of arc, each of them is made of
+     * a starting node,
+     * an ending node,
+     * a supply (if positive) -- or demand (if negative),
+     * a unit cost and
+     * a flow variable that stores the quantity that goes on the arc.
+     * </p>
+     *
+     * <p>
+     * Since each arc comes with a cost and a flow that goes through it, a global cost of the total flow is defined.
+     * </p>
+     *
+     * @param starts    list of starting nodes, one per arc
+     * @param ends      ending nodes, one per arc
+     * @param supplies  supplies, one per arc
+     * @param unitCosts unit cost, one per arc
+     * @param flows     amount flow, one per arc
+     * @param cost      cost of the flow
+     * @param offset    index of the smallest node
+     */
+    default void networkFlowDec(int[] starts, int[] ends, int[] supplies, int[] unitCosts, IntVar[] flows, IntVar cost, int offset) {
+        // cost function
+        ref().scalar(flows, unitCosts, "=", cost).post();
+        for (int i = 0; i < supplies.length; i++) {
+            int io = i + offset;
+            List<IntVar> src = new ArrayList<>();
+            List<IntVar> snk = new ArrayList<>();
+            for (int j = 0; j < starts.length; j++) {
+                if (starts[j] == io) {
+                    src.add(flows[j]);
+                }
+                if (ends[j] == io) {
+                    snk.add(flows[j]);
+                }
+            }
+            snk.add(ref().intVar(supplies[i]));
+            ref().sum(src.toArray(new IntVar[0]), "=", snk.toArray(new IntVar[0])).post();
+        }
+        new Constraint("", new PropMinCostMaxFlow(starts, ends, supplies, unitCosts, flows, cost, offset)).post();
     }
 
 }
