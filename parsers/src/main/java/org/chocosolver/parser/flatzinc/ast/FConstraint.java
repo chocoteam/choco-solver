@@ -1357,6 +1357,41 @@ public enum FConstraint {
 
         }
     },
+
+    choco_fzn_network_flow {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] _arc = exps.get(0).toIntArray();
+            int A = _arc.length / 2;
+            int[] starts = new int[_arc.length / 2];
+            int[] ends = new int[_arc.length / 2];
+            for (int j = 0; j < A; j++) {
+                starts[j] = _arc[2 * j];
+                ends[j] = _arc[2 * j + 1];
+            }
+            int[] balance = exps.get(1).toIntArray();
+            IntVar[] flow = exps.get(3).toIntVarArray(model);
+            model.networkFlowDec(starts, ends, balance, flow,  1);
+        }
+    },
+    choco_fzn_network_flow_cost {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] _arc = exps.get(0).toIntArray();
+            int A = _arc.length / 2;
+            int[] starts = new int[_arc.length / 2];
+            int[] ends = new int[_arc.length / 2];
+            for (int j = 0; j < A; j++) {
+                starts[j] = _arc[2 * j];
+                ends[j] = _arc[2 * j + 1];
+            }
+            int[] balance = exps.get(1).toIntArray();
+            int[] weight = exps.get(2).toIntArray();
+            IntVar[] flow = exps.get(3).toIntVarArray(model);
+            IntVar cost = exps.get(4).intVarValue(model);
+            model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
+        }
+    },
     nvalueChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {

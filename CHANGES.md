@@ -12,8 +12,9 @@ NEXT MILESTONE
 - Extend some black-box strategies to `SetVar` and `GraphVar`
 - Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
 - Add `increasing` and `decreasing` constraints
-- revamp `pow` constraint
-- increase interval for MiniZinc unbounded intvar
+- Add `networkFlowDec` constraint, which is composed of scalar products and a MinCostMaxFlow propagator
+- Revamp `pow` constraint
+- Increase interval for MiniZinc unbounded intvar
 - Add threshold for Element with array of variables signature
 - Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)  
  
