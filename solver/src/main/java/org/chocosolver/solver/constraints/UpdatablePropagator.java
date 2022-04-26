@@ -13,6 +13,8 @@ package org.chocosolver.solver.constraints;
  * A specific interface propagator to enable, under certain conditions,
  * to update some of their internal structure.
  * <br/>
+ * @implSpec Such propagator should not be swapped on entailment when declared as an objective function
+ * otherwise it becomes inconsistent.
  *
  * @author Charles Prud'homme
  * @since 04/12/2020

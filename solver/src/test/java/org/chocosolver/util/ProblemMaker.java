@@ -14,6 +14,8 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.tools.ArrayUtils;
 
 /**
  * A factory dedicated to problems creation.
@@ -26,11 +28,12 @@ public class ProblemMaker {
      * Creates a n-Queen problem with only binary constraints.
      * n queens must be placed on a nxn chessboard.
      * The variables can be accessed though the hook name "vars".
+     *
      * @param n number of queens (or size of the chessboard)
      * @return a solve-ready solver.
      */
     @SuppressWarnings("Duplicates")
-    public static Model makeNQueenWithBinaryConstraints(int n){
+    public static Model makeNQueenWithBinaryConstraints(int n) {
         Model model = new Model();
         IntVar[] vars = new IntVar[n];
         for (int i = 0; i < vars.length; i++) {
@@ -52,6 +55,7 @@ public class ProblemMaker {
      * Creates a n-Queen problem with one allDifferent constraint and binary constraints.
      * n queens must be placed on a nxn chessboard.
      * The variables can be accessed though the hook name "vars".
+     *
      * @param n number of queens (or size of the chessboard)
      * @return a solve-ready solver.
      */
@@ -78,6 +82,7 @@ public class ProblemMaker {
      * Creates a Costas array problem of size n.
      * Two AllDifferent constraints are used, on achieving AC, the other BC.
      * The variables can be accessed though the hook name "vars" and "vectors".
+     *
      * @param n size of the array.
      * @return a solve-ready solver
      */
@@ -112,6 +117,7 @@ public class ProblemMaker {
     /**
      * Creates a Golomb ruler problem of size m.
      * The variables can be accessed though the hook name "ticks" and "diffs".
+     *
      * @param m size of the rule
      * @return a solve-ready solver
      */
@@ -143,11 +149,11 @@ public class ProblemMaker {
             model.arithm(diffs[0], "<", diffs[diffs.length - 1]).post();
         }
         model.addHook("objective", ticks[m - 1]);
-        model.setObjective(Model.MINIMIZE,ticks[m - 1]);
+        model.setObjective(Model.MINIMIZE, ticks[m - 1]);
         return model;
     }
 
-    public static Model makeEq5(){
+    public static Model makeEq5() {
         Model model = new Model("Eq5");
         IntVar[] vars = new IntVar[15];
         vars[0] = model.intVar("A90397", -20, 20, false);
@@ -177,7 +183,7 @@ public class ProblemMaker {
         return model;
     }
 
-    public static Model makeContrived(){
+    public static Model makeContrived() {
         Model model = new Model("Contrived");
         int l = 100;
         int d = l + 1;
@@ -192,6 +198,34 @@ public class ProblemMaker {
         model.arithm(v[2], "=", w[2]).post();
         model.arithm(v[3], "=", w[3]).post();
 
+        return model;
+    }
+
+    public static Model makeSteiner(int m) {
+        Model model = new Model("Steiner");
+        //int m = 7;
+        int n = m * (m - 1) / 6;
+
+        SetVar[] vars = model.setVarArray("set", n, new int[]{}, ArrayUtils.array(1, n));
+        SetVar[] intersect = new SetVar[n * n];
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                intersect[i * n + j] = model.setVar("interSet " + i + " " + j, new int[]{}, ArrayUtils.array(1, n));
+            }
+        }
+
+        // Post constraints
+        for (int i = 0; i < n; i++){
+            vars[i].getCard().eq(3).post();
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                model.intersection(new SetVar[]{vars[i], vars[j]}, intersect[i * n + j]).post();
+                intersect[i * n + j].getCard().le(1).post();
+            }
+        }
+        model.addHook("set", vars);
+        model.addHook("inter", intersect);
         return model;
     }
 }

@@ -114,7 +114,7 @@ public class Search {
      * @param search a search heuristic building branching decisions
      * @return a greedy form of search
      */
-    public static AbstractStrategy greedySearch(AbstractStrategy search) {
+    public static AbstractStrategy<?> greedySearch(AbstractStrategy<?> search) {
         return new GreedyBranching(search);
     }
 
@@ -155,7 +155,76 @@ public class Search {
      * @return a strategy to instantiate sets
      */
     public static SetStrategy setVarSearch(SetVar... sets) {
-        return setVarSearch(new GeneralizedMinDomVarSelector(), new SetDomainMin(), true, sets);
+        return setVarSearch(new GeneralizedMinDomVarSelector<>(), new SetDomainMin(), true, sets);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
+     * it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
+     * Boussemart et al. ECAI 2004.
+     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
+     */
+    public static AbstractStrategy<SetVar> domOverWDegSearch(SetVar... vars) {
+        return new SetStrategy(vars, new DomOverWDeg<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
+     * it to its lower bound, where the weight incrementer is "ca.cd".
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
+     */
+    public static AbstractStrategy<SetVar> domOverWDegRefSearch(SetVar... vars) {
+        return new SetStrategy(vars, new DomOverWDegRef<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Conflict History</code>
+     * and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
+     * Habet et al. SAC 2019.
+     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
+     */
+    public static AbstractStrategy<SetVar> conflictHistorySearch(SetVar... vars) {
+        return new SetStrategy(vars, new ConflictHistorySearch<>(vars, 0), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure rate based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<SetVar> failureRateBasedSearch(SetVar... vars) {
+        return new SetStrategy(vars, new FailureBased<>(vars, 0, 2), new SetDomainMin(), true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Failure length based</code>
+     * variable ordering and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Failure Based Variable Ordering Heuristics for Solving CSPs."
+     * H. Li, M. Yin, and Z. Li, CP 2021.
+     * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
+     */
+    public static AbstractStrategy<SetVar> failureLengthBasedSearch(SetVar... vars) {
+        return new SetStrategy(vars, new FailureBased<>(vars, 0, 4), new SetDomainMin(), true);
     }
 
     // ************************************************************************************
@@ -236,6 +305,59 @@ public class Search {
                 true,
                 graphs
         );
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
+     * it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
+     * Boussemart et al. ECAI 2004.
+     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
+     */
+    public static AbstractStrategy<IntVar> domOverWDegSearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new DomOverWDeg<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
+     * it to its lower bound, where the weight incrementer is "ca.cd".
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
+     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
+     */
+    public static AbstractStrategy<IntVar> domOverWDegRefSearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new DomOverWDegRef<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>Conflict History</code>
+     * and assigns it to its lower bound.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
+     * Habet et al. SAC 2019.
+     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
+     */
+    public static AbstractStrategy<IntVar> conflictHistorySearch(GraphVar... vars) {
+        return new GraphStrategy(vars, new ConflictHistorySearch<>(vars, 0),
+                new GraphNodeThenEdges(),
+                new GraphLexNode(),
+                new GraphLexEdge(),
+                true);
     }
 
     // ************************************************************************************
@@ -378,7 +500,7 @@ public class Search {
             model.getSolver().attach(model.getSolver().defaultSolution());
             valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
         }
-        return new IntStrategy(vars, new DomOverWDeg(vars, 0), valueSelector);
+        return new IntStrategy(vars, new DomOverWDeg<>(vars, 0), valueSelector);
     }
 
     /**
@@ -392,7 +514,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return new IntStrategy(vars, new DomOverWDeg(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDeg<>(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -405,7 +527,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
-        return new IntStrategy(vars, new DomOverWDegRef(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new DomOverWDegRef<>(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -435,7 +557,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
-        return new IntStrategy(vars, new ConflictHistorySearch(vars, 0), new IntDomainMin());
+        return new IntStrategy(vars, new ConflictHistorySearch<>(vars, 0), new IntDomainMin());
     }
 
     /**
@@ -449,7 +571,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
      */
     public static AbstractStrategy<IntVar> failureRateBasedSearch(IntVar... vars) {
-        return new FailureBased(vars, 0, 2, new IntDomainMin());
+        return new IntStrategy(vars, new FailureBased<>(vars, 0, 2), new IntDomainMin());
     }
 
     /**
@@ -463,7 +585,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/cp/LiYL21">https://dblp.org/rec/conf/cp/LiYL21</a>
      */
     public static AbstractStrategy<IntVar> failureLengthBasedSearch(IntVar... vars) {
-        return new FailureBased(vars, 0, 4, new IntDomainMin());
+        return new IntStrategy(vars, new FailureBased<>(vars, 0, 4), new IntDomainMin());
     }
 
     /**
@@ -561,7 +683,7 @@ public class Search {
         // 1. retrieve variables, keeping the declaration order, and put them in four groups:
         List<IntVar> livars = new ArrayList<>(); // integer and boolean variables
         List<SetVar> lsvars = new ArrayList<>(); // set variables
-        List<GraphVar> lgvars = new ArrayList<>(); // graph variables
+        List<GraphVar<?>> lgvars = new ArrayList<>(); // graph variables
         List<RealVar> lrvars = new ArrayList<>();// real variables.
         Variable[] variables = model.getVars();
         Variable objective = null;
@@ -578,7 +700,7 @@ public class Search {
                         lsvars.add((SetVar) var);
                         break;
                     case Variable.GRAPH:
-                        lgvars.add((GraphVar) var);
+                        lgvars.add((GraphVar<?>) var);
                         break;
                     case Variable.REAL:
                         lrvars.add((RealVar) var);
@@ -657,7 +779,8 @@ public class Search {
      * @param model declaring model
      * @return a strategy that lets Ibex terminates the solving process.
      */
-    public static AbstractStrategy ibexSolving(Model model) {
+    public static AbstractStrategy<Variable> ibexSolving(Model model) {
+        //noinspection unchecked
         return new AbstractStrategy(model.getVars()) {
             final IbexDecision dec = new IbexDecision(model);
 
@@ -725,7 +848,7 @@ public class Search {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new ConflictHistorySearch(vars, solver.getModel().getSeed(), flushThs),
+                        new ConflictHistorySearch<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -752,7 +875,7 @@ public class Search {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDeg(vars, solver.getModel().getSeed(), flushThs),
+                        new DomOverWDeg<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -765,7 +888,7 @@ public class Search {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
                 return new IntStrategy(vars,
-                        new DomOverWDegRef(vars, solver.getModel().getSeed(), flushThs),
+                        new DomOverWDegRef<>(vars, solver.getModel().getSeed(), flushThs),
                         valueSelector.make(solver, last));
             }
         },
@@ -785,10 +908,9 @@ public class Search {
         FRBA {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
-                return new FailureBased(vars,
-                        solver.getModel().getSeed(),
-                        2,
-                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last));
+                return new IntStrategy(vars,
+                        new FailureBased<>(vars, solver.getModel().getSeed(), 2),
+                        valueSelector.make(solver, last));
             }
         },
         /**
@@ -797,10 +919,9 @@ public class Search {
         FLBA {
             @Override
             public AbstractStrategy<IntVar> make(Solver solver, IntVar[] vars, Search.ValH valueSelector, int flushThs, boolean last) {
-                return new FailureBased(vars,
-                        solver.getModel().getSeed(),
-                        4,
-                        valueSelector == Search.ValH.DEFAULT ? null : valueSelector.make(solver, last));
+                return new IntStrategy(vars,
+                        new FailureBased<>(vars, solver.getModel().getSeed(), 4),
+                        valueSelector.make(solver, last));
             }
         },
         /**
@@ -1087,7 +1208,6 @@ public class Search {
                 if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
                     return selector;
                 }
-                final IntVar[] vars = model.retrieveIntVars(true);
                 model.getSolver().attach(model.getSolver().defaultSolution());
                 return new IntDomainLast(model.getSolver().defaultSolution(), selector, null);
             } else {

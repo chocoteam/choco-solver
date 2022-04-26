@@ -7,18 +7,21 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-/**
- * @author Jean-Guillaume Fages
- * @since 03/04/14
- * Created by IntelliJ IDEA.
- */
 package org.chocosolver.solver.constraints.nary.nvalue.amnv.differences;
 
-import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.binary.PropNotEqualX_Y;
+import org.chocosolver.solver.constraints.nary.alldifferent.PropAllDiffInst;
+import org.chocosolver.solver.constraints.set.PropAllDiff;
 import org.chocosolver.solver.variables.Variable;
+
+import java.util.Arrays;
 
 /**
  * automatic detection of binary disequalities and allDifferent constraints
+ *
+ * @author Jean-Guillaume Fages
+ * @since 03/04/14
+ * Created by IntelliJ IDEA.
  */
 public class AutoDiffDetection implements D {
 
@@ -26,7 +29,9 @@ public class AutoDiffDetection implements D {
     // VARIABLES
     //***********************************************************************************
 
-    /** whether or not disequality constraints may be added during search **/
+    /**
+     * whether or not disequality constraints may be added during search
+     **/
     public static boolean dynamicAdditions = false;
 
     private final Variable[] scope;
@@ -48,14 +53,15 @@ public class AutoDiffDetection implements D {
         // automatic detection of binary disequalities and allDifferent constraints
         if (dynamicAdditions || scope[i1].getEnvironment().getWorldIndex() <= 1) {
             int nbp = scope[i1].getNbProps();
-            for (int i = 0; i < nbp; i++) {
-                Propagator p = scope[i1].getPropagator(i);
-                if (p.isActive())
-                    if (p.getClass().getName().contains("PropNotEqualX_Y") || p.getClass().getName().contains("PropAllDiff"))
-                        for (Variable v : p.getVars())
-                            if (v == scope[i2])
-                                return true;
+            if (scope[i2].getNbProps() < nbp) {
+                int t = i1;
+                i1 = i2;
+                i2 = t;
             }
+            int finalI = i2;
+            return scope[i1].streamPropagators()
+                    .filter(p -> (p instanceof PropNotEqualX_Y || p instanceof PropAllDiffInst || p instanceof PropAllDiff) && p.isActive())
+                    .anyMatch(p -> Arrays.stream(p.getVars()).anyMatch(v -> v == scope[finalI]));
         }
         return false;
     }

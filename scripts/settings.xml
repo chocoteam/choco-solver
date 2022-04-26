@@ -9,7 +9,7 @@
     </servers>
     <profiles>
         <profile>
-            <id>release</id>
+            <id>ossrhDeploy</id>
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>

@@ -12,6 +12,7 @@ package org.chocosolver.solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.limits.TimeCounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.*;
@@ -24,6 +25,7 @@ import org.testng.annotations.Test;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -596,7 +598,7 @@ public class ModelTest {
             mode.getSolver().hardReset();
         }
     }
-    
+
     @Test(groups = "1s", timeOut = 60000)
     public void testHR() {
         Model m = new Model();
@@ -708,6 +710,34 @@ public class ModelTest {
         IntVar[] vars = model.intVarArray("X", 3, 0, 2);
         model.allDifferent(vars).post();
         model.getSolver().findAllSolutions();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSampling1() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(9);
+        Stream<Solution> sol = m.getSolver().tableSampling(8, 3, 1d / 8, new Random(97)
+                , new TimeCounter(m, "1s"));
+        Assert.assertNotNull(sol);
+        sol.limit(10).forEach(s -> System.out.printf("%s%n", s));
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSampling2() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(9);
+        Stream<Solution> sol = m.getSolver().tableSampling(8, 2, 1 / 16d, new Random(97)
+                , new TimeCounter(m, "1s"));
+        Assert.assertNotNull(sol);
+        sol.limit(10).forEach(s -> System.out.printf("%s%n", s));
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testSampling3() {
+        Model m = ProblemMaker.makeNQueenWithOneAlldifferent(9);
+        Stream<Solution> sol = m.getSolver().tableSampling(8, 4, 1d / 32d, new Random(97)
+                , new TimeCounter(m, "1s"));
+        Assert.assertNotNull(sol);
+        sol.limit(10).forEach(s -> System.out.printf("%s%n", s));
     }
 
 }

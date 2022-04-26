@@ -9,16 +9,24 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
+
+import java.util.Arrays;
+import java.util.Spliterator;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Class used to factorise code The subclass must implement Variable interface <br/>
@@ -80,23 +88,13 @@ public abstract class AbstractVariable implements Variable {
     protected final String name;
 
     /**
-     * List of propagators of this variable.
+     * List of propagators, by event type
      */
-    protected Propagator<?>[] propagators;
-
-    /**
-     * Store the index of this variable in each of its propagators.
-     */
-    int[] pindices;
-
-    /**
-     * Dependency indices, for efficient scheduling purpose.
-     */
-    private final int[] dindices;
+    final BipartiteList[] propagators;
     /**
      * Nb dependencies
      */
-    private final int dsize;
+    private int nbPropagators;
 
     /**
      * List of views based on this variable.
@@ -116,6 +114,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of monitors observing this variable.
      */
+    @SuppressWarnings("rawtypes")
     protected IVariableMonitor[] monitors;
 
     /**
@@ -165,13 +164,15 @@ public abstract class AbstractVariable implements Variable {
         this.views = new IView[2];
         this.idxInViews = new int[2];
         this.monitors = new IVariableMonitor[2];
-        this.propagators = new Propagator[8];
-        this.pindices = new int[8];
+        this.scheduler = createScheduler();
+        int dsize = this.scheduler.select(0);
+        this.propagators = new BipartiteList[dsize + 1];
+        for (int i = 0; i < dsize + 1; i++) {
+            this.propagators[i] = new BipartiteList(model.getEnvironment());
+        }
+        this.nbPropagators = 0;
         this.ID = this.model.nextId();
         this.model.associates(this);
-        this.scheduler = createScheduler();
-        this.dsize = this.scheduler.select(0) + 1;
-        this.dindices = new int[dsize + 1];
         this.instWI = 0; // set to 0 to capture constant automatically
         this.scheduled = false;
     }
@@ -189,6 +190,22 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
+    public void schedulePropagators(PropagationEngine engine) {
+        if (mask > 0) {
+            EvtScheduler<?> si = this.getEvtScheduler();
+            si.init(mask);
+            while (si.hasNext()) {
+                int i = si.next();
+                int j = si.next();
+                for (; i < j; i++) {
+                    propagators[i].schedule(cause, engine, mask);
+                }
+            }
+        }
+        this.clearEvents();
+    }
+
+    @Override
     public void unschedule() {
         this.scheduled = false;
     }
@@ -199,147 +216,110 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    public final int link(Propagator<?> propagator, int idxInProp) {
-        // 1. ensure capacity
-        if (dindices[dsize] == propagators.length) {
-            Propagator<?>[] tmp = propagators;
-            propagators = new Propagator[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, propagators, 0, dindices[dsize]);
-
-            int[] itmp = pindices;
-            pindices = new int[itmp.length * 3 / 2 + 1];
-            System.arraycopy(itmp, 0, pindices, 0, dindices[dsize]);
-            if (pindices.length != propagators.length) {
-                throw new UnsupportedOperationException("error: pindices.length != propagators.length in " + this);
-            }
-
-        }
-        // 2. put it in the right place
-        int pc = propagator.getPropagationConditions(idxInProp);
-        return subscribe(propagator, idxInProp, scheduler.select(pc));
-    }
-
-    /**
-     * Move a propagator from position 'from' to position 'to' in {@link #propagators}. The element
-     * at position 'from' will then be 'null'.
-     *
-     * @param from a position in {@link #propagators}
-     * @param to   a position in {@link #propagators}
-     */
-    private void move(int from, int to) {
-        if (propagators[from] != null) {
-            propagators[to] = propagators[from];
-            pindices[to] = pindices[from];
-            propagators[to].setVIndices(pindices[from], to);
-            propagators[from] = null;
-        }
-    }
-
-    int subscribe(Propagator<?> p, int ip, int i) {
-        int j = dsize - 1;
-        for (; j >= i; j--) {
-            move(dindices[j], dindices[j + 1]);
-            dindices[j + 1]++;
-        }
-        propagators[dindices[i]] = p;
-        pindices[dindices[i]] = ip;
-        return dindices[i];
-    }
-
-    @Override
-    public int swapOnPassivate(Propagator<?> propagator, int idxInProp) {
-        int pp = propagator.getVIndice(idxInProp);
-        assert pp != -1;
+    public final void link(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
-        move(dindices[i + 1] - 1, pp);
-        for (int j = i + 1; j < dsize; j++) {
-            move(dindices[j + 1] - 1, dindices[j] - 1);
-            dindices[j]--;
-        }
-        propagators[dindices[dsize] - 1] = propagator;
-        pindices[dindices[dsize] - 1] = idxInProp;
-        return dindices[dsize] - 1;
-    }
-
-    @Override
-    public int swapOnActivate(Propagator<?> propagator, int idxInProp) {
-        int pp = propagator.getVIndice(idxInProp);
-        if (pp > -1) {
-            assert propagators[pp] == propagator;
-            assert dindices[dsize - 1] <= pp && pp <= dindices[dsize];
-            int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
-            move(--dindices[dsize], pp);
-            for (int j = dsize - 1; j >= i; j--) {
-                move(dindices[j], dindices[j + 1]);
-                dindices[j + 1]++;
-            }
-            propagators[dindices[i]] = propagator;
-            pindices[dindices[i]] = idxInProp;
-            return dindices[i];
-        } else {
-            assert propagator.getConstraint().getStatus() == Constraint.Status.FREE;
-            return -1;
-        }
+        nbPropagators++;
+        propagator.setVIndices(idxInProp, propagators[i].add(propagator, idxInProp));
     }
 
     @Override
     public final void unlink(Propagator<?> propagator, int idxInProp) {
-        int i = propagator.getVIndice(idxInProp); // todo deal with -1
-        if (i > -1) {
-            assert propagators[i] == propagator : "Try to unlink :\n" + propagator + "\nfrom " + this.getName() + " but found:\n" + propagators[i];
-            // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-            int mask = 0;
-            if (i < dindices[dsize - 1]) { // the position above this limit indicates a propagator that was swapped to passivate
-                mask = propagator.getPropagationConditions(pindices[i]);
-            }
-            cancel(i, scheduler.select(mask));
-            propagator.setVIndices(idxInProp, -1);
-        }
+        int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
+        nbPropagators--;
+        propagators[i].remove(propagator, idxInProp, this);
     }
 
-    void cancel(int pp, int i) {
-        // start moving the other ones
-        move(dindices[i + 1] - 1, pp);
-        for (int j = i + 1; j < dsize; j++) {
-            move(dindices[j + 1] - 1, dindices[j] - 1);
-            dindices[j]--;
-        }
-        dindices[dsize]--;
+    @Override
+    public void swapOnPassivate(Propagator<?> propagator, int idxInProp) {
+        int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
+        propagators[i].swap(propagator, idxInProp, this);
+    }
+
+    @Override
+    @Deprecated
+    public int swapOnActivate(Propagator<?> propagator, int idxInProp) {
+        throw new UnsupportedOperationException("Cannot swap on activation");
     }
 
     @Override
     public final Propagator<?>[] getPropagators() {
-        return propagators;
+        throw new UnsupportedOperationException("The method is deprecated");
     }
 
     @Override
     public final Propagator<?> getPropagator(int idx) {
-        return propagators[idx];
+        throw new UnsupportedOperationException("The method is deprecated");
+    }
+
+    @Override
+    public Stream<Propagator<?>> streamPropagators() {
+        Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
+
+            int c = 0;
+            int i = propagators[c].first;
+
+            @Override
+            public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
+                do {
+                    if (i < propagators[c].last) {
+                        action.accept(propagators[c].propagators[i++]);
+                        return true;
+                    } else {
+                        c++;
+                        if (c < propagators.length) {
+                            i = propagators[c].first;
+                        } else {
+                            return false;
+                        }
+                    }
+                } while (true);
+            }
+
+            @Override
+            public Spliterator<Propagator<?>> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return nbPropagators;
+            }
+
+            @Override
+            public int characteristics() {
+                return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+            }
+
+        };
+        return StreamSupport.stream(it, false);
     }
 
     @Override
     public final int getNbProps() {
-        return dindices[dsize];
+        return nbPropagators;
     }
 
     @Override
     public final int[] getPIndices() {
-        return pindices;
+        throw new UnsupportedOperationException("The method is deprecated");
     }
 
     @Override
     public final void setPIndice(int pos, int val) {
-        pindices[pos] = val;
+        //pindices[pos] = val;
+        throw new UnsupportedOperationException("setPIndice to be implemented");
     }
 
     @Override
+    @Deprecated
     public final int getDindex(int i) {
-        return dindices[i];
+        throw new UnsupportedOperationException("The method is deprecated");
     }
 
     @Override
     public final int getIndexInPropagator(int pidx) {
-        return pindices[pidx];
+        //return pindices[pidx];
+        throw new UnsupportedOperationException("setPIndice to be implemented");
     }
 
     @Override
@@ -364,7 +344,7 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void notifyPropagators(IEventType event, ICause cause) throws ContradictionException {
         assert cause != null;
-        if(this.isInstantiated()){
+        if (this.isInstantiated()) {
             recordWorldIndex();
         }
         model.getSolver().getEngine().onVariableUpdate(this, event, cause);
@@ -374,6 +354,7 @@ public abstract class AbstractVariable implements Variable {
 
     public void notifyMonitors(IEventType event) throws ContradictionException {
         for (int i = mIdx - 1; i >= 0; i--) {
+            //noinspection unchecked
             monitors[i].onUpdate(this, event);
         }
     }
@@ -535,6 +516,199 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public ICause getCause() {
         return cause;
+    }
+
+    static class BipartiteList {
+        /**
+         * The current capacity
+         */
+        private int capacity;
+        /**
+         * The position of the first element (inclusive)
+         */
+        int first;
+        /**
+         * The position of the last element (exclusive)
+         */
+        int last;
+        /**
+         * The number of passive propagators, starting from first
+         */
+        final IStateInt splitter;
+
+        /**
+         * List of propagators
+         */
+        Propagator<?>[] propagators;
+
+        /**
+         * Store the index of each propagator.
+         */
+        int[] pindices;
+
+        public BipartiteList(IEnvironment environment) {
+            this.splitter = environment.makeInt(0);
+            this.first = this.last = 0;
+            this.capacity = 10;
+            this.propagators = new Propagator[capacity];
+            this.pindices = new int[capacity];
+        }
+
+        /**
+         * Add a propagator <i>p</i> at the end of {@link #propagators}
+         * and set at the same position in {@link #pindices} the position
+         * of the variable in <i>p</i>.
+         *
+         * @param propagator the propagator to add
+         * @param idxInVar   position of the variable in the propagator
+         * @return the number of propagators stored
+         */
+        public int add(Propagator<?> propagator, int idxInVar) {
+            if (first > 0 && splitter.get() == 0) {
+                shiftTail();
+            }
+            if (last == capacity - 1) {
+                capacity = capacity + (capacity >> 1);
+                propagators = Arrays.copyOf(propagators, capacity);
+                pindices = Arrays.copyOf(pindices, capacity);
+            }
+            propagators[last] = propagator;
+            pindices[last++] = idxInVar;
+            return last - 1;
+        }
+
+        /**
+         * Remove the propagator <i>p</i> from {@link #propagators}.
+         *
+         * @param propagator
+         * @param idxInProp
+         * @param var
+         */
+        public void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+            int p = propagator.getVIndice(idxInProp);
+            assert p > -1;
+            assert propagators[p] == propagator : "Try to unlink from " + var.getName() + ":\n" + propagator + "but found:\n" + propagators[p];
+            assert propagators[p].getVar(idxInProp) == var;
+            // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
+            if (p < splitter.get()) {
+                // swap the propagator to remove with the first one
+                propagator.setVIndices(idxInProp, -1);
+                propagators[p] = propagators[first];
+                pindices[p] = pindices[first];
+                propagators[p].setVIndices(pindices[p], p);
+                propagators[first] = null;
+                pindices[first] = 0;
+                first++;
+            } else {
+                // swap the propagator to remove with the last one
+                last--;
+                if (p < last) {
+                    propagators[p] = propagators[last];
+                    pindices[p] = pindices[last];
+                    propagators[p].setVIndices(pindices[p], p);
+                }
+                propagators[last] = null;
+                pindices[last] = 0;
+                propagator.setVIndices(idxInProp, -1);
+            }
+        }
+
+        public void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+            int p = propagator.getVIndice(idxInProp);
+            assert p != -1;
+            assert propagators[p] == propagator : "Try to swap from " + var.getName() + ":\n" + propagator + "but found: " + propagators[p];
+            assert propagators[p].getVar(idxInProp) == var;
+            int pos = splitter.add(1) - 1;
+            if (first > 0) {
+                if (pos == 0) {
+                    shiftTail();
+                    //then recompute the position of this
+                    p = propagator.getVIndice(idxInProp);
+                } else {
+                    // s = Math.min(s, first);
+                    throw new UnsupportedOperationException();
+                }
+            }
+            if (pos < p) {
+                propagators[p] = propagators[pos];
+                propagators[pos] = propagator;
+                int pi = pindices[p];
+                pindices[p] = pindices[pos];
+                pindices[pos] = pi;
+                propagators[p].setVIndices(pindices[p], p);
+                propagators[pos].setVIndices(pindices[pos], pos);
+                assert propagators[pos] == propagator;
+            }
+        }
+
+        public void schedule(ICause cause, PropagationEngine engine, int mask) {
+            int s = splitter.get();
+            if (first > 0) {
+                if (s == 0) {
+                    shiftTail();
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+            for (int p = s; p < last; p++) {
+                Propagator<?> prop = propagators[p];
+                if (prop.isActive() && cause != prop) {
+                    engine.schedule(prop, pindices[p], mask);
+                }
+            }
+        }
+
+        private void shiftTail() {
+            for (int i = 0; i < last - first; i++) {
+                propagators[i] = propagators[i + first];
+                pindices[i] = pindices[i + first];
+                propagators[i].setVIndices(pindices[i], i);
+            }
+            for (int i = last - first; i < last; i++) {
+                propagators[i] = null;
+                pindices[i] = 0;
+            }
+            last -= first;
+            first = 0;
+        }
+
+        Stream<Propagator<?>> stream() {
+            int s = splitter.get();
+            if (first > 0) {
+                if (s == 0) {
+                    shiftTail();
+                }
+            }
+            Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
+                int i = s;
+                @Override
+                public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
+                    if (i < last) {
+                        action.accept(propagators[i++]);
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+
+                @Override
+                public Spliterator<Propagator<?>> trySplit() {
+                    return null;
+                }
+
+                @Override
+                public long estimateSize() {
+                    return last - first;
+                }
+
+                @Override
+                public int characteristics() {
+                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+                }
+
+            };
+            return StreamSupport.stream(it, false);
+        }
     }
 
 }

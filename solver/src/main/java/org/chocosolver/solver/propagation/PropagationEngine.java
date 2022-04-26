@@ -18,7 +18,6 @@ import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
-import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.ArrayList;
@@ -241,7 +240,7 @@ public class PropagationEngine {
         if (propagator.isActive()) {
             propagator.propagate(PropagatorEventType.FULL_PROPAGATION.getMask());
             while (!var_queue.isEmpty()) {
-                schedule(var_queue.pollFirst());
+                var_queue.pollFirst().schedulePropagators(this);
             }
         }
     }
@@ -249,7 +248,7 @@ public class PropagationEngine {
     private void manageModifications() {
         if (!var_queue.isEmpty()) {
             do {
-                schedule(var_queue.pollFirst());
+                var_queue.pollFirst().schedulePropagators(this);
             } while (hybrid < 2 && !var_queue.isEmpty());
         }
     }
@@ -301,29 +300,6 @@ public class PropagationEngine {
             variable.schedule();
         }
         variable.storeEvents(type.getMask(), cause);
-    }
-
-    private void schedule(Variable variable) {
-        int mask = variable.getMask();
-        if (mask > 0) {
-            ICause cause = variable.getCause();
-            Propagator<?>[] vpropagators = variable.getPropagators();
-            int[] vindices = variable.getPIndices();
-            Propagator<?> prop;
-            EvtScheduler<?> si = variable.getEvtScheduler();
-            si.init(mask);
-            while (si.hasNext()) {
-                int p = variable.getDindex(si.next());
-                int t = variable.getDindex(si.next());
-                for (; p < t; p++) {
-                    prop = vpropagators[p];
-                    if (prop.isActive() && cause != prop) {
-                        schedule(prop, vindices[p], mask);
-                    }
-                }
-            }
-        }
-        variable.clearEvents();
     }
 
     public void schedule(Propagator<?> prop, int pindice, int mask) {

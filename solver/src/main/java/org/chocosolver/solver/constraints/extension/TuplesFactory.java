@@ -14,6 +14,8 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 
+import java.util.Random;
+
 import static org.chocosolver.util.tools.ArrayUtils.concat;
 
 /**
@@ -100,6 +102,27 @@ public class TuplesFactory {
 
     }
 
+    /**
+     * A method that randomly generates tuples from a set of variables.
+     *
+     * @param proba  probability to keep a tuple in Tuples (0 < proba < 1)
+     * @param random an instance of pseudorandom numbers streamer
+     * @param vars   concerned variables
+     * @return the set of retain tuples, which can be empty
+     * @implNote <p>
+     * If <i>proba</i> <= 0, then the tuple list will be empty
+     * </p>
+     * <p>
+     * If <i>proba</i> > 1, then all combination will be retained
+     * </p>
+     * <p>All combinations of instantiations of <i>vars</i> are generated
+     * and for each of them, an instantiation is kept with probability <i>p</i>.
+     * </p>
+     */
+    public static Tuples randomTuples(final double proba, final Random random, IntVar... vars) {
+        return generateTuples(vs -> random.nextDouble() < proba, true,vars);
+    }
+
     // BEWARE: PLEASE, keep signatures sorted by increasing arity and alphabetical order!!
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,8 +188,8 @@ public class TuplesFactory {
     /**
      * Generate valid tuples for an element constraint : MATRIX[ROWINDEX-ROWOFFSET][COLINDEX-COLOFFSET] = VALUE
      *
-     * @param VALUE  an integer variable taking its value in MATRIX
-     * @param MATRIX  an array of integer values
+     * @param VALUE     an integer variable taking its value in MATRIX
+     * @param MATRIX    an array of integer values
      * @param ROWINDEX  an integer variable representing the row of value of VALUE in MATRIX
      * @param ROWOFFSET offset matching ROWINDEX.LB and MATRIX[0] (Generally 0)
      * @param COLINDEX  an integer variable representing the column of value of VALUE in MATRIX
@@ -177,12 +200,12 @@ public class TuplesFactory {
                                  IntVar ROWINDEX, int ROWOFFSET,
                                  IntVar COLINDEX, int COLOFFSET) {
         Tuples t = new Tuples(true);
-        for(int i  = 0; i < MATRIX.length; i++) {
+        for (int i = 0; i < MATRIX.length; i++) {
             for (int j = 0; j < MATRIX[i].length; j++) {
                 if (ROWINDEX.contains(i - ROWOFFSET)
                         && COLINDEX.contains(j - COLOFFSET)
                         && VALUE.contains(MATRIX[i][j])) {
-                    t.add(i, j, MATRIX[i - - ROWOFFSET][j - COLOFFSET]);
+                    t.add(i, j, MATRIX[i - -ROWOFFSET][j - COLOFFSET]);
                 }
             }
         }
@@ -253,7 +276,7 @@ public class TuplesFactory {
      * @return a Tuples object, reserved for a table constraint
      */
     public static Tuples modulo(IntVar VAR1, IntVar VAR2, IntVar RES) {
-        return generateTuples(values -> values[1]!=0 && values[2] == values[0] % values[1], true, VAR1, VAR2, RES);
+        return generateTuples(values -> values[1] != 0 && values[2] == values[0] % values[1], true, VAR1, VAR2, RES);
     }
 
     /**
@@ -394,7 +417,7 @@ public class TuplesFactory {
 
     /**
      * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub>*COEFFS<sub>i</sub> OPERATOR SCALAR + CSTE
-     *
+     * <p>
      * with OPERATOR in {"=", "!=", ">","<",">=","<="}
      *
      * @param VARS concerned variables
@@ -432,7 +455,7 @@ public class TuplesFactory {
 
     /**
      * Generate valid tuples for &#8721;<sub>i in |VARS|</sub>VARS<sub>i</sub> OPERATOR SUM + CSTE
-     *
+     * <p>
      * with OPERATOR in {"=", "!=", ">","<",">=","<="}
      *
      * @param VARS concerned variables

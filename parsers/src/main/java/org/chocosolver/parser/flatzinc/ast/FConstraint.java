@@ -907,6 +907,20 @@ public enum FConstraint {
             model.circuit(vars, offset).post();
         }
     },
+    fzn_decreasing_bool{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] vars = exps.get(0).toBoolVarArray(model);
+            model.decreasing(vars, 0).post();
+        }
+    },
+    fzn_decreasing_int{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            model.decreasing(vars, 0).post();
+        }
+    },
     count_eqchoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1137,6 +1151,20 @@ public enum FConstraint {
             }
             model.globalCardinality(vars, values, cards, closed).post();
 
+        }
+    },
+    fzn_increasing_bool{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] vars = exps.get(0).toBoolVarArray(model);
+            model.increasing(vars, 0).post();
+        }
+    },
+    fzn_increasing_int{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            model.increasing(vars, 0).post();
         }
     },
     inverseChoco {
@@ -2378,14 +2406,7 @@ public enum FConstraint {
             IntVar x = exps.get(0).intVarValue(model);
             int y = exps.get(1).intValue();
             IntVar z = exps.get(2).intVarValue(model);
-            Tuples tuples = new Tuples(true);
-            for (int val1 : x) {
-                int res = (int) Math.pow(val1, y);
-                if (z.contains(res)) {
-                    tuples.add(val1, res);
-                }
-            }
-            model.table(x, z, tuples).post();
+            model.pow(x, y, z).post();
         }
     },
 

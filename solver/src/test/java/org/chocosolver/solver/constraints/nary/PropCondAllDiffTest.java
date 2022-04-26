@@ -235,6 +235,13 @@ public class PropCondAllDiffTest {
         assertTrue(solutionFound);
     }
 
+    @Test(groups = "1s", timeOut=60000)
+    public void testAllZeros() {
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray(10, 0, 0);
+        model.allDifferentExcept0(vars).post();
+        assertTrue(model.getSolver().solve());
+    }
 
     private Map<IntVar, Boolean> mustBeDiff(IntVar[] vars, int nDiff) {
         Map<IntVar, Boolean> mustBeDiff = new HashMap<>();

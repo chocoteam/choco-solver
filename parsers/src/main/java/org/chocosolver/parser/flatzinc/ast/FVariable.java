@@ -162,7 +162,7 @@ public final class FVariable {
         if (expression != null) {
             iv = buildOnExpression(DEBUG ? name : NO_NAME, expression, datas, model);
         } else {
-            iv = model.intVar(DEBUG ? name : NO_NAME, -999999, 999999);
+            iv = model.intVar(DEBUG ? name : NO_NAME, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
         }
         datas.register(name, iv);
         return iv;

@@ -20,7 +20,6 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
-import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -69,10 +68,10 @@ public class PropFastGCC extends Propagator<IntVar> {
         this.mandatories = new ISet[n2];
         this.map = map;
         for (int idx = 0; idx < n2; idx++) {
-            mandatories[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
-            possibles[idx] = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+            mandatories[idx] = SetFactory.makeBitSet(0);
+            possibles[idx] = SetFactory.makeBitSet(0);
         }
-        this.valueToCompute = SetFactory.makeStoredSet(SetType.BITSET, 0, model);
+        this.valueToCompute = SetFactory.makeBitSet(0);
         this.boundVar = new TIntArrayList();
         for (int i = 0; i < n; i++) {
             if (!vars[i].hasEnumeratedDomain()) {
@@ -97,8 +96,8 @@ public class PropFastGCC extends Propagator<IntVar> {
             IntVar v = vars[i];
             int ub = v.getUB();
             if (v.isInstantiated()) {
-                if (map.containsKey(v.getValue())) {
-                    int j = map.get(v.getValue());
+                if (map.containsKey(ub)) {
+                    int j = map.get(ub);
                     mandatories[j].add(i);
                 }
             } else {

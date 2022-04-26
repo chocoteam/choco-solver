@@ -20,10 +20,8 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorContradiction;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IVariableMonitor;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.events.IntEventType;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -39,8 +37,8 @@ import java.util.stream.Collectors;
  * @author Charles Prud'homme
  * @since 26/02/2020.
  */
-public abstract class AbstractCriterionBasedVariableSelector implements VariableSelector<IntVar>,
-        IVariableMonitor<Variable>, IMonitorContradiction, IMonitorRestart {
+public abstract class AbstractCriterionBasedVariableSelector<V extends Variable> implements VariableSelector<V>,
+        IVariableMonitor<V>, IMonitorContradiction, IMonitorRestart {
 
     /**
      * An element helps to keep 2 things up to date:
@@ -120,7 +118,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
     final HashMap<Propagator<?>, double[]> refinedWeights = new HashMap<>();
     static final double[] rw = {0.};
 
-    public AbstractCriterionBasedVariableSelector(IntVar[] vars, long seed, int flush) {
+    public AbstractCriterionBasedVariableSelector(V[] vars, long seed, int flush) {
         this.random = new java.util.Random(seed);
         this.solver = vars[0].getModel().getSolver();
         this.environment = vars[0].getModel().getEnvironment();
@@ -129,8 +127,8 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
     }
 
     @Override
-    public final IntVar getVariable(IntVar[] vars) {
-        IntVar best = null;
+    public final V getVariable(V[] vars) {
+        V best = null;
         bests.resetQuick();
         double w = Double.NEGATIVE_INFINITY;
         int to = last.get();
@@ -148,7 +146,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
                 }
             } else {
                 // swap
-                IntVar tmp = vars[to];
+                V tmp = vars[to];
                 vars[to] = vars[idx];
                 vars[idx] = tmp;
                 idx--;
@@ -164,7 +162,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
         return best;
     }
 
-    protected abstract double weight(IntVar v);
+    protected abstract double weight(V v);
 
     @Override
     public final void onContradiction(ContradictionException cex) {
@@ -291,8 +289,8 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
 
     @Override
     public final void onUpdate(Variable var, IEventType evt) {
-        if (evt == IntEventType.INSTANTIATE) {
-            for (Propagator<?> p : var.getPropagators()) {
+        if (var.isInstantiated()) {
+            var.streamPropagators().forEach(p -> {
                 Element elt = failCount.get(p);
                 if (elt != null) {
                     if (p.getVar(elt.ws[0]) == var) {
@@ -301,7 +299,7 @@ public abstract class AbstractCriterionBasedVariableSelector implements Variable
                         updateFutvars(p, elt, 1);
                     }
                 }
-            }
+            });
         }
     }
 

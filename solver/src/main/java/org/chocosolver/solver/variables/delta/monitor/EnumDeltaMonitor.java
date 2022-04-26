@@ -49,7 +49,7 @@ public class EnumDeltaMonitor extends TimeStampedObject implements IIntDeltaMoni
     private void freeze() {
         if (getTimeStamp() == -1) {
             throw new SolverException("Delta Monitor created in this is not activated. " +
-                    "This should be the last instruction of this.propagate(int) " +
+                    "This should be the last instruction of p.propagate(int) " +
                     "by calling `monitor.startMonitoring()`");
         }
         if (needReset()) {

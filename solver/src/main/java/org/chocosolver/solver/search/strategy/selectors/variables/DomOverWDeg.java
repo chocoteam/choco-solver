@@ -12,6 +12,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 
 /**
@@ -23,7 +24,7 @@ import org.chocosolver.util.tools.VariableUtils;
  * @author Charles Prud'homme
  * @since 12/07/12
  */
-public class DomOverWDeg extends AbstractCriterionBasedVariableSelector implements IMonitorRestart {
+public class DomOverWDeg<V extends Variable> extends AbstractCriterionBasedVariableSelector<V> implements IMonitorRestart {
 
     /**
      * Creates a DomOverWDeg variable selector
@@ -31,7 +32,7 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector implemen
      * @param variables decision variables
      * @param seed      seed for breaking ties randomly
      */
-    public DomOverWDeg(IntVar[] variables, long seed) {
+    public DomOverWDeg(V[] variables, long seed) {
         this(variables, seed, Integer.MAX_VALUE);
     }
 
@@ -42,7 +43,7 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector implemen
      * @param seed      seed for breaking ties randomly
      * @param flushThs flush threshold, when reached, it flushes scores
      */
-    public DomOverWDeg(IntVar[] variables, long seed,int flushThs) {
+    public DomOverWDeg(V[] variables, long seed,int flushThs) {
         super(variables, seed, flushThs);
     }
 
@@ -63,7 +64,7 @@ public class DomOverWDeg extends AbstractCriterionBasedVariableSelector implemen
     }
 
     @Override
-    protected final double weight(IntVar v) {
+    protected final double weight(Variable v) {
         //assert weightW(v) == weights.get(v) : "wrong weight for " + v + ", expected " + weightW(v) + ", but found " + weights.get(v);
         return 1 + weights.get(v);
     }

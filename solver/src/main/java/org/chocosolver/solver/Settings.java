@@ -63,7 +63,7 @@ public class Settings {
 
     private boolean enableSAT = false;
 
-    private boolean swapOnPassivate = false;
+    private boolean swapOnPassivate = true;
 
     private boolean checkDeclaredConstraints = true;
 
@@ -83,7 +83,7 @@ public class Settings {
 
     private int dominancePerimeter = 4;
 
-    private boolean explainGlobalFailureInSum = true;
+    private boolean explainGlobalFailureInSum = false;
 
     private double ibexContractionRatio = Ibex.RATIO;
 

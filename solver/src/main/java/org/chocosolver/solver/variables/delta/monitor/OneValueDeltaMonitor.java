@@ -47,8 +47,9 @@ public class OneValueDeltaMonitor extends TimeStampedObject implements IIntDelta
 
     private void freeze() {
         if (getTimeStamp() == -1) {
-            throw new SolverException("If a propagator `p` declares delta monitors (for instance, `IIntDeltaMonitor monitor  = var.monitorDelta(this);`),\n" +
-                    "then a call to `monitor.activate()` is required as final instruction of on `p.propagate(int)`");
+            throw new SolverException("Delta Monitor created in this is not activated. " +
+                    "This should be the last instruction of p.propagate(int) " +
+                    "by calling `monitor.startMonitoring()`");
         }
         if (needReset()) {
             delta.lazyClear();

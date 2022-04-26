@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 
 /**
@@ -21,7 +22,7 @@ import org.chocosolver.util.tools.VariableUtils;
  * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
  * @since 12/06/20
  */
-public class DomOverWDegRef extends DomOverWDeg {
+public class DomOverWDegRef<V extends Variable> extends DomOverWDeg<V> {
 
     /**
      * Creates a DomOverWDegRef variable selector with "CACD" as weight incrementer.
@@ -29,7 +30,7 @@ public class DomOverWDegRef extends DomOverWDeg {
      * @param variables decision variables
      * @param seed      seed for breaking ties randomly
      */
-    public DomOverWDegRef(IntVar[] variables, long seed) {
+    public DomOverWDegRef(V[] variables, long seed) {
         super(variables, seed);
     }
 
@@ -40,7 +41,7 @@ public class DomOverWDegRef extends DomOverWDeg {
      * @param seed      seed for breaking ties randomly
      * @param flushThs flush threshold, when reached, it flushes scores
      */
-    public DomOverWDegRef(IntVar[] variables, long seed, int flushThs) {
+    public DomOverWDegRef(V[] variables, long seed, int flushThs) {
         super(variables, seed, flushThs);
     }
 

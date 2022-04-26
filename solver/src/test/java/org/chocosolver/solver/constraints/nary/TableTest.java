@@ -536,7 +536,7 @@ public class TableTest {
         model.table(new IntVar[]{x, y, z}, ts, staralgo).post();
 
         Solver solver = model.getSolver();
-        solver.showDecisions();
+        //solver.showDecisions();
         solver.showSolutions();
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 5);
@@ -561,12 +561,12 @@ public class TableTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
-        public void testST3(String staralgo) {
+    public void testST3(String staralgo) {
         Model model = new Model();
         //IntVar w = model.intVar("w", 0, 1);
-        IntVar x = model.intVar("x",0, 1);
-        IntVar y = model.intVar("y",0, 1);
-        IntVar z = model.intVar("z",0, 1);
+        IntVar x = model.intVar("x", 0, 1);
+        IntVar y = model.intVar("y", 0, 1);
+        IntVar z = model.intVar("z", 0, 1);
         Tuples ts = new Tuples(true);
         int ST = 99;
         ts.setUniversalValue(ST);
@@ -581,7 +581,7 @@ public class TableTest {
         Assert.assertEquals(solver.getSolutionCount(), 7);
     }
 
-    @Test(groups = "1s", timeOut = 60000,dataProvider = "balgos")
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
     public void testJuha1(String a) {
         Model model = new Model("Table MWE");
         IntVar foo = model.intVar("foo", new int[]{1, 3, 7});
@@ -610,6 +610,15 @@ public class TableTest {
         Constraint table = model.table(new IntVar[]{foo, foo1, bar}, allowed, a);
         table.reifyWith(b);
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 18);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testPow(String a) {
+        Model model = new Model("Table MWE");
+        IntVar foo = model.intVar("foo", 2, 60);
+        IntVar foo1 = model.intVar("foo1", 0, 999_999);
+        model.table(new IntVar[]{foo1, foo}, TuplesFactory.power(foo1, foo, 7), a).post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 6);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
@@ -667,7 +676,7 @@ public class TableTest {
         allowed.add(1, 2, 3);
         allowed.add(2, 2, 2);
         allowed.add(3, 2, 1);
-        Constraint table = model.table(new IntVar[]{foo, bar,far}, allowed, a);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, allowed, a);
         table.post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
     }
@@ -745,7 +754,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT1(String a) {
-        if(a.equals("FC"))return;
+        if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
         IntVar x1 = cp.intOffsetView(x0, 10);
@@ -772,7 +781,7 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testCT2(String a) {
-        if(a.equals("FC"))return;
+        if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
         IntVar x1 = cp.intOffsetView(x0, 10);
@@ -789,6 +798,17 @@ public class TableTest {
             cp.getSolver().propagate(); // should trigger an inconsistency
         } catch (ContradictionException c) {
         }
-
     }
+
+    @Test(groups = "1s")
+    public void testRnd() {
+        Model model = new Model();
+        IntVar foo = model.intVar("foo", 0, 7, true);
+        IntVar bar = model.intVar("bar", 0, 7, true);
+        IntVar far = model.intVar("far", 0, 7, true);
+        Constraint table = model.table(new IntVar[]{foo, bar, far}, TuplesFactory.randomTuples(.5, new Random(13), foo, bar, far));
+        table.post();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 255);
+    }
+
 }
