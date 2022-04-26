@@ -42,7 +42,7 @@ public class NetworkflowTest {
             flow[i] = model.intVar(new int[]{0, 450});
         }
         IntVar cost = model.intVar(0, 10000);
-        model.networkFlowDec(starts, ends, balance, weight, flow, cost, 1);
+        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -77,7 +77,7 @@ public class NetworkflowTest {
         flow[14] = model.intVar(0, 450);
         flow[15] = model.intVar(0, 450);
         IntVar cost = model.intVar(0, 10000);
-        model.networkFlowDec(starts, ends, balance, weight, flow, cost, 1);
+        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -103,7 +103,7 @@ public class NetworkflowTest {
         flow[++i] = model.intVar("c" + i, 0, 1);
         flow[++i] = model.intVar("c" + i, 2, 10);
         IntVar cost = model.intVar(0, 100);
-        model.networkFlowDec(starts, ends, balance, weight, flow, cost, 0);
+        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 0);
         model.setObjective(false, cost);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
@@ -130,7 +130,7 @@ public class NetworkflowTest {
         flow[15] = model.intVar("c15", 0, 3);
         flow[16] = model.intVar("c16", 0, 1);
         IntVar cost = model.intVar(0, 10);
-        model.networkFlowDec(starts, ends, balance, weight, flow, cost, 0);
+        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 0);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -144,7 +144,39 @@ public class NetworkflowTest {
     }
 
     @Test(groups = "1s")
-    public void testMCMFORtools() {
+    public void testMCMFORtools1() {
+        int[] startNodes = new int[]{0, 0, 0, 1, 1, 2, 2, 3, 3};
+        int[] endNodes = new int[]{1, 2, 3, 2, 4, 3, 4, 2, 4};
+        int[] capacities = new int[]{20, 30, 10, 40, 30, 10, 20, 5, 20};
+
+        // Define an array of supplies at each node.
+        int[] supplies = new int[]{60, 0, 0, 0, -60};
+
+        Model model = new Model();
+        IntVar[] flow = new IntVar[startNodes.length];
+        for (int i = 0; i < startNodes.length; i++) {
+            flow[i] = model.intVar(String.format("f(%d,%d)", startNodes[i], endNodes[i]), 0, capacities[i]);
+        }
+        model.networkFlowDec(startNodes, endNodes, supplies, flow, 0);
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(flow));
+        if (solver.solve()) {
+            /*System.out.println("Maximum Flow: " + maxFlow.getValue());
+            System.out.println();
+            System.out.println(" Edge   Flow / Capacity");
+            for (int i = 0; i < startNodes.length; ++i) {
+                System.out.println(startNodes[i] + " -> " + endNodes[i] + "  "
+                        + flow[i].getValue() + "  / " + capacities[i]);
+            }
+            System.out.println();
+            System.out.println();*/
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 1);
+        Assert.assertEquals(solver.getNodeCount(), 1);
+    }
+
+    @Test(groups = "1s")
+    public void testMCMFORtools2() {
         int[] startNodes = new int[]{0, 0, 1, 1, 1, 2, 2, 3, 4};
         int[] endNodes = new int[]{1, 2, 2, 3, 4, 3, 4, 4, 2};
         int[] capacities = new int[]{15, 8, 20, 4, 10, 15, 4, 20, 5};
@@ -159,7 +191,7 @@ public class NetworkflowTest {
             flow[i] = model.intVar(String.format("f(%d,%d)", startNodes[i], endNodes[i]), 0, capacities[i]);
         }
         IntVar cost = model.intVar(0, 1000);
-        model.networkFlowDec(startNodes, endNodes, supplies, unitCosts, flow, cost, 0);
+        model.networkCostFlowDec(startNodes, endNodes, supplies, unitCosts, flow, cost, 0);
         model.setObjective(false, cost);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
