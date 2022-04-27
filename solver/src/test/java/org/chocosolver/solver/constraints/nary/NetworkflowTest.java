@@ -16,6 +16,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.stream.IntStream;
+
 /**
  * <br/>
  *
@@ -42,7 +44,7 @@ public class NetworkflowTest {
             flow[i] = model.intVar(new int[]{0, 450});
         }
         IntVar cost = model.intVar(0, 10000);
-        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
+        model.costFlow(starts, ends, balance, weight, flow, cost, 1);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -77,7 +79,7 @@ public class NetworkflowTest {
         flow[14] = model.intVar(0, 450);
         flow[15] = model.intVar(0, 450);
         IntVar cost = model.intVar(0, 10000);
-        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
+        model.costFlow(starts, ends, balance, weight, flow, cost, 1);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -103,7 +105,7 @@ public class NetworkflowTest {
         flow[++i] = model.intVar("c" + i, 0, 1);
         flow[++i] = model.intVar("c" + i, 2, 10);
         IntVar cost = model.intVar(0, 100);
-        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 0);
+        model.costFlow(starts, ends, balance, weight, flow, cost, 0);
         model.setObjective(false, cost);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
@@ -130,7 +132,7 @@ public class NetworkflowTest {
         flow[15] = model.intVar("c15", 0, 3);
         flow[16] = model.intVar("c16", 0, 1);
         IntVar cost = model.intVar(0, 10);
-        model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 0);
+        model.costFlow(starts, ends, balance, weight, flow, cost, 0);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         solver.showShortStatistics();
@@ -157,7 +159,8 @@ public class NetworkflowTest {
         for (int i = 0; i < startNodes.length; i++) {
             flow[i] = model.intVar(String.format("f(%d,%d)", startNodes[i], endNodes[i]), 0, capacities[i]);
         }
-        model.networkFlowDec(startNodes, endNodes, supplies, flow, 0);
+        model.costFlow(startNodes, endNodes, supplies, IntStream.range(0, startNodes.length).map(i -> 0).toArray(),
+                flow, model.intVar(0), 0);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));
         if (solver.solve()) {
@@ -191,7 +194,7 @@ public class NetworkflowTest {
             flow[i] = model.intVar(String.format("f(%d,%d)", startNodes[i], endNodes[i]), 0, capacities[i]);
         }
         IntVar cost = model.intVar(0, 1000);
-        model.networkCostFlowDec(startNodes, endNodes, supplies, unitCosts, flow, cost, 0);
+        model.costFlow(startNodes, endNodes, supplies, unitCosts, flow, cost, 0);
         model.setObjective(false, cost);
         Solver solver = model.getSolver();
         solver.setSearch(Search.inputOrderLBSearch(flow));

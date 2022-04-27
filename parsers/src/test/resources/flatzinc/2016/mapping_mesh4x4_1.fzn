@@ -1,5 +1,5 @@
 predicate fzn_count_eq(array [int] of var int: x,var int: y,var int: c);
-predicate choco_fzn_network_flow_cost(array [int,1..2] of int: arc,array [int] of int: balance,array [int] of int: weight,array [int] of var int: flow,var int: cost);
+predicate choco_fzn_network_flow_cost(array [int] of int: arc,array [int] of int: balance,array [int] of int: weight,array [int] of var int: flow,var int: cost);
 predicate fzn_bin_packing_load(array [int] of var int: load,array [int] of var int: bin,array [int] of int: w);
 predicate array_int_maximum(var int: m,array [int] of var int: x);
 array [1..18] of int: X_INTRODUCED_722_ = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,450,-450];

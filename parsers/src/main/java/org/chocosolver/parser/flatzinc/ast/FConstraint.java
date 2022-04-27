@@ -29,6 +29,7 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /*
  * User : CPRUDHOM
@@ -1371,7 +1372,8 @@ public enum FConstraint {
             }
             int[] balance = exps.get(1).toIntArray();
             IntVar[] flow = exps.get(3).toIntVarArray(model);
-            model.networkFlowDec(starts, ends, balance, flow,  1);
+            model.costFlow(starts, ends, balance, IntStream.range(0, starts.length).map(i -> 0).toArray(),
+                    flow, model.intVar(0), 1);
         }
     },
     choco_fzn_network_flow_cost {
@@ -1389,7 +1391,7 @@ public enum FConstraint {
             int[] weight = exps.get(2).toIntArray();
             IntVar[] flow = exps.get(3).toIntVarArray(model);
             IntVar cost = exps.get(4).intVarValue(model);
-            model.networkCostFlowDec(starts, ends, balance, weight, flow, cost, 1);
+            model.costFlow(starts, ends, balance, weight, flow, cost, 1);
         }
     },
     nvalueChoco {

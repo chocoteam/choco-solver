@@ -402,7 +402,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
     }
 
     /**
-     * A decomposition for the network flow constraint.
+     * A decomposition for the cost flow constraint.
      * <p>
      * The network is defined by a set of arc, each of them is made of
      * a starting node,
@@ -424,7 +424,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
      * @param cost      cost of the flow
      * @param offset    index of the smallest node
      */
-    default void networkCostFlowDec(int[] starts, int[] ends, int[] supplies, int[] unitCosts, IntVar[] flows, IntVar cost, int offset) {
+    default void costFlow(int[] starts, int[] ends, int[] supplies, int[] unitCosts, IntVar[] flows, IntVar cost, int offset) {
         // cost function
         ref().scalar(flows, unitCosts, "=", cost).post();
         for (int i = 0; i < supplies.length; i++) {
@@ -443,43 +443,6 @@ public interface IDecompositionFactory extends ISelf<Model> {
             ref().sum(src.toArray(new IntVar[0]), "=", snk.toArray(new IntVar[0])).post();
         }
         new Constraint("", new PropMinCostMaxFlow(starts, ends, supplies, unitCosts, flows, cost, offset)).post();
-    }
-
-    /**
-     * A decomposition for the network flow constraint.
-     * <p>
-     * The network is defined by a set of arc, each of them is made of
-     * a starting node,
-     * an ending node,
-     * a supply (if positive) -- or demand (if negative) and
-     * a flow variable that stores the quantity that goes on the arc.
-     * </p>
-     *
-     * @param starts    list of starting nodes, one per arc
-     * @param ends      ending nodes, one per arc
-     * @param supplies  supplies, one per arc
-     * @param flows     amount flow, one per arc
-     * @param offset    index of the smallest node
-     */
-    default void networkFlowDec(int[] starts, int[] ends, int[] supplies, IntVar[] flows, int offset) {
-        // cost function
-        for (int i = 0; i < supplies.length; i++) {
-            int io = i + offset;
-            List<IntVar> src = new ArrayList<>();
-            List<IntVar> snk = new ArrayList<>();
-            for (int j = 0; j < starts.length; j++) {
-                if (starts[j] == io) {
-                    src.add(flows[j]);
-                }
-                if (ends[j] == io) {
-                    snk.add(flows[j]);
-                }
-            }
-            snk.add(ref().intVar(supplies[i]));
-            ref().sum(src.toArray(new IntVar[0]), "=", snk.toArray(new IntVar[0])).post();
-        }
-        new Constraint("", new PropMinCostMaxFlow(starts, ends, supplies,
-                IntStream.range(0, flows.length).map(i -> 0).toArray(), flows, ref().intVar(0), offset)).post();
     }
 
 }

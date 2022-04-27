@@ -1,4 +1,4 @@
-predicate choco_fzn_network_flow_cost(array [int,1..2] of int: arc,array [int] of int: balance,array [int] of int: weight,array [int] of var int: flow,var int: cost);
+predicate choco_fzn_network_flow_cost(array [int] of int: arc,array [int] of int: balance,array [int] of int: weight,array [int] of var int: flow,var int: cost);
 array [1..24] of int: X_INTRODUCED_28_ = [1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0];
 array [1..12] of int: X_INTRODUCED_29_ = [0,0,0,0,0,0,0,0,0,0,0,0];
 array [1..48] of int: X_INTRODUCED_30_ = [1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,1,1,11,2,12,3,1,4,2,5,3,6,4,7,5,8,6,9,7,10,8,11,9,12,10];
