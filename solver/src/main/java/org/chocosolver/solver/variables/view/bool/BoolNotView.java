@@ -18,6 +18,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
+import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IntView;
@@ -82,11 +83,12 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
         boolean hasChanged = false;
         if (from <= to && from <= 1 && to >= 0) {
             if (from == 1) {
-                hasChanged = instantiateTo(1, cause);
-            } else if (to == 0) {
                 hasChanged = instantiateTo(0, cause);
+            } else if (to == 0) {
+                hasChanged = instantiateTo(1, cause);
             } else {
-                instantiateTo(2, cause);
+                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
+                this.contradiction(cause, AbstractVariable.MSG_EMPTY);
             }
         }
         return hasChanged;
