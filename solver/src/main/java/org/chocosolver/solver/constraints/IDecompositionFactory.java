@@ -43,6 +43,32 @@ import static java.lang.String.format;
 public interface IDecompositionFactory extends ISelf<Model> {
 
     /**
+     * Posts a decomposition of an among constraint.
+     * nbVar is the number of variables of the collection vars that take their value in values.
+     * <br/><a href="https://sofdem.github.io/gccat/gccat/Camong.html">gccat among</a>
+     * <br/>
+     * Decomposition described in :
+     * C. Bessiere, E. Hebrard, B. Hnich, Z. Kiziltan, T. Walsh,
+     * Among, common and disjoint Constraints
+     * CP-2005
+     *
+     * @param nbVar  a variable
+     * @param vars   vector of variables
+     * @param values set of values
+     */
+    default void amongDec(IntVar nbVar, IntVar[] vars, IntVar[] values) {
+        BoolVar[] ins = ref().boolVarArray("ins", vars.length);
+        for(int i  = 0; i < vars.length; i++){
+            BoolVar[] eqs = ref().boolVarArray("ins", values.length);
+            for(int j = 0; j < values.length; j++){
+                ref().reifyXeqY(vars[i], values[j], eqs[j]);
+            }
+            ref().addClausesBoolOrArrayEqVar(eqs, ins[i]);
+        }
+        ref().sum(ins, "=", nbVar).post();
+    }
+
+    /**
      * Creates and <b>posts</b> a decomposition of a cumulative constraint: associates a boolean
      * variable to each task and each point of time sich that the scalar product of boolean
      * variables per heights for each time never exceed capacity.
