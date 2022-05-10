@@ -16,9 +16,23 @@ NEXT MILESTONE
 - Revamp `pow` constraint
 - Increase interval for MiniZinc unbounded intvar
 - Add threshold for Element with array of variables signature
-- Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)  
- 
+- Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)
+- Remove `CPProfiler` since the project is not active anymore.
+
+### JAR Files
+Since 4.10.9, two new jar files are available for download. 
+These are lighter versions of those with dependencies, 
+namely `choco-solver-light-VERSION.jar` and `choco-parsers-light-VERSION.jar`.
+The following dependency have been excluded from this archive:
+- `org.apache.pdfbox:pdfbox`
+- `org.apache.fontbox:fontbox`
+- `com.ibm.icu:icu4j`
+
+This results in 57% and 82% smaller archives respectively.
+Note that the non-alleged versions are still available for download.
+
 ### Deprecated API (to be removed in next release):
+- `IOutputFactory.outputSearchTreeToCPProfiler(boolean domain)`
 
 ### Other closed issues and pull requests:
 See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
