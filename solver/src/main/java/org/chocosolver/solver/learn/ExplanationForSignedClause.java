@@ -303,24 +303,6 @@ public class ExplanationForSignedClause extends IExplanation {
     }
 
     /**
-     * @see IntVar#unionLit(int, ExplanationForSignedClause)
-     * @see IntVar#unionLit(int, int, ExplanationForSignedClause)
-     * @see IntVar#unionLit(IntIterableRangeSet, ExplanationForSignedClause)
-     * @see IntVar#intersectLit(int, ExplanationForSignedClause)
-     * @see IntVar#intersectLit(int, int, ExplanationForSignedClause)
-     * @see IntVar#intersectLit(IntIterableRangeSet, ExplanationForSignedClause)
-     * @deprecated
-     */
-    @Deprecated
-    public void addLiteral(IntVar var, IntIterableRangeSet dom, boolean pivot) {
-        if (pivot) {
-            var.intersectLit(dom, this);
-        } else {
-            var.unionLit(dom, this);
-        }
-    }
-
-    /**
      * Remove {@code var} from {@link #literals} and {@link #front}
      *
      * @param var a variable

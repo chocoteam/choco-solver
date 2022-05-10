@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.memory.ICondition;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -350,16 +349,6 @@ public class Settings {
     public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
-    }
-
-    @Deprecated
-    public ICondition getEnvironmentHistorySimulationCondition() {
-        return null;
-    }
-
-    @Deprecated
-    public Settings setEnvironmentHistorySimulationCondition(ICondition environmentHistorySimulationCondition) {
-        return null;
     }
 
     /**
