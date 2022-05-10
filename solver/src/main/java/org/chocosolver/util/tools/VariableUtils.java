@@ -359,7 +359,7 @@ public class VariableUtils {
          */
         public static double searchSpaceSize(Iterator<IntVar> vars) {
             double size = 1;
-            while (vars.hasNext()) {
+            while (vars.hasNext() && size >= 0 && size < Double.POSITIVE_INFINITY) {
                 IntVar var = vars.next();
                 size *= var.getDomainSize();
             }

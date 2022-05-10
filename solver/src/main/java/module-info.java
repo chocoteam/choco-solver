@@ -131,7 +131,6 @@ module org.chocosolver.solver {
 
     requires trove4j;
     requires org.jgrapht.core;
-    requires cpprof.java;
     requires java.desktop;
     requires org.knowm.xchart;
     requires java.management;
