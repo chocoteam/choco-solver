@@ -548,7 +548,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             if (plint != null) {
                 plint.update(bestFound, true);
             } else {
-                plint = new PropLexInt(mobj, bestFound, true);
+                plint = new PropLexInt(mobj, bestFound, true, true);
                 clint = new Constraint("lex objectives", (Propagator<IntVar>) plint);
                 clint.post();
             }

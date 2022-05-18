@@ -74,13 +74,14 @@ public class PropAtLeastNValues_AC extends Propagator<IntVar> {
      * @param variables array of integer variables
      * @param nValues integer variable
      */
-    public PropAtLeastNValues_AC(IntVar[] variables, int[] vals, IntVar nValues) {
+    public PropAtLeastNValues_AC(IntVar[] variables, IntVar nValues) {
         super(concat(variables, nValues), QUADRATIC, true);
         this.idms = new IIntDeltaMonitor[this.vars.length];
         for (int i = 0; i < this.vars.length; i++) {
             idms[i] = this.vars[i].monitorDelta(this);
         }
         n = variables.length;
+        int[] vals = model.getDomainUnion(vars);
         map = new TIntIntHashMap(vals.length);
         IntVar v;
         int ub;

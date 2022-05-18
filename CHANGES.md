@@ -10,15 +10,37 @@ NEXT MILESTONE
 ### Major features:
 - Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
 - Extend some black-box strategies to `SetVar` and `GraphVar`
- 
+- Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
+- Add `increasing` and `decreasing` constraints
+- Add `costFlow` constraint, which is composed of scalar products and a MinCostMaxFlow propagator
+- Revamp `pow` constraint
+- Increase interval for MiniZinc unbounded intvar
+- Add threshold for Element with array of variables signature
+- Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)
+- Remove `CPProfiler` since the project is not active anymore.
+
+### JAR Files
+Since 4.10.9, two new jar files are available for download. 
+These are lighter versions of those with dependencies, 
+namely `choco-solver-light-VERSION.jar` and `choco-parsers-light-VERSION.jar`.
+The following dependency have been excluded from this archive:
+- `org.apache.pdfbox:pdfbox`
+- `org.apache.fontbox:fontbox`
+- `com.ibm.icu:icu4j`
+
+This results in 57% and 82% smaller archives respectively.
+Note that the non-alleged versions are still available for download.
+
 ### Deprecated API (to be removed in next release):
+- `IOutputFactory.outputSearchTreeToCPProfiler(boolean domain)`
 
 ### Other closed issues and pull requests:
 See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 - [Mathieu Vavrille](https://github.com/MathieuVavrille) (@MathieuVavrille)
-- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)    
+- [Nicolas Pierre](https://github.com/PoltyPoltou) (@PoltyPoltou)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
     
 4.10.8 - 07 Jan 2022
 -------------------

@@ -192,6 +192,11 @@ public interface GraphVar<E extends IGraph> extends Variable {
     }
 
     @Override
+    default int getDomainSize() {
+        throw new UnsupportedOperationException("No domain size for GraphVar");
+    }
+
+    @Override
     GraphDelta getDelta();
 
     /**
@@ -202,8 +207,4 @@ public interface GraphVar<E extends IGraph> extends Variable {
      */
     IGraphDeltaMonitor monitorDelta(ICause propagator);
 
-    @Override
-    default int getDomainSize() {
-        return getUB().getDomainSize() + 1 - getLB().getDomainSize();
-    }
 }

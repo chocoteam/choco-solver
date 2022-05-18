@@ -32,7 +32,7 @@ import static java.lang.System.out;
 import static org.testng.Assert.assertEquals;
 
 /**
- * -Djava.library.path=-Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.3.1/__build__/plugins/java
+ * -Djava.library.path=/usr/local/lib
  * <br/>
  *
  * @author Charles Prud'homme

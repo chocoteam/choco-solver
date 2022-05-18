@@ -62,6 +62,22 @@ public class BoolNotViewTest {
         }
     }
 
+    @Test(groups = "1s")
+    public void test2() throws ContradictionException {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        b.not().removeInterval(-2, 0, Cause.Null);
+        Assert.assertEquals(b.getValue(), 0);
+    }
+
+    @Test(groups = "1s")
+    public void test3() throws ContradictionException {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        b.not().removeInterval(1, 3, Cause.Null);
+        Assert.assertEquals(b.getValue(), 1);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void testIt() {
         Model ref = new Model();

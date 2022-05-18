@@ -81,11 +81,11 @@ public class PropSignedClause extends Propagator<IntVar> {
      * <p/>
      * ( ... &or; vars[i] &isin; ranges[i] &or; ... )
      *
-     * @param vars set of variables
+     * @param vars   set of variables
      * @param ranges set of allowed ranges
      * @return a instance of {@link PropSignedClause}
      */
-    public static PropSignedClause makeFromIn(IntVar[] vars, IntIterableRangeSet[] ranges){
+    public static PropSignedClause makeFromIn(IntVar[] vars, IntIterableRangeSet[] ranges) {
         return new PropSignedClause(vars, ranges, true);
     }
 
@@ -93,11 +93,12 @@ public class PropSignedClause extends Propagator<IntVar> {
      * Create a {@link PropSignedClause} instance considering that 'ranges' are forbidden:
      * <p/>
      * ( ... &or; vars[i] &notin; ranges[i] &or; ... )
-     * @param vars set of variables
+     *
+     * @param vars   set of variables
      * @param ranges set of allowed ranges
      * @return a instance of {@link PropSignedClause}
      */
-    public static PropSignedClause makeFromOut(IntVar[] vars, IntIterableRangeSet[] ranges){
+    public static PropSignedClause makeFromOut(IntVar[] vars, IntIterableRangeSet[] ranges) {
         return new PropSignedClause(vars, ranges, false);
     }
 
@@ -137,7 +138,7 @@ public class PropSignedClause extends Propagator<IntVar> {
         return IntEventType.boundAndInst();//all();
     }
 
-    public void forceActivation(){
+    public void forceActivation() {
         setActive0();
     }
 
@@ -212,16 +213,13 @@ public class PropSignedClause extends Propagator<IntVar> {
                 p = 0;
                 FL ^= F1;
             }
+            if (p == 0) {
+                // Make sure the false literal is pos[1]:
+                swap();
+            }
             // assertion: p is false
             int l0 = pos[0];
             int l1 = pos[1];
-            if (p == 0) {
-                // Make sure the false literal is pos[1]:
-                int t = l0;
-                pos[0] = l0 = l1;
-                pos[1] = l1 = t;
-                swap();
-            }
             // Look for new watch:
             boolean cont = false;
             for (; k < to; k++) {
@@ -231,7 +229,7 @@ public class PropSignedClause extends Propagator<IntVar> {
                     // update watcher -- preserve the operations order
                     if (vars[1] != mvars[l]) {
                         vars[1].unlink(this, 1);
-                        setVIndices(1, mvars[l].link(this, 1));
+                        mvars[l].link(this, 1);
                         vars[1] = mvars[l];
                     }
                     pos[1] = l;
@@ -264,22 +262,16 @@ public class PropSignedClause extends Propagator<IntVar> {
     }
 
     private void swap() {
-        // update propagator internal structure
-        // 0. get temp var
+        vars[0].unlink(this, 0);
+        vars[1].unlink(this, 1);
         IntVar v = this.vars[1];
-        // 1. swap variables
         vars[1] = vars[0];
         vars[0] = v;
-        int vi0 = getVIndice(0);
-        assert vars[1].getIndexInPropagator(vi0) == 0;
-        int vi1 = getVIndice(1);
-        assert vars[0].getIndexInPropagator(vi1) == 1;
-        // 2. swap pindices
-        this.vars[0].setPIndice(vi1, 0);
-        this.vars[1].setPIndice(vi0, 1);
-        // 3. swap vindices
-        setVIndices(0, vi1);
-        setVIndices(1, vi0);
+        int t = pos[0];
+        pos[0] = pos[1];
+        pos[1] = t;
+        vars[0].link(this, 0);
+        vars[1].link(this, 1);
     }
 
     int getNbFalsified() {
@@ -312,11 +304,12 @@ public class PropSignedClause extends Propagator<IntVar> {
      *     <li>var(ci) &sube; var(cj) and</li>
      *     <li>for each v in var(ci), rang(v, ci) &sube; rang(v, cj)</li>
      * </ul>
-     * @implSpec vars in each clause is supposed to be sorted wrt the var ID.
-     * Otherwise, this method can return incorrect results.
+     *
      * @param cj another clause
      * @return negative integer, zero, or a positive integer as ci outshines,
      * is not comparable with or is outshone by cj.
+     * @implSpec vars in each clause is supposed to be sorted wrt the var ID.
+     * Otherwise, this method can return incorrect results.
      */
     final int dominate(PropSignedClause cj) {
         if (this.mvars.length < cj.mvars.length) {
@@ -330,23 +323,25 @@ public class PropSignedClause extends Propagator<IntVar> {
 
     /**
      * Considering |ci| < |cj|, test if ci outshines cj.
-     * @implSpec variables, in each clause, are supposed to be sorted wrt to increasing ID.
+     *
      * @param ci a clause
      * @param cj another clause
      * @return 1 if ci outshines cj, 0 otherwise
+     * @implSpec variables, in each clause, are supposed to be sorted wrt to increasing ID.
      */
-    private int outhsine0(PropSignedClause ci, PropSignedClause cj){
+    private int outhsine0(PropSignedClause ci, PropSignedClause cj) {
         return 0;
     }
 
     /**
      * Considering two clauses with same cardinality, check which one outshines the other, if any.
-     * @implSpec variables, in each clause, are supposed to be sorted wrt to increasing ID.
+     *
      * @param ci a clause
      * @param cj another clause
      * @return 1, 0 or -1 as ci outshines cj, ci and cj are incomparable or cj oushines ci.
+     * @implSpec variables, in each clause, are supposed to be sorted wrt to increasing ID.
      */
-    private int outhsine1(PropSignedClause ci, PropSignedClause cj){
+    private int outhsine1(PropSignedClause ci, PropSignedClause cj) {
         return 0;
     }
 
@@ -380,7 +375,7 @@ public class PropSignedClause extends Propagator<IntVar> {
                 set.addBetween(bounds[i << 1], bounds[(i << 1) + 1]);
                 i++;
             } while (i < mvars.length && mvars[i - 1] == mvars[i]);
-            if(v == pivot){
+            if (v == pivot) {
                 v.intersectLit(set, explanation);
             } else {
                 v.unionLit(set, explanation);

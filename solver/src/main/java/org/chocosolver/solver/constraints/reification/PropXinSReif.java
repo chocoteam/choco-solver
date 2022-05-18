@@ -40,30 +40,30 @@ public class PropXinSReif extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (r.getLB() == 1) {
-            var.removeAllValuesBut(set, this);
+        if (r.isInstantiated()) {
+            if (r.getValue() == 1) {
+                var.removeAllValuesBut(set, this);
+                setPassive();
+            } else {
+                if (var.removeValues(set, this) || !set.intersect(var)) {
+                    setPassive();
+                }
+            }
+        } else if (IntIterableSetUtils.includedIn(var, set)) {
+            r.setToTrue(this);
             setPassive();
-        } else if (r.getUB() == 0) {
-            if (var.removeValues(set, this) || !set.intersect(var)) {
-                setPassive();
-            }
-        } else {
-            if (IntIterableSetUtils.includedIn(var, set)) {
-                r.setToTrue(this);
-                setPassive();
-            } else if (!set.intersect(var)) {
-                r.setToFalse(this);
-                setPassive();
-            }
+        } else if (!set.intersect(var)) {
+            r.setToFalse(this);
+            setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if(isCompletelyInstantiated()){
-            if(r.isInstantiatedTo(1)){
+        if (isCompletelyInstantiated()) {
+            if (r.isInstantiatedTo(1)) {
                 return ESat.eval(IntIterableSetUtils.includedIn(var, set));
-            }else{
+            } else {
                 return ESat.eval(!set.intersect(var));
             }
         }
@@ -72,9 +72,7 @@ public class PropXinSReif extends Propagator<IntVar> {
 
 
     /**
-     * @implSpec
-     *
-     * Premise: (x &isin; S) &hArr; b
+     * @implSpec Premise: (x &isin; S) &hArr; b
      * <p>
      * 4 cases here (only cases that triggered filtering are reported):
      * <ol type="a">
@@ -143,7 +141,7 @@ public class PropXinSReif extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + var.getName() +" ∈ " + set + ") <=> "+r.getName();
+        return "(" + var.getName() + " ∈ " + set + ") <=> " + r.getName();
     }
 
 }

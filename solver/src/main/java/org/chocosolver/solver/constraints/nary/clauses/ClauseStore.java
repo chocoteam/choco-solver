@@ -916,12 +916,12 @@ public class ClauseStore extends Propagator<IntVar> {
             StringBuilder st = new StringBuilder();
             st.append("#").append(id).append(" : ");
             st.append("?").append(isEntailed()).append(" : ");
-            st.append('(').append(mvars[pos[0]]).append(" \u2208 [")
+            st.append('(').append(mvars[pos[0]].getName()).append(" \u2208 [")
                     .append(bounds[pos[0] << 1]).append(',').append(bounds[(pos[0] << 1) + 1]).append(']');
             st.append(':').append(check(pos[0]));
             for (int i = 1; i < pos.length; i++) {
                 st.append(") \u2228 (");
-                st.append(mvars[pos[i]]).append(" \u2208 [").append(bounds[pos[i] << 1])
+                st.append(mvars[pos[i]].getName()).append(" \u2208 [").append(bounds[pos[i] << 1])
                         .append(',').append(bounds[(pos[i] << 1) + 1]).append(']');
                 st.append(':').append(check(pos[i]));
             }

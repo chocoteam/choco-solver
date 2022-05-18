@@ -9,7 +9,7 @@ enlight9.mps.gz,0,1000,511,512,true
 pigeon-11.mps.gz,1,0.0,1618,500,true
 bg512142.mps.gz,0,999.0001,0,1,true
 glass4.mps.gz,0,999.0001,0,1,true
-mik-250-1-100-1.mps.gz,4,-998.9999999999999,9653,8490,true
+mik-250-1-100-1.mps.gz,5,-998.9999999999981,12272,10500,true
 m100n500k4r1.mps.gz,12,-17,5076212,5075748,false
 noswot.mps.gz,4,-41,1195217,1187590,false
 ns1766074.mps.gz,0,1000,5,6,true
@@ -21,4 +21,4 @@ p2m2p1m1p0n100.mps.gz,0,1000,0,1,true
 timtab1.mps.gz,0,999.0001,0,1,true
 pigeon-10.mps.gz,1,0.0,1471,500,true
 pigeon-12.mps.gz,1,0.0,1765,500,true
-markshare_5_0.mps.gz,27,8.0,3300384,3274864,false
+markshare_5_0.mps.gz,28,3.0000000000000036,3300384,3274864,false

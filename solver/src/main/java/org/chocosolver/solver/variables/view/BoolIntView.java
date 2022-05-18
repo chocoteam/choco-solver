@@ -94,16 +94,6 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final boolean setToTrue(ICause cause) throws ContradictionException {
-        return instantiateTo(1, cause);
-    }
-
-    @Override
-    public final boolean setToFalse(ICause cause) throws ContradictionException {
-        return instantiateTo(0, cause);
-    }
-
-    @Override
     public final boolean removeValue(int value, ICause cause) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)

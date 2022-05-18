@@ -39,7 +39,7 @@ public class SuspiciousTest {
         s.getSolver().limitBacktrack(50);
         while (s.getSolver().solve()) ;
         long bc = s.getSolver().getBackTrackCount();
-        assertEquals(bc, 57);
+        assertEquals(bc, 50);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -77,6 +77,6 @@ public class SuspiciousTest {
         model.getSolver().limitNode(200);
         while (model.getSolver().solve()) ;
         long sc = model.getSolver().getSolutionCount();
-        assertEquals(sc, 47);
+        assertEquals(sc, 45);
     }
 }

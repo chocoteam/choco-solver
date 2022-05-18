@@ -135,6 +135,6 @@ public interface SetVar extends Variable {
 
 	@Override
 	default int getDomainSize() {
-		return getUB().size() + 1 - getLB().size();
+		return 1 << (getUB().size() - getLB().size());
 	}
 }
