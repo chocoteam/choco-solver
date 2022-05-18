@@ -34,7 +34,8 @@ public class PropXeqYCReif extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[2].getLB() == 1) {
+        if(vars[2].isInstantiated()){
+        if (vars[2].getValue() == 1) {
             if (vars[0].isInstantiated()) {
                 vars[1].instantiateTo(vars[0].getValue() - cste, this);
                 setPassive();
@@ -61,18 +62,19 @@ public class PropXeqYCReif extends Propagator<IntVar> {
                     }
                 }
             }
-        } else if (vars[2].getUB() == 0) {
+        } else {
             if (vars[0].isInstantiated()) {
-                if (vars[1].removeValue(vars[0].getValue() - cste, this) || !vars[1].contains(vars[0].getValue() - cste)) {
+                if (!vars[1].contains(vars[0].getValue() - cste) || vars[1].removeValue(vars[0].getValue() - cste, this)) {
                     setPassive();
                 }
             } else if (vars[1].isInstantiated()) {
-                if (vars[0].removeValue(vars[1].getValue() + cste, this) || !vars[0].contains(vars[1].getValue() + cste)) {
+                if (!vars[0].contains(vars[1].getValue() + cste) || vars[0].removeValue(vars[1].getValue() + cste, this)) {
                     setPassive();
                 }
             } else if (vars[0].getUB() < (vars[1].getLB() + cste) || (vars[1].getUB() + cste) < vars[0].getLB()) {
                 setPassive();
             }
+        }
         } else {
             if (vars[0].isInstantiated()) {
                 if (vars[1].isInstantiated()) {
