@@ -727,7 +727,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (TuplesFactory.canBeTupled(X, Y, Z)) {
             return table(new IntVar[]{X, Y, Z}, TuplesFactory.times(X, Y, Z));
         } else {
-            return new Constraint(ConstraintsName.TIMES, new PropTimesNaive(X, Y, Z));
+            long a = X.getLB(), b = X.getUB(), c = Y.getLB(), d = Y.getUB();
+            long min = Math.min(Math.min(a * c, a * d), Math.min(b * c, b * d));
+            long max = Math.max(Math.max(a * c, a * d), Math.max(b * c, b * d));
+            if ((int) min != min || (int) max != max) {
+                return new Constraint(ConstraintsName.TIMES, new PropTimesNaiveWithLong(X, Y, Z));
+            } else {
+                return new Constraint(ConstraintsName.TIMES, new PropTimesNaive(X, Y, Z));
+            }
         }
     }
 
