@@ -20,10 +20,14 @@ import org.chocosolver.parser.flatzinc.ast.searches.SetSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.VarChoice;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.decision.Decision;
+import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.objects.IntCircularQueue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -49,7 +53,8 @@ public class FGoal {
         seq_search,
         int_search,
         bool_search,
-        set_search
+        set_search,
+        warm_start
     }
 
     public static void define_goal(Model aModel, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
@@ -111,6 +116,29 @@ public class FGoal {
             }
             return org.chocosolver.solver.search.strategy.Search.sequencer(strats);
         }
+        if (search == Search.warm_start) {
+            IntVar[] scope = exps[0].toIntVarArray(solver); // deal with set var?
+            int[] values = exps[1].toIntArray();
+            IntCircularQueue q = new IntCircularQueue(scope.length);
+            for (int i = 0; i < scope.length; i++) {
+                q.addLast(i);
+            }
+            return new AbstractStrategy<IntVar>() {
+                @Override
+                public Decision<IntVar> getDecision() {
+                    IntDecision dec = null;
+                    if (!q.isEmpty()) {
+                        int i = q.pollFirst();
+                        IntVar var = scope[i];
+                        int val = values[i];
+                        dec = solver.getSolver().getDecisionPath().makeIntDecision(
+                                var, DecisionOperatorFactory.makeIntEq(), val);
+                    }
+                    return dec;
+                }
+            };
+        }
+
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
         description.append(vchoice).append(";");
         Assignment assignment = Assignment.valueOf(((EIdentifier) exps[2]).value);

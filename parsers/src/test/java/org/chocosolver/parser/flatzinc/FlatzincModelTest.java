@@ -112,5 +112,36 @@ public class FlatzincModelTest {
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
+    
+    @Test(groups = "1s")
+    public void testWarmStart() {
+        InputStream in = new ByteArrayInputStream(("array [1..10] of int: X_INTRODUCED_11_ = [1,1,1,1,1,1,1,1,1,1];\n" +
+                "array [1..10] of int: X_INTRODUCED_12_ = [1,0,0,1,0,0,1,0,0,0];\n" +
+                "var 0..1: X_INTRODUCED_0_;\n" +
+                "var 0..1: X_INTRODUCED_1_;\n" +
+                "var 0..1: X_INTRODUCED_2_;\n" +
+                "var 0..1: X_INTRODUCED_3_;\n" +
+                "var 0..1: X_INTRODUCED_4_;\n" +
+                "var 0..1: X_INTRODUCED_5_;\n" +
+                "var 0..1: X_INTRODUCED_6_;\n" +
+                "var 0..1: X_INTRODUCED_7_;\n" +
+                "var 0..1: X_INTRODUCED_8_;\n" +
+                "var 0..1: X_INTRODUCED_9_;\n" +
+                "array [1..10] of var int: x:: output_array([1..10]) = [X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_];\n" +
+                "constraint int_lin_le(X_INTRODUCED_11_,[X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_],3);\n" +
+                "solve :: warm_start(x,X_INTRODUCED_12_) satisfy;").getBytes());
+        Flatzinc fzn = new Flatzinc(false, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        fzn.configureSearch();
+        Model model = fzn.getModel();
+        //model.getSolver().showDecisions();
+        //model.getSolver().limitSolution(3);
+        while(model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 176);
+    }
 
 }
