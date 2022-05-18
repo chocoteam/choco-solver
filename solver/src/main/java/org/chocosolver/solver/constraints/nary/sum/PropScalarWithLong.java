@@ -246,7 +246,7 @@ public class PropScalarWithLong extends PropSumWithLong {
             return;
         }
         int w = -1;
-        int sum = 0;
+        long sum = 0;
         for (int i = 0; i < l; i++) {
             if (vars[i].isInstantiated()) {
                 sum += vars[i].getValue() * c[i];

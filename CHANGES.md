@@ -18,6 +18,7 @@ NEXT MILESTONE
 - Add threshold for Element with array of variables signature
 - Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)
 - Remove `CPProfiler` since the project is not active anymore.
+- Make possible to deal with large domains for some constraints (#894)
 
 ### JAR Files
 Since 4.10.9, two new jar files are available for download. 
