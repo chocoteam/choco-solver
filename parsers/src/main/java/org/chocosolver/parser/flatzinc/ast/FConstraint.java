@@ -907,14 +907,14 @@ public enum FConstraint {
             model.circuit(vars, offset).post();
         }
     },
-    fzn_decreasing_bool{
+    fzn_decreasing_bool {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] vars = exps.get(0).toBoolVarArray(model);
             model.decreasing(vars, 0).post();
         }
     },
-    fzn_decreasing_int{
+    fzn_decreasing_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
@@ -1153,14 +1153,14 @@ public enum FConstraint {
 
         }
     },
-    fzn_increasing_bool{
+    fzn_increasing_bool {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] vars = exps.get(0).toBoolVarArray(model);
             model.increasing(vars, 0).post();
         }
     },
-    fzn_increasing_int{
+    fzn_increasing_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
@@ -2088,19 +2088,13 @@ public enum FConstraint {
     bool_eq_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            BoolVar a = exps.get(0).boolVarValue(model);
-            BoolVar b = exps.get(1).boolVarValue(model);
-            BoolVar r = exps.get(2).boolVarValue(model);
-            a.eq(b).decompose().impliedBy(r);
+            int_eq_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_ne_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            BoolVar a = exps.get(0).boolVarValue(model);
-            BoolVar b = exps.get(1).boolVarValue(model);
-            BoolVar r = exps.get(2).boolVarValue(model);
-            a.ne(b).decompose().impliedBy(r);
+            int_ne_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_or_imp {
@@ -2124,61 +2118,37 @@ public enum FConstraint {
     bool_lin_eq_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "=", c, as.length + 1).impliedBy(r);
+            int_lin_eq_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_ge_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, ">=", c, as.length + 1).impliedBy(r);
+            int_lin_ge_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_gt_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, ">", c, as.length + 1).impliedBy(r);
+            int_lin_gt_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_le_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "<=", c, as.length + 1).impliedBy(r);
+            int_lin_le_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_lt_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "<", c, as.length + 1).impliedBy(r);
+            int_lin_lt_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_ne_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "!=", c, as.length + 1).impliedBy(r);
+            int_lin_ne_imp.build(model, datas, id, exps, annotations);
         }
     },
     int_eq_imp {
