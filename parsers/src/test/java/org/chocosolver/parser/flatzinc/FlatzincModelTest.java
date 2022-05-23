@@ -129,7 +129,7 @@ public class FlatzincModelTest {
                 "var 0..1: X_INTRODUCED_9_;\n" +
                 "array [1..10] of var int: x:: output_array([1..10]) = [X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_];\n" +
                 "constraint int_lin_le(X_INTRODUCED_11_,[X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_,X_INTRODUCED_8_,X_INTRODUCED_9_],3);\n" +
-                "solve :: warm_start(x,X_INTRODUCED_12_) satisfy;").getBytes());
+                "solve :: warm_start_int(x,X_INTRODUCED_12_) satisfy;").getBytes());
         Flatzinc fzn = new Flatzinc(false, false, 1);
         fzn.createSettings();
         fzn.createSolver();

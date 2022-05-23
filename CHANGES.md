@@ -8,8 +8,9 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- It is now possible to declare hints to help the search finding a first solution. See `solver.addHint(var, val)`.
 - Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
-- Extend some black-box strategies to `SetVar` and `GraphVar`
+- Extend some black-box strategies to `SetVar`
 - Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
 - Add `increasing` and `decreasing` constraints
 - Add `costFlow` constraint, which is composed of scalar products and a MinCostMaxFlow propagator

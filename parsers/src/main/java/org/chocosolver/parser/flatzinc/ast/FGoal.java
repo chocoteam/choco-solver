@@ -20,33 +20,30 @@ import org.chocosolver.parser.flatzinc.ast.searches.SetSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.VarChoice;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
-import org.chocosolver.solver.search.strategy.decision.Decision;
-import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
-import org.chocosolver.util.objects.IntCircularQueue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 /*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 12 janv. 2010
-* Since : Choco 2.1.1
-*
-* Class for solve goals definition based on flatzinc-like objects.
-*
-* A solve goal is defined with:
-* </br> 'solve annotations satisfy;'
-* </br> or 'solve annotations maximize expression;'
-* /br> or 'solve annotations minimize expression;' 
-*/
+ * User : CPRUDHOM
+ * Mail : cprudhom(a)emn.fr
+ * Date : 12 janv. 2010
+ * Since : Choco 2.1.1
+ *
+ * Class for solve goals definition based on flatzinc-like objects.
+ *
+ * A solve goal is defined with:
+ * </br> 'solve annotations satisfy;'
+ * </br> or 'solve annotations maximize expression;'
+ * /br> or 'solve annotations minimize expression;'
+ */
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class FGoal {
 
     private enum Search {
@@ -54,7 +51,8 @@ public class FGoal {
         int_search,
         bool_search,
         set_search,
-        warm_start
+        warm_start_bool,
+        warm_start_int
     }
 
     public static void define_goal(Model aModel, List<EAnnotation> annotations, ResolutionPolicy type, Expression expr) {
@@ -102,41 +100,27 @@ public class FGoal {
         Expression[] exps = new Expression[e.exps.size()];
         e.exps.toArray(exps);
         Search search;
-        try{
+        try {
             search = Search.valueOf(e.id.value);
-        }catch (IllegalArgumentException ex){
+        } catch (IllegalArgumentException ex) {
             solver.getSolver().log().printf("%% ignored search annotation: %s\n", e);
             return null;
         }
-        if(search == Search.seq_search){
-            EArray eArray = (EArray)e.exps.get(0);
+        if (search == Search.seq_search) {
+            EArray eArray = (EArray) e.exps.get(0);
             AbstractStrategy[] strats = new AbstractStrategy[eArray.what.size()];
-            for(int i = 0; i < strats.length; i++){
-                strats[i] = readSearchAnnotation((EAnnotation)eArray.getWhat_i(i), solver, description);
+            for (int i = 0; i < strats.length; i++) {
+                strats[i] = readSearchAnnotation((EAnnotation) eArray.getWhat_i(i), solver, description);
             }
             return org.chocosolver.solver.search.strategy.Search.sequencer(strats);
         }
-        if (search == Search.warm_start) {
+        if (search == Search.warm_start_int || search == Search.warm_start_bool) {
             IntVar[] scope = exps[0].toIntVarArray(solver); // deal with set var?
             int[] values = exps[1].toIntArray();
-            IntCircularQueue q = new IntCircularQueue(scope.length);
-            for (int i = 0; i < scope.length; i++) {
-                q.addLast(i);
+            for(int i = 0; i < scope.length; i++){
+                solver.getSolver().addHint(scope[i], values[i]);
             }
-            return new AbstractStrategy<IntVar>() {
-                @Override
-                public Decision<IntVar> getDecision() {
-                    IntDecision dec = null;
-                    if (!q.isEmpty()) {
-                        int i = q.pollFirst();
-                        IntVar var = scope[i];
-                        int val = values[i];
-                        dec = solver.getSolver().getDecisionPath().makeIntDecision(
-                                var, DecisionOperatorFactory.makeIntEq(), val);
-                    }
-                    return dec;
-                }
-            };
+            return null;
         }
 
         VarChoice vchoice = VarChoice.valueOf(((EIdentifier) exps[1]).value);
