@@ -1,0 +1,17 @@
+var set of 1..3: X_INTRODUCED_0_;
+var set of 1..3: X_INTRODUCED_1_;
+var set of 1..3: X_INTRODUCED_2_;
+var set of 1..3: X_INTRODUCED_3_;
+var set of 1..3: X_INTRODUCED_4_;
+var set of 1..3: X_INTRODUCED_5_;
+var set of 1..3: X_INTRODUCED_6_;
+var set of 1..3: X_INTRODUCED_7_;
+array [1..8] of var set of int: sets:: output_array([1..8]) = [X_INTRODUCED_0_,X_INTRODUCED_1_,X_INTRODUCED_2_,X_INTRODUCED_3_,X_INTRODUCED_4_,X_INTRODUCED_5_,X_INTRODUCED_6_,X_INTRODUCED_7_];
+constraint set_lt(X_INTRODUCED_0_,X_INTRODUCED_1_);
+constraint set_lt(X_INTRODUCED_1_,X_INTRODUCED_2_);
+constraint set_lt(X_INTRODUCED_2_,X_INTRODUCED_3_);
+constraint set_lt(X_INTRODUCED_3_,X_INTRODUCED_4_);
+constraint set_lt(X_INTRODUCED_4_,X_INTRODUCED_5_);
+constraint set_lt(X_INTRODUCED_5_,X_INTRODUCED_6_);
+constraint set_lt(X_INTRODUCED_6_,X_INTRODUCED_7_);
+solve  satisfy;

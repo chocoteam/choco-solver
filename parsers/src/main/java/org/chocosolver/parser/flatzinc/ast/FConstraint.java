@@ -10,7 +10,6 @@
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
@@ -19,7 +18,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
-import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.*;
@@ -1798,33 +1796,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-
-            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
-
-            TIntHashSet values = new TIntHashSet();
-            for (int i : a.getUB()) {
-                values.add(i);
-            }
-            for (int i : b.getUB()) {
-                values.add(i);
-            }
-            int[] env = values.toArray();
-            Arrays.sort(env);
-            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
-            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
-
-            BoolVar _b1 = model.subsetEq(a, b).reify();
-
-            model.post(model.partition(new SetVar[]{ab, b}, a),
-                    model.partition(new SetVar[]{ba, a}, b),
-                    model.union(new SetVar[]{ab, ba}, c));
-
-            model.min(c, min, false);
-            BoolVar _b2 = model.member(min, a).reify();
-
-            model.addClausesAtMostNMinusOne(new BoolVar[]{_b1, _b2});
-
+            model.setLe(a, b).post();
         }
     },
     set_lt {
@@ -1833,33 +1805,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-
-            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
-
-            TIntHashSet values = new TIntHashSet();
-            for (int i : a.getUB()) {
-                values.add(i);
-            }
-            for (int i : b.getUB()) {
-                values.add(i);
-            }
-            int[] env = values.toArray();
-            Arrays.sort(env);
-            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
-            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
-
-            BoolVar _b1 = model.subsetEq(a, b).reify();
-            BoolVar _b2 = model.allDifferent(a, b).reify();
-
-            model.post(model.partition(new SetVar[]{ab, b}, a),
-                    model.partition(new SetVar[]{ba, a}, b),
-                    model.union(new SetVar[]{ab, ba}, c));
-            model.min(c, min, false);
-            BoolVar _b3 = model.member(min, a).reify();
-
-            model.addClauses(LogOp.or(_b3, LogOp.and(_b1, _b2)));
-
+            model.setLt(a, b).post();
         }
     },
     set_ne {

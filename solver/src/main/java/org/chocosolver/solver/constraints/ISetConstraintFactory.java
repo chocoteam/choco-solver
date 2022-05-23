@@ -9,11 +9,13 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.set.*;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -24,7 +26,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Jean-Guillaume FAGES
  * @since 4.0.0
  */
-public interface ISetConstraintFactory {
+public interface ISetConstraintFactory extends ISelf<Model> {
 
     //***********************************************************************************
     // BASICS : union/inter/subset/card
@@ -60,9 +62,9 @@ public interface ISetConstraintFactory {
      * is equal to <i>unionSet</i>.
      *
      * @param unionSet set variable representing the union of <i>sets</i>
-     * @param vOffset value offset
+     * @param vOffset  value offset
      * @param indices  set variable representing the indices of selected variables in <i>sets</i>
-     * @param iOffset index offset
+     * @param iOffset  index offset
      * @param sets     an array of set variables
      * @return A constraint ensuring that the <i>indices-</i>union of <i>sets</i> is equal to <i>unionSet</i>
      */
@@ -140,7 +142,7 @@ public interface ISetConstraintFactory {
      * @return A constraint ensuring that |{s in <i>sets</i> where |s|=0}| = <i>nbEmpty</i>
      */
     default Constraint nbEmpty(SetVar[] sets, int nbEmpty) {
-        return nbEmpty(sets, sets[0].getModel().intVar(nbEmpty));
+        return nbEmpty(sets, ref().intVar(nbEmpty));
     }
 
     /**
@@ -515,7 +517,7 @@ public interface ISetConstraintFactory {
      * @return a constraint ensuring that <i>set</i> belongs to <i>sets</i>
      */
     default Constraint member(SetVar[] sets, SetVar set) {
-        IntVar index = set.getModel().intVar("idx_tmp", 0, sets.length - 1, false);
+        IntVar index = ref().intVar("idx_tmp", 0, sets.length - 1, false);
         return element(index, sets, 0, set);
     }
 
@@ -571,9 +573,8 @@ public interface ISetConstraintFactory {
         } else {
             IntVar integer = intVar;
             if (!intVar.hasEnumeratedDomain()) {
-                Model s = intVar.getModel();
-                integer = s.intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
-                s.arithm(integer, "=", intVar).post();
+                integer = ref().intVar("enumViewOf(" + intVar.getName() + ")", intVar.getLB(), intVar.getUB(), false);
+                ref().arithm(integer, "=", intVar).post();
             }
             return new Constraint(ConstraintsName.SETNOTMEMBER,
                     new PropNotMemberIntSet(integer, set),
@@ -600,5 +601,47 @@ public interface ISetConstraintFactory {
                 return member(cst, set);
             }
         };
+    }
+
+    /**
+     * Creates a "less or equal" constraint stating that the constant <i>a</i> &#8828; <i>b</i>.
+     * <p>Lexicographic order of the sorted lists of elements.
+     *
+     * @param a a SetVar
+     * @param b a SetVar
+     * @return a constraint ensuring that <i>a</i> and <i>b</i> are lexicographically ordered.
+     * @implSpec This is based on {@link org.chocosolver.solver.variables.IViewFactory#setBoolsView(SetVar, int, int)}
+     * and {@link IIntConstraintFactory#lexLessEq(IntVar[], IntVar[])}
+     */
+    default Constraint setLe(final SetVar a, final SetVar b) {
+        IntIterableRangeSet union = new IntIterableRangeSet();
+        for (int v : a.getUB()) {
+            union.add(v);
+        }
+        for (int v : b.getUB()) {
+            union.add(v);
+        }
+        return ref().lexLessEq(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
+    }
+
+    /**
+     * Creates a "strictly less" constraint stating that the constant <i>a</i> &#8826; <i>b</i>.
+     * <p>Lexicographic order of the sorted lists of elements.
+     *
+     * @param a a SetVar
+     * @param b a SetVar
+     * @return a constraint ensuring that <i>a</i> and <i>b</i> are lexicographically ordered.
+     * @implSpec This is based on {@link org.chocosolver.solver.variables.IViewFactory#setBoolsView(SetVar, int, int)}
+     * and {@link IIntConstraintFactory#lexLess(IntVar[], IntVar[])}
+     */
+    default Constraint setLt(final SetVar a, final SetVar b) {
+        IntIterableRangeSet union = new IntIterableRangeSet();
+        for (int v : a.getUB()) {
+            union.add(v);
+        }
+        for (int v : b.getUB()) {
+            union.add(v);
+        }
+        return ref().lexLess(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
     }
 }

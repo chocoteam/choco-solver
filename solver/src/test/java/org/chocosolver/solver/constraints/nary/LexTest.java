@@ -11,10 +11,13 @@ package org.chocosolver.solver.constraints.nary;
 
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -35,7 +38,7 @@ import static org.testng.Assert.fail;
 public class LexTest {
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testLessLexq() {
         for (int seed = 0; seed < 5; seed++) {
             Model model = new Model();
@@ -55,7 +58,7 @@ public class LexTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testLex() {
         for (int seed = 0; seed < 5; seed++) {
             Model model = new Model();
@@ -75,7 +78,7 @@ public class LexTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testLexiSatisfied() {
         Model model = new Model();
         IntVar v1 = model.intVar("v1", 1, 1, true);
@@ -97,7 +100,7 @@ public class LexTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testAshish() {
         Model model = new Model();
         IntVar[] a = new IntVar[2];
@@ -122,7 +125,7 @@ public class LexTest {
         assertEquals(6, model.getSolver().getSolutionCount());
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug1() {
         Model model = new Model();
         IntVar[] a = new IntVar[2];
@@ -146,7 +149,7 @@ public class LexTest {
         assertEquals(model.getSolver().getSolutionCount(), 4);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug2() {
         Model model = new Model();
         IntVar[] a = new IntVar[2];
@@ -170,7 +173,7 @@ public class LexTest {
         assertEquals(model.getSolver().getSolutionCount(), 8);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug3() {
         Model model = new Model();
         IntVar[] a = new IntVar[2];
@@ -192,7 +195,7 @@ public class LexTest {
         assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug4() {
         Model model = new Model();
         IntVar[] a = new IntVar[5];
@@ -220,7 +223,7 @@ public class LexTest {
         assertEquals(model.getSolver().getSolutionCount(), 216);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testBug5() {
         Model model = new Model();
         IntVar[] a = new IntVar[3];
@@ -247,43 +250,114 @@ public class LexTest {
         assertEquals(model.getSolver().getSolutionCount(), 30);
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
-    public void outOfBoundsInLexLE() throws Exception{
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void outOfBoundsInLexLE() throws Exception {
         Model choco = new Model();
 
         IntVar[] x = new IntVar[]{
                 choco.intVar(new int[]{2147483646}),
-                choco.intVar(new int[]{-800571629,-800571628,-800571626,-800571624,-800571622}),
-                choco.intVar(new int[]{-805251943,-805251939,-805251936,-805251935}),
+                choco.intVar(new int[]{-800571629, -800571628, -800571626, -800571624, -800571622}),
+                choco.intVar(new int[]{-805251943, -805251939, -805251936, -805251935}),
                 choco.intVar(new int[]{-937887857}),
         };
 
         IntVar[] y = new IntVar[]{
-                choco.intVar(new int[]{2147483641,2147483643,2147483644,2147483646}),
-                choco.intVar(new int[]{-3,0,2,3,4})
+                choco.intVar(new int[]{2147483641, 2147483643, 2147483644, 2147483646}),
+                choco.intVar(new int[]{-3, 0, 2, 3, 4})
         };
 
         choco.post(choco.lexLessEq(x, y));
         choco.getSolver().propagate();
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
-    public void outOfBoundsInLexLT() throws Exception{
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)
+    public void outOfBoundsInLexLT() throws Exception {
         Model choco = new Model();
 
         IntVar[] x = new IntVar[]{
                 choco.intVar(new int[]{2147483646}),
-                choco.intVar(new int[]{-800571629,-800571628,-800571626,-800571624,-800571622}),
-                choco.intVar(new int[]{-805251943,-805251939,-805251936,-805251935}),
+                choco.intVar(new int[]{-800571629, -800571628, -800571626, -800571624, -800571622}),
+                choco.intVar(new int[]{-805251943, -805251939, -805251936, -805251935}),
                 choco.intVar(new int[]{-937887857}),
         };
 
         IntVar[] y = new IntVar[]{
-                choco.intVar(new int[]{2147483641,2147483643,2147483644,2147483646}),
-                choco.intVar(new int[]{-3,0,2,3,4})
+                choco.intVar(new int[]{2147483641, 2147483643, 2147483644, 2147483646}),
+                choco.intVar(new int[]{-3, 0, 2, 3, 4})
         };
 
         choco.post(choco.lexLess(x, y));
         choco.getSolver().propagate();
     }
+
+
+    @Test(groups = "1s")
+    public void testBoolVar2() {
+        Model model = new Model();
+        SetVar a = model.setVar("a", new int[]{}, new int[]{0, 1});
+        SetVar b = model.setVar("b", new int[]{}, new int[]{1, 2});
+        model.setLe(a, b).post();
+        Solver solver = model.getSolver();
+        solver.showDecisions();
+        solver.setSearch(Search.setVarSearch(a, b));
+        Assert.assertEquals(solver.findAllSolutions().size(), 6);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s")
+    public void testBoolVar3() {
+        Model model = new Model();
+        SetVar a = model.setVar("a", new int[]{}, new int[]{0, 1, 2, 3});
+        SetVar b = model.setVar("b", new int[]{}, new int[]{0, 1, 2, 3});
+        model.setLe(a, b).post();
+        Solver solver = model.getSolver();
+        solver.showDecisions();
+        solver.setSearch(Search.setVarSearch(a, b));
+        Assert.assertEquals(solver.findAllSolutions().size(), 136);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s", enabled = true)
+    public void testBoolVar4() {
+        Model model = new Model();
+        SetVar a = model.setVar("a", new int[]{}, new int[]{0, 1});
+        SetVar b = model.setVar("b", new int[]{}, new int[]{1, 2});
+        model.setLt(a, b).post();
+        Solver solver = model.getSolver();
+        //solver.showDecisions();
+        solver.showSolutions();
+        solver.setSearch(Search.setVarSearch(a, b));
+        Assert.assertEquals(solver.findAllSolutions().size(), 4);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s", enabled = true)
+    public void testBoolVar5() {
+        Model model = new Model();
+        SetVar a = model.setVar("a", new int[]{}, new int[]{1, 2});
+        SetVar b = model.setVar("b", new int[]{}, new int[]{1, 2});
+        model.setLt(a, b).post();
+        Solver solver = model.getSolver();
+        //solver.showDecisions();
+        solver.showSolutions();
+        solver.setSearch(Search.setVarSearch(a, b));
+        Assert.assertEquals(solver.findAllSolutions().size(), 6);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s", enabled = true)
+    public void testBoolVar6() {
+        Model model = new Model();
+        SetVar a = model.setVar("a", new int[]{}, new int[]{1, 2, 3});
+        SetVar b = model.setVar("b", new int[]{}, new int[]{1, 2, 3});
+        model.setLt(a, b).post();
+
+        Solver solver = model.getSolver();
+        //solver.showDecisions();
+        solver.showSolutions();
+        solver.setSearch(Search.setVarSearch(a, b));
+        Assert.assertEquals(solver.findAllSolutions().size(), 28);
+        solver.printShortStatistics();
+    }
+
 }
