@@ -345,8 +345,12 @@ public final class FVariable {
                 break;
             case SET:
                 vs = new SetVar[size];
-                for (int i = 1; i <= size; i++) {
-                    vs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, expression, datas, solver);
+                if (expression == null) {
+                    for (int i = 1; i <= size; i++) {
+                        vs[i - 1] = buildWithSet(name + '_' + i, (DSet) what, expression, datas, solver);
+                    }
+                }else if (expression.getTypeOf().equals(Expression.EType.ARR)) {
+                    buildFromSetArray(vs, (EArray) expression, size, solver);
                 }
                 datas.register(name, vs);
                 break;
@@ -361,6 +365,13 @@ public final class FVariable {
         //build the array
         for (int i = 0; i < size; i++) {
             vs[i] = array.getWhat_i(i).intVarValue(solver);
+        }
+    }
+
+    private static void buildFromSetArray(Variable[] vs, EArray array, int size, Model solver) {
+        //build the array
+        for (int i = 0; i < size; i++) {
+            vs[i] = array.getWhat_i(i).setVarValue(solver);
         }
     }
 }
