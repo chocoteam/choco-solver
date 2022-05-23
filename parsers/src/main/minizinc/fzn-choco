@@ -153,7 +153,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -f -varh DOMWDEGR -valh BMIN -last -restarts '[luby,200,50000]' -flush 32 -lc 1"
+    ARGS=$ARGS" -f -varh DOMWDEGR -valh BMIN -last -restarts '[luby,200,50000]' -flush 32 -lc 1 -ocs OUTPUT"
 fi
 
 if test "${STAT_SOL}" = "yes"
@@ -161,7 +161,7 @@ then
     ARGS=$ARGS" -stasol"
 fi
 
-CMD="java -XX:+UseSerialGC -server -Xmx8G -Xss64M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"
+CMD="java -server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"
 
 if test "${LVL}" = "INFO"
 then

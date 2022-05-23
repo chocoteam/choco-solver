@@ -19,7 +19,13 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDegRef;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
@@ -45,12 +51,27 @@ import java.util.stream.Stream;
  */
 public class Flatzinc extends RegParser {
 
+    public enum CompleteSearch{
+        /**
+         * No complementary search (might be incorrect though)
+         */
+        NO,
+        /**
+         * Complete the search with a search on variables declared in output annotations
+         */
+        OUTPUT,
+        /**
+         * Complete the search with a search on all variables.
+         */
+        ALL
+    }
+
     @Option(name = "-stasol", usage = "Output statistics for solving (default: false).")
     protected boolean oss = false;
 
-    @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem " +
-            "(default: false, i.e., restricted to the variables declared in output).")
-    protected boolean ocs = false;
+    @Option(name = "-ocs", usage = "Opens the complementary search to all variables of the problem\n" +
+            "(default: OUTPUT, i.e., restricted to the variables declared in output).")
+    protected CompleteSearch ocs = CompleteSearch.OUTPUT;
 
     //***********************************************************************************
     // VARIABLES
@@ -108,6 +129,7 @@ public class Flatzinc extends RegParser {
         String iname = instance == null ? "" : Paths.get(instance).getFileName().toString();
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             datas[i] = new Datas(threadModel, level, oss);
             threadModel.addHook("CUMULATIVE", "GLB");
@@ -123,7 +145,6 @@ public class Flatzinc extends RegParser {
                 FileInputStream fileInputStream = new FileInputStream(instance);
                 parse(models.get(i), datas[i], fileInputStream);
                 fileInputStream.close();
-                models.get(i).getSolver().logWithANSI(ansi);
                 if (level.isLoggable(Level.INFO)) {
                     models.get(i).getSolver().log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
                 }
@@ -162,9 +183,9 @@ public class Flatzinc extends RegParser {
      * @param m a Model
      */
     protected void makeComplementarySearch(Model m, int i) {
-        if (ocs) {
+        if (ocs == CompleteSearch.ALL) {
             super.makeComplementarySearch(m, i);
-        } else {
+        } else if (ocs == CompleteSearch.OUTPUT) {
             Solver solver = m.getSolver();
             List<AbstractStrategy<?>> strats = new LinkedList<>();
             strats.add(solver.getSearch());
@@ -176,7 +197,16 @@ public class Flatzinc extends RegParser {
                         .sorted(Comparator.comparingInt(IntVar::getDomainSize))
                         .toArray(IntVar[]::new);
                 if (ivars.length > 0) {
-                    strats.add(Search.lastConflict(Search.minDomLBSearch(ivars)));
+                    IntValueSelector valueSelector;
+                    if (m.getResolutionPolicy() == ResolutionPolicy.SATISFACTION
+                            || !(m.getObjective() instanceof IntVar)) {
+                        valueSelector = new IntDomainMin();
+                    } else {
+                        valueSelector = new IntDomainBest();
+                        m.getSolver().attach(m.getSolver().defaultSolution());
+                        valueSelector = new IntDomainLast(m.getSolver().defaultSolution(), valueSelector, null);
+                    }
+                    strats.add(Search.lastConflict(new IntStrategy(ivars, new DomOverWDegRef<>(ivars, 0), valueSelector)));
                 }
                 SetVar[] svars = Stream.of(datas[i].allOutPutVars())
                         .filter(VariableUtils::isSet)
