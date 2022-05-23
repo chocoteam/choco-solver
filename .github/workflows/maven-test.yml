@@ -104,7 +104,7 @@ jobs:
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
   publish:
-    needs: [ test-parser ]
+    needs: [ test-solver ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
