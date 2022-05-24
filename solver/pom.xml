@@ -69,7 +69,7 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.3.0</version>
@@ -81,7 +81,8 @@
                         </goals>
                         <configuration>
                             <minimizeJar>true</minimizeJar>
-                            <finalName>${project.artifactId}-light-${project.version}</finalName>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>light</shadedClassifierName>
                             <filters>
                                 <filter>
                                     <artifact>org.apache.pdfbox:pdfbox</artifact>
@@ -99,7 +100,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>-->
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
