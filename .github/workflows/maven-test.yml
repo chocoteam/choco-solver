@@ -27,14 +27,6 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      # Caching deps
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
       # Install Ibex
       - name: Install Ibex
         if: matrix.group == 'ibex'
