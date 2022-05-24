@@ -22,15 +22,15 @@ NEXT MILESTONE
 - Make possible to deal with large domains for some constraints (#894)
 
 ### JAR Files
-Since 4.10.9, two new jar files are available for download. 
-These are lighter versions of those with dependencies, 
-namely `choco-solver-light-VERSION.jar` and `choco-parsers-light-VERSION.jar`.
+Since 4.10.9, a new jar file is available for download. 
+This is a lighter version of the one with dependencies, 
+namely `choco-parsers-light-VERSION.jar`.
 The following dependency have been excluded from this archive:
 - `org.apache.pdfbox:pdfbox`
 - `org.apache.fontbox:fontbox`
 - `com.ibm.icu:icu4j`
 
-This results in 57% and 82% smaller archives respectively.
+This results in 82% smaller archive.
 Note that the non-alleged versions are still available for download.
 
 ### Deprecated API (to be removed in next release):
