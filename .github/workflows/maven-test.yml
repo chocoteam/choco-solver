@@ -43,6 +43,11 @@ jobs:
       # Regression tests
       - name: Test ${{ matrix.group }}
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+
+      - name: Setup tmate session
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
+	
   test-parser:
     needs: [ test-solver ]
     runs-on: ubuntu-latest
