@@ -90,7 +90,7 @@ jobs:
       - name: Set up Maven central repository
         uses: actions/setup-java@v3
         with:
-          java-version: 8
+          java-version: 11
           distribution: 'temurin'
           server-id: ossrh
           server-username: MAVEN_USERNAME
