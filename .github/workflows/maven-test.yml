@@ -16,7 +16,7 @@ jobs:
     strategy:
       #fail-fast: false
       matrix:
-        group: [ "1s", "10s", "checker", "ibex" ]
+        group: [ "no", "1s", "10s", "checker", "ibex" ]
 
     # The different steps
     steps:
@@ -35,7 +35,7 @@ jobs:
 
       # Regression tests
       - name: Test ${{ matrix.group }}
-        run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+        run: mvn -B --file pom.xml package -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
       - name: Setup tmate session
         if: ${{ failure() }}
