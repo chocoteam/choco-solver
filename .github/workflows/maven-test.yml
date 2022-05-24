@@ -47,7 +47,7 @@ jobs:
       - name: Setup tmate session
         if: ${{ failure() }}
         uses: mxschmitt/action-tmate@v3
-	
+
   test-parser:
     needs: [ test-solver ]
     runs-on: ubuntu-latest
