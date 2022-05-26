@@ -13,6 +13,7 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -68,6 +69,14 @@ public class BoolNotViewTest {
         BoolVar b = ref.boolVar();
         b.not().removeInterval(-2, 0, Cause.Null);
         Assert.assertEquals(b.getValue(), 0);
+    }
+
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds() throws Exception {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        BoolNotView bnot = (BoolNotView) b.not();
+        bnot.updateBounds(1,0, Cause.Null);
     }
 
     @Test(groups = "1s")

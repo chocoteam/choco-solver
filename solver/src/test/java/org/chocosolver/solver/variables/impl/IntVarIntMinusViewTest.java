@@ -13,6 +13,7 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.view.integer.IntMinusView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -45,6 +46,7 @@ public class IntVarIntMinusViewTest extends IntVarTest {
     @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
     public void testUpdateInfeasBounds() throws Exception {
         setup();
-        var.updateBounds(1,-1, Cause.Null);
+        IntMinusView mv = (IntMinusView) var;
+        mv.updateBounds(3,2, Cause.Null);
     }
 }

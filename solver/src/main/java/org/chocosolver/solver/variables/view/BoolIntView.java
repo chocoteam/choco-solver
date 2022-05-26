@@ -158,6 +158,7 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     @Override
     public final boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
+        if(lb>ub) contradiction(cause, "infeasible bounds");
         if (lb > kTRUE || ub < kFALSE) {
             model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_EMPTY);
