@@ -51,6 +51,12 @@ public class BoolLeqViewTest {
     public void testMonitorDelta() {
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds() throws Exception {
+        before();
+        b.updateBounds(1,-1, Cause.Null);
+    }
+
     @Test(groups = "1s")
     public void testGetBooleanValueU() {
         Assert.assertEquals(b.getBooleanValue(), ESat.UNDEFINED);
