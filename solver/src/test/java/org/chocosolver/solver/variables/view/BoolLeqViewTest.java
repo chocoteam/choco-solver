@@ -9,9 +9,6 @@
  */
 package org.chocosolver.solver.variables.view;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.stream.Stream;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
@@ -26,6 +23,10 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -49,6 +50,32 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testMonitorDelta() {
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
+        before();
+        b.updateBounds(1, 0, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        before();
+        b.updateBounds(2, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        before();
+        b.updateBounds(0, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        before();
+        b.updateBounds(2, -1, Cause.Null);
     }
 
     @Test(groups = "1s")

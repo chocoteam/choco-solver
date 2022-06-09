@@ -38,6 +38,12 @@ public class BitsetArrayIntVarImplTest {
         var = new BitsetArrayIntVarImpl("test", new int[]{-5, 0, 3, 4, 5}, new Model());
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds() throws Exception {
+        setUp();
+        var.updateBounds(1,-1, Cause.Null);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void testRemoveValue() throws Exception {
         setUp();

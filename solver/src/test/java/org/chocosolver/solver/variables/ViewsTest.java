@@ -59,6 +59,13 @@ public class ViewsTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testBoolIntViewUpdateInfeasBounds() throws Exception {
+        Model ref = new Model();
+        IntVar iv = ref.intVar(0,5);
+        BoolVar b = iv.eq(3).boolVar();
+        b.updateBounds(1,0, Cause.Null);
+    }
 
     @Test(groups = "10s", timeOut = 60000)
     public void test1() {

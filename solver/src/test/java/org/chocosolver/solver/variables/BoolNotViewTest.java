@@ -70,6 +70,40 @@ public class BoolNotViewTest {
         Assert.assertEquals(b.getValue(), 0);
     }
 
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        BoolVar bnot = b.not();
+        bnot.updateBounds(1, 0, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        BoolVar bnot = b.not();
+        bnot.updateBounds(2, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        BoolVar bnot = b.not();
+        bnot.updateBounds(0, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        Model ref = new Model();
+        BoolVar b = ref.boolVar();
+        BoolVar bnot = b.not();
+        bnot.updateBounds(2, -1, Cause.Null);
+    }
+
     @Test(groups = "1s")
     public void test3() throws ContradictionException {
         Model ref = new Model();

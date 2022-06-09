@@ -97,6 +97,15 @@ public class ViewMinusTest {
         }
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds() throws Exception {
+        Model model = new Model();
+
+        IntVar X = model.intVar("X", 1, 10, false);
+        IntVar var = model.intMinusView(X);
+        var.updateBounds(1,-1, Cause.Null);
+    }
+
     @Test(groups="10s", timeOut=60000)
     public void test2() {
         Random random = new Random();

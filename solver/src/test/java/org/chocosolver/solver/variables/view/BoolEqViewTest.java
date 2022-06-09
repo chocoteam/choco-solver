@@ -51,6 +51,32 @@ public class BoolEqViewTest {
     public void testMonitorDelta() {
     }
 
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
+        before();
+        b.updateBounds(1, 0, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        before();
+        b.updateBounds(2, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        before();
+        b.updateBounds(0, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        before();
+        b.updateBounds(2, -1, Cause.Null);
+    }
+
     @Test(groups = "1s")
     public void testGetBooleanValueU() {
         Assert.assertEquals(b.getBooleanValue(), ESat.UNDEFINED);

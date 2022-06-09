@@ -253,7 +253,8 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         } else {
             if (lb == kTRUE) {
                 hasChanged = instantiateTo(kTRUE, cause);
-            } else if (ub == kFALSE) {
+            }
+            if (ub == kFALSE) {
                 hasChanged = instantiateTo(kFALSE, cause);
             }
         }
