@@ -121,7 +121,6 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if(lb>ub) contradiction(cause, "infeasible bounds");
         if (lb > 1) {
             var.instantiateTo(-1, cause);
         } else if (ub < 0) {
@@ -129,7 +128,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
         } else {
             if (lb == 1) {
                 hasChanged = instantiateTo(1, cause);
-            } else if (ub == 0) {
+            }
+            if (ub == 0) {
                 hasChanged = instantiateTo(0, cause);
             }
         }

@@ -317,7 +317,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         assert cause != null;
-        if(lb>ub) contradiction(cause, "infeasible bounds");
         int olb = this.getLB();
         int oub = this.getUB();
         boolean update = false;
@@ -335,6 +334,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 d += olb - lb;
                 LB.set(lb);
+                olb = lb;
             }
             if (olb > ub) {
                 model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);

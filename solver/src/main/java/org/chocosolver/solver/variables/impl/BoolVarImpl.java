@@ -247,14 +247,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
     @Override
     public boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
-        if(lb>ub) contradiction(cause, "infeasible bounds");
         if (lb > kTRUE || ub < kFALSE) {
             model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, lb > kTRUE ? MSG_LOW : MSG_UPP);
         } else {
             if (lb == kTRUE) {
                 hasChanged = instantiateTo(kTRUE, cause);
-            } else if (ub == kFALSE) {
+            }
+            if (ub == kFALSE) {
                 hasChanged = instantiateTo(kFALSE, cause);
             }
         }

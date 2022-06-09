@@ -38,10 +38,30 @@ public class BoolVarImplTest {
         var = new BoolVarImpl("test", new Model());
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
-    public void testUpdateInfeasBounds() throws Exception {
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
         setUp();
-        var.updateBounds(1,0, Cause.Null);
+        var.updateBounds(1, 0, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        setUp();
+        var.updateBounds(2, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        setUp();
+        var.updateBounds(0, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        setUp();
+        var.updateBounds(2, -1, Cause.Null);
     }
 
     @Test(groups = "1s", timeOut = 60000)

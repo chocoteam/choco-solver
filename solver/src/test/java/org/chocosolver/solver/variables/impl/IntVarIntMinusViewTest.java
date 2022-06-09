@@ -13,7 +13,6 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.view.integer.IntMinusView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,10 +42,29 @@ public class IntVarIntMinusViewTest extends IntVarTest {
         assertEquals(var.getDomainSize(), original.getDomainSize());
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
-    public void testUpdateInfeasBounds() throws Exception {
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
         setup();
-        IntMinusView mv = (IntMinusView) var;
-        mv.updateBounds(3,2, Cause.Null);
+        var.updateBounds(4, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        setup();
+        var.updateBounds(5, 4, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        setup();
+        var.updateBounds(1, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        setup();
+        var.updateBounds(5, 0, Cause.Null);
     }
 }

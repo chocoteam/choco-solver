@@ -16,8 +16,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainRandomBound;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
-import org.chocosolver.solver.variables.view.BoolIntView;
-import org.chocosolver.solver.variables.view.bool.BoolNotView;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
@@ -65,7 +63,7 @@ public class ViewsTest {
     public void testBoolIntViewUpdateInfeasBounds() throws Exception {
         Model ref = new Model();
         IntVar iv = ref.intVar(0,5);
-        BoolIntView b = (BoolIntView)iv.eq(3).boolVar();
+        BoolVar b = iv.eq(3).boolVar();
         b.updateBounds(1,0, Cause.Null);
     }
 
