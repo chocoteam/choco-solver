@@ -136,11 +136,11 @@ module org.chocosolver.solver {
     requires java.management;
     requires automaton;
 
-    opens org.chocosolver.memory to testng;
+    opens org.chocosolver.memory to org.testng;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.set to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints to org.chocosolver.parsers, testng;
-    opens org.chocosolver.solver.constraints.binary to org.chocosolver.parsers, testng;
+    opens org.chocosolver.solver.constraints to org.chocosolver.parsers, org.testng;
+    opens org.chocosolver.solver.constraints.binary to org.chocosolver.parsers, org.testng;
     opens org.chocosolver.solver.constraints.binary.element to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.reification to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.among to org.chocosolver.parsers;
@@ -151,7 +151,7 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.element to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
     opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, tesng;
+    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, org.testng;
     exports org.chocosolver.solver.constraints.nary.flow;
     opens org.chocosolver.solver.constraints.nary.flow to org.chocosolver.parsers;
     exports org.chocosolver.solver.constraints.nary.knapsack;
