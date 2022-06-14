@@ -135,7 +135,6 @@ module org.chocosolver.solver {
     requires org.knowm.xchart;
     requires java.management;
     requires automaton;
-    requires org.jheaps;
 
     opens org.chocosolver.memory to testng;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers;
