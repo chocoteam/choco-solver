@@ -1109,6 +1109,31 @@ public class RealTest {
         Assert.assertEquals(5, model.getSolver().getSolutionCount());
     }
 
+    @Test(groups = "1s")
+    public void lb_above_highest_element_should_yield_contradiction() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 8., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 1);
+        model.element(x, new double[]{3.0, 7.0}, y).post();
+        try{
+            model.getSolver().findSolution();
+        } catch (Exception e){
+            Class exceptionType = e.getClass();
+            Assert.assertEquals(exceptionType, ContradictionException.class);
+        }
+    }
+
+    @Test
+    public void ub_below_lowest_element_should_yield_contradiction() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 0., 2., 1.e-4);
+        IntVar y = model.intVar("I", 0, 1);
+        model.element(x, new double[]{3.0, 7.0}, y).post();
+        model.getSolver().findSolution();
+    }
+
+
+
     @Test(groups = "ibex", timeOut = 60000)
     public void testJoao2() {
         Ibex ibex = new Ibex(new double[]{1.e-1});
@@ -1259,4 +1284,5 @@ public class RealTest {
         Assert.assertEquals(x2.getLB(), 0.5, precision);
         Assert.assertEquals(x2.getUB(), 0.5, precision);
     }
+
 }

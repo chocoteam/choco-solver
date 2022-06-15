@@ -48,6 +48,9 @@ public class PropMixedElement extends Propagator<Variable> {
             y.updateLowerBound(0, this);
             y.updateUpperBound(values.length - 1, this);
         }
+        if(x.getUB() < values[y.getLB()] || x.getLB() > values[y.getUB()]){
+            model.getSolver().throwsException(this, x, "variable out of array bounds");
+        }
         updateIInf();
         updateISup();
         updateReal();
