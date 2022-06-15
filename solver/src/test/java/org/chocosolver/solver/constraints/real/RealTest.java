@@ -1129,10 +1129,13 @@ public class RealTest {
         RealVar x = model.realVar("V", 0., 2., 1.e-4);
         IntVar y = model.intVar("I", 0, 1);
         model.element(x, new double[]{3.0, 7.0}, y).post();
-        model.getSolver().findSolution();
+        try{
+            model.getSolver().findSolution();
+        } catch (Exception e){
+            Class exceptionType = e.getClass();
+            Assert.assertEquals(exceptionType, ContradictionException.class);
+        }
     }
-
-
 
     @Test(groups = "ibex", timeOut = 60000)
     public void testJoao2() {
