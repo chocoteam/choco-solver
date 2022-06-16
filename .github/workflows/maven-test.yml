@@ -96,7 +96,7 @@ jobs:
           server-username: MAVEN_USERNAME
           server-password: MAVEN_CENTRAL_TOKEN
           gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
           #cache: maven
       - name: publish packages
         run: mvn -PossrhDeploy --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
