@@ -181,7 +181,7 @@ public class PerformanceTest {
                 "-lvl", "SILENT",
                 "-stasol",
                 "-p", "1",
-                "-ocs" // required for this problem, otherwise the solution is not correct
+                "-ocs", "ALL" // required for this problem, otherwise the solution is not correct
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
