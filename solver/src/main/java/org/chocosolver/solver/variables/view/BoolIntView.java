@@ -15,32 +15,24 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.delta.NoDelta;
-import org.chocosolver.solver.variables.delta.IDelta;
-import org.chocosolver.solver.variables.delta.IEnumDelta;
-import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
-import org.chocosolver.solver.variables.delta.OneValueDelta;
+import org.chocosolver.solver.variables.delta.*;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
-import org.chocosolver.util.iterators.DisposableRangeBoundIterator;
-import org.chocosolver.util.iterators.DisposableRangeIterator;
-import org.chocosolver.util.iterators.DisposableValueBoundIterator;
-import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
  * An abstract class for boolean views over {@link org.chocosolver.solver.variables.IntVar}.
  *
+ * @author Charles Prud'homme
  * @see BoolEqView
  * @see BoolLeqView
  * <p>
  * Project: choco-solver.
- * @author Charles Prud'homme
  * @since 04/12/2018.
  */
 public abstract class BoolIntView<I extends IntVar> extends IntView<I> implements BoolVar {
@@ -85,9 +77,12 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
 
     @Override
     public final void notify(IEventType event, int variableIdx) throws ContradictionException {
-        if(!fixed.get()) {
-            if(isInstantiated()){
+        if (!fixed.get()) {
+            if (isInstantiated()) {
                 this.fixed.set(Boolean.TRUE);
+                if (reactOnRemoval) {
+                    delta.add(1 - getValue(), this);
+                }
                 super.notify(event, variableIdx);
             }
         }

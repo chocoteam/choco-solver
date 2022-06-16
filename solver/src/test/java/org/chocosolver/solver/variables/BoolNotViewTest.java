@@ -12,10 +12,13 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -212,5 +215,35 @@ public class BoolNotViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(o), rng);
         Assert.assertEquals(lits.get(v), rng);
+    }
+
+    @Test(groups = "1s")
+    public void testToTable() throws ContradictionException {
+        for (int i = 0; i < 100; i++) {
+            Model mod = new Model();
+            IntVar res = mod.intVar("r", 0, 1004);
+            BoolVar[] xs = mod.boolVarArray(5);
+            BoolVar[] vs = new BoolVar[5];
+            for (int j = 0; j < 5; j++) {
+                vs[j] = xs[j].not();
+                /*vs[j] = mod.boolVar();
+                mod.arithm(xs[j], "!=", vs[j]).post();*/
+            }
+            int[] coeffs = new int[]{
+                    1, 1, 1, 1, 1000
+            };
+
+            mod.table(ArrayUtils.append(vs, new IntVar[]{res}),
+                    TuplesFactory.scalar(vs, coeffs, res, 1), "CT+").post();
+            mod.getSolver().setSearch(Search.randomSearch(xs, i));
+            while (mod.getSolver().solve()) {
+                int c = 0;
+                for (int j = 0; j < xs.length; j++) {
+                    c += vs[j].getValue() * coeffs[j];
+                }
+                Assert.assertEquals(c, res.getValue());
+            }
+            Assert.assertEquals(mod.getSolver().getSolutionCount(), 32);
+        }
     }
 }

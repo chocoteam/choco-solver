@@ -11,8 +11,11 @@ package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Explainer;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
@@ -20,6 +23,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -448,7 +452,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(4,5);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
 
     }
@@ -464,7 +468,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,3);
+        rng.addBetween(0, 3);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -481,7 +485,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,3);
+        rng.addBetween(0, 3);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -497,7 +501,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(4,5);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -512,7 +516,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,3);
+        rng.addBetween(0, 3);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -527,7 +531,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(4,5);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -542,7 +546,7 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(0);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,3);
+        rng.addBetween(0, 3);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -557,21 +561,51 @@ public class BoolLeqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(4,5);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
-    @Test(groups="1s", timeOut=6000000)
-    public void testAA23(){
+    @Test(groups = "1s", timeOut = 6000000)
+    public void testAA23() {
         Model model = new Model();
         final IntVar[] xs = model.intVarArray("x", 5, 0, 5);
         final BoolVar[] bs = Stream.of(xs).map(x ->
-            model.intGeView(x, 1)
+                model.intGeView(x, 1)
         ).toArray(BoolVar[]::new);
 
         final IntVar count = model.intVar(0, 5);
         model.sum(bs, "=", count).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 7776);
+    }
+
+    @Test(groups = "1s")
+    public void testToTable() throws ContradictionException {
+        for (int i = 0; i < 100; i++) {
+            Model mod = new Model(Settings.init().setEnableViews(false));
+            IntVar res = mod.intVar("r", 0, 1004);
+            IntVar[] xs = mod.intVarArray(5, new int[]{2, 3, 4, 5});
+            BoolVar[] vs = new BoolVar[5];
+            for (int j = 0; j < 5; j++) {
+                vs[j] = mod.intLeView(xs[j], 3);
+                /*vs[j] = mod.boolVar();
+                mod.reifyXltC(xs[j], 4, vs[j]);*/
+            }
+            int[] coeffs = new int[]{
+                    1, 1, 1, 1, 1000
+            };
+
+            mod.table(ArrayUtils.append(vs, new IntVar[]{res}),
+                    TuplesFactory.scalar(vs, coeffs, res, 1), "CT+").post();
+            mod.getSolver().setSearch(Search.randomSearch(xs, i));
+            while (mod.getSolver().solve()) {
+                int c = 0;
+                for (int j = 0; j < xs.length; j++) {
+                    c += vs[j].getValue() * coeffs[j];
+                }
+                Assert.assertEquals(c, res.getValue());
+            }
+            Assert.assertEquals(mod.getSolver().getSolutionCount(), 1024);
+        }
     }
 
 }
