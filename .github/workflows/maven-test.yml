@@ -83,24 +83,29 @@ jobs:
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
   publish:
-    needs: [ test-solver ]
+    #needs: [ test-solver ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Maven central repository
-        uses: actions/setup-java@v3
+      - name: Release
+        uses: qcastel/github-actions-maven-release@1.5
         with:
-          java-version: 11
-          distribution: 'temurin'
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_CENTRAL_TOKEN
-          gpg-private-key: ${{ secrets.MAVEN_GPG_PRIVATE_KEY }}
-          gpg-passphrase: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
-          #cache: maven
-      - name: publish packages
-        run: mvn -PossrhDeploy --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
-        env:
-          MAVEN_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
-          MAVEN_CENTRAL_TOKEN: ${{ secrets.MAVEN_CENTRAL_TOKEN }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+          git-release-bot-name: "cprudhom"
+          git-release-bot-email: "charles.prudhomme@imt-atlantique.fr"
+          release-branch-name: "master"
+          access-token: ${GITHUB_TOKEN}
+
+          gpg-enabled: "true"
+          gpg-key-id: ${{ secrets.GPG_KEY_ID }}
+          gpg-key: ${{ secrets.GPG_KEY }}
+
+          maven-repo-server-id: ${{ secrets.MVN_REPO_PRIVATE_REPO }}
+          maven-repo-server-username: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+          maven-repo-server-password: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+          maven-args: "javadoc:aggregate-jar source:jar -DskipTests"
+
+          maven-release-args: "-DskipTests"
+          maven-release-publish: true
+          maven-snapshot-publish: true
+          maven-publish-args: "-DskipTests"
+          # javadoc:aggregate-jar source:jar
