@@ -1269,4 +1269,12 @@ public class RealTest {
         model.getSolver().findSolution();
     }
     
+    @Test(groups = "1s")
+    public void testElement2() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 8., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 1);
+        model.element(x, new double[]{3.0, 7.0}, y).post();
+        model.getSolver().findSolution();
+    }
 }
