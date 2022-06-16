@@ -10,6 +10,7 @@
 package org.chocosolver.parser.flatzinc.ast.searches;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.SetValueSelector;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
@@ -63,6 +64,8 @@ public class SetSearch {
                 valSelector = new SetDomainMin();
                 break;
             case indomain_max:
+                valSelector = new SetDomainMax();
+                break;
             case indomain_middle:
             case indomain_median:
             case indomain_random:
