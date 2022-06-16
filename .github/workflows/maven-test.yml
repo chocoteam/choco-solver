@@ -87,8 +87,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Release
-        uses: qcastel/github-actions-maven-release@1.5
+      - name: Maven Release and Publish
+        uses: mg-smartrent/github-actions-maven-release@v1.5
         with:
           git-release-bot-name: "cprudhom"
           git-release-bot-email: "charles.prudhomme@imt-atlantique.fr"
