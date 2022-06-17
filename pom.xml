@@ -113,6 +113,7 @@
                     <id>ossrh</id>
                     <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                     <layout>default</layout>
+                    <uniqueVersion>true</uniqueVersion>
                 </snapshotRepository>
             </distributionManagement>
             <activation>
