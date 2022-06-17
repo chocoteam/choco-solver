@@ -135,6 +135,10 @@ public interface SetVar extends Variable {
 
 	@Override
 	default int getDomainSize() {
-		return 1 << (getUB().size() - getLB().size());
+		long dom = 1L << (getUB().size() - getLB().size());
+		if (dom < 0 || dom > Integer.MAX_VALUE) {
+			dom = Integer.MAX_VALUE;
+		}
+		return (int) dom;
 	}
 }
