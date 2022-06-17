@@ -25,7 +25,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
           cache: maven
       - name: publish packages
-        run: mvn --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
+        run: mvn -P ossrhDeploy --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
         env:
           MAVEN_USERNAME: ${{ secrets.OSS_SONATYPE_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.OSS_SONATYPE_PASSWORD }}
