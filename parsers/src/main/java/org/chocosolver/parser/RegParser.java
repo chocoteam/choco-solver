@@ -14,8 +14,11 @@ import org.chocosolver.solver.*;
 import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMax;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDegRef;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Argument;
@@ -160,7 +163,7 @@ public abstract class RegParser implements IParser {
         this.parser_cmd = parser_cmd;
     }
 
-    public void createSettings(){
+    public void createSettings() {
         defaultSettings = Settings.prod();
     }
 
@@ -229,7 +232,7 @@ public abstract class RegParser implements IParser {
     @Override
     public final void configureSearch() {
         Solver solver = portfolio.getModels().get(0).getSolver();
-        if(level.is(Level.VERBOSE)) {
+        if (level.is(Level.VERBOSE)) {
             solver.verboseSolving(1000);
         }
         if (nb_cores == 1) {
@@ -267,32 +270,46 @@ public abstract class RegParser implements IParser {
                 }
                 IntVar obj = (IntVar) solver.getObjectiveManager().getObjective();
                 IntVar[] dvars;
-                if(solver.getMove().getStrategy()!=null) {
+                SetVar[] svars;
+                if (solver.getMove().getStrategy() != null) {
                     dvars = Arrays.stream(solver.getMove().getStrategy().getVariables())
-                                .map(Variable::asIntVar)
-                                .filter(v -> v != obj)
-                                .toArray(IntVar[]::new);
-                }else{
+                            .filter(VariableUtils::isInt)
+                            .map(Variable::asIntVar)
+                            .filter(v -> v != obj)
+                            .toArray(IntVar[]::new);
+                    svars = Arrays.stream(solver.getMove().getStrategy().getVariables())
+                            .filter(VariableUtils::isSet)
+                            .map(Variable::asSetVar)
+                            .toArray(SetVar[]::new);
+                } else {
                     dvars = Arrays.stream(solver.getModel().retrieveIntVars(true))
                             .map(Variable::asIntVar)
                             .filter(v -> v != obj)
                             .toArray(IntVar[]::new);
+                    svars = Arrays.stream(solver.getModel().retrieveSetVars())
+                            .map(Variable::asSetVar)
+                            .toArray(SetVar[]::new);
                 }
-                if(dvars.length == 0){
+                if (dvars.length == 0) {
                     dvars = new IntVar[]{solver.getModel().intVar(0)};
+                }
+                if (svars.length == 0) {
+                    svars = new SetVar[]{solver.getModel().setVar()};
                 }
                 solver.getMove().removeStrategy();
                 solver.setMove(new MoveBinaryDFS());
-                AbstractStrategy<IntVar> strategy = varH.make(solver, dvars, valH, flush, last);
+                AbstractStrategy<IntVar> istrat = varH.make(solver, dvars, valH, flush, last);
+                AbstractStrategy<SetVar> sstrat = Search.setVarSearch(new DomOverWDegRef<>(svars, solver.getModel().getSeed()), new SetDomainMax(), true, svars);
 
                 if (obj != null) {
                     boolean max = solver.getObjectiveManager().getPolicy() == ResolutionPolicy.MAXIMIZE;
                     solver.setSearch(
-                            strategy,
+                            istrat,
+                            sstrat,
                             max ? Search.minDomUBSearch(obj) : Search.minDomLBSearch((obj))
                     );
                 } else {
-                    solver.setSearch(strategy);
+                    solver.setSearch(istrat, sstrat);
                 }
                 if (cos) {
                     solver.setSearch(Search.conflictOrderingSearch(solver.getSearch()));
