@@ -1,0 +1,32 @@
+# Workflow to perform a snapshot release if continuous integration succeeded.
+
+name: Snapshot package publisher
+on:
+  workflow_run:
+    workflows: [ "Java CI with Maven" ]
+  push:
+    branches:
+      - master
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Maven central repository
+        uses: actions/setup-java@v2
+        with:
+          java-version: 8
+          server-id: sonatype
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+          distribution: 'adopt'
+          cache: maven
+      - name: publish packages
+        run: mvn --batch-mode -DskipTests javadoc:aggregate-jar source:jar deploy
+        env:
+          MAVEN_USERNAME: ${{ secrets.MVN_REPO_PRIVATE_REPO_USER }}
+          MAVEN_PASSWORD: ${{ secrets.MVN_REPO_PRIVATE_REPO_PASSWORD }}
+          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_KEY_ID }}
