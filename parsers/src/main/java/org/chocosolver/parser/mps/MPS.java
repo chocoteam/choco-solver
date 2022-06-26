@@ -95,6 +95,7 @@ public class MPS extends RegParser {
         parsers = new MPSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            threadModel.getSolver().logWithANSI(ansi);
             threadModel.setPrecision(precision);
             portfolio.addModel(threadModel);
             parsers[i] = new MPSParser();
@@ -156,6 +157,8 @@ public class MPS extends RegParser {
         Solver solver = model.getSolver();
         if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();
+            getModel().displayVariableOccurrences();
+            getModel().displayPropagatorOccurrences();
         }
         if (enumerate) {
             while (solver.solve()) {
