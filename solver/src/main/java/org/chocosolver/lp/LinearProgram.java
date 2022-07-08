@@ -10,6 +10,7 @@
 package org.chocosolver.lp;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Optional;
 
 /**
@@ -17,9 +18,29 @@ import java.util.Optional;
  * <p>This is based on "Introduction to Algorithms, Third Edition",
  * By Thomas H. Cormen, Charles E. Leiserson, Ronald L. Rivest and Clifford Stein,
  * 29.3 The simplex algorithm.</p>
- * <p>The linear program is expected to be given in slack form,
- * that omits the words "maximize" and "subject to",
- * as well as the explicit nonnegativity constraints.</p>
+ * <p>There are various ways to declare a LP.
+ * Either, by giving it as a standard form providing the A nxm-matrix, the m-vector b and the n-vector c.
+ * <pre> {@code
+ * double[] c = {5, 7};
+ * double[][] A = {{4, 3}, {2, 3}};
+ * double[] b = {36, 48};
+ * LinearProgram lp = new LinearProgram(A, b, c);
+ * }</pre>
+ * <p>
+ * Or, by declaring the variables first and then adding some constraints and the objective function.
+ * In that case, all the variables must be declared first and have to be nonnegative (&ge; 0).
+ * <pre> {@code
+ *  LinearProgram lp = new LinearProgram(false);
+ *  lp.makeVariables(2);
+ *  lp.addLeq(new double[]{4, 3}, 36);
+ *  lp.addLeq(new double[]{2, 3}, 48);
+ *  lp.setObjective(true, new double[]{5, 7});
+ *  }</pre>
+ * </p>
+ * Next, a call to {@link #simplex()} runs the Simplex algorithm and returns the status of the resolution.
+ * If the status is {@link Status#FEASIBLE}
+ * then the value assigned to each variable is accessible with {@code lp.lp.value(i);}
+ * and the value of the objective function with {@code lp.objective();}.
  * <p>
  * <br/>
  *
@@ -182,23 +203,42 @@ public class LinearProgram {
         UNBOUNDED
     }
 
-    // number of coefficients
-    private final int n;
+    // number of variables
+    private int n;
     // number of constraints
-    private final int m;
+    private int m;
     // a mxn matrix
-    private final double[][] A;
+    private double[][] A;
     // an m-vector
-    private final double[] b;
+    private double[] b;
     // an n-vector
-    private final double[] c;
+    private double[] c;
     // an n-vector
-    private final double[] x;
+    private double[] x;
     private double z;
     // feasibility of the LP
     private Status status = Status.UNKNOWN;
     // trace the resolution
     private final boolean trace;
+
+    /**
+     * Create a LinearProgram instance that take a linear program in standard form as input.
+     *
+     * @param matA  is an mxn matrix
+     * @param vecB  is an m-vector
+     * @param vecC  is n-vector
+     * @param trace set to <i>true</i> to trace the resolution
+     */
+    public LinearProgram(double[][] matA, double[] vecB, double[] vecC, boolean trace) {
+        super();
+        this.m = vecB.length;
+        this.n = vecC.length;
+        this.A = matA.clone();
+        this.b = vecB.clone();
+        this.c = vecC.clone();
+        this.x = new double[n];
+        this.trace = trace;
+    }
 
     /**
      * Create a LinearProgram instance that take a linear program in standard form as input.
@@ -212,23 +252,154 @@ public class LinearProgram {
     }
 
     /**
-     * Create a LinearProgram instance that take a linear program in standard form as input.
+     * Initialize a LinearProgram instance.
      *
-     * @param matA  is an mxn matrix
-     * @param vecB  is an m-vector
-     * @param vecC  is n-vector
      * @param trace set to <i>true</i> to trace the resolution
      */
-    public LinearProgram(double[][] matA, double[] vecB, double[] vecC, boolean trace) {
-        this.m = vecB.length;
-        this.n = vecC.length;
-        this.A = matA.clone();
-        this.b = vecB.clone();
-        this.c = vecC.clone();
-        this.x = new double[n];
-        this.trace = trace;
+    public LinearProgram(boolean trace) {
+        this(new double[0][0], new double[0], new double[0], trace);
     }
 
+    /**
+     * Initialize a LinearProgram instance.
+     */
+    public LinearProgram() {
+        this(false);
+    }
+
+    /**
+     * Declare a new variable.
+     * A variable is supposed to be nonnegative (&ge; 0).
+     *
+     * @return the index of the variable
+     */
+    public int makeVariable() {
+        if (m > 0) {
+            throw new UnsupportedOperationException("Some constraints are alreadey declared");
+        }
+        return n++;
+    }
+
+    /**
+     * Declare <i>n</i> new variables
+     */
+    public void makeVariables(int n) {
+        if (m > 0) {
+            throw new UnsupportedOperationException("Some constraints are alreadey declared");
+        }
+        this.n += n;
+    }
+
+    private void checkLength(double[] a) {
+        if (a.length != n) {
+            throw new UnsupportedOperationException("" +
+                    "The number of coefficients in the objective function differs from " +
+                    "the number of variables declared.");
+        }
+    }
+
+    /**
+     * Set the objective function to optimize
+     *
+     * @param maximize set to <i>true</i> for maximization, <i>false</i> otherwise
+     * @param ci       coefficients of the objective function
+     */
+    public void setObjective(boolean maximize, double[] ci) {
+        checkLength(ci);
+        this.c = Arrays.copyOf(ci, n);
+        if (!maximize) {
+            for (int i = 0; i < n; i++) {
+                c[i] *= -1;
+            }
+        }
+    }
+
+    /**
+     * Add a linear inequality (&le;) to the system.
+     *
+     * @param ci coefficients of the linear inequality, respecting variable indices
+     * @param b  the right-hand side value
+     */
+    public void addLeq(double[] ci, double b) {
+        checkLength(ci);
+        // increase capacity of A
+        double[][] At = this.A;
+        A = new double[this.m + 1][this.n];
+        System.arraycopy(At, 0, this.A, 0, m);
+        // then add the new constraint
+        System.arraycopy(ci, 0, this.A[m], 0, n);
+        // increase capacity of b
+        double[] bt = this.b;
+        this.b = new double[this.m + 1];
+        System.arraycopy(bt, 0, this.b, 0, m);
+        // and add the new rhs
+        this.b[m] = b;
+        m++;
+    }
+
+    /**
+     * Add a linear inequality (&le;) to the system.
+     *
+     * @param map coefficients of the linear inequality, as a map
+     * @param b   the right-hand side value
+     */
+    public void addLeq(HashMap<Integer, Double> map, double b) {
+        double[] ci = new double[n];
+        map.forEach((v, c) -> ci[v] = c);
+        addLeq(ci, b);
+    }
+
+    /**
+     * Add a linear inequality (&ge;) to the system.
+     *
+     * @param ci coefficients of the linear inequality, respecting variable indices
+     * @param b  the right-hand side value
+     * @implNote the (&ge;)-inequality is turned into a (&le;)-inequality constraint
+     */
+    public void addGeq(double[] ci, double b) {
+        addLeq(ci, b);
+        for (int i = 0; i < n; i++) {
+            this.A[m - 1][i] *= -1;
+        }
+        this.b[m - 1] *= -1;
+    }
+
+    /**
+     * Add a linear inequality (&ge;) to the system.
+     *
+     * @param map coefficients of the linear inequality, as a map
+     * @param b   the right-hand side value
+     */
+    public void addGeq(HashMap<Integer, Double> map, double b) {
+        double[] ci = new double[n];
+        map.forEach((v, c) -> ci[v] = c);
+        addGeq(ci, b);
+    }
+
+    /**
+     * Add a linear equality (=) to the system.
+     *
+     * @param ci coefficients of the linear equality, respecting variable indices
+     * @param b  the right-hand side value
+     * @implNote the equality constraint is turned into two inequality constraints.
+     */
+    public void addEq(double[] ci, double b) {
+        checkLength(ci);
+        addLeq(ci, b);
+        addGeq(ci, b);
+    }
+
+    /**
+     * Add a linear equality (=) to the system.
+     *
+     * @param map coefficients of the linear equality, as a map
+     * @param b   the right-hand side value
+     */
+    public void addEq(HashMap<Integer, Double> map, double b) {
+        double[] ci = new double[n];
+        map.forEach((v, c) -> ci[v] = c);
+        addEq(ci, b);
+    }
 
     /**
      * Apply the Simplex algorithm on this linear program.
@@ -245,6 +416,9 @@ public class LinearProgram {
         if (opt.isPresent()) {
             Slack slack = opt.get();
             if (Status.FEASIBLE.equals(status = solve(slack))) {
+                if (this.x.length != n) {
+                    this.x = new double[n];
+                }
                 slack.setValues(x);
                 this.z = slack.v;
             }

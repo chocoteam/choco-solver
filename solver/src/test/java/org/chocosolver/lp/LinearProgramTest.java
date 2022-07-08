@@ -3,6 +3,8 @@ package org.chocosolver.lp;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
+
 /**
  * <br/>
  *
@@ -254,6 +256,120 @@ public class LinearProgramTest {
         Assert.assertEquals(lp.value(0), 0., 1e-8);
         Assert.assertEquals(lp.value(1), 12.0, 1e-8);
         Assert.assertEquals(lp.objective(), 840, 1e-8);
+    }
+
+    @Test(groups = "1s")
+    public void testModeler1() {
+        LinearProgram lp = new LinearProgram(false);
+        lp.makeVariables(2);
+        lp.addLeq(new double[]{4, 3}, 36);
+        lp.addLeq(new double[]{2, 3}, 48);
+        lp.setObjective(true, new double[]{5, 7});
+        Assert.assertEquals(lp.simplex(), LinearProgram.Status.FEASIBLE);
+        Assert.assertEquals(lp.value(0), 0., 1e-8);
+        Assert.assertEquals(lp.value(1), 12.0, 1e-8);
+        Assert.assertEquals(lp.objective(), 84, 1e-8);
+    }
+
+    @Test(groups = "1s")
+    public void testModeler2() {
+        LinearProgram lp = new LinearProgram(false);
+        int x1 = lp.makeVariable();
+        int x2 = lp.makeVariable();
+        lp.addLeq(new HashMap<>() {{
+            put(x1, 4.);
+            put(x2, 3.);
+        }}, 36);
+        lp.addLeq(new HashMap<>() {{
+            put(x1, 2.);
+            put(x2, 3.);
+        }}, 48);
+        lp.setObjective(true, new double[]{5, 7});
+        Assert.assertEquals(lp.simplex(), LinearProgram.Status.FEASIBLE);
+        Assert.assertEquals(lp.value(0), 0., 1e-8);
+        Assert.assertEquals(lp.value(1), 12.0, 1e-8);
+        Assert.assertEquals(lp.objective(), 84, 1e-8);
+    }
+
+    @Test(groups = "1s")
+    public void testModeler3() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(3);
+        lp.addEq(new HashMap<>() {{
+            put(0, 1.);
+            put(1, 1.);
+            put(2, -1.);
+        }}, 7);
+        lp.addLeq(new double[]{1, -2, 2}, 4);
+        lp.setObjective(false, new double[]{-2, 3, -3});
+        Assert.assertEquals(lp.simplex(), LinearProgram.Status.FEASIBLE);
+        Assert.assertEquals(lp.objective(), 9., 1e-8);
+        Assert.assertEquals(lp.value(0), 6., 1e-8);
+        Assert.assertEquals(lp.value(1), 1., 1e-8);
+        Assert.assertEquals(lp.value(2), 0., 1e-8);
+    }
+
+    @Test(groups = "1s")
+    public void testModeler4() {
+        // 29.3-7
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(3);
+        lp.setObjective(false, new double[]{1, 1, 1});
+        lp.addGeq(new double[]{2, 7.5, 3}, 10000);
+        lp.addGeq(new HashMap<>() {{
+            put(0, 20.);
+            put(1, 5.);
+            put(2, 3.);
+        }}, 30000);
+        Assert.assertEquals(lp.simplex(), LinearProgram.Status.FEASIBLE);
+        Assert.assertEquals(lp.objective(), -2250, 1e-8);
+        Assert.assertEquals(lp.value(0), 1250, 1e-8);
+        Assert.assertEquals(lp.value(1), 1000, 1e-8);
+        Assert.assertEquals(lp.value(2), 0, 1e-8);
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError0() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariable();
+        lp.addEq(new double[]{1}, 1);
+        lp.makeVariable();
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError1() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariable();
+        lp.addEq(new double[]{1}, 1);
+        lp.makeVariables(2);
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError2() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(2);
+        lp.addLeq(new double[]{1}, 1);
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError3() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(2);
+        lp.addGeq(new double[]{1}, 1);
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError4() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(2);
+        lp.addEq(new double[]{1}, 1);
+    }
+
+    @Test(groups = "1s", expectedExceptions = UnsupportedOperationException.class)
+    public void testError5() {
+        LinearProgram lp = new LinearProgram();
+        lp.makeVariables(2);
+        lp.setObjective(true, new double[]{1});
     }
 
 }
