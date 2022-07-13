@@ -271,16 +271,17 @@ public class LinearProgramTest {
         Assert.assertEquals(lp.objective(), 84, 1e-8);
     }
 
+    @SuppressWarnings("Convert2Diamond")
     @Test(groups = "1s")
     public void testModeler2() {
         LinearProgram lp = new LinearProgram(false);
         int x1 = lp.makeVariable();
         int x2 = lp.makeVariable();
-        lp.addLeq(new HashMap<>() {{
+        lp.addLeq(new HashMap<Integer, Double>() {{
             put(x1, 4.);
             put(x2, 3.);
         }}, 36);
-        lp.addLeq(new HashMap<>() {{
+        lp.addLeq(new HashMap<Integer, Double>() {{
             put(x1, 2.);
             put(x2, 3.);
         }}, 48);
@@ -291,11 +292,12 @@ public class LinearProgramTest {
         Assert.assertEquals(lp.objective(), 84, 1e-8);
     }
 
+    @SuppressWarnings("Convert2Diamond")
     @Test(groups = "1s")
     public void testModeler3() {
         LinearProgram lp = new LinearProgram();
         lp.makeVariables(3);
-        lp.addEq(new HashMap<>() {{
+        lp.addEq(new HashMap<Integer, Double>() {{
             put(0, 1.);
             put(1, 1.);
             put(2, -1.);
@@ -309,6 +311,7 @@ public class LinearProgramTest {
         Assert.assertEquals(lp.value(2), 0., 1e-8);
     }
 
+    @SuppressWarnings("Convert2Diamond")
     @Test(groups = "1s")
     public void testModeler4() {
         // 29.3-7
@@ -316,7 +319,7 @@ public class LinearProgramTest {
         lp.makeVariables(3);
         lp.setObjective(false, new double[]{1, 1, 1});
         lp.addGeq(new double[]{2, 7.5, 3}, 10000);
-        lp.addGeq(new HashMap<>() {{
+        lp.addGeq(new HashMap<Integer, Double>() {{
             put(0, 20.);
             put(1, 5.);
             put(2, 3.);
