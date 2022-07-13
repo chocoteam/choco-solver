@@ -307,6 +307,15 @@ pages="557--571",
 abstract="A key feature of constraint programming is the ability to design specific search strategies to solve problems. On the contrary, integer programming solvers have used efficient general-purpose strategies since their earliest implementations. We present a new general purpose search strategy for constraint programming inspired from integer programming techniques and based on the concept of the impact of a variable. The impact measures the importance of a variable for the reduction of the search space. Impacts are learned from the observation of domain reduction during search and we show how restarting search can dramatically improve performance. Using impacts for solving multiknapsack, magic square, and Latin square completion problems shows that this new criteria for choosing variables and values can outperform classical general-purpose strategies.",
 isbn="978-3-540-30201-8"
 }
+@ARTICLE{5887401,
+  author={Smith, Gillian and Whitehead, Jim and Mateas, Michael},
+  journal={IEEE Transactions on Computational Intelligence and AI in Games},
+  title={Tanagra: Reactive Planning and Constraint Solving for Mixed-Initiative Level Design},
+  year={2011},
+  volume={3},
+  number={3},
+  pages={201-215},
+  doi={10.1109/TCIAIG.2011.2159716}}
 @inproceedings{fages:hal-00904069,
   TITLE = {{Combining finite and continuous solvers Towards a simpler solver maintenance}},
   AUTHOR = {Fages, Jean-Guillaume and Chabert, Gilles and Prud'Homme, Charles},
@@ -414,6 +423,78 @@ isbn="978-3-540-30201-8"
   biburl    = {https://dblp.org/rec/conf/cp/LiYL21.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
 }
+@article{LE2021100085,
+title = {DirectDebug: A software package for the automated testing and debugging of feature models},
+journal = {Software Impacts},
+volume = {9},
+pages = {100085},
+year = {2021},
+issn = {2665-9638},
+doi = {https://doi.org/10.1016/j.simpa.2021.100085},
+url = {https://www.sciencedirect.com/science/article/pii/S2665963821000300},
+author = {Viet-Man Le and Alexander Felfernig and Thi Ngoc Trang Tran and MÃŒslÃŒm Atas and Mathias Uta and David Benavides and JosÃ© Galindo},
+keywords = {Automated testing and debugging, Feature models, Variability models, Diagnosis, Conflict detection}
+}
+@InProceedings{10.1007/978-3-030-78375-4_8,
+author="Delaune, St{\'e}phanie
+and Derbez, Patrick
+and Huynh, Paul
+and Minier, Marine
+and Mollimard, Victor
+and Prud'homme, Charles",
+editor="Sako, Kazue
+and Tippenhauer, Nils Ole",
+title="Efficient Methods to Search for Best Differential Characteristics on SKINNY",
+booktitle="Applied Cryptography and Network Security",
+year="2021",
+publisher="Springer International Publishing",
+address="Cham",
+pages="184--207",
+isbn="978-3-030-78375-4"
+}
+@InProceedings{10.1007/978-3-319-44953-1_40,
+author="Lorca, Xavier
+and Prud'homme, Charles
+and Questel, Aur{\'e}lien
+and Rottembourg, Beno{\^i}t",
+editor="Rueher, Michel",
+title="Using Constraint Programming for the Urban Transit Crew Rescheduling Problem",
+booktitle="Principles and Practice of Constraint Programming",
+year="2016",
+publisher="Springer International Publishing",
+address="Cham",
+pages="636--649",
+abstract="Scheduling urban and trans-urban transportation is an important issue for industrial societies. The Urban Transit Crew Scheduling Problem is one of the most important optimization problem related to this issue. It mainly relies on scheduling bus drivers' workday respecting both collective agreements and the bus schedule needs. If this problem has been intensively studied from a tactical point of view, its operational aspect has been neglected while the problem becomes more and more complex and more and more prone to disruptions. In this way, this paper presents how the constraint programming technologies are able to recover the tactical plans at the operational level in order to efficiently help in answering regulation needs after disruptions.",
+isbn="978-3-319-44953-1"
+}
+@INPROCEEDINGS{8814186,
+  author={Ait Salaht, Farah and Desprez, Frédéric and Lebre, Adrien and Prud'homme, Charles and Abderrahim, Mohamed},
+  booktitle={2019 IEEE International Conference on Services Computing (SCC)},
+  title={Service Placement in Fog Computing Using Constraint Programming},
+  year={2019},
+  volume={},
+  number={},
+  pages={19-27},
+  doi={10.1109/SCC.2019.00017}}
+@inproceedings{charpentier2021cosling,
+  title={COSLING Configurator.},
+  author={Charpentier, Antoine and Fages, Jean-Guillaume and Lap{\`e}gue, Tanguy},
+  booktitle={ConfWS},
+  pages={33--36},
+  year={2021}
+}
+@article{CANIZARES2022116149,
+title = {SINPA: SupportINg the automation of construction PlAnning},
+journal = {Expert Systems with Applications},
+volume = {190},
+pages = {116149},
+year = {2022},
+issn = {0957-4174},
+doi = {https://doi.org/10.1016/j.eswa.2021.116149},
+url = {https://www.sciencedirect.com/science/article/pii/S0957417421014755},
+author = {Pablo C. Cañizares and Sonia Estévez-Martín and Manuel Núñez},
+keywords = {Constraint programming, Construction sites planning, Tools to support projects development},
+}
 @article{DBLP:journals/constraints/Justeau-Allaire22,
   author    = {Dimitri Justeau{-}Allaire and
                Charles Prud'homme},
@@ -428,4 +509,17 @@ isbn="978-3-540-30201-8"
   timestamp = {Mon, 13 Jun 2022 20:57:36 +0200},
   biburl    = {https://dblp.org/rec/journals/constraints/Justeau-Allaire22.bib},
   bibsource = {dblp computer science bibliography, https://dblp.org}
+}
+@InProceedings{10.1007/978-3-031-08011-1_21,
+author="Ouellet, Yanick
+and Quimper, Claude-Guy",
+editor="Schaus, Pierre",
+title="A MinCumulative Resource Constraint",
+booktitle="Integration of Constraint Programming, Artificial Intelligence, and Operations Research",
+year="2022",
+publisher="Springer International Publishing",
+address="Cham",
+pages="318--334",
+abstract="The cumulative constraint is the key to the success of Constraint Programming in solving scheduling problems with cumulative resources. It limits the maximum amount of a resource consumed by the tasks at any time point. However, there are few global constraints that ensure that a minimum amount of a resource is consumed at any time point. We introduce such a constraint, the MinCumulative. We show that filtering the constraint is NP-Hard and propose a checker and a filtering algorithm based on the fully elastic relaxation used for the cumulative constraint. We also show how to model MinCumulative using the SoftCumulative constraint. We present experiments comparing the different methods to solve MinCumulative using Constraint Programming.",
+isbn="978-3-031-08011-1"
 }

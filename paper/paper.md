@@ -23,34 +23,51 @@ bibliography: paper.bib
 
 ---
 
-# Constraint programming
+# Summary
 
 Constraint Programming (CP) is a powerful programming paradigm for solving 
 combinatorial search problems [@DBLP:reference/fai/2].
 CP is at the intersection of artificial intelligence, computer science, operations research and many other fields.
-A user states a problem using variables, their domains (possible values for each
+Although closely related to integer linear programming, 
+CP does not require the constraints or the objective function to be linear.
+On the contrary, one of the richness's of the paradigm lies in the wide variety of constraints 
+it proposes to model and solve decision problems
+Thus, the objective of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
+and secondly to provide technics to automatically solve this problem.
+In standard use, a user states a problem using variables, their domains (possible values for each
 variable), and constraints, predicates that must hold on the variables.
 The wide variety of constraints available allows the user to describe his problem as naturally as possible.
-In addition to being declarative, the CP offers a range of techniques that find solutions to the problem.
-Each constraint ensures that it holds, otherwise a propagator filters (*removes*) 
+Each constraint ensures that it holds, otherwise a propagator *filters* ,removes, 
 from the domain of variables the values that prevent the satisfiability.
+It is the combination of the selected constraints that defines the problem to be solved.
 The problem is solved by alternating space reduction (usually by a depth-first search) and propagation, 
-thus ensuring the completeness of the approach. 
+thus ensuring the completeness of the approach.
+                                               
+# Statement of need
 
-
-# General overview
-    
 `Choco-solver` is Java library for constraint programming.
-In 2003, when the choice of programming language was made, Java was the most popular language. 
+In the early 2000s, when the choice of programming language was made, Java was the most popular language. 
 It is still very popular today ([TIOBE Index](https://www.tiobe.com/tiobe-index/)) 
 and allows the library to be easily integrated into both academic and industrial projects.
 Since then, the library has evolved a great deal, but ease of use has always been a guiding principle in its development.
 The API for `Choco-solver` was to keep the entry points to a minimum and thus simplify modelling for users.
 It contains numerous variables, many (global) constraints and search procedures, to provide wide modeling perspectives.
 `Choco-solver` is used by the academy for teaching and research and by the industry to solve real-world problems, 
-such as program verification, data center management, timetabling, scheduling and routing.
+such as cryptanalysis [@10.1007/978-3-030-78375-4_8],
+planing construction [@CANIZARES2022116149], 
+automated testing and debugging [@LE2021100085],
+scheduling [@10.1007/978-3-319-44953-1_40],
+level design [@5887401]
+or placement service [@8814186].
+The library was designed to be used not only as a black box, where only the modelling step is required, 
+but also as an open and modifiable system.
+The implementation of new constraints [@10.1007/978-3-031-08011-1_21] 
+or strategies for exploring the search space [@DBLP:conf/cp/LiYL21;@fages:hal-01629182] 
+is therefore possible.
+    
+# Features and Functionality
 
-# Describing a model                                                        
+## Modeling                                                        
 
 `Choco-solver` comes with the commonly used types of variables: 
 integer variables (with either bounded or enumerated domain), 
@@ -66,7 +83,7 @@ or *StableKeySort* [@beldiceanu:hal-01186680].
 One can pick some existing propagators to compose a new constraint or 
 create its own one in a straightforward way by implementing a filtering algorithm and a satisfaction checker.
                                    
-# Resolution toolbox
+## Solving
 
 `Choco-solver` has been carefully designed to offer wide range of resolution configurations 
 and good solving performances.
@@ -95,7 +112,7 @@ solving on one or more thread,
 or simply checking satisfaction.
 The search process itself is observable and extensible.
 
-# Miscellaneous
+## Miscellaneous
 
 Although originally designed to solve discrete mathematical problems, 
 `Choco-solver` supports natively real variables and constraints also, and relies on [Ibex-lib](http://www.ibex-lib.org/) 
