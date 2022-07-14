@@ -139,4 +139,9 @@ public class Set_FixedArray implements ISet {
 			}
 		};
 	}
+	
+        @Override
+        public int[] toArray() {
+            return values.clone();
+	}
 }

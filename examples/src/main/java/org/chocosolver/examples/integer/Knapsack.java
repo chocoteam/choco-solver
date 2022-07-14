@@ -65,7 +65,7 @@ public class Knapsack extends AbstractProblem {
         for (int i = 0, j = 3; i < no; i++) {
             energies[i] = data.data[j++];
             volumes[i] = data.data[j++];
-            nbOmax[i] = volumes[i]==0?42:(int) Math.ceil(capacites[1] / volumes[i]);
+            nbOmax[i] = volumes[i]==0?42:(int) Math.ceil(capacites[1]*1. / volumes[i]);
         }
     }
 

@@ -9,8 +9,8 @@
  */
 package org.chocosolver.solver.constraints.reification;
 
-import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.ImpliedConstraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -18,71 +18,82 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
 
-import java.util.*;
-
 /**
- * This propagator ensures the following relationship:
+ * Implication propagator
  * <p>
- * r &rArr; c
- * </p>
- * where 'r' is a boolean variable and 'c' a constraint (ie, set of propagators).
  * <br/>
  *
- * @author Charles Prud'homme
- * @since 03/06/2021
+ * @author Jean-Guillaume Fages
+ * @since 02/2013
  */
 public class PropImplied extends Propagator<Variable> {
 
-    /**
-     * Implying BoolVar
-     */
-    private final BoolVar impR;
-    /**
-     * Implied constraint
-     */
-    private final Constraint impC;
+    //***********************************************************************************
+    // VARIABLES
+    //***********************************************************************************
 
-    private static Variable[] extractVars(Constraint c, BoolVar r) {
-        Set<Variable> setOfVars = new HashSet<>();
-        setOfVars.add(r);
-        for (Propagator<?> p : c.getPropagators()) {
-            Collections.addAll(setOfVars, p.getVars());
-        }
-        Variable[] allVars = setOfVars.toArray(new Variable[0]);
-        Arrays.sort(allVars, Comparator.comparingInt(Identity::getId));
-        return allVars;
+    // boolean variable of the reification
+    private final BoolVar bVar;
+    // constraint to apply if bVar = true
+    private final Constraint trueCons;
+    // constraint in charge of the reification process (constraint of this propagator)
+    private ImpliedConstraint reifCons;
+
+    //***********************************************************************************
+    // CONSTRUCTION
+    //***********************************************************************************
+
+    public PropImplied(Variable[] allVars, Constraint consIfBoolTrue) {
+        super(allVars, computePrority(consIfBoolTrue), false);
+        this.bVar = (BoolVar) vars[0];
+        this.trueCons = consIfBoolTrue;
     }
 
-    public PropImplied(BoolVar r, Constraint c) {
-        super(extractVars(c, r), PropagatorPriority.LINEAR, false);
-        this.impC = c;
-        this.impC.ignore();
-        this.impR = r;
+    public void setReifCons(ImpliedConstraint reifCons) {
+        assert this.reifCons == null : "cannot change the ReificationConstraint of a PropReif";
+        this.reifCons = reifCons;
     }
+
+    private static PropagatorPriority computePrority(Constraint consIfBoolTrue) {
+        int p = consIfBoolTrue.computeMaxPriority().priority;
+        return PropagatorPriority.get(Math.max(p, PropagatorPriority.TERNARY.priority));
+    }
+
+    //***********************************************************************************
+    // METHODS
+    //***********************************************************************************
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (impR.isInstantiated()) {
-            if (impR.isInstantiatedTo(1)) {
-                this.model.postTemp(impC);
+        if (bVar.isInstantiated()) {
+            setPassive();
+            if (bVar.getBooleanValue() == ESat.TRUE) {
+                reifCons.activate(0);
             }
-            this.setPassive();
         } else {
-            if (ESat.FALSE.equals(impC.isSatisfied())) {
-                impR.instantiateTo(0, this);
-                this.setPassive();
+            ESat sat = trueCons.isSatisfied();
+            if (sat == ESat.FALSE) {
+                bVar.setToFalse(this);
+                setPassive();
             }
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if (impR.isInstantiatedTo(1)) {
-            return impC.isSatisfied();
-        } else if (impR.isInstantiatedTo(0)) {
-            return ESat.TRUE;
-        } else {
-            return ESat.UNDEFINED;
+        if (bVar.isInstantiated()) {
+            if (bVar.getValue() == 1) {
+                return trueCons.isSatisfied();
+            } else {
+                return ESat.TRUE;
+            }
         }
+        return ESat.UNDEFINED;
     }
+
+    @Override
+    public String toString() {
+        return bVar.toString() + "=>" + trueCons.toString();
+    }
+
 }

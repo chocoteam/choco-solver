@@ -39,30 +39,30 @@ public class PropXeqCReif extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (r.getLB() == 1) {
-            var.instantiateTo(cste, this);
+        if (r.isInstantiated()) {
+            if (r.getValue() == 1) {
+                var.instantiateTo(cste, this);
+                setPassive();
+            } else {
+                if (var.removeValue(cste, this) || !var.contains(cste)) {
+                    setPassive();
+                }
+            }
+        } else if (var.isInstantiatedTo(cste)) {
+            r.setToTrue(this);
             setPassive();
-        } else if (r.getUB() == 0) {
-            if (var.removeValue(cste, this) || !var.contains(cste)) {
-                setPassive();
-            }
-        } else {
-            if (var.isInstantiatedTo(cste)) {
-                r.setToTrue(this);
-                setPassive();
-            } else if (!var.contains(cste)) {
-                r.setToFalse(this);
-                setPassive();
-            }
+        } else if (!var.contains(cste)) {
+            r.setToFalse(this);
+            setPassive();
         }
     }
 
     @Override
     public ESat isEntailed() {
-        if(isCompletelyInstantiated()){
-            if(r.isInstantiatedTo(1)){
+        if (isCompletelyInstantiated()) {
+            if (r.isInstantiatedTo(1)) {
                 return ESat.eval(var.contains(cste));
-            }else{
+            } else {
                 return ESat.eval(!var.contains(cste));
             }
         }
@@ -70,9 +70,7 @@ public class PropXeqCReif extends Propagator<IntVar> {
     }
 
     /**
-     * @implSpec
-     *
-     * Premise: (x = c) &hArr; b
+     * @implSpec Premise: (x = c) &hArr; b
      * <p>
      * 4 cases here (only cases that triggered filtering are reported):
      * <ol type="a">
@@ -141,6 +139,6 @@ public class PropXeqCReif extends Propagator<IntVar> {
 
     @Override
     public String toString() {
-        return "(" + var.getName() +" = " + cste + ") <=> "+r.getName();
+        return "(" + var.getName() + " = " + cste + ") <=> " + r.getName();
     }
 }

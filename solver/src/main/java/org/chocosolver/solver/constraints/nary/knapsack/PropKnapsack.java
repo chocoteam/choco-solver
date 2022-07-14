@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.solver.constraints.nary;
+package org.chocosolver.solver.constraints.nary.knapsack;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;

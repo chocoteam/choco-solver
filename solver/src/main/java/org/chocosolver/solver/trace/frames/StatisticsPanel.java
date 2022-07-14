@@ -241,7 +241,7 @@ public class StatisticsPanel extends JPanel {
         JMenuItem item = new JMenuItem("Disconnect",
                 KeyEvent.VK_D);
         item.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_D, InputEvent.ALT_MASK));
+                KeyEvent.VK_D, InputEvent.ALT_DOWN_MASK));
         item.addActionListener(e -> {
             if ((chartOptions & 0b10) != 0) {
                 this.remove(chartpanel);
@@ -258,7 +258,7 @@ public class StatisticsPanel extends JPanel {
         JMenuItem item = new JMenuItem("Hide/Show",
                 KeyEvent.VK_H);
         item.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_H, InputEvent.ALT_MASK));
+                KeyEvent.VK_H, InputEvent.ALT_DOWN_MASK));
         item.addActionListener(e -> {
             if ((chartOptions & 0b10) != 0) {
                 this.remove(chartpanel);

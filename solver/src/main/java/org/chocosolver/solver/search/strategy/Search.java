@@ -307,59 +307,6 @@ public class Search {
         );
     }
 
-    /**
-     * Assignment strategy which selects a variable according to <code>DomOverWDeg</code> and assign
-     * it to its lower bound.
-     *
-     * @param vars list of variables
-     * @return assignment strategy
-     * @implNote This is based on "Boosting Systematic Search by Weighting Constraints."
-     * Boussemart et al. ECAI 2004.
-     * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
-     */
-    public static AbstractStrategy<IntVar> domOverWDegSearch(GraphVar... vars) {
-        return new GraphStrategy(vars, new DomOverWDeg<>(vars, 0),
-                new GraphNodeThenEdges(),
-                new GraphLexNode(),
-                new GraphLexEdge(),
-                true);
-    }
-
-    /**
-     * Assignment strategy which selects a variable according to <code>refined DomOverWDeg</code> and assign
-     * it to its lower bound, where the weight incrementer is "ca.cd".
-     *
-     * @param vars list of variables
-     * @return assignment strategy
-     * @implNote This is based on "Refining Constraint Weighting." Wattez et al. ICTAI 2019.
-     * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
-     */
-    public static AbstractStrategy<IntVar> domOverWDegRefSearch(GraphVar... vars) {
-        return new GraphStrategy(vars, new DomOverWDegRef<>(vars, 0),
-                new GraphNodeThenEdges(),
-                new GraphLexNode(),
-                new GraphLexEdge(),
-                true);
-    }
-
-    /**
-     * Assignment strategy which selects a variable according to <code>Conflict History</code>
-     * and assigns it to its lower bound.
-     *
-     * @param vars list of variables
-     * @return assignment strategy
-     * @implNote This is based on "Conflict history based search for constraint satisfaction problem."
-     * Habet et al. SAC 2019.
-     * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
-     */
-    public static AbstractStrategy<IntVar> conflictHistorySearch(GraphVar... vars) {
-        return new GraphStrategy(vars, new ConflictHistorySearch<>(vars, 0),
-                new GraphNodeThenEdges(),
-                new GraphLexNode(),
-                new GraphLexEdge(),
-                true);
-    }
-
     // ************************************************************************************
     // REALVAR STRATEGIES
     // ************************************************************************************

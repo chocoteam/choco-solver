@@ -18,7 +18,7 @@ def convertall(dir, list, CMD):
         return
     pbname = os.path.basename(dir)
     mznfiles = [file for file in os.listdir(dir) if file.endswith("mzn")]
-    dznfiles = [file for file in os.listdir(dir) if file.endswith("dzn")]
+    dznfiles = [file for file in os.listdir(dir) if file.endswith("dzn") or file.endswith("json")]
     for mzn in mznfiles:
         mznpath = os.path.join(dir, mzn)
         if len(dznfiles) > 0:
@@ -53,38 +53,46 @@ parser = argparse.ArgumentParser(description='Convert MiniZinc files in FlatZinc
 parser.add_argument(
     "-G", "--globals",
     help='Directory wherein global constraints supported by Choco are given.',
-    default='/Users/cprudhom/Sources/choco/extensions/choco-parsers/src/main/mzn_lib/',
+    default='/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/mzn_lib/',
     # default='/Users/cprudhom/Sources/Sandbox/chuffed/trunk/chuffed/flatzinc/mznlib/'
     # default='/Applications/MiniZincIDE.app/Contents/Resources/share/minizinc/std'
 )
 parser.add_argument(
     "-d", "--directory",
     help="MiniZinc files directory.",
-    default="/Users/cprudhom/Sources/MiniZinc/minizinc-challenges/rcpsp/data_psplib"
+    default="/Users/kyzrsoze/Sources/MiniZinc/mznc2020_probs/whirlpool"
 )
 parser.add_argument(
     "-o", "--outputdirectory",
     help="Output files directory.",
-    default="/Users/cprudhom/Sources/MiniZinc/Challenges/fzn/rcpsp/"
+    default="/Users/kyzrsoze/Sources/MiniZinc/fzn2020_probs/"
 )
 parser.add_argument(
     "-p", "--process",
     help='Number of processes to run in parallel',
     type=int,
-    default=4
+    default=1
 )
 
 args = parser.parse_args()
 path = args.outputdirectory
 os.makedirs(path, exist_ok=True)
-CMD = "mzn2fzn -I \"" + args.globals + "\" %s -o " + os.path.join(path, "%s")
+CMD = "minizinc --time-limit 1000 --solver org.choco.choco %s --fzn " + os.path.join(path, "%s")
+#CMD = "minizinc -c --solver org.choco.choco %s --fzn " + os.path.join(path, "%s")
 
 commands = []
+convertall(args.directory, commands, CMD)
 for bdir in os.listdir(args.directory) :
         convertall(os.path.join(args.directory, bdir), commands, CMD)
 
-pool = multiprocessing.Pool(args.process)
-pool.map(
-    work,
-    commands
-)
+#pool = multiprocessing.Pool(args.process)
+#pool.map(
+#    work,
+#    commands
+#)
+for cmd in commands:
+    print(cmd)
+    subprocess.call(
+        cmd,
+        shell=True,
+    )

@@ -32,7 +32,7 @@ import static java.lang.System.out;
 import static org.testng.Assert.assertEquals;
 
 /**
- * -Djava.library.path=-Djava.library.path=/Users/cprudhom/Sources/Ibex/ibex-2.3.1/__build__/plugins/java
+ * -Djava.library.path=/usr/local/lib
  * <br/>
  *
  * @author Charles Prud'homme
@@ -1258,5 +1258,23 @@ public class RealTest {
         Assert.assertEquals(y2.getUB(), 100.0, precision);
         Assert.assertEquals(x2.getLB(), 0.5, precision);
         Assert.assertEquals(x2.getUB(), 0.5, precision);
+    }
+
+    @Test(groups = "1s")
+    public void testElement() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 0., 2., 1.e-4);
+        IntVar y = model.intVar("I", 0, 1);
+        model.element(x, new double[]{3.0, 7.0}, y).post();
+        model.getSolver().findSolution();
+    }
+    
+    @Test(groups = "1s")
+    public void testElement2() {
+        Model model = new Model();
+        RealVar x = model.realVar("V", 8., 10., 1.e-4);
+        IntVar y = model.intVar("I", 0, 1);
+        model.element(x, new double[]{3.0, 7.0}, y).post();
+        model.getSolver().findSolution();
     }
 }

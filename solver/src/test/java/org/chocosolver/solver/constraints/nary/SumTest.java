@@ -10,8 +10,8 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
@@ -22,9 +22,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.stream;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 /**
  * @author Alexandre LEBRUN
@@ -38,8 +36,8 @@ public class SumTest {
         model = new Model();
     }
 
-    @Test(groups = "1s", timeOut=60000)
-    public void testNominal() throws ContradictionException{
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNominal() throws ContradictionException {
         IntVar[] vars = model.intVarArray(5, 0, 5);
         IntVar sum = model.intVar(15, 20);
         model.sum(vars, "=", sum).post();
@@ -58,7 +56,7 @@ public class SumTest {
         assertEquals(nbSol, nbSol2);
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testNoSolution() {
         IntVar[] vars = model.intVarArray(5, 0, 5);
         IntVar sum = model.intVar(26, 30);
@@ -68,7 +66,7 @@ public class SumTest {
         assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testZero() {
         IntVar[] vars = new IntVar[]{
                 model.intVar(-5, -1),
@@ -83,7 +81,7 @@ public class SumTest {
     }
 
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testSameVariableSolution() {
         IntVar ref = model.intVar(1, 5);
         IntVar[] vars = new IntVar[]{ref, ref};
@@ -92,7 +90,7 @@ public class SumTest {
         checkSolutions(vars, model.intVar(10));
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testSameVariableNoSolution() {
         IntVar ref = model.intVar(1, 5);
         IntVar[] vars = new IntVar[]{ref, ref};
@@ -102,7 +100,7 @@ public class SumTest {
     }
 
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testZeroElements() {
         IntVar[] vars = new IntVar[0];
         IntVar sum = model.intVar(-100, 100);
@@ -111,7 +109,7 @@ public class SumTest {
         assertEquals(checkSolutions(vars, sum), 1);
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testNoExactSolution() {
         IntVar[] vars = model.intVarArray(5, new int[]{0, 2});
         IntVar sum = model.intVar(101);
@@ -120,7 +118,7 @@ public class SumTest {
         assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testSimpleSum() {
         IntVar[] vars = model.intVarArray(2, new int[]{2, 3});
         IntVar sum = model.intVar(5);
@@ -129,7 +127,7 @@ public class SumTest {
         assertEquals(checkSolutions(">=", vars, sum), 3);
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testJustAbove() {
         IntVar[] vars = model.intVarArray(6, 6, 10);
         IntVar sum = model.intVar(0, 36);
@@ -139,7 +137,7 @@ public class SumTest {
         assertFalse(model.getSolver().solve());
     }
 
-    @Test(groups = "1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void justBelow() {
         IntVar[] vars = model.intVarArray(7, 0, 7);
         IntVar sum = model.intVar(49);
@@ -179,8 +177,8 @@ public class SumTest {
         return nbSol;
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testJL01(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testJL01() {
         Model m = new Model();
         IntVar i = m.intVar("i", -1, 0);
         IntVar j = m.intVar("j", 0, 1);
@@ -191,8 +189,8 @@ public class SumTest {
         Assert.assertEquals(m.getSolver().getSolutionCount(), 3);
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void testFH01(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void testFH01() {
         Model m = new Model();
         IntVar[] i = m.intVarArray("i", 3, 0, 2);
         IntVar o = m.intVar("o", 0, 6);
@@ -217,7 +215,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void sumGtIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
         Model choco = new Model();
 
@@ -243,7 +241,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void sumGtIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
         Model choco = new Model();
 
@@ -274,7 +272,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void sumGeIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
         Model choco = new Model();
 
@@ -300,7 +298,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void sumGeIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
         Model choco = new Model();
 
@@ -330,7 +328,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void sumLeIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
         Model choco = new Model();
 
@@ -355,7 +353,7 @@ public class SumTest {
      *
      * @throws ContradictionException never. But it really should throw one.
      */
-    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void sumLeIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
         Model choco = new Model();
 
@@ -384,7 +382,7 @@ public class SumTest {
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void sumLtIsSubjectToUnderflowWhenRhsIsConstant() throws ContradictionException {
         Model choco = new Model();
 
@@ -409,7 +407,7 @@ public class SumTest {
      *
      * @throws ContradictionException never. But it really should throw one.
      */
-    @Test(groups="1s", timeOut=60000,expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void sumLtIsSubjectToUnderflowWhenRhsIsVar() throws ContradictionException {
         Model choco = new Model();
 
@@ -423,13 +421,14 @@ public class SumTest {
     }
 
     ///
+
     /**
      * This case illustrates that the same problem occurs even when there is
      * more than one single variable involved in the constraint.
      *
      * @throws ContradictionException always. But it really should not.
      */
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void isAlsoHappensWhenThereIsMoreThanOneVariableInTheSum() throws ContradictionException {
         Model choco = new Model();
 
@@ -456,10 +455,10 @@ public class SumTest {
      * here it is not the case (even though all possible solutions are
      * feasible).
      */
-    @Test(groups="1s", timeOut=60000,expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000)
     public void firstSumGeShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = -2147483647;
-        Model  cp = new Model();
+        int rhs = -2147483647;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-5, 5});
         IntVar x1 = cp.intVar(new int[]{-5, 5});
         IntVar x2 = cp.intVar(new int[]{-5, 5});
@@ -469,13 +468,13 @@ public class SumTest {
         cp.getSolver().propagate(); // throws a spurious inconsistency
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void secndSumGeShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
+        int rhs = 0;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-731435840});
-        IntVar x1 = cp.intVar(new int[]{-731435844,-731435843,-731435841,-731435837});
-        IntVar x2 = cp.intVar(new int[]{-731435847,-731435842,-731435840,-731435839,-731435837});
+        IntVar x1 = cp.intVar(new int[]{-731435844, -731435843, -731435841, -731435837});
+        IntVar x2 = cp.intVar(new int[]{-731435847, -731435842, -731435840, -731435839, -731435837});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2}, ">=", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
@@ -484,10 +483,10 @@ public class SumTest {
     /**
      * Same remark as above, exept it is for the > operator rather than >=
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000)
     public void firstSumGtShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = -2147483647;
-        Model  cp = new Model();
+        int rhs = -2147483647;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-5, 5});
         IntVar x1 = cp.intVar(new int[]{-5, 5});
         IntVar x2 = cp.intVar(new int[]{-5, 5});
@@ -496,17 +495,18 @@ public class SumTest {
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
     }
+
     /**
      * Same remark as above, exept it is for the > operator rather than >=
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void secndSumGtShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
+        int rhs = 0;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-777264600});
         IntVar x1 = cp.intVar(new int[]{-777264591});
-        IntVar x2 = cp.intVar(new int[]{-777264597,-777264591});
-        IntVar x3 = cp.intVar(new int[]{-777264597,-777264591});
+        IntVar x2 = cp.intVar(new int[]{-777264597, -777264591});
+        IntVar x3 = cp.intVar(new int[]{-777264597, -777264591});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
         cp.getSolver().propagate(); // does not detect inconsistency
@@ -515,14 +515,14 @@ public class SumTest {
     /**
      * Same remark as above, exept it is for the > operator rather than >=
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void secndSumGtShouldBeBoundZConsistent2() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
+        int rhs = 0;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-100});
         IntVar x1 = cp.intVar(new int[]{-91});
-        IntVar x2 = cp.intVar(new int[]{-97,-91});
-        IntVar x3 = cp.intVar(new int[]{-97,-91});
+        IntVar x2 = cp.intVar(new int[]{-97, -91});
+        IntVar x3 = cp.intVar(new int[]{-97, -91});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">", rhs));
         cp.getSolver().propagate(); // does not detect inconsistency
@@ -532,60 +532,63 @@ public class SumTest {
      * Here we consider the <= operator. Here, it is problematic as it fails to
      * detect an inconsistency (even one which is obvious to an human brain)
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void firstSumLeShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = -2147483647;
-        Model  cp = new Model();
-        IntVar x0 = cp.intVar(new int[]{186191402,186191412});
-        IntVar x1 = cp.intVar(new int[]{186191402,186191412});
-        IntVar x2 = cp.intVar(new int[]{186191402,186191412});
+        int rhs = -2147483647;
+        Model cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{186191402, 186191412});
+        IntVar x1 = cp.intVar(new int[]{186191402, 186191412});
+        IntVar x2 = cp.intVar(new int[]{186191402, 186191412});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2}, "<=", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
     }
+
     /**
      * Here we consider the <= operator. Here, it is problematic as it fails to
      * detect an inconsistency (even one which is obvious to an human brain)
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void secndSumLeShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
-        IntVar x0 = cp.intVar(new int[]{1551476532,551476534,551476537});
+        int rhs = 0;
+        Model cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{1551476532, 551476534, 551476537});
         IntVar x1 = cp.intVar(new int[]{551476531});
-        IntVar x2 = cp.intVar(new int[]{551476531,551476533,551476535});
+        IntVar x2 = cp.intVar(new int[]{551476531, 551476533, 551476535});
         IntVar x3 = cp.intVar(new int[]{551476531});
         IntVar x4 = cp.intVar(new int[]{551476537});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, "<=", rhs));
         cp.getSolver().propagate(); // does not detect inconsistency
     }
+
     /**
      * Same as above, for the '<' operator
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void firstSumLtShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = -2147483647;
-        Model  cp = new Model();
-        IntVar x0 = cp.intVar(new int[]{186191402,186191412});
-        IntVar x1 = cp.intVar(new int[]{186191402,186191412});
-        IntVar x2 = cp.intVar(new int[]{186191402,186191412});
+        int rhs = -2147483647;
+        Model cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{186191402, 186191412});
+        IntVar x1 = cp.intVar(new int[]{186191402, 186191412});
+        IntVar x2 = cp.intVar(new int[]{186191402, 186191412});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2}, "<", rhs));
         cp.getSolver().propagate(); // does not detect inconsistency
     }
+
     /**
      * Same as above, for the '<' operator
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000)
     public void secndSumLtShouldBeBoundZ() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
+        int rhs = 0;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-461559231});
-        IntVar x1 = cp.intVar(new int[]{-461559228,-461559227});
-        IntVar x2 = cp.intVar(new int[]{-461559226,-461559224});
-        IntVar x3 = cp.intVar(new int[]{-461559234,-461559230});
-        IntVar x4 = cp.intVar(new int[]{-461559234,-461559232,-461559231,-461559224});
+        IntVar x1 = cp.intVar(new int[]{-461559228, -461559227});
+        IntVar x2 = cp.intVar(new int[]{-461559226, -461559224});
+        IntVar x3 = cp.intVar(new int[]{-461559234, -461559230});
+        IntVar x4 = cp.intVar(new int[]{-461559234, -461559232, -461559231, -461559224});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, "<", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
@@ -596,10 +599,10 @@ public class SumTest {
      * here it is not the case (even though all possible solutions are
      * feasible).
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000)
     public void firstSumGeShouldBeBoundZConsistent3() throws ContradictionException {
-        int   rhs = -2147483647;
-        Model  cp = new Model();
+        int rhs = -2147483647;
+        Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-5, 5});
         IntVar x1 = cp.intVar(new int[]{-5, 5});
         IntVar x2 = cp.intVar(new int[]{-5, 5});
@@ -609,14 +612,14 @@ public class SumTest {
         cp.getSolver().propagate(); // throws a spurious inconsistency
     }
 
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000)
     public void secndSumGeShouldBeBoundZConsistent4() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
-        IntVar x0=cp.intVar(new int[]{972708062,972708065,972708068,972708069});
-        IntVar x1=cp.intVar(new int[]{972708066});
-        IntVar x2=cp.intVar(new int[]{972708061,972708063,972708069});
-        IntVar x3=cp.intVar(new int[]{972708065});
+        int rhs = 0;
+        Model cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{972708062, 972708065, 972708068, 972708069});
+        IntVar x1 = cp.intVar(new int[]{972708066});
+        IntVar x2 = cp.intVar(new int[]{972708061, 972708063, 972708069});
+        IntVar x3 = cp.intVar(new int[]{972708065});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3}, ">=", rhs));
         cp.getSolver().propagate(); // throws a spurious inconsistency
@@ -624,7 +627,7 @@ public class SumTest {
 
     /**
      * Voila comment sont rapportés mes contrexemples.
-     *
+     * <p>
      * ###########################
      * RHS : 0
      * ###########################
@@ -633,17 +636,56 @@ public class SumTest {
      * WITNESS   : x0={-530774850,-530774849,-530774844,-530774842,-530774840}, x1={-530774850,-530774845}, x2={-530774847}, x3={-530774847,-530774846,-530774844,-530774841}, x4={-530774840}
      * ###########################
      */
-    @Test(groups="1s", timeOut=60000, expectedExceptions = SolverException.class)
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
     public void thirdSumGeShouldBeBoundZConsistent() throws ContradictionException {
-        int   rhs = 0;
-        Model  cp = new Model();
-        IntVar x0=cp.intVar(new int[]{-530774850,-530774849,-530774844,-530774842,-530774840});
-        IntVar x1=cp.intVar(new int[]{-530774850,-530774845});
-        IntVar x2=cp.intVar(new int[]{-530774847});
-        IntVar x3=cp.intVar(new int[]{-530774847,-530774846,-530774844,-530774841});
-        IntVar x4=cp.intVar(new int[]{-530774840});
+        int rhs = 0;
+        Model cp = new Model();
+        IntVar x0 = cp.intVar(new int[]{-530774850, -530774849, -530774844, -530774842, -530774840});
+        IntVar x1 = cp.intVar(new int[]{-530774850, -530774845});
+        IntVar x2 = cp.intVar(new int[]{-530774847});
+        IntVar x3 = cp.intVar(new int[]{-530774847, -530774846, -530774844, -530774841});
+        IntVar x4 = cp.intVar(new int[]{-530774840});
 
         cp.post(cp.sum(new IntVar[]{x0, x1, x2, x3, x4}, ">=", rhs));
         cp.getSolver().propagate(); // devrait lancer une exception
+    }
+
+    @Test(groups = "10s")
+    public void testBigCoeffs1() throws ContradictionException {
+        for (int i = 0; i < 70; i++) {
+            int rhs = 0;
+            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
+
+            cp.post(cp.sum(xs, ">=", rhs));
+            cp.getSolver().setSearch(Search.randomSearch(xs, i));
+            Assert.assertNotNull(cp.getSolver().findSolution());
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testBigCoeffs2() throws ContradictionException {
+        for (int i = 0; i < 70; i++) {
+            int rhs = 0;
+            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
+
+            cp.post(cp.sum(xs, "=", rhs));
+            cp.getSolver().setSearch(Search.randomSearch(xs, i));
+            Assert.assertNotNull(cp.getSolver().findSolution());
+        }
+    }
+
+    @Test(groups = "10s")
+    public void testBigCoeffs3() throws ContradictionException {
+        for (int i = 0; i < 70; i++) {
+            int rhs = 0;
+            Model cp = new Model(Settings.init().setMinCardinalityForSumDecomposition(1001));
+            IntVar[] xs = cp.intVarArray(1000, IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND);
+
+            cp.post(cp.sum(xs, "!=", rhs));
+            cp.getSolver().setSearch(Search.randomSearch(xs, i));
+            Assert.assertNotNull(cp.getSolver().findSolution());
+        }
     }
 }

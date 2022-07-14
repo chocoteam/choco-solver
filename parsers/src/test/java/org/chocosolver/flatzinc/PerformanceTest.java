@@ -167,8 +167,8 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 1123, "Unexpected best solution");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 35, "Unexpected number of solutions");
-        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 841_296, "Unexpected number of nodes");
-        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 841_227, "Unexpected number of failures");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 822_035, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 821_966, "Unexpected number of failures");
     }
 
     @Test(groups = "mzn", timeOut = 60_000, priority = 1)
@@ -181,7 +181,7 @@ public class PerformanceTest {
                 "-lvl", "SILENT",
                 "-stasol",
                 "-p", "1",
-                "-ocs" // required for this problem, otherwise the solution is not correct
+                "-ocs", "ALL" // required for this problem, otherwise the solution is not correct
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);

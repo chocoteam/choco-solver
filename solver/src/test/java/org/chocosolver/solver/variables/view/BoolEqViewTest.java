@@ -12,7 +12,9 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Explainer;
+import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
@@ -20,6 +22,7 @@ import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -41,14 +44,40 @@ public class BoolEqViewTest {
     BoolVar b;
 
     @BeforeMethod(alwaysRun = true)
-    public void before(){
+    public void before() {
         model = new Model();
-        x = model.intVar("x", 0,5);
+        x = model.intVar("x", 0, 5);
         b = new BoolEqView(x, 3);
     }
 
     @Test(groups = "1s")
     public void testMonitorDelta() {
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds1() throws Exception {
+        before();
+        b.updateBounds(1, 0, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds2() throws Exception {
+        before();
+        b.updateBounds(2, 1, Cause.Null);
+    }
+
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds3() throws Exception {
+        before();
+        b.updateBounds(0, -1, Cause.Null);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds4() throws Exception {
+        before();
+        b.updateBounds(2, -1, Cause.Null);
     }
 
     @Test(groups = "1s")
@@ -69,7 +98,7 @@ public class BoolEqViewTest {
     }
 
     @Test(groups = "1s")
-    public void testSetToTrue() throws ContradictionException{
+    public void testSetToTrue() throws ContradictionException {
         Assert.assertTrue(b.setToTrue(Cause.Null));
         Assert.assertTrue(x.isInstantiatedTo(3));
     }
@@ -377,7 +406,7 @@ public class BoolEqViewTest {
         Assert.assertEquals(b.previousValueOut(0), -1);
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetValueIterator() {
         DisposableValueIterator vit = b.getValueIterator(true);
         Assert.assertTrue(vit.hasNext());
@@ -396,7 +425,7 @@ public class BoolEqViewTest {
         vit.dispose();
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void testGetRangeIterator() {
         DisposableRangeIterator rit = b.getRangeIterator(true);
         Assert.assertTrue(rit.hasNext());
@@ -413,13 +442,13 @@ public class BoolEqViewTest {
         Assert.assertFalse(rit.hasPrevious());
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test1(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test1() {
         BoolVar[] doms = new BoolVar[6];
-        for(int i = 0 ; i < 6; i++){
+        for (int i = 0; i < 6; i++) {
             doms[i] = model.intEqView(x, i);
         }
-        while(model.getSolver().solve()){
+        while (model.getSolver().solve()) {
             System.out.printf("%s\n", x);
             System.out.printf("%s\n", Arrays.toString(doms));
 
@@ -437,8 +466,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
 
     }
@@ -486,8 +515,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -518,8 +547,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -536,8 +565,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -568,8 +597,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -586,8 +615,8 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
     }
 
@@ -617,8 +646,66 @@ public class BoolEqViewTest {
         IntIterableRangeSet rng = new IntIterableRangeSet(1);
         Assert.assertEquals(lits.get(b), rng);
         rng.clear();
-        rng.addBetween(0,2);
-        rng.addBetween(4,5);
+        rng.addBetween(0, 2);
+        rng.addBetween(4, 5);
         Assert.assertEquals(lits.get(x), rng);
+    }
+
+    @Test(groups = "1s")
+    public void testToTable() throws ContradictionException {
+        for (int i = 0; i < 100; i++) {
+            Model mod = new Model();
+            IntVar res = mod.intVar("r", 0, 1004);
+            IntVar[] xs = mod.intVarArray(5, new int[]{1, 2, 3});
+            BoolVar[] vs = new BoolVar[5];
+            for (int j = 0; j < 5; j++) {
+                vs[j] = mod.intEqView(xs[j], 2);
+                /*vs[j] = mod.boolVar();
+                mod.reifyXeqC(xs[j], 2, vs[j]);*/
+            }
+            int[] coeffs = new int[]{
+                    1, 1, 1, 1, 1000
+            };
+
+            mod.table(ArrayUtils.append(vs, new IntVar[]{res}),
+                    TuplesFactory.scalar(vs, coeffs, res, 1), "CT+").post();
+            mod.getSolver().setSearch(Search.randomSearch(xs, i));
+            while (mod.getSolver().solve()) {
+                int c = 0;
+                for (int j = 0; j < xs.length; j++) {
+                    c += vs[j].getValue() * coeffs[j];
+                }
+                Assert.assertEquals(c, res.getValue());
+            }
+            Assert.assertEquals(mod.getSolver().getSolutionCount(), 243);
+        }
+    }
+
+    @Test(groups = "1s")
+    public void testToTable2() throws ContradictionException {
+        for (int i = 0; i < 100; i++) {
+            Model mod = new Model();
+            IntVar res = mod.intVar("r", 0, 1004);
+            IntVar[] xs = mod.intVarArray(5, new int[]{1, 2, 3});
+            BoolVar[] vs = new BoolVar[5];
+            for (int j = 0; j < 5; j++) {
+                vs[j] = mod.intEqView(xs[j], 2).not();
+            }
+            int[] coeffs = new int[]{
+                    1, 1, 1, 1, 1000
+            };
+
+            mod.table(ArrayUtils.append(vs, new IntVar[]{res}),
+                    TuplesFactory.scalar(vs, coeffs, res, 1), "CT+").post();
+            mod.getSolver().setSearch(Search.randomSearch(xs, i));
+            while (mod.getSolver().solve()) {
+                int c = 0;
+                for (int j = 0; j < xs.length; j++) {
+                    c += vs[j].getValue() * coeffs[j];
+                }
+                Assert.assertEquals(c, res.getValue());
+            }
+            Assert.assertEquals(mod.getSolver().getSolutionCount(), 243);
+        }
     }
 }

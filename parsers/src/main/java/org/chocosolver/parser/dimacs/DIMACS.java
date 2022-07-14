@@ -71,6 +71,7 @@ public class DIMACS extends RegParser {
         parsers = new DIMACSParser[nb_cores];
         for (int i = 0; i < nb_cores; i++) {
             Model threadModel = new Model(iname + "_" + (i + 1), defaultSettings);
+            threadModel.getSolver().logWithANSI(ansi);
             portfolio.addModel(threadModel);
             parsers[i] = new DIMACSParser();
         }
@@ -127,6 +128,8 @@ public class DIMACS extends RegParser {
         Solver solver = model.getSolver();
         if (level.isLoggable(Level.INFO)) {
             solver.printShortFeatures();
+            getModel().displayVariableOccurrences();
+            getModel().displayPropagatorOccurrences();
         }
         if (enumerate) {
             while (solver.solve()) {

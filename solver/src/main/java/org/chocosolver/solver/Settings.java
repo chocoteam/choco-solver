@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.memory.ICondition;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -63,7 +62,7 @@ public class Settings {
 
     private boolean enableSAT = false;
 
-    private boolean swapOnPassivate = false;
+    private boolean swapOnPassivate = true;
 
     private boolean checkDeclaredConstraints = true;
 
@@ -83,7 +82,7 @@ public class Settings {
 
     private int dominancePerimeter = 4;
 
-    private boolean explainGlobalFailureInSum = true;
+    private boolean explainGlobalFailureInSum = false;
 
     private double ibexContractionRatio = Ibex.RATIO;
 
@@ -350,16 +349,6 @@ public class Settings {
     public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
-    }
-
-    @Deprecated
-    public ICondition getEnvironmentHistorySimulationCondition() {
-        return null;
-    }
-
-    @Deprecated
-    public Settings setEnvironmentHistorySimulationCondition(ICondition environmentHistorySimulationCondition) {
-        return null;
     }
 
     /**

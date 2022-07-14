@@ -476,7 +476,6 @@ public interface Modeler {
                 switch (st) {
                     case "at_least_AC":
                         new Constraint("atLeastNVAC", new PropAtLeastNValues_AC(decvars,
-                                s.getDomainUnion(decvars),
                                 vars[n - 1])).post();
                         break;
                     case "at_most_BC":

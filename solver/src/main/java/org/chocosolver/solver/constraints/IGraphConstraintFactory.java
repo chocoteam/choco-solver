@@ -957,8 +957,10 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
     default Constraint dcmst(UndirectedGraphVar graphVar, IntVar[] degrees,
                              IntVar costVar, int[][] edgeCosts,
                              int lagrMode) {
+        Constraint treeCstr = tree(graphVar);
+        treeCstr.ignore();
         Propagator[] props = ArrayUtils.append(
-                tree(graphVar).getPropagators()
+                treeCstr.getPropagators()
                 , new Propagator[]{
                         new PropTreeCostSimple(graphVar, costVar, edgeCosts)
                         , new PropMaxDegVarTree(graphVar, degrees)

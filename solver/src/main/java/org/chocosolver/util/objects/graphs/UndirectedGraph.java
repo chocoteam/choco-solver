@@ -591,15 +591,6 @@ public class UndirectedGraph implements IGraph {
         return false;
     }
 
-    @Override
-    public int getDomainSize() {
-        int size = 0;
-        for (int n : getNodes()) {
-            size += getNeighborsOf(n).size() + 1; // +1 to count the node
-        }
-        return size;
-    }
-
     /**
      * Structural equality test between two undirected graph vars.
      * Only existing nodes and edges are tested, i.e. graphs can have different underlying set data structures,

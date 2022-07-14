@@ -38,43 +38,7 @@ public interface UndirectedGraphVar extends GraphVar<UndirectedGraph> {
     default ISet getPotentialNeighborsOf(int idx) {
         return getUB().getNeighborsOf(idx);
     }
-
-    /**
-     * @deprecated For an undirected graph, this method is equivalent to getMandatoryNeighborsOf.
-     */
-    @Deprecated
-    @Override
-    default ISet getMandatorySuccessorsOf(int node) {
-        return GraphVar.super.getMandatorySuccessorsOf(node);
-    }
-
-    /**
-     * @deprecated For an undirected graph, this method is equivalent to getPotentialNeighborsOf.
-     */
-    @Deprecated
-    @Override
-    default ISet getPotentialSuccessorsOf(int node) {
-        return GraphVar.super.getPotentialSuccessorsOf(node);
-    }
-
-    /**
-     * @deprecated For an undirected graph, this method is equivalent to getMandatoryNeighborsOf.
-     */
-    @Deprecated
-    @Override
-    default ISet getMandatoryPredecessorsOf(int node) {
-        return GraphVar.super.getMandatoryPredecessorsOf(node);
-    }
-
-    /**
-     * @deprecated For an undirected graph, this method is equivalent to getPotentialNeighborsOf.
-     */
-    @Deprecated
-    @Override
-    default ISet getPotentialPredecessorOf(int node) {
-        return GraphVar.super.getPotentialPredecessorOf(node);
-    }
-
+    
     /**
      * Retrieves the current value of the variable if instantiated, otherwise the lower bound (kernel).
      *

@@ -55,7 +55,7 @@ public class PropMixedElement extends Propagator<Variable> {
 
     public void updateIInf() throws ContradictionException {
         int inf = y.getLB();
-        while (values[inf] < x.getLB()) {
+        while (inf < values.length && values[inf] < x.getLB()) {
             inf++;
         }
         y.updateLowerBound(inf, this);
@@ -63,7 +63,7 @@ public class PropMixedElement extends Propagator<Variable> {
 
     public void updateISup() throws ContradictionException {
         int sup = y.getUB();
-        while (values[sup] > x.getUB()) {
+        while (sup >= 0 && values[sup] > x.getUB()) {
             sup--;
         }
         y.updateUpperBound(sup, this);

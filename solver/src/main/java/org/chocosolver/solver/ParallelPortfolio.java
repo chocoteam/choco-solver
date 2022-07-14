@@ -20,6 +20,13 @@ import org.chocosolver.solver.search.loop.lns.INeighborFactory;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.loop.monitors.NogoodFromRestarts;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.ConflictHistorySearch;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDeg;
+import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDegRef;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -419,6 +426,7 @@ public class ParallelPortfolio {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void configureModel(int workerID) {
         Model worker = getModels().get(workerID);
         Solver solver = worker.getSolver();
@@ -449,15 +457,26 @@ public class ParallelPortfolio {
         ivars = Arrays.copyOf(ivars, ki);
         svars = Arrays.copyOf(svars, ks);
         rvars = Arrays.copyOf(rvars, kr);
+        if (ivars.length == 0) {
+            ivars = new IntVar[]{solver.getModel().intVar(0)};
+        }
+        if (svars.length == 0) {
+            svars = new SetVar[]{solver.getModel().setVar()};
+        }
 
         // set heuristic
         boolean opt = policy != ResolutionPolicy.SATISFACTION;
+        AbstractStrategy<IntVar> istrat;
+        AbstractStrategy<SetVar> sstrat;
         switch (workerID) {
             case 0:
                 // DWD  + fast restart + LC (+ B2V)
+                istrat = VarH.DOMWDEG.make(solver, ivars, ValH.BEST, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new DomOverWDeg<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
+
                 solver.setSearch(
                         lastConflict(
-                                VarH.DOMWDEG.make(solver, ivars, ValH.BEST, Integer.MAX_VALUE, opt)
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -466,9 +485,11 @@ public class ParallelPortfolio {
                 }
                 break;
             case 1:
+                istrat = VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new ConflictHistorySearch<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
                 solver.setSearch(
                         lastConflict(
-                                VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -478,9 +499,11 @@ public class ParallelPortfolio {
                 break;
             case 2:
                 // input order + LC
+                istrat = VarH.INPUT.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new InputOrder<>(solver.getModel()), new SetDomainMin(), true, svars);
                 solver.setSearch(
                         lastConflict(
-                                VarH.INPUT.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 if (reliableness.containsKey(worker)) {
@@ -488,10 +511,12 @@ public class ParallelPortfolio {
                 }
                 break;
             case 3:
-                if (!opt) {
+                if (!opt || ks > 0) {
+                    istrat = VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt);
+                    sstrat = Search.setVarSearch(new DomOverWDegRef<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
                     solver.setSearch(
                             lastConflict(
-                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                                    new StrategiesSequencer(istrat, sstrat)
                             )
                     );
                     Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -511,18 +536,23 @@ public class ParallelPortfolio {
                 break;
             case 4:
                 // ABS  + fast restart + LC
+                istrat = VarH.ABS.make(solver, ivars, ValH.DEFAULT, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new ConflictHistorySearch<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
                 solver.setSearch(
                         lastConflict(
-                                VarH.ABS.make(solver, ivars, ValH.DEFAULT, Integer.MAX_VALUE, opt)
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
                 break;
             case 5:
                 // DWD  + fast restart + COS
+                istrat = VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new DomOverWDeg<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
+
                 solver.setSearch(
-                        Search.conflictOrderingSearch(
-                                VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                        lastConflict(
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 Restarts.LUBY.declare(solver, 500, 0.d, 5000);
@@ -530,21 +560,27 @@ public class ParallelPortfolio {
                 break;
             case 6:
                 // DWD  + fast restart + LC (+ B2V)
+                sstrat = Search.setVarSearch(new DomOverWDeg<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
                 if (!opt) {
-                    solver.setSearch(VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, false));
+                    solver.setSearch(VarH.DOMWDEG.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, false), sstrat);
                 } else {
                     solver.setSearch(
                             lastConflict(
-                                    VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                                    new StrategiesSequencer(
+                                            VarH.DOMWDEGR.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt),
+                                            sstrat)
                             )
                     );
                     Restarts.LUBY.declare(solver, 500, 0.d, 5000);
                 }
                 break;
             case 7:
+                istrat = VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt);
+                sstrat = Search.setVarSearch(new ConflictHistorySearch<>(svars, solver.getModel().getSeed()), new SetDomainMin(), true, svars);
+
                 solver.setSearch(
                         lastConflict(
-                                VarH.CHS.make(solver, ivars, ValH.MIN, Integer.MAX_VALUE, opt)
+                                new StrategiesSequencer(istrat, sstrat)
                         )
                 );
                 Restarts.LUBY.declare(solver, 40, 0.d, 5000);
@@ -565,7 +601,7 @@ public class ParallelPortfolio {
                 break;
         }
         // complete with set default search
-        if (ks > 0) {
+        if (ks > 0 && workerID > 6) {
             solver.setSearch(solver.getSearch(), setVarSearch(svars));
         }
         // complete with real default search

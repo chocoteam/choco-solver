@@ -344,13 +344,11 @@ public interface IOutputFactory extends ISelf<Solver> {
     }
 
     /**
-     * Plug <a href="https://github.com/cp-profiler/cp-profiler">cp-profiler</a> instance to this.
-     *
-     * @param domain set to <i>true</i> to send variables' domain on each node, <i>false</i> otherwise.
-     * @return a {@link Closeable} object to be closed at the end of resolution
+     * @deprecated
      */
+    @Deprecated
     default Closeable outputSearchTreeToCPProfiler(boolean domain) {
-        return new CPProfiler(this.ref(), domain);
+        return null;
     }
 
     /**

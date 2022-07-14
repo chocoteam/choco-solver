@@ -6,7 +6,7 @@ MEM_LIMIT=4000
 DIR=./
 TDIR=./
 SEED=0
-JAR_NAME=choco-parsers.jar
+JAR_NAME=choco-parsers-light-4.10.9-SNAPSHOT.jar
 CHOCO_JAR=${DIR}/${JAR_NAME}
 usage="\
 
@@ -132,7 +132,7 @@ do
 done
 
 FILE="$1"
-ARGS=" -limit=[${TIME_LIMIT}s] -p $NB_NODES -f -varh CHS -valh min -last -restarts [luby,500,5000] -lc 1"
+ARGS=" -limit=[${TIME_LIMIT}s] -p $NB_NODES -f -varh DOMWDEG -valh BMIN -last -restarts [luby,500,5000] -lc 1"
 
 CMD="java -XX:+UseSerialGC -server -Xss128M -Xmx${MEM_LIMIT}m -cp .:${CHOCO_JAR} org.chocosolver.parser.xcsp.ChocoXCSP \"${FILE}\" ${ARGS}"
 

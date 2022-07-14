@@ -52,3 +52,11 @@ predicate int_lin_ne_imp(array [int] of int: as, array [int] of var int: bs,
                          int: c, var bool: r);
 
 predicate set_in_imp(var int: x, set of int: S, var bool: r);
+
+annotation warm_start_bool( array[int] of var bool: x, array[int] of bool: v );
+annotation warm_start_int( array[int] of var int: x, array[int] of int: v );
+annotation warm_start_set( array[int] of var set of int: x, array[int] of set of int: v );
+
+annotation warm_start( array[int] of var bool: x, array[int] of bool: v ) = warm_start_bool(x, v);
+annotation warm_start( array[int] of var int: x, array[int] of int: v ) = warm_start_int(x, v);
+annotation warm_start( array[int] of var set of int: x, array[int] of set of int: v ) = warm_start_set(x, v);

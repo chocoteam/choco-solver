@@ -55,7 +55,7 @@ public class LNSTest {
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
+            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1]*1. / volumes[i]), true);
         }
         final IntVar power = model.intVar("power", 0, 99999, true);
         IntVar scalar = model.intVar("weight", capacities[0], capacities[1], true);
@@ -130,7 +130,7 @@ public class LNSTest {
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
+            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1]*1. / volumes[i]), true);
         }
         final IntVar power = model.intVar("power", 0, 99999, true);
         IntVar scalar = model.intVar("weight", capacities[0], capacities[1], true);
@@ -155,7 +155,7 @@ public class LNSTest {
         try {
             // object #17 cannot be set to a value greater than 50 (91 in the previous solution)
             objects[16].updateUpperBound(50, Cause.Null);
-        } catch (ContradictionException e) {
+        } catch (ContradictionException ignored) {
         }
         // declaring a neighborhood for LNS, here a random one
         RandomNeighborhood rnd = new RandomNeighborhood(objects, 1, 0);
@@ -188,7 +188,7 @@ public class LNSTest {
         // occurrence of each item
         IntVar[] objects = new IntVar[nos];
         for (int i = 0; i < nos; i++) {
-            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] / volumes[i]), true);
+            objects[i] = model.intVar("o_" + (i + 1), 0, (int) ceil(capacities[1] * 1.d / volumes[i]), true);
         }
         final IntVar power = model.intVar("power", 0, 99999, true);
         IntVar scalar = model.intVar("weight", capacities[0], capacities[1], true);
@@ -258,10 +258,6 @@ public class LNSTest {
             }
         }
 
-        assert initialNode >= 0 && initialNode < nodes;
-        assert linkCosts.length == nodes;
-        assert linkCosts[0].length == nodes;
-
         Model model = new Model("MEB");
 
         IntVar[] parents = model.intVarArray("parents", nodes, 0, nodes - 1);   // indexed by child node
@@ -323,7 +319,7 @@ public class LNSTest {
 
 
         // Set up basic search for first sol.
-        Move basicsearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg(decvars, 992634), new IntDomainMin()));
+        Move basicsearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg<>(decvars, 992634), new IntDomainMin()));
         Solver solver = model.getSolver();
         solver.setMove(basicsearch);
 
@@ -336,12 +332,13 @@ public class LNSTest {
         in.init(); // Should this be necessary?
 
         //   Type of search within LNS neighbourhoods
-        Move innersearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg(decvars, 0L), new IntDomainMin()));
+        Move innersearch = new MoveBinaryDFS(new IntStrategy(decvars, new DomOverWDeg<>(decvars, 0L), new IntDomainMin()));
 
         MoveLNS lns = new MoveLNS(innersearch, in, new BacktrackCounter(model, 50));
 
         solver.setMove(lns);
         solver.limitNode(20000);
+        //noinspection StatementWithEmptyBody
         while (solver.solve()) ;
         Assert.assertEquals(solver.getObjectiveManager().getBestUB(), 318);
     }
@@ -353,17 +350,17 @@ public class LNSTest {
     public void testKnapsackSet20() {
         int obj1 = testKnapsackSet(20, false);
         int obj2 = testKnapsackSet(20, true);
-        Assert.assertTrue(obj1 == obj2);
+        Assert.assertEquals(obj2, obj1);
     }
 
     @Test(groups="10s", timeOut=60000)
     public void testKnapsackSet30() {
         int obj1 = testKnapsackSet(30, false);
         int obj2 = testKnapsackSet(30, true);
-        Assert.assertTrue(obj1==obj2); // on this data set LNS improves results
+        Assert.assertEquals(obj2, obj1); // on this data set LNS improves results
     }
 
-    @Test(groups="60s", timeOut=60000)
+    @Test(groups="10s", timeOut=60000)
     public void testKnapsackSet50() {
         int obj1 = testKnapsackSet(50, false);
         int obj2 = testKnapsackSet(50, true);

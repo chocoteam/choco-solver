@@ -549,6 +549,16 @@ public class XCSPParser implements XCallbacks2 {
     }
 
     @Override
+    public void buildCtrLogic(String id, XVariables.XVarInteger x, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, int k) {
+        repost(id);
+    }
+
+    @Override
+    public void buildCtrLogic(String id, XVariables.XVarInteger x, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, XVariables.XVarInteger z) {
+        repost(id);
+    }
+    
+    @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeArithmeticOperator aop, int p, Types.TypeConditionOperatorRel op, int k) {
         rel(ari(var(x), aop, model.intVar(p)), op, model.intVar(k)).post();
     }
@@ -859,6 +869,12 @@ public class XCSPParser implements XCallbacks2 {
     public void buildCtrCount(String id, XNode<XVariables.XVarInteger>[] trees, int[] values, Condition condition) {
         IntVar x = condToVar(condition,0, trees.length);
         model.among(x, vars(trees), values).post();
+    }
+
+    @Override
+    public void buildCtrCount(String id, XVariables.XVarInteger[] list, XVariables.XVarInteger[] values, Condition condition) {
+        IntVar x = condToVar(condition,0, list.length);
+        model.amongDec(x, vars(list), vars(values));
     }
 
 

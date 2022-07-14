@@ -253,25 +253,14 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         } else {
             if (lb == kTRUE) {
                 hasChanged = instantiateTo(kTRUE, cause);
-            } else if (ub == kFALSE) {
+            }
+            if (ub == kFALSE) {
                 hasChanged = instantiateTo(kFALSE, cause);
             }
         }
         return hasChanged;
     }
-
-    @Override
-    public boolean setToTrue(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(kTRUE, cause);
-    }
-
-    @Override
-    public boolean setToFalse(ICause cause) throws ContradictionException {
-        assert cause != null;
-        return instantiateTo(kFALSE, cause);
-    }
-
+    
     @Override
     public boolean isInstantiated() {
         return mValue < kUNDEF;

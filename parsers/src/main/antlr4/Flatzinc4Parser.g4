@@ -114,6 +114,10 @@ var_type_u  returns [Declaration decl]
     {
     $decl = new DManyInt(values);
     }
+    |   SET OF INT
+    {
+    $decl = new DSet(DInt.me);
+    }
     |   SET OF i1=INT_CONST DD i2=INT_CONST
     {
     $decl = new DSet(new DInt2(EInt.make($i1.text), EInt.make($i2.text)));

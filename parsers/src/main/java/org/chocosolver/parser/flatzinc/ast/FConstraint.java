@@ -10,7 +10,6 @@
 package org.chocosolver.parser.flatzinc.ast;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.parser.flatzinc.ast.expression.EAnnotation;
 import org.chocosolver.parser.flatzinc.ast.expression.ESetBounds;
 import org.chocosolver.parser.flatzinc.ast.expression.Expression;
@@ -19,7 +18,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
-import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.variables.*;
@@ -29,6 +27,7 @@ import org.chocosolver.util.tools.VariableUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /*
  * User : CPRUDHOM
@@ -906,6 +905,20 @@ public enum FConstraint {
             model.circuit(vars, offset).post();
         }
     },
+    fzn_decreasing_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] vars = exps.get(0).toBoolVarArray(model);
+            model.decreasing(vars, 0).post();
+        }
+    },
+    fzn_decreasing_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            model.decreasing(vars, 0).post();
+        }
+    },
     count_eqchoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1138,6 +1151,20 @@ public enum FConstraint {
 
         }
     },
+    fzn_increasing_bool {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            BoolVar[] vars = exps.get(0).toBoolVarArray(model);
+            model.increasing(vars, 0).post();
+        }
+    },
+    fzn_increasing_int {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] vars = exps.get(0).toIntVarArray(model);
+            model.increasing(vars, 0).post();
+        }
+    },
     inverseChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1327,6 +1354,42 @@ public enum FConstraint {
             IntVar[] x = exps.get(1).toIntVarArray(model);
             model.min(m, x).post();
 
+        }
+    },
+
+    choco_fzn_network_flow {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] _arc = exps.get(0).toIntArray();
+            int A = _arc.length / 2;
+            int[] starts = new int[_arc.length / 2];
+            int[] ends = new int[_arc.length / 2];
+            for (int j = 0; j < A; j++) {
+                starts[j] = _arc[2 * j];
+                ends[j] = _arc[2 * j + 1];
+            }
+            int[] balance = exps.get(1).toIntArray();
+            IntVar[] flow = exps.get(3).toIntVarArray(model);
+            model.costFlow(starts, ends, balance, IntStream.range(0, starts.length).map(i -> 0).toArray(),
+                    flow, model.intVar(0), 1);
+        }
+    },
+    choco_fzn_network_flow_cost {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            int[] _arc = exps.get(0).toIntArray();
+            int A = _arc.length / 2;
+            int[] starts = new int[_arc.length / 2];
+            int[] ends = new int[_arc.length / 2];
+            for (int j = 0; j < A; j++) {
+                starts[j] = _arc[2 * j];
+                ends[j] = _arc[2 * j + 1];
+            }
+            int[] balance = exps.get(1).toIntArray();
+            int[] weight = exps.get(2).toIntArray();
+            IntVar[] flow = exps.get(3).toIntVarArray(model);
+            IntVar cost = exps.get(4).intVarValue(model);
+            model.costFlow(starts, ends, balance, weight, flow, cost, 1);
         }
     },
     nvalueChoco {
@@ -1733,33 +1796,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-
-            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
-
-            TIntHashSet values = new TIntHashSet();
-            for (int i : a.getUB()) {
-                values.add(i);
-            }
-            for (int i : b.getUB()) {
-                values.add(i);
-            }
-            int[] env = values.toArray();
-            Arrays.sort(env);
-            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
-            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
-
-            BoolVar _b1 = model.subsetEq(a, b).reify();
-
-            model.post(model.partition(new SetVar[]{ab, b}, a),
-                    model.partition(new SetVar[]{ba, a}, b),
-                    model.union(new SetVar[]{ab, ba}, c));
-
-            model.min(c, min, false);
-            BoolVar _b2 = model.member(min, a).reify();
-
-            model.addClausesAtMostNMinusOne(new BoolVar[]{_b1, _b2});
-
+            model.setLe(a, b).post();
         }
     },
     set_lt {
@@ -1768,33 +1805,7 @@ public enum FConstraint {
 
             SetVar a = exps.get(0).setVarValue(model);
             SetVar b = exps.get(1).setVarValue(model);
-
-            SetVar ab = model.setVar(model.generateName(), a.getLB().toArray(), a.getUB().toArray());
-            SetVar ba = model.setVar(model.generateName(), b.getLB().toArray(), b.getUB().toArray());
-
-            TIntHashSet values = new TIntHashSet();
-            for (int i : a.getUB()) {
-                values.add(i);
-            }
-            for (int i : b.getUB()) {
-                values.add(i);
-            }
-            int[] env = values.toArray();
-            Arrays.sort(env);
-            SetVar c = model.setVar(model.generateName(), new int[]{}, env);
-            IntVar min = model.intVar(model.generateName(), env[0], env[env.length - 1]);
-
-            BoolVar _b1 = model.subsetEq(a, b).reify();
-            BoolVar _b2 = model.allDifferent(a, b).reify();
-
-            model.post(model.partition(new SetVar[]{ab, b}, a),
-                    model.partition(new SetVar[]{ba, a}, b),
-                    model.union(new SetVar[]{ab, ba}, c));
-            model.min(c, min, false);
-            BoolVar _b3 = model.member(min, a).reify();
-
-            model.addClauses(LogOp.or(_b3, LogOp.and(_b1, _b2)));
-
+            model.setLt(a, b).post();
         }
     },
     set_ne {
@@ -2023,19 +2034,13 @@ public enum FConstraint {
     bool_eq_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            BoolVar a = exps.get(0).boolVarValue(model);
-            BoolVar b = exps.get(1).boolVarValue(model);
-            BoolVar r = exps.get(2).boolVarValue(model);
-            a.eq(b).decompose().impliedBy(r);
+            int_eq_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_ne_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            BoolVar a = exps.get(0).boolVarValue(model);
-            BoolVar b = exps.get(1).boolVarValue(model);
-            BoolVar r = exps.get(2).boolVarValue(model);
-            a.ne(b).decompose().impliedBy(r);
+            int_ne_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_or_imp {
@@ -2059,61 +2064,37 @@ public enum FConstraint {
     bool_lin_eq_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "=", c, as.length + 1).impliedBy(r);
+            int_lin_eq_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_ge_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, ">=", c, as.length + 1).impliedBy(r);
+            int_lin_ge_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_gt_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, ">", c, as.length + 1).impliedBy(r);
+            int_lin_gt_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_le_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "<=", c, as.length + 1).impliedBy(r);
+            int_lin_le_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_lt_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "<", c, as.length + 1).impliedBy(r);
+            int_lin_lt_imp.build(model, datas, id, exps, annotations);
         }
     },
     bool_lin_ne_imp {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            int[] as = exps.get(0).toIntArray();
-            BoolVar[] bs = exps.get(1).toBoolVarArray(model);
-            int c = exps.get(2).intValue();
-            BoolVar r = exps.get(3).boolVarValue(model);
-            model.scalar(bs, as, "!=", c, as.length + 1).impliedBy(r);
+            int_lin_ne_imp.build(model, datas, id, exps, annotations);
         }
     },
     int_eq_imp {
@@ -2342,14 +2323,7 @@ public enum FConstraint {
             IntVar x = exps.get(0).intVarValue(model);
             int y = exps.get(1).intValue();
             IntVar z = exps.get(2).intVarValue(model);
-            Tuples tuples = new Tuples(true);
-            for (int val1 : x) {
-                int res = (int) Math.pow(val1, y);
-                if (z.contains(res)) {
-                    tuples.add(val1, res);
-                }
-            }
-            model.table(x, z, tuples).post();
+            model.pow(x, y, z).post();
         }
     },
 

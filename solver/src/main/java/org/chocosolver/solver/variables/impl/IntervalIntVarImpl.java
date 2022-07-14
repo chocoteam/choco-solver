@@ -334,6 +334,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
                 }
                 d += olb - lb;
                 LB.set(lb);
+                olb = lb;
             }
             if (olb > ub) {
                 model.getSolver().getEventObserver().updateUpperBound(this, ub, oub, cause);

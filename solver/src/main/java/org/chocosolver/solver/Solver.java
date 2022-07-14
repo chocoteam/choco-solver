@@ -37,7 +37,9 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.WarmStart;
 import org.chocosolver.solver.trace.IOutputFactory;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.ESat;
@@ -136,7 +138,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * The objective manager declare
      */
-    @SuppressWarnings("WeakerAccess")
+    @SuppressWarnings({"WeakerAccess", "rawtypes"})
     protected IObjectiveManager objectivemanager;
 
     /**
@@ -227,6 +229,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * This object is accessible lazily
      */
     private Solution lastSol = null;
+
+    /**
+     * Store hints on partial solution, to better start the search
+     */
+    private WarmStart warmStart = null;
 
     /**
      * Default logger
@@ -421,7 +428,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         // call to HeuristicVal.update(Action.initial_propagation)
         if (M.getChildMoves().size() <= 1 && M.getStrategy() == null) {
-            if(getModel().getSettings().warnUser()) {
+            if (getModel().getSettings().warnUser()) {
                 logger.white().println("No search strategies defined.");
                 logger.white().println("Set to default ones.");
             }
@@ -432,6 +439,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             AbstractStrategy<Variable> declared = M.getStrategy();
             AbstractStrategy<?> complete = mModel.getSettings().makeDefaultSearch(mModel);
             setSearch(declared, complete);
+        }
+        if (warmStart != null) {
+            AbstractStrategy<Variable> declared = M.getStrategy();
+            warmStart.setStrategy(declared);
+            setSearch(warmStart);
         }
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
@@ -624,6 +636,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
      *     <li>replace {@link #P} by {@link PropagateBasic}</li>
      *     <li>call {@link Solver#setNoLearning()}</li>
+     *     <li>remove warm start hints</li>
      *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
      *     <li>call {@link Model#removeMinisat()}</li>
      * </ul>
@@ -637,6 +650,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         setMove(new MoveBinaryDFS());
         setPropagate(new PropagateBasic());
         setNoLearning();
+        //no need to unplug, done by searchMonitors.reset()
+        this.lastSol = null;
+        if(this.warmStart != null) {
+            this.warmStart.clearHints();
+            this.warmStart = null;
+        }
         searchMonitors.reset();
         defaultSearch = false;
         completeSearch = false;
@@ -657,6 +676,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             engine.initialize();
         }
         if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
+            //noinspection unchecked
             ArrayList<Task> tset = (ArrayList<Task>) mModel.getHook(Model.TASK_SET_HOOK_NAME);
             for (int i = 0; i < tset.size(); i++) {
                 tset.get(i).ensureBoundConsistency();
@@ -1181,6 +1201,29 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     @SuppressWarnings("WeakerAccess")
     public void makeCompleteStrategy(boolean isComplete) {
         this.completeSearch = isComplete;
+    }
+
+    /**
+     * Declare a <i>warm start</i> strategy that consists of a set of variables and a set of values.
+     * It allows to define either a solution or at least a partial solution in order to drive the search toward
+     * a solution.
+     * <p> Such a (partial) solution serves only once.
+     * <p>Note that a variable can appears more than once.
+     */
+    public void addHint(IntVar var, int val) {
+        if (warmStart == null) {
+            warmStart = new WarmStart(this);
+        }
+        warmStart.addHint(var, val);
+    }
+
+    /**
+     * Remove declare hints
+     */
+    public void removeHints() {
+        setSearch(warmStart.getStrategy());
+        warmStart.clearHints();
+        warmStart = null;
     }
 
     /**

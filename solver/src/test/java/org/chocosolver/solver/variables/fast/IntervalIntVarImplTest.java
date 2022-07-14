@@ -35,6 +35,11 @@ public class IntervalIntVarImplTest {
         var = new IntervalIntVarImpl("test", -2, 2, new Model());
     }
 
+    @Test(groups="1s", timeOut=60000, expectedExceptions = ContradictionException.class)
+    public void testUpdateInfeasBounds() throws Exception {
+        setUp();
+        var.updateBounds(1,-1, Cause.Null);
+    }
 
     @Test(groups="1s", timeOut=60000)
     public void testRemoveValue() throws Exception {
