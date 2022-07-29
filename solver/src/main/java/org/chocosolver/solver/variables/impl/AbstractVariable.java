@@ -722,6 +722,6 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(ID);
+        return ID;
     }
 }
