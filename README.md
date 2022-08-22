@@ -16,7 +16,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.10.8 (07 Jan 2022).
+Current stable version is 4.10.9 (22 Aug 2022).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -122,7 +122,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.10.8</version>
+   <version>4.10.9</version>
 </dependency>
 ```
 
