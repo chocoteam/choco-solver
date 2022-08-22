@@ -10,22 +10,47 @@ NEXT MILESTONE
 ### Major features:
 - It is now possible to declare hints to help the search finding a first solution. See `solver.addHint(var, val)`.
 - Add `Solver.tableSampling` resolution policy which returns a stream of `Solution` randomly sampled.
-- Extend some black-box strategies to `SetVar`
-- Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
 - Add `increasing` and `decreasing` constraints
 - Add `costFlow` constraint, which is composed of scalar products and a MinCostMaxFlow propagator
 - Revamp `pow` constraint
-- Increase interval for MiniZinc unbounded intvar
-- Add threshold for Element with array of variables signature
+- Add threshold for `element` with array of variables signature
 - Add a propagator for 0/1-knapsack (thanks to @PoltyPoltou)
 - Remove `CPProfiler` since the project is not active anymore.
 - Make possible to deal with large domains for some constraints (#894)
+- Add a `LinearProgram` class to deal with linear program (!) and a two-phase Simplex (not connected yet)
+- Fix bug related to delta in boolean views
+- Improvements relative to reified propagators
+- Change signature of AtLeastNValues
+- Record time to best in `Measures(IMeasures measures)` constructor
+ 
+####  Change the way propagators are stored in variables to ease swapping (#889)
+Each variable is in charge of scheduling its propagators. 
+This impacts the way propagators are stored in a variable. 
+Consequently, the `getPropagators()` and `getPropagator(int)` methods are deprecated, `streamPropagators()` replaces them. 
+Unless otherwise stated, a propagator that can be entailed is automatically swapped in its variables' internal structure.
+
+#### SetVar
+- Extend some black-box strategies to `SetVar`
+- Add `union(SetVar unionSet, SetVar indices, SetVar[] sets)` constraint
+- Add free strategy for SetVar (RegParser and ParallelPortfolio)
+- Fix `SetVar#getDomainSize`
+- Add `SetDomainMax`
+- Add 'setLe' and 'setLt' constraint (as a decomposition) in `ISetConstraintFactory`
+
+#### Flatzinc, XCSP3 and MPS
+- Change default search of Flatzinc
+- Increase interval for Flatzinc unbounded intvar
+- Remove default ANSI in parsers
+- Update FZN grammar to deal with 'set of int'
+- Flatzinc: deal with warm_start
+- Add ignored search annotation warning in FGoal
+- Update XCSPParser + add `model.amongDec`
 
 ### JAR Files
 Since 4.10.9, a new jar file is available for download. 
 This is a lighter version of the one with dependencies, 
 namely `choco-parsers-light-VERSION.jar`.
-The following dependency have been excluded from this archive:
+The following dependencies have been excluded from this archive:
 - `org.apache.pdfbox:pdfbox`
 - `org.apache.fontbox:fontbox`
 - `com.ibm.icu:icu4j`
@@ -42,7 +67,9 @@ See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
 #### Contributors to this release:
 - [Mathieu Vavrille](https://github.com/MathieuVavrille) (@MathieuVavrille)
 - [Nicolas Pierre](https://github.com/PoltyPoltou) (@PoltyPoltou)
-- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom) 
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
     
 4.10.8 - 07 Jan 2022
 -------------------

@@ -105,8 +105,11 @@ In the following, we distinguish two usages of Choco:
 The name of the jar file terms the packaging:
 - `choco-solver-4.XX.Y-jar-with-dependencies.jar` or 
 - `choco-solver-4.XX.Y.jar`.
-- `choco-solver-4.XX.Y-jar-with-dependencies.jar` or
-- `choco-solver-4.XX.Y.jar`.
+- `choco-parsers-4.XX.Y-jar-with-dependencies.jar` or
+- `choco-parsers-4.XX.Y-light.jar` or
+- `choco-parsers-4.XX.Y.jar`.
+
+The `light` tagged jar file is a version of the `jar-with-dependencies` one with dependencies from this archive.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
