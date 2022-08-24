@@ -1917,7 +1917,7 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] x = exps.get(0).toBoolVarArray(model);
             IntVar z = exps.get(1).intVarValue(model);
-            model.argmax(z, 1, x);
+            model.argmax(z, 1, x).post();
         }
     },
     fzn_maximum_arg_int {
@@ -1933,7 +1933,7 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             BoolVar[] x = exps.get(0).toBoolVarArray(model);
             IntVar z = exps.get(1).intVarValue(model);
-            model.argmin(z, 1, x);
+            model.argmin(z, 1, x).post();
         }
     },
     fzn_minimum_arg_int {
@@ -1941,7 +1941,7 @@ public enum FConstraint {
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] x = exps.get(0).toIntVarArray(model);
             IntVar z = exps.get(1).intVarValue(model);
-            model.argmin(z, 1, x);
+            model.argmin(z, 1, x).post();
         }
     },
     // redefinitions.mzn
