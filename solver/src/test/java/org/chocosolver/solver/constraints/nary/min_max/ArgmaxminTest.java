@@ -80,7 +80,6 @@ public class ArgmaxminTest {
             }
         }
         Assert.assertEquals(solver.getSolutionCount(), 234);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "seeds")
@@ -102,7 +101,6 @@ public class ArgmaxminTest {
             }
         }
         Assert.assertEquals(solver.getSolutionCount(), 84);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
@@ -123,7 +121,6 @@ public class ArgmaxminTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 84);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
@@ -144,7 +141,6 @@ public class ArgmaxminTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 84);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
@@ -166,7 +162,6 @@ public class ArgmaxminTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 1440);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "seeds")
@@ -211,7 +206,6 @@ public class ArgmaxminTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 234);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "decAndSeed")
@@ -232,7 +226,6 @@ public class ArgmaxminTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 234);
-        solver.printShortStatistics();
     }
 
     @Test(groups = "1s", dataProvider = "seeds")
