@@ -33,7 +33,17 @@ import java.util.Random;
 public class ArgmaxminTest {
 
     @DataProvider
-    private Object[][] decOrNot() {
+    private Object[][] dec() {
+        List<Object[]> args = new ArrayList<>();
+        for (int offset = -3; offset < 4; offset++) {
+            args.add(new Object[]{true, offset});
+            args.add(new Object[]{false, offset});
+        }
+        return args.toArray(new Object[0][0]);
+    }
+
+    @DataProvider
+    private Object[][] decAndSeed() {
         List<Object[]> args = new ArrayList<>();
         for (int seed = 0; seed < 200; seed++) {
             args.add(new Object[]{true, seed});
@@ -64,9 +74,9 @@ public class ArgmaxminTest {
         model.member(z, new int[]{0, 2, 3}).post();
         Solver solver = model.getSolver();
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
-        while (solver.solve()){
-            for(int i=0;i<x.length;i++){
-                Assert.assertFalse(i!=z.getValue() && x[i].getValue()<min.getValue());
+        while (solver.solve()) {
+            for (int i = 0; i < x.length; i++) {
+                Assert.assertFalse(i != z.getValue() && x[i].getValue() < min.getValue());
             }
         }
         Assert.assertEquals(solver.getSolutionCount(), 234);
@@ -86,16 +96,16 @@ public class ArgmaxminTest {
         model.member(z, new int[]{0, 2, 3}).post();
         Solver solver = model.getSolver();
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
-        while (solver.solve()){
-            for(int i=0;i<x.length;i++){
-                Assert.assertFalse(i!=z.getValue() && x[i].getValue()>max.getValue());
+        while (solver.solve()) {
+            for (int i = 0; i < x.length; i++) {
+                Assert.assertFalse(i != z.getValue() && x[i].getValue() > max.getValue());
             }
         }
         Assert.assertEquals(solver.getSolutionCount(), 84);
         solver.printShortStatistics();
     }
 
-    @Test(groups = "1s", dataProvider = "decOrNot")
+    @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test1(boolean dec, long seed) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
@@ -116,7 +126,7 @@ public class ArgmaxminTest {
         solver.printShortStatistics();
     }
 
-    @Test(groups = "1s", dataProvider = "decOrNot")
+    @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test1o(boolean dec, long seed) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
@@ -133,7 +143,29 @@ public class ArgmaxminTest {
         Solver solver = model.getSolver();
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x, x, new IntVar[]{z}), seed));
         solver.findAllSolutions();
-        Assert.assertEquals(solver.getSolutionCount(), 24);
+        Assert.assertEquals(solver.getSolutionCount(), 84);
+        solver.printShortStatistics();
+    }
+
+    @Test(groups = "1s", dataProvider = "decAndSeed")
+    public void test1o2(boolean dec, long seed) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[5];
+        IntVar z = model.intVar("z", 1, 5);
+        x[0] = model.intVar("X_INTRODUCED_143_", new int[]{14, 19, 25});
+        x[1] = model.intVar("X_INTRODUCED_833_", new int[]{0, 24});
+        x[2] = model.intVar("X_INTRODUCED_26_", new int[]{0, 2, 8, 18});
+        x[3] = model.intVar("X_INTRODUCED_833_", 0, 29);
+        x[4] = model.intVar("X_INTRODUCED_834_", new int[]{0, 13});
+        if (dec) {
+            model.argmaxDec(z, 1, x);
+        } else {
+            model.argmax(z, 1, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x, new IntVar[]{z}), seed));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 1440);
         solver.printShortStatistics();
     }
 
@@ -161,7 +193,7 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
-    @Test(groups = "1s", dataProvider = "decOrNot")
+    @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test2(boolean dec, long seed) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
@@ -182,7 +214,7 @@ public class ArgmaxminTest {
         solver.printShortStatistics();
     }
 
-    @Test(groups = "1s", dataProvider = "decOrNot")
+    @Test(groups = "1s", dataProvider = "decAndSeed")
     public void test2o(boolean dec, long seed) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
@@ -227,5 +259,109 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
+    @Test(groups = "1s", dataProvider = "dec")
+    public void testAAA0(boolean dec, int o) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        IntVar z = model.intVar("z", new int[]{0+o, 1+o, 2+o, 3+o});
+        x[0] = model.intVar("x1", 1, 3);
+        x[1] = model.intVar("x2", 2, 4);
+        x[2] = model.intVar("x3", 3, 5);
+        x[3] = model.intVar("x4", 4, 6);
+        if (dec) {
+            model.argmaxDec(z, o, x);
+        } else {
+            model.argmax(z, o, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.minDomLBSearch(ArrayUtils.append(x, new IntVar[]{z})));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 81);
+        Assert.assertEquals(solver.getNodeCount(), 161);
+    }
+
+    @Test(groups = "1s", dataProvider = "dec")
+    public void testAAB0(boolean dec, int o) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        IntVar z = model.intVar("z", new int[]{3+o});
+        x[0] = model.intVar("x1", 1);
+        x[1] = model.intVar("x2", 2);
+        x[2] = model.intVar("x3", 3, 5);
+        x[3] = model.intVar("x4", 4, 6);
+        if (dec) {
+            model.argmaxDec(z, o, x);
+        } else {
+            model.argmax(z, o, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.minDomLBSearch(ArrayUtils.append(x, new IntVar[]{z})));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 6);
+        Assert.assertEquals(solver.getNodeCount(), 11);
+    }
+
+    @Test(groups = "1s", dataProvider = "dec")
+    public void testAAC0(boolean dec, int o) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        IntVar z = model.intVar("z", new int[]{2+o, 3+o});
+        x[0] = model.intVar("x1", 4, 5);
+        x[1] = model.intVar("x2", 1);
+        x[2] = model.intVar("x3", 2);
+        x[3] = model.intVar("x4", 4, 6);
+        if (dec) {
+            model.argmaxDec(z, o, x);
+        } else {
+            model.argmax(z, o, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.minDomLBSearch(ArrayUtils.append(x, new IntVar[]{z})));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 3);
+        Assert.assertEquals(solver.getNodeCount(), 5);
+    }
+
+    @Test(groups = "1s", dataProvider = "dec")
+    public void testAAD0(boolean dec, int o) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        IntVar z = model.intVar("z", new int[]{0+o, 3+o});
+        x[0] = model.intVar("x1", 4, 5);
+        x[1] = model.intVar("x2", 1);
+        x[2] = model.intVar("x3", 2);
+        x[3] = model.intVar("x4", 4, 5);
+        if (dec) {
+            model.argmaxDec(z, o, x);
+        } else {
+            model.argmax(z, o, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.minDomLBSearch(ArrayUtils.append(new IntVar[]{z}, x)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 4);
+        Assert.assertEquals(solver.getNodeCount(), 7);
+    }
+
+    @Test(groups = "1s", dataProvider = "dec")
+    public void testAAE0(boolean dec, int o) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[4];
+        IntVar z = model.intVar("z", new int[]{0+o, 3+o});
+        x[0] = model.intVar("x1", 4);
+        x[1] = model.intVar("x2", 1);
+        x[2] = model.intVar("x3", 2);
+        x[3] = model.intVar("x4", 4, 5);
+        if (dec) {
+            model.argmaxDec(z, o, x);
+        } else {
+            model.argmax(z, o, x).post();
+        }
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.minDomLBSearch(ArrayUtils.append(new IntVar[]{z}, x)));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+        Assert.assertEquals(solver.getNodeCount(), 3);
+    }
 
 }

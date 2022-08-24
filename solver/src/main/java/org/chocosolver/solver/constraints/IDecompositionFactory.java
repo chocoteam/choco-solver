@@ -264,8 +264,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
         IntVar[] q = new IntVar[n];
         IntVar M = ref().intVar("M", n * min, n * (max + 1));
-        z.ge(0).post();
-        z.lt(vars.length).post();
+        z.ge(offset).post();
+        z.lt(vars.length+offset).post();
         for (int j = 0; j < n; j++) {
             q[j] = ref().intAffineView(n, vars[j], n - j);
             z.ne(j + offset).iff(M.gt(q[j])).post();
@@ -288,6 +288,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
         int max = Stream.of(vars).mapToInt(IntVar::getUB).max().getAsInt();
         IntVar[] q = new IntVar[n];
         IntVar M = ref().intVar("M", n * min, n * (max + 1));
+        z.ge(offset).post();
+        z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
             q[j] = ref().intAffineView(n, vars[j], j);
             z.ne(j + offset).iff(M.lt(q[j])).post();

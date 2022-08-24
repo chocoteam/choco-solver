@@ -52,8 +52,7 @@ public class PropArgmax extends Propagator<IntVar> {
         this.ubi = z.getModel().getEnvironment().makeInt(-1);
         this.lbi = z.getModel().getEnvironment().makeInt(-1);
         this.proc = j -> {
-            j -= o;
-            if (j == ubi.get()) {
+            if (j - o == ubi.get()) {
                 filterUb();
             } else {
                 vars[j - o].updateUpperBound(vars[ubi.get()].getUB() - (j < lbi.get() ? 1 : 0), PropArgmax.this);
@@ -72,9 +71,9 @@ public class PropArgmax extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateBounds(0, n-1, this);
+        vars[n].updateBounds(o, n + o - 1, this);
         filterUb();
-        lbi.set(argmax(IntVar::getLB));
+        lbi.set(argmaxlb(IntVar::getLB));
         filterZ();
         if (vars[n].isInstantiated()) {
             filterLb(vars[n].getValue() - o);
@@ -85,9 +84,7 @@ public class PropArgmax extends Propagator<IntVar> {
     @Override
     public void propagate(int j, int mask) throws ContradictionException {
         if (j == n) { // on z
-            if (IntEventType.isRemove(mask)) {
-                delta.forEachRemVal(proc);
-            }
+            delta.forEachRemVal(proc);
             if (vars[n].isInstantiated()) {
                 filterLb(vars[n].getValue() - o);
             }
@@ -113,7 +110,20 @@ public class PropArgmax extends Propagator<IntVar> {
         }
     }
 
-    private int argmax(Bound bnd) {
+    private int argmaxlb(Bound bnd) {
+        int lbi = 0;
+        int _lb, lb = bnd.bound(vars[lbi]);
+        for (int i = 1; i < n; i++) {
+            _lb = bnd.bound(vars[i]);
+            if (_lb > lb) {
+                lb = _lb;
+                lbi = i;
+            }
+        }
+        return lbi;
+    }
+
+    private int argmaxub(Bound bnd) {
         int ubi = vars[n].getLB();
         int _ub, ub = bnd.bound(vars[ubi - o]);
         for (int i = vars[n].nextValue(ubi); i <= vars[n].getUB(); i = vars[n].nextValue(i)) {
@@ -127,7 +137,7 @@ public class PropArgmax extends Propagator<IntVar> {
     }
 
     private void filterUb() throws ContradictionException {
-        ubi.set(argmax(IntVar::getUB));
+        ubi.set(argmaxub(IntVar::getUB));
         int ub = vars[ubi.get()].getUB();
         for (int j = vars[n].nextValueOut(-1 + o); j < n + o; j = vars[n].nextValueOut(j)) {
             int jj = j - o;
