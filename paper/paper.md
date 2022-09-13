@@ -52,7 +52,7 @@ placement service [@8814186] and many others.
 
 # Statement of need
 For constraint programming to be used successfully, it is essential to have a library that incorporates the latest 
-advances in constraint programming, while ensuring reliability, performance and responsiveness.
+advances in the field, while ensuring reliability, performance and responsiveness.
 This was also the motivation for the creation of `Choco-solver` :  providing state-of-the-art algorithms 
 and high resolution performance 
 while offering ease of use and development, all in a free and open-source library.
@@ -61,6 +61,8 @@ and user-friendly library.
 There is a community of users and contributors who actively participate in improving the library. 
 In addition, `Choco-solver` relies on software quality standards (unit and performance tests, continuous integration, 
 code review, etc.) and frequent updates are made.
+Finally, the choice of Java as programming language makes the integration of the library simple  
+into both academic and industrial projects.
               
 # CP in a nutshell
 Like integer linear programming or Boolean satisfaction, constraint programming is a field of mathematical programming.
