@@ -18,7 +18,7 @@ affiliations:
     index: 1
   - name: COSLING S.A.S., Nantes, France
     index: 2
-date: 13 July 2022
+date: 25 August 2022
 bibliography: paper.bib
 
 ---
@@ -28,10 +28,47 @@ bibliography: paper.bib
 Constraint Programming (CP) is a powerful programming paradigm for solving 
 combinatorial search problems [@DBLP:reference/fai/2].
 CP is at the intersection of artificial intelligence, computer science, operations research and many other fields.
-Although closely related to integer linear programming, 
-CP does not require the constraints or the objective function to be linear.
-On the contrary, one of the richness's of the paradigm lies in the wide variety of constraints 
-it proposes to model and solve decision problems
+One of the richness's of the paradigm lies in the wide variety of constraints it proposes. 
+Thus, the benefit of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
+and secondly to provide technics to automatically solve this problem.
+
+`Choco-solver` is Java library for constraint programming which was created in the early 2000s.
+Since then, the library has evolved a great deal, but ease of use has always been a guiding principle in its development.
+The `Choco-solver` API is designed to reduce entry points to a minimum and thus simplify modelling for users.
+The wide variety of constraints available allows the user to describe his problem as naturally as possible.
+The black-box approach to solving allows everyone to focus on modelling.
+However, `Choco-solver` is also open and modifiable.
+The implementation of new constraints [@10.1007/978-3-031-08011-1_21] 
+or strategies for exploring the search space [@DBLP:conf/cp/LiYL21;@fages:hal-01629182] 
+is therefore possible.
+
+As a result, `Choco-solver` is used by the academy for teaching and research and by the industry to solve real-world problems, 
+such as cryptanalysis [@10.1007/978-3-030-78375-4_8],
+planing construction [@CANIZARES2022116149], 
+automated testing and debugging [@LE2021100085],
+scheduling [@10.1007/978-3-319-44953-1_40],
+level design [@5887401]
+placement service [@8814186] and many others.
+
+# Statement of need
+For constraint programming to be used successfully, it is essential to have a library that incorporates the latest 
+advances in constraint programming, while ensuring reliability, performance and responsiveness.
+This was also the motivation for the creation of `Choco-solver` :  providing state-of-the-art algorithms 
+and high resolution performance 
+while offering ease of use and development, all in a free and open-source library.
+With 20 years of development, `Choco-solver` is now a stable, flexible, extensible, powerful, 
+and user-friendly library. 
+There is a community of users and contributors who actively participate in improving the library. 
+In addition, `Choco-solver` relies on software quality standards (unit and performance tests, continuous integration, 
+code review, etc.) and frequent updates are made.
+              
+# CP in a nutshell
+Like integer linear programming or Boolean satisfaction, constraint programming is a field of mathematical programming.
+It focuses on describing and solving applied mathematical problems.
+However, what distinguishes the CP from the first two approaches is that it relies on a high level language to 
+describe the problems. 
+Actually, one of the richness's of the paradigm lies in the wide variety of constraints 
+it proposes, which are also central to the solving stage. 
 Thus, the objective of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
 and secondly to provide technics to automatically solve this problem.
 In standard use, a user states a problem using variables, their domains (possible values for each
@@ -42,29 +79,7 @@ from the domain of variables the values that prevent the satisfiability.
 It is the combination of the selected constraints that defines the problem to be solved.
 The problem is solved by alternating space reduction (usually by a depth-first search) and propagation, 
 thus ensuring the completeness of the approach.
-                                               
-# Statement of need
 
-`Choco-solver` is Java library for constraint programming.
-In the early 2000s, when the choice of programming language was made, Java was the most popular language. 
-It is still very popular today ([TIOBE Index](https://www.tiobe.com/tiobe-index/)) 
-and allows the library to be easily integrated into both academic and industrial projects.
-Since then, the library has evolved a great deal, but ease of use has always been a guiding principle in its development.
-The API for `Choco-solver` was to keep the entry points to a minimum and thus simplify modelling for users.
-It contains numerous variables, many (global) constraints and search procedures, to provide wide modeling perspectives.
-`Choco-solver` is used by the academy for teaching and research and by the industry to solve real-world problems, 
-such as cryptanalysis [@10.1007/978-3-030-78375-4_8],
-planing construction [@CANIZARES2022116149], 
-automated testing and debugging [@LE2021100085],
-scheduling [@10.1007/978-3-319-44953-1_40],
-level design [@5887401]
-or placement service [@8814186].
-The library was designed to be used not only as a black box, where only the modelling step is required, 
-but also as an open and modifiable system.
-The implementation of new constraints [@10.1007/978-3-031-08011-1_21] 
-or strategies for exploring the search space [@DBLP:conf/cp/LiYL21;@fages:hal-01629182] 
-is therefore possible.
-    
 # Features and Functionality
 
 ## Modeling                                                        
@@ -82,7 +97,10 @@ and include less common even though useful ones, such as  *Tree* [@DBLP:conf/cpa
 or *StableKeySort* [@beldiceanu:hal-01186680].
 One can pick some existing propagators to compose a new constraint or 
 create its own one in a straightforward way by implementing a filtering algorithm and a satisfaction checker.
-                                   
+Many models are available on the [Choco-solver website](https://choco-solver.org/tutos/).
+
+
+                           
 ## Solving
 
 `Choco-solver` has been carefully designed to offer wide range of resolution configurations 
@@ -130,7 +148,8 @@ And thus consolidate the place of `Choco-solver` as an important tool in the CP 
 # Acknowledgements
 
 We acknowledge contributions from (in alphabetical order) 
-Hadrien Cambazard, Arthur Godet, Narendra Jussien, Dimitri Justeau-Allaire, Xavier Lorca, Arnaud Malapert and 
-Guillaume Rochart.  
+Hadrien Cambazard, Arthur Godet, Fabien Hermenier, Narendra Jussien, Dimitri Justeau-Allaire, 
+Alexandre Lebrun, Jimmy Liang, Xavier Lorca, Arnaud Malapert, 
+Guillaume Rochart, João Pedro Schmitt and Mohamed Wahbi.  
 
 # References
