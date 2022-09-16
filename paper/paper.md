@@ -49,22 +49,8 @@ automated testing and debugging [@LE2021100085],
 scheduling [@10.1007/978-3-319-44953-1_40],
 level design [@5887401]
 placement service [@8814186] and many others.
-
-# Statement of need
-For constraint programming to be used successfully, it is essential to have a library that incorporates the latest 
-advances in the field, while ensuring reliability, performance and responsiveness.
-This was also the motivation for the creation of `Choco-solver` :  providing state-of-the-art algorithms 
-and high resolution performance 
-while offering ease of use and development, all in a free and open-source library.
-With 20 years of development, `Choco-solver` is now a stable, flexible, extensible, powerful, 
-and user-friendly library. 
-There is a community of users and contributors who actively participate in improving the library. 
-In addition, `Choco-solver` relies on software quality standards (unit and performance tests, continuous integration, 
-code review, etc.) and frequent updates are made.
-Finally, the choice of Java as programming language makes the integration of the library simple  
-into both academic and industrial projects.
-              
-# CP in a nutshell
+             
+## CP in a nutshell
 Like integer linear programming or Boolean satisfaction, constraint programming is a field of mathematical programming.
 It focuses on describing and solving applied mathematical problems.
 However, what distinguishes the CP from the first two approaches is that it relies on a high level language to 
@@ -81,6 +67,25 @@ from the domain of variables the values that prevent the satisfiability.
 It is the combination of the selected constraints that defines the problem to be solved.
 The problem is solved by alternating space reduction (usually by a depth-first search) and propagation, 
 thus ensuring the completeness of the approach.
+This standard usage can be extended in different ways, for example, by hybridisation with local search, 
+Boolean satisfiability or linear programming techniques.
+
+# Statement of need
+For constraint programming to be used successfully, it is essential to have a library that incorporates the latest 
+advances in the field, while ensuring reliability, performance and responsiveness.
+This was also the motivation for the creation of `Choco-solver` :  providing state-of-the-art algorithms 
+and high resolution performance 
+while offering ease of use and development, all in a free and open-source library.
+
+
+## Achievement
+With 20 years of development, `Choco-solver` is now a stable, flexible, extensible, powerful, 
+and user-friendly library. 
+There is a community of users and contributors who actively participate in improving the library. 
+In addition, `Choco-solver` relies on software quality standards (unit and performance tests, continuous integration, 
+code review, etc.) and frequent updates are made.
+Finally, the choice of Java as programming language makes the integration of the library simple  
+into both academic and industrial projects.
 
 # Features and Functionality
 
@@ -88,7 +93,7 @@ thus ensuring the completeness of the approach.
 
 `Choco-solver` comes with the commonly used types of variables: 
 integer variables (with either bounded or enumerated domain), 
-Boolean variables, set variables [@gervet_1997] and graph variables [@dooms_2005;@fages_2015]. 
+Boolean variables, set variables [@gervet_1997] graph variables [@dooms_2005;@fages_2015] and real variables. 
 Views [@DBLP:conf/cp/SchulteT05;@DBLP:journals/constraints/Justeau-Allaire22] 
 but also arithmetical, relational and logical expressions are supported.
 
@@ -97,10 +102,12 @@ from classic ones, such as arithmetical constraints,
 to  must-have global constraints, such as *AllDifferent* [@10.5555/199288.178024] or *Cumulative* [@aggoun:hal-00442821],
 and include less common even though useful ones, such as  *Tree* [@DBLP:conf/cpaior/BeldiceanuFL05] 
 or *StableKeySort* [@beldiceanu:hal-01186680].
-One can pick some existing propagators to compose a new constraint or 
+In many cases, the Choco-Solver API provides various options in addition to the default signature - 
+corresponding to a robust implementation – of a constraint. 
+This allows the user to experiment alternative approaches and tune the model to its instance. 
+The user may also pick some existing propagators to compose a new constraint or 
 create its own one in a straightforward way by implementing a filtering algorithm and a satisfaction checker.
-Many models are available on the [Choco-solver website](https://choco-solver.org/tutos/).
-
+Many models are available on the [Choco-solver website](https://choco-solver.org/tutos/) as modelling tutorials.
 
                            
 ## Solving
@@ -126,25 +133,27 @@ The search process can also be greatly improved by various built-in search strat
 Standard restart policies are also available, to take full advantage of the learning strategies.
 Problem-adapted search strategies are also supported.
 
-One can solve a problem in many ways :  finding one or all solutions, 
+One can solve a problem in many ways:  finding one or all solutions, 
 optimizing one or more objectives,
 solving on one or more thread, 
 or simply checking satisfaction.
 The search process itself is observable and extensible.
 
-## Miscellaneous
+## Community tools integration
 
-Although originally designed to solve discrete mathematical problems, 
-`Choco-solver` supports natively real variables and constraints also, and relies on [Ibex-lib](http://www.ibex-lib.org/) 
- to solve the continuous part of the problem [@fages:hal-00904069].
-Equally, a Boolean satisfaction solver (based on [MiniSat](http://minisat.se/Main.html)) is integrated 
-to offer better performance on logical constraints.
-Finally, several useful extra features are also available such as parsers to [XCSP3 format](http://xcsp.org/) 
+Several useful extra features are also available such as parsers to [XCSP3 format](http://xcsp.org/) 
 and [MiniZinc format](https://www.minizinc.org/resources.html). 
 In addition to offering alternatives to modelling in Java, 
 it also allows participation in the two major constraint solver competitions :
 [MiniZinc Challenge](https://www.minizinc.org/challenge.html) and [XCSP3 Competition](http://www.xcsp.org/competitions/).
-And thus consolidate the place of `Choco-solver` as an important tool in the CP community.
+
+Finally, although originally designed to solve discrete mathematical problems, 
+`Choco-solver` supports natively real variables and constraints also, and relies on [Ibex-lib](http://www.ibex-lib.org/) 
+ to solve the continuous part of the problem [@fages:hal-00904069].
+Equally, a Boolean satisfaction solver (based on [MiniSat](http://minisat.se/Main.html)) is integrated 
+to offer better performance on logical constraints.
+
+These aspects consolidate the place of `Choco-solver` as an important tool in the CP community.                                                                                                                         
 
 
 # Acknowledgements
