@@ -493,7 +493,7 @@ public class TableTest {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertTrue(false);
+            Assert.fail();
         }
         Assert.assertEquals(table.isSatisfied(), ESat.FALSE);
         Assert.assertEquals(ts.check(x, y, z), ESat.FALSE);
@@ -579,6 +579,33 @@ public class TableTest {
 
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 7);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "starred")
+    public void testST4(String staralgo) {
+        Model model = new Model();
+        //IntVar w = model.intVar("w", 0, 1);
+        IntVar st = model.intVar("x", 1, 3);
+        IntVar cp = model.intVar("y", 2, 2);
+        IntVar t = model.intVar("z", 0, 999);
+        IntVar l = model.intVar("z", 1, 70_000, true);
+        Tuples ts = new Tuples(true);
+        int ST = -1;
+        ts.setUniversalValue(ST);
+        ts.add(1, 2, ST, 3500);
+        ts.add(2, 2, ST, 3500);
+        model.table(new IntVar[]{st, cp, t, l}, ts, staralgo).post();
+
+
+        // t = 0 ==> l = [3500, 69999], st = 2 ==> l = [3500, 69998]
+        Solver solver = model.getSolver();
+        try {
+            solver.propagate();
+            Assert.assertEquals(l.getUB(), 3500);
+            out.printf("%s\n", model);
+        } catch (ContradictionException ce) {
+            Assert.fail();
+        }
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
