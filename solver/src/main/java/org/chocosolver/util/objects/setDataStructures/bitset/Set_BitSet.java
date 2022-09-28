@@ -158,15 +158,4 @@ public class Set_BitSet extends AbstractSet implements ISet.WithOffset {
 	public SetType getSetType(){
 		return SetType.BITSET;
 	}
-
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder("{");
-                ISetIterator iter = newIterator();
-                while (iter.hasNext()) {
-			st.append(iter.nextInt()).append(", ");
-		}
-		st.append("}");
-		return st.toString().replace(", }","}");
-	}
 }

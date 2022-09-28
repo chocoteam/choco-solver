@@ -111,9 +111,8 @@ public abstract class AbstractSet implements ISet {
     @Override
     public String toString() {
         StringBuilder st = new StringBuilder("{");
-        ISetIterator iter = newIterator();
-        while (iter.hasNext()) {
-            st.append(iter.nextInt()).append(", ");
+        for(int i : toArray()) {
+            st.append(i).append(", ");
         }
         st.append("}");
         return st.toString().replace(", }","}");
