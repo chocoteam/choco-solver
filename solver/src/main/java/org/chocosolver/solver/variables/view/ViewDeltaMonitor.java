@@ -49,19 +49,19 @@ public abstract class ViewDeltaMonitor implements IIntDeltaMonitor {
 
     @Override
     public void forEachRemVal(SafeIntProcedure proc) {
-        values.clear();
+        values.resetQuick();
         deltamonitor.forEachRemVal(filler);
-        for (int v = 0; v < values.size(); v++) {
-            proc.execute(transform(values.toArray()[v]));
+        for (int i = 0; i < values.size(); i++) {
+            proc.execute(transform(values.getQuick(i)));
         }
     }
 
     @Override
     public void forEachRemVal(IntProcedure proc) throws ContradictionException {
-        values.clear();
+        values.resetQuick();
         deltamonitor.forEachRemVal(filler);
-        for (int v = 0; v < values.size(); v++) {
-            proc.execute(transform(values.toArray()[v]));
+        for (int i = 0; i < values.size(); i++) {
+            proc.execute(transform(values.getQuick(i)));
         }
     }
 
