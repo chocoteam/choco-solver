@@ -17,10 +17,10 @@ import org.chocosolver.memory.IStateLong;
 public class OneWordS64BitSet implements IStateBitSet {
 
     /*
-    * BitSets are packed into arrays of "word."  Currently a word is
-    * a long, which consists of 64 bits, requiring 6 address bits.
-    * The choice of word size is determined purely by performance concerns.
-    */
+     * BitSets are packed into arrays of "word."  Currently a word is
+     * a long, which consists of 64 bits, requiring 6 address bits.
+     * The choice of word size is determined purely by performance concerns.
+     */
     private final static int ADDRESS_BITS_PER_WORD = 6;
     private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
 
@@ -33,22 +33,14 @@ public class OneWordS64BitSet implements IStateBitSet {
     private final IStateLong word;
 
     /**
-     * Creates a bit set whose initial size is large enough to explicitly
-     * represent bits with indices in the range <code>0</code> through
-     * <code>nbits-1</code>. All bits are initially <code>false</code>.
+     * Creates a bit set whose initial size is 64.
+     * All bits are initially <code>false</code>.
      *
      * @param environment backtrackable environment
-     * @param nbits       the initial size of the bit set.
      * @throws NegativeArraySizeException if the specified initial size
      *                                    is negative.
      */
-    public OneWordS64BitSet(IEnvironment environment, int nbits) {
-        // nbits can't be negative; size 0 is OK
-        if (nbits < 0)
-            throw new NegativeArraySizeException("nbits < 0: " + nbits);
-        if (nbits > 64)
-            throw new ArrayIndexOutOfBoundsException("nbits > 64: " + nbits);
-
+    public OneWordS64BitSet(IEnvironment environment) {
         word = environment.makeLong(0);
     }
 
@@ -200,7 +192,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the next set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
@@ -244,7 +236,7 @@ public class OneWordS64BitSet implements IStateBitSet {
         if (word != 0)
             return Long.numberOfTrailingZeros(word);
         else
-            return 0;
+            return BITS_PER_WORD;
     }
 
     /**
@@ -263,7 +255,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -292,7 +284,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous clear bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -341,7 +333,7 @@ public class OneWordS64BitSet implements IStateBitSet {
      * <code>BitSet</code>.
      *
      * @return the number of bits set to <tt>true</tt> in this
-     *         <code>BitSet</code>.
+     * <code>BitSet</code>.
      * @since 1.4
      */
     public int cardinality() {

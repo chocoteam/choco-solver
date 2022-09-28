@@ -9,6 +9,8 @@
  */
 package org.chocosolver.memory;
 
+import org.chocosolver.memory.structure.OneWordS32BitSet;
+import org.chocosolver.memory.structure.OneWordS64BitSet;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
@@ -26,6 +28,11 @@ import org.testng.annotations.Test;
  * @since 28/09/2017.
  */
 public class EnvironmentTest {
+
+    @DataProvider
+    public static Object[][] bitset() {
+        return new Object[][]{{32}, {64}, {128}};
+    }
 
     @DataProvider(name = "env")
     public Object[][] env() {
@@ -151,7 +158,32 @@ public class EnvironmentTest {
         try {
             prim.set(-1);
             Assert.fail();
-        } catch (IndexOutOfBoundsException ignored) { }
+        } catch (IndexOutOfBoundsException ignored) {
+        }
+    }
+
+    @Test(groups = "1s", dataProvider = "bitset")
+    public void testBitset2(int size) {
+        final IEnvironment env = new EnvironmentTrailing();
+        final IStateBitSet b = env.makeBitSet(size);
+        try {
+            b.set(63);
+            Assert.assertEquals(b.nextClearBit(63), 64);
+            try{
+                b.set(64);
+            }catch (IndexOutOfBoundsException e){
+                Assert.assertTrue(b instanceof OneWordS64BitSet);
+            }
+        } catch (IndexOutOfBoundsException e) {
+            Assert.assertTrue(b instanceof OneWordS32BitSet);
+            b.set(31);
+            Assert.assertEquals(b.nextClearBit(31), 32);
+            try {
+                b.set(32);
+                Assert.fail();
+            }catch (IndexOutOfBoundsException ignored){
+            }
+        }
     }
 
     @Test(groups = "1s")
