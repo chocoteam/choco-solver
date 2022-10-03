@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.min_max;
 
+import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -41,6 +42,7 @@ public class PropArgmax extends Propagator<IntVar> {
     private final int o;
     private final IStateInt ubi;
     private final IStateInt lbi;
+    private final IStateBitSet Ir;
     private final IIntDeltaMonitor delta;
     private final IntProcedure proc;
 
@@ -51,12 +53,16 @@ public class PropArgmax extends Propagator<IntVar> {
         this.delta = z.monitorDelta(this);
         this.ubi = z.getModel().getEnvironment().makeInt(-1);
         this.lbi = z.getModel().getEnvironment().makeInt(-1);
+        this.Ir = z.getModel().getEnvironment().makeBitSet(n);
         this.proc = j -> {
-            j -= o;
-            if (j == ubi.get()) {
+            int jj = j - o;
+            int lbi_ = lbi.get();
+            int ubi_  = ubi.get();
+            Ir.set(jj, vars[jj].getUB() > vars[lbi_].getLB() - (jj <= lbi_ ? 1 : 0));
+            if (jj == ubi_) {
                 filterUb();
             } else {
-                vars[j - o].updateUpperBound(vars[ubi.get()].getUB() - (j < lbi.get() ? 1 : 0), PropArgmax.this);
+                vars[jj].updateUpperBound(vars[ubi_].getUB() - (j < lbi_ ? 1 : 0), PropArgmax.this);
             }
         };
     }
@@ -72,9 +78,14 @@ public class PropArgmax extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[n].updateBounds(0, n-1, this);
+        vars[n].updateBounds(o, n + o - 1, this);
         filterUb();
-        lbi.set(argmax(IntVar::getLB));
+        int lbi_ = argmaxlb(IntVar::getLB);
+        lbi.set(lbi_);
+        for (int j = vars[n].nextValueOut(-1 + o); j < n + o; j = vars[n].nextValueOut(j)) {
+            int jj = j - o;
+            Ir.set(jj, vars[jj].getUB() > vars[lbi_].getLB() - (jj <= lbi_ ? 1 : 0));
+        }
         filterZ();
         if (vars[n].isInstantiated()) {
             filterLb(vars[n].getValue() - o);
@@ -85,9 +96,7 @@ public class PropArgmax extends Propagator<IntVar> {
     @Override
     public void propagate(int j, int mask) throws ContradictionException {
         if (j == n) { // on z
-            if (IntEventType.isRemove(mask)) {
-                delta.forEachRemVal(proc);
-            }
+            delta.forEachRemVal(proc);
             if (vars[n].isInstantiated()) {
                 filterLb(vars[n].getValue() - o);
             }
@@ -113,7 +122,20 @@ public class PropArgmax extends Propagator<IntVar> {
         }
     }
 
-    private int argmax(Bound bnd) {
+    private int argmaxlb(Bound bnd) {
+        int lbi = 0;
+        int _lb, lb = bnd.bound(vars[lbi]);
+        for (int i = 1; i < n; i++) {
+            _lb = bnd.bound(vars[i]);
+            if (_lb > lb) {
+                lb = _lb;
+                lbi = i;
+            }
+        }
+        return lbi;
+    }
+
+    private int argmaxub(Bound bnd) {
         int ubi = vars[n].getLB();
         int _ub, ub = bnd.bound(vars[ubi - o]);
         for (int i = vars[n].nextValue(ubi); i <= vars[n].getUB(); i = vars[n].nextValue(i)) {
@@ -127,26 +149,31 @@ public class PropArgmax extends Propagator<IntVar> {
     }
 
     private void filterUb() throws ContradictionException {
-        ubi.set(argmax(IntVar::getUB));
-        int ub = vars[ubi.get()].getUB();
-        for (int j = vars[n].nextValueOut(-1 + o); j < n + o; j = vars[n].nextValueOut(j)) {
-            int jj = j - o;
-            vars[jj].updateUpperBound(ub - (jj < ubi.get() ? 1 : 0), this);
+        int ubi_ = argmaxub(IntVar::getUB);
+        ubi.set(ubi_);
+        int ub = vars[ubi_].getUB();
+        for (int jj = Ir.nextSetBit(0); jj > -1; jj = Ir.nextSetBit(jj + 1)) {
+            vars[jj].updateUpperBound(ub - (jj < ubi_ ? 1 : 0), this);
         }
     }
 
     private void filterZ() throws ContradictionException {
-        int lb = vars[lbi.get()].getLB();
+        int lbi_ = lbi.get();
+        int lb = vars[lbi_].getLB();
         for (int j = vars[n].getLB(); j <= vars[n].getUB(); j = vars[n].nextValue(j)) {
             int jj = j - o;
-            if (vars[jj].getUB() <= lb - (jj <= lbi.get() ? 1 : 0)) {
+            if (vars[jj].getUB() <= lb - (jj <= lbi_ ? 1 : 0)) {
                 vars[n].removeValue(j, this);
+                Ir.clear(jj);
+            } else {
+                Ir.set(jj);
             }
         }
     }
 
     private void filterLb(int j) throws ContradictionException {
-        vars[j].updateLowerBound(vars[lbi.get()].getLB() + (lbi.get() < j ? 1 : 0), this);
+        int lbi_ = lbi.get();
+        vars[j].updateLowerBound(vars[lbi_].getLB() + (lbi_ < j ? 1 : 0), this);
         lbi.set(j);
     }
 

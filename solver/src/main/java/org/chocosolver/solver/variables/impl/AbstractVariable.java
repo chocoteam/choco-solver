@@ -23,6 +23,7 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -711,4 +712,16 @@ public abstract class AbstractVariable implements Variable {
         }
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof AbstractVariable)) return false;
+        AbstractVariable that = (AbstractVariable) o;
+        return ID == that.ID;
+    }
+
+    @Override
+    public int hashCode() {
+        return ID;
+    }
 }

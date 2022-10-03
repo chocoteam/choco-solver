@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
@@ -33,7 +34,7 @@ import static org.testng.Assert.assertEquals;
  */
 public class LogicTreeTest {
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test1() {
         Model model = new Model();
 
@@ -50,7 +51,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "((a or b or not(c)) and (a or b or not(d)))");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test12() {
         Model model = new Model();
 
@@ -69,7 +70,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test2() {
         Model model = new Model();
 
@@ -85,7 +86,7 @@ public class LogicTreeTest {
         Assert.assertEquals(root.toString(), "(d or c or not(a) or b)");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test3() {
         Model model = new Model();
 
@@ -99,7 +100,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test4() {
         Model model = new Model();
 
@@ -116,7 +117,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test5() {
         Model model = new Model();
 
@@ -133,7 +134,7 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test6() {
         Model model = new Model();
 
@@ -147,7 +148,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "(b or not(a))");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test7() {
         Model model = new Model();
 
@@ -163,7 +164,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "((a or c) and (b or c) and (b or not(a)))");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test8() {
         Model model = new Model();
 
@@ -181,7 +182,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "(c or d)");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test9() {
         Model model = new Model();
 
@@ -198,7 +199,7 @@ public class LogicTreeTest {
         Assert.assertEquals(l.toString(), "cste -- 0 = 0");
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test10() {
 
         Model model = new Model();
@@ -230,8 +231,8 @@ public class LogicTreeTest {
         }
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test11(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test11() {
         Model model = new Model();
         BoolVar a = model.boolVar("a");
         BoolVar b = model.boolVar("b");
@@ -244,8 +245,8 @@ public class LogicTreeTest {
         Assert.assertEquals(ll.toString(), "(not(b) or not(a))");
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test13(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test13() {
         Model model = new Model();
         BoolVar a = model.boolVar("a");
         BoolVar b = model.boolVar("b");
@@ -255,8 +256,8 @@ public class LogicTreeTest {
     }
 
 
-    @Test(groups="1s", timeOut=60000)
-    public void test14(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test14() {
         Model model = new Model();
         BoolVar a = model.boolVar("a");
         BoolVar b = model.boolVar("b");
@@ -265,14 +266,14 @@ public class LogicTreeTest {
         Assert.assertEquals(ll.toString(), "cste -- 1 = 1");
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test15(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test15() {
         Model model = new Model();
         IntVar a = model.intVar("a", -1, 1, false);
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
-        model.arithm(a,"=",0).reifyWith(b1);
-        model.arithm(a,">",0).reifyWith(b2);
+        model.arithm(a, "=", 0).reifyWith(b1);
+        model.arithm(a, ">", 0).reifyWith(b2);
 
         LogOp l = LogOp.or(
                 LogOp.and(b1, b2.not()),
@@ -292,14 +293,14 @@ public class LogicTreeTest {
         Assert.assertTrue(b2.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test16(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test16() {
         Model model = new Model();
         IntVar a = model.intVar("a", -1, 1, false);
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
-        model.arithm(a,"=",0).reifyWith(b1);
-        model.arithm(a,">",0).reifyWith(b2);
+        model.arithm(a, "=", 0).reifyWith(b1);
+        model.arithm(a, ">", 0).reifyWith(b2);
 
         LogOp l = LogOp.or(b1.not(), b2.not());
         model.addClauses(l);
@@ -316,14 +317,14 @@ public class LogicTreeTest {
         Assert.assertTrue(a.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s", timeOut=60000)
-    public void test17(){
+    @Test(groups = "1s", timeOut = 60000)
+    public void test17() {
         Model model = new Model();
         IntVar a = model.intVar("a", -1, 1, false);
         BoolVar b1 = model.boolVar("b1");
         BoolVar b2 = model.boolVar("b2");
-        model.arithm(a,"=",0).reifyWith(b1);
-        model.arithm(a,">",0).reifyWith(b2);
+        model.arithm(a, "=", 0).reifyWith(b1);
+        model.arithm(a, ">", 0).reifyWith(b2);
 
         model.addClauses(new BoolVar[0], new BoolVar[]{b1, b2});
         model.getMinisat().getPropSat().initialize();
@@ -339,7 +340,7 @@ public class LogicTreeTest {
         Assert.assertTrue(a.isInstantiatedTo(0));
     }
 
-    @Test(groups="1s", timeOut=60000)
+    @Test(groups = "1s", timeOut = 60000)
     public void test18() {
         Model model = new Model();
 
@@ -359,5 +360,33 @@ public class LogicTreeTest {
         ILogical l = LogicTreeToolBox.toCNF(root, model);
 
         Assert.assertEquals(l.toString(), "((a or b) and (a or c) and (a or d) and (b or c) and (b or e) and (c or f) and (a or b or c) and (a or b or d) and (a or b or e) and (a or b or f) and (a or c or d) and (a or c or e) and (a or c or f) and (a or d or e) and (a or d or f) and (b or c or d) and (b or c or e) and (b or c or f) and (b or d or e) and (b or e or f) and (c or d or f) and (c or e or f) and (d or e or f))");
+    }
+
+    @Test(groups = "1s")
+    public void test19() {
+        Model model = new Model();
+
+        BoolVar x = model.boolVar("X");
+        BoolVar y = model.boolVar("Y");
+
+        model.addClauses(LogOp.or(model.boolVar(true), x, y));
+
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(4, solver.getSolutionCount());
+    }
+
+    @Test(groups = "1s")
+    public void test20() {
+        Model model = new Model();
+
+        BoolVar x = model.boolVar("X");
+        BoolVar y = model.boolVar("Y");
+
+        model.addClauses(LogOp.and(model.boolVar(false), x, y));
+
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(0, solver.getSolutionCount());
     }
 }

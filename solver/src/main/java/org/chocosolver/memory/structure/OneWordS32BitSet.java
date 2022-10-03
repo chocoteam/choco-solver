@@ -17,10 +17,10 @@ import org.chocosolver.memory.IStateInt;
 public class OneWordS32BitSet implements IStateBitSet {
 
     /*
-    * BitSets are packed into arrays of "word."  Currently a word is
-    * an int, which consists of 32 bits, requiring 6 address bits.
-    * The choice of word size is determined purely by performance concerns.
-    */
+     * BitSets are packed into arrays of "word."  Currently a word is
+     * an int, which consists of 32 bits, requiring 6 address bits.
+     * The choice of word size is determined purely by performance concerns.
+     */
     private final static int ADDRESS_BITS_PER_WORD = 5;
     private final static int BITS_PER_WORD = 1 << ADDRESS_BITS_PER_WORD;
 
@@ -33,23 +33,27 @@ public class OneWordS32BitSet implements IStateBitSet {
     private final IStateInt word;
 
     /**
-     * Creates a bit set whose initial size is large enough to explicitly
-     * represent bits with indices in the range <code>0</code> through
-     * <code>nbits-1</code>. All bits are initially <code>false</code>.
+     * Creates a bit set whose initial size is 32.
+     * All bits are initially <code>false</code>.
      *
      * @param environment backtrackable environment
-     * @param nbits       the initial size of the bit set.
      * @throws NegativeArraySizeException if the specified initial size
      *                                    is negative.
      */
-    public OneWordS32BitSet(IEnvironment environment, int nbits) {
-        // nbits can't be negative; size 0 is OK
-        if (nbits < 0)
-            throw new NegativeArraySizeException("nbits < 0: " + nbits);
-        if (nbits > 32)
-            throw new ArrayIndexOutOfBoundsException("nbits > 32: " + nbits);
-
+    public OneWordS32BitSet(IEnvironment environment) {
         word = environment.makeInt(0);
+    }
+
+    /**
+     * Checks that index is a valid range of bit indices.
+     *
+     * @param index index
+     */
+    private static void checkIndex(int index) {
+        if (index < 0)
+            throw new IndexOutOfBoundsException("fromIndex < 0: " + index);
+        if (index > 31)
+            throw new IndexOutOfBoundsException("fromIndex > 31: " + index);
     }
 
     /**
@@ -59,10 +63,8 @@ public class OneWordS32BitSet implements IStateBitSet {
      * @param toIndex   ending index
      */
     private static void checkRange(int fromIndex, int toIndex) {
-        if (fromIndex < 0)
-            throw new IndexOutOfBoundsException("fromIndex < 0: " + fromIndex);
-        if (toIndex < 0)
-            throw new IndexOutOfBoundsException("toIndex < 0: " + toIndex);
+        checkIndex(fromIndex);
+        checkIndex(toIndex);
         if (fromIndex > toIndex)
             throw new IndexOutOfBoundsException("fromIndex: " + fromIndex + " > toIndex: " + toIndex);
     }
@@ -76,8 +78,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      */
     @Override
     public void set(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        checkIndex(bitIndex);
 
         word.set(word.get() | (1 << bitIndex)); // Restores invariants
     }
@@ -130,8 +131,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      */
     @Override
     public void clear(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        checkIndex(bitIndex);
 
         word.set(word.get() & ~(1 << bitIndex));
     }
@@ -199,7 +199,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the next set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is negative
      * @since 1.4
      */
@@ -245,7 +245,7 @@ public class OneWordS32BitSet implements IStateBitSet {
         if (word != 0)
             return Integer.numberOfTrailingZeros(word);
         else
-            return 0;
+            return BITS_PER_WORD;
     }
 
     /**
@@ -264,7 +264,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous set bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -294,7 +294,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      *
      * @param fromIndex the index to start checking from (inclusive)
      * @return the index of the previous clear bit, or {@code -1} if there
-     *         is no such bit
+     * is no such bit
      * @throws IndexOutOfBoundsException if the specified index is less
      *                                   than {@code -1}
      * @since 1.7
@@ -345,7 +345,7 @@ public class OneWordS32BitSet implements IStateBitSet {
      * <code>BitSet</code>.
      *
      * @return the number of bits set to <tt>true</tt> in this
-     *         <code>BitSet</code>.
+     * <code>BitSet</code>.
      * @since 1.4
      */
     @Override
