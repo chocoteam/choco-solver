@@ -27,10 +27,14 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -1054,5 +1058,139 @@ public class Model implements IModel {
     @Override
     public Model ref() {
         return this;
+    }
+
+    private static String getClassName(Class c) {
+        String[] sp = c.toString().split("\\.");
+        return sp[sp.length - 1];
+    }
+
+    private static <V> String prettyIntListSizeMap(Map<Integer, List<V>> map) {
+        StringBuilder sb = new StringBuilder("{");
+        List<Integer> sortedArities = map.keySet().stream().sorted().collect(Collectors.toList());
+        for (int i = 0; i < sortedArities.size(); i++) {
+            sb.append(sortedArities.get(i)).append(": ").append(map.get(sortedArities.get(i)).size());
+            if (i + 1 < sortedArities.size()) {
+                sb.append(", ");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
+    public void analyse() {
+        analyse(System.out);
+    }
+
+    public void analyse(PrintStream ps) {
+        ps.println();
+        ps.println("################################################################################################");
+        ps.println("#################################### BEGIN OF MODEL ANALYSIS ###################################");
+        ps.println("################################################################################################");
+        ps.println();
+        ps.println("################################################");
+        ps.println("############## VARIABLES ANALYSIS ##############");
+        ps.println("################################################");
+        ps.println();
+        Class[] varsTypes = new Class[]{BoolVar.class, GraphVar.class, IntVar.class, RealVar.class, SetVar.class};
+        Map<Class, Map<String, List<Variable>>> mapTypeClassNbVars = new HashMap<>();
+        for (Class c : varsTypes) {
+            mapTypeClassNbVars.put(c, Arrays.stream(vars)
+                    .filter(Objects::nonNull)
+                    .filter(c::isInstance)
+                    .filter(var -> !c.equals(IntVar.class) || !(var instanceof BoolVar))
+                    .collect(Collectors.groupingBy(var -> getClassName(var.getClass()))));
+            if (!mapTypeClassNbVars.get(c).isEmpty()) {
+                ps.println(getClassName(c));
+                List<String> list = mapTypeClassNbVars.get(c).keySet().stream().sorted().collect(Collectors.toList());
+                for(int i = 0; i < list.size(); i++) {
+                    String varType = list.get(i);
+                    int nbVariables = mapTypeClassNbVars.get(c).get(varType).size();
+                    long nbInstantiatedVariables = mapTypeClassNbVars.get(c).get(varType).stream().filter(Variable::isInstantiated).count();
+                    long nbConstantVariables = mapTypeClassNbVars.get(c).get(varType).stream().filter(Variable::isAConstant).count();
+                    long nbViews = mapTypeClassNbVars.get(c).get(varType).stream().filter(var -> (var.getTypeAndKind() & Variable.VIEW) != 0).count();
+                    if (mapTypeClassNbVars.get(c).get(varType).stream().allMatch(IView.class::isInstance)) {
+                        nbViews = 0;
+                    }
+                    Map<Integer, List<Variable>> byDomainSize = mapTypeClassNbVars.get(c).get(varType).stream().collect(Collectors.groupingBy(Variable::getDomainSize));
+                    Map<Integer, List<Variable>> byNbPropagators = mapTypeClassNbVars.get(c).get(varType).stream().collect(Collectors.groupingBy(Variable::getNbProps));
+                    Map<Integer, List<Variable>> byNbViews = mapTypeClassNbVars.get(c).get(varType).stream().collect(Collectors.groupingBy(Variable::getNbViews));
+                    ps.println("\t" + varType + " = " + nbVariables);
+                    if (nbInstantiatedVariables > 0) {
+                        ps.println("\t\t- Nb instantiated: " + nbInstantiatedVariables);
+                    }
+                    if (nbConstantVariables > 0) {
+                        ps.println("\t\t- Nb constants: " + nbConstantVariables);
+                    }
+                    if (byNbPropagators.containsKey(0) && !byNbPropagators.get(0).isEmpty()) {
+                        ps.println("\t\t- Nb unconstrained: " + byNbPropagators.get(0).size());
+                    }
+                    if (nbViews > 0) {
+                        ps.println("\t\t- Nb views: " + nbViews);
+                    }
+                    ps.println("\t\t- By domain size: " + prettyIntListSizeMap(byDomainSize));
+                    if (byNbPropagators.keySet().size() != 1 || !byNbPropagators.containsKey(0)) {
+                        ps.println("\t\t- By number of propagators: " + prettyIntListSizeMap(byNbPropagators));
+                    }
+                    if (byNbViews.keySet().size() != 1 || !byNbViews.containsKey(0)) {
+                        ps.println("\t\t- By number of views: " + prettyIntListSizeMap(byNbViews));
+                    }
+                    if (i + 1 < list.size()) {
+                        ps.println();
+                    }
+                }
+                ps.println();
+                ps.println();
+            }
+        }
+        ps.println("################################################");
+        ps.println("############# CONSTRAINTS ANALYSIS #############");
+        ps.println("################################################");
+        ps.println();
+        Class[] cstrsTypes = Arrays.stream(cstrs).filter(Objects::nonNull).map(Constraint::getClass).distinct().toArray(Class[]::new);
+        Map<Class, Map<String, List<Propagator>>> mapTypeClassNbCstrs = new HashMap<>();
+        for (Class c : cstrsTypes) {
+            mapTypeClassNbCstrs.put(c, Arrays.stream(cstrs)
+                    .filter(Objects::nonNull)
+                    .filter(c::isInstance)
+                    .flatMap(cstr -> Arrays.stream(cstr.getPropagators()))
+                    .collect(Collectors.groupingBy(var -> getClassName(var.getClass()))));
+            if (!mapTypeClassNbCstrs.get(c).isEmpty()) {
+                ps.println(getClassName(c));
+                List<String> list = mapTypeClassNbCstrs.get(c).keySet().stream().sorted().collect(Collectors.toList());
+                for(int i = 0; i < list.size(); i++) {
+                    String propType = list.get(i);
+                    int nbPropagators = mapTypeClassNbCstrs.get(c).get(propType).size();
+                    long nbEntailedPropagators = mapTypeClassNbCstrs.get(c).get(propType).stream().filter(p -> p.isEntailed().equals(ESat.TRUE)).count();
+                    long nbPassivePropagators = mapTypeClassNbCstrs.get(c).get(propType).stream().filter(Propagator::isPassive).count();
+                    long nbCompletelyInstantiatedPropagators = mapTypeClassNbCstrs.get(c).get(propType).stream().filter(Propagator::isCompletelyInstantiated).count();
+                    long nbReifiedPropagators = mapTypeClassNbCstrs.get(c).get(propType).stream().filter(Propagator::isReified).count();
+                    Map<Integer, List<Propagator>> byArity = mapTypeClassNbCstrs.get(c).get(propType).stream().collect(Collectors.groupingBy(Propagator::arity));
+                    ps.println("\t" + propType + " = " + nbPropagators);
+                    if (nbEntailedPropagators > 0) {
+                        ps.println("\t\t- Nb entailed: " + nbEntailedPropagators);
+                    }
+                    if (nbPassivePropagators > 0) {
+                        ps.println("\t\t- Nb passive: " + nbPassivePropagators);
+                    }
+                    if (nbCompletelyInstantiatedPropagators > 0) {
+                        ps.println("\t\t- Nb completely instantiated: " + nbCompletelyInstantiatedPropagators);
+                    }
+                    if (nbReifiedPropagators > 0) {
+                        ps.println("\t\t- Nb reified: " + nbReifiedPropagators);
+                    }
+                    ps.println("\t\t- By arity: " + prettyIntListSizeMap(byArity));
+                    if (i + 1 < list.size()) {
+                        ps.println();
+                    }
+                }
+                ps.println();
+                ps.println();
+            }
+        }
+        ps.println("################################################################################################");
+        ps.println("##################################### END OF MODEL ANALYSIS ####################################");
+        ps.println("################################################################################################");
+        ps.println();
     }
 }
