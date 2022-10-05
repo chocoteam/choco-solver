@@ -42,19 +42,13 @@ The implementation of new constraints [@10.1007/978-3-031-08011-1_21]
 or strategies for exploring the search space [@DBLP:conf/cp/LiYL21;@fages:hal-01629182] 
 is therefore possible.
 
-As a result, `Choco-solver` is used by the academy for teaching and research and by the industry to solve real-world problems, 
-such as cryptanalysis [@10.1007/978-3-030-78375-4_8],
-planing construction [@CANIZARES2022116149], 
-automated testing and debugging [@LE2021100085],
-scheduling [@10.1007/978-3-319-44953-1_40],
-level design [@5887401]
-placement service [@8814186] and many others.
+As a result, `Choco-solver` is used by the academy for teaching and research and by the industry to solve real-world problems.
              
 ## CP in a nutshell
-Like integer linear programming or Boolean satisfaction, constraint programming is a field of mathematical programming.
-It focuses on describing and solving applied mathematical problems.
-However, what distinguishes the CP from the first two approaches is that it relies on a high level language to 
-describe the problems. 
+Constraint programming provides not only a declarative way for user to describe discrete problems,
+but also technics for solving them automatically.  
+In that sense, it is very close to integer linear programming or Boolean satisfaction
+but is distinguished from them with its high-level modeling language and expressiveness.
 Actually, one of the richness's of the paradigm lies in the wide variety of constraints 
 it proposes, which are also central to the solving stage. 
 Thus, the objective of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
@@ -62,7 +56,7 @@ and secondly to provide technics to automatically solve this problem.
 In standard use, a user states a problem using variables, their domains (possible values for each
 variable), and constraints, predicates that must hold on the variables.
 The wide variety of constraints available allows the user to describe his problem as naturally as possible.
-Each constraint ensures that it holds, otherwise a propagator *filters* ,removes, 
+Each constraint ensures that it holds, otherwise a propagator filters  
 from the domain of variables the values that prevent the satisfiability.
 It is the combination of the selected constraints that defines the problem to be solved.
 The problem is solved by alternating space reduction (usually by a depth-first search) and propagation, 
@@ -92,17 +86,17 @@ into both academic and industrial projects.
 ## Modeling                                                        
 
 `Choco-solver` comes with the commonly used types of variables: 
-integer variables (with either bounded or enumerated domain), 
+integer variables, 
 Boolean variables, set variables [@gervet_1997] graph variables [@dooms_2005;@fages_2015] and real variables. 
 Views [@DBLP:conf/cp/SchulteT05;@DBLP:journals/constraints/Justeau-Allaire22] 
 but also arithmetical, relational and logical expressions are supported.
 
-Up to 100 constraints --and more than 150 propagators-- are provided : 
+Up to 100 constraints are provided : 
 from classic ones, such as arithmetical constraints, 
 to  must-have global constraints, such as *AllDifferent* [@10.5555/199288.178024] or *Cumulative* [@aggoun:hal-00442821],
 and include less common even though useful ones, such as  *Tree* [@DBLP:conf/cpaior/BeldiceanuFL05] 
 or *StableKeySort* [@beldiceanu:hal-01186680].
-In many cases, the Choco-Solver API provides various options in addition to the default signature - 
+In many cases, the `Choco-solver` API provides various options in addition to the default signature - 
 corresponding to a robust implementation – of a constraint. 
 This allows the user to experiment alternative approaches and tune the model to its instance. 
 The user may also pick some existing propagators to compose a new constraint or 
@@ -133,16 +127,19 @@ The search process can also be greatly improved by various built-in search strat
 Standard restart policies are also available, to take full advantage of the learning strategies.
 Problem-adapted search strategies are also supported.
 
-One can solve a problem in many ways:  finding one or all solutions, 
+One can solve a problem in many ways:  
+simply checking satisfaction,
+finding one or all solutions, 
 optimizing one or more objectives,
-solving on one or more thread, 
-or simply checking satisfaction.
+or solving on one or more thread.
 The search process itself is observable and extensible.
 
 ## Community tools integration
 
 Several useful extra features are also available such as parsers to [XCSP3 format](http://xcsp.org/) 
 and [MiniZinc format](https://www.minizinc.org/resources.html). 
+`Choco-solver` is also embedded in [PyCSP3](https://pypi.org/project/pycsp3/), 
+a library in Python 3 for modeling and solving combinatorial constrained problems.
 In addition to offering alternatives to modelling in Java, 
 it also allows participation in the two major constraint solver competitions :
 [MiniZinc Challenge](https://www.minizinc.org/challenge.html) and [XCSP3 Competition](http://www.xcsp.org/competitions/).
@@ -154,13 +151,53 @@ Equally, a Boolean satisfaction solver (based on [MiniSat](http://minisat.se/Mai
 to offer better performance on logical constraints.
 
 These aspects consolidate the place of `Choco-solver` as an important tool in the CP community.                                                                                                                         
+    
+
+Note that there are a couple of other Java constraint solvers of equivalent maturity, 
+like [JaCoP](https://github.com/radsz/jacop) or [ACE](https://github.com/xcsp3team/ace).
+The performance of these tools is comparable, they are mainly distinguished by the functionalities in terms 
+of modelling and resolution. 
+Among the most noteworthy, `Choco-solver` makes available constraints based on graph variables 
+or real variables, or it can parse both MiniZinc and XCSP3 input files.
+
+# Industrial use
+
+## Applications
+
+`Choco-solver` is used by the industry to solve many real-world problems, 
+such as cryptanalysis [@10.1007/978-3-030-78375-4_8], 
+construction planning [@CANIZARES2022116149], 
+automated testing and debugging [@LE2021100085], 
+scheduling [@10.1007/978-3-319-44953-1_40], 
+level design [@5887401], 
+placement service [@8814186] and many others.
+In the Railway industry, `Choco-solver` is used to optimize the rail traffic of French train stations, on a daily basis. 
+It is also used at a higher level to run simulations for capacity and maintenance planning. 
+The underlying mathematical problems, involving multi-objective functions and millions of variables and constraints, 
+are solved within seconds by the solver. 
+In the Defense sector, `Choco-solver` is used for various applications. 
+One publicly known is the long-term maintenance planning of the Mirage 2000 fleet [@OptaForce]. 
+This planning and scheduling problem includes various capacity constraints, load balancing, mission covering, 
+in an over-constrained environment. 
+A fleet of hundred aircraft can be planned by `Choco-solver` for the next fifteen years within a few minutes.
+Another type of industrial application of `Choco-solver` is Configuration [@Charpentier2021COSLINGC], 
+where the solver is used to solve dynamical constraint models. 
+The underlying mathematical problems is generally simpler than in planning applications, 
+but an optimal result is expected within milliseconds. 
+This occurs in quotation systems for sales automation, but also design automation and system configuration.
+
+In most of those cases, experts set advanced solution techniques, such as specific search strategies, 
+Large Neighborhood Search or *ad hoc* global constraints, in order to improve their model. 
+`Choco-solver` is flexible enough to allow such fine-tuning, necessary to tackle challenging problems. 
+With the right approach, `Choco-solver` can come up with nearly optimal solutions in a very short time.
 
 
 # Acknowledgements
 
 We acknowledge contributions from (in alphabetical order) 
-Hadrien Cambazard, Arthur Godet, Fabien Hermenier, Narendra Jussien, Dimitri Justeau-Allaire, 
-Alexandre Lebrun, Jimmy Liang, Xavier Lorca, Arnaud Malapert, 
+Hadrien Cambazard, Arthur Godet, Fabien Hermenier, Narendra Jussien, 
+Dimitri Justeau-Allaire, Tanguy Lapègue, Alexandre Lebrun, 
+Jimmy Liang, Xavier Lorca, Arnaud Malapert, 
 Guillaume Rochart, João Pedro Schmitt and Mohamed Wahbi.  
 
 # References
