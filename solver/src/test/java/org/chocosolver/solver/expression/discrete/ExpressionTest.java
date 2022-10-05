@@ -484,6 +484,16 @@ public class ExpressionTest {
         eval(model, y.eq(b.ift(t.add(1),t.sub(1))), p, 6);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test481(int p) {
+        Model model = new Model();
+        IntVar n = model.intVar("n", 1, 3);
+        IntVar a = model.intVar("a", new int[]{2});
+        BoolVar q = model.boolVar("q");
+        IntVar b = model.intVar("b", new int[]{1, 2, 3});
+        eval(model, n.eq(q.ift(a, b)), p, 6);
+    }
+
     @Test(groups="1s", timeOut=60000, dataProvider = "post")
     public void test49(int p){
         Model model = new Model();
