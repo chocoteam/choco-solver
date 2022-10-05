@@ -607,6 +607,16 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         model.getSolver().throwsException(this, null, null);
     }
 
+    /**
+     * Throws a contradiction exception with a specific message
+     *
+     * @param message the message associated with the failure
+     * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
+     */
+    public void fails(String message) throws ContradictionException {
+         model.getSolver().throwsException(this, null, message);
+     }
+
     @Override
     public int compareTo(Propagator<V> o) {
         return this.ID - o.ID;

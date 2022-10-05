@@ -183,6 +183,18 @@ public interface IOutputFactory extends ISelf<Solver> {
     }
 
     /**
+     * Plug a search monitor which outputs a message on each solution, based on the variables
+     * given in parameters.
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     *
+     * @see IOutputFactory.DefaultSolutionMessage
+     */
+    default void showSolutions(Variable... variables) {
+        showSolutions(new DefaultSolutionMessage(ref(), variables));
+    }
+
+    /**
      * Plug a search monitor which outputs {@code message} on each decision.
      * <p>
      * Recommended usage: to be called before the resolution step.
@@ -424,25 +436,41 @@ public interface IOutputFactory extends ISelf<Solver> {
          */
         private final Solver solver;
 
+        private Variable[] vars;
+
         /**
          * Create a solution message
          *
          * @param solver solver to output
          */
         public DefaultSolutionMessage(Solver solver) {
+            this(solver, null);
+        }
+
+        /**
+         * Create a solution message
+         *
+         * @param solver solver to output
+         * @param vars variables to output
+         */
+        public DefaultSolutionMessage(Solver solver, Variable[] vars) {
             this.solver = solver;
+            this.vars = vars;
         }
 
         @Override
         public String print() {
+            if(vars == null){
+                vars = solver.getSearch().getVariables();
+            }
             return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getSolutionCount(),
                     solver.getMeasures().toOneLineString(),
-                    print(solver.getSearch().getVariables())
+                    printVars()
             );
         }
 
-        private String print(Variable[] vars) {
+        private String printVars() {
             StringBuilder s = new StringBuilder(32);
             for (Variable v : vars) {
                 s.append(v).append(' ');
