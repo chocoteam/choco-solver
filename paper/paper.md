@@ -46,7 +46,7 @@ As a result, `Choco-solver` is used by the academics for teaching and research, 
              
 ## CP in a nutshell
 Constraint programming provides not only a declarative way for users to describe discrete problems,
-but also techniques for solving them automatically.  
+but also techniques for solving them automatically. 
 In that sense, it is very close to integer linear programming or Boolean satisfaction
 but is distinguished from them with its high-level modeling language and expressiveness.
 Actually, one of the richness's of the paradigm lies in the wide variety of constraints 
