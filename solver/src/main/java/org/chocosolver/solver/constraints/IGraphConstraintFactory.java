@@ -61,7 +61,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @param nb an integer variable indicating the expected number of nodes in g
      * @return A constraint to force the number of nodes in g to be equal to nb
      */
-    default Constraint nbNodes(GraphVar g, IntVar nb) {
+    default Constraint nbNodes(GraphVar<?> g, IntVar nb) {
         return new Constraint("nbNodes", new PropNbNodes(g, nb));
     }
 
@@ -72,7 +72,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @param nb an integer variable indicating the expected number of edges in g
      * @return A constraint to force the number of edges in g to be equal to nb
      */
-    default Constraint nbEdges(GraphVar g, IntVar nb) {
+    default Constraint nbEdges(GraphVar<?> g, IntVar nb) {
         return new Constraint("nbEdges", new PropNbEdges(g, nb));
     }
 
@@ -86,7 +86,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @param g a graph variable
      * @return A constraint which makes sure every node has a loop
      */
-    default Constraint loopSet(GraphVar g, SetVar loops) {
+    default Constraint loopSet(GraphVar<?> g, SetVar loops) {
         return new Constraint("loopSet", new PropLoopSet(g, loops));
     }
 
@@ -98,7 +98,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @param nb an integer variable counting the number of loops in g
      * @return A constraint which ensures g has nb loops
      */
-    default Constraint nbLoops(GraphVar g, IntVar nb) {
+    default Constraint nbLoops(GraphVar<?> g, IntVar nb) {
         return new Constraint("nbLoops", new PropNbLoops(g, nb));
     }
 
@@ -111,23 +111,23 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
     // symmetry
 
     /**
-     * Creates a constraint which ensures that g is a symmetric directed graph
+     * Creates a constraint which ensures that g is a symetric directed graph
      * This means (i,j) in g <=> (j,i) in g
      * Note that it may be preferable to use an undirected graph variable instead!
      *
      * @param g a directed graph variable
-     * @return A constraint which ensures that g is a symmetric directed graph
+     * @return A constraint which ensures that g is a symetric directed graph
      */
     default Constraint symmetric(DirectedGraphVar g) {
         return new Constraint("symmetric", new PropSymmetric(g));
     }
 
     /**
-     * Creates a constraint which ensures that g is an antisymmetric directed graph
+     * Creates a constraint which ensures that g is an antisymetric directed graph
      * This means (i,j) in g => (j,i) notin g
      *
      * @param g a directed graph variable
-     * @return A constraint which ensures that g is an antisymmetric directed graph
+     * @return A constraint which ensures that g is an antisymetric directed graph
      */
     default Constraint antisymmetric(DirectedGraphVar g) {
         return new Constraint("antisymmetric", new PropAntiSymmetric(g));
@@ -144,8 +144,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @param g A graph variable
      * @return A transitivity constraint
      */
-    default Constraint transitivity(GraphVar g) {
-        return new Constraint("transitivity", new PropTransitivity(g));
+    default Constraint transitivity(GraphVar<?> g) {
+        return new Constraint("transitivity", new PropTransitivity<>(g));
     }
 
     //***********************************************************************************
@@ -191,10 +191,10 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint :
      * int i in nodes <=> vertex i in g
      *
-     * @param g
-     * @param nodes
+     * @param g a graph variable
+     * @param nodes a set variable
      */
-    default Constraint nodesChanneling(GraphVar g, SetVar nodes) {
+    default Constraint nodesChanneling(GraphVar<?> g, SetVar nodes) {
         return new Constraint("nodesSetChanneling",
                 new PropNodeSetChannel(nodes, g));
     }
@@ -203,10 +203,10 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint :
      * nodes[i] = 1 <=> vertex i in g
      *
-     * @param g
-     * @param nodes
+     * @param g a graph variable
+     * @param nodes a set variable
      */
-    default Constraint nodesChanneling(GraphVar g, BoolVar[] nodes) {
+    default Constraint nodesChanneling(GraphVar<?> g, BoolVar[] nodes) {
         return new Constraint("nodesBoolsChanneling",
                 new PropNodeBoolsChannel(nodes, g));
     }
@@ -215,11 +215,11 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint :
      * isIn = 1 <=> vertex 'vertex' in g
      *
-     * @param g
-     * @param isIn
-     * @param vertex
+     * @param g a graph variable
+     * @param isIn a Boolean variable
+     * @param vertex int
      */
-    default Constraint nodeChanneling(GraphVar g, BoolVar isIn, int vertex) {
+    default Constraint nodeChanneling(GraphVar<?> g, BoolVar isIn, int vertex) {
         return new Constraint("nodesBoolChanneling",
                 new PropNodeBoolChannel(isIn, vertex, g));
     }
@@ -230,10 +230,10 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint :
      * isEdge = 1 <=> edge (from,to) in g
      *
-     * @param g
-     * @param isEdge
-     * @param from
-     * @param to
+     * @param g a graph variable
+     * @param isEdge a Boolean variable
+     * @param from index of the origin
+     * @param to index of the destination
      */
     default Constraint edgeChanneling(DirectedGraphVar g, BoolVar isEdge, int from, int to) {
         return new Constraint("edgeChanneling",
@@ -246,10 +246,10 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * isEdge = 1 <=> edge (i,j) in g
      *
-     * @param g
-     * @param isEdge
-     * @param i
-     * @param j
+     * @param g a graph variable
+     * @param isEdge a Boolean variable
+     * @param i index of the origin
+     * @param j index of the destination
      */
     default Constraint edgeChanneling(UndirectedGraphVar g, BoolVar isEdge, int i, int j) {
         return new Constraint("edgeChanneling",
@@ -262,8 +262,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * int j in neighbors[i] <=> edge (i,j) in g
      *
-     * @param g
-     * @param neighbors
+     * @param g a graph variable
+     * @param neighbors array of set variables
      */
     default Constraint neighborsChanneling(UndirectedGraphVar g, SetVar[] neighbors) {
         return new Constraint("neighSetsChanneling",
@@ -275,8 +275,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * neighbors[i][j] = 1 <=> edge (i,j) in g
      *
-     * @param g
-     * @param neighbors
+     * @param g a graph variable
+     * @param neighbors a matrix of Boolean variables
      */
     default Constraint neighborsChanneling(UndirectedGraphVar g, BoolVar[][] neighbors) {
         return new Constraint("neighBoolsChanneling",
@@ -287,9 +287,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * int j in neighborsOf <=> edge (node,j) in g
      *
-     * @param g
-     * @param neighborsOf
-     * @param node
+     * @param g a graph variable
+     * @param neighborsOf a set variable
+     * @param node index of the node
      */
     default Constraint neighborsChanneling(UndirectedGraphVar g, SetVar neighborsOf, int node) {
         return new Constraint("neighSetChanneling",
@@ -300,9 +300,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * neighborsOf[j] = 1 <=> edge (node,j) in g
      *
-     * @param g
-     * @param neighborsOf
-     * @param node
+     * @param g a graph variable
+     * @param neighborsOf an array of Boolean variables
+     * @param node index of the node
      */
     default Constraint neighborsChanneling(UndirectedGraphVar g, BoolVar[] neighborsOf, int node) {
         return new Constraint("neighBoolChanneling",
@@ -315,8 +315,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * int j in successors[i] <=> edge (i,j) in g
      *
-     * @param g
-     * @param successors
+     * @param g a graph variable
+     * @param successors an array of set variables
      */
     default Constraint successorsChanneling(DirectedGraphVar g, SetVar[] successors) {
         return new Constraint("succSetsChanneling",
@@ -327,8 +327,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * successors[i][j] <=> edge (i,j) in g
      *
-     * @param g
-     * @param successors
+     * @param g a graph variable
+     * @param successors a matrix of Boolean variables
      */
     default Constraint successorsChanneling(DirectedGraphVar g, BoolVar[][] successors) {
         return new Constraint("succBoolsChanneling",
@@ -339,9 +339,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * int j in successorsOf <=> edge (node,j) in g
      *
-     * @param g
-     * @param successorsOf
-     * @param node
+     * @param g a graph variable
+     * @param successorsOf a set variable
+     * @param node index of the node
      */
     default Constraint successorsChanneling(DirectedGraphVar g, SetVar successorsOf, int node) {
         return new Constraint("succSetChanneling",
@@ -352,9 +352,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * successorsOf[j] = 1 <=> edge (node,j) in g
      *
-     * @param g
-     * @param successorsOf
-     * @param node
+     * @param g a graph variable
+     * @param successorsOf an array of Boolean variables
+     * @param node index of the node
      */
     default Constraint successorsChanneling(DirectedGraphVar g, BoolVar[] successorsOf, int node) {
         return new Constraint("succBoolChanneling",
@@ -367,9 +367,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * int j in predecessorsOf <=> edge (j,node) in g
      *
-     * @param g
-     * @param predecessorsOf
-     * @param node
+     * @param g a graph variable
+     * @param predecessorsOf a set variable
+     * @param node index of the node
      */
     default Constraint predecessorsChanneling(DirectedGraphVar g, SetVar predecessorsOf, int node) {
         return new Constraint("predSetChanneling",
@@ -380,9 +380,9 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * Channeling constraint:
      * predecessorsOf[j] = 1 <=> edge (j,node) in g
      *
-     * @param g
-     * @param predecessorsOf
-     * @param node
+     * @param g a graph variable
+     * @param predecessorsOf an array of Boolean variables
+     * @param node index of the node
      */
     default Constraint predecessorsChanneling(DirectedGraphVar g, BoolVar[] predecessorsOf, int node) {
         return new Constraint("predBoolChanneling",
@@ -611,13 +611,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @return a cycle constraint
      */
     default Constraint cycle(UndirectedGraphVar g) {
-        int m = 0;
-        int n = g.getNbMaxNodes();
-        for (int i = 0; i < n; i++) {
-            m += g.getPotentialNeighborsOf(i).size();
-        }
-        m /= 2;
-        Propagator pMaxDeg = new PropNodeDegreeAtMostIncr(g, 2);
+        Propagator<?> pMaxDeg = new PropNodeDegreeAtMostIncr(g, 2);
         if (g.getMandatoryNodes().size() <= 1) {
             // Graphs with one node and a loop must be accepted
             IntVar nbNodes = g.getModel().intVar(g.getMandatoryNodes().size(), g.getPotentialNodes().size());
@@ -672,12 +666,12 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
 
     /**
      * Creates a connectedness constraint which ensures that g is connected
-     *
+     * </br>
      * BEWARE : empty graphs or graph with 1 node are allowed (they are not disconnected...)
      * if one wants a graph with >= 2 nodes he should use the node number constraint (nbNodes)
      * connected only focuses on the graph structure to prevent two nodes not to be connected
      * if there is 0 or only 1 node, the constraint is therefore not violated
-     *
+     * </br>
      * The purpose of CP is to compose existing constraints, and nbNodes already exists
      *
      * @param g an undirected graph variable
@@ -688,8 +682,8 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates a connectedness constraint which ensures that g is biconnected
-     * Beware : should be used in addition to connected
+     * Creates a connectedness constraint which ensures that g is bi-connected
+     * Beware : should be used in addition to connected(g)
      * The empty graph is not considered biconnected.
      *
      * @param g an undirected graph variable
@@ -865,7 +859,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      */
     default Constraint nbCliques(UndirectedGraphVar g, IntVar nb) {
         return new Constraint("NbCliques",
-                new PropTransitivity(g),
+                new PropTransitivity<>(g),
                 new PropNbCC(g, nb),
                 new PropNbCliques(g, nb) // redundant propagator
         );
@@ -928,7 +922,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
      * @return a tsp constraint
      */
     default Constraint tsp(UndirectedGraphVar graphVar, IntVar costVar, int[][] edgeCosts, int lagrMode) {
-        Propagator[] props = ArrayUtils.append(cycle(graphVar).getPropagators(),
+        Propagator<?>[] props = ArrayUtils.append(cycle(graphVar).getPropagators(),
                 new Propagator[]{new PropCycleCostSimple(graphVar, costVar, edgeCosts)});
         if (lagrMode > 0) {
             PropLagrOneTree hk = new PropLagrOneTree(graphVar, costVar, edgeCosts);
@@ -959,7 +953,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
                              int lagrMode) {
         Constraint treeCstr = tree(graphVar);
         treeCstr.ignore();
-        Propagator[] props = ArrayUtils.append(
+        Propagator<?>[] props = ArrayUtils.append(
                 treeCstr.getPropagators()
                 , new Propagator[]{
                         new PropTreeCostSimple(graphVar, costVar, edgeCosts)
@@ -1017,8 +1011,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
                 }
                 Constraint c = m.and(clause);
                 Constraint pij = m.arithm(p[j], "=", I);
-                m.ifThen(pij, c);
-                m.ifThen(c, pij);
+                m.ifOnlyIf(pij, c);
             }
         }
 
