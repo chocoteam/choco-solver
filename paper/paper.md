@@ -127,6 +127,7 @@ Standard restart policies are also available, to take full advantage of the lear
 Problem-adapted search strategies are also supported.
 
 One can solve a problem by  
+
 - simply checking satisfaction
 - finding one or all solutions 
 - optimizing one or more objectives
