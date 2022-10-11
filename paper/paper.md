@@ -28,9 +28,9 @@ bibliography: paper.bib
 Constraint Programming (CP) is a powerful programming paradigm for solving 
 combinatorial search problems [@DBLP:reference/fai/2].
 CP is at the intersection of artificial intelligence, computer science, operations research, and many other fields.
-One of the richness's of the paradigm lies in the wide variety of constraints it proposes. 
-Thus, the benefit of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
-and secondly to provide techniques to automatically solve this problem.
+One of the strengths of the paradigm is the wide variety of constraints it offers. 
+CP is both a rich declarative language for describing combinatorial problems and a set of algorithms 
+and techniques for solving them automatically.
 
 `Choco-solver` is Java library for constraint programming which was created in the early 2000s.
 Since then, the library has evolved a great deal, but ease of use has always been a guiding principle in its development.
@@ -46,19 +46,18 @@ As a result, `Choco-solver` is used by the academics for teaching and research, 
              
 ## CP in a nutshell
 Constraint programming provides not only a declarative way for users to describe discrete problems,
-but also technique for solving them automatically.  
+but also techniques for solving them automatically. 
 In that sense, it is very close to integer linear programming or Boolean satisfaction
 but is distinguished from them with its high-level modeling language and expressiveness.
 Actually, one of the richness's of the paradigm lies in the wide variety of constraints 
 it proposes, which are also central to the solving stage. 
 Thus, the objective of CP is twofold: firstly to offer a rich declarative language to describe a combinatorial problem, 
-and secondly to provide technics for solving the problem automatically.
+and secondly to provide techniques for solving the problem automatically.
 In standard use, a user states a problem using variables, their domains (possible values for each
 variable), and constraints which are called predicates that must hold on the variables.
 The wide variety of constraints available allows the users to describe their problem as naturally as possible.
-Each constraint ensures that it holds, otherwise a propagator filters  
-the values that prevent the satisfiability.
-It is the combination of the selected constraints that defines the problem to be solved.
+Each constraint ensures that it holds, otherwise a propagator filters the values that prevent the satisfiability.
+It is the combination of the selected constraints that defines the problem.
 The problem is solved by alternating space reduction (usually by a depth-first search) and propagation, 
 thus ensuring the completeness of the approach.
 This standard usage can be extended in different ways, for example, by hybridisation with local search, 
@@ -95,8 +94,8 @@ Up to 100 constraints are provided from classic ones, such as arithmetical const
 to  must-have global constraints such as *AllDifferent* [@10.5555/199288.178024] or *Cumulative* [@aggoun:hal-00442821],
 and include less common even though useful ones such as  *Tree* [@DBLP:conf/cpaior/BeldiceanuFL05] 
 or *StableKeySort* [@beldiceanu:hal-01186680].
-In many cases, the `Choco-solver` API provides various options in addition to the default signature - 
-corresponding to a robust implementation – of a constraint. 
+In many cases, the `Choco-solver` API provides various options in addition to the default signature – corresponding to 
+a robust implementation – of a constraint. 
 This allows users to experiment alternative approaches and tune the model to its instance. 
 The users may also pick some existing propagators to compose a new constraint or 
 create their own one in a straightforward way by implementing a filtering algorithm and a satisfaction checker.
