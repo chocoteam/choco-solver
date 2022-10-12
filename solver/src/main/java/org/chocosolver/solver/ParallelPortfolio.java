@@ -354,7 +354,8 @@ public class ParallelPortfolio {
      * @return a list that contained the found solutions.
      */
     public Stream<Solution> streamSolutions() {
-        Spliterator<Solution> it = new Spliterator<>() {
+        //noinspection Convert2Diamond
+        Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
