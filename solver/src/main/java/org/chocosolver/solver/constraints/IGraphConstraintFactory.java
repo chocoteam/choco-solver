@@ -1062,8 +1062,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
                 }
                 Constraint c = m.and(clause);
                 Constraint pij = m.arithm(p[j], "=", I);
-                m.ifThen(pij, c);
-                m.ifThen(c, pij);
+                m.ifOnlyIf(c, pij);
             }
         }
 
