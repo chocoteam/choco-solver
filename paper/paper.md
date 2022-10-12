@@ -12,10 +12,10 @@ authors:
     affiliation: 1
     corresponding: true
   - name: Jean-Guillaume Fages
+    orcid: 0000-0001-5638-4777
     affiliation: 2
 affiliations:
   - name: TASC, IMT-Atlantique, LS2N-CNRS, Nantes, France
-    orcid: 0000-0001-5638-4777
     index: 1
   - name: COSLING S.A.S., Nantes, France
     index: 2
