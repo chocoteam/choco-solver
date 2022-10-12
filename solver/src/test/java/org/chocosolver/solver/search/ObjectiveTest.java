@@ -226,7 +226,7 @@ public class ObjectiveTest {
             r.setSearch(Search.objectiveStrategy(a, p), minDomLBSearch(a));
             r.setNoGoodRecordingFromSolutions(a);
             while (model.getSolver().solve()) ;
-            assertEquals(model.getSolver().isStopCriterionMet(), false);
+            assertFalse(model.getSolver().isStopCriterionMet());
         }
     }
 
@@ -241,7 +241,7 @@ public class ObjectiveTest {
             r.setSearch(Search.objectiveStrategy(objective, p), randomSearch(ticks, 0L));
             r.setNoGoodRecordingFromSolutions(ticks);
             while (model.getSolver().solve()) ;
-            assertEquals(model.getSolver().isStopCriterionMet(), false);
+            assertFalse(model.getSolver().isStopCriterionMet());
             assertEquals(r.getBestSolutionValue(), 34);
         }
     }
@@ -262,7 +262,7 @@ public class ObjectiveTest {
             model.getSolver().reset();
             final int finalI = i;
             oman.setCutComputer(n -> n.intValue() - ends[finalI]);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
@@ -283,7 +283,7 @@ public class ObjectiveTest {
             }
             model.getSolver().reset();
             ends[0] = floorDiv(ends[0], 2);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
@@ -467,7 +467,7 @@ public class ObjectiveTest {
         solver.showShortStatistics();
         while (model.getSolver().solve()) {
         }
-        assertEquals(model.getSolver().isStopCriterionMet(), false);
+        assertFalse(model.getSolver().isStopCriterionMet());
         assertEquals(solver.getBestSolutionValue(), 44);
     }
 }

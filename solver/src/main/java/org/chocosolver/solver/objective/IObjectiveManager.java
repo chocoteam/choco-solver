@@ -13,7 +13,9 @@ import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
 
+import java.util.function.DoubleUnaryOperator;
 import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 
 /**
  * interface to monitor the bounds of the objective variable.
@@ -39,7 +41,9 @@ public interface IObjectiveManager<V extends Variable> extends IBoundsManager, I
     boolean updateBestSolution();
 
     /**
-     * Set a user-defined cut computer to avoid "worse" solutions
+     * Set a user-defined cut computer to avoid "worse" solutions.
+     * @see AbstractIntObjManager#setCutComputer(IntUnaryOperator)
+     * @see AbstractRealObjManager#setCutComputer(DoubleUnaryOperator) 
      */
     void setCutComputer(Function<Number, Number> cutComputer);
 

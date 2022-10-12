@@ -354,7 +354,7 @@ public class ParallelPortfolio {
      * @return a list that contained the found solutions.
      */
     public Stream<Solution> streamSolutions() {
-        Spliterator<Solution> it = new Spliterator<Solution>() {
+        Spliterator<Solution> it = new Spliterator<>() {
 
             @Override
             public boolean tryAdvance(Consumer<? super Solution> action) {
@@ -388,7 +388,6 @@ public class ParallelPortfolio {
     ///////////////////////////////////////   INTERNAL METHODS    //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @SuppressWarnings("unchecked")
     public void prepare() {
         isPrepared = true;
         check();
@@ -417,11 +416,7 @@ public class ParallelPortfolio {
             if (solverVal == bestVal) {
                 getSolutionFound().set(true);
                 finder = m;
-                if (m.getResolutionPolicy() == ResolutionPolicy.MAXIMIZE) {
-                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestLB(bestVal));
-                } else {
-                    models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestUB(bestVal));
-                }
+                models.forEach(s1 -> s1.getSolver().getObjectiveManager().updateBestSolution(bestVal));
             }
         }
     }
