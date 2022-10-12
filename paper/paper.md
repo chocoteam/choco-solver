@@ -162,8 +162,6 @@ or real variables, or it can parse both MiniZinc and XCSP3 input files.
 
 # Industrial use
 
-## Applications
-
 `Choco-solver` is used by the industry to solve many real-world problems, 
 such as cryptanalysis [@10.1007/978-3-030-78375-4_8], 
 construction planning [@CANIZARES2022116149], 
