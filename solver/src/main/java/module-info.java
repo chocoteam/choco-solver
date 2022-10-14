@@ -21,8 +21,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.memory.trailing.trail.flatten;
     exports org.chocosolver.memory.trailing.trail.chunck;
     exports org.chocosolver.memory.structure;
-
-    exports org.chocosolver.cutoffseq;
+    
     exports org.chocosolver.sat;
     exports org.chocosolver.solver;
     exports org.chocosolver.solver.learn;
@@ -158,6 +157,8 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.knapsack to org.chocosolver.parsers;
     exports org.chocosolver.solver.constraints.nary.knapsack.structure;
     opens org.chocosolver.solver.constraints.nary.knapsack.structure to org.chocosolver.parsers;
+    exports org.chocosolver.solver.constraints.nary.diffn;
+    opens org.chocosolver.solver.constraints.nary.diffn to org.chocosolver.parsers;
 
 
 }

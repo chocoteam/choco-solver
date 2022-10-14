@@ -17,9 +17,9 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.ACounter;
 import org.chocosolver.solver.search.loop.monitors.IMonitorDownBranch;
 import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
-import org.chocosolver.solver.search.loop.move.Move;
-import org.chocosolver.solver.search.loop.move.MoveRestart;
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.search.restart.AbstractRestart;
+import org.chocosolver.solver.search.restart.MonotonicCutoff;
+import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
@@ -48,7 +48,7 @@ import static java.lang.Integer.MAX_VALUE;
  * @author Charles Prud'homme
  * @since 07/06/12
  */
-public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
+public final class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorDownBranch, IMonitorRestart,
         IVariableMonitor<IntVar>, Comparator<IntVar>/*, VariableSelector<IntVar>*/ {
 
     private static final double ONE = 1.0f;
@@ -128,14 +128,14 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private boolean restartAfterEachLeaf = true;
 
-    private Move rfMove;
+    private Restarter mRestarter;
 
     public ActivityBased(final Model model, IntVar[] vars, IntValueSelector valueSelector,
                          double g, double d, int a, int samplingIterationForced, long seed) {
         super(vars);
         this.model = model;
         this.vars = vars;
-        if(valueSelector != null){
+        if (valueSelector != null) {
             this.valueSelector = valueSelector;
         }
         A = new double[vars.length];
@@ -155,11 +155,9 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         random = new Random(seed);
         nb_probes = 0;
         this.samplingIterationForced = samplingIterationForced;
-//        idx_large = 0; // start the first variable
-//        init(vars);
     }
 
-    public ActivityBased(IntVar[] vars){
+    public ActivityBased(IntVar[] vars) {
         this(vars[0].getModel(),
                 vars,
                 null,
@@ -173,7 +171,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     @Override
     public boolean init() {
         Solver solver = model.getSolver();
-        if(!solver.getSearchMonitors().contains(this)) {
+        if (!solver.getSearchMonitors().contains(this)) {
             model.getSolver().plugMonitor(this);
             for (int i = 0; i < vars.length; i++) {
                 v2i.put(vars[i].getId(), i);
@@ -189,9 +187,8 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                 vAct[i] = new ArrayVal(ampl, vars[i].getLB());
             }
         }
-    	if (restartAfterEachLeaf) {
-            rfMove = new MoveRestart(model.getSolver().getMove(),
-                    new MonotonicRestartStrategy(1),
+        if (restartAfterEachLeaf) {
+            mRestarter = new Restarter(new MonotonicCutoff(1),
                     new ACounter(model.getSolver().getMeasures(), 1) {
                         @Override
                         public long currentValue() {
@@ -199,7 +196,13 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
                         }
                     },
                     MAX_VALUE, true);
-            model.getSolver().setMove(rfMove);
+
+            AbstractRestart curr = model.getSolver().getRestarter();
+            if (curr == AbstractRestart.NO_RESTART) {
+                model.getSolver().setRestarter(mRestarter);
+            } else {
+                curr.setNext(mRestarter);
+            }
         }
         return true;
     }
@@ -207,16 +210,16 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
     @Override
     public void remove() {
         Solver solver = model.getSolver();
-        if(solver.getSearchMonitors().contains(this)) {
+        if (solver.getSearchMonitors().contains(this)) {
             solver.unplugMonitor(this);
             for (int i = 0; i < vars.length; i++) {
                 v2i.put(vars[i].getId(), i);
                 vars[i].removeMonitor(this);
             }
         }
-    	if (restartAfterEachLeaf) {
-		removeRFMove();
-    	}
+        if (restartAfterEachLeaf) {
+            removeRFMove();
+        }
     }
 
     @Override
@@ -224,16 +227,16 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
-        if (currentVar==-1 || vars[currentVar] != variable) {
-			if(sampling){
-				return null;
-			}
+        if (currentVar == -1 || vars[currentVar] != variable) {
+            if (sampling) {
+                return null;
+            }
             // retrieve indice of the variable in vars
-			for(int i=0;i<vars.length;i++){
-				if(vars[i]==variable){
-					currentVar = i;
-				}
-			}
+            for (int i = 0; i < vars.length; i++) {
+                if (vars[i] == variable) {
+                    currentVar = i;
+                }
+            }
             assert vars[currentVar] == variable;
         }
         currentVal = valueSelector.selectValue(variable);
@@ -282,14 +285,6 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             return 1;
         }
         return 0;
-    }
-
-    public double getActivity(IntVar var) {
-        if (v2i.containsKey(var.getId())) {
-            return A[v2i.get(var.getId())] / var.getDomainSize();
-        } else {
-            return 0.0d;
-        }
     }
 
 
@@ -352,7 +347,7 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
             //BEWARE: when it fails very soon (after 1 node), it is worth forcing sampling
             if (nb_probes > samplingIterationForced && idx == vars.length) {
                 sampling = false;
-                if(restartAfterEachLeaf){
+                if (restartAfterEachLeaf) {
                     removeRFMove();
                 }
                 restartAfterEachLeaf = false;
@@ -368,16 +363,23 @@ public class ActivityBased extends AbstractStrategy<IntVar> implements IMonitorD
 
     private void removeRFMove() {
         Solver sl = model.getSolver();
-        Move m = sl.getMove();
-        if (rfMove != null) {
-            if (m == rfMove) {
-                sl.setMove(rfMove.getChildMoves().get(0));
-            } else {
-                while (m.getChildMoves() != null && m.getChildMoves().get(0) != rfMove) {
-                    m = m.getChildMoves().get(0);
-                }
-                if (m.getChildMoves() != rfMove) {
-                    m.setChildMoves(rfMove.getChildMoves());
+        if (mRestarter != null) {
+            AbstractRestart prev = null;
+            AbstractRestart curr = sl.getRestarter();
+            while (curr != mRestarter && curr != null) {
+                prev = curr;
+                curr = curr.getNext();
+            }
+            if (curr != null) {
+                AbstractRestart next = curr.getNext();
+                if (prev == null) {
+                    if (next == null) {
+                        sl.clearRestarter();
+                    } else {
+                        sl.setRestarter(next);
+                    }
+                } else {
+                    prev.setNext(next);
                 }
             }
         }
