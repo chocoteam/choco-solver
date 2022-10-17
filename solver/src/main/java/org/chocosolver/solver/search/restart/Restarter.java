@@ -51,7 +51,6 @@ public final class Restarter extends AbstractRestart {
 
     private final boolean resetCutoffOnSolution;
 
-    private AbstractRestart next = AbstractRestart.NO_RESTART;
 
     /**
      * @param restartStrategy       defines when restarts happen
@@ -74,16 +73,6 @@ public final class Restarter extends AbstractRestart {
         restartFromStrategyCount = 0;
         limit = restartStrategy.getNextCutoff();
         this.next.init();
-    }
-
-    @Override
-    public void setNext(AbstractRestart restart) {
-        this.next = restart;
-    }
-
-    @Override
-    public AbstractRestart getNext() {
-        return this.next;
     }
 
     /**

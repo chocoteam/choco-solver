@@ -22,17 +22,23 @@ import org.chocosolver.solver.Solver;
 public abstract class AbstractRestart {
 
     public static final AbstractRestart NO_RESTART = new AbstractRestart() {
+        @Override
+        public void setNext(AbstractRestart restart) {
+            throw new UnsupportedOperationException("Cannot set 'next' restart policy to 'NO_RESTART'.");
+        }
     };
+
+    AbstractRestart next = null;
 
     public void init() {
     }
 
     public void setNext(AbstractRestart restart) {
-        throw new UnsupportedOperationException("Cannot set next on this instance");
+        this.next = restart;
     }
 
     public AbstractRestart getNext() {
-        return null;
+        return this.next;
     }
 
     public boolean mustRestart(Solver solver) {

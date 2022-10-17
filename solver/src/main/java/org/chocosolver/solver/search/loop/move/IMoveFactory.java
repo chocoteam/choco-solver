@@ -75,7 +75,7 @@ public interface IMoveFactory extends ISelf<Solver> {
     }
 
     /**
-     * Creates a Move object that encapsulates the current move within a restart move.
+     * Defines a restart policy.
      * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
      * thanks to <code>restartStrategy</code>.
      * There will be at most <code>restartsLimit</code> restarts.
@@ -89,7 +89,7 @@ public interface IMoveFactory extends ISelf<Solver> {
     }
 
     /**
-     * Creates a Move object that encapsulates the current move within a restart move.
+     * Defines a restart policy.
      * Every time the <code>restartCriterion</code> is met, a restart is done, the new restart limit is updated
      * thanks to <code>restartStrategy</code>.
      * There will be at most <code>restartsLimit</code> restarts.
@@ -101,7 +101,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      */
     default void setRestarts(LongCriterion restartCriterion, ICutoff restartStrategy, int restartsLimit,
                              boolean resetCutoffOnSolution) {
-        ref().setRestarter(new Restarter(restartStrategy, restartCriterion, restartsLimit, resetCutoffOnSolution));
+        ref().addRestarter(new Restarter(restartStrategy, restartCriterion, restartsLimit, resetCutoffOnSolution));
     }
 
     /**
@@ -173,11 +173,10 @@ public interface IMoveFactory extends ISelf<Solver> {
     }
 
     /**
-     * Creates a Move object that encapsulates the current move within a restart move.
-     * Every time a solution is found, a restart is done.
+     * Creates restart strategy that restarts every time a solution is found.
      */
     default void setRestartOnSolutions() {
-        ref().setRestarter(new Restarter(
+        ref().addRestarter(new Restarter(
                 new MonotonicCutoff(1),
                 new SolutionCounter(ref().getModel(), 1),
                 Integer.MAX_VALUE, true));
