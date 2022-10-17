@@ -157,8 +157,5 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints.nary.knapsack to org.chocosolver.parsers;
     exports org.chocosolver.solver.constraints.nary.knapsack.structure;
     opens org.chocosolver.solver.constraints.nary.knapsack.structure to org.chocosolver.parsers;
-    exports org.chocosolver.solver.constraints.nary.diffn;
-    opens org.chocosolver.solver.constraints.nary.diffn to org.chocosolver.parsers;
-
 
 }
