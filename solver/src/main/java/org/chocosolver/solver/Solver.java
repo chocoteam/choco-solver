@@ -1141,17 +1141,23 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * Add a restart policy.
-     * If a policy is already defined, this method replaces it with <i>restarter</i>.
+     * Add or complete a restart policy.
+     * If no policy is defined, this method declares <i>restarter</i> as the current strategy.
+     * If a policy is defined, this method adds <i>restarter</i> as the next policy to check.
      *
      * @param restarter restarter policy
+     * @see #clearRestarter()
      */
-    public void setRestarter(AbstractRestart restarter) {
-        this.restarter = restarter;
+    public void addRestarter(AbstractRestart restarter) {
+        if (this.restarter == AbstractRestart.NO_RESTART) {
+            this.restarter = restarter;
+        } else {
+            this.restarter.setNext(restarter);
+        }
     }
 
     /**
-     * @return the current declared restart policy
+     * @return the current declared restart policy or {@link AbstractRestart#NO_RESTART}
      */
     public AbstractRestart getRestarter() {
         return this.restarter;
@@ -1160,6 +1166,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Clear the declared restart strategy.
      * Consequently, no restarting will occur.
+     * @implNote replace the declared restart policy by {@link AbstractRestart#NO_RESTART}
      */
     public void clearRestarter() {
         this.restarter = AbstractRestart.NO_RESTART;

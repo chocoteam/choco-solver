@@ -101,7 +101,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      */
     default void setRestarts(LongCriterion restartCriterion, ICutoff restartStrategy, int restartsLimit,
                              boolean resetCutoffOnSolution) {
-        ref().setRestarter(new Restarter(restartStrategy, restartCriterion, restartsLimit, resetCutoffOnSolution));
+        ref().addRestarter(new Restarter(restartStrategy, restartCriterion, restartsLimit, resetCutoffOnSolution));
     }
 
     /**
@@ -177,7 +177,7 @@ public interface IMoveFactory extends ISelf<Solver> {
      * Every time a solution is found, a restart is done.
      */
     default void setRestartOnSolutions() {
-        ref().setRestarter(new Restarter(
+        ref().addRestarter(new Restarter(
                 new MonotonicCutoff(1),
                 new SolutionCounter(ref().getModel(), 1),
                 Integer.MAX_VALUE, true));
