@@ -1,5 +1,7 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/solver/src/resources/png/ChocoLogo-160x135.png)
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.04708/status.svg)](https://doi.org/10.21105/joss.04708)
+
 [![Discord](https://img.shields.io/discord/976015799619842078?color=7289DA&logo=discord&style=plastic)](https://discord.gg/aH6zxa7e64)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
 [![javadoc.io](https://javadoc.io/badge2/org.choco-solver/choco-solver/javadoc.io.svg)](https://javadoc.io/doc/org.choco-solver/choco-solver)
@@ -16,7 +18,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.10.9 (22 Aug 2022).
+Current stable version is 4.10.10 (11 Oct 2022).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -123,7 +125,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.10.9</version>
+   <version>4.10.10</version>
 </dependency>
 ```
 

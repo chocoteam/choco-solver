@@ -572,6 +572,18 @@ public class Model implements IModel {
     }
 
     /**
+     * Returns the object associated with the named <code>hookName</code>
+     *
+     * @param hookName the name of the hook to return
+     * @param defaultValue the default mapping of the key
+     * @return the object associated to the name <code>hookName</code>,
+     * or defaultValue if this map contains no mapping for the key
+     */
+    public Object getHookOrDefault(String hookName, Object defaultValue) {
+        return hooks.getOrDefault(hookName, defaultValue);
+    }
+
+    /**
      * Returns the map containing declared hooks.
      * This map is mutable.
      *
@@ -936,8 +948,7 @@ public class Model implements IModel {
                 if (!getSolver().getEngine().isInitialized()) {
                     throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                             "A call to Model.post(Constraint) is more appropriate.");
-                }
-                if (getSolver().getEngine().isInitialized()) {
+                }else {
                     for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }

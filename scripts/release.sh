@@ -22,11 +22,11 @@ git push origin master || quit "unable  to push on master"
 
 # add new tag
 #Quit if tag already exists
-git ls-remote --exit-code --tags origin ${VERSION} && quit "tag ${VERSION} already exists"
+git ls-remote --exit-code --tags origin v${VERSION} && quit "tag ${VERSION} already exists"
 # We assume the tests have been run before, and everything is OK for the release
 
 # add the tag
-git tag -a ${VERSION} -m "create tag ${VERSION}" || quit "Unable to tag with ${VERSION}"
+git tag -a v${VERSION} -m "create tag ${VERSION}" || quit "Unable to tag with ${VERSION}"
 git push --tags || quit "Unable to push the tag ${VERSION}"
 
 

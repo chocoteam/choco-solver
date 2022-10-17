@@ -595,7 +595,7 @@ public class Search {
     }
 
     /**
-     * Assigns the non-instantiated variable of smallest domain size to its lower bound.
+     * Assigns the non-instantiated variable of the smallest domain size to its lower bound.
      *
      * @param vars list of variables
      * @return assignment strategy
@@ -605,7 +605,7 @@ public class Search {
     }
 
     /**
-     * Assigns the non-instantiated variable of smallest domain size to its upper bound.
+     * Assigns the non-instantiated variable of the smallest domain size to its upper bound.
      *
      * @param vars list of variables
      * @return assignment strategy

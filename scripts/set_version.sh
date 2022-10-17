@@ -5,7 +5,7 @@ source "${dir}"/commons.sh
 #Script to notify the website about a release
 
 function sedInPlace() {
-	if [ $(uname) = "Darwin" ]; then
+	if [ "$(uname)" = "Darwin" ]; then
 		sed -i '' "$1" $2
 	else
 		sed -i'' "$1" $2
@@ -44,7 +44,7 @@ then
     sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
     ## For MiniZinc
-    sedInPlace "s%    git fetch -q && git checkout -q master.*%    git fetch -q && git checkout -q $VERSION && \%"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
+    sedInPlace "s%    git fetch -q && git checkout -q master.*%    git fetch -q && git checkout -q $VERSION && \ %"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
     sedInPlace "s%CHOCO_JAR=~/.m2/.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minizinc/fzn-choco
 
@@ -57,18 +57,18 @@ else
 
     # shellcheck disable=SC2016
     sedInPlace '6 i\
-    \
-    NEXT MILESTONE\
-    -------------------\
-    \
-    ### Major features:\
-    \
-    ### Deprecated API (to be removed in next release):\
-    \
-    ### Other closed issues and pull requests:\
-    See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solver/milestone/xx)\
-    \
-    #### Contributors to this release:\
-    \
+\
+NEXT MILESTONE\
+-------------------\
+\
+### Major features:\
+\
+### Deprecated API (to be removed in next release):\
+\
+### Other closed issues and pull requests:\
+See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solver/milestone/xx)\
+\
+#### Contributors to this release:\
+\
     ' CHANGES.md
 fi

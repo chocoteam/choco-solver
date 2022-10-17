@@ -25,6 +25,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -286,7 +288,6 @@ public class ConstraintTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testJiTee1() {
-        Random rr = new Random(2); //2 gives a suitable first requirement 500 for 'load'
         Model model = new Model("model");
         IntVar load = model.intVar("load", new int[]{0, 100, 200, 300, 400, 500, 600, 700});
         IntVar dim_A = model.intVar("dim_A", new int[]{150, 195, 270, 370, 470});
@@ -341,7 +342,7 @@ public class ConstraintTest {
             c.post();
 
             //Randomly post a sticky constraint that remains between iterations. Probability to post() is lower than unpost()
-            int r = 0;
+            int r;
             if (stickyCstr == null) {
                 r = rr.nextInt(100);
                 if (r <= 7) {
@@ -391,8 +392,6 @@ public class ConstraintTest {
         Constraint modC = model.mod(a, ten, b);
         modC.post();
 
-        int i = 0;
-
         for (int aNow = a.getLB(); aNow < a.getUB(); aNow++) {
             Constraint ra = model.arithm(a, "=", aNow);
             model.post(ra);
@@ -400,7 +399,6 @@ public class ConstraintTest {
                 Constraint rb = model.arithm(b, "=", bNow);
                 model.post(rb);
                 while (model.getSolver().solve()) {
-                    i++;
                 }
                 model.unpost(rb);
                 model.getSolver().reset();
@@ -486,13 +484,14 @@ public class ConstraintTest {
         Model model = new Model();
         Solver solver = model.getSolver();
         BoolVar a = model.boolVar("a");
+        //noinspection unused
         IntVar x = model.intVar("x", 0, 10);
         Constraint cstr = a.eq(1).decompose();
         cstr.post();
 
         // Check constraint disabling blocking during solution finding
         while (solver.solve()) {
-            assertEquals(solver.isSolving(), true);
+            assertTrue(solver.isSolving());
             assertEquals(solver.getSearchState(), SearchState.TERMINATED);
             assertThrows(SolverException.class, () -> cstr.setEnabled(false));
         }
@@ -519,7 +518,7 @@ public class ConstraintTest {
         // Check constraint disabling allowing when the search is new
         solver.hardReset();
         assertEquals(solver.getSearchState(), SearchState.NEW);
-        assertEquals(solver.isSolving(), false);
+        assertFalse(solver.isSolving());
         cstr.setEnabled(false);
         cstr.setEnabled(true);
     }
@@ -542,6 +541,51 @@ public class ConstraintTest {
         assertEquals(solver.getEnvironment().getWorldIndex(), 0);
         cstr.setEnabled(false);
         cstr.setEnabled(true);
+    }
+
+    @Test(groups = "1s")
+    public void testNoWarning1() {
+        ByteArrayOutputStream warnContent = new ByteArrayOutputStream();
+
+        Model model = new Model(Settings.dev());
+
+        IntVar start = model.intVar("S", 1, 10, true);
+        IntVar end = model.intVar("E", 5, 14, true);
+        IntVar bound = model.intVar("B", 10, 15, true);
+
+        model.ifThenElse(
+                model.arithm(start, "<", bound),
+                model.arithm(end, "<=", bound),
+                model.arithm(start, ">", bound));
+        Solver solver = model.getSolver();
+
+        solver.log().add(new PrintStream(warnContent));
+        solver.solve();
+        Assert.assertEquals("\u001B[37mNo search strategies defined.\n" +
+                "\u001B[0m\u001B[37mSet to default ones.\n" +
+                "\u001B[0m", warnContent.toString());
+    }
+
+
+    @Test(groups = "1s")
+    public void testNoWarning2() {
+        ByteArrayOutputStream warnContent = new ByteArrayOutputStream();
+
+        Model model = new Model(Settings.dev());
+
+        IntVar start = model.intVar("S", 1, 10, true);
+        IntVar bound = model.intVar("B", 10, 15, true);
+
+        model.ifOnlyIf(
+                model.arithm(start, "<", bound),
+                model.arithm(start, "<", bound));
+        Solver solver = model.getSolver();
+
+        solver.log().add(new PrintStream(warnContent));
+        solver.solve();
+        Assert.assertEquals("\u001B[37mNo search strategies defined.\n" +
+                "\u001B[0m\u001B[37mSet to default ones.\n" +
+                "\u001B[0m", warnContent.toString());
     }
 
 }
