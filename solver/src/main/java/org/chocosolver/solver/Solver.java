@@ -33,6 +33,7 @@ import org.chocosolver.solver.search.loop.propagate.Propagate;
 import org.chocosolver.solver.search.loop.propagate.PropagateBasic;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.search.restart.AbstractRestart;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
@@ -226,6 +227,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean canBeRepaired = true;
 
     /**
+     * The restarting strategy
+     */
+    private AbstractRestart restarter;
+
+    /**
      * This object is accessible lazily
      */
     private Solution lastSol = null;
@@ -265,6 +271,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         setMove(new MoveBinaryDFS());
         setPropagate(new PropagateBasic());
         setNoLearning();
+        restarter = AbstractRestart.NO_RESTART;
     }
 
     public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
@@ -445,6 +452,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             warmStart.setStrategy(declared);
             setSearch(warmStart);
         }
+        restarter.init();
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
             feasible = FALSE;
@@ -498,10 +506,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected void extend() {
         searchMonitors.beforeOpenNode();
         mMeasures.incNodeCount();
-        if (!M.extend(this)) {
+        action = propagate;
+        if (restarter.mustRestart(this)) {
+            this.restart();
+        } else if (!M.extend(this)) {
             action = validate;
-        } else {
-            action = propagate;
         }
         searchMonitors.afterOpenNode();
     }
@@ -520,7 +529,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             action = propagate;
         }
         searchMonitors.beforeUpBranch();
-        canBeRepaired = M.repair(this);
+        if (restarter.mustRestart(this)) {
+            canBeRepaired = true;
+            this.restart();
+        } else {
+            canBeRepaired = M.repair(this);
+        }
         searchMonitors.afterUpBranch();
         if (!canBeRepaired) {
             stop = true;
@@ -652,7 +666,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         setNoLearning();
         //no need to unplug, done by searchMonitors.reset()
         this.lastSol = null;
-        if(this.warmStart != null) {
+        if (this.warmStart != null) {
             this.warmStart.clearHints();
             this.warmStart = null;
         }
@@ -1127,6 +1141,34 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Add or complete a restart policy.
+     * @implNote There can be multiple restart policies, stored in as linked list.
+     * In
+     * @param restarter restarter policy
+     * @see #clearRestarter()
+     */
+    public void addRestarter(AbstractRestart restarter) {
+        restarter.setNext(this.restarter);
+        this.restarter = restarter;
+    }
+
+    /**
+     * @return the current declared restart policy or {@link AbstractRestart#NO_RESTART}
+     */
+    public AbstractRestart getRestarter() {
+        return this.restarter;
+    }
+
+    /**
+     * Clear the declared restart strategy.
+     * Consequently, no restarting will occur.
+     * @implNote replace the declared restart policy by {@link AbstractRestart#NO_RESTART}
+     */
+    public void clearRestarter() {
+        this.restarter = AbstractRestart.NO_RESTART;
+    }
+
+    /**
      * Declares an objective manager to use.
      *
      * @param om the objective manager to use instead of the declared one (if any).
@@ -1487,6 +1529,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Defines whether (when {@code ansi} is set to {@code true}) or not
      * ANSI tags are added to any trace from choco-solver.
+     *
      * @param ansi {@code true} to enable colors
      */
     public void logWithANSI(boolean ansi) {

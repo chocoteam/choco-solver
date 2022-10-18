@@ -12,7 +12,7 @@ package org.chocosolver.solver.constraints.graph.cost.hcp;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.strategy.GraphCostBasedSearch;
 import org.chocosolver.solver.variables.UndirectedGraphVar;
 import org.chocosolver.util.objects.graphs.UndirectedGraph;
@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
  * @author Jean-Guillaume Fages
  * @since Oct. 2012
  */
-public class HamiltonianCycleProblem {
+public class HamiltonianCycleProblemTest {
 
     @Test(groups = "1s", timeOut = 60000)
     public void testHCP() {
@@ -59,7 +59,7 @@ public class HamiltonianCycleProblem {
         solver.limitTime("10s");
         solver.showStatistics();
         // restart search every 100 fails
-        solver.setRestarts(new FailCounter(model,100), new MonotonicRestartStrategy(100), 1000);
+        solver.setRestarts(new FailCounter(model,100), new MonotonicCutoff(100), 1000);
 
         model.getSolver().solve();
     }

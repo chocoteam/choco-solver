@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
 import org.chocosolver.solver.constraints.real.RealConstraint;
@@ -354,6 +354,7 @@ public class ParallelPortfolio {
      * @return a list that contained the found solutions.
      */
     public Stream<Solution> streamSolutions() {
+        //noinspection Convert2Diamond
         Spliterator<Solution> it = new Spliterator<Solution>() {
 
             @Override
@@ -388,7 +389,6 @@ public class ParallelPortfolio {
     ///////////////////////////////////////   INTERNAL METHODS    //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @SuppressWarnings("unchecked")
     public void prepare() {
         isPrepared = true;
         check();
@@ -597,7 +597,7 @@ public class ParallelPortfolio {
                 if (reliableness.containsKey(worker)) {
                     solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                 }
-                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoff(500), 5000);
                 break;
         }
         // complete with set default search
