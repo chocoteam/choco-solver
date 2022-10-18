@@ -197,12 +197,7 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
                     },
                     MAX_VALUE, true);
 
-            AbstractRestart curr = model.getSolver().getRestarter();
-            if (curr == AbstractRestart.NO_RESTART) {
-                model.getSolver().addRestarter(mRestarter);
-            } else {
-                curr.setNext(mRestarter);
-            }
+            model.getSolver().addRestarter(mRestarter);
         }
         return true;
     }
@@ -373,9 +368,8 @@ public final class ActivityBased extends AbstractStrategy<IntVar> implements IMo
             if (curr != null) {
                 AbstractRestart next = curr.getNext();
                 if (prev == null) {
-                    if (next == null) {
-                        sl.clearRestarter();
-                    } else {
+                    sl.clearRestarter();
+                    if (next != AbstractRestart.NO_RESTART) {
                         sl.addRestarter(next);
                     }
                 } else {

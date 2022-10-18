@@ -10,6 +10,7 @@
 package org.chocosolver.solver.search.restart;
 
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.SolverException;
 
 /**
  * Defines the methods of a restart policy.
@@ -34,6 +35,9 @@ public abstract class AbstractRestart {
     }
 
     public void setNext(AbstractRestart restart) {
+        if(restart == null){
+            throw new SolverException("Next restart policy cannot be null");
+        }
         this.next = restart;
     }
 
