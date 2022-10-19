@@ -1,5 +1,7 @@
 ![logo](https://github.com/chocoteam/choco-solver/blob/master/solver/src/resources/png/ChocoLogo-160x135.png)
 
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.04708/status.svg)](https://doi.org/10.21105/joss.04708)
+
 [![Discord](https://img.shields.io/discord/976015799619842078?color=7289DA&logo=discord&style=plastic)](https://discord.gg/aH6zxa7e64)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.choco-solver/choco-solver)
 [![javadoc.io](https://javadoc.io/badge2/org.choco-solver/choco-solver/javadoc.io.svg)](https://javadoc.io/doc/org.choco-solver/choco-solver)
@@ -16,7 +18,7 @@
 
 Choco-solver is an open-source Java library for Constraint Programming.
 
-Current stable version is 4.10.8 (07 Jan 2022).
+Current stable version is 4.10.10 (11 Oct 2022).
 
 Choco-solver comes with:
 - various type of variables (integer, boolean, set, graph and real),
@@ -28,7 +30,8 @@ But also, facilities to interact with the search loop, factories to help modelli
 
 Choco-solver is distributed under BSD 4-Clause License (Copyright (c) 1999-2022, IMT Atlantique).
 
-Contact: [Choco-solver on Gitter](https://gitter.im/chocoteam/choco-solver#)
+Contact:
+- [Choco-solver on Discord](https://discord.gg/aH6zxa7e64)
 
 ### Overview
 
@@ -105,8 +108,11 @@ In the following, we distinguish two usages of Choco:
 The name of the jar file terms the packaging:
 - `choco-solver-4.XX.Y-jar-with-dependencies.jar` or 
 - `choco-solver-4.XX.Y.jar`.
-- `choco-solver-4.XX.Y-jar-with-dependencies.jar` or
-- `choco-solver-4.XX.Y.jar`.
+- `choco-parsers-4.XX.Y-jar-with-dependencies.jar` or
+- `choco-parsers-4.XX.Y-light.jar` or
+- `choco-parsers-4.XX.Y.jar`.
+
+The `light` tagged jar file is a version of the `jar-with-dependencies` one with dependencies from this archive.
 
 A [Changelog file](./CHANGES.md) is maintained for each release.
 
@@ -119,7 +125,7 @@ So you only have to edit your `pom.xml` to declare the following library depende
 <dependency>
    <groupId>org.choco-solver</groupId>
    <artifactId>choco-solver</artifactId>
-   <version>4.10.8</version>
+   <version>4.10.10</version>
 </dependency>
 ```
 

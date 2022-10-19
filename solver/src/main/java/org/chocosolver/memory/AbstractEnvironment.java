@@ -53,9 +53,9 @@ public abstract class AbstractEnvironment implements IEnvironment {
     @Override
     public IStateBitSet makeBitSet(int size) {
         if (size < 32) {
-            return new OneWordS32BitSet(this, size);
+            return new OneWordS32BitSet(this);
         } else if (size < 64) {
-            return new OneWordS64BitSet(this, size);
+            return new OneWordS64BitSet(this);
         } else {
             return new S64BitSet(this, size);
         }

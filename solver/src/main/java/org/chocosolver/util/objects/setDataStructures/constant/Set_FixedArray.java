@@ -78,17 +78,6 @@ public class Set_FixedArray implements ISet {
 	}
 
 	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder("{");
-                ISetIterator iter = newIterator();
-                while (iter.hasNext()) {
-			st.append(iter.nextInt()).append(", ");
-		}
-		st.append("}");
-		return st.toString().replace(", }","}");
-	}
-
-	@Override
 	public SetType getSetType(){
 		return SetType.FIXED_ARRAY;
 	}

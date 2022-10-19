@@ -117,17 +117,6 @@ public class Set_Std_BitSet extends AbstractSet implements ISet.WithOffset {
 		return offset+ values.prevSetBit(values.length());
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder("{");
-                ISetIterator iter = newIterator();
-                while (iter.hasNext()) {
-			st.append(iter.nextInt()).append(", ");
-		}
-		st.append("}");
-		return st.toString().replace(", }","}");
-	}
-
 	//***********************************************************************************
 	// ITERATOR
 	//***********************************************************************************

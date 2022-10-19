@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
@@ -181,7 +181,7 @@ public class SolverTest {
         Solver r = model.getSolver();
         r.setDFS();
         r.setSearch(inputOrderLBSearch(model.retrieveIntVars(false)));
-        model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyCutoffStrategy(2), 2);
+        model.getSolver().setRestarts(limit -> model.getSolver().getNodeCount() >= limit, new LubyCutoff(2), 2);
         while (model.getSolver().solve()) ;
 
         assertEquals(model.getSolver().getRestartCount(), 2);

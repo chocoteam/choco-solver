@@ -120,17 +120,6 @@ public class Set_Swap2 extends AbstractSet {
         return SetType.SMALLBIPARTITESET;
     }
 
-	@Override
-	public String toString() {
-		StringBuilder st = new StringBuilder("{");
-		ISetIterator iter = newIterator();
-		while (iter.hasNext()) {
-			st.append(iter.nextInt()).append(", ");
-		}
-		st.append("}");
-		return st.toString().replace(", }","}");
-	}
-
     @Override
     public ISetIterator iterator(){
         iter.reset();

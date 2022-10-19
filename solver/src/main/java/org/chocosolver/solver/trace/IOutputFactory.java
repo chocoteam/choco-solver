@@ -42,7 +42,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-        "** Choco 4.10.8 (2022-01) : Constraint Programming Solver, Copyright (c) 2010-2022";
+        "** Choco 4.10.10 (2022-10) : Constraint Programming Solver, Copyright (c) 2010-2022";
     
     /**
      * Print the version message.
@@ -180,6 +180,18 @@ public interface IOutputFactory extends ISelf<Solver> {
      */
     default void showSolutions() {
         showSolutions(new DefaultSolutionMessage(ref()));
+    }
+
+    /**
+     * Plug a search monitor which outputs a message on each solution, based on the variables
+     * given in parameters.
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     *
+     * @see IOutputFactory.DefaultSolutionMessage
+     */
+    default void showSolutions(Variable... variables) {
+        showSolutions(new DefaultSolutionMessage(ref(), variables));
     }
 
     /**
@@ -424,25 +436,41 @@ public interface IOutputFactory extends ISelf<Solver> {
          */
         private final Solver solver;
 
+        private Variable[] vars;
+
         /**
          * Create a solution message
          *
          * @param solver solver to output
          */
         public DefaultSolutionMessage(Solver solver) {
+            this(solver, null);
+        }
+
+        /**
+         * Create a solution message
+         *
+         * @param solver solver to output
+         * @param vars variables to output
+         */
+        public DefaultSolutionMessage(Solver solver, Variable[] vars) {
             this.solver = solver;
+            this.vars = vars;
         }
 
         @Override
         public String print() {
+            if(vars == null){
+                vars = solver.getSearch().getVariables();
+            }
             return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getSolutionCount(),
                     solver.getMeasures().toOneLineString(),
-                    print(solver.getSearch().getVariables())
+                    printVars()
             );
         }
 
-        private String print(Variable[] vars) {
+        private String printVars() {
             StringBuilder s = new StringBuilder(32);
             for (Variable v : vars) {
                 s.append(v).append(' ');

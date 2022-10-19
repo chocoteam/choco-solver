@@ -23,7 +23,7 @@ WORKDIR /src
 # Get and build of Choco-solver
 RUN	git clone https://github.com/chocoteam/choco-solver.git /choco-solver &&  \
     cd /choco-solver/ && \
-    git fetch -q && git checkout -q master && \
+    git fetch -q && git checkout -q 4.10.9 && \
     git log --format="%H" -n 1 && \
     mvn -q clean install -DskipTests && \
     cd ..

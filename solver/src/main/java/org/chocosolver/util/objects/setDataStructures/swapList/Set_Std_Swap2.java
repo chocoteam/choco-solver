@@ -124,17 +124,6 @@ public class Set_Std_Swap2 extends AbstractSet {
     }
 
     @Override
-    public String toString() {
-        StringBuilder st = new StringBuilder("{");
-        ISetIterator iter = newIterator();
-        while (iter.hasNext()) {
-            st.append(iter.nextInt()).append(", ");
-        }
-        st.append("}");
-        return st.toString().replace(", }","}");
-    }
-
-    @Override
     public ISetIterator iterator(){
         iter.reset();
         return iter;
