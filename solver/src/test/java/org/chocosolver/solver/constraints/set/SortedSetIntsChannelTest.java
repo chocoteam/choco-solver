@@ -27,7 +27,7 @@ public class SortedSetIntsChannelTest {
         Model model = new Model();
         IntVar[] ints = model.intVarArray(5, 0, 5);
         SetVar s = model.setVar(new int[] {}, new int[] {1, 2, 3, 4, 5});
-        model.sortedSetIntsChanneling(s, ints, 0).post();
+        model.sortedSetIntsChanneling(s, ints, 0, 0).post();
         while (model.getSolver().solve()) {
             int[] values = s.getValue().toArray();
             Arrays.sort(values);
@@ -47,7 +47,7 @@ public class SortedSetIntsChannelTest {
         Model model = new Model();
         IntVar[] ints = model.intVarArray(5, 0, 4);
         SetVar s = model.setVar(new int[] {}, new int[] {1, 2, 3, 4, 5});
-        model.sortedSetIntsChanneling(s, ints, 0).post();
+        model.sortedSetIntsChanneling(s, ints, 0, 0).post();
         while (model.getSolver().solve()) {
             int[] values = s.getValue().toArray();
             Arrays.sort(values);
@@ -67,7 +67,7 @@ public class SortedSetIntsChannelTest {
         Model model = new Model();
         IntVar[] ints = model.intVarArray(5, 1, 5);
         SetVar s = model.setVar(new int[] {}, new int[] {1, 2, 3, 4, 5});
-        model.sortedSetIntsChanneling(s, ints, 0).post();
+        model.sortedSetIntsChanneling(s, ints, 0, 0).post();
         while (model.getSolver().solve()) {
             int[] values = s.getValue().toArray();
             Arrays.sort(values);
@@ -87,7 +87,7 @@ public class SortedSetIntsChannelTest {
         Model model = new Model();
         IntVar[] ints = model.intVarArray(5, 0, 8);
         SetVar s = model.setVar(new int[] {}, new int[] {1, 2, 3, 4, 5, 6, 7, 8});
-        model.sortedSetIntsChanneling(s, ints, 0).post();
+        model.sortedSetIntsChanneling(s, ints, 0, 0).post();
         while (model.getSolver().solve()) {
             int[] values = s.getValue().toArray();
             Arrays.sort(values);
@@ -107,7 +107,7 @@ public class SortedSetIntsChannelTest {
         Model model = new Model();
         IntVar[] ints = model.intVarArray(10, 0, 5);
         SetVar s = model.setVar(new int[] {}, new int[] {1, 2, 3, 4, 5});
-        model.sortedSetIntsChanneling(s, ints, 0).post();
+        model.sortedSetIntsChanneling(s, ints, 0, 0).post();
         while (model.getSolver().solve()) {
             int[] values = s.getValue().toArray();
             Arrays.sort(values);

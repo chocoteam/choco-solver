@@ -34,16 +34,14 @@ public class PropSortedIntChannel extends Propagator<Variable> {
     private final SetVar set;
     private final IntVar[] ints;
     private final int nullValue;
+    private final int offset;
 
-    /**
-     * Channeling between set variables and integer variables
-     * x in sets[y-offSet1] <=> ints[x-offSet2] = y
-     */
-    public PropSortedIntChannel(SetVar set, IntVar[] ints, final int nullValue) {
+    public PropSortedIntChannel(SetVar set, IntVar[] ints, final int nullValue, final int offset) {
         super(ArrayUtils.append(new Variable[] {set}, ints), PropagatorPriority.LINEAR, false);
         this.set = set;
         this.ints = ints;
         this.nullValue = nullValue;
+        this.offset = offset;
     }
 
     @Override
@@ -58,14 +56,14 @@ public class PropSortedIntChannel extends Propagator<Variable> {
         }
         // Instantiate ints that are positioned within the kernel to the sorted kernel value.
         for (int i = 0; i < sortedLB.length && i < ints.length; i++) {
-            ints[i].instantiateTo(sortedLB[i], this);
+            ints[i].instantiateTo(sortedLB[i] + offset, this);
         }
         // Filter possible values of ints positioned out of the kernel and within the envelope.
         for (int i = sortedLB.length; i < sortedUB.length && i < ints.length; i++) {
             IntIterableSet removeAllBut = (IntIterableSet) SetFactory.makeRangeSet();
             removeAllBut.add(nullValue);
             for (int j = i; j < sortedUB.length; j++) {
-                removeAllBut.add(sortedUB[j]);
+                removeAllBut.add(sortedUB[j] + offset);
             }
             ints[i].removeAllValuesBut(removeAllBut, this);
         }
@@ -78,7 +76,7 @@ public class PropSortedIntChannel extends Propagator<Variable> {
             int[] sortedValues = set.getValue().toArray();
             Arrays.sort(sortedValues);
             for (int i = 0; i < ints.length; i++) {
-                if (i < sortedValues.length && ints[i].getValue() != sortedValues[i]) {
+                if (i < sortedValues.length && ints[i].getValue() != sortedValues[i] + offset) {
                     return ESat.FALSE;
                 } else {
                     if (i >= sortedValues.length && ints[i].getValue() != nullValue) {
