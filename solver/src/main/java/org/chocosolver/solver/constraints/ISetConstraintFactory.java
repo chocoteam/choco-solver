@@ -625,7 +625,15 @@ public interface ISetConstraintFactory extends ISelf<Model> {
         for (int v : b.getUB()) {
             union.add(v);
         }
-        return ref().lexLessEq(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
+        int offset = union.min();
+        int size = union.size();
+        BoolVar[] boolA = new BoolVar[size];
+        BoolVar[] boolB = new BoolVar[size];
+        for (int i = 0; i < size; i++) {
+            boolA[size - i - 1] = ref().setBoolView(a, i + offset);
+            boolB[size - i - 1] = ref().setBoolView(b, i + offset);
+        }
+        return ref().lexLessEq(boolA, boolB);
     }
 
     /**
@@ -646,6 +654,14 @@ public interface ISetConstraintFactory extends ISelf<Model> {
         for (int v : b.getUB()) {
             union.add(v);
         }
-        return ref().lexLess(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
+        int offset = union.min();
+        int size = union.size();
+        BoolVar[] boolA = new BoolVar[size];
+        BoolVar[] boolB = new BoolVar[size];
+        for (int i = 0; i < size; i++) {
+            boolA[size - i - 1] = ref().setBoolView(a, i + offset);
+            boolB[size - i - 1] = ref().setBoolView(b, i + offset);
+        }
+        return ref().lexLess(boolA, boolB);
     }
 }
