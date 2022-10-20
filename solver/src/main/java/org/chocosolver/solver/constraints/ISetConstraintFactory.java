@@ -369,6 +369,10 @@ public interface ISetConstraintFactory extends ISelf<Model> {
         );
     }
 
+    default Constraint sortedSetIntsChanneling(SetVar set, IntVar[] ints, int nullValue) {
+        return new Constraint("test", new PropSortedIntChannel(set, ints, nullValue));
+    }
+
     //***********************************************************************************
     // MINIZINC API
     //***********************************************************************************
