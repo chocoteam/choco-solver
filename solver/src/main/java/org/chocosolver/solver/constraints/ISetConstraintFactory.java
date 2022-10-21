@@ -381,7 +381,7 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      * @return A sortedSetIntsChanneling constraint.
      */
     default Constraint sortedSetIntsChanneling(SetVar set, IntVar[] ints, int nullValue, int offset) {
-        return new Constraint("test", new PropSortedIntChannel(set, ints, nullValue, offset));
+        return new Constraint(ConstraintsName.SETORDEREDINTCHANNELING, new PropSortedIntChannel(set, ints, nullValue, offset));
     }
 
     //***********************************************************************************
