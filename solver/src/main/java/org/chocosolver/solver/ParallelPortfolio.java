@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.sat.NogoodStealer;
 import org.chocosolver.solver.constraints.real.RealConstraint;
@@ -593,7 +593,7 @@ public class ParallelPortfolio {
                 if (reliableness.containsKey(worker)) {
                     solver.plugMonitor(new NogoodFromRestarts(worker, manager));
                 }
-                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
+                solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoff(500), 5000);
                 break;
         }
         // complete with set default search

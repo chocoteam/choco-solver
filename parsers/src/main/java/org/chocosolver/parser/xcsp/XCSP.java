@@ -9,7 +9,7 @@
  */
 package org.chocosolver.parser.xcsp;
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
@@ -124,7 +124,7 @@ public class XCSP extends RegParser {
             Solver solver = target.getSolver();
             solver.setSearch(Search.defaultSearch(target));
             solver.setNoGoodRecordingFromRestarts();
-            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoffStrategy(500), 5000);
+            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoff(500), 5000);
         }
     }
 

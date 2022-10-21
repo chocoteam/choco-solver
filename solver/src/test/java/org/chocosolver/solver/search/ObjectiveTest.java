@@ -10,7 +10,7 @@
 package org.chocosolver.solver.search;
 
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -462,7 +462,7 @@ public class ObjectiveTest {
             }
             )
         ));
-        solver.setRestarts(c -> solver.getFailCount() > c, new LubyCutoffStrategy(2), 512);
+        solver.setRestarts(c -> solver.getFailCount() > c, new LubyCutoff(2), 512);
         solver.setNoGoodRecordingFromSolutions(ticks);
         solver.showShortStatistics();
         while (model.getSolver().solve()) {

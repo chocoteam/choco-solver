@@ -10,12 +10,36 @@ type: software
 authors:
   - given-names: Charles
     family-names: Prud'homme
-    affiliation: IMT Atlantique
+    affiliation: 'IMT Atlantique, LS2N'
     orcid: 'https://orcid.org/0000-0002-4546-9027'
   - given-names: Jean-Guillaume
     family-names: Fages
-    affiliation: COSLING S.A.S
+    affiliation: COSLING S.A.S.
     orcid: 'https://orcid.org/0000-0001-5638-4777'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.7185962
+    description: The concept DOI of the software
 repository-code: 'https://github.com/chocoteam/choco-solver'
 url: 'https://choco-solver.org/'
 license: BSD-4-Clause
+preferred-citation:
+  authors:
+    - given-names: Charles
+      family-names: Prud'homme
+      affiliation: IMT Atlantique
+      orcid: 'https://orcid.org/0000-0002-4546-9027'
+    - given-names: Jean-Guillaume
+      family-names: Fages
+      affiliation: COSLING S.A.S
+      orcid: 'https://orcid.org/0000-0001-5638-4777'
+  doi: "10.21105/joss.04708"
+  journal: "Journal of Open Source Software"
+  publisher:
+    -name: "The Open Journal"
+  title: "Choco-solver: A Java library for constraint programming"
+  type: article
+  start: 4708
+  volume: 7
+  issue: 78
+  year: 2022
