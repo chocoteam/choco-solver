@@ -45,7 +45,7 @@ public class ModelAnalyser {
         return sp[sp.length - 1];
     }
 
-    public void analyse() {
+    public ModelAnalysis analyse() {
         // Variables analysis
         mapTypeClassVars.clear();
         for (Class c : VARS_TYPES) {
@@ -71,6 +71,15 @@ public class ModelAnalyser {
                 mapTypeClassCstrs.put(cstrName, typeMap);
             }
         }
+        VariableTypeStatistics[] varsTypeStats = getVariableTypes().stream()
+                .map(c -> getVariableClassNamesOfType(c).stream().map(varType -> createVariableTypeStatistics(c, varType)).collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .toArray(VariableTypeStatistics[]::new);
+        ConstraintTypeStatistics[] cstrsTypeStats = getConstraintTypes().stream()
+                .map(c -> getConstraintClassNamesOfType(c).stream().map(propType -> createConstraintTypeStatistics(c, propType)).collect(Collectors.toList()))
+                .flatMap(List::stream)
+                .toArray(ConstraintTypeStatistics[]::new);
+        return new ModelAnalysis(varsTypeStats, cstrsTypeStats);
     }
 
     public List<Class> getVariableTypes() {
@@ -339,6 +348,20 @@ public class ModelAnalyser {
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////     ModelAnalysis     ///////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static class ModelAnalysis {
+        public final VariableTypeStatistics[] varsTypeStats;
+        public final ConstraintTypeStatistics[] cstrsTypeStats;
+
+        public ModelAnalysis(VariableTypeStatistics[] varsTypeStats, ConstraintTypeStatistics[] cstrsTypeStats) {
+            this.varsTypeStats = varsTypeStats;
+            this.cstrsTypeStats = cstrsTypeStats;
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////////////     PRINTING     /////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -443,52 +466,5 @@ public class ModelAnalyser {
         ps.println("##################################### END OF MODEL ANALYSIS ####################################");
         ps.println("################################################################################################");
         ps.println();
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////     JSON EXPORT     ////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private static void toFile(String path, Object toWrite) {
-        ObjectMapper mapper = new ObjectMapper();
-        try {
-            File f = new File(path);
-            if(!f.getParentFile().exists()) {
-                f.getParentFile().mkdirs();
-            }
-            DefaultPrettyPrinter.Indenter indenter = new DefaultIndenter("    ", DefaultIndenter.SYS_LF);
-            DefaultPrettyPrinter printer = new DefaultPrettyPrinter();
-            printer.indentObjectsWith(indenter);
-            printer.indentArraysWith(indenter);
-            String s = mapper.writer(printer).writeValueAsString(toWrite);
-            FileWriter fw = new FileWriter(path);
-            fw.write(s);
-            fw.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static class ModelAnalyserJson {
-        public final VariableTypeStatistics[] varsTypeStats;
-        public final ConstraintTypeStatistics[] cstrsTypeStats;
-
-        public ModelAnalyserJson(VariableTypeStatistics[] varsTypeStats, ConstraintTypeStatistics[] cstrsTypeStats) {
-            this.varsTypeStats = varsTypeStats;
-            this.cstrsTypeStats = cstrsTypeStats;
-        }
-    }
-
-    public void toJson(String path) {
-        VariableTypeStatistics[] varsTypeStats = getVariableTypes().stream()
-                .map(c -> getVariableClassNamesOfType(c).stream().map(varType -> createVariableTypeStatistics(c, varType)).collect(Collectors.toList()))
-                .flatMap(List::stream)
-                .toArray(VariableTypeStatistics[]::new);
-        ConstraintTypeStatistics[] cstrsTypeStats = getConstraintTypes().stream()
-                .map(c -> getConstraintClassNamesOfType(c).stream().map(propType -> createConstraintTypeStatistics(c, propType)).collect(Collectors.toList()))
-                .flatMap(List::stream)
-                .toArray(ConstraintTypeStatistics[]::new);
-        ModelAnalyserJson modelAnalyserJson = new ModelAnalyserJson(varsTypeStats, cstrsTypeStats);
-        toFile(path, modelAnalyserJson);
     }
 }
