@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class ModelAnalyser {
     private final Model model;
 
-    private static final Class[] VARS_TYPES = new Class<>[]{BoolVar.class, GraphVar.class, IntVar.class, RealVar.class, SetVar.class};
+    private static final Class[] VARS_TYPES = new Class[]{BoolVar.class, GraphVar.class, IntVar.class, RealVar.class, SetVar.class};
     private final Map<String, Map<String, List<Variable>>> mapTypeClassVars = new HashMap<>();
     private final Map<String, Map<String, List<Propagator>>> mapTypeClassCstrs = new HashMap<>();
 
