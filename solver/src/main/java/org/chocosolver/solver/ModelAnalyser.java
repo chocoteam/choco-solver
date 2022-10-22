@@ -218,7 +218,6 @@ public class ModelAnalyser {
         public final String classVarType;
         public final int nbVariables;
         public final int nbInstantiatedVariables;
-        public final int nbConstantVariables;
         /**
          * Map indicating the number of analysed variables of the type and class by domains' range
          */
@@ -233,14 +232,13 @@ public class ModelAnalyser {
         public final Map<Integer, Integer> byNbViews;
 
         private VariableTypeStatistics(String varType, String classVarType,
-                                       int nbVariables, int nbInstantiatedVariables, int nbConstantVariables,
+                                       int nbVariables, int nbInstantiatedVariables,
                                       LinkedHashMap<String, Integer> byDomainSize, Map<Integer, Integer> byNbPropagators,
                                       Map<Integer, Integer> byNbViews) {
             this.varType = varType;
             this.classVarType = classVarType;
             this.nbVariables = nbVariables;
             this.nbInstantiatedVariables = nbInstantiatedVariables;
-            this.nbConstantVariables = nbConstantVariables;
             this.byDomainSize = byDomainSize;
             this.byNbPropagators = byNbPropagators;
             this.byNbViews = byNbViews;
@@ -269,10 +267,6 @@ public class ModelAnalyser {
             if (printAllStats || nbInstantiatedVariables > 0) {
                 sb.append(addInitialTab ? "\t" : "");
                 sb.append("\t- Nb instantiated: ").append(nbInstantiatedVariables).append("\n");
-            }
-            if (printAllStats || nbConstantVariables > 0) {
-                sb.append(addInitialTab ? "\t" : "");
-                sb.append("\t- Nb constants: ").append(nbConstantVariables).append("\n");
             }
             if (printAllStats || byNbPropagators.containsKey(0)) {
                 sb.append(addInitialTab ? "\t" : "");
@@ -307,7 +301,6 @@ public class ModelAnalyser {
             }
             int nbVariables = list.size();
             int nbInstantiatedVariables = (int) list.stream().filter(Variable::isInstantiated).count();
-            int nbConstantVariables = (int) list.stream().filter(Variable::isAConstant).count();
             LinkedHashMap<String, Integer> byDomainSize = new LinkedHashMap<>();
             Map<Integer, List<Variable>> byDomainIntSize = Collections.unmodifiableMap(
                     new LinkedHashMap<>(list.stream().collect(Collectors.groupingBy(Variable::getDomainSize)))
@@ -365,7 +358,7 @@ public class ModelAnalyser {
             }
             return new VariableTypeStatistics(
                     varType, classNameOfType,
-                    nbVariables, nbInstantiatedVariables, nbConstantVariables,
+                    nbVariables, nbInstantiatedVariables,
                     byDomainSize, byNbPropagators, byNbViews
             );
         }
