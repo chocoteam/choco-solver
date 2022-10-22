@@ -29,7 +29,7 @@ import java.util.Set;
 public abstract class AbstractStrategy<V extends Variable>  {
 
     protected final V[] vars;
-    protected Set<V> scope;
+    protected final Set<V> scope;
 
     @SafeVarargs
     protected AbstractStrategy(V... variables) {
