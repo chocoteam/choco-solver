@@ -14,10 +14,16 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
 
+import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.nio.file.StandardOpenOption.APPEND;
 
 /**
  * The <code>ModelAnalyser</code> is a class providing methods to analyse the <code>Model</code>.
@@ -842,5 +848,206 @@ public class ModelAnalyser {
         ps.println("##################################### END OF MODEL ANALYSIS ####################################");
         ps.println("################################################################################################");
         ps.println();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////     CSP GRAPH     /////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private static class Node<T> {
+        private static int ID = 0;
+        public final int id;
+        public final T obj;
+        public final Map<Node<T>,Integer> neighbors = new HashMap<>();
+        public Node(T t) {
+            this.id = ID++;
+            this.obj = t;
+        }
+    }
+
+    private static class Graph<T> {
+        public final List<Node<T>> nodes = new ArrayList<>();
+        public final Map<T, Node<T>> mapObjToNodes = new HashMap<>();
+
+        private static final String NODE = "\t%d [label = \"%s\" shape = circle];\n";
+        private static final String EDGE = "\t%d -- %d [weight = %d];\n";
+
+        private String buildGvString() {
+            StringBuilder sb = new StringBuilder("graph G{\n");
+            sb.append("\trankdir=TB;\n\n");
+            for (Node<T> node : nodes) {
+                if (node.obj instanceof Variable) {
+                    Variable var = (Variable) node.obj;
+                    sb.append(String.format(NODE, node.id, var.getName()));
+                } else {
+                    Propagator prop = (Propagator) node.obj;
+                    sb.append(String.format(NODE, node.id, getClassName(prop.getClass()) + "-" + prop.getId()));
+                }
+            }
+            sb.append("\n\n");
+            Set<Integer> edgesSet = new HashSet<>();
+            for (int i = 0; i < nodes.size(); i++) {
+                Node<T> nodei = nodes.get(i);
+                for (Map.Entry<Node<T>,Integer> entry : nodei.neighbors.entrySet()) {
+                    Node<T> nodej = entry.getKey();
+                    Integer pair1 = nodei.id * Node.ID + nodej.id;
+                    Integer pair2 = nodej.id * Node.ID + nodei.id;
+                    if (!edgesSet.contains(pair1) && !edgesSet.contains(pair2)) {
+                        edgesSet.add(pair1);
+                        sb.append(String.format(EDGE, nodei.id, nodej.id, entry.getValue()));
+                    }
+                }
+            }
+            sb.append("}");
+            return sb.toString();
+        }
+    }
+
+    private Graph<Propagator> buildPropagatorOrientedGraph(boolean withWeight) {
+        Node.ID = 0;
+        Propagator[] propagators = Arrays.stream(this.model.getCstrs())
+                .map(Constraint::getPropagators)
+                .flatMap(Arrays::stream)
+                .distinct()
+                .toArray(Propagator[]::new);
+        Graph<Propagator> graph = new Graph<>();
+        // Add nodes
+        for (Propagator prop : propagators) {
+            Node<Propagator> node = new Node<>(prop);
+            graph.nodes.add(node);
+            graph.mapObjToNodes.put(prop, node);
+        }
+        // Add edges
+        for (int i = 0; i < propagators.length; i++) {
+            final int finali = i;
+            for (int j = i + 1; j < propagators.length; j++) {
+                int nbCommonVars = 0;
+                for (int k = 0; k < propagators[i].getNbVars(); k++) {
+                    final int finalk = k;
+                    boolean commonVar = Arrays.stream(propagators[j].getVars())
+                            .filter(Objects::nonNull)
+                            .anyMatch(v -> v.equals(propagators[finali].getVar(finalk)));
+                    if (commonVar) {
+                        nbCommonVars++;
+                    }
+                }
+                if (nbCommonVars > 0) {
+                    Node<Propagator> nodei = graph.mapObjToNodes.get(propagators[i]);
+                    Node<Propagator> nodej = graph.mapObjToNodes.get(propagators[j]);
+                    nodei.neighbors.put(nodej, withWeight ? nbCommonVars : 1);
+                    nodej.neighbors.put(nodei, withWeight ? nbCommonVars : 1);
+                }
+            }
+        }
+        return graph;
+    }
+
+    private <T> void writeGraph(Graph<T> graph, String orientation, String path) {
+        Path instance = Paths.get(path);
+        if (Files.exists(instance)) {
+            try {
+                Files.delete(instance);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            Files.createFile(instance);
+            Files.write(instance, graph.buildGvString().getBytes(), APPEND);
+        } catch (IOException e) {
+            System.err.println("Could not write " + orientation + "-oriented graph");
+        }
+    }
+
+    /**
+     * Write a gv file, at the given path, corresponding to the propagator-oriented graph of the <code>Model</code>
+     *
+     * @param path the path to which write the gv file
+     * @see ModelAnalyser#writePropagatorOrientedGraph(String, boolean)
+     */
+    public void writePropagatorOrientedGraph(String path) {
+        writePropagatorOrientedGraph(path, true);
+    }
+
+    /**
+     * Write a gv file, at the given path, corresponding to the propagator-oriented graph of the <code>Model</code>
+     *
+     * @param path the path to which write the gv file
+     * @param withWeight whether to take the weight into account
+     */
+    public void writePropagatorOrientedGraph(String path, boolean withWeight) {
+        Graph<Propagator> graph = buildPropagatorOrientedGraph(withWeight);
+        writeGraph(graph, "propagator", path);
+    }
+
+    private Graph<Variable> buildVariableOrientedGraph(boolean withWeight) {
+        Node.ID = 0;
+        Variable[] variables = Arrays.stream(this.model.getVars())
+                .distinct()
+                .toArray(Variable[]::new);
+        Graph<Variable> graph = new Graph<>();
+        // Add nodes
+        for (Variable var : variables) {
+            Node<Variable> node = new Node<>(var);
+            graph.nodes.add(node);
+            graph.mapObjToNodes.put(var, node);
+        }
+        Map<Variable, Set<Propagator>> mapVarProps = new HashMap<>();
+        Propagator[] propagators = Arrays.stream(this.model.getCstrs())
+                .map(Constraint::getPropagators)
+                .flatMap(Arrays::stream)
+                .distinct()
+                .toArray(Propagator[]::new);
+        for (Propagator prop : propagators) {
+            for (Variable var : prop.getVars()) {
+                if (!mapVarProps.containsKey(var)) {
+                    mapVarProps.put(var, new HashSet<>());
+                }
+                mapVarProps.get(var).add(prop);
+            }
+        }
+        // Add edges
+        for (int i = 0; i < variables.length; i++) {
+            if (!mapVarProps.containsKey(variables[i])) {
+                continue;
+            }
+            for (int j = i + 1; j < variables.length; j++) {
+                if (!mapVarProps.containsKey(variables[j])) {
+                    continue;
+                }
+                int nbCommonPropagators = (int) mapVarProps.get(variables[i]).stream()
+                        .filter(Objects::nonNull)
+                        .filter(mapVarProps.get(variables[j])::contains)
+                        .count();
+                if (nbCommonPropagators > 0) {
+                    Node<Variable> nodei = graph.mapObjToNodes.get(variables[i]);
+                    Node<Variable> nodej = graph.mapObjToNodes.get(variables[j]);
+                    nodei.neighbors.put(nodej, withWeight ? nbCommonPropagators : 1);
+                    nodej.neighbors.put(nodei, withWeight ? nbCommonPropagators : 1);
+                }
+            }
+        }
+        return graph;
+    }
+
+    /**
+     * Write a gv file, at the given path, corresponding to the variable-oriented graph of the <code>Model</code>
+     *
+     * @param path the path to which write the gv file
+     * @see ModelAnalyser#writeVariableOrientedGraph(String, boolean)
+     */
+    public void writeVariableOrientedGraph(String path) {
+        writeVariableOrientedGraph(path, true);
+    }
+
+    /**
+     * Write a gv file, at the given path, corresponding to the variable-oriented graph of the <code>Model</code>
+     *
+     * @param path the path to which write the gv file
+     * @param withWeight whether to take the weight into account
+     */
+    public void writeVariableOrientedGraph(String path, boolean withWeight) {
+        Graph<Variable> graph = buildVariableOrientedGraph(withWeight);
+        writeGraph(graph, "variable", path);
     }
 }
