@@ -83,7 +83,7 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
         int idx = (index==null)?0:index.get();
         Decision<U> decision = null;
         while (decision == null && idx < strategies.length) {
-            if (contains(strategies[idx].vars, variable)) {
+            if (strategies[idx].contains(variable)) {
                 decision = strategies[idx].computeDecision(variable);
             }
             idx++;

@@ -212,8 +212,7 @@ public abstract class RegParser implements IParser {
         Solver solver = m.getSolver();
         if (solver.getSearch() != null) {
             THashSet<Variable> dvars = new THashSet<>();
-            dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
-            int k = 0;
+            dvars.addAll(solver.getSearch().getScope());
             IntVar[] ivars = m.streamVars()
                     .filter(VariableUtils::isInt)
                     .filter(v -> !VariableUtils.isConstant(v))

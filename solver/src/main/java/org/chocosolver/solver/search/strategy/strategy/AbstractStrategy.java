@@ -15,6 +15,10 @@ import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * A search strategy provides decisions to go down in the search space.
  * The main method is {@link #computeDecision(Variable)} which returns the next decision to apply.
@@ -25,10 +29,16 @@ import org.chocosolver.solver.variables.Variable;
 public abstract class AbstractStrategy<V extends Variable>  {
 
     protected final V[] vars;
+    protected Set<V> scope;
 
     @SafeVarargs
     protected AbstractStrategy(V... variables) {
         this.vars = variables.clone();
+        this.scope = new HashSet<>(Arrays.asList(variables));
+    }
+
+    public final boolean contains(V var) {
+        return scope.contains(var);
     }
 
     /**
@@ -84,6 +94,13 @@ public abstract class AbstractStrategy<V extends Variable>  {
      */
     public V[] getVariables() {
         return vars;
+    }
+
+    /**
+     * @return set of variables
+     */
+    public Set<V> getScope() {
+        return scope;
     }
 
     /**

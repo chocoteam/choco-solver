@@ -19,6 +19,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * A class to store warm_start hints.
@@ -151,6 +152,11 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
     @Override
     public Variable[] getVariables() {
         return mainStrategy.getVariables();
+    }
+
+    @Override
+    public Set<Variable> getScope() {
+        return mainStrategy.getScope();
     }
 
     @Override

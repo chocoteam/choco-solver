@@ -67,8 +67,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
      */
     int pcft;
 
-    protected Set<V> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -89,7 +87,6 @@ public class ConflictOrderingSearch<V extends Variable> extends AbstractStrategy
         prev = new TIntArrayList();
         next = new TIntArrayList();
         pcft = -1;
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
     }
 
     //***********************************************************************************

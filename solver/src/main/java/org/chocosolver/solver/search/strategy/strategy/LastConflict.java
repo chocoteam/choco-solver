@@ -60,8 +60,6 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
      */
     private final V[] conflictingVariables;
 
-    protected Set<Variable> scope;
-
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -77,7 +75,6 @@ public class LastConflict<V extends Variable> extends AbstractStrategy<V> implem
         assert k > 0 : "parameter K of last conflict must be strictly positive!";
         this.model = model;
         this.mainStrategy = mainStrategy;
-        this.scope = new HashSet<>(Arrays.asList(mainStrategy.vars));
         //noinspection unchecked
         conflictingVariables = (V[])new Variable[k];
         nbCV = 0;
