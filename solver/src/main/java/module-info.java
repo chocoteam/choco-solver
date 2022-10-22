@@ -135,7 +135,6 @@ module org.chocosolver.solver {
     requires org.knowm.xchart;
     requires java.management;
     requires automaton;
-    requires com.fasterxml.jackson.databind;
 
     opens org.chocosolver.memory to org.testng;
     opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers;
