@@ -18,7 +18,7 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.limits.BacktrackCounter;
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.values.SetDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.Random;
@@ -44,7 +44,7 @@ public class NogoodTest {
         IntVar[] vars = model.intVarArray("vars", 3, 0, 2, false);
         model.getSolver().setNoGoodRecordingFromRestarts();
         model.getSolver().setSearch(randomSearch(vars, 29091981L));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 3);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 27);
         assertEquals(model.getSolver().getBackTrackCount(), 54);
@@ -56,7 +56,7 @@ public class NogoodTest {
         IntVar[] vars = model.intVarArray("vars", 3, 0, 3, false);
         model.getSolver().setNoGoodRecordingFromRestarts();
         model.getSolver().setSearch(randomSearch(vars, 29091981L));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 1000);
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 1000);
         model.getSolver().limitTime(2000);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 64);
@@ -142,7 +142,7 @@ public class NogoodTest {
         SetVar[] vars = model.setVarArray("vars", 3, new int[]{}, new int[]{1, 2});
         model.getSolver().setNoGoodRecordingFromRestarts();
         model.getSolver().setSearch(Search.setVarSearch(new Random<SetVar>(29091981L), new SetDomainMin(), true, vars));
-        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicRestartStrategy(30), 3);
+        model.getSolver().setRestarts(new BacktrackCounter(model, 0), new MonotonicCutoff(30), 3);
         while (model.getSolver().solve()) ;
         assertEquals(model.getSolver().getSolutionCount(), 64);
         assertEquals(model.getSolver().getBackTrackCount(), 133);
