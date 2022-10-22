@@ -560,13 +560,17 @@ public class ModelAnalyser {
         public final int nbCompletelyInstantiatedPropagators;
         public final int nbReifiedPropagators;
         /**
-         * Map indicating the number of analysed propagators of the type of constraint  and class by the number of variables in their scope
+         * Map indicating the number of analysed propagators of the type of constraint and class by the number of variables in their scope
+         */
+        public final Map<Integer, Integer> byNbVariables;
+        /**
+         * Map indicating the number of analysed propagators of the type of constraint and class by the number of uninstantiated variables in their scope
          */
         public final Map<Integer, Integer> byArity;
 
         private ConstraintTypeStatistics(String cstrType, String propType,
                 int nbPropagators, int nbEntailedPropagators, int nbPassivePropagators, int nbCompletelyInstantiatedPropagators,
-                int nbReifiedPropagators, Map<Integer, Integer> byArity) {
+                int nbReifiedPropagators, Map<Integer, Integer> byNbVariables, Map<Integer, Integer> byArity) {
             this.cstrType = cstrType;
             this.propType = propType;
             this.nbPropagators = nbPropagators;
@@ -574,6 +578,7 @@ public class ModelAnalyser {
             this.nbPassivePropagators = nbPassivePropagators;
             this.nbCompletelyInstantiatedPropagators = nbCompletelyInstantiatedPropagators;
             this.nbReifiedPropagators = nbReifiedPropagators;
+            this.byNbVariables = byNbVariables;
             this.byArity = byArity;
         }
 
@@ -614,6 +619,8 @@ public class ModelAnalyser {
                 sb.append("\t- Nb reified: ").append(nbReifiedPropagators).append("\n");
             }
             sb.append(addInitialTab ? "\t" : "");
+            sb.append("\t- By number of variables: ").append(prettyIntSizeMap(byNbVariables)).append("\n");
+            sb.append(addInitialTab ? "\t" : "");
             sb.append("\t- By arity: ").append(prettyIntSizeMap(byArity));
             return sb.toString();
         }
@@ -630,6 +637,14 @@ public class ModelAnalyser {
             int nbPassivePropagators = (int) list.stream().filter(Propagator::isPassive).count();
             int nbCompletelyInstantiatedPropagators = (int) list.stream().filter(Propagator::isCompletelyInstantiated).count();
             int nbReifiedPropagators = (int) list.stream().filter(Propagator::isReified).count();
+            Map<Integer, List<Propagator>> byNbVarsList = list.stream().collect(Collectors.groupingBy(Propagator::arity));
+            Map<Integer, Integer> byNbVars = new LinkedHashMap<>();
+            List<Integer> nbVarsList = byNbVarsList.keySet().stream().sorted().collect(Collectors.toList());
+            for (Integer nbVars : nbVarsList) {
+                if (!byNbVarsList.get(nbVars).isEmpty()) {
+                    byNbVars.put(nbVars, byNbVarsList.get(nbVars).size());
+                }
+            }
             Map<Integer, List<Propagator>> byArityList = list.stream().collect(Collectors.groupingBy(Propagator::arity));
             Map<Integer, Integer> byArity = new LinkedHashMap<>();
             List<Integer> arityList = byArityList.keySet().stream().sorted().collect(Collectors.toList());
@@ -641,7 +656,7 @@ public class ModelAnalyser {
             return new ConstraintTypeStatistics(
                     cstrType, classNameOfType,
                     nbPropagators, nbEntailedPropagators, nbPassivePropagators, nbCompletelyInstantiatedPropagators,
-                    nbReifiedPropagators, byArity
+                    nbReifiedPropagators, byNbVars, byArity
             );
         }
     }
