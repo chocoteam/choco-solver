@@ -16,6 +16,7 @@ import org.chocosolver.util.ESat;
 
 import java.io.PrintStream;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -165,6 +166,61 @@ public class ModelAnalyser {
         return new ArrayList<>();
     }
 
+    private List<Variable> retrieveVariablesWithProperty(Predicate<Variable> predicate) {
+        return Arrays.stream(this.model.getVars())
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    private List<Variable> getVariablesWithPropertyOfType(Predicate<Variable> predicate, String type) {
+        return this.mapTypeClassVars.computeIfAbsent(type, s -> new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Return the list of unconstrained variables in the <code>Model</code>
+     *
+     * @return the list of unconstrained variables
+     */
+    public List<Variable> getUnconstrainedVariables() {
+        return retrieveVariablesWithProperty(v -> v.getNbProps() == 0);
+    }
+
+    /**
+     * Return the list of unconstrained variables in the <code>Model</code> of the given type
+     * Method retrieveVariableData() must have been called prior to this for it to work.
+     *
+     * @return the list of unconstrained variables of the given type
+     * @see ModelAnalyser#getVariableTypes()
+     */
+    public List<Variable> getUnconstrainedVariables(String type) {
+        return getVariablesWithPropertyOfType(v -> v.getNbProps() == 0, type);
+    }
+
+    /**
+     * Return the list of variables with at least one view in the <code>Model</code>
+     *
+     * @return the list of variables with at least one view
+     */
+    public List<Variable> getVariablesWithViews() {
+        return retrieveVariablesWithProperty(v -> v.getNbViews() > 0);
+    }
+
+    /**
+     * Return the list of variables with at least one view in the <code>Model</code> of the given type
+     * Method retrieveVariableData() must have been called prior to this for it to work.
+     *
+     * @return the list of variables of the given type with at least one view
+     * @see ModelAnalyser#getVariableTypes()
+     */
+    public List<Variable> getVariablesWithViews(String type) {
+        return getVariablesWithPropertyOfType(v -> v.getNbViews() > 0, type);
+    }
+
     /**
      * Return the list of Constraint types present in the <code>Model</code>.
      * Method retrievePropagatorData() must have been called prior to this for it to work.
@@ -192,6 +248,103 @@ public class ModelAnalyser {
             return mapTypeClassCstrs.get(constraintType).keySet().stream().sorted().collect(Collectors.toList());
         }
         return new ArrayList<>();
+    }
+
+    private List<Propagator> retrievePropagatorWithProperty(Predicate<Propagator> predicate) {
+        return Arrays.stream(this.model.getCstrs())
+                .map(Constraint::getPropagators)
+                .flatMap(Arrays::stream)
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    private List<Propagator> getPropagatorsWithPropertyOfType(Predicate<Propagator> predicate, String type) {
+        return this.mapTypeClassCstrs.computeIfAbsent(type, s -> new HashMap<>())
+                .values()
+                .stream()
+                .flatMap(List::stream)
+                .filter(predicate)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Return the list of entailed propagators in the <code>Model</code>
+     *
+     * @return the list of entailed propagators
+     */
+    public List<Propagator> getEntailedPropagators() {
+        return retrievePropagatorWithProperty(p -> p.isEntailed().equals(ESat.TRUE));
+    }
+
+    /**
+     * Return the list of entailed propagators in the <code>Model</code> of the given type
+     * Method retrievePropagatorData() must have been called prior to this for it to work.
+     *
+     * @return the list of entailed propagators of the given type
+     * @see ModelAnalyser#getConstraintTypes()
+     */
+    public List<Propagator> getEntailedPropagators(String type) {
+        return getPropagatorsWithPropertyOfType(p -> p.isEntailed().equals(ESat.TRUE), type);
+    }
+
+    /**
+     * Return the list of passive propagators in the <code>Model</code>
+     *
+     * @return the list of passive propagators
+     */
+    public List<Propagator> getPassivePropagators() {
+        return retrievePropagatorWithProperty(Propagator::isPassive);
+    }
+
+    /**
+     * Return the list of passive propagators in the <code>Model</code> of the given type
+     * Method retrievePropagatorData() must have been called prior to this for it to work.
+     *
+     * @return the list of passive propagators of the given type
+     * @see ModelAnalyser#getConstraintTypes()
+     */
+    public List<Propagator> getPassivePropagators(String type) {
+        return getPropagatorsWithPropertyOfType(Propagator::isPassive, type);
+    }
+
+    /**
+     * Return the list of completely instantiated propagators in the <code>Model</code>
+     *
+     * @return the list of completely instantiated propagators
+     */
+    public List<Propagator> getCompletelyInstantiatedPropagators() {
+        return retrievePropagatorWithProperty(Propagator::isCompletelyInstantiated);
+    }
+
+    /**
+     * Return the list of completely instantiated propagators in the <code>Model</code> of the given type
+     * Method retrievePropagatorData() must have been called prior to this for it to work.
+     *
+     * @return the list of completely instantiated propagators of the given type
+     * @see ModelAnalyser#getConstraintTypes()
+     */
+    public List<Propagator> getCompletelyInstantiatedPropagators(String type) {
+        return getPropagatorsWithPropertyOfType(Propagator::isCompletelyInstantiated, type);
+    }
+
+    /**
+     * Return the list of reified propagators in the <code>Model</code>
+     *
+     * @return the list of reified propagators
+     */
+    public List<Propagator> getReifiedPropagators() {
+        return retrievePropagatorWithProperty(Propagator::isReified);
+    }
+
+    /**
+     * Return the list of reified propagators in the <code>Model</code> of the given type
+     * Method retrievePropagatorData() must have been called prior to this for it to work.
+     *
+     * @return the list of reified propagators of the given type
+     * @see ModelAnalyser#getConstraintTypes()
+     */
+    public List<Propagator> getReifiedPropagators(String type) {
+        return getPropagatorsWithPropertyOfType(Propagator::isReified, type);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
