@@ -669,6 +669,11 @@ public class Model implements IModel {
         return this.settings;
     }
 
+    /**
+     * Return an analyser for the Model
+     *
+     * @return a {@link ModelAnalyser}
+     */
     public ModelAnalyser getModelAnalyser() {
         if (this.modelAnalyser == null) {
             this.modelAnalyser = new ModelAnalyser(this);
