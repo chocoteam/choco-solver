@@ -91,15 +91,6 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
         return decision;
     }
 
-    private static boolean contains(Variable[] vars, Variable variable) {
-        for (Variable v : vars) {
-            if (v.equals(variable)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * {@inheritDoc}
      * Iterates over the declared sub-strategies and gets the overall current decision.
