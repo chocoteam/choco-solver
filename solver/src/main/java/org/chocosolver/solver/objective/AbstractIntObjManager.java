@@ -16,38 +16,117 @@ import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
+import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntUnaryOperator;
 
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
- *
  */
-abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
+public abstract class AbstractIntObjManager implements IObjectiveManager<IntVar> {
 
     private static final long serialVersionUID = 5539060355541720114L;
 
+    /**
+     * The variable to optimize
+     **/
+    transient protected final IntVar objective;
+
+    /**
+     * Define how should the objective be optimize
+     */
+    protected final ResolutionPolicy policy;
+
+    /**
+     * define the precision to consider a variable as instantiated
+     **/
+    protected final int precision;
+
+    /**
+     * best lower bound found so far
+     **/
+    protected int bestProvedLB;
+
+    /**
+     * best upper bound found so far
+     **/
+    protected int bestProvedUB;
+
+    /**
+     * Define how the cut should be updated when posting the cut
+     **/
+    transient protected IntUnaryOperator cutComputer = n -> n; // walking cut by default
+
     public AbstractIntObjManager(AbstractIntObjManager objman) {
-        super(objman);
+        objective = objman.objective;
+        policy = objman.policy;
+        precision = objman.precision;
+        bestProvedLB = objman.bestProvedLB;
+        bestProvedUB = objman.bestProvedUB;
+        cutComputer = objman.cutComputer;
     }
 
-    public AbstractIntObjManager(IntVar objective, ResolutionPolicy policy, Number precision) {
-        super(objective, policy, precision);
+    public AbstractIntObjManager(IntVar objective, ResolutionPolicy policy, int precision) {
+        assert Objects.nonNull(objective);
+        this.objective = objective;
+        assert Objects.nonNull(policy);
+        this.policy = policy;
+        this.precision = precision;
         bestProvedLB = objective.getLB() - 1;
         bestProvedUB = objective.getUB() + 1;
     }
 
+
     @Override
-    public synchronized boolean updateBestLB(Number lb) {
-        if (bestProvedLB.intValue() < lb.intValue()) {
+    public final IntVar getObjective() {
+        return objective;
+    }
+
+    @Override
+    public final ResolutionPolicy getPolicy() {
+        return policy;
+    }
+
+    @Override
+    public final Number getBestLB() {
+        return bestProvedLB;
+    }
+
+    @Override
+    public final Number getBestUB() {
+        return bestProvedUB;
+    }
+
+    @Override
+    public final void setCutComputer(Function<Number, Number> cutComputer) {
+        this.cutComputer = operand -> cutComputer.apply(operand).intValue();
+    }
+
+    public final void setCutComputer(IntUnaryOperator cutComputer) {
+            this.cutComputer = cutComputer;
+        }
+
+    @Override
+    public void setStrictDynamicCut() {
+        cutComputer = n -> n + precision;
+    }
+
+    @Override
+    public final void setWalkingDynamicCut() {
+        cutComputer = n -> n;
+    }
+
+    public synchronized boolean updateBestLB(int lb) {
+        if (bestProvedLB < lb) {
             bestProvedLB = lb;
             return true;
         }
         return false;
     }
 
-    @Override
-    public synchronized boolean updateBestUB(Number ub) {
-        if (bestProvedUB.intValue() > ub.intValue()) {
+    public synchronized boolean updateBestUB(int ub) {
+        if (bestProvedUB > ub) {
             bestProvedUB = ub;
             return true;
         }
@@ -55,17 +134,22 @@ abstract class AbstractIntObjManager extends AbstractObjManager<IntVar> {
     }
 
     @Override
-    public boolean updateBestSolution() {
-        if(!objective.isInstantiated()) {
-            throw new SolverException(
-                "objective variable (" + objective + ") is not instantiated on solution. Check constraints and/or decision variables.");
-        }
-        return updateBestSolution(objective.getValue());
+    public boolean updateBestSolution(Number n) {
+        return updateBestSolution(n.intValue());
     }
 
+    /**
+     * Informs the manager that a new solution has been found
+     */
+    public abstract boolean updateBestSolution(int n);
+
     @Override
-    public void setStrictDynamicCut() {
-        cutComputer = (Number n) -> n.intValue() + precision.intValue();
+    public boolean updateBestSolution() {
+        if (!objective.isInstantiated()) {
+            throw new SolverException(
+                    "objective variable (" + objective + ") is not instantiated on solution. Check constraints and/or decision variables.");
+        }
+        return updateBestSolution(objective.getValue());
     }
 
     @Override
@@ -99,13 +183,13 @@ class MinIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public boolean updateBestSolution(Number n) {
+    public boolean updateBestSolution(int n) {
         return updateBestUB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(bestProvedLB.intValue(), cutComputer.apply(bestProvedUB).intValue(), this);
+        objective.updateBounds(bestProvedLB, cutComputer.applyAsInt(bestProvedUB), this);
     }
 
     @Override
@@ -115,7 +199,7 @@ class MinIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(IntIterableRangeSet.MIN, bestProvedUB.intValue() - 1, explanation);
+        objective.intersectLit(IntIterableRangeSet.MIN, bestProvedUB - 1, explanation);
     }
 
 }
@@ -134,13 +218,13 @@ class MaxIntObjManager extends AbstractIntObjManager {
     }
 
     @Override
-    public boolean updateBestSolution(Number n) {
+    public boolean updateBestSolution(int n) {
         return updateBestLB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(cutComputer.apply(bestProvedLB).intValue(), bestProvedUB.intValue(), this);
+        objective.updateBounds(cutComputer.applyAsInt(bestProvedLB), bestProvedUB, this);
     }
 
     @Override
@@ -150,6 +234,6 @@ class MaxIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(bestProvedLB.intValue() + 1, IntIterableRangeSet.MAX, explanation);
+        objective.intersectLit(bestProvedLB + 1, IntIterableRangeSet.MAX, explanation);
     }
 }
