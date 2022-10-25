@@ -137,6 +137,8 @@ public class ConstraintsName {
 
     public static final String SETINTCHANNELING = "SETINTCHANNELING";
 
+    public static final String SETORDEREDINTCHANNELING = "SETORDEREDINTCHANNELING";
+
     public static final String SETALLDISJOINT = "SETALLDISJOINT";
 
     public static final String SETALLDIFFERENT = "SETALLDIFFERENT";
