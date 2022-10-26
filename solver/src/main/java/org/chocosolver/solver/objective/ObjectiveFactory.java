@@ -10,7 +10,6 @@
 package org.chocosolver.solver.objective;
 
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
@@ -97,9 +96,9 @@ public final class ObjectiveFactory {
     @SuppressWarnings("unchecked")
     public static <V> V copy(V object) {
         try {
-            Class c = object.getClass();
+            Class<?> c = object.getClass();
             // Use the "copy constructor":
-            Constructor ct = c.getConstructor(c);
+            Constructor<?> ct = c.getConstructor(c);
             return (V) ct.newInstance(object);
         } catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             // fails silently
@@ -152,16 +151,6 @@ final class SATManager implements IObjectiveManager<Variable> {
     }
 
     @Override
-    public boolean updateBestLB(Number lb) {
-        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
-    }
-
-    @Override
-    public boolean updateBestUB(Number ub) {
-        throw new UnsupportedOperationException("There is no objective bounds in satisfaction problems");
-    }
-
-    @Override
     public Number getBestSolutionValue() {
         throw new UnsupportedOperationException("There is no objective variable in satisfaction problems");
     }
@@ -198,7 +187,7 @@ final class SATManager implements IObjectiveManager<Variable> {
     }
 
     @Override
-    public void postDynamicCut() throws ContradictionException {
+    public void postDynamicCut() {
         // nothing to do
     }
 

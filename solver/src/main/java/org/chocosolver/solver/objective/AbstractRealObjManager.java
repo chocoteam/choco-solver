@@ -13,36 +13,119 @@ import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.RealVar;
 
+import java.util.Objects;
+import java.util.function.DoubleUnaryOperator;
+import java.util.function.Function;
+
 /**
  * @author Jean-Guillaume Fages, Charles Prud'homme, Arnaud Malapert
  */
-abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
+abstract class AbstractRealObjManager implements IObjectiveManager<RealVar> {
 
     private static final long serialVersionUID = 8038511375883592639L;
 
-    public AbstractRealObjManager(AbstractObjManager<RealVar> objman) {
-        super(objman);
+    /**
+     * The variable to optimize
+     **/
+    transient protected final RealVar objective;
+
+    /**
+     * Define how should the objective be optimize
+     */
+    protected final ResolutionPolicy policy;
+
+    /**
+     * define the precision to consider a variable as instantiated
+     **/
+    protected final double precision;
+
+    /**
+     * best lower bound found so far
+     **/
+    protected double bestProvedLB;
+
+    /**
+     * best upper bound found so far
+     **/
+    protected double bestProvedUB;
+
+    /**
+     * Define how the cut should be updated when posting the cut
+     **/
+    transient protected DoubleUnaryOperator cutComputer = n -> n; // walking cut by default
+
+
+    public AbstractRealObjManager(AbstractRealObjManager objman) {
+        objective = objman.objective;
+        policy = objman.policy;
+        precision = objman.precision;
+        bestProvedLB = objman.bestProvedLB;
+        bestProvedUB = objman.bestProvedUB;
+        cutComputer = objman.cutComputer;
+
     }
 
-    public AbstractRealObjManager(RealVar objective, ResolutionPolicy policy, Number precision) {
-        super(objective, policy, precision);
-        double prec = Math.abs(precision.doubleValue());
-        bestProvedLB = objective.getLB() - prec;
-        bestProvedUB = objective.getUB() + prec;
+    public AbstractRealObjManager(RealVar objective, ResolutionPolicy policy, double precision) {
+        assert Objects.nonNull(objective);
+        this.objective = objective;
+        assert Objects.nonNull(policy);
+        this.policy = policy;
+        this.precision = precision;
+        this.bestProvedLB = objective.getLB() - precision;
+        this.bestProvedUB = objective.getUB() + precision;
+    }
+
+
+    @Override
+    public final RealVar getObjective() {
+        return objective;
     }
 
     @Override
-    public synchronized boolean updateBestLB(Number lb) {
-        if (bestProvedLB.doubleValue() < lb.doubleValue()) {
+    public final ResolutionPolicy getPolicy() {
+        return policy;
+    }
+
+    @Override
+    public final Number getBestLB() {
+        return bestProvedLB;
+    }
+
+    @Override
+    public final Number getBestUB() {
+        return bestProvedUB;
+    }
+
+    @Override
+    public final void setCutComputer(Function<Number, Number> cutComputer) {
+        this.cutComputer = operand -> cutComputer.apply(operand).intValue();
+    }
+
+    public final void setCutComputer(DoubleUnaryOperator cutComputer) {
+        this.cutComputer = cutComputer;
+    }
+
+    @Override
+    public void setStrictDynamicCut() {
+        cutComputer = n -> n + precision;
+    }
+
+    @Override
+    public final void setWalkingDynamicCut() {
+        cutComputer = n -> n;
+    }
+
+
+    public synchronized boolean updateBestLB(double lb) {
+        if (bestProvedLB < lb) {
             bestProvedLB = lb;
             return true;
         }
         return false;
     }
 
-    @Override
-    public synchronized boolean updateBestUB(Number ub) {
-        if (bestProvedUB.doubleValue() > ub.doubleValue()) {
+    public synchronized boolean updateBestUB(double ub) {
+        if (bestProvedUB > ub) {
             bestProvedUB = ub;
             return true;
         }
@@ -50,19 +133,22 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
     }
 
     @Override
+    public boolean updateBestSolution(Number n) {
+        return updateBestSolution(n.doubleValue());
+    }
+
+    public abstract boolean updateBestSolution(double n);
+
+    @Override
     public boolean updateBestSolution() {
         assert objective.isInstantiated();
         return updateBestSolution(objective.getUB());
     }
 
-    @Override
-    public void setStrictDynamicCut() {
-        cutComputer = (Number n) -> n.doubleValue() + precision.doubleValue();
-    }
 
     private int getNbDecimals() {
         int dec = 0;
-        double p = precision.doubleValue();
+        double p = precision;
         while ((int) p <= 0 && dec <= 12) {
             dec++;
             p *= 10;
@@ -72,7 +158,7 @@ abstract class AbstractRealObjManager extends AbstractObjManager<RealVar> {
 
     @Override
     public void resetBestBounds() {
-        double prec = Math.abs(precision.doubleValue());
+        double prec = Math.abs(precision);
         bestProvedLB = objective.getLB() - prec;
         bestProvedUB = objective.getUB() + prec;
     }
@@ -97,13 +183,13 @@ class MinRealObjManager extends AbstractRealObjManager {
     }
 
     @Override
-    public boolean updateBestSolution(Number n) {
+    public boolean updateBestSolution(double n) {
         return updateBestUB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(bestProvedLB.doubleValue(), cutComputer.apply(bestProvedUB).doubleValue(), this);
+        objective.updateBounds(bestProvedLB, cutComputer.applyAsDouble(bestProvedUB), this);
     }
 
     @Override
@@ -127,13 +213,13 @@ class MaxRealObjManager extends AbstractRealObjManager {
     }
 
     @Override
-    public boolean updateBestSolution(Number n) {
+    public boolean updateBestSolution(double n) {
         return updateBestLB(n);
     }
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(cutComputer.apply(bestProvedLB).doubleValue(), bestProvedUB.doubleValue(), this);
+        objective.updateBounds(cutComputer.applyAsDouble(bestProvedLB), bestProvedUB, this);
     }
 
     @Override
