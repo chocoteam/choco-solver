@@ -353,11 +353,12 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     boolean isInstantiatedTo(int value);
 
     /**
-     * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
+     * Retrieves the current value of the variable if instantiated
      *
-     * @return the current value (or lower bound if not yet instantiated).
+     * @return the current value
+     * @throws IllegalStateException when the variable is not instantiated
      */
-    int getValue();
+    int getValue() throws IllegalStateException;
 
     /**
      * Retrieves the lower bound of the variable
