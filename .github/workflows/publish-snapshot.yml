@@ -14,11 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Set up Maven central repository
-        uses: actions/setup-java@v3.6.0
+      - name: 'Set up Set up Maven central repository (Oracle JDK 17)'
+        uses: actions/setup-java@v3
         with:
-          java-version: '11'
-          distribution: 'temurin'
+          website: oracle.com
+          release: 17
           server-id: ossrh
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD

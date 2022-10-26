@@ -17,11 +17,11 @@ jobs:
       id: get_version
       run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\/v/}
 
-    - name: Set up JDK 11 for deploy to OSSRH
+    - name: 'Set up latest Oracle JDK 17 to deploy to OSSRH'
       uses: actions/setup-java@v3.6.0
       with:
-        distribution: 'adopt'
-        java-version: '11'
+        website: oracle.com
+        release: 17
         server-id: ossrh 
         server-username: MAVEN_USERNAME
         server-password: MAVEN_CENTRAL_TOKEN
