@@ -103,7 +103,11 @@ public final class IntScaleView<I extends IntVar> extends IntView<I> {
     }
 
     @Override
-    public int getValue() {
+    public int getValue() throws IllegalStateException{
+        if (!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return var.getValue() * cste;
     }
 
