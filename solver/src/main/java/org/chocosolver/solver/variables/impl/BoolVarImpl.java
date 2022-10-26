@@ -279,14 +279,12 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
         return aValue == kFALSE || aValue == kTRUE;
     }
 
-    /**
-     * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
-     *
-     * @return the current value (or lower bound if not yet instantiated).
-     */
     @Override
-    public int getValue() {
-        assert isInstantiated() : name + " not instantiated";
+    public int getValue() throws IllegalStateException{
+        if (!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return getLB();
     }
 

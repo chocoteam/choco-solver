@@ -54,7 +54,7 @@ public class LexTest {
             model.getSolver().setSearch(randomSearch(append(vs1, vs2), seed));
             while (model.getSolver().solve()) ;
             int kpn = (int) pow(k + 1, n1 / 2);
-            assertEquals(model.getSolver().getSolutionCount(), (kpn * (kpn + 1) / 2));
+            assertEquals(model.getSolver().getSolutionCount(), ((long) kpn * (kpn + 1) / 2));
         }
     }
 
@@ -298,9 +298,9 @@ public class LexTest {
         SetVar b = model.setVar("b", new int[]{}, new int[]{1, 2});
         model.setLe(a, b).post();
         Solver solver = model.getSolver();
-        solver.showDecisions();
+        solver.showSolutions(a, b);
         solver.setSearch(Search.setVarSearch(a, b));
-        Assert.assertEquals(solver.findAllSolutions().size(), 6);
+        Assert.assertEquals(solver.findAllSolutions().size(), 13);
         solver.printShortStatistics();
     }
 
@@ -325,9 +325,9 @@ public class LexTest {
         model.setLt(a, b).post();
         Solver solver = model.getSolver();
         //solver.showDecisions();
-        solver.showSolutions();
+        solver.showSolutions(a, b);
         solver.setSearch(Search.setVarSearch(a, b));
-        Assert.assertEquals(solver.findAllSolutions().size(), 4);
+        Assert.assertEquals(solver.findAllSolutions().size(), 11);
         solver.printShortStatistics();
     }
 

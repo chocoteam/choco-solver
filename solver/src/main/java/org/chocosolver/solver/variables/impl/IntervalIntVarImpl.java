@@ -75,7 +75,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     /**
      * Signed Literal
      */
-    protected SignedLiteral.Set literal;
+    private SignedLiteral.Set literal;
 
     /**
      * Create a bounded domain IntVar : [min,max]
@@ -373,14 +373,12 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         return ((aValue >= LB.get()) && (aValue <= UB.get()));
     }
 
-    /**
-     * Retrieves the current value of the variable if instantiated, otherwier the lower bound.
-     *
-     * @return the current value (or lower bound if not yet instantiated).
-     */
     @Override
-    public int getValue() {
-        assert isInstantiated() : name + " not instantiated";
+    public int getValue() throws IllegalStateException{
+        if(!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return getLB();
     }
 
@@ -489,7 +487,6 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();
@@ -503,7 +500,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected EvtScheduler<IntEventType> createScheduler() {
         return new IntEvtScheduler();
     }
 
