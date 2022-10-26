@@ -71,8 +71,9 @@ abstract class AbstractRealObjManager implements IObjectiveManager<RealVar> {
         assert Objects.nonNull(policy);
         this.policy = policy;
         this.precision = precision;
-        this.bestProvedLB = objective.getLB() - precision;
-        this.bestProvedUB = objective.getUB() + precision;
+        double prec = Math.abs(precision);
+        this.bestProvedLB = objective.getLB() - prec;
+        this.bestProvedUB = objective.getUB() + prec;
     }
 
 
