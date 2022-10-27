@@ -13,6 +13,8 @@ import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -20,9 +22,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -35,6 +39,29 @@ public class PerformanceTest {
     private static final String ROOT = "/flatzinc/";
     private static final String COMMENT = "#";
     private static final String DELIMITER = ",";
+
+    private static final String LEVEL = "SILENT";
+
+    private StringBuilder writer;
+
+    @BeforeSuite
+    public void openFile() {
+        writer = new StringBuilder();
+        writer.append("name,time (in sec),");
+    }
+
+    @AfterSuite
+    public void closeFile() throws IOException {
+        String pathTemp = System.getProperty("user.dir");
+        Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
+        System.out.printf("%s", path.toAbsolutePath());
+        Files.write(path, writer.toString().getBytes());
+    }
+
+    private void logPerf(Flatzinc fzn) {
+        writer.append(String.format(Locale.ENGLISH, "%s,%.2f,\n",
+                fzn.getModel().getName(), fzn.getModel().getSolver().getTimeCount()));
+    }
 
     @DataProvider()
     public Object[][] instances() {
@@ -52,7 +79,7 @@ public class PerformanceTest {
                 parameters.add(new Object[]{
                         ROOT + columns[0] + File.separator + columns[1], // path
                         Integer.parseInt(columns[2]), // solutions
-                        "_".equals(columns[3])?null:Integer.parseInt(columns[3]), // best
+                        "_".equals(columns[3]) ? null : Integer.parseInt(columns[3]), // best
                         Integer.parseInt(columns[4]), // nodes
                         Integer.parseInt(columns[5]) // failures
                 });
@@ -70,9 +97,8 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                "-lvl", "SILENT",
-                "-p", "1",
-                "-stasol"
+                "-lvl", LEVEL,
+                "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -89,6 +115,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        logPerf(fzn);
     }
 
 
@@ -100,9 +127,8 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[180s]", // but, problems are expected to end within 21s max
-                "-lvl", "SILENT",
-                "-p", "1",
-                "-stasol"
+                "-lvl", LEVEL,
+                "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -117,6 +143,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 16582, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 16581, "Unexpected number of failures");
         Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 6, "Unexpected best solution");
+        logPerf(fzn);
     }
 
     @Test(groups = "mzn", timeOut = 240_000, priority = 2)
@@ -126,9 +153,8 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[180s]", // but, problems are expected to end within 33s max
-                "-lvl", "SILENT",
-                "-p", "1",
-                "-stasol"
+                "-lvl", LEVEL,
+                "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
         fzn.setUp(args);
@@ -143,6 +169,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 2_164_075, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 2_164_010, "Unexpected number of failures");
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 33, "Unexpected number of solutions");
+        logPerf(fzn);
     }
 
     @Test(groups = "mzn", timeOut = 240_000, priority = 2)
@@ -152,8 +179,7 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[180s]", // but, problems are expected to end within 40s max
-                "-lvl", "SILENT",
-                "-stasol",
+                "-lvl", LEVEL,
                 "-p", "1"
         };
         Flatzinc fzn = new Flatzinc();
@@ -169,6 +195,7 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 35, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 822_035, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 821_966, "Unexpected number of failures");
+        logPerf(fzn);
     }
 
     @Test(groups = "mzn", timeOut = 60_000, priority = 1)
@@ -178,8 +205,7 @@ public class PerformanceTest {
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]",
-                "-lvl", "SILENT",
-                "-stasol",
+                "-lvl", LEVEL,
                 "-p", "1",
                 "-ocs", "ALL" // required for this problem, otherwise the solution is not correct
         };
@@ -196,5 +222,6 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 2, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 90_150, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 90_147, "Unexpected number of failures");
+        logPerf(fzn);
     }
 }

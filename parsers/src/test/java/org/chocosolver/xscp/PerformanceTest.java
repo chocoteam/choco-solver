@@ -13,17 +13,21 @@ import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.xcsp.XCSP;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
+import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 
 /**
  * <br/>
@@ -36,12 +40,33 @@ public class PerformanceTest {
     private static final String COMMENT = "#";
     private static final String DELIMITER = ",";
 
+    private StringBuilder writer;
+
+    @BeforeSuite
+    public void openFile() {
+        writer = new StringBuilder();
+        writer.append("name,time (in sec),");
+    }
+
+    @AfterSuite
+    public void closeFile() throws IOException {
+        String pathTemp = System.getProperty("user.dir");
+        Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
+        System.out.printf("%s", path.toAbsolutePath());
+        Files.write(path, writer.toString().getBytes());
+    }
+
+    private void logPerf(XCSP xcsp) {
+        writer.append(String.format(Locale.ENGLISH, "%s,%.2f,\n",
+                xcsp.getModel().getName(), xcsp.getModel().getSolver().getTimeCount()));
+    }
+
     @DataProvider()
-    public Object[][] instances() throws URISyntaxException, IOException {
+    public Object[][] instances() {
         List<Object[]> parameters = new ArrayList<>();
         try (BufferedReader br = Files.newBufferedReader(
-                Paths.get(this.getClass().getResource(
-                        ROOT + "instances.csv").getPath()))) {
+                Paths.get(Objects.requireNonNull(this.getClass().getResource(
+                        ROOT + "instances.csv")).getPath()))) {
             // read the file line by line
             String line;
             while ((line = br.readLine()) != null) {
@@ -66,11 +91,11 @@ public class PerformanceTest {
 
     @Test(groups = "xcsp", dataProvider = "instances", timeOut = 60000)
     public void testThemAll(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
-        String file = this.getClass().getResource(path).getFile();
+        String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
         String[] args = new String[]{
                 file,
                 "-limit", "[50s]", // but, problems are expected to end within 30s max
-                "-lvl","COMPET",
+                "-lvl", "SILENT",
                 "-p", "1"
         };
         //RegParser.PRINT_LOG = false;
@@ -96,6 +121,7 @@ public class PerformanceTest {
         if (bst != null) {
             Assert.assertEquals(xcsp.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
         }
+        logPerf(xcsp);
     }
 
 }

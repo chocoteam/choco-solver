@@ -3,9 +3,8 @@
 2021,yumi-dynamic+p_10.fzn,0,_,0,1
 2021,feistel.fzn,1,_,174,160
 2021,mapping_mesh2x2_2.fzn,2,970,96,93
-2021,steiner-systems.fzn,1,_,64,63
+2021,steiner-systems.fzn,1,_,31,9
 2020,bnn+inventory_4_8s.fzn,1,17,16,15
-#2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
 2020,is+v1HjuSBQMb.fzn,18,454656,13938,13903
 2020,is+v1HjuSBQMb_new.fzn,18,454656,13893,13858
 2020,p1f-pjs+10.fzn,27,300,12498,12445
@@ -16,9 +15,8 @@
 2020,soccer+xIGData_22_12_22_5.fzn,1,_,4031,3725
 2020,stable-goods-solution+s-d6.fzn,13,6264,144303,144278
 2019,amaze3+2012-03-19.fzn,1,_,68704,68687
-2019,ccmcp+3_20_0_25_5.fzn,22,1247,112882,112839
+2019,ccmcp+3_20_0_25_5.fzn,22,1247,113086,113043
 2019,fm3_3.fzn,322,165922,6867,6224
-#2019,foxgeesecorn+54.fzn,1,_,68704,68687
 2019,group+u6g1pref1.fzn,14,120,284,257
 2019,median_string_dp+p2_10_8-0.fzn,4,34,6207,6200
 2019,mknapsack_global+mknap2-1.fzn,1,7772,5808,5807
@@ -27,7 +25,6 @@
 2018,oocsp_racks+050_r1.fzn,1,_,9,4
 2018,oocsp_racks+050_r1n.fzn,1,_,9,4
 2018,rotating-workforce+ex1479.fzn,1,_,128979,128877
-#2018,steiner-tree+es10fst03.stp.fzn,2,26003678,90150,90147
 2018,test-scheduling+t30m10r3-15.fzn,1,2785,7684,7683
 2017,group+u12g1pref0.fzn,13,207,819,794
 2017,tcgc2+k10_34.fzn,2,433,429538,429535
@@ -62,6 +59,9 @@
 2012,ship-schedule+ship-schedule.cp+6ShipsMixed.fzn,237,301650,16082,15609
 2012,solbat+sb+sb_12_12_5_1.fzn,1,_,1315,1284
 2012,solbat+sb+sb_14_14_6_0.fzn,1,_,383,352
-2012,still-life-wastage+still-life+09.fzn,6,43,109330,109319
-2012,still-life-wastage+still-life+10.fzn,7,54,164477,164464
+2012,still-life-wastage+still-life+09.fzn,6,43,109396,109385
+2012,still-life-wastage+still-life+10.fzn,8,54,164569,164554
 2012,tpp+tpp+tpp_5_5_20_1.fzn,54,115,3215964,3215857
+#2020,bnn+cellda_y_10s.fzn,1,6,16582,16581
+#2019,foxgeesecorn+54.fzn,1,_,68704,68687
+#2018,steiner-tree+es10fst03.stp.fzn,2,26003678,90150,90147
