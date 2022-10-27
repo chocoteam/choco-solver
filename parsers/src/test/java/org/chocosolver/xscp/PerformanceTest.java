@@ -13,8 +13,8 @@ import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.xcsp.XCSP;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
-import org.testng.annotations.AfterSuite;
-import org.testng.annotations.BeforeSuite;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -42,13 +42,13 @@ public class PerformanceTest {
 
     private StringBuilder writer;
 
-    @BeforeSuite
+    @BeforeClass
     public void openFile() {
         writer = new StringBuilder();
         writer.append("name,time (in sec),");
     }
 
-    @AfterSuite
+    @AfterClass
     public void closeFile() throws IOException {
         String pathTemp = System.getProperty("user.dir");
         Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
