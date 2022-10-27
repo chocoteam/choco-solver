@@ -147,7 +147,11 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public int getValue() {
+    public int getValue() throws IllegalStateException{
+        if(!isInstantiated()){
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         int v = var.getValue();
         return 1 - v;
     }
@@ -224,7 +228,7 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected EvtScheduler<IntEventType> createScheduler() {
         return new BoolEvtScheduler();
     }
 

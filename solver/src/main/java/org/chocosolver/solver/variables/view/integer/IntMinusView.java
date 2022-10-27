@@ -137,7 +137,11 @@ public class IntMinusView<I extends IntVar> extends IntView<I> {
     }
 
     @Override
-    public int getValue() {
+    public int getValue() throws IllegalStateException{
+        if(!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return -var.getValue();
     }
 
@@ -176,7 +180,7 @@ public class IntMinusView<I extends IntVar> extends IntView<I> {
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected EvtScheduler<IntEventType> createScheduler() {
         return new IntEvtScheduler();
     }
 

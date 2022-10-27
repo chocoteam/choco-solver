@@ -23,7 +23,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainLast;
 import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
-import org.chocosolver.solver.search.strategy.selectors.variables.DomOverWDegRef;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
@@ -206,7 +206,7 @@ public class Flatzinc extends RegParser {
                         m.getSolver().attach(m.getSolver().defaultSolution());
                         valueSelector = new IntDomainLast(m.getSolver().defaultSolution(), valueSelector, null);
                     }
-                    strats.add(Search.lastConflict(new IntStrategy(ivars, new DomOverWDegRef<>(ivars, 0), valueSelector)));
+                    strats.add(Search.lastConflict(new IntStrategy(ivars, new FirstFail(m), valueSelector)));
                 }
                 SetVar[] svars = Stream.of(datas[i].allOutPutVars())
                         .filter(VariableUtils::isSet)
