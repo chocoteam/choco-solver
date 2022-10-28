@@ -9,6 +9,7 @@
  */
 package org.chocosolver.flatzinc;
 
+import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
@@ -32,6 +33,7 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
+@Listeners(PerformanceListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/flatzinc/";
     private static final String COMMENT = "#";
@@ -41,17 +43,16 @@ public class PerformanceTest {
 
     private StringBuilder writer;
 
-    @BeforeClass
-    public void openFile() {
+    @BeforeClass(alwaysRun = true, groups = "mzn")
+    public void beforeStart() {
         writer = new StringBuilder();
-        writer.append("name,time (in sec),");
+        writer.append("name,time (in sec),\n");
     }
 
-    @AfterClass
-    public void closeFile() throws IOException {
+    @AfterClass(groups = "mzn")
+    public void afterStart() throws IOException {
         String pathTemp = System.getProperty("user.dir");
-        Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
-        System.out.printf("%s", path.toAbsolutePath());
+        Path path = Paths.get(pathTemp, "target", "mzn_results.csv");
         Files.write(path, writer.toString().getBytes());
     }
 
