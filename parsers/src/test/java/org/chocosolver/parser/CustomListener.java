@@ -34,7 +34,11 @@ public class CustomListener extends TestListenerAdapter {
 
     @Override
     public void onTestStart(ITestResult tr) {
-        System.out.printf("\t%s.%s ..", tr.getInstanceName(), tr.getName());
+        System.out.printf("\t%s.%s(%s) ..",
+                tr.getInstanceName(),
+                tr.getName(),
+                tr.getParameters()[0]
+                );
         original = System.out;
         System.setOut(fake);
     }
