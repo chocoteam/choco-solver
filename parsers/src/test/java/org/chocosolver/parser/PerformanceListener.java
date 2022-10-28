@@ -22,7 +22,7 @@ import java.io.PrintStream;
  * @version choco
  * @since 20/08/2014
  */
-public class CustomListener extends TestListenerAdapter {
+public class PerformanceListener extends TestListenerAdapter {
 
     PrintStream original = System.out;
     PrintStream fake = new PrintStream(new OutputStream() {
@@ -37,7 +37,7 @@ public class CustomListener extends TestListenerAdapter {
         System.out.printf("\t%s.%s(%s) ..",
                 tr.getInstanceName(),
                 tr.getName(),
-                tr.getParameters()[0]
+                tr.getParameters().length == 0 ? "" : tr.getParameters()[0]
                 );
         original = System.out;
         System.setOut(fake);

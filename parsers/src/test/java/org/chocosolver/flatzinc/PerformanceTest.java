@@ -9,7 +9,7 @@
  */
 package org.chocosolver.flatzinc;
 
-import org.chocosolver.parser.CustomListener;
+import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.flatzinc.Flatzinc;
 import org.chocosolver.solver.search.SearchState;
@@ -33,7 +33,7 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
-@Listeners(CustomListener.class)
+@Listeners(PerformanceListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/flatzinc/";
     private static final String COMMENT = "#";
