@@ -47,11 +47,10 @@ public class PerformanceTest {
         writer.append("name,time (in sec),\n");
     }
 
-    @AfterClass()
+    @AfterClass(groups = "xcsp")
     public void afterStart() throws IOException {
         String pathTemp = System.getProperty("user.dir");
-        Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
-        System.out.printf("%s", path.toAbsolutePath());
+        Path path = Paths.get(pathTemp, "target", "xcsp_results.csv");
         Files.write(path, writer.toString().getBytes());
     }
 

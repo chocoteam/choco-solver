@@ -49,11 +49,10 @@ public class PerformanceTest {
         writer.append("name,time (in sec),\n");
     }
 
-    @AfterClass()
+    @AfterClass(groups = "mzn")
     public void afterStart() throws IOException {
         String pathTemp = System.getProperty("user.dir");
-        Path path = Paths.get(pathTemp, "parsers", "target", "mzn_results.csv");
-        System.out.printf("%s", path.toAbsolutePath());
+        Path path = Paths.get(pathTemp, "target", "mzn_results.csv");
         Files.write(path, writer.toString().getBytes());
     }
 

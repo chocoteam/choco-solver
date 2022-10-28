@@ -63,7 +63,6 @@ jobs:
         if: matrix.group == 'xcsp'
         uses: actions/upload-artifact@v3
         with:
-          name: my-artifact
           path: ${{ github.workspace }}/parsers/target/xcsp_results.csv
 
   test-mzn:
@@ -92,5 +91,4 @@ jobs:
       - name: 'Upload MZN results'
         uses: actions/upload-artifact@v3
         with:
-          name: my-artifact
           path: ${{ github.workspace }}/parsers/target/mzn_results.csv
