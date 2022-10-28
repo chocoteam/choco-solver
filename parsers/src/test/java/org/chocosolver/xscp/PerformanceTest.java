@@ -9,14 +9,12 @@
  */
 package org.chocosolver.xscp;
 
+import org.chocosolver.parser.CustomListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.xcsp.XCSP;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -35,6 +33,7 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
+@Listeners(CustomListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/xcsp/";
     private static final String COMMENT = "#";
@@ -42,14 +41,14 @@ public class PerformanceTest {
 
     private StringBuilder writer;
 
-    @BeforeClass
-    public void openFile() {
+    @BeforeClass(alwaysRun = true)
+    public void beforeStart() {
         writer = new StringBuilder();
-        writer.append("name,time (in sec),");
+        writer.append("name,time (in sec),\n");
     }
 
-    @AfterClass
-    public void closeFile() throws IOException {
+    @AfterClass()
+    public void afterStart() throws IOException {
         String pathTemp = System.getProperty("user.dir");
         Path path = Paths.get(pathTemp, "parsers", "target", "xcsp_results.csv");
         System.out.printf("%s", path.toAbsolutePath());

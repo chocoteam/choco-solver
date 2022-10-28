@@ -14,7 +14,7 @@
  * @since 15/10/2019
  */
 module org.chocosolver.parsers {
-    exports org.chocosolver.parser to args4j, org.chocosolver.examples;
+    exports org.chocosolver.parser to args4j, org.chocosolver.examples, org.testng;
     requires transitive org.chocosolver.solver;
     requires xcsp3.tools;
     requires args4j;
