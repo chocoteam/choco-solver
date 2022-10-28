@@ -34,11 +34,7 @@ public class PerformanceListener extends TestListenerAdapter {
 
     @Override
     public void onTestStart(ITestResult tr) {
-        System.out.printf("\t%s.%s(%s) ..",
-                tr.getInstanceName(),
-                tr.getName(),
-                tr.getParameters().length == 0 ? "" : tr.getParameters()[0]
-                );
+        System.out.printf("\t%s.%s ..", tr.getTestClass().getName(), tr.getName());
         original = System.out;
         System.setOut(fake);
     }

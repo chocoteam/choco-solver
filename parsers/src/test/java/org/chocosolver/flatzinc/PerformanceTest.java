@@ -43,7 +43,7 @@ public class PerformanceTest {
 
     private StringBuilder writer;
 
-    @BeforeClass(alwaysRun = true)
+    @BeforeClass(alwaysRun = true, groups = "mzn")
     public void beforeStart() {
         writer = new StringBuilder();
         writer.append("name,time (in sec),\n");
