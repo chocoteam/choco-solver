@@ -40,5 +40,5 @@ basics,seq_search_3+FD_seq_search.fzn,1,_,5,0
 basics,seq_search_3.fzn,1,_,5,0
 basics,seq_search_4+FD_seq_search.fzn,1,_,6,0
 basics,seq_search_4.fzn,1,_,6,0
-basics,test_set_lt_1.fzn,1,_,124635,124612
-basics,test_set_lt_2.fzn,1,_,12,9
+basics,test_set_lt_1.fzn,1,_,1370724,1370664
+basics,test_set_lt_2.fzn,1,_,2585,2568

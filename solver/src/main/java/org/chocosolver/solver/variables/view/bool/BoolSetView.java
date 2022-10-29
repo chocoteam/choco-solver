@@ -36,7 +36,6 @@ import java.util.Iterator;
 
 /**
  * Boolean view b over a set variable S:
- *
  * With v an integer, b = true iff S contains v.
  *
  * @author Dimitri Justeau-Allaire
@@ -215,7 +214,11 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public final int getValue() {
+    public final int getValue() throws IllegalStateException{
+        if (!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return getLB();
     }
 

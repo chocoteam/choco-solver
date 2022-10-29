@@ -262,7 +262,7 @@ public class ObjectiveTest {
             model.getSolver().reset();
             final int finalI = i;
             oman.setCutComputer(n -> n.intValue() - ends[finalI]);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
@@ -283,7 +283,7 @@ public class ObjectiveTest {
             }
             model.getSolver().reset();
             ends[0] = floorDiv(ends[0], 2);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions

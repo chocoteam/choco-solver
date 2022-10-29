@@ -26,6 +26,8 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -213,7 +215,6 @@ public abstract class RegParser implements IParser {
         if (solver.getSearch() != null) {
             THashSet<Variable> dvars = new THashSet<>();
             dvars.addAll(Arrays.asList(solver.getSearch().getVariables()));
-            int k = 0;
             IntVar[] ivars = m.streamVars()
                     .filter(VariableUtils::isInt)
                     .filter(v -> !VariableUtils.isConstant(v))
@@ -339,7 +340,9 @@ public abstract class RegParser implements IParser {
     public final void solve() {
         getModel().getSolver().getMeasures().setReadingTimeCount(creationTime + System.nanoTime());
         if (level.isLoggable(Level.INFO)) {
-            getModel().getSolver().log().white().print("solve instance...\n");
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
+            LocalDateTime now = LocalDateTime.now();
+            getModel().getSolver().log().white().printf("Problem solving starts at %s\n", dtf.format(now));
         }
         if (portfolio.getModels().size() == 1) {
             singleThread();

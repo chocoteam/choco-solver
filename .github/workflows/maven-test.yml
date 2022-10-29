@@ -59,6 +59,12 @@ jobs:
       - name: Test ${{ matrix.group }}
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
 
+      - name: 'Upload XCSP results'
+        if: matrix.group == 'xcsp'
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ github.workspace }}/parsers/target/xcsp_results.csv
+
   test-mzn:
     needs: [ test-solver ]
     runs-on: ubuntu-latest
@@ -81,3 +87,8 @@ jobs:
       # Regression tests
       - name: Test ${{ matrix.group }}
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
+
+      - name: 'Upload MZN results'
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ github.workspace }}/parsers/target/mzn_results.csv

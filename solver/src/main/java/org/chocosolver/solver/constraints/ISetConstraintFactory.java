@@ -18,6 +18,8 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Arrays;
+
 /**
  * Interface to make constraints over SetVar
  * <p>
@@ -126,7 +128,7 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      * @return A constraint which ensures that <i>sets</i>[i] is a subset of <i>sets</i>[j] if i<j
      */
     default Constraint subsetEq(SetVar... sets) {
-        Propagator[] props = new Propagator[sets.length - 1];
+        Propagator<?>[] props = new Propagator[sets.length - 1];
         for (int i = 0; i < sets.length - 1; i++) {
             props[i] = new PropSubsetEq(sets[i], sets[i + 1]);
         }
@@ -367,6 +369,19 @@ public interface ISetConstraintFactory extends ISelf<Model> {
                 new PropIntChannel(sets, ints, offset1, offset2),
                 new PropIntChannel(sets, ints, offset1, offset2), new PropAllDisjoint(sets)
         );
+    }
+
+    /**
+     * Channeling constraint stating that int[i] = v + offset, where v is the ith element of the sorted elements of set.
+     * If <i>i</i> is out of bounds with set, int[i] = nullValue.
+     * @param set A set variable.
+     * @param ints An array of integer variables.
+     * @param nullValue An int.
+     * @param offset An int.
+     * @return A sortedSetIntsChanneling constraint.
+     */
+    default Constraint sortedSetIntsChanneling(SetVar set, IntVar[] ints, int nullValue, int offset) {
+        return new Constraint(ConstraintsName.SETORDEREDINTCHANNELING, new PropSortedIntChannel(set, ints, nullValue, offset));
     }
 
     //***********************************************************************************
@@ -621,7 +636,20 @@ public interface ISetConstraintFactory extends ISelf<Model> {
         for (int v : b.getUB()) {
             union.add(v);
         }
-        return ref().lexLessEq(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
+        int size = union.size();
+        int min = union.min();
+        int offset = 0;
+        if (min <= 0) {
+            offset = 1 - min;
+        }
+        int finalOffset = offset;
+        int[] ubA = Arrays.stream(a.getUB().toArray()).map(i -> i + finalOffset).toArray();
+        int[] ubB = Arrays.stream(b.getUB().toArray()).map(i -> i + finalOffset).toArray();
+        IntVar[] intsA = ref().intVarArray(size, ArrayUtils.concat(ubA, 0));
+        IntVar[] intsB = ref().intVarArray(size, ArrayUtils.concat(ubB, 0));
+        ref().sortedSetIntsChanneling(a, intsA, 0, offset).post();
+        ref().sortedSetIntsChanneling(b, intsB, 0, offset).post();
+        return ref().lexLessEq(intsA, intsB);
     }
 
     /**
@@ -642,6 +670,19 @@ public interface ISetConstraintFactory extends ISelf<Model> {
         for (int v : b.getUB()) {
             union.add(v);
         }
-        return ref().lexLess(ref().setBoolsView(a, union.size(), union.min()), ref().setBoolsView(b, union.size(), union.min()));
+        int size = union.size();
+        int min = union.min();
+        int offset = 0;
+        if (min <= 0) {
+            offset = 1 - min;
+        }
+        int finalOffset = offset;
+        int[] ubA = Arrays.stream(a.getUB().toArray()).map(i -> i + finalOffset).toArray();
+        int[] ubB = Arrays.stream(b.getUB().toArray()).map(i -> i + finalOffset).toArray();
+        IntVar[] intsA = ref().intVarArray(size, ArrayUtils.concat(ubA, 0));
+        IntVar[] intsB = ref().intVarArray(size, ArrayUtils.concat(ubB, 0));
+        ref().sortedSetIntsChanneling(a, intsA, 0, offset).post();
+        ref().sortedSetIntsChanneling(b, intsB, 0, offset).post();
+        return ref().lexLess(intsA, intsB);
     }
 }
