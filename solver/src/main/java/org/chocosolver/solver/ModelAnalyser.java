@@ -13,6 +13,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -415,7 +416,7 @@ public class ModelAnalyser {
          * @param addVarType a boolean indicating whether to add the type of the analysed variables in the String
          * @param printAllStats a boolean indicating whether to add all the statistics to the String (if false, some criterion won't be added, for example nbInstantiatedVariables if equals to zero)
          * @return a String describing the VariableTypeStatistics
-         * @see ModelAnalyser#printVariableAnalysis(PrintStream)
+         * @see ModelAnalyser#printVariableAnalysis()
          */
         public String toString(boolean addInitialTab, boolean addVarType, boolean printAllStats) {
             StringBuilder sb = new StringBuilder(addInitialTab ? "\t" : "");
@@ -600,7 +601,7 @@ public class ModelAnalyser {
          * @param addCstrType a boolean indicating whether to add the type of constraint of the analysed propagators in the String
          * @param printAllStats a boolean indicating whether to add all the statistics to the String (if false, some criterion won't be added, for example nbEntailedPropagators if equals to zero)
          * @return a String describing the ConstraintTypeStatistics
-         * @see ModelAnalyser#printConstraintAnalysis(PrintStream)
+         * @see ModelAnalyser#printConstraintAnalysis()
          */
         public String toString(boolean addInitialTab, boolean addCstrType, boolean printAllStats) {
             StringBuilder sb = new StringBuilder(addInitialTab ? "\t" : "");
@@ -733,121 +734,77 @@ public class ModelAnalyser {
         return sb.toString();
     }
 
-    /**
-     * Print the analysis on variables in System.out.
-     *
-     * @see ModelAnalyser#printVariableAnalysis(PrintStream)
-     * @see ModelAnalyser#printAnalysis()
-     */
-    public void printVariableAnalysis() {
-        printVariableAnalysis(System.out);
-    }
-
-    /**
-     * Print the analysis on variables in the given <code>PrintStream</code>.
-     *
-     * @param ps the <code>PrintStream</code> in which to print the variables analysis
-     * @see ModelAnalyser#printAnalysis(PrintStream)
-     * @see java.io.PrintStream
-     */
-    public void printVariableAnalysis(PrintStream ps) {
-        retrieveVariableData();
-        ps.println("################################################");
-        ps.println("######### BEGIN OF VARIABLES ANALYSIS ##########");
-        ps.println("################################################");
-        ps.println();
+    private void printVariableAnalysis(boolean retrieveData) {
+        if (retrieveData) {
+            retrieveVariableData();
+        }
+        Logger logger = model.getSolver().log();
+        logger.green().println("BEGINNING OF VARIABLES ANALYSIS");
         for (String c : getVariableTypes()) {
-            ps.println(c);
+            logger.blue().println(c);
             List<String> list = getVariableClassNamesOfType(c);
             for (int i = 0; i < list.size(); i++) {
                 String varType = list.get(i);
                 VariableTypeStatistics varTypeStats = createVariableTypeStatistics(c, varType);
-                ps.println(varTypeStats.toString(true, false, true));
-                if (i + 1 < list.size()) {
-                    ps.println();
-                }
+                logger.println(varTypeStats.toString(true, false, true));
+                logger.println("");
             }
-            ps.println();
-            ps.println();
         }
-        ps.println("################################################");
-        ps.println("########## END OF VARIABLES ANALYSIS ###########");
-        ps.println("################################################");
+        logger.red().println("END OF VARIABLES ANALYSIS");
     }
 
     /**
-     * Print the analysis on propagators in System.out.
+     * Print the analysis on variables in all Solver's PrintStream.
      *
-     * @see ModelAnalyser#printConstraintAnalysis(PrintStream)
      * @see ModelAnalyser#printAnalysis()
      */
-    public void printConstraintAnalysis() {
-        printConstraintAnalysis(System.out);
+    public void printVariableAnalysis() {
+        printVariableAnalysis(true);
     }
 
-    /**
-     * Print the analysis on propagators in the given <code>PrintStream</code>.
-     *
-     * @param ps the <code>PrintStream</code> in which to print the propagators analysis
-     * @see ModelAnalyser#printAnalysis(PrintStream)
-     * @see java.io.PrintStream
-     */
-    public void printConstraintAnalysis(PrintStream ps) {
-        retrievePropagatorData();
-        ps.println("################################################");
-        ps.println("######### BEGIN OF CONSTRAINTS ANALYSIS ########");
-        ps.println("################################################");
-        ps.println();
+    private void printConstraintAnalysis(boolean retrieveData) {
+        if (retrieveData) {
+            retrievePropagatorData();
+        }
+        Logger logger = model.getSolver().log();
+        logger.green().println("BEGINNING OF CONSTRAINTS ANALYSIS");
         for (String cstrType : getConstraintTypes()) {
-            ps.println(cstrType);
+            logger.blue().println(cstrType);
             List<String> list = getConstraintClassNamesOfType(cstrType);
             for (int i = 0; i < list.size(); i++) {
                 String propType = list.get(i);
                 ConstraintTypeStatistics cstrTypeStats = createConstraintTypeStatistics(cstrType, propType);
-                ps.println(cstrTypeStats.toString(true, false, true));
-                if (i + 1 < list.size()) {
-                    ps.println();
-                }
+                logger.println(cstrTypeStats.toString(true, false, true));
+                logger.println("");
             }
-            ps.println();
-            ps.println();
         }
-        ps.println("################################################");
-        ps.println("########## END OF CONSTRAINTS ANALYSIS #########");
-        ps.println("################################################");
+        logger.red().println("END OF CONSTRAINTS ANALYSIS");
     }
 
     /**
-     * Print the analysis of the <code>Model</code> in System.out.
+     * Print the analysis on propagators in all Solver's PrintStream.
      *
-     * @see ModelAnalyser#printAnalysis(PrintStream)
+     * @see ModelAnalyser#printAnalysis()
+     */
+    public void printConstraintAnalysis() {
+        printConstraintAnalysis(true);
+    }
+
+    /**
+     * Print the analysis of the <code>Model</code> in all Solver's PrintStream.
      */
     public void printAnalysis() {
-        printAnalysis(System.out);
-    }
-
-    /**
-     * Print the analysis of the <code>Model</code> in the given <code>PrintStream</code>.
-     *
-     * @param ps the <code>PrintStream</code> in which to print the <code>Model</code> analysis
-     * @see java.io.PrintStream
-     */
-    public void printAnalysis(PrintStream ps) {
         retrieveModelData();
-        ps.println();
-        ps.println("################################################################################################");
-        ps.println("#################################### BEGIN OF MODEL ANALYSIS ###################################");
-        ps.println("################################################################################################");
-        ps.println();
-        printVariableAnalysis(ps);
-        ps.println();
-        ps.println();
-        printConstraintAnalysis(ps);
-        ps.println();
-        ps.println("################################################################################################");
-        ps.println("##################################### END OF MODEL ANALYSIS ####################################");
-        ps.println("################################################################################################");
-        ps.println();
+        Logger logger = model.getSolver().log();
+        logger.println("");
+        logger.green().println("BEGINNING OF MODEL ANALYSIS");
+        logger.println("");
+        printVariableAnalysis(false);
+        logger.println("");
+        printConstraintAnalysis(false);
+        logger.println("");
+        logger.red().println("END OF MODEL ANALYSIS");
+        logger.println("");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
