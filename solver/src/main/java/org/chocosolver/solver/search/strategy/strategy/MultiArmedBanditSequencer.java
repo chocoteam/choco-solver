@@ -84,7 +84,7 @@ public class MultiArmedBanditSequencer<V extends Variable> extends AbstractStrat
     }
 
     @Override
-    protected Decision<V> computeDecision(V variable) {
+    public Decision<V> computeDecision(V variable) {
         if (variable == null || variable.isInstantiated()) {
             return null;
         }
