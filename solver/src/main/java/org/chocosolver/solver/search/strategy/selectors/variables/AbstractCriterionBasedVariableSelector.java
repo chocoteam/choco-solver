@@ -23,10 +23,7 @@ import org.chocosolver.solver.variables.IVariableMonitor;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -60,10 +57,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
                     w = new double[p.getNbVars()];
                 } else if (w.length < p.getNbVars()) {
                     // may happen propagators (like PropSat) with dynamic variable addition
-                    w = new double[p.getNbVars()];
-                    double[] nw = new double[p.getNbVars()];
-                    System.arraycopy(w, 0, nw, 0, w.length);
-                    w = nw;
+                    w = Arrays.copyOf(w, p.getNbVars());
                 }
                 return w;
             };
