@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.impl;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -42,7 +41,7 @@ public class AbstractVariableTest {
 
     Model model;
     AbstractVariable v;
-    Propagator[] props;
+    Propagator<?>[] props;
 
 
     @BeforeMethod(alwaysRun = true)
@@ -182,7 +181,7 @@ public class AbstractVariableTest {
         private final int idx;
 
         public PropFake(IntVar var, int i) {
-            super(new IntVar[]{var});
+            super(var);
             this.idx = i;
         }
 
@@ -209,7 +208,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -220,14 +219,14 @@ public class AbstractVariableTest {
         env.worldPush();
         v.swapOnPassivate(p2, 0);
         v.swapOnPassivate(p0, 0);
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 3);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 3);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p1});
         env.worldPop();
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 3);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 3);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p2, p0, p1});
     }
 
@@ -236,7 +235,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -247,22 +246,22 @@ public class AbstractVariableTest {
         env.worldPush();
         PropFake p3 = new PropFake(v, 3);
         v.link(p3, 0);
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 4);
-        Assert.assertEquals(list.splitter.get(), 0);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 4);
+        Assert.assertEquals(list[4].getSplitter(), 0);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p0, p1, p2, p3});
         v.swapOnPassivate(p3, 0);
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 4);
-        Assert.assertEquals(list.splitter.get(), 1);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 4);
+        Assert.assertEquals(list[4].getSplitter(), 1);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p1, p2, p0});
         env.worldPop();
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 4);
-        Assert.assertEquals(list.splitter.get(), 0);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 4);
+        Assert.assertEquals(list[4].getSplitter(), 0);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p3, p1, p2, p0});
     }
 
@@ -271,7 +270,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -285,10 +284,10 @@ public class AbstractVariableTest {
         env.save(() -> v.unlink(p3, 0));
         v.swapOnPassivate(p3, 0);
         env.worldPop();
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 3);
-        Assert.assertEquals(list.splitter.get(), 0);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 3);
+        Assert.assertEquals(list[4].getSplitter(), 0);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p0, p1, p2});
     }
 
@@ -297,7 +296,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -317,10 +316,10 @@ public class AbstractVariableTest {
         env.save(() -> v.unlink(p4, 0));
         v.swapOnPassivate(p4, 0);
         env.worldPop();
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 3);
-        Assert.assertEquals(list.splitter.get(), 0);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 3);
+        Assert.assertEquals(list[4].getSplitter(), 0);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p0, p1, p2});
     }
 
@@ -329,7 +328,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.BipartiteList list = ((AbstractVariable) v).propagators[4];
+        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -345,16 +344,16 @@ public class AbstractVariableTest {
         PropFake p4 = new PropFake(v, 4);
         v.link(p4, 0);
         env.save(() -> v.unlink(p4, 0));
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 5);
-        Assert.assertEquals(list.splitter.get(), 1);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 5);
+        Assert.assertEquals(list[4].getSplitter(), 1);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p1, p2, p0, p4});
         env.worldPop();
-        Assert.assertEquals(list.first, 0);
-        Assert.assertEquals(list.last, 3);
-        Assert.assertEquals(list.splitter.get(), 0);
-        Assert.assertEquals(list.stream().toArray(Propagator[]::new),
+        Assert.assertEquals(list[4].getFirst(), 0);
+        Assert.assertEquals(list[4].getLast(), 3);
+        Assert.assertEquals(list[4].getSplitter(), 0);
+        Assert.assertEquals(list[4].stream().toArray(Propagator[]::new),
                 new Propagator[]{p0, p1, p2});
     }
 }
