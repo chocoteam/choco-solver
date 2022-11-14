@@ -21,9 +21,9 @@ import org.chocosolver.solver.variables.*;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -74,6 +74,12 @@ public abstract class AbstractVariable implements Variable {
     static final String MSG_BOUND = "new bounds are incorrect";
 
     /**
+     * Empty bipartite list
+     */
+    static final ABipartiteList EMPTY = new ABipartiteList() {
+    };
+
+    /**
      * Unique ID of this variable.
      */
     private final int ID;
@@ -91,7 +97,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of propagators, by event type
      */
-    final BipartiteList[] propagators;
+    final ABipartiteList[] propagators;
     /**
      * Nb dependencies
      */
@@ -162,14 +168,14 @@ public abstract class AbstractVariable implements Variable {
     protected AbstractVariable(String name, Model model) {
         this.name = name;
         this.model = model;
-        this.views = new IView[2];
-        this.idxInViews = new int[2];
-        this.monitors = new IVariableMonitor[2];
+        this.views = new IView[0];
+        this.idxInViews = new int[0];
+        this.monitors = new IVariableMonitor[0];
         this.scheduler = createScheduler();
         int dsize = this.scheduler.select(0);
-        this.propagators = new BipartiteList[dsize + 1];
+        this.propagators = new ABipartiteList[dsize + 1];
         for (int i = 0; i < dsize + 1; i++) {
-            this.propagators[i] = new BipartiteList(model.getEnvironment());
+            this.propagators[i] = EMPTY;
         }
         this.nbPropagators = 0;
         this.ID = this.model.nextId();
@@ -220,6 +226,9 @@ public abstract class AbstractVariable implements Variable {
     public final void link(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
         nbPropagators++;
+        if (propagators[i] == EMPTY) {
+            propagators[i] = new BipartiteList(model.getEnvironment());
+        }
         propagator.setVIndices(idxInProp, propagators[i].add(propagator, idxInProp));
     }
 
@@ -257,18 +266,18 @@ public abstract class AbstractVariable implements Variable {
         Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
 
             int c = 0;
-            int i = propagators[c].first;
+            int i = propagators[c].getFirst();
 
             @Override
             public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
                 do {
-                    if (i < propagators[c].last) {
-                        action.accept(propagators[c].propagators[i++]);
+                    if (i < propagators[c].getLast()) {
+                        action.accept(propagators[c].get(i++));
                         return true;
                     } else {
                         c++;
                         if (c < propagators.length) {
-                            i = propagators[c].first;
+                            i = propagators[c].getFirst();
                         } else {
                             return false;
                         }
@@ -386,9 +395,7 @@ public abstract class AbstractVariable implements Variable {
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {
-            IVariableMonitor<?>[] tmp = monitors;
-            monitors = new IVariableMonitor[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, monitors, 0, mIdx);
+            monitors = Arrays.copyOf(monitors, ArrayUtils.newBoundedSize(monitors.length));
         }
         monitors[mIdx++] = monitor;
     }
@@ -408,12 +415,8 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void subscribeView(IView<?> view, int idx) {
         if (vIdx == views.length) {
-            IView<?>[] tmp = views;
-            int[] tmpIdx = idxInViews;
-            views = new IView[tmp.length * 3 / 2 + 1];
-            idxInViews = new int[tmp.length * 3 / 2 + 1];
-            System.arraycopy(tmp, 0, views, 0, vIdx);
-            System.arraycopy(tmpIdx, 0, idxInViews, 0, vIdx);
+            views = Arrays.copyOf(views, ArrayUtils.newBoundedSize(views.length));
+            idxInViews = Arrays.copyOf(idxInViews, ArrayUtils.newBoundedSize(idxInViews.length));
         }
         views[vIdx] = view;
         idxInViews[vIdx] = idx;
@@ -519,7 +522,47 @@ public abstract class AbstractVariable implements Variable {
         return cause;
     }
 
-    static class BipartiteList {
+    static abstract class ABipartiteList {
+
+        int getFirst() {
+            return 0;
+        }
+
+        int getLast() {
+            return 0;
+        }
+
+        int getSplitter() {
+            return 0;
+        }
+
+        Propagator<?> get(int i) {
+            throw new UnsupportedOperationException();
+        }
+
+        int add(Propagator<?> propagator, int idxInVar) {
+            // empty
+            return 0;
+        }
+
+        void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+            throw new UnsupportedOperationException();
+        }
+
+        void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+            throw new UnsupportedOperationException();
+        }
+
+        void schedule(ICause cause, PropagationEngine engine, int mask) {
+            // empty
+        }
+
+        Stream<Propagator<?>> stream() {
+            return Stream.empty();
+        }
+    }
+    
+    static final class BipartiteList extends ABipartiteList {
         /**
          * The current capacity
          */
@@ -550,9 +593,29 @@ public abstract class AbstractVariable implements Variable {
         public BipartiteList(IEnvironment environment) {
             this.splitter = environment.makeInt(0);
             this.first = this.last = 0;
-            this.capacity = 10;
+            this.capacity = 1;
             this.propagators = new Propagator[capacity];
             this.pindices = new int[capacity];
+        }
+
+        @Override
+        int getFirst() {
+            return first;
+        }
+
+        @Override
+        int getLast() {
+            return last;
+        }
+
+        @Override
+        int getSplitter() {
+            return splitter.get();
+        }
+
+        @Override
+        Propagator<?> get(int i) {
+            return propagators[i];
         }
 
         /**
@@ -564,12 +627,12 @@ public abstract class AbstractVariable implements Variable {
          * @param idxInVar   position of the variable in the propagator
          * @return the number of propagators stored
          */
-        public int add(Propagator<?> propagator, int idxInVar) {
+        int add(Propagator<?> propagator, int idxInVar) {
             if (first > 0 && splitter.get() == 0) {
                 shiftTail();
             }
             if (last == capacity - 1) {
-                capacity = capacity + (capacity >> 1);
+                capacity = ArrayUtils.newBoundedSize(capacity);
                 propagators = Arrays.copyOf(propagators, capacity);
                 pindices = Arrays.copyOf(pindices, capacity);
             }
@@ -581,11 +644,11 @@ public abstract class AbstractVariable implements Variable {
         /**
          * Remove the propagator <i>p</i> from {@link #propagators}.
          *
-         * @param propagator
-         * @param idxInProp
-         * @param var
+         * @param propagator the propagator to add
+         * @param idxInProp  position of the variable in the propagator
+         * @param var        the variable
          */
-        public void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+        void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
             assert p > -1;
             assert propagators[p] == propagator : "Try to unlink from " + var.getName() + ":\n" + propagator + "but found:\n" + propagators[p];
@@ -614,7 +677,7 @@ public abstract class AbstractVariable implements Variable {
             }
         }
 
-        public void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
+        void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
             assert p != -1;
             assert propagators[p] == propagator : "Try to swap from " + var.getName() + ":\n" + propagator + "but found: " + propagators[p];
@@ -642,7 +705,7 @@ public abstract class AbstractVariable implements Variable {
             }
         }
 
-        public void schedule(ICause cause, PropagationEngine engine, int mask) {
+        void schedule(ICause cause, PropagationEngine engine, int mask) {
             int s = splitter.get();
             if (first > 0) {
                 if (s == 0) {
@@ -682,6 +745,7 @@ public abstract class AbstractVariable implements Variable {
             }
             Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
                 int i = s;
+
                 @Override
                 public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
                     if (i < last) {
