@@ -19,8 +19,10 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.objects.queues.CircularQueue;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -473,12 +475,9 @@ public class PropagationEngine {
 
         private void ensureCapacity() {
             if (size >= elements.length - 1) {
-                Propagator<?>[] tmp = elements;
-                elements = new Propagator[elements.length * 3 / 2];
-                System.arraycopy(tmp, 0, elements, 0, size);
-                int[] itmp = keys;
-                keys = new int[elements.length];
-                System.arraycopy(itmp, 0, keys, 0, size);
+                int nsize = ArrayUtils.newBoundedSize(elements.length);
+                elements = Arrays.copyOf(elements, nsize);
+                keys = Arrays.copyOf(keys, nsize);
             }
         }
 
