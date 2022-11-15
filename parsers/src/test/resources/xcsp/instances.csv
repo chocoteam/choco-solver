@@ -25,7 +25,7 @@ basics,KnightTour-06-ext03.xml.lzma,1,_,944,923
 basics,KnightTour-06-int.xml.lzma,1,_,10017,9879
 basics,Langford-3-10.xml.lzma,1,_,372,367
 basics,LangfordBin-08.xml.lzma,1,_,78,72
-basics,LowAutocorrelation-015.xml.lzma,3,15,6502,6441
+basics,LowAutocorrelation-015.xml.lzma,3,15,6635,6578
 basics,MagicSequence-008-ca.xml.lzma,1,_,5,1
 basics,MagicSequence-008-co.xml.lzma,1,_,5,1
 basics,MagicSquare-4-table.xml.lzma,1,_,20,13
@@ -85,7 +85,7 @@ basics,SumColoring-myciel4_c18.xml.lzma,5,22,27017,26883
 basics,Rlfap-graph-04-opt_c18.xml.lzma,1,394,236,235
 basics,PeacableArmies-m1-05_c18.xml.lzma,3,4,3074,3020
 basics,PeacableArmies-m2-05_c18.xml.lzma,5,4,2058,2017
-basics,TravelingTournament-a3-galaxy04_c18.xml.lzma,4,416,4170,4131
+basics,TravelingTournament-a3-galaxy04_c18.xml.lzma,4,416,4180,4139
 basics,Rcpsp-j30-01-01_c18.xml.lzma,7,43,159,146
 basics,QuadraticAssignment-qap_c18.xml.lzma,10,4776,945,924
 basics,Auction-sum-example_c18.xml.lzma,2,54,6,3
