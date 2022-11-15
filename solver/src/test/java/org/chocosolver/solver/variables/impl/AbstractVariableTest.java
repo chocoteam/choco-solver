@@ -208,7 +208,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
+        IBipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -235,7 +235,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
+        IBipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -270,7 +270,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
+        IBipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -296,7 +296,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
+        IBipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);
@@ -328,7 +328,7 @@ public class AbstractVariableTest {
         Model model = new Model();
         IEnvironment env = model.getEnvironment();
         IntVar v = model.intVar("x", 1, 3);
-        AbstractVariable.ABipartiteList[] list = ((AbstractVariable) v).propagators;
+        IBipartiteList[] list = ((AbstractVariable) v).propagators;
         PropFake p0 = new PropFake(v, 0);
         PropFake p1 = new PropFake(v, 1);
         PropFake p2 = new PropFake(v, 2);

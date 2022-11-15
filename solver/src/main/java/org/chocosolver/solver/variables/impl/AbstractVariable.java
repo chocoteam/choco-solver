@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.variables.impl;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
@@ -74,12 +72,6 @@ public abstract class AbstractVariable implements Variable {
     static final String MSG_BOUND = "new bounds are incorrect";
 
     /**
-     * Empty bipartite list
-     */
-    static final ABipartiteList EMPTY = new ABipartiteList() {
-    };
-
-    /**
      * Unique ID of this variable.
      */
     private final int ID;
@@ -97,7 +89,7 @@ public abstract class AbstractVariable implements Variable {
     /**
      * List of propagators, by event type
      */
-    final ABipartiteList[] propagators;
+    final IBipartiteList[] propagators;
     /**
      * Nb dependencies
      */
@@ -173,9 +165,9 @@ public abstract class AbstractVariable implements Variable {
         this.monitors = new IVariableMonitor[0];
         this.scheduler = createScheduler();
         int dsize = this.scheduler.select(0);
-        this.propagators = new ABipartiteList[dsize + 1];
+        this.propagators = new IBipartiteList[dsize + 1];
         for (int i = 0; i < dsize + 1; i++) {
-            this.propagators[i] = EMPTY;
+            this.propagators[i] = IBipartiteList.empty();
         }
         this.nbPropagators = 0;
         this.ID = this.model.nextId();
@@ -226,7 +218,7 @@ public abstract class AbstractVariable implements Variable {
     public final void link(Propagator<?> propagator, int idxInProp) {
         int i = scheduler.select(propagator.getPropagationConditions(idxInProp));
         nbPropagators++;
-        if (propagators[i] == EMPTY) {
+        if (propagators[i] == IBipartiteList.EMPTY) {
             propagators[i] = new BipartiteList(model.getEnvironment());
         }
         propagator.setVIndices(idxInProp, propagators[i].add(propagator, idxInProp));
@@ -520,260 +512,6 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public ICause getCause() {
         return cause;
-    }
-
-    static abstract class ABipartiteList {
-
-        int getFirst() {
-            return 0;
-        }
-
-        int getLast() {
-            return 0;
-        }
-
-        int getSplitter() {
-            return 0;
-        }
-
-        Propagator<?> get(int i) {
-            throw new UnsupportedOperationException();
-        }
-
-        int add(Propagator<?> propagator, int idxInVar) {
-            // empty
-            return 0;
-        }
-
-        void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            throw new UnsupportedOperationException();
-        }
-
-        void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            throw new UnsupportedOperationException();
-        }
-
-        void schedule(ICause cause, PropagationEngine engine, int mask) {
-            // empty
-        }
-
-        Stream<Propagator<?>> stream() {
-            return Stream.empty();
-        }
-    }
-    
-    static final class BipartiteList extends ABipartiteList {
-        /**
-         * The current capacity
-         */
-        private int capacity;
-        /**
-         * The position of the first element (inclusive)
-         */
-        int first;
-        /**
-         * The position of the last element (exclusive)
-         */
-        int last;
-        /**
-         * The number of passive propagators, starting from first
-         */
-        final IStateInt splitter;
-
-        /**
-         * List of propagators
-         */
-        Propagator<?>[] propagators;
-
-        /**
-         * Store the index of each propagator.
-         */
-        int[] pindices;
-
-        public BipartiteList(IEnvironment environment) {
-            this.splitter = environment.makeInt(0);
-            this.first = this.last = 0;
-            this.capacity = 1;
-            this.propagators = new Propagator[capacity];
-            this.pindices = new int[capacity];
-        }
-
-        @Override
-        int getFirst() {
-            return first;
-        }
-
-        @Override
-        int getLast() {
-            return last;
-        }
-
-        @Override
-        int getSplitter() {
-            return splitter.get();
-        }
-
-        @Override
-        Propagator<?> get(int i) {
-            return propagators[i];
-        }
-
-        /**
-         * Add a propagator <i>p</i> at the end of {@link #propagators}
-         * and set at the same position in {@link #pindices} the position
-         * of the variable in <i>p</i>.
-         *
-         * @param propagator the propagator to add
-         * @param idxInVar   position of the variable in the propagator
-         * @return the number of propagators stored
-         */
-        int add(Propagator<?> propagator, int idxInVar) {
-            if (first > 0 && splitter.get() == 0) {
-                shiftTail();
-            }
-            if (last == capacity - 1) {
-                capacity = ArrayUtils.newBoundedSize(capacity, capacity * 2);
-                propagators = Arrays.copyOf(propagators, capacity);
-                pindices = Arrays.copyOf(pindices, capacity);
-            }
-            propagators[last] = propagator;
-            pindices[last++] = idxInVar;
-            return last - 1;
-        }
-
-        /**
-         * Remove the propagator <i>p</i> from {@link #propagators}.
-         *
-         * @param propagator the propagator to add
-         * @param idxInProp  position of the variable in the propagator
-         * @param var        the variable
-         */
-        void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            int p = propagator.getVIndice(idxInProp);
-            assert p > -1;
-            assert propagators[p] == propagator : "Try to unlink from " + var.getName() + ":\n" + propagator + "but found:\n" + propagators[p];
-            assert propagators[p].getVar(idxInProp) == var;
-            // Dynamic addition of a propagator may be not considered yet, so the assertion is not correct
-            if (p < splitter.get()) {
-                // swap the propagator to remove with the first one
-                propagator.setVIndices(idxInProp, -1);
-                propagators[p] = propagators[first];
-                pindices[p] = pindices[first];
-                propagators[p].setVIndices(pindices[p], p);
-                propagators[first] = null;
-                pindices[first] = 0;
-                first++;
-            } else {
-                // swap the propagator to remove with the last one
-                last--;
-                if (p < last) {
-                    propagators[p] = propagators[last];
-                    pindices[p] = pindices[last];
-                    propagators[p].setVIndices(pindices[p], p);
-                }
-                propagators[last] = null;
-                pindices[last] = 0;
-                propagator.setVIndices(idxInProp, -1);
-            }
-        }
-
-        void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            int p = propagator.getVIndice(idxInProp);
-            assert p != -1;
-            assert propagators[p] == propagator : "Try to swap from " + var.getName() + ":\n" + propagator + "but found: " + propagators[p];
-            assert propagators[p].getVar(idxInProp) == var;
-            int pos = splitter.add(1) - 1;
-            if (first > 0) {
-                if (pos == 0) {
-                    shiftTail();
-                    //then recompute the position of this
-                    p = propagator.getVIndice(idxInProp);
-                } else {
-                    // s = Math.min(s, first);
-                    throw new UnsupportedOperationException();
-                }
-            }
-            if (pos < p) {
-                propagators[p] = propagators[pos];
-                propagators[pos] = propagator;
-                int pi = pindices[p];
-                pindices[p] = pindices[pos];
-                pindices[pos] = pi;
-                propagators[p].setVIndices(pindices[p], p);
-                propagators[pos].setVIndices(pindices[pos], pos);
-                assert propagators[pos] == propagator;
-            }
-        }
-
-        void schedule(ICause cause, PropagationEngine engine, int mask) {
-            int s = splitter.get();
-            if (first > 0) {
-                if (s == 0) {
-                    shiftTail();
-                } else {
-                    throw new UnsupportedOperationException();
-                }
-            }
-            for (int p = s; p < last; p++) {
-                Propagator<?> prop = propagators[p];
-                if (prop.isActive() && cause != prop) {
-                    engine.schedule(prop, pindices[p], mask);
-                }
-            }
-        }
-
-        private void shiftTail() {
-            for (int i = 0; i < last - first; i++) {
-                propagators[i] = propagators[i + first];
-                pindices[i] = pindices[i + first];
-                propagators[i].setVIndices(pindices[i], i);
-            }
-            for (int i = last - first; i < last; i++) {
-                propagators[i] = null;
-                pindices[i] = 0;
-            }
-            last -= first;
-            first = 0;
-        }
-
-        Stream<Propagator<?>> stream() {
-            int s = splitter.get();
-            if (first > 0) {
-                if (s == 0) {
-                    shiftTail();
-                }
-            }
-            Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
-                int i = s;
-
-                @Override
-                public boolean tryAdvance(Consumer<? super Propagator<?>> action) {
-                    if (i < last) {
-                        action.accept(propagators[i++]);
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-
-                @Override
-                public Spliterator<Propagator<?>> trySplit() {
-                    return null;
-                }
-
-                @Override
-                public long estimateSize() {
-                    return last - first;
-                }
-
-                @Override
-                public int characteristics() {
-                    return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
-                }
-
-            };
-            return StreamSupport.stream(it, false);
-        }
     }
 
     @Override
