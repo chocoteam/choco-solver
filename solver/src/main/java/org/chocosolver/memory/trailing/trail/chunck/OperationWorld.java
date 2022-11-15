@@ -12,12 +12,14 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.structure.IOperation;
 
+import java.util.Arrays;
+
 /**
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 31/05/2016
  */
-public class OperationWorld implements World{
+public class OperationWorld implements World {
 
 
     /**
@@ -43,7 +45,8 @@ public class OperationWorld implements World{
         variableStack[now] = v;
         now++;
         if (now == variableStack.length) {
-            resizeUpdateCapacity();
+            int newCapacity = (int) (variableStack.length * loadfactor);
+            variableStack = Arrays.copyOf(variableStack, newCapacity);
         }
     }
 
@@ -54,13 +57,6 @@ public class OperationWorld implements World{
             v = variableStack[i];
             v.undo();
         }
-    }
-
-    private void resizeUpdateCapacity() {
-        final int newCapacity = (int)(variableStack.length * loadfactor);
-        final IOperation[] tmp1 = new IOperation[newCapacity];
-        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
-        variableStack = tmp1;
     }
 
     public void clear() {

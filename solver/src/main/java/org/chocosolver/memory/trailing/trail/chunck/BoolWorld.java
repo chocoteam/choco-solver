@@ -12,6 +12,8 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.trailing.StoredBool;
 
+import java.util.Arrays;
+
 /**
  * A world devoted to integers.
  * @author Fabien Hermenier
@@ -70,7 +72,10 @@ public class BoolWorld implements World{
         stampStack[now] = oldStamp;
         now++;
         if (now == valueStack.length) {
-            resizeUpdateCapacity();
+            int newCapacity = (int)(variableStack.length * loadfactor);
+            valueStack = Arrays.copyOf(valueStack, newCapacity);
+            variableStack = Arrays.copyOf(variableStack, newCapacity);
+            stampStack = Arrays.copyOf(stampStack, newCapacity);
         }
     }
 
@@ -79,19 +84,6 @@ public class BoolWorld implements World{
         for (int i = now - 1; i >= 0; i--) {
             variableStack[i]._set(valueStack[i], stampStack[i]);
         }
-    }
-
-    private void resizeUpdateCapacity() {
-        int newCapacity = (int)(variableStack.length * loadfactor);
-        final StoredBool[] tmp1 = new StoredBool[newCapacity];
-        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
-        variableStack = tmp1;
-        final boolean[] tmp2 = new boolean[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
-        final int[] tmp3 = new int[newCapacity];
-        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
-        stampStack = tmp3;
     }
 
     @Override
