@@ -1,8 +1,9 @@
 name: Performance
 on:
   pull_request:
-    types: [ opened ]
-
+    types: [ opened, reopened, synchronize, edited ]
+  issue_comment:
+     types: [ created, edited ]
 jobs:
   trigger:
     runs-on: ubuntu-latest
