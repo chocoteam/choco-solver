@@ -12,6 +12,8 @@ package org.chocosolver.memory.trailing.trail.flatten;
 import org.chocosolver.memory.trailing.StoredInt;
 import org.chocosolver.memory.trailing.trail.IStoredIntTrail;
 
+import java.util.Arrays;
+
 
 public class StoredIntTrail implements IStoredIntTrail {
 
@@ -77,7 +79,7 @@ public class StoredIntTrail implements IStoredIntTrail {
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
         if (worldIndex == worldStartLevels.length - 1) {
-            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+            worldStartLevels = Arrays.copyOf(worldStartLevels, (int) (worldStartLevels.length * loadfactor));
         }
     }
 
@@ -160,11 +162,4 @@ public class StoredIntTrail implements IStoredIntTrail {
         System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
         stampStack = tmp3;
     }
-
-    private void resizeWorldCapacity(int newWorldCapacity) {
-        final int[] tmp = new int[newWorldCapacity];
-        System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
-        worldStartLevels = tmp;
-    }
-
 }

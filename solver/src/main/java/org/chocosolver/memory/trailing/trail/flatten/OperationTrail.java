@@ -12,6 +12,8 @@ package org.chocosolver.memory.trailing.trail.flatten;
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.IOperationTrail;
 
+import java.util.Arrays;
+
 /**
  * Created by IntelliJ IDEA.
  * User: chameau
@@ -64,7 +66,7 @@ public class OperationTrail implements IOperationTrail {
     public void worldPush(int worldIndex) {
         worldStartLevels[worldIndex] = currentLevel;
         if (worldIndex == worldStartLevels.length - 1) {
-            resizeWorldCapacity((int) (worldStartLevels.length * loadfactor));
+            worldStartLevels = Arrays.copyOf(worldStartLevels, (int) (worldStartLevels.length * loadfactor));
         }
     }
 
@@ -98,7 +100,7 @@ public class OperationTrail implements IOperationTrail {
     public void savePreviousState(IOperation operation) {
         valueStack[currentLevel++] = operation;
         if (currentLevel == valueStack.length) {
-            resizeUpdateCapacity();
+            valueStack = Arrays.copyOf(valueStack, (int) (valueStack.length * loadfactor));
         }
     }
 
@@ -113,19 +115,5 @@ public class OperationTrail implements IOperationTrail {
         for (int t = currentWorldIndex; t > at; t--) {
             worldStartLevels[t]++;
         }
-    }
-
-    private void resizeUpdateCapacity() {
-        final int newCapacity = (int) (valueStack.length * loadfactor);
-        // First, copy the stack of former values
-        final IOperation[] tmp2 = new IOperation[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
-    }
-
-    private void resizeWorldCapacity(int newWorldCapacity) {
-        final int[] tmp = new int[newWorldCapacity];
-        System.arraycopy(worldStartLevels, 0, tmp, 0, worldStartLevels.length);
-        worldStartLevels = tmp;
     }
 }
