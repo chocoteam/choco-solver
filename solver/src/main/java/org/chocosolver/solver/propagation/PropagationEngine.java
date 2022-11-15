@@ -475,7 +475,7 @@ public class PropagationEngine {
 
         private void ensureCapacity() {
             if (size >= elements.length - 1) {
-                int nsize = ArrayUtils.newBoundedSize(elements.length);
+                int nsize = ArrayUtils.newBoundedSize(elements.length, 8);
                 elements = Arrays.copyOf(elements, nsize);
                 keys = Arrays.copyOf(keys, nsize);
             }

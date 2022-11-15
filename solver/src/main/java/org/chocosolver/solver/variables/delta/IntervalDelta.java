@@ -39,7 +39,7 @@ public final class IntervalDelta extends TimeStampedObject implements IIntervalD
 
     private void ensureCapacity() {
         if (last >= from.length) {
-            int nsize = ArrayUtils.newBoundedSize(last);
+            int nsize = ArrayUtils.newBoundedSize(last, from.length * 2);
             from = Arrays.copyOf(from, nsize);
             to = Arrays.copyOf(to, nsize);
             causes = Arrays.copyOf(causes, nsize);

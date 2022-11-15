@@ -395,7 +395,7 @@ public abstract class AbstractVariable implements Variable {
         }
         // 2. then add the monitor
         if (mIdx == monitors.length) {
-            monitors = Arrays.copyOf(monitors, ArrayUtils.newBoundedSize(monitors.length));
+            monitors = Arrays.copyOf(monitors, ArrayUtils.newBoundedSize(monitors.length, 16));
         }
         monitors[mIdx++] = monitor;
     }
@@ -415,8 +415,8 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public void subscribeView(IView<?> view, int idx) {
         if (vIdx == views.length) {
-            views = Arrays.copyOf(views, ArrayUtils.newBoundedSize(views.length));
-            idxInViews = Arrays.copyOf(idxInViews, ArrayUtils.newBoundedSize(idxInViews.length));
+            views = Arrays.copyOf(views, ArrayUtils.newBoundedSize(views.length, 16));
+            idxInViews = Arrays.copyOf(idxInViews, ArrayUtils.newBoundedSize(idxInViews.length, 16));
         }
         views[vIdx] = view;
         idxInViews[vIdx] = idx;
@@ -632,7 +632,7 @@ public abstract class AbstractVariable implements Variable {
                 shiftTail();
             }
             if (last == capacity - 1) {
-                capacity = ArrayUtils.newBoundedSize(capacity);
+                capacity = ArrayUtils.newBoundedSize(capacity, capacity * 2);
                 propagators = Arrays.copyOf(propagators, capacity);
                 pindices = Arrays.copyOf(pindices, capacity);
             }
