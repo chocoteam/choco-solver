@@ -572,7 +572,7 @@ public class Model implements IModel {
     /**
      * Returns the object associated with the named <code>hookName</code>
      *
-     * @param hookName the name of the hook to return
+     * @param hookName     the name of the hook to return
      * @param defaultValue the default mapping of the key
      * @return the object associated to the name <code>hookName</code>,
      * or defaultValue if this map contains no mapping for the key
@@ -813,7 +813,7 @@ public class Model implements IModel {
      */
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
-            vars = Arrays.copyOf(vars, ArrayUtils.newBoundedSize(vars.length));
+            vars = Arrays.copyOf(vars, ArrayUtils.newBoundedSize(vars.length, vars.length * 2));
         }
         vars[vIdx++] = variable;
         switch ((variable.getTypeAndKind() & Variable.KIND)) {
@@ -957,7 +957,7 @@ public class Model implements IModel {
                 if (!getSolver().getEngine().isInitialized()) {
                     throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                             "A call to Model.post(Constraint) is more appropriate.");
-                }else {
+                } else {
                     for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }

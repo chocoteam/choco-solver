@@ -37,7 +37,7 @@ public final class EnumDelta extends TimeStampedObject implements IEnumDelta {
 
     private void ensureCapacity() {
         if (last >= rem.length) {
-            int nsize = ArrayUtils.newBoundedSize(last);
+            int nsize = ArrayUtils.newBoundedSize(last, rem.length * 2);
             rem = Arrays.copyOf(rem, nsize);
             causes = Arrays.copyOf(causes, nsize);
         }

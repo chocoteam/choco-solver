@@ -802,12 +802,12 @@ public enum ArrayUtils {
 
     /**
      * Compute a new size, classically for array.
-     * The new size is at least increased by 1 and at most by 10.
+     * The new size is at least increased by 1 and at most by `max`.
      *
      * @param curSize the current size
      * @return the new size
      */
-    public static int newBoundedSize(int curSize) {
-        return curSize + Math.max(1, Math.min(10, (curSize >> 1)));
+    public static int newBoundedSize(int curSize, int max) {
+        return curSize + Math.max(1, Math.min(max, (curSize >> 1)));
     }
 }
