@@ -14,6 +14,7 @@ import org.testng.TestListenerAdapter;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Arrays;
 
 /**
  * <br/>
@@ -34,7 +35,8 @@ public class PerformanceListener extends TestListenerAdapter {
 
     @Override
     public void onTestStart(ITestResult tr) {
-        System.out.printf("\t%s.%s ..", tr.getTestClass().getName(), tr.getName());
+        System.out.printf("\t%s(%s) ..", tr.getName(),
+                Arrays.toString(tr.getParameters()));
         original = System.out;
         System.setOut(fake);
     }
