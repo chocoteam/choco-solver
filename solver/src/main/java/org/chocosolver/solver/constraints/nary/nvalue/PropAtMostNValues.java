@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.nvalue;
 
+import gnu.trove.iterator.TIntIterator;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -16,9 +17,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 
 import java.util.BitSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.QUADRATIC;
 import static org.chocosolver.util.tools.ArrayUtils.concat;
@@ -45,6 +43,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     private final TIntArrayList dVar;
     private int minVal, nbInst;
     private final BitSet valSet;
+    private final TIntArrayList intersection;
 
     //***********************************************************************************
     // CONSTRUCTORS
@@ -55,9 +54,9 @@ public class PropAtMostNValues extends Propagator<IntVar> {
      * The number of distinct values among concerned values in the set of variables vars is exactly equal to nValues
      * No level of consistency for the filtering
      *
-     * @param variables array of variables
+     * @param variables       array of variables
      * @param concernedValues will be sorted!
-     * @param nValues integer variable
+     * @param nValues         integer variable
      */
     public PropAtMostNValues(IntVar[] variables, int[] concernedValues, IntVar nValues) {
         super(concat(variables, nValues), QUADRATIC, false);
@@ -76,6 +75,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         valSet = new BitSet(maxVal - minVal + 1);
         instVals = new int[n];
         dVar = new TIntArrayList();
+        intersection = new TIntArrayList();
     }
 
     //***********************************************************************************
@@ -125,7 +125,7 @@ public class PropAtMostNValues extends Propagator<IntVar> {
         }
         nbInst = count;
         // filtering cardinality variable
-        vars[n].updateLowerBound(count, this);
+        vars[n].updateBounds(count, countMax, this);
         // filtering decision variables
         if (count != countMax && vars[n].isInstantiated())
             if (count == vars[n].getUB()) {
@@ -184,24 +184,24 @@ public class PropAtMostNValues extends Propagator<IntVar> {
     }
 
     private void intersectionDomains() {
-        final List<Integer> inter = new LinkedList<>();
+        intersection.resetQuick();
         IntVar v = vars[dVar.get(0)];
         for (int val = v.getLB(); val <= v.getUB(); val = v.nextValue(val)) {
-            inter.add(val);
+            intersection.add(val);
         }
 
         for (int i = 0; i < dVar.size(); i++) {
             final int next = dVar.get(i);
             v = vars[next];
-            for (final Iterator it = inter.iterator(); it.hasNext(); ) {
-                if (!v.contains((Integer) it.next())) {
+            for (final TIntIterator it = intersection.iterator(); it.hasNext(); ) {
+                if (!v.contains(it.next())) {
                     it.remove();
                 }
             }
         }
         valSet.clear();
-        for (final Integer i : inter) {
-            valSet.set(i - minVal);
+        for (final TIntIterator it = intersection.iterator(); it.hasNext(); ) {
+            valSet.set(it.next() - minVal);
         }
     }
 

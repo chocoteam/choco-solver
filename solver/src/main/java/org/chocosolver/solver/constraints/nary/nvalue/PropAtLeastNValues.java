@@ -95,7 +95,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
         // filtering cardinality variable
-        vars[n].updateUpperBound(countMax, this);
+        vars[n].updateBounds(count, countMax, this);
         // filtering decision variables
         boolean again = false;
         if (count < countMax && countMax == vars[n].getLB()) {
@@ -228,18 +228,7 @@ public class PropAtLeastNValues extends Propagator<IntVar> {
             }
         }
      }
-    /**
-     * Find in the implication graph and add in the explanation all instantiation events (the real events added are inverted because only disjunctions are allowed for explanation)
-     */
-    private void explainEquaForalliForallt(ExplanationForSignedClause e, int[] indexes) {
-        for (int i : indexes) {
-            for (int t : e.root(vars[i])) {
-                if (e.domain(vars[i]).contains(t)) {
-                    vars[i].intersectLit(e.setDiffVal(t), e);
-                }
-            }
-        }
-    }
+
     /**
      * Detect and explain the event at pivot variable p
      * @param p pivot variable

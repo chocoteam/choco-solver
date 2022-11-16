@@ -15,6 +15,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
@@ -23,6 +24,7 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.BitSet;
 
 public class NValueTest {
@@ -115,9 +117,9 @@ public class NValueTest {
         final IntVar N = model.intVar("N", 6);
         model.atMostNValues(XS, N, false).post();
 
-
+        model.getSolver().setSearch(Search.inputOrderLBSearch(XS));
         model.getSolver().solve();
-        Assert.assertEquals(model.getSolver().getBackTrackCount(), 0);
+        Assert.assertEquals(model.getSolver().getBackTrackCount(), 2407);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -170,6 +172,34 @@ public class NValueTest {
             model.getSolver().setSearch(new FullyRandom(ArrayUtils.append(XS, new IntVar[]{N}), i));
             model.getSolver().findAllSolutions();
             Assert.assertEquals(model.getSolver().getSolutionCount(), 3720, "Seed:" + i);
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAtMost2() {
+        Model model = new Model();
+        int n = 10;
+        final IntVar[] XS = model.intVarArray("XS", n, 0, n, false);
+        final IntVar N = model.intVar("N", 0, n);
+        model.atMostNValues(XS, N, true).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(XS, 0));
+        if (solver.solve()) {
+            Assert.assertTrue(N.isInstantiated(), N + Arrays.toString(XS));
+        }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testAtLeast2() {
+        Model model = new Model();
+        int n = 10;
+        final IntVar[] XS = model.intVarArray("XS", n, 0, n, false);
+        final IntVar N = model.intVar("N", 0, n);
+        model.atLeastNValues(XS, N, true).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.randomSearch(XS, 0));
+        if (solver.solve()) {
+            Assert.assertTrue(N.isInstantiated(), N + Arrays.toString(XS));
         }
     }
 }
