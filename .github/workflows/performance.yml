@@ -1,36 +1,18 @@
-name: Performance
 on:
   pull_request:
-    types: [ opened, reopened, synchronize, edited ]
+    types: [opened]
   issue_comment:
-     types: [ created, edited ]
+    types: [created]
 jobs:
-  trigger:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
         with:
-          trigger: '@evaluate'
+          trigger: '@deploy'
           reaction: rocket
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-      - uses: actions/setup-java@v3
+      - run: 'echo Found it!'
         if: steps.check.outputs.triggered == 'true'
-        with:
-          java-version: '11'
-          distribution: 'temurin'
-      - uses: actions/checkout@v3
-        if: steps.check.outputs.triggered == 'true'
-      - uses: actions/checkout@v3
-        if: steps.check.outputs.triggered == 'true'
-        with:
-          repository: chocoteam/benchmarks
-          path: ${{ github.workspace }}/parsers/src/test/resources/benchmarks
-      # Regression tests
-      - name: Test ${{ matrix.group }}
-        run: mvn -B --file pom.xml test -DtestFailureIgnore=true -Dgroups="benchmark"
-      - name: 'Upload perf results'
-        uses: actions/upload-artifact@v3
-        with:
-          path: ${{ github.workspace }}/parsers/target/benchmark_results.csv
