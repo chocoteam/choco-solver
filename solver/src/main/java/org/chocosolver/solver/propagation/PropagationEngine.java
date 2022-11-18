@@ -66,7 +66,7 @@ public class PropagationEngine {
     /**
      * The last propagator executed
      */
-    Propagator<?> lastProp;
+    protected Propagator<?> lastProp;
     /**
      * One bit per queue: true if the queue is not empty.
      */
