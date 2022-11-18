@@ -1,16 +1,16 @@
+name: Benchmarking
 on:
-  pull_request:
-    types: [opened]
   issue_comment:
-    types: [created]
+    types: [ created ]
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
         with:
-          trigger: '@deploy'
+          trigger: '/bench'
           reaction: rocket
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
