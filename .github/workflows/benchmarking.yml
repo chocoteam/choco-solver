@@ -14,7 +14,7 @@ jobs:
           reaction: rocket
         env:
           GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}'
-      - run: 'Execution of the performance test suite'
+      - run: 'echo Execution of the performance test suite'
         if: steps.check.outputs.triggered == 'true'
 
   evaluate:
