@@ -23,7 +23,7 @@ jobs:
 
   evaluate:
     needs: trigger
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: ${{needs.trigger.outputs.output1}} == 'true'
     steps:
       - uses: actions/setup-java@v3
