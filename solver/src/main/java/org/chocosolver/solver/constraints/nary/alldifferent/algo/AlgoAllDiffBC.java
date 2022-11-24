@@ -13,9 +13,9 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
+import org.chocosolver.util.tools.MathUtils;
 
 import java.util.Comparator;
-import org.chocosolver.util.tools.MathUtils;
 
 public class AlgoAllDiffBC {
 
@@ -28,12 +28,12 @@ public class AlgoAllDiffBC {
 
     private Interval[] intervals, minsorted, maxsorted;
 
-    private final Propagator aCause;
+    private final Propagator<?> aCause;
     private IntVar[] vars;
 
     private ArraySort<Interval> sorter;
 
-    public AlgoAllDiffBC(Propagator cause) {
+    public AlgoAllDiffBC(Propagator<?> cause) {
         this.aCause = cause;
     }
 

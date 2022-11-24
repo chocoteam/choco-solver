@@ -52,7 +52,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
     private final int[] CUR;
     private boolean prune;
 
-    protected final ArraySort sorter;
+    private final ArraySort<?> sorter;
     private final IntComparator sortmincomp1 = (i, j) -> {
         int z = 0;
         while (z <= k && XLB[i][z] == XLB[j][z]) {
@@ -134,7 +134,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         this.ARRAY = new int[n];
         this.CUR = new int[k + 1];
 
-        sorter = new ArraySort(n, false, true);
+        sorter = new ArraySort<>(n, false, true);
     }
 
 
@@ -265,7 +265,7 @@ public final class PropKeysorting extends Propagator<IntVar> {
         }
         sorter.sort(SORTMAX, n, sortmaxcomp1);
         y = n - 1;
-        for (int i = n - 1; i > +0; i--) {
+        for (int i = n - 1; i > 0; i--) {
             x = SORTMAX[i];
             while (y >= 0 && lexLt(XUB[x], YLB[y], k + 1)) {
                 y--;

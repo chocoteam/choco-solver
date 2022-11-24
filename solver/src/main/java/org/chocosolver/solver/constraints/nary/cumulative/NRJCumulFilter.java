@@ -28,7 +28,7 @@ public class NRJCumulFilter extends CumulFilter{
 	//***********************************************************************************
 
 	private final int[] sor_array;
-	private final ArraySort sorter;
+	private final ArraySort<?> sorter;
 	private final IntComparator comparator;
 	private final int[] slb;
 	private final int[] dlb;
@@ -42,7 +42,7 @@ public class NRJCumulFilter extends CumulFilter{
 	public NRJCumulFilter(int n){
 		super(n);
 		sor_array = new int[n];
-		sorter = new ArraySort(n,false,true);
+		sorter = new ArraySort<>(n,false,true);
 		slb = new int[n];
 		dlb = new int[n];
 		eub = new int[n];
