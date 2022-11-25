@@ -124,9 +124,17 @@ public class PropSum extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.instantiation();
             case LE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.INCLOW : IntEventType.DECUPP);
+                if(vIdx < pos){
+                    return IntEventType.lowerBoundAndInst();
+                }else{
+                    return IntEventType.upperBoundAndInst();
+                }
             case GE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.DECUPP : IntEventType.INCLOW);
+                if(vIdx < pos){
+                    return IntEventType.upperBoundAndInst();
+                }else{
+                    return IntEventType.lowerBoundAndInst();
+                }
             default:
                 return IntEventType.boundAndInst();
         }

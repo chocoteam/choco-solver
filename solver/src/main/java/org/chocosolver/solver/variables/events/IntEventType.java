@@ -28,7 +28,7 @@ import org.chocosolver.solver.ICause;
  * for example if one propagator removes values 1,2 and 3 from V={1, 2, 3, 4, 5},
  * it can be seen either by a sequence of 3 REMOVE OR one INCLOW.
  * Both express the same operations, one with 3 items the second with only one
- *
+ * <p>
  * Now, the purposes:
  * <ol>
  *     <li>
@@ -89,9 +89,9 @@ import org.chocosolver.solver.ICause;
  * </pre>
  * your propagator will be informed anytime one of its variable is modified by any events.
  * Later, when your propagator is actually executed, the aggregated events mask is given as input
- * (2nd parameter of {@link org.chocosolver.solver.constraints.Propagator#propagate(int i,int m)}),
+ * (2nd parameter of {@link org.chocosolver.solver.constraints.Propagator#propagate(int i, int m)}),
  * and here you can adapt the algorithm to the events got.
- *
+ * <p>
  * Indeed, you can have a merge event made of {@link #DECUPP} and {@link #INCLOW} and {@link #REMOVE} which indicates that:
  * <ol>
  *    <li>the upper bound of the variable i has decreased,</li>
@@ -167,10 +167,27 @@ public enum IntEventType implements IEventType {
     private static final int IDI = combine(BOUND, INSTANTIATE);
 
     /**
+     * Combination of masks for bound + instantiate events
+     */
+    private static final int II = combine(INCLOW, INSTANTIATE);
+
+    /**
+     * Combination of masks for bound + instantiate events
+     */
+    private static final int DI = combine(DECUPP, INSTANTIATE);
+
+    /**
      * Combines into a single mask some evts.
+     *
      * @param evts list of events to combine
      * @return mask expressing the combination of evts
+     * @deprecated change visibility to protected
+     * @see #all()
+     * @see #boundAndInst()
+     * @see #lowerBoundAndInst()
+     * @see #upperBoundAndInst()
      */
+    @Deprecated
     public static int combine(IntEventType... evts) {
         int mask = 0;
         for (int i = 0; i < evts.length; i++) {
@@ -191,6 +208,20 @@ public enum IntEventType implements IEventType {
      */
     public static int boundAndInst() {
         return IDI;
+    }
+
+    /**
+     * @return the bound and instantiation events' mask
+     */
+    public static int lowerBoundAndInst() {
+        return II;
+    }
+
+    /**
+     * @return the bound and instantiation events' mask
+     */
+    public static int upperBoundAndInst() {
+        return DI;
     }
 
     /**
