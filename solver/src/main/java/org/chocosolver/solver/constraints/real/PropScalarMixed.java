@@ -121,9 +121,9 @@ public class PropScalarMixed extends Propagator<Variable> {
                 if (VariableUtils.isReal(vars[vIdx])) {
                     return c[vIdx] > 0 ? RealEventType.DECUPP.getMask() : RealEventType.INCLOW.getMask();
                 } else {
-                    if(c[vIdx] > 0){
+                    if (c[vIdx] > 0) {
                         return IntEventType.upperBoundAndInst();
-                    }else{
+                    } else {
                         return IntEventType.lowerBoundAndInst();
                     }
                 }
@@ -453,20 +453,29 @@ public class PropScalarMixed extends Propagator<Variable> {
     protected ESat check(double sumLB, double sumUB) {
         switch (o) {
             case LE:
-                if (sumLB <= b) {
+                if (sumUB <= b) {
                     return ESat.TRUE;
                 }
-                return ESat.FALSE;
+                if (sumLB > b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
             case GE:
-                if (sumUB >= b) {
+                if (sumLB >= b) {
                     return ESat.TRUE;
                 }
-                return ESat.FALSE;
+                if (sumUB < b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
             default:
-                if (sumLB <= b && b <= sumUB) {
+                if (sumUB <= b && sumLB >= b) {
                     return ESat.TRUE;
                 }
-                return ESat.FALSE;
+                if (sumLB > b || sumUB < b) {
+                    return ESat.FALSE;
+                }
+                return ESat.UNDEFINED;
         }
     }
 
