@@ -6,11 +6,15 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
+    env:
+      allowed_users: '${{ secrets.GH_ALLOWED }}'
+      user: '${{ github.actor }}'
     outputs:
       output1: ${{ steps.check.outputs.triggered }}
     steps:
       - uses: khan/pull-request-comment-trigger@v1.1.0
         id: check
+        if: contains(${{ env.allowed_users }}, ${{ env.user }})
         with:
           trigger: '/bench'
           reaction: rocket
@@ -23,7 +27,7 @@ jobs:
 
   evaluate:
     needs: trigger
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     if: ${{needs.trigger.outputs.output1}} == 'true'
     steps:
       - uses: actions/setup-java@v3
