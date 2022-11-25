@@ -48,7 +48,7 @@ public class PropDiffN extends Propagator<IntVar> {
         if (!(n == y.length && n == dx.length && n == dy.length)) {
             throw new SolverException("PropDiffN variable arrays do not have same size");
         }
-        overlappingBoxes = new UndirectedGraph(model, n, SetType.LINKED_LIST, true);
+        overlappingBoxes = new UndirectedGraph(model, n, SetType.BITSET, true);
         boxesToCompute = new TIntArrayList(n);
         for (int i = 0; i < n; i++) {
             for (int j = i + 1; j < n; j++) {
