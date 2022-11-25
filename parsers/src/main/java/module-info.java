@@ -21,6 +21,7 @@ module org.chocosolver.parsers {
     requires java.sql;
     requires org.antlr.antlr4.runtime;
     requires trove4j;
+    requires java.management;
 
     opens org.chocosolver.parser to args4j, org.testng;
     opens org.chocosolver.parser.mps to args4j;
