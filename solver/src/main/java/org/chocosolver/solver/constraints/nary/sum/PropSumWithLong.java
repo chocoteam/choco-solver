@@ -77,16 +77,16 @@ public class PropSumWithLong extends Propagator<IntVar> {
      * the other ones are equal to -1.
      *
      * @param variables list of integer variables
-     * @param pos position of the last positive coefficient
-     * @param o operator amng EQ, LE, GE and NE
-     * @param b bound to respect
+     * @param pos       position of the last positive coefficient
+     * @param o         operator amng EQ, LE, GE and NE
+     * @param b         bound to respect
      */
     public PropSumWithLong(IntVar[] variables, int pos, Operator o, long b) {
         this(variables, pos, o, b, computePriority(variables.length), false);
     }
 
 
-    PropSumWithLong(IntVar[] variables, int pos, Operator o, long b, PropagatorPriority priority, boolean reactOnFineEvent){
+    PropSumWithLong(IntVar[] variables, int pos, Operator o, long b, PropagatorPriority priority, boolean reactOnFineEvent) {
         super(variables, priority, reactOnFineEvent);
         this.pos = pos;
         this.o = o;
@@ -98,6 +98,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Compute the priority of the propagator wrt the number of involved variables
+     *
      * @param nbvars number of variables
      * @return the priority
      */
@@ -119,9 +120,17 @@ public class PropSumWithLong extends Propagator<IntVar> {
             case NQ:
                 return IntEventType.instantiation();
             case LE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.INCLOW : IntEventType.DECUPP);
+                if (vIdx < pos) {
+                    return IntEventType.lowerBoundAndInst();
+                } else {
+                    return IntEventType.upperBoundAndInst();
+                }
             case GE:
-                return IntEventType.combine(IntEventType.INSTANTIATE, vIdx < pos ? IntEventType.DECUPP : IntEventType.INCLOW);
+                if (vIdx < pos) {
+                    return IntEventType.upperBoundAndInst();
+                } else {
+                    return IntEventType.lowerBoundAndInst();
+                }
             default:
                 return IntEventType.boundAndInst();
         }
@@ -142,7 +151,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
         for (; i < l; i++) { // then the negative ones
             lb = -vars[i].getUB();
@@ -150,7 +159,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
     }
 
@@ -162,6 +171,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Execute filtering wrt the operator
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filter() throws ContradictionException {
@@ -184,6 +194,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Apply filtering when operator is EQ
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnEq() throws ContradictionException {
@@ -222,7 +233,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
                 // then negative ones
@@ -247,7 +258,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
             }
@@ -256,11 +267,12 @@ public class PropSumWithLong extends Propagator<IntVar> {
                 this.setPassive();
                 return;
             }
-        }while (anychange) ;
+        } while (anychange);
     }
 
     /**
      * Apply filtering when operator is LE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnLeq() throws ContradictionException {
@@ -285,7 +297,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -299,7 +311,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -310,6 +322,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Apply filtering when operator is GE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnGeq() throws ContradictionException {
@@ -319,7 +332,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
         if (model.getSolver().isLearnOff() && E < 0) {
             fails();
         }
-        if(maxI > E) {
+        if (maxI > E) {
             maxI = 0;
             long lb, ub;
             int i = 0;
@@ -334,7 +347,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -348,7 +361,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -359,6 +372,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Apply filtering when operator is NE
+     *
      * @throws ContradictionException if contradiction is detected
      */
     protected void filterOnNeq() throws ContradictionException {
@@ -403,11 +417,12 @@ public class PropSumWithLong extends Propagator<IntVar> {
 
     /**
      * Whether the current state of the scalar product is entailed
+     *
      * @param sumLB sum of lower bounds
      * @param sumUB sum of upper bounds
      * @return the entailment check
      */
-    public ESat check(long sumLB, long sumUB){
+    public ESat check(long sumLB, long sumUB) {
         switch (o) {
             case NQ:
                 if (sumUB < b || sumLB > b) {
@@ -460,8 +475,8 @@ public class PropSumWithLong extends Propagator<IntVar> {
         return linComb.toString();
     }
 
-    public static long nb(Operator co){
-        switch (co){
+    public static long nb(Operator co) {
+        switch (co) {
             case LE:
                 return 1;
             case GE:
@@ -471,8 +486,8 @@ public class PropSumWithLong extends Propagator<IntVar> {
         }
     }
 
-    public static Operator nop(Operator co){
-        switch (co){
+    public static Operator nop(Operator co) {
+        switch (co) {
             case LE:
                 return Operator.GE;
             case GE:
@@ -482,7 +497,7 @@ public class PropSumWithLong extends Propagator<IntVar> {
         }
     }
 
-    protected PropSumWithLong opposite(){
+    protected PropSumWithLong opposite() {
         return new PropSumWithLong(vars, pos, nop(o), b + nb(o));
     }
 }

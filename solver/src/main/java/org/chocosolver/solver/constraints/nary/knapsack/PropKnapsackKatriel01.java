@@ -112,10 +112,10 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             return IntEventType.boundAndInst();
         } else if (vIdx == n) {
             // updates on the max weight
-            return IntEventType.combine(IntEventType.DECUPP, IntEventType.INSTANTIATE);
+            return IntEventType.upperBoundAndInst();
         } else /* vIdx == n + 1 */ {
             // updates on the energy variable
-            return IntEventType.combine(IntEventType.INCLOW, IntEventType.INSTANTIATE);
+            return IntEventType.lowerBoundAndInst();
         }
     }
 
