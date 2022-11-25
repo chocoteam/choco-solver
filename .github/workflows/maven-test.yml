@@ -38,7 +38,7 @@ jobs:
         run: mvn -B --file pom.xml package -Pcoverage -DtestFailureIgnore=true -Dgroups=${{ matrix.group }}
   test-parser:
     needs: [ test-solver ]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Tests matrix
     strategy:
       #fail-fast: false
@@ -67,7 +67,7 @@ jobs:
 
   test-mzn:
     needs: [ test-solver ]
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     # Tests matrix
     strategy:
       #fail-fast: false
