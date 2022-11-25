@@ -28,8 +28,6 @@ import org.chocosolver.util.ESat;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import static org.chocosolver.solver.variables.events.IntEventType.*;
-
 public class SetTimes extends Propagator<IntVar> implements VariableSelector<IntVar>, IMonitorUpBranch {
     private final Task[] tasks;
     private final HashMap<IntVar, Integer> notSelectable;
@@ -88,7 +86,7 @@ public class SetTimes extends Propagator<IntVar> implements VariableSelector<Int
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.combine(INCLOW, INSTANTIATE);
+        return IntEventType.lowerBoundAndInst();
     }
 
     @Override
