@@ -238,22 +238,6 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    @Deprecated
-    public int swapOnActivate(Propagator<?> propagator, int idxInProp) {
-        throw new UnsupportedOperationException("Cannot swap on activation");
-    }
-
-    @Override
-    public final Propagator<?>[] getPropagators() {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final Propagator<?> getPropagator(int idx) {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
     public Stream<Propagator<?>> streamPropagators() {
         Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
 
@@ -299,29 +283,6 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public final int getNbProps() {
         return nbPropagators;
-    }
-
-    @Override
-    public final int[] getPIndices() {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final void setPIndice(int pos, int val) {
-        //pindices[pos] = val;
-        throw new UnsupportedOperationException("setPIndice to be implemented");
-    }
-
-    @Override
-    @Deprecated
-    public final int getDindex(int i) {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final int getIndexInPropagator(int pidx) {
-        //return pindices[pidx];
-        throw new UnsupportedOperationException("setPIndice to be implemented");
     }
 
     @Override

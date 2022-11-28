@@ -13,8 +13,6 @@ import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
 import org.chocosolver.memory.structure.IOperation;
 
 
-
-
 /**
  * An interface to ease declaration of backtrackable objects (mostly primitives).
  *
@@ -90,6 +88,7 @@ public interface IEnvironment  {
      * @return new IStateDouble computed by the environment
      */
 
+    @SuppressWarnings("unused")
     IStateDouble makeFloat();
 
     /**
@@ -104,6 +103,7 @@ public interface IEnvironment  {
      * Factory pattern: new backtrackable long attached to this environment.
      * @return a backtrackable long
      */
+    @SuppressWarnings("unused")
     IStateLong makeLong();
 
     /**
@@ -120,6 +120,14 @@ public interface IEnvironment  {
      * @return IStateBitSet
      */
     IStateBitSet makeBitSet(int size);
+
+    /**
+     * Factory pattern: new SparseBitSet objects are created by the environment
+     *
+     * @param blocksize block size in bits.
+     * @return IStateBitSet
+     */
+    IStateBitSet makeSparseBitset(int blocksize);
 
     /**
      * Factory pattern: new IStateIntVector objects are created by the environment
@@ -145,6 +153,7 @@ public interface IEnvironment  {
      *
      * @return IndexedBipartiteSet
      */
+    @SuppressWarnings("unused")
     BasicIndexedBipartiteSet getSharedBipartiteSetForBooleanVars();
 
     /**

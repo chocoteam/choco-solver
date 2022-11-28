@@ -10,6 +10,14 @@ NEXT MILESTONE
 ### Major features:
 
 ### Deprecated API (to be removed in next release):
+From `Solver`:
+- `Propagate getPropagate()`
+- `void setPropagate(Propagate p)`
+- `Closeable outputSearchTreeToCPProfiler(boolean domain)`
+
+Others:
+- `Propagate` class
+- `IntEventType`: `int combine(IntEventType... evts)`
 
 ### Other closed issues and pull requests:
 See [milestone 4.10.11](https://github.com/chocoteam/choco-solver/milestone/xx)
