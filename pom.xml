@@ -271,7 +271,7 @@
                     <!-- see http://www.mojohaus.org/extra-enforcer-rules/enforceBytecodeVersion.html -->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.0.0
+                    <version>3.1.0
                     </version> <!-- find the latest version at http://maven.apache.org/plugins/maven-enforcer-plugin/ -->
                     <executions>
                         <execution>
@@ -293,7 +293,7 @@
                         <dependency>
                             <groupId>org.codehaus.mojo</groupId>
                             <artifactId>extra-enforcer-rules</artifactId>
-                            <version>1.5.1</version>
+                            <version>1.6.1</version>
                         </dependency>
                         <dependency>
                             <groupId>org.apache.maven.shared</groupId>
@@ -337,7 +337,7 @@
                         <dependency>
                             <groupId>com.puppycrawl.tools</groupId>
                             <artifactId>checkstyle</artifactId>
-                            <version>10.4</version>
+                            <version>10.5.0</version>
                         </dependency>
                     </dependencies>
                     <executions>
@@ -356,7 +356,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -475,7 +475,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-project-info-reports-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.4.1</version>
                 <reportSets>
                     <reportSet>
                         <reports>
