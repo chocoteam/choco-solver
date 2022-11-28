@@ -18,7 +18,7 @@ public class SparseBitSetTest {
   @Test
   public void testNew() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     Assert.assertTrue(bs.isEmpty());
     Assert.assertEquals(0, bs.cardinality());
     Assert.assertEquals(-1, bs.nextSetBit(0));
@@ -27,7 +27,7 @@ public class SparseBitSetTest {
   @Test
   public void testSetGet() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     Assert.assertFalse(bs.get(72904));
     bs.set(65);
     Assert.assertTrue(bs.get(65));
@@ -49,7 +49,7 @@ public class SparseBitSetTest {
   @Test
   public void testNextSetBit() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     // Set inside the first block.
     bs.set(1);
     // Other consecutive bit sets on different blocks.
@@ -76,7 +76,7 @@ public class SparseBitSetTest {
   @Test
   public void testNextClearBit() {
     final IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     Assert.assertEquals(0, bs.nextClearBit(0));
     bs.set(1);
     // Before the set bit, same block.
@@ -102,7 +102,7 @@ public class SparseBitSetTest {
   @Test
   public void testPrevClearBit() {
     final IEnvironment env = new EnvironmentTrailing();
-    final IStateBitSet bs = new SparseBitSet(env, 64);
+    final IStateBitSet bs = env.makeSparseBitset(64);
     Assert.assertEquals(bs.prevClearBit(0), 0);
     bs.set(0);
     Assert.assertEquals(bs.prevClearBit(0), -1);
@@ -114,7 +114,7 @@ public class SparseBitSetTest {
   @Test
   public void testPrevSetBit() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     // Set inside the first block.
     bs.set(1);
     // Other consecutive bit sets on different blocks
@@ -141,7 +141,7 @@ public class SparseBitSetTest {
   @Test
   public void testClear() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     bs.set(1);
     bs.set(128);
     bs.set(8212);
@@ -167,7 +167,7 @@ public class SparseBitSetTest {
       expectedExceptions = IndexOutOfBoundsException.class)
   public void testBadSetRanges(final int from, final int to) {
     final IEnvironment env = new EnvironmentTrailing();
-    final IStateBitSet bs = new SparseBitSet(env, 64);
+    final IStateBitSet bs = env.makeSparseBitset(64);
     bs.set(from, to);
   }
 
@@ -175,14 +175,14 @@ public class SparseBitSetTest {
       expectedExceptions = IndexOutOfBoundsException.class)
   public void testBadClearRanges(final int from, final int to) {
     final IEnvironment env = new EnvironmentTrailing();
-    final IStateBitSet bs = new SparseBitSet(env, 64);
+    final IStateBitSet bs = env.makeSparseBitset(64);
     bs.clear(from, to);
   }
 
   @Test
   public void testSetRange() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     IStateBitSet ref = new S64BitSet(env);
 
     bs.set(3, 135);
@@ -239,7 +239,7 @@ public class SparseBitSetTest {
   @Test
   public void testSize() {
     final IEnvironment env = new EnvironmentTrailing();
-    final IStateBitSet sparse = new SparseBitSet(env, 64);
+    final IStateBitSet sparse = env.makeSparseBitset(64);
     sparse.set(0);
     // 64 blocks of 64 bits each.
     Assert.assertEquals(sparse.size(), 64 * 64);
@@ -251,7 +251,7 @@ public class SparseBitSetTest {
   @Test
   public void testClearRange() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     bs.clear(0, 187);
     Assert.assertEquals(bs.cardinality(), 0);
     bs.set(10, 237);
@@ -281,7 +281,7 @@ public class SparseBitSetTest {
   @Test
   public void testEmpty() {
     IEnvironment env = new EnvironmentTrailing();
-    IStateBitSet bs = new SparseBitSet(env, 64);
+    IStateBitSet bs = env.makeSparseBitset(64);
     Assert.assertTrue(bs.isEmpty());
     bs.set(10, 237);
     Assert.assertFalse(bs.isEmpty());
@@ -345,47 +345,47 @@ public class SparseBitSetTest {
   public void testEquals() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet ref = new S64BitSet(env, 64);
-    final IStateBitSet sparse = new SparseBitSet(env, 128);
+    final IStateBitSet sparse = env.makeSparseBitset(128);
 
     // S64Bitset.equals is not correct, cannot use Assert.assertEquals()
-    Assert.assertTrue(sparse.equals(ref));
+    Assert.assertEquals(ref, sparse);
     ref.set(7, 32);
     sparse.set(7, 32);
 
-    Assert.assertTrue(sparse.equals(ref));
+    Assert.assertEquals(ref, sparse);
     ref.set(278, 317);
     sparse.set(278, 317);
 
-    Assert.assertTrue(sparse.equals(ref));
+    Assert.assertEquals(ref, sparse);
 
     env.worldPush();
     // Clear a bit already cleared. No change expected.
     sparse.clear(3);
-    Assert.assertTrue(sparse.equals(ref));
+    Assert.assertEquals(ref, sparse);
 
     // Bit cleared in a new world. No longer equals.
     sparse.clear(300);
-    Assert.assertFalse(sparse.equals(ref));
+    Assert.assertNotEquals(ref, sparse);
 
     // Restore the event.
     env.worldPop();
-    Assert.assertTrue(sparse.equals(ref));
+    Assert.assertEquals(ref, sparse);
 
     // Same cardinality, not the same bits.
     sparse.clear(300);
     sparse.set(1);
-    Assert.assertFalse(sparse.equals(ref));
+    Assert.assertNotEquals(ref, sparse);
 
     Assert.assertEquals(sparse, sparse);
-    Assert.assertFalse(sparse.equals(null));
+    Assert.assertNotEquals(sparse, null);
   }
 
   @Test
   public void testHashCode() {
     final IEnvironment env = new EnvironmentTrailing();
     // Different block sizes but same content.
-    final IStateBitSet sparse1 = new SparseBitSet(env, 128);
-    final IStateBitSet sparse2 = new SparseBitSet(env, 64);
+    final IStateBitSet sparse1 = env.makeSparseBitset(128);
+    final IStateBitSet sparse2 = env.makeSparseBitset(64);
     Assert.assertEquals(sparse1.hashCode(), sparse2.hashCode());
     sparse1.set(1);
     sparse1.set(64);

@@ -9,10 +9,7 @@
  */
 package org.chocosolver.memory;
 
-import org.chocosolver.memory.structure.BasicIndexedBipartiteSet;
-import org.chocosolver.memory.structure.OneWordS32BitSet;
-import org.chocosolver.memory.structure.OneWordS64BitSet;
-import org.chocosolver.memory.structure.S64BitSet;
+import org.chocosolver.memory.structure.*;
 
 /**
  * Super class of all environments !
@@ -61,6 +58,10 @@ public abstract class AbstractEnvironment implements IEnvironment {
         }
     }
 
+    @Override
+    public IStateBitSet makeSparseBitset(int blocksize) {
+        return new SparseBitSet(this, 64);
+    }
 
     /**
      * {@inheritDoc}
@@ -72,6 +73,7 @@ public abstract class AbstractEnvironment implements IEnvironment {
         }
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void createSharedBipartiteSet(int size) {
         booleanSet = new BasicIndexedBipartiteSet(this, size);
     }
