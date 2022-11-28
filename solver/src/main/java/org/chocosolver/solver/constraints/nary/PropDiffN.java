@@ -110,13 +110,13 @@ public class PropDiffN extends Propagator<IntVar> {
                     }
                 }
             }
-            pruneList.clear();
+            pruneList.resetQuick();
             for(int k = 0; k<boxesToCompute.size(); k++)  {
                 int i = boxesToCompute.getQuick(k);
                 energyCheck(i);
                 hasFiltered |= prune(i);
             }
-            boxesToCompute.clear();
+            boxesToCompute.resetQuick();
             for(int k = 0; k< pruneList.size(); k++) {
                 prop(pruneList.getQuick(k));
             }
