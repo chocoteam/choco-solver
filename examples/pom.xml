@@ -34,10 +34,12 @@
     <dependency>
       <groupId>org.choco-solver</groupId>
       <artifactId>choco-solver</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>org.choco-solver</groupId>
       <artifactId>choco-parsers</artifactId>
+      <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>args4j</groupId>
@@ -46,7 +48,6 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
-  <groupId>org.choco-solver.choco</groupId>
   <build>
     <plugins>
       <plugin>
