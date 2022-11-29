@@ -308,7 +308,7 @@
                     <version>3.2.0</version>
                     <configuration>
                         <configLocation>checkstyle.xml</configLocation>
-                        <encoding>UTF-8</encoding>
+                        <outputEncoding>UTF-8</outputEncoding>
                         <consoleOutput>false</consoleOutput>
                         <failsOnError>false</failsOnError>
                         <linkXRef>false</linkXRef>
@@ -543,7 +543,7 @@
                 <version>3.2.0</version>
                 <configuration>
                     <configLocation>checkstyle.xml</configLocation>
-                    <encoding>UTF-8</encoding>
+                    <outputEncoding>UTF-8</outputEncoding>
                     <consoleOutput>false</consoleOutput>
                     <failsOnError>false</failsOnError>
                     <linkXRef>false</linkXRef>
