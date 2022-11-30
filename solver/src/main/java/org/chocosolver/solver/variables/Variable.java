@@ -133,18 +133,6 @@ public interface Variable extends Identity, Comparable<Variable> {
     String getName();
 
     /**
-     * @deprecated see {@link #streamPropagators()} instead
-     */
-    @Deprecated
-    Propagator<?>[] getPropagators();
-
-    /**
-     * @deprecated see {@link #streamPropagators()} instead
-     */
-    @Deprecated
-    Propagator<?> getPropagator(int idx);
-
-    /**
      * @return a stream of the propagators of this variable
      */
     Stream<Propagator<?>> streamPropagators();
@@ -155,32 +143,6 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @return number of propagators of this
      */
     int getNbProps();
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    int[] getPIndices();
-
-    /**
-     * @Deprecated
-     */
-    @Deprecated
-    void setPIndice(int pos, int val);
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    int getDindex(int i);
-
-    /**
-     * Return the position of the variable in the propagator at position pidx
-     *
-     * @param pidx index of the propagator within the list of propagators of this
-     * @return position of this in the propagator pidx
-     */
-    int getIndexInPropagator(int pidx);
 
     /**
      * Build and add a monitor to the monitor list of <code>this</code>.
@@ -234,12 +196,6 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @param idxInProp  index of the variable in the propagator
      */
     void swapOnPassivate(Propagator<?> propagator, int idxInProp);
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    int swapOnActivate(Propagator<?> propagator, int idxInProp);
 
     /**
      * Remove a propagator from the list of propagator of <code>this</code>.

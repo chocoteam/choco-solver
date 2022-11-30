@@ -30,12 +30,12 @@ public interface SetVar extends Variable {
 	/**
 	 * Get SetVar Lower Bound : the set of integers that must belong to every solution (i.e. a subset of all solutions)
 	 * To iterate over this set, use the following loop:
-	 *
+	 * <p>
 	 * ISet lbSet = getLB();
 	 * for(int i : lbSet){
 	 *  	...
 	 * }
-	 *
+	 * <p>
 	 * This object is read-only. Use variable methods <code>force</code> to update the domain
 	 *
 	 * @return the lower bound of this SetVar.
@@ -46,12 +46,12 @@ public interface SetVar extends Variable {
 	/**
 	 * Get SetVar Upper Bound : the set of integers that may belong to a solution (i.e. a superset of all solutions)
 	 * To iterate over this set, use the following loop:
-	 *
+	 * <p>
 	 * ISet ubSet = getUB();
 	 * for(int i : ubSet){
 	 *  	...
 	 * }
-	 *
+	 * <p>
 	 * This object is read-only. Use variable methods <code>remove</code> to update the domain
 	 *
 	 * @return the lower bound of this SetVar.
@@ -89,7 +89,7 @@ public interface SetVar extends Variable {
      * @param element value to add
      * @param cause cause of value addition
      * @return true iff element has been added to the lower bound
-     * @throws ContradictionException
+     * @throws ContradictionException if adding element fails
      */
     boolean force(int element, ICause cause) throws ContradictionException;
 
@@ -99,7 +99,7 @@ public interface SetVar extends Variable {
      * @param element value to remove
      * @param cause cause of value removal
      * @return true iff element has been removed from the upper bound
-     * @throws ContradictionException
+     * @throws ContradictionException if removing element fails
      */
     boolean remove(int element, ICause cause) throws ContradictionException;
 
@@ -109,7 +109,7 @@ public interface SetVar extends Variable {
      * @param value a set of integers
      * @param cause cause of instantiation
      * @return true iff a domain modification occurred
-     * @throws ContradictionException
+     * @throws ContradictionException if instantiating fails
      */
     boolean instantiateTo(int[] value, ICause cause) throws ContradictionException;
 
@@ -133,12 +133,18 @@ public interface SetVar extends Variable {
      */
 	ISetDeltaMonitor monitorDelta(ICause propagator);
 
+	/**
+	 * @implSpec When the 'range = (getUB().size() - getLB().size())' is greater than or equal to 32
+	 * this method returns {@link Integer#MAX_VALUE}.
+	 * Otherwise, it returns 2^range
+	 */
 	@Override
 	default int getDomainSize() {
-		long dom = 1L << (getUB().size() - getLB().size());
-		if (dom < 0 || dom > Integer.MAX_VALUE) {
-			dom = Integer.MAX_VALUE;
+		int range = getUB().size() - getLB().size();
+		int dom = Integer.MAX_VALUE;
+		if (range < 32) {
+			dom = 1 << range;
 		}
-		return (int) dom;
+		return dom;
 	}
 }

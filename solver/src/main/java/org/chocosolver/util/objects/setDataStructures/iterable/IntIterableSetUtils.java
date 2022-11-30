@@ -423,7 +423,7 @@ public class IntIterableSetUtils {
         setr.clear();
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
-        if (s1 > 0 && s2 > 0) {
+        if (s1 >= 0 && s2 >= 0) {
             setr.grow(set1.SIZE);
             int i = 0, j = 0;
             int lbi, ubi, lbj, ubj, lb, ub;
@@ -485,7 +485,7 @@ public class IntIterableSetUtils {
         boolean change = false;
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
-        if (s1 > 0 && s2 > 0) {
+        if (s1 >= 0 && s2 >= 0) {
             int i = 0, j = 0;
             int s = 0, c = 0;
             int[] e = new int[set1.SIZE];

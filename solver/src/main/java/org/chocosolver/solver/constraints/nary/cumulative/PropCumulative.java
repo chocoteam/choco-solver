@@ -99,7 +99,7 @@ public class PropCumulative extends Propagator<IntVar> {
     @Override
     public int getPropagationConditions(int idx) {
         if (idx == vars.length - 1) {
-            return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.DECUPP);
+            return IntEventType.upperBoundAndInst();
         }
         return IntEventType.boundAndInst();
     }
@@ -209,7 +209,7 @@ public class PropCumulative extends Propagator<IntVar> {
     /**
      * Return the index of an IntVar
      *
-     * @param pivot
+     * @param pivot variable
      */
     private int getInd(IntVar pivot) {
         int ind = -1;
@@ -218,7 +218,7 @@ public class PropCumulative extends Propagator<IntVar> {
                 ind = i;
             }
         }
-        if (ind == -1) throw new UnsupportedOperationException("Unfindable pivot variable ");
+        if (ind == -1) throw new UnsupportedOperationException("pivot variable cannot be found");
         return ind;
     }
 

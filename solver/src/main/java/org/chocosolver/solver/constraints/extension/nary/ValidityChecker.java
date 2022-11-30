@@ -26,13 +26,13 @@ public class ValidityChecker implements IntComparator {
     protected IntVar[] vars;
     public int[] sortedidx;
     protected int arity;
-    protected ArraySort sorter;
+    protected ArraySort<?> sorter;
 
     public ValidityChecker(int ari, IntVar[] vars) {
         arity = ari;
         this.vars = new IntVar[arity];
         sortedidx = new int[arity];
-        sorter = new ArraySort(arity, false, true);
+        sorter = new ArraySort<>(arity, false, true);
         for (int i = 0; i < vars.length; i++) {
             this.vars[i] = vars[i];
             sortedidx[i] = i;

@@ -110,13 +110,22 @@ public class PropScalarMixed extends Propagator<Variable> {
                 if (VariableUtils.isReal(vars[vIdx])) {
                     return c[vIdx] > 0 ? RealEventType.INCLOW.getMask() : RealEventType.DECUPP.getMask();
                 } else {
-                    return IntEventType.combine(IntEventType.INSTANTIATE, c[vIdx] > 0 ? IntEventType.INCLOW : IntEventType.DECUPP);
+                    if (c[vIdx] > 0) {
+                        return IntEventType.lowerBoundAndInst();
+                    } else {
+                        return IntEventType.upperBoundAndInst();
+                    }
+
                 }
             case GE:
                 if (VariableUtils.isReal(vars[vIdx])) {
                     return c[vIdx] > 0 ? RealEventType.DECUPP.getMask() : RealEventType.INCLOW.getMask();
                 } else {
-                    return IntEventType.combine(IntEventType.INSTANTIATE, c[vIdx] > 0 ? IntEventType.DECUPP : IntEventType.INCLOW);
+                    if (c[vIdx] > 0) {
+                        return IntEventType.upperBoundAndInst();
+                    } else {
+                        return IntEventType.lowerBoundAndInst();
+                    }
                 }
             default:
                 if (VariableUtils.isReal(vars[vIdx])) {
@@ -444,7 +453,7 @@ public class PropScalarMixed extends Propagator<Variable> {
     protected ESat check(double sumLB, double sumUB) {
         switch (o) {
             case LE:
-                if (sumLB <= b) {
+                if (sumUB <= b) {
                     return ESat.TRUE;
                 }
                 if (sumLB > b) {
@@ -452,7 +461,7 @@ public class PropScalarMixed extends Propagator<Variable> {
                 }
                 return ESat.UNDEFINED;
             case GE:
-                if (sumUB >= b) {
+                if (sumLB >= b) {
                     return ESat.TRUE;
                 }
                 if (sumUB < b) {
@@ -460,10 +469,10 @@ public class PropScalarMixed extends Propagator<Variable> {
                 }
                 return ESat.UNDEFINED;
             default:
-                if (sumLB <= b && b <= sumUB) {
+                if (sumUB <= b && sumLB >= b) {
                     return ESat.TRUE;
                 }
-                if (sumUB < b || sumLB > b) {
+                if (sumLB > b || sumUB < b) {
                     return ESat.FALSE;
                 }
                 return ESat.UNDEFINED;
