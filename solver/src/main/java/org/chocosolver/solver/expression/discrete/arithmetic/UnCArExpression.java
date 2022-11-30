@@ -44,7 +44,7 @@ public class UnCArExpression implements ArExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
@@ -155,6 +155,11 @@ public class UnCArExpression implements ArExpression {
     @Override
     public ArExpression[] getExpressionChild() {
         return new ArExpression[]{e1};
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx == 0) this.e1 = e;
     }
 
     @Override

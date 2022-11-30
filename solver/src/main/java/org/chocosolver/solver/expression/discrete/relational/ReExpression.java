@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.arithmetic.IfArExpression;
 import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
@@ -41,7 +42,7 @@ public interface ReExpression extends ArExpression {
     /**
      * List of available operator for relational expression
      */
-    enum Operator {
+    enum Operator implements ExpOperator {
         /**
          * less than
          */
@@ -164,7 +165,6 @@ public interface ReExpression extends ArExpression {
      * @param map mapping between variables of the topmost expression and position in <i>values</i>
      * @return an evaluation of this relational expression based on a tuple
      */
-    @SuppressWarnings("SuspiciousMethodCalls")
     default boolean beval(int[] values, Map<IntVar, Integer> map){
         assert this instanceof BoolVar;
         return values[map.get(this)] == 1;

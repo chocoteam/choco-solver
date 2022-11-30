@@ -12,6 +12,8 @@ package org.chocosolver.solver.expression.discrete.logical;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -32,12 +34,13 @@ public class BiLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ReExpression e1;
+    private ReExpression e1;
 
     /**
      * The second expression this expression relies on
      */
-    private final ReExpression e2;
+    private ReExpression e2;
+
     /**
      * Builds a n-ary expression
      *
@@ -86,6 +89,16 @@ public class BiLoExpression extends LoExpression {
     }
 
     @Override
+    public int getNoChild() {
+        return 2;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1, e2};
+    }
+
+    @Override
     public Constraint decompose() {
         BoolVar v1 = e1.boolVar();
         BoolVar v2 = e2.boolVar();
@@ -104,6 +117,22 @@ public class BiLoExpression extends LoExpression {
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         return op.eval(e1.beval(values, map), e2.beval(values, map));
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        this.substitute(idx, (ReExpression) e);
+    }
+
+    @Override
+    public void substitute(int idx, ReExpression e) {
+        if (idx == 0) this.e1 = e;
+        if (idx == 1) this.e2 = e;
     }
 
     @Override

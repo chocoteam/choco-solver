@@ -43,7 +43,7 @@ public class UnArExpression implements ArExpression {
     /**
      * The expression this expression relies on
      */
-    private final ArExpression e;
+    private ArExpression e;
 
     /**
      * Builds a unary expression
@@ -74,6 +74,16 @@ public class UnArExpression implements ArExpression {
     @Override
     public ArExpression[] getExpressionChild() {
         return new ArExpression[]{e};
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx == 0) this.e = e;
     }
 
     @Override

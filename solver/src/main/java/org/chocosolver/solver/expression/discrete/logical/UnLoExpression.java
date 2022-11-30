@@ -12,6 +12,8 @@ package org.chocosolver.solver.expression.discrete.logical;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -32,12 +34,13 @@ public class UnLoExpression extends LoExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ReExpression e;
+    private ReExpression e;
+
     /**
      * Builds a n-ary expression
      *
      * @param op an operator
-     * @param e an expression
+     * @param e  an expression
      */
     public UnLoExpression(Operator op, ReExpression e) {
         super(e.getModel(), op);
@@ -57,7 +60,7 @@ public class UnLoExpression extends LoExpression {
                 me = model.boolNotView(b);
             } else {
                 throw new UnsupportedOperationException(
-                    "Unary logical expressions does not support " + op.name());
+                        "Unary logical expressions does not support " + op.name());
             }
         }
         return me;
@@ -84,7 +87,32 @@ public class UnLoExpression extends LoExpression {
     }
 
     @Override
+    public int getNoChild() {
+        return 1;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e};
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        this.substitute(idx, (ReExpression) e);
+    }
+
+    @Override
+    public void substitute(int idx, ReExpression e) {
+        if (idx == 0) this.e = e;
+    }
+
+    @Override
     public String toString() {
-        return op.name() + "(" + e.toString()+ ")";
+        return op.name() + "(" + e.toString() + ")";
     }
 }
