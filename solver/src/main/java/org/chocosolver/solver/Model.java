@@ -27,10 +27,14 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -172,6 +176,8 @@ public class Model implements IModel {
      * A seed for randomness
      */
     private long seed = 0L;
+
+    private ModelAnalyser modelAnalyser = null;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
@@ -663,6 +669,18 @@ public class Model implements IModel {
         return this.settings;
     }
 
+    /**
+     * Return an analyser for the Model
+     *
+     * @return a {@link ModelAnalyser}
+     */
+    public ModelAnalyser getModelAnalyser() {
+        if (this.modelAnalyser == null) {
+            this.modelAnalyser = new ModelAnalyser(this);
+        }
+        return this.modelAnalyser;
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// SETTERS ////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1066,4 +1084,5 @@ public class Model implements IModel {
     public Model ref() {
         return this;
     }
+
 }
