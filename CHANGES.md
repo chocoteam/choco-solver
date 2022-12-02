@@ -8,7 +8,7 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
-
+- Correcting the lack of filtering in `PropIncreasing` 
 ### Deprecated API (to be removed in next release):
 From `Solver`:
 - `Propagate getPropagate()`

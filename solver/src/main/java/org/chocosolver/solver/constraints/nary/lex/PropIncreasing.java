@@ -47,15 +47,19 @@ public class PropIncreasing extends Propagator<IntVar> {
             for (int j = vars.length - 1; j > 0; j--) {
                 vars[j - 1].updateUpperBound(vars[j].getUB() - strict, this);
             }
+            left = vars.length - 1;
+            right = 0;
         } else {
             int i = left;
             left = vars.length - 1;
             int j = right;
             right = 0;
-            while (i < vars.length - 1 && vars[i + 1].updateLowerBound(vars[i].getLB() + strict, this)) {
+            while (i < vars.length - 1) {
+                vars[i + 1].updateLowerBound(vars[i].getLB() + strict, this);
                 i++;
             }
-            while (j > 0 && vars[j - 1].updateUpperBound(vars[j].getUB() - strict, this)) {
+            while (j > 0) {
+                vars[j - 1].updateUpperBound(vars[j].getUB() - strict, this);
                 j--;
             }
         }
