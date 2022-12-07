@@ -91,7 +91,9 @@ public class TimeCumulFilter extends CumulFilter {
 					h[i].updateUpperBound(minH,aCause);
 				}
 			}
-			for (int i : tasks) {
+			tIter = tasks.iterator();
+			while (tIter.hasNext()){
+				int i = tIter.nextInt();
 				if (h[i].getLB() > 0) {
 					// filters
 					if (s[i].getLB() + d[i].getLB() > min) {

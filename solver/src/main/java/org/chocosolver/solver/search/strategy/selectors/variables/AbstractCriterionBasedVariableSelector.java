@@ -27,6 +27,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
@@ -52,21 +53,6 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
             this.ws = new int[]{w0, w1, count};
         }
     }
-
-    private final BiFunction<Propagator<?>, double[], double[]> remapWeights =
-            (p, w) -> {
-                if (w == null) {
-                    // if absent
-                    w = new double[p.getNbVars()];
-                } else if (w.length < p.getNbVars()) {
-                    // may happen propagators (like PropSat) with dynamic variable addition
-                    w = new double[p.getNbVars()];
-                    double[] nw = new double[p.getNbVars()];
-                    System.arraycopy(w, 0, nw, 0, w.length);
-                    w = nw;
-                }
-                return w;
-            };
 
     protected static final int FLUSH_TOPS = 20;
     protected static final double FLUSH_RATIO = .9 * FLUSH_TOPS;
@@ -117,6 +103,35 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
      */
     final HashMap<Propagator<?>, double[]> refinedWeights = new HashMap<>();
     static final double[] rw = {0.};
+
+    private final BiFunction<Propagator<?>, double[], double[]> remapWeights =
+            (p, w) -> {
+                if (w == null) {
+                    // if absent
+                    w = new double[p.getNbVars()];
+                } else if (w.length < p.getNbVars()) {
+                    // may happen propagators (like PropSat) with dynamic variable addition
+                    w = new double[p.getNbVars()];
+                    double[] nw = new double[p.getNbVars()];
+                    System.arraycopy(w, 0, nw, 0, w.length);
+                    w = nw;
+                }
+                return w;
+            };
+
+    private final BiConsumer<Variable, Propagator<?>> updater = (v, p) -> {
+        Element elt = failCount.get(p);
+        if (elt != null) {
+            if (p.getVar(elt.ws[0]) == v) {
+                updateFutvars(p, elt, 0);
+            } else if (p.getVar(elt.ws[1]) == v) {
+                updateFutvars(p, elt, 1);
+            }
+        }
+    };
+
+    private final BiFunction<Variable, Integer, Integer> incr = (v, c) -> c + 1;
+    private final BiFunction<Variable, Integer, Integer> decr = (v, c) -> c - 1;
 
     public AbstractCriterionBasedVariableSelector(V[] vars, long seed, int flush) {
         this.random = new java.util.Random(seed);
@@ -264,13 +279,13 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
             observed.put(var, 1);
             var.addMonitor(this);
         } else {
-            observed.computeIfPresent(var, (v, c) -> c + 1);
+            observed.computeIfPresent(var, incr);
         }
     }
 
     private void unplug(Variable var) {
         assert observed.containsKey(var);
-        Integer obs = observed.computeIfPresent(var, (v, c) -> c - 1);
+        Integer obs = observed.computeIfPresent(var, decr);
         if (obs != null && obs == 0) {
             var.removeMonitor(this);
             observed.remove(var);
@@ -290,16 +305,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
     @Override
     public final void onUpdate(Variable var, IEventType evt) {
         if (var.isInstantiated()) {
-            var.streamPropagators().forEach(p -> {
-                Element elt = failCount.get(p);
-                if (elt != null) {
-                    if (p.getVar(elt.ws[0]) == var) {
-                        updateFutvars(p, elt, 0);
-                    } else if (p.getVar(elt.ws[1]) == var) {
-                        updateFutvars(p, elt, 1);
-                    }
-                }
-            });
+            var.forEachPropagator(updater);
         }
     }
 

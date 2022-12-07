@@ -21,6 +21,7 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
@@ -136,6 +137,13 @@ public interface Variable extends Identity, Comparable<Variable> {
      * @return a stream of the propagators of this variable
      */
     Stream<Propagator<?>> streamPropagators();
+
+    /**
+     * Performs an action for each propagator of this variable.
+     *
+     * @param action action to perform on the elements
+     */
+    void forEachPropagator(BiConsumer<Variable, Propagator<?>> action);
 
     /**
      * Return the number of propagators
