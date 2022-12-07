@@ -112,6 +112,8 @@ public interface IReificationFactory extends ISelf<Model> {
             else {
                 ref().arithm(ifVar, "<=", thenCstr.reify()).post();
             }
+        }else{
+            thenCstr.ignore();
         }
     }
 
