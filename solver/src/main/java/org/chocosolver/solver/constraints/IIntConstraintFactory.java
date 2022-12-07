@@ -10,7 +10,6 @@
 package org.chocosolver.solver.constraints;
 
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
@@ -64,10 +63,7 @@ import org.chocosolver.solver.constraints.ternary.*;
 import org.chocosolver.solver.constraints.unary.Member;
 import org.chocosolver.solver.constraints.unary.NotMember;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -76,6 +72,7 @@ import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -512,7 +509,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
      */
-    @SuppressWarnings("SuspiciousNameCombination")
     default Constraint pow(IntVar X, int C, IntVar Y) {
         if (C <= 0) {
             throw new SolverException("The power parameter should be strictly greater than 0.");
@@ -1491,40 +1487,22 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
         assert values.length == occurrences.length;
-        if (!closed) {
-            return new GlobalCardinality(vars, values, occurrences);
-        } else {
-            TIntArrayList toAdd = new TIntArrayList();
-            TIntSet givenValues = new TIntHashSet();
-            for (int i : values) {
-                assert !givenValues.contains(i);
-                givenValues.add(i);
-            }
-            for (IntVar var : vars) {
-                int ub = var.getUB();
-                for (int k = var.getLB(); k <= ub; k = var.nextValue(k)) {
-                    if (!givenValues.contains(k)) {
-                        if (!toAdd.contains(k)) {
-                            toAdd.add(k);
-                        }
-                    }
-                }
-            }
-            if (toAdd.size() > 0) {
-                int n2 = values.length + toAdd.size();
-                int[] v2 = new int[n2];
-                IntVar[] cards = new IntVar[n2];
-                System.arraycopy(values, 0, v2, 0, values.length);
-                System.arraycopy(occurrences, 0, cards, 0, values.length);
-                for (int i = values.length; i < n2; i++) {
-                    v2[i] = toAdd.get(i - values.length);
-                    cards[i] = vars[0].getModel().intVar(0);
-                }
-                return new GlobalCardinality(vars, v2, cards);
-            } else {
-                return new GlobalCardinality(vars, values, occurrences);
-            }
+        if (closed) {
+            SetVar svars = ref().setVar(new int[]{},
+                    Arrays.stream(vars)
+                            .flatMapToInt(IntVar::stream)
+                            .boxed()
+                            .collect(Collectors.toSet())
+                            .stream().mapToInt(i -> i)
+                            .sorted().toArray());
+            SetVar svalues = ref().setVar(Arrays.stream(values)
+                    .boxed()
+                    .collect(Collectors.toSet())
+                    .stream().mapToInt(i -> i)
+                    .sorted().toArray());
+            ref().subsetEq(svars, svalues).post();
         }
+        return new GlobalCardinality(vars, values, occurrences);
     }
 
     /**

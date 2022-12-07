@@ -37,7 +37,7 @@ import java.util.Objects;
 public class PerformanceTest {
     private static final String ROOT = "/xcsp/";
     private static final String COMMENT = "#";
-    private static final String DELIMITER = ",";
+    private static final String DELIMITER = ";";
 
     private StringBuilder writer;
 
