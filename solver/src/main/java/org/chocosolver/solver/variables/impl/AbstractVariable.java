@@ -161,9 +161,9 @@ public abstract class AbstractVariable implements Variable {
     protected AbstractVariable(String name, Model model) {
         this.name = name;
         this.model = model;
-        this.views = new IView[0];
-        this.idxInViews = new int[0];
-        this.monitors = new IVariableMonitor[0];
+        this.views = null;
+        this.idxInViews = null;
+        this.monitors = null;
         this.scheduler = createScheduler();
         int dsize = this.scheduler.select(0);
         this.propagators = new IBipartiteList[dsize + 1];
@@ -240,6 +240,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public Stream<Propagator<?>> streamPropagators() {
+        //noinspection Convert2Diamond
         Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
 
             int c = 0;
@@ -357,6 +358,9 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void addMonitor(IVariableMonitor<?> monitor) {
+        if(monitors == null){
+            this.monitors = new IVariableMonitor[1];
+        }
         // 1. check the non redundancy of a monitor if expected.
         if (model.getSettings().checkDeclaredMonitors()) {
             for (int i = 0; i < mIdx; i++) {
@@ -384,6 +388,10 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void subscribeView(IView<?> view, int idx) {
+        if (views == null) {
+            this.views = new IView[1];
+            this.idxInViews = new int[1];
+        }
         if (vIdx == views.length) {
             views = Arrays.copyOf(views, ArrayUtils.newBoundedSize(views.length, 16));
             idxInViews = Arrays.copyOf(idxInViews, ArrayUtils.newBoundedSize(idxInViews.length, 16));
@@ -490,46 +498,6 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public ICause getCause() {
         return cause;
-    }
-
-    static abstract class ABipartiteList {
-
-        int getFirst() {
-            return 0;
-        }
-
-        int getLast() {
-            return 0;
-        }
-
-        int getSplitter() {
-            return 0;
-        }
-
-        Propagator<?> get(int i) {
-            throw new UnsupportedOperationException();
-        }
-
-        int add(Propagator<?> propagator, int idxInVar) {
-            // empty
-            return 0;
-        }
-
-        void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            throw new UnsupportedOperationException();
-        }
-
-        void swap(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
-            throw new UnsupportedOperationException();
-        }
-
-        void schedule(ICause cause, PropagationEngine engine, int mask) {
-            // empty
-        }
-
-        Stream<Propagator<?>> stream() {
-            return Stream.empty();
-        }
     }
 
     @Override
