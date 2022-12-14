@@ -905,9 +905,12 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take the same value.
      *
      * @param vars list of variables
+     * @implNote
+     * This constraint is reformulated as an atMostNValues constraint, with bound consistency.
      */
     default Constraint allEqual(IntVar... vars) {
-        return atMostNValues(vars, ref().intVar(1), false);
+        return new Constraint(ConstraintsName.ATMOSTNVALUES,
+                new PropAtMostNValues_BC(vars, ref().intVar(1)));
     }
 
     /**
