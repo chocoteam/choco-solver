@@ -18,6 +18,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.scheduler.IntEvtScheduler;
 import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IView;
@@ -173,7 +174,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public int getValue() {
+    public int getValue() throws IllegalStateException{
         return constante;
     }
 
@@ -249,19 +250,18 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void addMonitor(IVariableMonitor monitor) {
+    public void addMonitor(IVariableMonitor<?> monitor) {
     }
 
     @Override//void (a constant receives no event)
-    public void removeMonitor(IVariableMonitor monitor) {
+    public void removeMonitor(IVariableMonitor<?> monitor) {
     }
 
     @Override//void (a constant receives no event)
-    public void subscribeView(IView view, int idx) {
+    public void subscribeView(IView<?> view, int idx) {
     }
 
 
-    @SuppressWarnings("unchecked")
     @Override
     public IIntDeltaMonitor monitorDelta(ICause propagator) {
         return IIntDeltaMonitor.Default.NONE;
@@ -276,11 +276,11 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyMonitors(IEventType event) throws ContradictionException {
+    public void notifyMonitors(IEventType event) {
     }
 
     @Override//void (a constant receives no event)
-    public void notifyViews(IEventType event, ICause cause) throws ContradictionException {
+    public void notifyViews(IEventType event, ICause cause) {
     }
 
     @Override
@@ -294,7 +294,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    protected EvtScheduler createScheduler() {
+    protected EvtScheduler<IntEventType> createScheduler() {
         return new IntEvtScheduler();
     }
 

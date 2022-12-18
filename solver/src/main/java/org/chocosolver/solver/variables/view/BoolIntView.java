@@ -18,6 +18,7 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.*;
 import org.chocosolver.solver.variables.delta.monitor.OneValueDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
+import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
@@ -173,12 +174,16 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final int getValue() {
+    public final int getValue() throws IllegalStateException{
+        if(!isInstantiated()) {
+            throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
+                    name + " is not instantiated");
+        }
         return getLB();
     }
 
     @Override
-    protected final EvtScheduler createScheduler() {
+    protected final EvtScheduler<IntEventType> createScheduler() {
         return new BoolEvtScheduler();
     }
 
@@ -230,7 +235,6 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
         return delta;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public final IIntDeltaMonitor monitorDelta(ICause propagator) {
         createDelta();

@@ -423,6 +423,12 @@ public class IntIterableSetUtils {
         setr.clear();
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
+        if(s1 == 0){
+            setr.addAll(set2);
+        }
+        if (s2 == 0) {
+            setr.addAll(set1);
+        }
         if (s1 > 0 && s2 > 0) {
             setr.grow(set1.SIZE);
             int i = 0, j = 0;
@@ -474,7 +480,7 @@ public class IntIterableSetUtils {
     }
 
     /**
-     * Set <i>set1</i> to <i>set1</i> &cap; <i>set2</i>
+     * Set <i>set1</i> to <i>set1</i> &cup; <i>set2</i>
      *
      * @param set1 a set of ints
      * @param set2 a set of ints
@@ -485,7 +491,10 @@ public class IntIterableSetUtils {
         boolean change = false;
         int s1 = set1.SIZE >> 1;
         int s2 = set2.SIZE >> 1;
-        if (s1 > 0 && s2 > 0) {
+        if(s1 == 0){
+            return set1.addAll(set2);
+        }
+        if (s1 > 0 && s2 >= 0) {
             int i = 0, j = 0;
             int s = 0, c = 0;
             int[] e = new int[set1.SIZE];

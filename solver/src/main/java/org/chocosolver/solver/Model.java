@@ -27,10 +27,14 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.solver.variables.view.IView;
+import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -172,6 +176,8 @@ public class Model implements IModel {
      * A seed for randomness
      */
     private long seed = 0L;
+
+    private ModelAnalyser modelAnalyser = null;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
@@ -566,6 +572,18 @@ public class Model implements IModel {
     }
 
     /**
+     * Returns the object associated with the named <code>hookName</code>
+     *
+     * @param hookName the name of the hook to return
+     * @param defaultValue the default mapping of the key
+     * @return the object associated to the name <code>hookName</code>,
+     * or defaultValue if this map contains no mapping for the key
+     */
+    public Object getHookOrDefault(String hookName, Object defaultValue) {
+        return hooks.getOrDefault(hookName, defaultValue);
+    }
+
+    /**
      * Returns the map containing declared hooks.
      * This map is mutable.
      *
@@ -649,6 +667,18 @@ public class Model implements IModel {
      */
     public Settings getSettings() {
         return this.settings;
+    }
+
+    /**
+     * Return an analyser for the Model
+     *
+     * @return a {@link ModelAnalyser}
+     */
+    public ModelAnalyser getModelAnalyser() {
+        if (this.modelAnalyser == null) {
+            this.modelAnalyser = new ModelAnalyser(this);
+        }
+        return this.modelAnalyser;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -923,8 +953,7 @@ public class Model implements IModel {
                 if (!getSolver().getEngine().isInitialized()) {
                     throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                             "A call to Model.post(Constraint) is more appropriate.");
-                }
-                if (getSolver().getEngine().isInitialized()) {
+                }else {
                     for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }
@@ -1055,4 +1084,5 @@ public class Model implements IModel {
     public Model ref() {
         return this;
     }
+
 }

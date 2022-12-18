@@ -40,11 +40,11 @@ import org.kohsuke.args4j.Option;
 public class Langford extends AbstractProblem {
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-k", usage = "Number of sets.", required = false)
+    @Option(name = "-k", usage = "Number of sets.")
     private int k = 3;
 
     @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-n", usage = "Upper bound.", required = false)
+    @Option(name = "-n", usage = "Upper bound.")
     private int n = 9;
 
     IntVar[] position;
@@ -58,10 +58,10 @@ public class Langford extends AbstractProblem {
         position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < this.k - 1; j++) {
-                position[i + j * n].sub(i+2).eq(position[i + (j + 1) * n]).post();
+                model.arithm(position[i + j * n], "-", position[i + (j + 1) * n], "=", i+2).post();
             }
         }
-        position[0].lt(position[n * k - 1]).post();
+        position[0].gt(position[n * k - 1]).post();
         model.allDifferent(position, "AC").post();
     }
 

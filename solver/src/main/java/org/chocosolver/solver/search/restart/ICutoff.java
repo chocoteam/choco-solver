@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.cutoffseq;
+package org.chocosolver.solver.search.restart;
 
 /**
  * Interface defining service for cutoff strategy: a sequence of cutoff
@@ -16,7 +16,7 @@ package org.chocosolver.cutoffseq;
  * @author Charles Prud'homme, Arnaud Malapert
  * @since 13/05/11
  */
-public interface ICutoffStrategy {
+public interface ICutoff {
 
     /**
      * @return the next restart cutoff

@@ -23,8 +23,8 @@ import org.chocosolver.solver.variables.view.IView;
 import org.chocosolver.util.iterators.EvtScheduler;
 
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Spliterator;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -237,23 +237,8 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
-    @Deprecated
-    public int swapOnActivate(Propagator<?> propagator, int idxInProp) {
-        throw new UnsupportedOperationException("Cannot swap on activation");
-    }
-
-    @Override
-    public final Propagator<?>[] getPropagators() {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final Propagator<?> getPropagator(int idx) {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
     public Stream<Propagator<?>> streamPropagators() {
+        //noinspection Convert2Diamond
         Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
 
             int c = 0;
@@ -296,31 +281,24 @@ public abstract class AbstractVariable implements Variable {
     }
 
     @Override
+    public void forEachPropagator(BiConsumer<Variable, Propagator<?>> action) {
+        int c = 0;
+        int i = propagators[c].first;
+        do {
+            if (i < propagators[c].last) {
+                action.accept(this, propagators[c].propagators[i++]);
+            } else {
+                c++;
+                if (c < propagators.length) {
+                    i = propagators[c].first;
+                }
+            }
+        } while (c < propagators.length);
+    }
+
+    @Override
     public final int getNbProps() {
         return nbPropagators;
-    }
-
-    @Override
-    public final int[] getPIndices() {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final void setPIndice(int pos, int val) {
-        //pindices[pos] = val;
-        throw new UnsupportedOperationException("setPIndice to be implemented");
-    }
-
-    @Override
-    @Deprecated
-    public final int getDindex(int i) {
-        throw new UnsupportedOperationException("The method is deprecated");
-    }
-
-    @Override
-    public final int getIndexInPropagator(int pidx) {
-        //return pindices[pidx];
-        throw new UnsupportedOperationException("setPIndice to be implemented");
     }
 
     @Override
@@ -581,9 +559,9 @@ public abstract class AbstractVariable implements Variable {
         /**
          * Remove the propagator <i>p</i> from {@link #propagators}.
          *
-         * @param propagator
-         * @param idxInProp
-         * @param var
+         * @param propagator the propagator to remove
+         * @param idxInProp the index of the variable in the propagator
+         * @param var the variable (for assertions only)
          */
         public void remove(Propagator<?> propagator, int idxInProp, final AbstractVariable var) {
             int p = propagator.getVIndice(idxInProp);
@@ -680,6 +658,7 @@ public abstract class AbstractVariable implements Variable {
                     shiftTail();
                 }
             }
+            //noinspection Convert2Diamond
             Spliterator<Propagator<?>> it = new Spliterator<Propagator<?>>() {
                 int i = s;
                 @Override

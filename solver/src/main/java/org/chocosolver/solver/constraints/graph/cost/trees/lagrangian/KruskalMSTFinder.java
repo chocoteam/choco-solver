@@ -49,7 +49,7 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
     protected double[][] distMatrix;
 
     //sort
-    protected ArraySort sorter;
+    protected ArraySort<?> sorter;
     protected IntComparator comparator;
 
     //***********************************************************************************
@@ -73,14 +73,8 @@ public class KruskalMSTFinder extends AbstractTreeFinder {
         useful = new BitSet(n);
         lca = new LCAGraphManager(ccN);
         //sort
-        sorter = new ArraySort(n * n, false, true);
-        comparator = (i1, i2) -> {
-            if (costs[i1] < costs[i2])
-                return -1;
-            else if (costs[i1] > costs[i2])
-                return 1;
-            else return 0;
-        };
+        sorter = new ArraySort<>(n * n, false, true);
+        comparator = (i1, i2) -> Double.compare(costs[i1], costs[i2]);
     }
 
     //***********************************************************************************

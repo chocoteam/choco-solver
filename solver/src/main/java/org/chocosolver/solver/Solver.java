@@ -30,9 +30,9 @@ import org.chocosolver.solver.search.loop.move.Move;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveSeq;
 import org.chocosolver.solver.search.loop.propagate.Propagate;
-import org.chocosolver.solver.search.loop.propagate.PropagateBasic;
 import org.chocosolver.solver.search.measure.IMeasures;
 import org.chocosolver.solver.search.measure.MeasuresRecorder;
+import org.chocosolver.solver.search.restart.AbstractRestart;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
@@ -114,11 +114,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////    PRIVATE FIELDS     //////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    /**
-     * The propagate component of this search loop
-     */
-    protected Propagate P;
 
     /**
      * The learning component of this search loop
@@ -226,6 +221,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean canBeRepaired = true;
 
     /**
+     * The restarting strategy
+     */
+    private AbstractRestart restarter;
+
+    /**
      * This object is accessible lazily
      */
     private Solution lastSol = null;
@@ -263,8 +263,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         mMeasures.setBoundsManager(objectivemanager);
         searchMonitors = new SearchMonitorList();
         setMove(new MoveBinaryDFS());
-        setPropagate(new PropagateBasic());
         setNoLearning();
+        restarter = AbstractRestart.NO_RESTART;
     }
 
     public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
@@ -411,7 +411,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 }
             }
             mMeasures.incFixpointCount();
-            P.execute(this);
+            doPropagate();
             action = extend;
             mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
@@ -445,6 +445,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             warmStart.setStrategy(declared);
             setSearch(warmStart);
         }
+        restarter.init();
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
             mModel.getEnvironment().worldPop();
             feasible = FALSE;
@@ -457,6 +458,30 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * Basic propagation:
+     * <ul>
+     *     <li>First, prepare the decision (to ensure good behavior of the
+     *     {@link org.chocosolver.solver.search.loop.move.Move#repair(Solver)} call)</li>
+     *     <li>then, a first propagation ensures that, if learning is on,
+     *     the unit no-good learnt on failure filters,
+     *     <li>the cut is posted before applying the decision to ensure good nogood,
+     *     and a second propagation ensures the cut is taken into account</li>
+     *     <li>the decision is applied (if learning is on and the decision is refuted,
+     *     it is bypassed by the learnt unit nogood),</li>
+     *     <li>finally, a fix point is reached.</li>
+     * </ul>
+     * @throws ContradictionException if failure occurs during propagation
+     */
+    private void doPropagate() throws ContradictionException {
+        //WARNING: keep the order as is (read javadoc for more details)
+        dpath.buildNext();
+        objectivemanager.postDynamicCut();
+        engine.propagate();
+        dpath.apply();
+        engine.propagate();
+    }
+
+    /**
      * Search loop propagation phase. This needs to be distinguished from {@link #propagate()}
      *
      * @param left true if we are branching on the left false otherwise
@@ -465,7 +490,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         searchMonitors.beforeDownBranch(left);
         try {
             mMeasures.incFixpointCount();
-            P.execute(this);
+            doPropagate();
             action = extend;
         } catch (ContradictionException ce) {
             engine.flush();
@@ -498,10 +523,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     protected void extend() {
         searchMonitors.beforeOpenNode();
         mMeasures.incNodeCount();
-        if (!M.extend(this)) {
+        action = propagate;
+        if (restarter.mustRestart(this)) {
+            this.restart();
+        } else if (!M.extend(this)) {
             action = validate;
-        } else {
-            action = propagate;
         }
         searchMonitors.afterOpenNode();
     }
@@ -520,7 +546,12 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
             action = propagate;
         }
         searchMonitors.beforeUpBranch();
-        canBeRepaired = M.repair(this);
+        if (restarter.mustRestart(this)) {
+            canBeRepaired = true;
+            this.restart();
+        } else {
+            canBeRepaired = M.repair(this);
+        }
         searchMonitors.afterUpBranch();
         if (!canBeRepaired) {
             stop = true;
@@ -584,7 +615,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * <p>
      * Resetting a solver to the state just before running the last resolution instruction.
-     * That is, {@link Propagate}, {@link Learn}, {@link Move} and {@link Search} are kept as declared.
+     * That is, {@link Learn}, {@link Move} and {@link Search} are kept as declared.
      * {@link ISearchMonitor} are also kept plugged to the search loop.
      * </p>
      * <p>
@@ -634,7 +665,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * In details, calling this method will, first call {@link #reset()} and then:
      * <ul>
      *     <li>replace {@link #M} by {@link MoveBinaryDFS}</li>
-     *     <li>replace {@link #P} by {@link PropagateBasic}</li>
      *     <li>call {@link Solver#setNoLearning()}</li>
      *     <li>remove warm start hints</li>
      *     <li>clear {@link #searchMonitors}, that forget any declared one</li>
@@ -648,11 +678,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         reset();
         this.M.removeStrategy();
         setMove(new MoveBinaryDFS());
-        setPropagate(new PropagateBasic());
         setNoLearning();
         //no need to unplug, done by searchMonitors.reset()
         this.lastSol = null;
-        if(this.warmStart != null) {
+        if (this.warmStart != null) {
             this.warmStart.clearHints();
             this.warmStart = null;
         }
@@ -715,7 +744,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         try {
             objectivemanager.postDynamicCut();
             mMeasures.incFixpointCount();
-            P.execute(this);
+            doPropagate();
             action = extend;
         } catch (ContradictionException e) {
             // trivial inconsistency is detected, due to the cut
@@ -910,10 +939,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * @return the current propagate.
+     * @deprecated
      */
+    @Deprecated
     public Propagate getPropagate() {
-        return P;
+        return null;
     }
 
     /**
@@ -1118,12 +1148,39 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * Overrides the Propagate object
-     *
-     * @param p the new Propagate to use
+     * @deprecated
      */
+    @Deprecated
     public void setPropagate(Propagate p) {
-        this.P = p;
+    }
+
+    /**
+     * Add or complete a restart policy.
+     *
+     * @param restarter restarter policy
+     * @implNote There can be multiple restart policies, stored in as linked list.
+     * @see #clearRestarter()
+     */
+    public void addRestarter(AbstractRestart restarter) {
+        restarter.setNext(this.restarter);
+        this.restarter = restarter;
+    }
+
+    /**
+     * @return the current declared restart policy or {@link AbstractRestart#NO_RESTART}
+     */
+    public AbstractRestart getRestarter() {
+        return this.restarter;
+    }
+
+    /**
+     * Clear the declared restart strategy.
+     * Consequently, no restarting will occur.
+     *
+     * @implNote replace the declared restart policy by {@link AbstractRestart#NO_RESTART}
+     */
+    public void clearRestarter() {
+        this.restarter = AbstractRestart.NO_RESTART;
     }
 
     /**
@@ -1487,6 +1544,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Defines whether (when {@code ansi} is set to {@code true}) or not
      * ANSI tags are added to any trace from choco-solver.
+     *
      * @param ansi {@code true} to enable colors
      */
     public void logWithANSI(boolean ansi) {

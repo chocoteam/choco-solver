@@ -10,7 +10,7 @@
 package org.chocosolver.solver.search;
 
 
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -226,7 +226,7 @@ public class ObjectiveTest {
             r.setSearch(Search.objectiveStrategy(a, p), minDomLBSearch(a));
             r.setNoGoodRecordingFromSolutions(a);
             while (model.getSolver().solve()) ;
-            assertEquals(model.getSolver().isStopCriterionMet(), false);
+            assertFalse(model.getSolver().isStopCriterionMet());
         }
     }
 
@@ -241,7 +241,7 @@ public class ObjectiveTest {
             r.setSearch(Search.objectiveStrategy(objective, p), randomSearch(ticks, 0L));
             r.setNoGoodRecordingFromSolutions(ticks);
             while (model.getSolver().solve()) ;
-            assertEquals(model.getSolver().isStopCriterionMet(), false);
+            assertFalse(model.getSolver().isStopCriterionMet());
             assertEquals(r.getBestSolutionValue(), 34);
         }
     }
@@ -262,7 +262,7 @@ public class ObjectiveTest {
             model.getSolver().reset();
             final int finalI = i;
             oman.setCutComputer(n -> n.intValue() - ends[finalI]);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
@@ -283,7 +283,7 @@ public class ObjectiveTest {
             }
             model.getSolver().reset();
             ends[0] = floorDiv(ends[0], 2);
-            oman.updateBestUB(best);
+            oman.updateBestSolution(best);
         }
         assertEquals(best, 34);
         assertEquals(model.getSolver().getSolutionCount(), 0); // the last resolution fails at finding solutions
@@ -462,12 +462,12 @@ public class ObjectiveTest {
             }
             )
         ));
-        solver.setRestarts(c -> solver.getFailCount() > c, new LubyCutoffStrategy(2), 512);
+        solver.setRestarts(c -> solver.getFailCount() > c, new LubyCutoff(2), 512);
         solver.setNoGoodRecordingFromSolutions(ticks);
         solver.showShortStatistics();
         while (model.getSolver().solve()) {
         }
-        assertEquals(model.getSolver().isStopCriterionMet(), false);
+        assertFalse(model.getSolver().isStopCriterionMet());
         assertEquals(solver.getBestSolutionValue(), 44);
     }
 }

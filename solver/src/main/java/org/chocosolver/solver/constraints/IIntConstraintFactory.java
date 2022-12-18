@@ -512,7 +512,6 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
      */
-    @SuppressWarnings("SuspiciousNameCombination")
     default Constraint pow(IntVar X, int C, IntVar Y) {
         if (C <= 0) {
             throw new SolverException("The power parameter should be strictly greater than 0.");
@@ -1491,9 +1490,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
         assert values.length == occurrences.length;
-        if (!closed) {
-            return new GlobalCardinality(vars, values, occurrences);
-        } else {
+        if (closed) {   
             TIntArrayList toAdd = new TIntArrayList();
             TIntSet givenValues = new TIntHashSet();
             for (int i : values) {
@@ -1521,10 +1518,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                     cards[i] = vars[0].getModel().intVar(0);
                 }
                 return new GlobalCardinality(vars, v2, cards);
-            } else {
-                return new GlobalCardinality(vars, values, occurrences);
             }
         }
+        return new GlobalCardinality(vars, values, occurrences);
     }
 
     /**

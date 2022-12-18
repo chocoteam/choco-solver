@@ -20,7 +20,10 @@ import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.stream.IntStream;
 
 /**
  * @author Guillaume Le Lou�t [guillaume.lelouet@gmail.com] 2016, Jean-Guillaume Fages
@@ -28,6 +31,11 @@ import org.testng.annotations.Test;
 public class SetVarImplTest {
 
     static final boolean originalHardCoded = SetFactory.HARD_CODED;
+
+    @DataProvider
+    public static Object[][] maxValue() {
+        return IntStream.range(0, 10).map(i -> 1 << i).mapToObj(i -> new Object[]{i}).toArray(Object[][]::new);
+    }
 
     @AfterClass
     public void tearDown() {
@@ -116,5 +124,16 @@ public class SetVarImplTest {
         Assert.assertEquals(s.getDomainSize(), 1);
     }
 
+
+    @Test(groups = "1s", dataProvider = "maxValue")
+    public void testLargeDom(int max) {
+        Model model = new Model("Rebalancer");
+        SetVar setVar1 = model.setVar(
+                "set1",
+                new int[0],
+                IntStream.range(0, max).toArray()
+        );
+        Assert.assertEquals(setVar1.getDomainSize(), max < 32 ? 1 << (max) : Integer.MAX_VALUE);
+    }
 
 }

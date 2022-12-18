@@ -9,8 +9,9 @@
  */
 package org.chocosolver.solver.search.strategy;
 
-import org.chocosolver.cutoffseq.GeometricalCutoffStrategy;
-import org.chocosolver.cutoffseq.LubyCutoffStrategy;
+import org.chocosolver.solver.search.restart.GeometricalCutoff;
+import org.chocosolver.solver.search.restart.LinearCutoff;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solution;
@@ -18,7 +19,7 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.objective.ObjectiveStrategy;
 import org.chocosolver.solver.objective.OptimizationPolicy;
 import org.chocosolver.solver.search.loop.monitors.IMonitorOpenNode;
-import org.chocosolver.solver.search.restart.MonotonicRestartStrategy;
+import org.chocosolver.solver.search.restart.MonotonicCutoff;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.search.strategy.decision.Decision;
@@ -595,7 +596,7 @@ public class Search {
     }
 
     /**
-     * Assigns the non-instantiated variable of smallest domain size to its lower bound.
+     * Assigns the non-instantiated variable of the smallest domain size to its lower bound.
      *
      * @param vars list of variables
      * @return assignment strategy
@@ -605,7 +606,7 @@ public class Search {
     }
 
     /**
-     * Assigns the non-instantiated variable of smallest domain size to its upper bound.
+     * Assigns the non-instantiated variable of the smallest domain size to its upper bound.
      *
      * @param vars list of variables
      * @return assignment strategy
@@ -1190,14 +1191,31 @@ public class Search {
          * <p>This policy will restart every {@code cutoff} failures, until {@code offset} restarts occur.
          *
          * @implNote {@code factor} is ignored.
-         * @see MonotonicRestartStrategy
+         * @see MonotonicCutoff
          */
         MONOTONIC {
             @Override
             public void declare(Solver solver, int cutoff, double factor, int offset) {
                 solver.setRestarts(
                         count -> solver.getFailCount() >= count,
-                        new MonotonicRestartStrategy(cutoff),
+                        new MonotonicCutoff(cutoff),
+                        offset
+                );
+                solver.setNoGoodRecordingFromRestarts();
+            }
+        },
+        /**
+         * To use a linear restart strategy.
+         *
+         * @implNote {@code factor} is ignored.
+         * @see LinearCutoff
+         */
+        LINEAR {
+            @Override
+            public void declare(Solver solver, int cutoff, double factor, int offset) {
+                solver.setRestarts(
+                        count -> solver.getFailCount() >= count,
+                        new LinearCutoff(cutoff),
                         offset
                 );
                 solver.setNoGoodRecordingFromRestarts();
@@ -1207,14 +1225,14 @@ public class Search {
          * To use a Luby restart strategy.
          *
          * @implNote {@code factor} is ignored.
-         * @see LubyCutoffStrategy
+         * @see LubyCutoff
          */
         LUBY {
             @Override
             public void declare(Solver solver, int cutoff, double factor, int offset) {
                 solver.setRestarts(
                         count -> solver.getFailCount() >= count,
-                        new LubyCutoffStrategy(cutoff),
+                        new LubyCutoff(cutoff),
                         offset
                 );
                 solver.setNoGoodRecordingFromRestarts();
@@ -1223,14 +1241,14 @@ public class Search {
         /**
          * To use a geometric restart strategy.
          *
-         * @see GeometricalCutoffStrategy
+         * @see GeometricalCutoff
          */
         GEOMETRIC {
             @Override
             public void declare(Solver solver, int cutoff, double factor, int offset) {
                 solver.setRestarts(
                         count -> solver.getFailCount() >= count,
-                        new GeometricalCutoffStrategy(cutoff, factor),
+                        new GeometricalCutoff(cutoff, factor),
                         offset
                 );
                 solver.setNoGoodRecordingFromRestarts();

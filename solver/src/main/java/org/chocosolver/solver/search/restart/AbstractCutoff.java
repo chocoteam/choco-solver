@@ -7,7 +7,7 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.cutoffseq;
+package org.chocosolver.solver.search.restart;
 
 /**
  * Abstract class to generate cutoff sequence
@@ -17,7 +17,7 @@ package org.chocosolver.cutoffseq;
  * @since 13/05/11
  */
 @SuppressWarnings("WeakerAccess")
-public abstract class AbstractCutoffStrategy implements ICutoffStrategy {
+public abstract class AbstractCutoff implements ICutoff {
 
     /**
      * The scale factor, should be strictly positive
@@ -25,11 +25,11 @@ public abstract class AbstractCutoffStrategy implements ICutoffStrategy {
     protected final long scaleFactor;
 
     /**
-     * Create a abstract class with the specific <i>scaleFactor</i>.
+     * Create an abstract class with the specific <i>scaleFactor</i>.
      * @param s scale factor (should be strictly positive)
      * @exception IllegalArgumentException if <i>scaleFactor</i> is not strictly positive
      */
-    public AbstractCutoffStrategy(long s) throws IllegalArgumentException{
+    public AbstractCutoff(long s) throws IllegalArgumentException{
         super();
         if (s < 1) {
             throw new IllegalArgumentException("The scale factor of a restart strategy must be strictly positive.");

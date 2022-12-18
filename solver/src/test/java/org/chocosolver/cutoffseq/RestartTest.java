@@ -9,6 +9,9 @@
  */
 package org.chocosolver.cutoffseq;
 
+import org.chocosolver.solver.search.restart.GeometricalCutoff;
+import org.chocosolver.solver.search.restart.ICutoff;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -43,19 +46,19 @@ public class RestartTest {
 	
 	@Test(timeOut=60000, groups = "1s")
 	public void testLubyRestarts() {
-		testCutoffs(new LubyCutoffStrategy(1), LUBY_2, 1);
-		testCutoffs(new LubyCutoffStrategy(4), LUBY_2, 4);
-		testCutoffs(new LubyCutoffStrategy(Integer.MAX_VALUE), LUBY_2, Integer.MAX_VALUE);
+		testCutoffs(new LubyCutoff(1), LUBY_2, 1);
+		testCutoffs(new LubyCutoff(4), LUBY_2, 4);
+		testCutoffs(new LubyCutoff(Integer.MAX_VALUE), LUBY_2, Integer.MAX_VALUE);
 	}
 
 	@Test(timeOut=60000, groups = "1s")
 	public void testGeomRestarts() {
-		testCutoffs(new GeometricalCutoffStrategy(1, 1.3), GEOMETRIC_1_1_3, 1);
-		testCutoffs(new GeometricalCutoffStrategy(4, 1.3), GEOMETRIC_4_1_3, 1);
-		testCutoffs(new GeometricalCutoffStrategy(1, 2), GEOMETRIC_2_2, 1);
+		testCutoffs(new GeometricalCutoff(1, 1.3), GEOMETRIC_1_1_3, 1);
+		testCutoffs(new GeometricalCutoff(4, 1.3), GEOMETRIC_4_1_3, 1);
+		testCutoffs(new GeometricalCutoff(1, 2), GEOMETRIC_2_2, 1);
 	}
 
-	private static void testCutoffs(ICutoffStrategy strat, long[] expected, long scale) {
+	private static void testCutoffs(ICutoff strat, long[] expected, long scale) {
 		for (long l : expected) {
 			Assert.assertEquals(strat.getNextCutoff(), scale * l);
 		}

@@ -3,20 +3,50 @@ Choco Solver ChangeLog
 
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
-    
-    NEXT MILESTONE
-    -------------------
-    
-    ### Major features:
-    
-    ### Deprecated API (to be removed in next release):
-    
-    ### Other closed issues and pull requests:
-    See [milestone 4.10.10](https://github.com/chocoteam/choco-solver/milestone/xx)
-    
-    #### Contributors to this release:
-    
+
+NEXT MILESTONE
+-------------------
+
+### Major features:
+- Correcting the lack of filtering in `PropIncreasing` 
+### Deprecated API (to be removed in next release):
+From `Solver`:
+- `Propagate getPropagate()`
+- `void setPropagate(Propagate p)`
+- `Closeable outputSearchTreeToCPProfiler(boolean domain)`
+
+Others:
+- `Propagate` class
+- `IntEventType`: `int combine(IntEventType... evts)`
+
+### Other closed issues and pull requests:
+See [milestone 4.10.11](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+
         
+4.10.10 - 11 Oct 2022
+-------------------
+
+### Major features:
+- Fix performance issue of ViewDeltaMonitor
+- Fix lack of filtering in STR2+ when domain is bounded
+- Fix issue relative to `OR` and `AND` in `LogOp`
+- Add missing checks in OneWordS32BitSet and OneWordS64BitSet + update constructors
+- Add new API to VariableUtils
+- Add CITATION.cff
+- Update paper.md
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.10](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Mehmet Hakan Satman](https://github.com/jbytecode) (@jbytecode)
+      
 4.10.9 - 22 Aug 2022
 -------------------
 

@@ -14,13 +14,15 @@
  * @since 15/10/2019
  */
 module org.chocosolver.parsers {
-    exports org.chocosolver.parser to args4j, org.chocosolver.examples;
+    exports org.chocosolver.parser;
+
     requires transitive org.chocosolver.solver;
     requires xcsp3.tools;
     requires args4j;
     requires java.sql;
     requires org.antlr.antlr4.runtime;
     requires trove4j;
+    requires java.management;
 
     opens org.chocosolver.parser to args4j, org.testng;
     opens org.chocosolver.parser.mps to args4j;

@@ -57,7 +57,7 @@ public class PropGraphCumulative extends PropCumulative {
      * @param e       end			variables
      * @param h       height		variables
      * @param capa    capacity	variable
-	 * @param fast    reduces the number of propagation (less filtering)
+     * @param fast    reduces the number of propagation (less filtering)
      * @param filters filtering algorithm to use
      */
     public PropGraphCumulative(IntVar[] s, IntVar[] d, IntVar[] e, IntVar[] h, IntVar capa, boolean fast,
@@ -66,7 +66,7 @@ public class PropGraphCumulative extends PropCumulative {
         this.g = new UndirectedGraph(model, n, SetType.BITSET, true);
         this.tasks = SetFactory.makeBipartiteSet(0);
         this.toCompute = SetFactory.makeBipartiteSet(0);
-		this.fast = fast;
+        this.fast = fast;
     }
 
     //***********************************************************************************
@@ -79,26 +79,28 @@ public class PropGraphCumulative extends PropCumulative {
             super.propagate(evtmask);
             graphComputation();
         } else {
-            if(full){
+            if (full) {
                 filter(allTasks);
-            }else {
+            } else {
                 int count = 0;
                 ISetIterator tcIt = toCompute.iterator();
-                while (tcIt.hasNext()){
+                while (tcIt.hasNext()) {
                     int i = tcIt.nextInt();
-                    for (int j : g.getNeighborsOf(i)) {
+                    ISetIterator it = g.getNeighborsOf(i).iterator();
+                    while (it.hasNext()) {
+                        int j = it.nextInt();
                         if (disjoint(i, j)) {
                             g.removeEdge(i, j);
                         }
                     }
                     count += g.getNeighborsOf(i).size();
-                    if(count >= 2*n)break;
+                    if (count >= 2 * n) break;
                 }
-                if (count >= 2*n) {
+                if (count >= 2 * n) {
                     filter(allTasks);
                 } else {
                     ISetIterator iter = toCompute.iterator();
-                    while (iter.hasNext()){
+                    while (iter.hasNext()) {
                         filterAround(iter.nextInt());
                     }
                 }
@@ -117,20 +119,20 @@ public class PropGraphCumulative extends PropCumulative {
         }
         if (varIdx < 4 * n) {
             int v = varIdx % n;
-            if(h[v].getUB()==0 || d[v].getUB()==0){
+            if (h[v].getUB() == 0 || d[v].getUB() == 0) {
                 allTasks.remove(v);
                 ISetIterator gIt = g.getNeighborsOf(v).iterator();
-                while (gIt.hasNext()){
-                    g.removeEdge(v,gIt.nextInt());
+                while (gIt.hasNext()) {
+                    g.removeEdge(v, gIt.nextInt());
                 }
-            }else if(s[v].getUB()<e[v].getLB() || !fast){
+            } else if (s[v].getUB() < e[v].getLB() || !fast) {
                 toCompute.add(v);
             }
         } else {
             updateMaxCapa();
             full = true;
         }
-		forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
+        forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
     }
 
     protected void filterAround(int taskIndex) throws ContradictionException {
@@ -172,10 +174,10 @@ public class PropGraphCumulative extends PropCumulative {
             Event event = events[timeIndex++];
             switch (event.type) {
                 case (START):
-                    boolean eok = h[event.index].getUB()>0 && d[event.index].getUB()>0;
-                    if(eok) {
+                    boolean eok = h[event.index].getUB() > 0 && d[event.index].getUB() > 0;
+                    if (eok) {
                         for (int i = tprune.nextSetBit(0); i >= 0; i = tprune.nextSetBit(i + 1)) {
-                            if(h[i].getUB()>0 && d[i].getUB()>0) {
+                            if (h[i].getUB() > 0 && d[i].getUB() > 0) {
                                 g.addEdge(i, event.index);
                             }
                         }

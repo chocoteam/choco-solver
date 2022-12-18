@@ -684,6 +684,30 @@ public class IntIterableRangeSetTest {
         }
     }
 
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnion3() {
+        IntIterableRangeSet set = IntIterableSetUtils.union(new IntIterableRangeSet(), new IntIterableRangeSet(0));
+        Assert.assertEquals(set.size(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnion4() {
+        IntIterableRangeSet set = new IntIterableRangeSet();
+        IntIterableSetUtils.unionOf(set, new IntIterableRangeSet(0));
+        Assert.assertEquals(set.size(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnion5() {
+        IntIterableRangeSet set = new IntIterableRangeSet(0);
+        IntIterableSetUtils.unionOf(set, new IntIterableRangeSet());
+        Assert.assertEquals(set.size(), 1);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testIncludedIn1() {
+        Assert.assertTrue(IntIterableSetUtils.includedIn(new IntIterableRangeSet(), new IntIterableRangeSet(0)));
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testRemoveBetween1() {
@@ -825,7 +849,7 @@ public class IntIterableRangeSetTest {
         Assert.assertTrue(cop.isEqualToObserved());
     }
 
-    class PassiveCopySet extends AbstractSet {
+    static class PassiveCopySet extends AbstractSet {
 
         private final ISet set;
         private final ISet values;

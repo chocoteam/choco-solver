@@ -32,7 +32,6 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
     private final IntVar y;
     private final int cste;
 
-    @SuppressWarnings({"unchecked"})
     public PropLessOrEqualXY_C(IntVar[] vars, int c) {
         super(vars, PropagatorPriority.BINARY, true);
         this.x = vars[0];
@@ -42,7 +41,7 @@ public final class PropLessOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public int getPropagationConditions(int vIdx) {
-        return IntEventType.combine(IntEventType.INSTANTIATE, IntEventType.INCLOW);
+        return IntEventType.lowerBoundAndInst();
     }
 
     @Override

@@ -18,11 +18,13 @@ import org.chocosolver.solver.constraints.nary.automata.FA.IAutomaton;
 import org.chocosolver.solver.constraints.nary.flow.PropMinCostMaxFlow;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -58,9 +60,9 @@ public interface IDecompositionFactory extends ISelf<Model> {
      */
     default void amongDec(IntVar nbVar, IntVar[] vars, IntVar[] values) {
         BoolVar[] ins = ref().boolVarArray("ins", vars.length);
-        for(int i  = 0; i < vars.length; i++){
+        for (int i = 0; i < vars.length; i++) {
             BoolVar[] eqs = ref().boolVarArray("ins", values.length);
-            for(int j = 0; j < values.length; j++){
+            for (int j = 0; j < values.length; j++) {
                 ref().reifyXeqY(vars[i], values[j], eqs[j]);
             }
             ref().addClausesBoolOrArrayEqVar(eqs, ins[i]);
@@ -151,6 +153,41 @@ public interface IDecompositionFactory extends ISelf<Model> {
         return results;
     }
 
+
+    /**
+     * Creates a global cardinality constraint (GCC):
+     * Each value values[i] should be taken by exactly occurrences[i] variables of vars.
+     * <br/>
+     * This constraint does not ensure any well-defined level of consistency, yet.
+     *
+     * @param vars        collection of variables
+     * @param values      collection of constrained values
+     * @param occurrences collection of cardinality variables
+     * @param closed      restricts domains of vars to values if set to true
+     */
+    default void globalCardinalityDec(IntVar[] vars, IntVar[] values, IntVar[] occurrences, boolean closed) {
+        assert values.length == occurrences.length;
+        for (int i = 0; i < values.length; i++) {
+            ref().count(values[i], vars, occurrences[i]).post();
+        }
+        if (closed) {
+            SetVar svars = ref().setVar(new int[]{},
+                    Arrays.stream(vars)
+                            .flatMapToInt(IntVar::stream)
+                            .boxed()
+                            .collect(Collectors.toSet())
+                            .stream().mapToInt(i -> i)
+                            .sorted().toArray());
+            SetVar svalues = ref().setVar(new int[]{},
+                    Arrays.stream(values)
+                            .flatMapToInt(IntVar::stream)
+                            .boxed()
+                            .collect(Collectors.toSet())
+                            .stream().mapToInt(i -> i)
+                            .sorted().toArray());
+            ref().subsetEq(svars, svalues).post();
+        }
+    }
 
     /**
      * Creates and <b>posts</b> a decomposition of a regular constraint.
@@ -265,7 +302,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         IntVar[] q = new IntVar[n];
         IntVar M = ref().intVar("M", n * min, n * (max + 1));
         z.ge(offset).post();
-        z.lt(vars.length+offset).post();
+        z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
             q[j] = ref().intAffineView(n, vars[j], n - j);
             z.ne(j + offset).iff(M.gt(q[j])).post();
