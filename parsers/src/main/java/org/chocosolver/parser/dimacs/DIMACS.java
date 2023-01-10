@@ -20,6 +20,8 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
 
+import java.io.PrintStream;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
@@ -81,20 +83,27 @@ public class DIMACS extends RegParser {
     public void buildModel() {
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
+            Model m = models.get(i);
+            Solver s = m.getSolver();
             try {
                 long ptime = -System.currentTimeMillis();
-                parse(models.get(i), parsers[i], i);
-                models.get(i).getSolver().logWithANSI(ansi);
+                parse(m, parsers[i], i);
+                if (!logFile.equals("")) {
+                    s.log().remove(System.out);
+                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFile)), true));
+                }else {
+                    s.logWithANSI(ansi);
+                }
                 if (level.isLoggable(Level.INFO)) {
-                    models.get(i).getSolver().log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
+                    s.log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
                 }
                 if (level.is(Level.JSON)) {
-                    models.get(i).getSolver().log().printf("{\"name\":\"%s\",\"stats\":[", instance);
+                    s.log().printf("{\"name\":\"%s\",\"stats\":[", instance);
                 }
             } catch (Exception e) {
                 if (level.isLoggable(Level.INFO)) {
-                    models.get(i).getSolver().log().red().print("UNSUPPORTED\n");
-                    models.get(i).getSolver().log().printf("%s\n", e.getMessage());
+                    s.log().red().print("UNSUPPORTED\n");
+                    s.log().printf("%s\n", e.getMessage());
                 }
                 e.printStackTrace();
                 throw new RuntimeException("UNSUPPORTED");

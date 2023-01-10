@@ -63,6 +63,13 @@ public abstract class RegParser implements IParser {
     )
     protected Level level = Level.COMPET;
 
+    @Option(name = "-log",
+            aliases = "--log-file",
+            usage = "Define the log file."
+    )
+    protected String logFile = "";
+
+
     @Option(name = "-limit",
             handler = LimitHandler.class,
             usage = "Resolution limits (XXhYYmZZs,Nruns,Msols) where each is optional (no space allowed).")

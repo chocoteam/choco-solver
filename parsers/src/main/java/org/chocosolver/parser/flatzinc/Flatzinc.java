@@ -32,14 +32,10 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 /**
@@ -140,13 +136,21 @@ public class Flatzinc extends RegParser {
     public void buildModel() {
         List<Model> models = portfolio.getModels();
         for (int i = 0; i < models.size(); i++) {
+            Model m = models.get(i);
+            Solver s = m.getSolver();
             try {
                 long ptime = -System.currentTimeMillis();
                 FileInputStream fileInputStream = new FileInputStream(instance);
-                parse(models.get(i), datas[i], fileInputStream);
+                parse(m, datas[i], fileInputStream);
                 fileInputStream.close();
+                if(!logFile.equals("")) {
+                    s.log().remove(System.out);
+                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFile)), true));
+                } else {
+                    s.logWithANSI(ansi);
+                }
                 if (level.isLoggable(Level.INFO)) {
-                    models.get(i).getSolver().log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
+                    s.log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
                 }
                 if (level.is(Level.JSON)) {
                     models.get(i).getSolver().log().printf("{\"name\":\"%s\",\"stats\":[", instance);
