@@ -123,7 +123,24 @@ public class MPS extends RegParser {
                     s.log().white().printf("File parsed in %d ms%n", (ptime + System.currentTimeMillis()));
                 }
                 if (level.is(Level.JSON)) {
-                    s.log().printf("{\"name\":\"%s\",\"stats\":[", instance);
+                    s.getMeasures().setReadingTimeCount(System.nanoTime() - s.getModel().getCreationTime());
+                    s.log().printf(Locale.US,
+                            "{\t\"name\":\"%s\",\n" +
+                                    "\t\"variables\": %d,\n" +
+                                    "\t\"constraints\": %d,\n" +
+                                    "\t\"policy\": \"%s\",\n" +
+                                    "\t\"parsing time\": %.3f,\n" +
+                                    "\t\"building time\": %.3f,\n" +
+                                    "\t\"memory\": %d,\n" +
+                                    "\t\"stats\":[",
+                            instance,
+                            m.getNbVars(),
+                            m.getNbCstrs(),
+                            m.getSolver().getObjectiveManager().getPolicy(),
+                            (ptime + System.currentTimeMillis()) / 1000f,
+                            s.getReadingTimeCount(),
+                            m.getEstimatedMemory() // TODO
+                    );
                 }
             } catch (Exception e) {
                 if (level.isLoggable(Level.INFO)) {
@@ -207,15 +224,25 @@ public class MPS extends RegParser {
                         solver.getObjectiveManager().getBestSolutionValue().intValue(),
                         solver.getTimeCount());
             if (level.is(Level.JSON)) {
-                solver.log().printf(Locale.US, "%s{\"bound\":%d,\"time\":%.1f}",
+                solver.log().printf(Locale.US, "%s\n\t\t{\"bound\":%d, \"time\":%.1f, " +
+                                "\"solutions\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d}",
                         solver.getSolutionCount() > 1 ? "," : "",
                         solver.getObjectiveManager().getBestSolutionValue().intValue(),
-                        solver.getTimeCount());
+                        solver.getTimeCount(),
+                        solver.getSolutionCount(),
+                        solver.getNodeCount(),
+                        solver.getFailCount(),
+                        solver.getRestartCount());
             }
         } else {
             if (level.is(Level.JSON)) {
-                solver.log().printf("{\"time\":%.1f},",
-                        solver.getTimeCount());
+                solver.log().printf("\t\t{\"time\":%.1f," +
+                                "\"solutions\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d}",
+                        solver.getTimeCount(),
+                        solver.getSolutionCount(),
+                        solver.getNodeCount(),
+                        solver.getFailCount(),
+                        solver.getRestartCount());
             }
         }
         output.setLength(0);
@@ -252,8 +279,14 @@ public class MPS extends RegParser {
                     solver.getTimeCount());
         }
         if (level.is(Level.JSON)) {
-            solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
-                    solver.getTimeCount(), complete ? "terminated" : "stopped");
+            solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
+                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                    solver.getTimeCount(),
+                    solver.getNodeCount(),
+                    solver.getFailCount(),
+                    solver.getRestartCount(),
+                    solver.getSearchState()
+            );
         }
         if (level.is(Level.IRACE)) {
             solver.log().printf(Locale.US, "%d %d",

@@ -153,7 +153,24 @@ public class Flatzinc extends RegParser {
                     s.log().white().printf(String.format("File parsed in %d ms%n", (ptime + System.currentTimeMillis())));
                 }
                 if (level.is(Level.JSON)) {
-                    models.get(i).getSolver().log().printf("{\"name\":\"%s\",\"stats\":[", instance);
+                    s.getMeasures().setReadingTimeCount(System.nanoTime() - s.getModel().getCreationTime());
+                    s.log().printf(Locale.US,
+                            "{\t\"name\":\"%s\",\n" +
+                                    "\t\"variables\": %d,\n" +
+                                    "\t\"constraints\": %d,\n" +
+                                    "\t\"policy\": \"%s\",\n" +
+                                    "\t\"parsing time\": %.3f,\n" +
+                                    "\t\"building time\": %.3f,\n" +
+                                    "\t\"memory\": %d,\n" +
+                                    "\t\"stats\":[",
+                            instance,
+                            m.getNbVars(),
+                            m.getNbCstrs(),
+                            m.getSolver().getObjectiveManager().getPolicy(),
+                            (ptime + System.currentTimeMillis()) / 1000f,
+                            s.getReadingTimeCount(),
+                            m.getEstimatedMemory() // TODO
+                            );
                 }
             } catch (IOException e) {
                 throw new Error(e.getMessage());
