@@ -207,7 +207,7 @@ public class DIMACS extends RegParser {
             }
         } else {
             if (level.is(Level.JSON)) {
-                solver.log().printf("\t\t{\"time\":%.1f," +
+                solver.log().printf(Locale.US, "\t\t{\"time\":%.1f," +
                                 "\"solutions\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d}",
                         solver.getTimeCount(),
                         solver.getSolutionCount(),

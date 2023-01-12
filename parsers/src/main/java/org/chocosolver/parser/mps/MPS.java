@@ -151,10 +151,6 @@ public class MPS extends RegParser {
                 throw new RuntimeException("UNSUPPORTED");
             }
         }
-        if (level.is(Level.JSON)) {
-            getModel().displayVariableOccurrences();
-            getModel().displayPropagatorOccurrences();
-        }
     }
 
     public void parse(Model target, MPSParser parser, int i) throws Exception {
