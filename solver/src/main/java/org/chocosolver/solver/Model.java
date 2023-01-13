@@ -27,14 +27,11 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.solver.variables.view.IView;
-import org.chocosolver.util.ESat;
 import org.chocosolver.util.tools.VariableUtils;
+import org.ehcache.sizeof.SizeOf;
 
-import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -679,6 +676,16 @@ public class Model implements IModel {
             this.modelAnalyser = new ModelAnalyser(this);
         }
         return this.modelAnalyser;
+    }
+
+    /**
+     * Returns an estimation of the current memory footprint of this.
+     * @return the total size in bytes for this model
+     * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
+     */
+    public long getEstimatedMemory(){
+        SizeOf sizeOf = SizeOf.newInstance();
+        return sizeOf.deepSizeOf(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
