@@ -99,9 +99,9 @@ public class XCSP extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(m, parsers[i], i);
-                if (!logFile.equals("")) {
+                if(logFilePath != null) {
                     s.log().remove(System.out);
-                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFile)), true));
+                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFilePath)), true));
                 }else {
                     s.logWithANSI(ansi);
                 }
@@ -125,7 +125,7 @@ public class XCSP extends RegParser {
                             m.getSolver().getObjectiveManager().getPolicy(),
                             (ptime + System.currentTimeMillis()) / 1000f,
                             s.getReadingTimeCount(),
-                            m.getEstimatedMemory() // TODO
+                            m.getEstimatedMemory()
                     );
                 }
             } catch (Exception e) {

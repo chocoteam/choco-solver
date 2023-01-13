@@ -32,7 +32,10 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 import org.kohsuke.args4j.Option;
 
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -143,9 +146,9 @@ public class Flatzinc extends RegParser {
                 FileInputStream fileInputStream = new FileInputStream(instance);
                 parse(m, datas[i], fileInputStream);
                 fileInputStream.close();
-                if(!logFile.equals("")) {
+                if(logFilePath != null) {
                     s.log().remove(System.out);
-                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFile)), true));
+                    s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFilePath)), true));
                 } else {
                     s.logWithANSI(ansi);
                 }
@@ -169,7 +172,7 @@ public class Flatzinc extends RegParser {
                             m.getSolver().getObjectiveManager().getPolicy(),
                             (ptime + System.currentTimeMillis()) / 1000f,
                             s.getReadingTimeCount(),
-                            m.getEstimatedMemory() // TODO
+                            m.getEstimatedMemory()
                             );
                 }
             } catch (IOException e) {
