@@ -13,6 +13,8 @@ package org.chocosolver.memory.trailing.trail.chunck;
 import org.chocosolver.memory.trailing.StoredInt;
 import org.chocosolver.memory.trailing.trail.IStoredIntTrail;
 
+import java.util.Arrays;
+
 /**
  * A trail for integers.
  *
@@ -52,15 +54,8 @@ public class ChunckedIntTrail extends ChunckedTrail<IntWorld> implements IStored
             current.clear();
         }
         if (worldIndex == worlds.length - 1) {
-            resizeWorlds();
+            worlds = Arrays.copyOf(worlds, (int) (worlds.length * loadfactor));
         }
-    }
-
-    private void resizeWorlds() {
-        int newCapacity = (int) (worlds.length * loadfactor);
-        IntWorld[] tmp = new IntWorld[newCapacity];
-        System.arraycopy(worlds, 0, tmp, 0, worlds.length);
-        worlds = tmp;
     }
 
     @Override

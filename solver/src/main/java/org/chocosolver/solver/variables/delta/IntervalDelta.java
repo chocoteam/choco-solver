@@ -12,6 +12,9 @@ package org.chocosolver.solver.variables.delta;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
  * A class to store the removed intervals of an integer variable.
@@ -36,15 +39,10 @@ public final class IntervalDelta extends TimeStampedObject implements IIntervalD
 
     private void ensureCapacity() {
         if (last >= from.length) {
-            int[] tmp = new int[last * 3 / 2 + 1];
-            System.arraycopy(from, 0, tmp, 0, last);
-            from = tmp;
-            tmp = new int[last * 3 / 2 + 1];
-            System.arraycopy(to, 0, tmp, 0, last);
-            to = tmp;
-            ICause[] tmpc = new ICause[last * 3 / 2 + 1];
-            System.arraycopy(causes, 0, tmpc, 0, last);
-            causes = tmpc;
+            int nsize = ArrayUtils.newBoundedSize(last, from.length * 2);
+            from = Arrays.copyOf(from, nsize);
+            to = Arrays.copyOf(to, nsize);
+            causes = Arrays.copyOf(causes, nsize);
         }
     }
 

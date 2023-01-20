@@ -15,7 +15,6 @@
  */
 module org.chocosolver.parsers {
     exports org.chocosolver.parser;
-
     requires transitive org.chocosolver.solver;
     requires xcsp3.tools;
     requires args4j;

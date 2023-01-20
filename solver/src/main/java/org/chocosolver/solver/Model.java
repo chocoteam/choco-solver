@@ -27,6 +27,7 @@ import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.ehcache.sizeof.SizeOf;
 
@@ -571,7 +572,7 @@ public class Model implements IModel {
     /**
      * Returns the object associated with the named <code>hookName</code>
      *
-     * @param hookName the name of the hook to return
+     * @param hookName     the name of the hook to return
      * @param defaultValue the default mapping of the key
      * @return the object associated to the name <code>hookName</code>,
      * or defaultValue if this map contains no mapping for the key
@@ -812,9 +813,7 @@ public class Model implements IModel {
      */
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
-            Variable[] tmp = vars;
-            vars = new Variable[tmp.length * 2];
-            System.arraycopy(tmp, 0, vars, 0, vIdx);
+            vars = Arrays.copyOf(vars, ArrayUtils.newBoundedSize(vars.length, vars.length * 2));
         }
         vars[vIdx++] = variable;
         switch ((variable.getTypeAndKind() & Variable.KIND)) {
@@ -921,9 +920,7 @@ public class Model implements IModel {
             while (cIdx + cs.length >= nsize) {
                 nsize *= 3 / 2 + 1;
             }
-            Constraint[] tmp = cstrs;
-            cstrs = new Constraint[nsize];
-            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
+            cstrs = Arrays.copyOf(cstrs, nsize);
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
@@ -960,7 +957,7 @@ public class Model implements IModel {
                 if (!getSolver().getEngine().isInitialized()) {
                     throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                             "A call to Model.post(Constraint) is more appropriate.");
-                }else {
+                } else {
                     for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }
@@ -1091,5 +1088,4 @@ public class Model implements IModel {
     public Model ref() {
         return this;
     }
-
 }

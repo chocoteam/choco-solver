@@ -12,13 +12,16 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.trailing.StoredDouble;
 
+import java.util.Arrays;
+
 /**
  * A world devoted to integers.
+ *
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
-public class DoubleWorld implements World{
+public class DoubleWorld implements World {
 
 
     /**
@@ -70,7 +73,10 @@ public class DoubleWorld implements World{
         stampStack[now] = oldStamp;
         now++;
         if (now == valueStack.length) {
-            resizeUpdateCapacity();
+            int newCapacity = (int) (variableStack.length * loadfactor);
+            valueStack = Arrays.copyOf(valueStack, newCapacity);
+            variableStack = Arrays.copyOf(variableStack, newCapacity);
+            stampStack = Arrays.copyOf(stampStack, newCapacity);
         }
     }
 
@@ -79,19 +85,6 @@ public class DoubleWorld implements World{
         for (int i = now - 1; i >= 0; i--) {
             variableStack[i]._set(valueStack[i], stampStack[i]);
         }
-    }
-
-    private void resizeUpdateCapacity() {
-        int newCapacity = (int)(variableStack.length * loadfactor);
-        final StoredDouble[] tmp1 = new StoredDouble[newCapacity];
-        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
-        variableStack = tmp1;
-        final double[] tmp2 = new double[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
-        final int[] tmp3 = new int[newCapacity];
-        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
-        stampStack = tmp3;
     }
 
     @Override

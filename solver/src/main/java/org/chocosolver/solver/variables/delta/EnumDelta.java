@@ -12,6 +12,9 @@ package org.chocosolver.solver.variables.delta;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.search.loop.TimeStampedObject;
+import org.chocosolver.util.tools.ArrayUtils;
+
+import java.util.Arrays;
 
 /**
  * A class to store the removed value of an integer variable.
@@ -27,27 +30,24 @@ public final class EnumDelta extends TimeStampedObject implements IEnumDelta {
     private int last;
 
     public EnumDelta(IEnvironment environment) {
-		super(environment);
+        super(environment);
         rem = new int[SIZE];
         causes = new ICause[SIZE];
     }
 
     private void ensureCapacity() {
         if (last >= rem.length) {
-            int[] tmp = new int[last * 3 / 2 + 1];
-            ICause[] tmpc = new ICause[last * 3 / 2 + 1];
-            System.arraycopy(rem, 0, tmp, 0, last);
-            System.arraycopy(causes, 0, tmpc, 0, last);
-            rem = tmp;
-            causes = tmpc;
+            int nsize = ArrayUtils.newBoundedSize(last, rem.length * 2);
+            rem = Arrays.copyOf(rem, nsize);
+            causes = Arrays.copyOf(causes, nsize);
         }
     }
 
-	@Override
+    @Override
     public void lazyClear() {
         if (needReset()) {
-			last = 0;
-			resetStamp();
+            last = 0;
+            resetStamp();
         }
     }
 
@@ -59,7 +59,7 @@ public final class EnumDelta extends TimeStampedObject implements IEnumDelta {
      */
     @Override
     public void add(int value, ICause cause) {
-		lazyClear();
+        lazyClear();
         ensureCapacity();
         causes[last] = cause;
         rem[last++] = value;

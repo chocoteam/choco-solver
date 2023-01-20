@@ -503,6 +503,12 @@ public enum FConstraint {
                 }
             }
             model.scalar(bs, as, "<=", c).reifyWith(r);
+            // slower version:
+            /* int[] bnds = VariableUtils.boundsForScalar(bs, as);
+            IntVar e = model.intVar(bnds[0], bnds[1]);
+            model.scalar(bs, as, "=", e).post();
+            model.reifyXleY(e, c, r);
+            */
         }
     },
     int_lin_ne {
