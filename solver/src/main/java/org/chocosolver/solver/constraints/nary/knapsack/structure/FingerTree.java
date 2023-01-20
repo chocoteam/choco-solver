@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -60,7 +60,7 @@ public class FingerTree<NodeType, LeafType> {
         if (nodeIndex != 0 && (isLeaf(nodeIndex) || isInnerNode(nodeIndex))) {
             return Math.floorDiv(nodeIndex - 1, 2);
         } else {
-            throw new IllegalArgumentException("Getting parent of an invalid index : " + Integer.toString(nodeIndex));
+            throw new IllegalArgumentException("Getting parent of an invalid index : " + nodeIndex);
         }
     }
 

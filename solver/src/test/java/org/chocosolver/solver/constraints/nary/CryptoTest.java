@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -143,9 +143,8 @@ public class CryptoTest {
             }
 
         	/*   the shift between two round    */
-            for(int i = 0; i < 3 * quarter_block; i ++){
-                input_at_round[r + 1][i] = input_at_round[r][quarter_block + i];
-            }
+            if (3 * quarter_block >= 0)
+                System.arraycopy(input_at_round[r], quarter_block + 0, input_at_round[r + 1], 0, 3 * quarter_block);
 
         }
 
@@ -176,9 +175,8 @@ public class CryptoTest {
         IntVar OBJ = model.intVar("objective value", 0, 128 / 6);
         IntVar[] activeflag = new IntVar[R * quarter_block];
         for(int i = 0; i < R; i++){
-            for(int j = 0; j < quarter_block; j ++){
-                activeflag[i * quarter_block + j] = before_S_at_round[i][j];
-            }
+            if (quarter_block >= 0)
+                System.arraycopy(before_S_at_round[i], 0, activeflag, i * quarter_block + 0, quarter_block);
         }
         model.sum(activeflag, "=", OBJ).post();
         model.setObjective(Model.MINIMIZE, OBJ);

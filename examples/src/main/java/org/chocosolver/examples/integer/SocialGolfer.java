@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -145,7 +145,7 @@ public class SocialGolfer extends AbstractProblem {
     public void solve() {
         model.getSolver().solve();
 
-        System.out.println(String.format("Social golfer(%d,%d,%d)", g, s, w));
+        System.out.printf("Social golfer(%d,%d,%d)%n", g, s, w);
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             int p = g * s;

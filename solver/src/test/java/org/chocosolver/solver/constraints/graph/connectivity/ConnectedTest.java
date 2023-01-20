@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -51,7 +51,7 @@ public class ConnectedTest {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
         Assert.assertTrue(GLB.getNodes().contains(3));
@@ -84,7 +84,7 @@ public class ConnectedTest {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
         Assert.assertTrue(GLB.getNodes().contains(4));
@@ -112,7 +112,7 @@ public class ConnectedTest {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
     }
@@ -140,7 +140,7 @@ public class ConnectedTest {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertTrue(GLB.getNodes().contains(1));
     }
@@ -202,7 +202,7 @@ public class ConnectedTest {
 		Assert.assertEquals(model.connected(graph).isSatisfied(), ESat.UNDEFINED);
 		model.connected(graph).post();
 		while (model.getSolver().solve());
-		Assert.assertTrue(model.getSolver().getSolutionCount() == 2);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
 	}
 
 	@Test(groups = "10s")
@@ -225,7 +225,7 @@ public class ConnectedTest {
 		model.connected(graph).post();
 		while (model.getSolver().solve());
 		model.getSolver().printStatistics();
-		Assert.assertTrue(model.getSolver().getSolutionCount() == 0);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
 	}
 
     @Test(groups = "10s")
@@ -246,11 +246,11 @@ public class ConnectedTest {
 		Solver s = m.getSolver();
 
 		s.propagate();
-		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+        Assert.assertEquals(g.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
-		Assert.assertTrue(s.getSolutionCount() == 1);
+        Assert.assertEquals(s.getSolutionCount(), 1);
 	}
 
 	@Test(groups = "10s")
@@ -270,11 +270,11 @@ public class ConnectedTest {
 		Solver s = m.getSolver();
 
 		s.propagate();
-		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+        Assert.assertEquals(g.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
-		Assert.assertTrue(s.getSolutionCount() == 1);
+        Assert.assertEquals(s.getSolutionCount(), 1);
 	}
 
 	@Test
@@ -298,9 +298,9 @@ public class ConnectedTest {
 		m.arithm(isConnected,"+", nbNodes,"=",3).post();
 
 		m.getSolver().propagate();
-		Assert.assertTrue(!isConnected.isInstantiated());
+        Assert.assertFalse(isConnected.isInstantiated());
 		while (m.getSolver().solve());
-		Assert.assertTrue(m.getSolver().getSolutionCount() == 7);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 7);
 	}
 
 	@Test
@@ -329,7 +329,7 @@ public class ConnectedTest {
 		m.getSolver().propagate();
 
 		Assert.assertTrue(graph.getMandatoryNodes().contains(31));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==3);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 3);
 	}
 
 	@Test
@@ -353,7 +353,7 @@ public class ConnectedTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNodes().contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==3);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -377,7 +377,7 @@ public class ConnectedTest {
 		m.connected(graph).post();
 
 		m.getSolver().propagate();
-		Assert.assertTrue(graph.getMandatoryNodes().size()==1);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 1);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -402,7 +402,7 @@ public class ConnectedTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==2);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 2);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -428,9 +428,9 @@ public class ConnectedTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==2);
-		Assert.assertTrue(!graph.getPotentialNodes().contains(4));
-		Assert.assertTrue(!graph.getPotentialNodes().contains(5));
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 2);
+        Assert.assertFalse(graph.getPotentialNodes().contains(4));
+        Assert.assertFalse(graph.getPotentialNodes().contains(5));
 		Assert.assertTrue(m.getSolver().solve());
 	}
 

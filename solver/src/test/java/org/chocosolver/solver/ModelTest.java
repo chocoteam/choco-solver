@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -367,7 +367,7 @@ public class ModelTest {
         Assert.assertEquals(model.getHooks().size(), 2);
         Assert.assertEquals(model.getHook("toto"), toto);
         model.removeHook("toto");
-        Assert.assertEquals(model.getHook("toto"), null);
+        assertNull(model.getHook("toto"));
         Assert.assertEquals(model.getHooks().size(), 1);
         model.removeAllHooks();
         Assert.assertEquals(model.getHooks().size(), 0);
@@ -441,7 +441,7 @@ public class ModelTest {
         m.getSolver().setSearch(inputOrderLBSearch((IntVar[]) m.getHook("ticks")));
         Solution s = m.getSolver().findOptimalSolution((IntVar) m.getHook("objective"), false);
         Assert.assertNotNull(s);
-        Assert.assertTrue(s.getIntVal((IntVar) m.getHook("objective")) == 25);
+        assertEquals(s.getIntVal((IntVar) m.getHook("objective")), 25);
         m.getEnvironment().worldPush();
         try {
             s.restore();

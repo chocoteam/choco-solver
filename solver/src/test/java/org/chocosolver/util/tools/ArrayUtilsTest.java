@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -134,7 +134,7 @@ public class ArrayUtilsTest {
     public void testGetColumn4() throws Exception {
         int[][] n = null;
         int[] nn = ArrayUtils.getColumn(n, 1);
-        Assert.assertEquals(nn, null);
+        Assert.assertNull(nn);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -154,7 +154,7 @@ public class ArrayUtilsTest {
     public void testGetColumn6() throws Exception {
         double[][] n = null;
         double[] nn = ArrayUtils.getColumn(n, 1);
-        Assert.assertEquals(nn, null);
+        Assert.assertNull(nn);
     }
 
     @Test(groups="1s", timeOut=60000)

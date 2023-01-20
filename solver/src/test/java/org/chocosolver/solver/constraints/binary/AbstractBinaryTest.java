@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -78,7 +78,7 @@ public abstract class AbstractBinaryTest {
         for (int k = 0; k < 20000; k++) {
             long seed = System.currentTimeMillis();
 			if(k==0){
-				seed = 1410851231099l;
+				seed = 1410851231099L;
 			}
             rand.setSeed(seed);
             bounded = rand.nextBoolean();

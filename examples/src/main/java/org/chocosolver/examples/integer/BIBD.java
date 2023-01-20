@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -120,7 +120,7 @@ public class BIBD extends AbstractProblem {
     @Override
     public void solve() {
         model.getSolver().solve();
-        System.out.println(String.format("BIBD(%d,%d,%d,%d,%d)", v, b, r, k, l));
+        System.out.printf("BIBD(%d,%d,%d,%d,%d)%n", v, b, r, k, l);
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < v; i++) {

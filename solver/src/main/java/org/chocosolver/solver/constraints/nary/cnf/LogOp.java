@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -45,15 +45,15 @@ public final class LogOp implements ILogical {
         }
     }
 
-    protected Type type;
+    Type type;
 
-    protected Operator operator;
+    Operator operator;
 
-    protected ILogical[] children;
+    private ILogical[] children;
 
-    protected BoolVar[] varsAsArray;
+    private BoolVar[] varsAsArray;
 
-    protected LogOp(Operator operator, Type type, ILogical... children) {
+    LogOp(Operator operator, Type type, ILogical... children) {
         this.type = type;
         this.operator = operator;
         if (children == null) {
@@ -239,7 +239,7 @@ public final class LogOp implements ILogical {
      *
      * @return number of children
      */
-    protected int getNbChildren() {
+    int getNbChildren() {
         return children.length;
     }
 
@@ -248,7 +248,7 @@ public final class LogOp implements ILogical {
      *
      * @return <code>true</code> if <code>this</code> contains one OR logic tree
      */
-    protected boolean hasOrChild() {
+    boolean hasOrChild() {
         for (int i = 0; i < children.length; i++) {
             if (!children[i].isLit() && ((LogOp) children[i]).is(Operator.OR)) {
                 return true;
@@ -262,7 +262,7 @@ public final class LogOp implements ILogical {
      *
      * @return <code>true</code> if <code>this</code> contains one AND logic tree
      */
-    protected boolean hasAndChild() {
+    boolean hasAndChild() {
         for (int i = 0; i < children.length; i++) {
             if (!children[i].isLit() && ((LogOp) children[i]).is(Operator.AND)) {
                 return true;

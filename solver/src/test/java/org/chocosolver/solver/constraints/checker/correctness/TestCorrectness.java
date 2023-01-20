@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -262,7 +262,7 @@ public class TestCorrectness {
     @Test(groups="checker", timeOut=60000)
     public void testCumulative() {
         int nBugSweep = 32;
-        long seedBugSweep = 1368003588936l;
+        long seedBugSweep = 1368003588936L;
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * nBugSweep + 1, 1, nBugSweep, seedBugSweep, false);
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {
@@ -274,7 +274,7 @@ public class TestCorrectness {
 
     @Test(groups="checker", timeOut=60000)
     public void testIncrementalCumulative() {
-        CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 32 + 1, 1, 32, 1368003588936l, true);
+        CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 32 + 1, 1, 32, 1368003588936L, true);
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 7 + 1, 1, 7, 29, true);
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {

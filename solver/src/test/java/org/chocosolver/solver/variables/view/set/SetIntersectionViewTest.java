@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -71,7 +71,7 @@ public class SetIntersectionViewTest {
         m.arithm(card, "=", 3).post();
         while (m.getSolver().solve()) {
             Assert.assertTrue(intersection.getValue().contains(3));
-            Assert.assertTrue(!intersection.getValue().contains(1));
+            Assert.assertFalse(intersection.getValue().contains(1));
             Assert.assertEquals(card.getValue(), 3);
             int[] sA = setA.getValue().toArray();
             int[] sB = setB.getValue().toArray();
@@ -144,12 +144,12 @@ public class SetIntersectionViewTest {
         setA.force(0, fakeCauseB);
         setB.force(0, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         delta.clear();
         setC.force(0, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
         Assert.assertTrue(delta.contains(0));
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         // Test remove elements
         delta.clear();
         setA.remove(8, fakeCauseB);
@@ -159,10 +159,10 @@ public class SetIntersectionViewTest {
         Assert.assertTrue(delta.contains(8));
         Assert.assertTrue(delta.contains(7));
         Assert.assertTrue(delta.contains(6));
-        Assert.assertTrue(delta.size() == 3);
+        Assert.assertEquals(delta.size(), 3);
         delta.clear();
         setB.remove(8, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
     }
 }

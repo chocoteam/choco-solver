@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -90,7 +90,7 @@ public final class MeasuresRecorder extends Measures {
      * Update the name of the model to Measures
      * @param name name of the model
      */
-    public final void setModelName(String name){
+    public void setModelName(String name){
         this.modelName = name;
     }
 
@@ -98,7 +98,7 @@ public final class MeasuresRecorder extends Measures {
      * indicates whether or not the optimum has been found and proved
      * @param objectiveOptimal <tt>true</tt> if the objective is proven to be optimal
      */
-    public final void setObjectiveOptimal(boolean objectiveOptimal) {
+    public void setObjectiveOptimal(boolean objectiveOptimal) {
         this.objectiveOptimal = objectiveOptimal;
     }
 
@@ -126,7 +126,7 @@ public final class MeasuresRecorder extends Measures {
     /**
      * increment node counter
      */
-    public final void incNodeCount() {
+    public void incNodeCount() {
         nodeCount++;
         depth = getCurrentDepth();
         maxDepth = Math.max(maxDepth, depth);
@@ -135,42 +135,42 @@ public final class MeasuresRecorder extends Measures {
     /**
      * increment backtrack counter
      */
-    public final void incBackTrackCount() {
+    public void incBackTrackCount() {
         backtrackCount++;
     }
 
     /**
      * increment backtrack counter
      */
-    public final void incBackjumpCount() {
+    public void incBackjumpCount() {
         backjumpCount++;
     }
 
     /**
      * increment fail counter
      */
-    public final void incFailCount() {
+    public void incFailCount() {
         failCount++;
     }
 
     /**
      * increment fail counter
      */
-    public final void incFixpointCount() {
+    public void incFixpointCount() {
         fixpointCount++;
     }
 
     /**
      * increment restart counter
      */
-    public final void incRestartCount() {
+    public void incRestartCount() {
         restartCount++;
     }
 
     /**
      * increment solution counter
      */
-    public final void incSolutionCount() {
+    public void incSolutionCount() {
         solutionCount++;
     }
 
@@ -179,7 +179,7 @@ public final class MeasuresRecorder extends Measures {
      * Update the current search state
      * @param state new search state
      */
-    public final void setSearchState(SearchState state) {
+    public void setSearchState(SearchState state) {
         Objects.requireNonNull(state);
         this.state = state;
     }
@@ -188,12 +188,12 @@ public final class MeasuresRecorder extends Measures {
      * Update the bounds managed
      * @param boundsManager new bound manager
      */
-    public final void setBoundsManager(IBoundsManager boundsManager) {
+    public void setBoundsManager(IBoundsManager boundsManager) {
         Objects.requireNonNull(boundsManager);
         this.boundsManager = boundsManager;
     }
 
-    public final void setReadingTimeCount(long readingTimeCount) {
+    public void setReadingTimeCount(long readingTimeCount) {
         if(this.readingTimeCount <= 0) {
             this.readingTimeCount = readingTimeCount;
         }

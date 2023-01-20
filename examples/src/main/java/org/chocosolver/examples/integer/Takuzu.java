@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -65,25 +65,19 @@ public class Takuzu extends AbstractProblem {
         // Rules on lines
         rule1(cells);
         rule2(cells);
-        switch (r3) {
-            case 2:
-                rule32(cells);
-                break;
-            default:
-                rule31(cells);
-                break;
+        if (r3 == 2) {
+            rule32(cells);
+        } else {
+            rule31(cells);
         }
         // Rules on columns
         BoolVar[][] tcells = ArrayUtils.transpose(cells);
         rule1(tcells);
         rule2(tcells);
-        switch (r3) {
-            case 2:
-                rule32(tcells);
-                break;
-            default:
-                rule31(tcells);
-                break;
+        if (r3 == 2) {
+            rule32(tcells);
+        } else {
+            rule31(tcells);
         }
     }
 

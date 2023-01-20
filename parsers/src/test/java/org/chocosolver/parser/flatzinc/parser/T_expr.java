@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -32,7 +32,7 @@ public class T_expr extends GrammarTest {
         Flatzinc4Parser fp = parser("true");
         Expression d =fp.expr().exp;
         Assert.assertTrue(d instanceof EBool);
-        Assert.assertEquals(true, ((EBool) d).value);
+        Assert.assertTrue(((EBool) d).value);
     }
 
     @Test(groups = "1s")
@@ -40,7 +40,7 @@ public class T_expr extends GrammarTest {
         Flatzinc4Parser fp = parser("false");
         Expression d = fp.expr().exp;
         Assert.assertTrue(d instanceof EBool);
-        Assert.assertEquals(false, ((EBool) d).value);
+        Assert.assertFalse(((EBool) d).value);
     }
 
     @Test(groups = "1s")

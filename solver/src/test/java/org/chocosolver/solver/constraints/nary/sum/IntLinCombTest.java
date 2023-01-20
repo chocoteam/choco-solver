@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -908,9 +908,9 @@ public class IntLinCombTest {
         m.scalar(row, new int[]{3, 4, 5}, "=", 9).post();
         while (m.getSolver().solve()) {
             int tot = row[0].getValue() * 3 + row[1].getValue() * 4 + row[2].getValue() * 5;
-            Assert.assertTrue(tot == 9);
+            assertEquals(tot, 9);
         }
-        Assert.assertTrue(m.getSolver().getSolutionCount() == 2);
+        assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
     @Test(groups = "1s", timeOut = 60000)

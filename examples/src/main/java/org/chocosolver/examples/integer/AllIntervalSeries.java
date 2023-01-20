@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -78,7 +78,7 @@ public class AllIntervalSeries extends AbstractProblem {
     @Override
     public void solve() {
         model.getSolver().solve();
-        System.out.println(String.format("All interval series(%s)", m));
+        System.out.printf("All interval series(%s)%n", m);
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m - 1; i++) {

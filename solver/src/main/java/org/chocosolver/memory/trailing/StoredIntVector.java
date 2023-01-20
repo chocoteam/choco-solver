@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,7 +26,7 @@ public final class StoredIntVector extends IStateIntVector {
 
     public int[] worldStamps;
 
-    protected final StoredIntVectorTrail myTrail;
+    private final StoredIntVectorTrail myTrail;
 
 
     /**
@@ -128,7 +128,7 @@ public final class StoredIntVector extends IStateIntVector {
     }
 
     @Override
-    public final int quickSet(int index, int val) {
+    public int quickSet(int index, int val) {
         assert (rangeCheck(index));
         final int oldValue = elementData[index];
         if (val != oldValue) {

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -180,36 +180,30 @@ public class SymmetryBreaking3Test {
     @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness() {
         for (int n = 5; n <= 7; n++) {
-            Assert.assertEquals(solutionExists(n, a[n], 5, true), true);
-            Assert.assertEquals(solutionExists(n, a[n] + 1, 5, true), false);
+            Assert.assertTrue(solutionExists(n, a[n], 5, true));
+            Assert.assertFalse(solutionExists(n, a[n] + 1, 5, true));
         }
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness1() {
         int n = 10;
-        Assert.assertEquals(solutionExists(n, a[n], 5, true), true);
+        Assert.assertTrue(solutionExists(n, a[n], 5, true));
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public static void testCorrectness2() {
         int n = 8;
-        Assert.assertEquals(solutionExists(n, a[n] + 1, 5, true), false);
+        Assert.assertFalse(solutionExists(n, a[n] + 1, 5, true));
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public static void testHardNoSolution() {
-        Assert.assertEquals(
-                solutionExists(8, 10, 6, true),
-                false // it's preprocessed value of solutionExists(8, 10, 6, false), 70 seconds @ AMD FX-8150 (3.6 GHz, 8 Gb RAM)
-        );
+        Assert.assertFalse(solutionExists(8, 10, 6, true));
     }
 
     @Test(groups = "1s", timeOut = 60000)
     public static void testHardSolutionExists() {
-        Assert.assertEquals(
-                solutionExists(10, 10, 9, true),
-                true // it's preprocessed value of solutionExists(10, 10, 9, false), 225 seconds @ AMD FX-8150 (3.6 GHz, 8 Gb RAM)
-        );
+        Assert.assertTrue(solutionExists(10, 10, 9, true));
     }
 }

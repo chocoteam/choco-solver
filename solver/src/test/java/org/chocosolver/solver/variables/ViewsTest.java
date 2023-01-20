@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -565,7 +565,7 @@ public class ViewsTest {
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
         s.getSolver().propagate();
-        assertEquals(sum.isInstantiated(), true);
+        assertTrue(sum.isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -577,7 +577,7 @@ public class ViewsTest {
         s.scalar(new IntVar[]{view, bool}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
         s.getSolver().propagate();
-        assertEquals(sum.isInstantiated(), true);
+        assertTrue(sum.isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -589,7 +589,7 @@ public class ViewsTest {
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
         s.getSolver().propagate();
-        assertEquals(sum.isInstantiated(), true);
+        assertTrue(sum.isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -601,7 +601,7 @@ public class ViewsTest {
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
         s.getSolver().propagate();
-        assertEquals(sum.isInstantiated(), true);
+        assertTrue(sum.isInstantiated());
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -737,7 +737,7 @@ public class ViewsTest {
         BoolVar[] z = new BoolVar[n];
         for (int i = 0; i < y.length; i++) {
             z[i] = model.boolNotView(y[i]);
-            Assert.assertTrue(z[i] == x[i]);
+            assertSame(z[i], x[i]);
         }
         checkDomains(true, x, y, z);
 

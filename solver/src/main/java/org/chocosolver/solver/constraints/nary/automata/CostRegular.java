@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -101,8 +101,9 @@ public class CostRegular extends Constraint {
                     pi.delta(k, j, succ);
                     if (!succ.isEmpty()) {
                         TIntIterator it = succ.iterator();
-                        for (; it.hasNext(); )
+                        while (it.hasNext()) {
                             layer.get(i + 1).add(it.next());
+                        }
                         int idx = starts[i] + j - offsets[i];
                         if (tmpQ[idx] == null)
                             tmpQ[idx] = new TIntHashSet();
@@ -147,7 +148,7 @@ public class CostRegular extends Constraint {
                         pi.delta(k, j, succ);
                         TIntIterator it = succ.iterator();
                         boolean added = false;
-                        for (; it.hasNext(); ) {
+                        while (it.hasNext()) {
                             int qn = it.next();
                             if (layer.get(i + 1).contains(qn)) {
                                 added = true;

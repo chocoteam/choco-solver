@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -31,7 +31,7 @@ public class T_param_decl extends GrammarTest {
         Object o = fp.datas.get("beer_is_good");
         Assert.assertNotNull(o);
         Assert.assertTrue(o instanceof Boolean);
-        Assert.assertEquals(true, ((Boolean) o).booleanValue());
+        Assert.assertTrue(((Boolean) o).booleanValue());
     }
 
     @Test(groups = "1s")

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -52,7 +52,7 @@ public class TestEdgeInducedSubgraphView {
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 5);
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             for (int i : g.getValue().getNodes()) {
                 for (int j : g.getValue().getNeighborsOf(i)) {
                     if (neigh[i].contains(j)) {

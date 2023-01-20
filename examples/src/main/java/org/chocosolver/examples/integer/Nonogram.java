@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -89,7 +89,7 @@ public class Nonogram extends AbstractProblem {
     @Override
     public void solve() {
         model.getSolver().solve();
-        System.out.println(String.format("Nonogram -- %s", data.name()));
+        System.out.printf("Nonogram -- %s%n", data.name());
         StringBuilder st = new StringBuilder();
         for (int i = 0; i < vars.length; i++) {
             st.append("\t");

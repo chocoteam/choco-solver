@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -28,8 +28,8 @@ public class CircularQueueTest {
         CircularQueue<Integer> queue = create();
         queue.addFirst(1);
         assertEquals(queue.pollLast(), Integer.valueOf(1));
-        assertEquals(queue.pollLast(), null);
-        assertEquals(queue.pollFirst(), null);
+        assertNull(queue.pollLast());
+        assertNull(queue.pollFirst());
     }
 
     @Test(groups = "1s", timeOut=60000)

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -20,8 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertThrows;
+import static org.testng.Assert.*;
 
 public class QuickXPlainTest {
 
@@ -79,7 +78,7 @@ public class QuickXPlainTest {
             model.post(userRequirements.get(i));
         }
 
-        assertEquals(solver.solve(), false);
+        assertFalse(solver.solve());
         solver.reset();
         List<Constraint> minConflictSet = solver.findMinimumConflictingSet(userRequirements);
         assertEquals(minConflictSet.size(), 2);
@@ -93,7 +92,7 @@ public class QuickXPlainTest {
         model.intVar(0, 10);
         model.getSolver().solve();
         // MCS can't be called during solving
-        assertEquals(model.getSolver().isSolving(), true);
+        assertTrue(model.getSolver().isSolving());
         assertThrows(SolverException.class, () -> model.getSolver().findMinimumConflictingSet(Collections.emptyList()));
     }
 

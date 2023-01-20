@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -58,7 +58,7 @@ public class ReifiedTest {
             s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
-            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, (long) values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -106,7 +106,7 @@ public class ReifiedTest {
             s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
-            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, (long) values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 

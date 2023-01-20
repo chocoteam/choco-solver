@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -74,7 +74,7 @@ public class SchurLemma extends AbstractProblem {
     public void solve() {
         model.getSolver().solve();
 
-        System.out.println(String.format("Schur's lemma (%d,%d)", n, k));
+        System.out.printf("Schur's lemma (%d,%d)%n", n, k);
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             for (int i = 0; i < k; i++) {
