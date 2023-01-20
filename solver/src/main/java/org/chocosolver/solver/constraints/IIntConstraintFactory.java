@@ -505,20 +505,21 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * <p>Creates a power constraint: X^C = Z.</p>
      *
-     * @param X first variable
-     * @param C an integer, should be positive
-     * @param Y result variable
+     * @param base first variable
+     * @param exponent an integer, should be positive
+     * @param result result variable
      * @implSpec The 'power' propagator does not exist.
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
      */
-    default Constraint pow(IntVar X, int C, IntVar Y) {
-        if (C <= 0) {
+    default Constraint pow(IntVar base, int exponent, IntVar result) {
+        if (exponent <= 0) {
             throw new SolverException("The power parameter should be strictly greater than 0.");
         }
-        if (TuplesFactory.canBeTupled(X, Y)) {
+        /*if (TuplesFactory.canBeTupled(X, Y)) {
             return table(new IntVar[]{Y, X}, TuplesFactory.power(Y, X, C));
-        } else {
+        } else */{
+            /*/ DECOMPOSITION
             final HashMap<Integer, IntVar> mm = new HashMap<>();
             mm.put(1, X);
             int mid = (int) Math.pow(2, Math.ceil(Math.log(C / 2.) / Math.log(2)));
@@ -535,6 +536,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             a = mm.get(mid);
             b = mm.get(C - mid);
             return ref().times(a, b, Y);
+            /*/
+            if((exponent % 2) == 0){
+                return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
+            }else{
+                return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
+            }
+            //*/
         }
     }
 

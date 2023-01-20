@@ -10,7 +10,6 @@
 package org.chocosolver.solver.expression.discrete.arithmetic;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.VariableUtils;
 
@@ -115,14 +114,7 @@ public class UnCArExpression implements ArExpression {
                     int min = v1.stream().map(v -> (int)Math.floor(Math.pow(v, e2))).min().orElse(IntVar.MIN_INT_BOUND);
                     int max = v1.stream().map(v -> (int)Math.ceil(Math.pow(v, e2))).max().orElse(IntVar.MAX_INT_BOUND);
                     me = model.intVar(model.generateName("pow_exp_"), min, max);
-                    Tuples tuples = new Tuples(true);
-                    for (int val1 : v1) {
-                        int res = (int) Math.pow(val1, e2);
-                        if (me.contains(res)) {
-                            tuples.add(val1, res);
-                        }
-                    }
-                    model.table(new IntVar[]{v1, me}, tuples).post();
+                    model.pow(v1, e2, me).post();
                 }
                     break;
                 case MIN:
