@@ -105,6 +105,7 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      * @param intersectionSet a set variable representing the intersection of <i>sets</i>
      * @param boundConsistent adds an additional propagator to guarantee BC
      * @return A constraint ensuring that the intersection of <i>sets</i> is equal to <i>intersectionSet</i>
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint intersection(SetVar[] sets, SetVar intersectionSet, boolean boundConsistent) {
         if (sets.length == 0) {
@@ -126,8 +127,13 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      *
      * @param sets an array of set variables
      * @return A constraint which ensures that <i>sets</i>[i] is a subset of <i>sets</i>[j] if i<j
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint subsetEq(SetVar... sets) {
+        if (sets == null || sets.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (sets.length == 1) return ref().trueConstraint();
         Propagator<?>[] props = new Propagator[sets.length - 1];
         for (int i = 0; i < sets.length - 1; i++) {
             props[i] = new PropSubsetEq(sets[i], sets[i + 1]);
@@ -406,8 +412,13 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      *
      * @param sets an array of disjoint set variables
      * @return a constraint ensuring that <i>sets</i> are all disjoint (empty intersection)
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allDisjoint(SetVar... sets) {
+        if (sets == null || sets.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (sets.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.SETALLDISJOINT, new PropAllDisjoint(sets));
     }
 
@@ -417,8 +428,13 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      *
      * @param sets an array of different set variables
      * @return a constraint ensuring that <i>sets</i> are all different
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allDifferent(SetVar... sets) {
+        if (sets == null || sets.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (sets.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.SETALLDIFFERENT, new PropAllDiff(sets),
                 new PropAllDiff(sets), new PropAtMost1Empty(sets)
         );
@@ -429,8 +445,13 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      *
      * @param sets an array of set variables to be equal
      * @return a constraint ensuring that all sets in <i>sets</i> are equal
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allEqual(SetVar... sets) {
+        if (sets == null || sets.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (sets.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.SETALLEQUAL, new PropAllEqual(sets));
     }
 
@@ -476,8 +497,13 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      *
      * @param sets an array of set variables
      * @return a constraint ensuring that x in <i>sets</i>[y] <=> y in <i>sets</i>[x]
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint symmetric(SetVar... sets) {
+        if (sets == null || sets.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (sets.length == 1) return ref().trueConstraint();
         return symmetric(sets, 0);
     }
 

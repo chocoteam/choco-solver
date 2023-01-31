@@ -445,18 +445,31 @@ public class Constraint {
         return PropagatorPriority.get(priority);
     }
 
-    /**
-     * Creates a new constraint with all propagators of toMerge
-     *
-     * @param name    name of the new constraint
-     * @param toMerge a set of constraints to merge in this
-     * @return a new constraint with all propagators of toMerge
-     */
-    public static Constraint merge(String name, Constraint... toMerge) {
-        ArrayList<Propagator> props = new ArrayList<>();
-        for (Constraint c : toMerge) {
+    private static void addPropagators(Constraint c, ArrayList<Propagator> in){
+        if (c != null) {
             c.ignore();
-            Collections.addAll(props, c.getPropagators());
+            Collections.addAll(in, c.getPropagators());
+        }
+    }
+
+    /**
+     * Creates a new constraint with all propagators of <i>toMerge0</i>, <i>toMerge1</i>
+     * and <i>toMerges</i>.
+     * Some constraints can be null but at least one propagator must be present.
+     *
+     * @param name     name of the new constraint
+     * @param toMerges  a set of constraints to merge in this (null are accepted)
+     * @return a new constraint with all propagators of toMerge
+     * @throws IllegalArgumentException when no propagator can be extracted
+     */
+    public static Constraint merge(String name,
+                                   Constraint... toMerges) {
+        ArrayList<Propagator> props = new ArrayList<>();
+        for (Constraint c : toMerges) {
+            addPropagators(c, props);
+        }
+        if (props.size() == 0) {
+            throw new IllegalArgumentException("No propagator to merge");
         }
         return new Constraint(name, props.toArray(new Propagator[0]));
     }

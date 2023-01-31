@@ -36,17 +36,15 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
     private final IStateInt index;
 
     @SuppressWarnings("unchecked")
-    @SafeVarargs
-    private static <V extends Variable> V[] make(AbstractStrategy<V>... strategies) {
+    private static <V extends Variable> V[] make(AbstractStrategy<V>[] strategies) {
         V[] vars = strategies[0].vars.clone();
         for (int i = 1; i < strategies.length; i++) {
             vars = ArrayUtils.append(vars, strategies[i].vars);
         }
         return vars;
     }
-
-    @SafeVarargs
-    public StrategiesSequencer(IEnvironment environment, AbstractStrategy<U>... strategies) {
+    
+    public StrategiesSequencer(IEnvironment environment, AbstractStrategy<U>[] strategies) {
         super(make(strategies));
         index = environment.makeInt(0);
         this.strategies = strategies;
