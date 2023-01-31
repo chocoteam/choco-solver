@@ -76,7 +76,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      * @param policy    should be DICHOTOMIC
      */
     public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
-        super(objective);
+        super(new IntVar[]{objective});
         this.obj = objective;
         this.model = obj.getModel();
         this.firstCall = true;

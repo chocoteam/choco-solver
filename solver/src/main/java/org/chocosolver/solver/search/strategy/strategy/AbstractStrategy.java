@@ -26,8 +26,7 @@ public abstract class AbstractStrategy<V extends Variable>  {
 
     protected final V[] vars;
 
-    @SafeVarargs
-    protected AbstractStrategy(V... variables) {
+    protected AbstractStrategy(V[] variables) {
         this.vars = variables.clone();
     }
 

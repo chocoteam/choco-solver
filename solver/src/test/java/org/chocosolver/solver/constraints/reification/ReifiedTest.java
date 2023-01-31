@@ -480,4 +480,28 @@ public class ReifiedTest {
         System.out.printf("%s\n", mode);
         mode.getSolver().propagate();
     }
+    
+    @Test(groups = "1s", expectedExceptions = IllegalArgumentException.class)
+    public void testofir1() {
+        Model choco2 = new Model("wololo");
+        IntVar a = choco2.intVar("a", -4, -3, true);
+        IntVar b = choco2.intVar("b", -4, 20, true);
+
+        Constraint ib = choco2.arithm(a, "=", -4);
+        Constraint den = choco2.arithm(b, "=", 2);
+        choco2.ifThen(ib, den);
+
+        Solver solver2 = choco2.getSolver();
+        solver2.showDecisions();
+        solver2.setSearch(Search.intVarSearch(
+        	   // selects the variable of smallest domain size
+        	   new FirstFail(choco2),
+        	   // selects the smallest domain value (lower bound)
+        	   new IntDomainMin()));
+        while (choco2.getSolver().solve()) {
+            System.out.println("A = " + a.getValue());
+            System.out.println("B = " + b.getValue());
+        }
+        solver2.printShortStatistics();
+    }
 }

@@ -782,9 +782,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *                    <b>DEFAULT</b>:
      *                    <br/>
      *                    Uses BC plus a probabilistic AC_ZHANG propagator to get a compromise between BC and AC_ZHANG
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allDifferent(IntVar[] vars, String CONSISTENCY) {
-        if (vars.length <= 1) return ref().trueConstraint();
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new AllDifferent(vars, CONSISTENCY);
     }
 
@@ -915,8 +919,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars list of variables
      * @implNote
      * This constraint is reformulated as an atMostNValues constraint, with bound consistency.
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allEqual(IntVar... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.ATMOSTNVALUES,
                 new PropAtMostNValues_BC(vars, ref().intVar(1)));
     }
@@ -926,8 +935,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take more than a single value.
      *
      * @param vars list of variables
+     *             @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint notAllEqual(IntVar... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return atLeastNValues(vars, ref().intVar(2), false);
     }
 
@@ -956,8 +970,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param bools an array of boolean variable
      * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint and(BoolVar... bools) {
+        if (bools == null || bools.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (bools.length == 1) return ref().arithm(bools[0], "=", 1);
         Model s = bools[0].getModel();
         IntVar sum = s.intVar(0, bools.length, true);
         s.sum(bools, "=", sum).post();
@@ -1067,7 +1086,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ConstraintsName.BINPACKING,
                 new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
                 model.sum(binLoad, "=", sum),
-                model.allDifferent(list.toArray(new IntVar[0]))
+                list.size() > 0 ? model.allDifferent(list.toArray(new IntVar[0])) : null
         );
     }
 
@@ -1762,22 +1781,32 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Creates a lexChainLess constraint.
      * For each pair of consecutive vectors vars<sub>i</sub> and vars<sub>i+1</sub> of the vars collection
-     * vars<sub>i</sub> is lexicographically strictly less than than vars<sub>i+1</sub>
+     * vars<sub>i</sub> is lexicographically strictly less than vars<sub>i+1</sub>
      *
      * @param vars collection of vectors of variables
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint lexChainLess(IntVar[]... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
     }
 
     /**
      * Creates a lexChainLessEq constraint.
      * For each pair of consecutive vectors vars<sub>i</sub> and vars<sub>i+1</sub> of the vars collection
-     * vars<sub>i</sub> is lexicographically less or equal than than vars<sub>i+1</sub>
+     * vars<sub>i</sub> is lexicographically less or equal than vars<sub>i+1</sub>
      *
      * @param vars collection of vectors of variables
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint lexChainLessEq(IntVar[]... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
     }
 
