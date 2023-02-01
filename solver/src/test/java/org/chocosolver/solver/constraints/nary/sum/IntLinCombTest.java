@@ -17,7 +17,7 @@ import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
+import org.chocosolver.solver.constraints.unary.BooleanConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
@@ -490,7 +490,8 @@ public class IntLinCombTest {
         Constraint c = model.scalar(ivars, coeffs, "=", ivars[0]);
         Assert.assertEquals(c.getPropagators().length, 1);
         Propagator p = c.getPropagator(0);
-        Assert.assertTrue(p instanceof PropTrue);
+        Assert.assertTrue(p instanceof BooleanConstraint.PropBoolean);
+        Assert.assertTrue(((BooleanConstraint.PropBoolean)p).bool);
     }
 
     @Test(groups = "1s", timeOut = 60000)

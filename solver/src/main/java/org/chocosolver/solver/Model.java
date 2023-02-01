@@ -13,14 +13,12 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
-import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
-import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
+import org.chocosolver.solver.constraints.unary.BooleanConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
@@ -66,6 +64,9 @@ public class Model implements IModel {
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
 
+    public static final String TRUE_CONSTRAINT_NAME= "H_TRUE";
+
+    public static final String FALSE_CONSTRAINT_NAME= "H_FALSE";
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
@@ -301,24 +302,6 @@ public class Model implements IModel {
      */
     public TIntObjectHashMap<IntVar> getCachedConstants() {
         return cachedConstants;
-    }
-
-    /**
-     * The basic "true" constraint, which is always satisfied
-     *
-     * @return a "true" constraint
-     */
-    public Constraint trueConstraint() {
-        return new Constraint(ConstraintsName.TRUE, new PropTrue(boolVar(true)));
-    }
-
-    /**
-     * The basic "false" constraint, which is always violated
-     *
-     * @return a "false" constraint
-     */
-    public Constraint falseConstraint() {
-        return new Constraint(ConstraintsName.FALSE, new PropFalse(boolVar(false)));
     }
 
     /**
@@ -590,6 +573,33 @@ public class Model implements IModel {
     protected Map<String, Object> getHooks() {
         return hooks;
     }
+
+    /**
+     * The basic "true" constraint, which is always satisfied
+     *
+     * @return a "true" constraint
+     */
+    public BooleanConstraint trueConstraint() {
+        if (getHook(TRUE_CONSTRAINT_NAME) == null) {
+            BooleanConstraint tconstraint = new BooleanConstraint(this, true);
+            addHook(TRUE_CONSTRAINT_NAME, tconstraint);
+        }
+        return (BooleanConstraint) getHook(TRUE_CONSTRAINT_NAME);
+    }
+
+    /**
+     * The basic "false" constraint, which is always violated
+     *
+     * @return a "false" constraint
+     */
+    public BooleanConstraint falseConstraint() {
+        if (getHook(FALSE_CONSTRAINT_NAME) == null) {
+            BooleanConstraint tconstraint = new BooleanConstraint(this, false);
+            addHook(FALSE_CONSTRAINT_NAME, tconstraint);
+        }
+        return (BooleanConstraint) getHook(FALSE_CONSTRAINT_NAME);
+    }
+
 
     /**
      * Returns the unique constraint embedding a minisat model.

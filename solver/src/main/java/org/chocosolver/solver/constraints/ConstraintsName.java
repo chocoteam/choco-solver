@@ -23,9 +23,7 @@ package org.chocosolver.solver.constraints;
 @SuppressWarnings("ALL")
 public class ConstraintsName {
 
-    public static final String TRUE = "TRUE";
-
-    public static final String FALSE = "FALSE";
+    public static final String BOOLEAN = "BOOLEAN";
 
     public static final String ARITHM = "ARITHM";
 

@@ -379,8 +379,7 @@ public class SolverTest {
                 " id        coarse      fine    filter     fails  name\n" +
                 " 0              3         2         2         0  \"PropBinPacking(VGU0, VGU1, VGU2, ..., binLoad[2])\"\n" +
                 " 1              1         0         0         0  \"binLoad[0] + binLoad[1] + binLoad[2] = 24576\"\n" +
-                " 2              1         0         0         0  \"true\"\n" +
-                "Total           5         2         2         0\n" +
+                "Total           4         2         2         0\n" +
                 "\n" +
                 "Integer variables\n" +
                 " \n" +
@@ -402,7 +401,6 @@ public class SolverTest {
                 " 6              1         0         0         0         0  \"binLoad[0]\"\n" +
                 " 7              1         0         0         0         0  \"binLoad[1]\"\n" +
                 " 8              1         0         0         0         0  \"binLoad[2]\"\n" +
-                " 9              0         0         0         0         0  \"cste -- 24576\"\n" +
-                " 10             0         0         0         0         0  \"cste -- 1\"\n\n");
+                " 9              0         0         0         0         0  \"cste -- 24576\"\n\n");
     }
 }
