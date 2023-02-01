@@ -10,8 +10,11 @@
 package org.chocosolver.solver.expression.discrete.logical;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
+
+import java.util.List;
 
 /**
  * <p>
@@ -25,7 +28,7 @@ public abstract class LoExpression implements ReExpression {
     /**
      * List of available operator for relational expression
      */
-    public enum Operator {
+    public enum Operator implements ExpOperator {
         /**
          * less than
          */
@@ -105,4 +108,12 @@ public abstract class LoExpression implements ReExpression {
      * If necessary, it creates intermediary variable and posts intermediary constraints
      */
     public abstract BoolVar boolVar();
+
+    /**
+     * Replace the sub-expression at position <i>idx</i> in the expression by <i>e</i>.
+     * @param idx index of the expression to replace
+     * @param e the new expression
+     * @implSpec This method is only supposed to be used by {{@link #rewrite(List)}
+     */
+    public abstract void substitute(int idx, ReExpression e);
 }

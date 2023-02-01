@@ -15,6 +15,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.arithmetic.BiArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -55,7 +56,7 @@ public class UnCReExpression implements ReExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
@@ -213,6 +214,26 @@ public class UnCReExpression implements ReExpression {
     }
 
     @Override
+    public int getNoChild() {
+        return 1;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1};
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx == 0) this.e1 = e;
+    }
+
+    @Override
     public String toString() {
         return op.name() + "(" + e1.toString() + "," + e2 + ")";
     }
@@ -220,6 +241,7 @@ public class UnCReExpression implements ReExpression {
     /**
      * Creates, or returns if already existing, the SAT variable corresponding
      * to the relationship.
+     *
      * @return the SAT variable of this relation
      */
     public int satVar() {

@@ -14,6 +14,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.arithmetic.BiArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -54,11 +55,11 @@ public class BiReExpression implements ReExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private final ArExpression e2;
+    private ArExpression e2;
 
     /**
      * Builds a binary expression
@@ -84,25 +85,25 @@ public class BiReExpression implements ReExpression {
         if (me == null) {
             IntVar v1 = e1.intVar();
             IntVar v2 = e2.intVar();
-            me = model.boolVar(model.generateName(op+"_exp_"));
+            me = model.boolVar(model.generateName(op + "_exp_"));
             switch (op) {
                 case LT:
-                    model.reifyXltY(v1,v2, me);
+                    model.reifyXltY(v1, v2, me);
                     break;
                 case LE:
-                    model.reifyXleY(v1,v2, me);
+                    model.reifyXleY(v1, v2, me);
                     break;
                 case GE:
-                    model.reifyXleY(v2,v1, me);
+                    model.reifyXleY(v2, v1, me);
                     break;
                 case GT:
-                    model.reifyXltY(v2,v1, me);
+                    model.reifyXltY(v2, v1, me);
                     break;
                 case NE:
-                    model.reifyXneY(v1,v2, me);
+                    model.reifyXneY(v1, v2, me);
                     break;
                 case EQ:
-                    model.reifyXeqY(v1,v2, me);
+                    model.reifyXeqY(v1, v2, me);
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());
@@ -117,21 +118,21 @@ public class BiReExpression implements ReExpression {
         e2.extractVar(variables);
     }
 
-    private static ArExpression.Operator detectOperator(ArExpression e){
+    private static ArExpression.Operator detectOperator(ArExpression e) {
         int nochild = e.getNoChild();
-        if(nochild == 1){
+        if (nochild == 1) {
             return NOP;
         }
         ArExpression.Operator o = null;
         ArExpression[] child = e.getExpressionChild();
         boolean madeOfLeaves = true;
-        for(int i = 0 ; madeOfLeaves && i < nochild; i++){
+        for (int i = 0; madeOfLeaves && i < nochild; i++) {
             madeOfLeaves = child[i].isExpressionLeaf();
         }
-        if(madeOfLeaves) {
-            if (nochild == 2 && e instanceof BiArExpression){
+        if (madeOfLeaves) {
+            if (nochild == 2 && e instanceof BiArExpression) {
                 o = ((BiArExpression) e).getOp();
-            } else if(e instanceof NaArExpression) {
+            } else if (e instanceof NaArExpression) {
                 o = ((NaArExpression) e).getOp();
             }// todo: deal with NaLoExpression
         }
@@ -142,13 +143,13 @@ public class BiReExpression implements ReExpression {
     public Constraint decompose() {
         ArExpression.Operator o1 = detectOperator(e1);
         ArExpression.Operator o2 = detectOperator(e2);
-        if(ALLOWED.contains(o1) && ALLOWED.contains(o2)) {
+        if (ALLOWED.contains(o1) && ALLOWED.contains(o2)) {
             IntVar[] vars = new IntVar[e1.getNoChild() + e2.getNoChild()];
             int[] coefs = new int[e1.getNoChild() + e2.getNoChild()];
             fill(vars, coefs, e1, o1, 0, 1);
             fill(vars, coefs, e2, o2, e1.getNoChild(), -1);
             Model model = vars[0].getModel();
-            org.chocosolver.solver.constraints.Operator ope = null;
+            org.chocosolver.solver.constraints.Operator ope;
             switch (op) {
                 case LT:
                     ope = org.chocosolver.solver.constraints.Operator.LT;
@@ -172,7 +173,7 @@ public class BiReExpression implements ReExpression {
                     throw new SolverException("Unknown operator: " + op);
             }
             return model.scalar(vars, coefs, ope.toString(), 0);
-        }else {
+        } else {
             IntVar v1 = e1.intVar();
             IntVar v2 = e2.intVar();
             Model model = v1.getModel();
@@ -197,22 +198,43 @@ public class BiReExpression implements ReExpression {
     private static void fill(IntVar[] vars, int[] coefs,
                              ArExpression e, ArExpression.Operator o1, int o, int m) {
         ArExpression[] child = e.getExpressionChild();
-        if(e.isExpressionLeaf() || child.length == 1){
+        if (e.isExpressionLeaf() || child.length == 1) {
             vars[o] = e.intVar();
-        }else {
+        } else {
             vars[o] = child[0].intVar();
         }
-        coefs[o] =  m;
-        for(int i = 1; i < child.length; i++){
+        coefs[o] = m;
+        for (int i = 1; i < child.length; i++) {
             vars[o + i] = child[i].intVar();
             assert ALLOWED.contains(o1);
-            coefs[o + i] =  (o1 == ADD ? 1 : -1) * m;
+            coefs[o + i] = (o1 == ADD ? 1 : -1) * m;
         }
     }
 
     @Override
     public boolean beval(int[] values, Map<IntVar, Integer> map) {
         return op.eval(e1.ieval(values, map), e2.ieval(values, map));
+    }
+
+    @Override
+    public int getNoChild() {
+        return 2;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return new ArExpression[]{e1, e2};
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx == 0) this.e1 = e;
+        if (idx == 1) this.e2 = e;
     }
 
     @Override

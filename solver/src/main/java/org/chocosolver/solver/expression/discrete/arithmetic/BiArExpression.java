@@ -44,11 +44,11 @@ public class BiArExpression implements ArExpression {
     /**
      * The first expression this expression relies on
      */
-    private final ArExpression e1;
+    private ArExpression e1;
     /**
      * The second expression this expression relies on
      */
-    private final ArExpression e2;
+    private ArExpression e2;
 
     /**
      * Builds a binary expression
@@ -110,10 +110,10 @@ public class BiArExpression implements ArExpression {
                     bounds = VariableUtils.boundsForPow(v1, v2);
                     me = model.intVar(model.generateName("pow_exp_"), bounds[0], bounds[1]);
                     Tuples tuples = new Tuples(true);
-                    for(int val1 : v1){
-                        for(int val2 : v2){
-                            int res = (int)Math.pow(val1, val2);
-                            if(me.contains(res)) {
+                    for (int val1 : v1) {
+                        for (int val2 : v2) {
+                            int res = (int) Math.pow(val1, val2);
+                            if (me.contains(res)) {
                                 tuples.add(val1, val2, res);
                             }
                         }
@@ -150,6 +150,17 @@ public class BiArExpression implements ArExpression {
     @Override
     public ArExpression[] getExpressionChild() {
         return new ArExpression[]{e1, e2};
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx == 0) this.e1 = e;
+        if (idx == 1) this.e2 = e;
     }
 
     @Override

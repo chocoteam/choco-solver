@@ -11,6 +11,8 @@ package org.chocosolver.solver.expression.discrete.logical;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
@@ -137,6 +139,33 @@ public class NaLoExpression extends LoExpression {
             eval = op.eval(eval, es[i].beval(values, map));
         }
         return eval;
+    }
+
+    @Override
+    public int getNoChild() {
+        return es.length;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return es;
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        substitute(idx, (ReExpression) e);
+    }
+
+    @Override
+    public void substitute(int idx, ReExpression e) {
+        if (idx >= 0 && idx < es.length) {
+            this.es[idx] = e;
+        }
     }
 
     @Override

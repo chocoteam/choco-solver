@@ -13,6 +13,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
+import org.chocosolver.solver.expression.discrete.arithmetic.ExpOperator;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -55,7 +56,7 @@ public class NaReExpression implements ReExpression {
      * Builds a nary expression
      *
      * @param op an operator
-     * @param e an expression
+     * @param e  an expression
      * @param es some expressions
      */
     public NaReExpression(Operator op, ArExpression e, ArExpression... es) {
@@ -83,7 +84,7 @@ public class NaReExpression implements ReExpression {
     public BoolVar boolVar() {
         if (me == null) {
             IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
-            me = model.boolVar(model.generateName(op+"_exp_"));
+            me = model.boolVar(model.generateName(op + "_exp_"));
             if (op == Operator.EQ) {
                 if (vs.length == 2) {
                     model.reifyXeqY(vs[0], vs[1], me);
@@ -92,15 +93,15 @@ public class NaReExpression implements ReExpression {
                     model.nValues(vs, count).post();
                     model.reifyXeqC(count, 1, me);
                 }
-            }else if(op == Operator.IN){
+            } else if (op == Operator.IN) {
                 BoolVar[] reifs = model.boolVarArray(vs.length - 1);
-                for(int i = 1; i < vs.length; i++) {
-                    model.reifyXeqY(vs[0], vs[i], reifs[i-1]);
+                for (int i = 1; i < vs.length; i++) {
+                    model.reifyXeqY(vs[0], vs[i], reifs[i - 1]);
                 }
-                model.addClausesSumBoolArrayGreaterEqVar(reifs,me);
+                model.addClausesSumBoolArrayGreaterEqVar(reifs, me);
             } else {
                 throw new UnsupportedOperationException(
-                    "Binary arithmetic expressions does not support " + op.name());
+                        "Binary arithmetic expressions does not support " + op.name());
             }
         }
         return me;
@@ -116,15 +117,15 @@ public class NaReExpression implements ReExpression {
         IntVar[] vs = Arrays.stream(es).map(ArExpression::intVar).toArray(IntVar[]::new);
         switch (op) {
             case EQ:
-                if(vs.length == 2){
+                if (vs.length == 2) {
                     return model.arithm(vs[0], "=", vs[1]);
-                }else {
+                } else {
                     return model.allEqual(vs);
                 }
             case IN:
                 return model.count(vs[0],
                         Arrays.copyOfRange(vs, 1, vs.length),
-                        model.intVar(op+"_idx", 1, vs.length-1));
+                        model.intVar(op + "_idx", 1, vs.length - 1));
         }
         throw new SolverException("Unexpected case");
     }
@@ -149,6 +150,28 @@ public class NaReExpression implements ReExpression {
                 throw new IllegalStateException("Unexpected value: " + op);
         }
         return eval;
+    }
+
+    @Override
+    public int getNoChild() {
+        return es.length;
+    }
+
+    @Override
+    public ArExpression[] getExpressionChild() {
+        return es;
+    }
+
+    @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx >= 0 && idx < es.length) {
+            this.es[idx] = e;
+        }
     }
 
     @Override

@@ -136,6 +136,18 @@ public class NaArExpression implements ArExpression {
     }
 
     @Override
+    public ExpOperator getOperator() {
+        return op;
+    }
+
+    @Override
+    public void set(int idx, ArExpression e) {
+        if (idx >= 0 && idx < es.length) {
+            this.es[idx] = e;
+        }
+    }
+
+    @Override
     public String toString() {
         return op.name() + "(" + es[0].toString() + ",... ," + es[es.length - 1].toString() + ")";
     }
