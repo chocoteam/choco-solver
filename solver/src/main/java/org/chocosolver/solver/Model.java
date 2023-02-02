@@ -580,11 +580,7 @@ public class Model implements IModel {
      * @return a "true" constraint
      */
     public BooleanConstraint trueConstraint() {
-        if (getHook(TRUE_CONSTRAINT_NAME) == null) {
-            BooleanConstraint tconstraint = new BooleanConstraint(this, true);
-            addHook(TRUE_CONSTRAINT_NAME, tconstraint);
-        }
-        return (BooleanConstraint) getHook(TRUE_CONSTRAINT_NAME);
+        return new BooleanConstraint(this, true);
     }
 
     /**
@@ -593,11 +589,7 @@ public class Model implements IModel {
      * @return a "false" constraint
      */
     public BooleanConstraint falseConstraint() {
-        if (getHook(FALSE_CONSTRAINT_NAME) == null) {
-            BooleanConstraint tconstraint = new BooleanConstraint(this, false);
-            addHook(FALSE_CONSTRAINT_NAME, tconstraint);
-        }
-        return (BooleanConstraint) getHook(FALSE_CONSTRAINT_NAME);
+        return new BooleanConstraint(this, false);
     }
 
 
