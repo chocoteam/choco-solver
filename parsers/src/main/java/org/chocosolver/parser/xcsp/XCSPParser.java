@@ -1090,6 +1090,26 @@ public class XCSPParser implements XCallbacks2 {
         model.min(x, vars).post();
     }
 
+    @Override
+    public void buildCtrMinimumArg(String id, XVariables.XVarInteger[] list, Types.TypeRank rank, Condition condition) {
+        buildArgmin(vars(list), rank, condition);
+    }
+
+    @Override
+    public void buildCtrMinimumArg(String id, XNode<XVariables.XVarInteger>[] trees, Types.TypeRank rank, Condition condition) {
+        buildArgmin(vars(trees), rank, condition);
+    }
+
+    private void buildArgmin(IntVar[] vars, Types.TypeRank rank, Condition condition) {
+        IntVar max = condToVar(condition, 0, vars.length);
+        if (rank.equals(Types.TypeRank.LAST)) {
+            ArrayUtils.reverse(vars);
+            IntVar max2 = model.intOffsetView(model.intMinusView(max), vars.length);
+            model.argmin(max2, 0, vars).post();
+        } else {
+            model.argmin(max, 0, vars).post();
+        }
+    }
 
     @Override
     public void buildCtrElement(String id, XVariables.XVarInteger[] list, Condition condition) {
@@ -1161,6 +1181,27 @@ public class XCSPParser implements XCallbacks2 {
         int max = Arrays.stream(vars).max(Comparator.comparingInt(IntVar::getUB)).get().getUB();
         IntVar x = condToVar(condition, min, max);
         model.max(x, vars).post();
+    }
+
+    @Override
+    public void buildCtrMaximumArg(String id, XVariables.XVarInteger[] list, Types.TypeRank rank, Condition condition) {
+        buildArgmax(vars(list), rank, condition);
+    }
+
+    @Override
+    public void buildCtrMaximumArg(String id, XNode<XVariables.XVarInteger>[] trees, Types.TypeRank rank, Condition condition) {
+        buildArgmax(vars(trees), rank, condition);
+    }
+
+    private void buildArgmax(IntVar[] vars, Types.TypeRank rank, Condition condition) {
+        IntVar max = condToVar(condition, 0, vars.length);
+        if (rank.equals(Types.TypeRank.LAST)) {
+            ArrayUtils.reverse(vars);
+            IntVar max2 = model.intOffsetView(model.intMinusView(max), vars.length);
+            model.argmax(max2, 0, vars).post();
+        } else {
+            model.argmax(max, 0, vars).post();
+        }
     }
 
     @Override
