@@ -35,7 +35,7 @@ basics;KnightTour-06-ext03.xml.lzma;1;_;944;923
 basics;KnightTour-06-int.xml.lzma;1;_;10017;9879
 basics;Langford-3-10.xml.lzma;1;_;372;367
 basics;LangfordBin-08.xml.lzma;1;_;78;72
-basics;LowAutocorrelation-015.xml.lzma;3;15;6502;6441
+basics;LowAutocorrelation-015.xml.lzma;3;15;6635;6578
 basics;MagicSequence-008-ca.xml.lzma;1;_;5;1
 basics;MagicSequence-008-co.xml.lzma;1;_;5;1
 basics;MagicSquare-4-table.xml.lzma;1;_;20;13
@@ -100,6 +100,6 @@ basics;testObjective1.xml.lzma;3;11;11;6
 basics;testPrimitive.xml.lzma;1;_;3;1
 basics;TestSchedulingM18-t30m10r3-15.xml.lzma;93;4149;3450;2650
 basics;Tpp-3-3-20-1.xml.lzma;5;126;87;78
-basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;4;416;4170;4131
+basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;4;416;4180;4139
 basics;Warehouse-opl.xml.lzma;1;383;568;557
 basics;Zebra.xml.lzma;1;_;13;6

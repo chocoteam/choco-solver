@@ -1178,7 +1178,8 @@ public class XCSPParser implements XCallbacks2 {
                         .boxed()
                         .collect(Collectors.toSet())
                         .stream().mapToInt(i -> i)
-                        .sorted().toArray());
+                        .sorted().toArray())
+                .post();
     }
 
     @Override
@@ -1512,7 +1513,7 @@ public class XCSPParser implements XCallbacks2 {
         assert IntStream.of(weights).min().orElse(0) > -1;
         assert IntStream.of(profits).min().orElse(0) > -1;
         model.knapsack(vars(list), condToVar(wcondition, 0, Arrays.stream(weights).sum()),
-                condToVar(wcondition, 0, Arrays.stream(profits).sum()),
+                condToVar(pcondition, 0, Arrays.stream(profits).sum()),
                 weights, profits).post();
 
     }
@@ -1704,6 +1705,7 @@ public class XCSPParser implements XCallbacks2 {
 
     private IntVar optScalar(IntVar[] vars, int[] coeffs) {
         int[] bounds = VariableUtils.boundsForScalar(vars, coeffs);
+        //bounds[0] = 184396;
         IntVar res = model.intVar("SCALAR", bounds[0], bounds[1], true);
         model.scalar(vars, coeffs, "=", res).post();
         return res;

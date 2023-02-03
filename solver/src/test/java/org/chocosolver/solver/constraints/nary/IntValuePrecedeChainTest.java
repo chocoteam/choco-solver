@@ -10,10 +10,12 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 
@@ -23,21 +25,7 @@ import static org.chocosolver.solver.search.strategy.Search.randomSearch;
  */
 public class IntValuePrecedeChainTest {
 
-    public static void int_value_precede_chain_dec(IntVar[] X, int S, int T) {
-        Model model = X[0].getModel();
-        model.arithm(X[0], "!=", T).post();
-        for (int j = 1; j < X.length; j++) {
-            BoolVar bj = model.arithm(X[j], "=", T).reify();
-            BoolVar[] bis = new BoolVar[j];
-            for (int i = 0; i < j; i++) {
-                bis[i] = model.arithm(X[i], "=", S).reify();
-            }
-            model.ifThen(bj, model.or(bis));
-        }
-    }
-
-
-    @Test(groups="10s", timeOut=60000)
+    @Test(groups = "10s", timeOut = 60000)
     public void test1() {
         for (int i = 0; i < 200; i++) {
             long s1, s2;
@@ -45,15 +33,15 @@ public class IntValuePrecedeChainTest {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
                 model.intValuePrecedeChain(vars, 1, 2).post();
-                model.getSolver().setSearch(randomSearch(vars, 0));
+                model.getSolver().setSearch(randomSearch(vars, i));
                 while (model.getSolver().solve()) ;
                 s1 = model.getSolver().getSolutionCount();
             }
             {
                 Model model = new Model();
                 IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
-                int_value_precede_chain_dec(vars, 1, 2);
-                model.getSolver().setSearch(randomSearch(vars, 0));
+                model.intValuePrecedeChainDec(vars, 1, 2);
+                model.getSolver().setSearch(randomSearch(vars, i));
                 while (model.getSolver().solve()) ;
                 s2 = model.getSolver().getSolutionCount();
             }
@@ -62,5 +50,37 @@ public class IntValuePrecedeChainTest {
         }
     }
 
-
+    @Test(groups = "1s")
+    public void test2() {
+        long s1, s2;
+        for (int i = 0; i < 200; i++) {
+            {
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
+                model.intValuePrecedeChain(vars, Arrays.stream(vars)
+                        .flatMapToInt(IntVar::stream)
+                        .boxed()
+                        .collect(Collectors.toSet())
+                        .stream().mapToInt(k -> k)
+                        .sorted().toArray()).post();
+                model.getSolver().setSearch(randomSearch(vars, i));
+                while (model.getSolver().solve()) ;
+                s1 = model.getSolver().getSolutionCount();
+            }
+            {
+                Model model = new Model();
+                IntVar[] vars = model.intVarArray("X", 5, 0, 5, false);
+                model.intValuePrecedeChainDec(vars, Arrays.stream(vars)
+                        .flatMapToInt(IntVar::stream)
+                        .boxed()
+                        .collect(Collectors.toSet())
+                        .stream().mapToInt(k -> k)
+                        .sorted().toArray());
+                model.getSolver().setSearch(randomSearch(vars, i));
+                while (model.getSolver().solve()) ;
+                s2 = model.getSolver().getSolutionCount();
+            }
+            Assert.assertEquals(s1, s2);
+        }
+    }
 }
