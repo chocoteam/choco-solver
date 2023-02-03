@@ -535,6 +535,22 @@ public class ExpressionTest {
                 .or(x.eq(y, new ArExpression.IntPrimitive(5, model))), p, 6);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test53(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        eval(model, x.notin(1, 2, 3), p, 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test54(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 5);
+        IntVar y = model.intVar("y", -2, 2);
+        IntVar z = model.intVar("z", 1, 3);
+        model.getSolver().showSolutions();
+        eval(model, x.notin(y, z), p, 68);
+    }
 
     @Test(groups = "1s")
     public void testJoao1() throws ContradictionException {

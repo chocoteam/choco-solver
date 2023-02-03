@@ -98,6 +98,12 @@ public class NaReExpression implements ReExpression {
                     model.reifyXeqY(vs[0], vs[i], reifs[i-1]);
                 }
                 model.addClausesSumBoolArrayGreaterEqVar(reifs,me);
+            } else if (op == Operator.NIN) {
+                BoolVar[] reifs = model.boolVarArray(vs.length - 1);
+                for (int i = 1; i < vs.length; i++) {
+                    model.reifyXneY(vs[0], vs[i], reifs[i - 1]);
+                }
+                model.addClausesBoolAndArrayEqVar(reifs, me);
             } else {
                 throw new UnsupportedOperationException(
                     "Binary arithmetic expressions does not support " + op.name());
@@ -125,6 +131,11 @@ public class NaReExpression implements ReExpression {
                 return model.count(vs[0],
                         Arrays.copyOfRange(vs, 1, vs.length),
                         model.intVar(op+"_idx", 1, vs.length-1));
+            case NIN:
+                return model.count(vs[0],
+                        Arrays.copyOfRange(vs, 1, vs.length),
+                        model.intVar(0));
+
         }
         throw new SolverException("Unexpected case");
     }
@@ -134,6 +145,7 @@ public class NaReExpression implements ReExpression {
         boolean eval;
         switch (op) {
             case EQ:
+            case NIN:
                 eval = true;
                 for (int i = 1; i < es.length && eval; i++) {
                     eval = op.eval(es[0].ieval(values, map), es[i].ieval(values, map));

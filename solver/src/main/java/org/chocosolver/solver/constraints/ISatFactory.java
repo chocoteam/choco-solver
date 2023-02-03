@@ -571,7 +571,7 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Add a clause stating that: max(BOOLVARS<sub>i</sub>) &le; TARGET
+     * Add a clause stating that: max(BOOLVARS<sub>i</sub>) = TARGET
      *
      * @param BOOLVARS a list of boolean variables
      * @param TARGET   a boolean variable

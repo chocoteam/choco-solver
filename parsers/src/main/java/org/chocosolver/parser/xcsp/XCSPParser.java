@@ -47,6 +47,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.xcsp.common.Constants.STAR_INT;
+import static org.xcsp.common.Types.TypeExpr.*;
 
 /**
  * <p>
@@ -129,11 +130,18 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrIntension(String id, XVariables.XVarInteger[] scope, XNodeParent<XVariables.XVarInteger> tree) {
-        ReExpression exp = buildRe(tree);
-        if (VariableUtils.domainCardinality(vars(scope)) < Integer.MAX_VALUE / 1000) {
-            exp.extension().post();
+        if(tree.type == IF){
+            ReExpression b = buildRe(tree.sons[0]);
+            b.imp(buildRe(tree.sons[1])).post();
+            b.not().imp(buildRe(tree.sons[2])).post();
+            
         } else {
-            exp.decompose().post();
+            ReExpression exp = buildRe(tree);
+            if (VariableUtils.domainCardinality(vars(scope)) < Integer.MAX_VALUE / 1000) {
+                exp.extension().post();
+            } else {
+                exp.decompose().post();
+            }
         }
     }
 
@@ -167,12 +175,19 @@ public class XCSPParser implements XCallbacks2 {
             case NE:
                 return buildAr(sons[0]).ne(buildAr(sons[1]));
             case IN:
-                List<ArExpression> set = new ArrayList<>();
+                List<ArExpression> set0 = new ArrayList<>();
                 for (XNode<V> sonsons : sons[1].sons) {
-                    set.add(buildAr(sonsons));
+                    set0.add(buildAr(sonsons));
                 }
                 //noinspection ConstantForZeroLengthArrayAllocation
-                return buildAr(sons[0]).in(set.toArray(new ArExpression[0]));
+                return buildAr(sons[0]).in(set0.toArray(new ArExpression[0]));
+            case NOTIN:
+                List<ArExpression> set1 = new ArrayList<>();
+                for (XNode<V> sonsons : sons[1].sons) {
+                    set1.add(buildAr(sonsons));
+                }
+                //noinspection ConstantForZeroLengthArrayAllocation
+                return buildAr(sons[0]).notin(set1.toArray(new ArExpression[0]));
             case EQ:
                 if (sons.length == 2) {
                     return buildAr(sons[0]).eq(buildAr(sons[1]));
@@ -227,6 +242,22 @@ public class XCSPParser implements XCallbacks2 {
                     throw new UnsupportedOperationException("Unknown type : " + type);
             }
         } else {
+            if(type == IN){
+                List<ArExpression> set = new ArrayList<>();
+                for (XNode<V> sonsons : sons[1].sons) {
+                    set.add(buildAr(sonsons));
+                }
+                //noinspection ConstantForZeroLengthArrayAllocation
+                return buildAr(sons[0]).in(set.toArray(new ArExpression[0]));
+            }else if(type == NOTIN){
+                List<ArExpression> set = new ArrayList<>();
+                for (XNode<V> sonsons : sons[1].sons) {
+                    set.add(buildAr(sonsons));
+                }
+                //noinspection ConstantForZeroLengthArrayAllocation
+                return buildAr(sons[0]).notin(set.toArray(new ArExpression[0]));
+            }
+
             ArExpression[] aes = extractAr(sons);
             switch (type) {
                 // arithmetic
@@ -266,8 +297,6 @@ public class XCSPParser implements XCallbacks2 {
                     return aes[0].gt(aes[1]);
                 case NE:
                     return aes[0].ne(aes[1]);
-                case IN:
-                    return new NaReExpression(ReExpression.Operator.IN, aes);
                 case EQ:
                     if (aes.length == 2) {
                         return aes[0].eq(aes[1]);
@@ -557,6 +586,11 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrLogic(String id, XVariables.XVarInteger x, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, XVariables.XVarInteger z) {
+        repost(id);
+    }
+
+    @Override
+    public void buildCtrLogic(String id, XVariables.XVarInteger x, Types.TypeEqNeOperator op, Types.TypeLogicalOperator lop, XVariables.XVarInteger[] vars) {
         repost(id);
     }
     
