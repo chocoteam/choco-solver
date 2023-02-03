@@ -1384,13 +1384,13 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrNoOverlap(String id, XVariables.XVarInteger[][] origins, XVariables.XVarInteger[][] lengths, boolean zeroIgnored) {
-        if (origins[0].length == 2) {
+        if (origins[0].length == 2 && zeroIgnored) {
             IntVar[] X = Arrays.stream(origins).map(o -> var(o[0])).toArray(IntVar[]::new);
             IntVar[] Y = Arrays.stream(origins).map(o -> var(o[1])).toArray(IntVar[]::new);
             IntVar[] W = Arrays.stream(lengths).map(l -> var(l[0])).toArray(IntVar[]::new);
             IntVar[] H = Arrays.stream(lengths).map(l -> var(l[1])).toArray(IntVar[]::new);
             model.diffN(X, Y, W, H, true).post();
-        } else {
+        }else{
             XCallbacks2.super.buildCtrNoOverlap(id, origins, lengths, zeroIgnored);
         }
     }
@@ -1398,8 +1398,6 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildCtrNoOverlap(String id, XVariables.XVarInteger[] xs, XVariables.XVarInteger[] ys, XVariables.XVarInteger[] lx, int[] ly, boolean zeroIgnored) {
         if (zeroIgnored) {
-            XCallbacks2.super.buildCtrNoOverlap(id, xs, ys, lx, ly, zeroIgnored);
-        } else {
             model.diffN(
                     vars(xs),
                     vars(ys),
@@ -1407,6 +1405,8 @@ public class XCSPParser implements XCallbacks2 {
                     IntStream.of(ly).mapToObj(l -> model.intVar(l)).toArray(IntVar[]::new),
                     true
             ).post();
+        }else{
+            XCallbacks2.super.buildCtrNoOverlap(id, xs, ys, lx, ly, zeroIgnored);
         }
     }
 
