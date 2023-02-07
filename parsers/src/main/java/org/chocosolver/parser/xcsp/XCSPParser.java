@@ -17,7 +17,6 @@ import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
 import org.chocosolver.solver.expression.discrete.arithmetic.NaArExpression;
-import org.chocosolver.solver.expression.discrete.logical.BiLoExpression;
 import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.expression.discrete.relational.NaReExpression;
@@ -231,7 +230,7 @@ public class XCSPParser implements XCallbacks2 {
                 case OR:
                     return new NaLoExpression(LoExpression.Operator.OR, res);
                 case XOR:
-                    return new BiLoExpression(LoExpression.Operator.XOR, res[0], res[1]);
+                    return new NaLoExpression(LoExpression.Operator.XOR, res);
                 case IFF:
                     return new NaLoExpression(LoExpression.Operator.IFF, res);
                 case IMP:
