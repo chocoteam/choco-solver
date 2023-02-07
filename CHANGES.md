@@ -4,11 +4,25 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
-NEXT MILESTONE
+4.10.11 - 07 Feb 2023
 -------------------
 
 ### Major features:
-- Correcting the lack of filtering in `PropIncreasing` 
+- Correcting the lack of filtering in `PropIncreasing`
+- Change the SetType for the undirected graph stored in DiffN for efficiency reason
+- `SparseBitSet` for a backtrackable bitset with mostly 0s (#935)
+- Change the way restarting works: not a `Move` anymore, directly included in `Solver` (#950)
+- Simplification of objective manager (#949)
+- Calling `getValue()` on an uninstantiated variable throws an IllegalStateException (#957)
+- Change the MiniZinc complementary search to a FirstFail (instead of DomOverWDeg) (#958)
+- Reduce object creation during solving (#985)
+- Reduce object creation during propagation (#969)
+- Reduce memory footprint of `Model` (#964)
+- Add `model.getEstimatedMemory()` method
+- Add `Model` analysis (#939)
+- Add log file as RegParser option (for parsers)
+- creation of PropPower propagators with exponent as int
+
 ### Deprecated API (to be removed in next release):
 From `Solver`:
 - `Propagate getPropagate()`
