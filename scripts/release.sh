@@ -31,7 +31,7 @@ git push --tags || quit "Unable to push the tag ${VERSION}"
 
 
 # Proceed to the deployment
-# mvn -P ossrhDeploy  javadoc:jar source:jar deploy -DskipTests -B -U  ||quit "Unable to deploy to master"
+mvn -P ossrhDeploy  javadoc:jar source:jar deploy -DskipTests -B -U  ||quit "Unable to deploy to master"
 
 #Set the next development version
 echo "** Prepare master for the next version **"
