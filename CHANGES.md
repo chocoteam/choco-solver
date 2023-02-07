@@ -23,7 +23,10 @@ Others:
 See [milestone 4.10.11](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet) 
+- [Fabien Hermenier](https://github.com/fhermeni) (@fhermeni)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
         
 4.10.10 - 11 Oct 2022
 -------------------
