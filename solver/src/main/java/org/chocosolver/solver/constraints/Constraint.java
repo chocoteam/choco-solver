@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints;
 
+import org.chocosolver.solver.Ilabelable;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.reification.Opposite;
 import org.chocosolver.solver.exception.SolverException;
@@ -31,7 +32,7 @@ import java.util.*;
  * @see org.chocosolver.solver.propagation.PropagationEngine
  * @since 0.01
  */
-public class Constraint {
+public class Constraint implements Ilabelable {
 
     //***********************************************************************************
     // VARIABLES
@@ -89,6 +90,8 @@ public class Constraint {
      * If a constraint is enabled to the propagation engine.
      */
     private boolean enabled = true;
+
+    private Set<String> labels;
 
     //***********************************************************************************
     // CONSTRUCTOR
@@ -432,6 +435,33 @@ public class Constraint {
      */
     public String getName() {
         return name;
+    }
+
+    @Override
+    public void addLabel(String label) {
+        if(labels == null){
+            labels = new HashSet<>();
+        }
+        labels.add(label);
+    }
+
+    @Override
+    public void remLabel(String label) {
+        if(labels != null){
+            labels.remove(label);
+        }
+    }
+
+    @Override
+    public void clearLabels() {
+        if (labels != null) {
+            labels.clear();
+        }
+    }
+
+    @Override
+    public boolean isLabeled(String label) {
+        return labels != null && labels.contains(label);
     }
 
     /**

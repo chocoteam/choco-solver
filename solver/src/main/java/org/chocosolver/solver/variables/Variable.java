@@ -12,6 +12,7 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
+import org.chocosolver.solver.Ilabelable;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
  * Created by IntelliJ IDEA.
  * User: xlorca, Charles Prud'homme
  */
-public interface Variable extends Identity, Comparable<Variable> {
+public interface Variable extends Identity, Comparable<Variable>, Ilabelable {
 
     /**
      * Type of variable: variable (unique).

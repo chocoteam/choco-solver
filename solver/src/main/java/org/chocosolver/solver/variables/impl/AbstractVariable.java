@@ -22,6 +22,8 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -133,6 +135,8 @@ public abstract class AbstractVariable implements Variable {
      */
     private int instWI;
 
+    private Set<String> labels;
+    
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // FOR PROPAGATION PURPOSE
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -358,7 +362,7 @@ public abstract class AbstractVariable implements Variable {
 
     @Override
     public void addMonitor(IVariableMonitor<?> monitor) {
-        if(monitors == null){
+        if (monitors == null) {
             this.monitors = new IVariableMonitor[1];
         }
         // 1. check the non redundancy of a monitor if expected.
@@ -511,5 +515,32 @@ public abstract class AbstractVariable implements Variable {
     @Override
     public int hashCode() {
         return ID;
+    }
+
+    @Override
+    public void addLabel(String label) {
+        if (labels == null) {
+            labels = new HashSet<>();
+        }
+        labels.add(label);
+    }
+
+    @Override
+    public void remLabel(String label) {
+        if (labels != null) {
+            labels.remove(label);
+        }
+    }
+
+    @Override
+    public void clearLabels() {
+        if (labels != null) {
+            labels.clear();
+        }
+    }
+
+    @Override
+    public boolean isLabeled(String label) {
+        return labels != null && labels.contains(label);
     }
 }
