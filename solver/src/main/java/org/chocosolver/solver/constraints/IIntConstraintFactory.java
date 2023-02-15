@@ -2512,7 +2512,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * Create a table constraint based on hybrid tuples.
-     * Such tuples make possible to declare expressions as restriction instead of simply settings int.
+     * Such tuples make possible to declare expressions as restriction on values a variable can take.
      * @param vars scope of the constraint
      * @param htuples hybrid tuples
      * @return a hybrid table constraint
