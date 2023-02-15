@@ -28,33 +28,33 @@ public interface HArExpression {
     }
 
     /**
-     * @param prop the hybrid table propagator as caller
+     * @param prop the hybrid table propagator as caller, to get variables from
      * @return <code>true</code> if this expression is instantiated
      * (i.e., its domain contains a unique value), <code>false</code> otherwise.
      */
     boolean isInstantiated(PropHybridTable prop);
 
     /**
-     * @param prop the hybrid table propagator as caller
+     * @param prop the hybrid table propagator as caller, to get variables from
      * @return the value this expression is instantiated to
      * @throws IllegalStateException when the expression is not instantiated
      */
     int getValue(PropHybridTable prop) throws IllegalStateException;
 
     /**
-     * @param prop the hybrid table propagator as caller
+     * @param prop the hybrid table propagator as caller, to get variables from
      * @return the current lower bound of this expression
      */
     int getLB(PropHybridTable prop);
 
     /**
-     * @param prop the hybrid table propagator as caller
+     * @param prop the hybrid table propagator as caller, to get variables from
      * @return the current upper bound of this expression
      */
     int getUB(PropHybridTable prop);
 
     /**
-     * @param prop  the hybrid table propagator as caller
+     * @param prop  the hybrid table propagator as caller, to get variables from
      * @param value the value to check
      * @return <code>true</code> if this expression contains the value <code>value</code>.
      */

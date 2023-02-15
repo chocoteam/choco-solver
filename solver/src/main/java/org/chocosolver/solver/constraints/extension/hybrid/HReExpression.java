@@ -177,6 +177,9 @@ public interface HReExpression {
 
         @Override
         public int getValue(PropHybridTable prop) {
+            if (!isInstantiated(prop)) {
+                throw new IllegalStateException("getValue() can be only called on instantiated variable.");
+            }
             return prop.getVar(a).getValue();
         }
 

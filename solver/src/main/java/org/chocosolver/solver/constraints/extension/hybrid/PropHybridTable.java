@@ -45,7 +45,7 @@ public class PropHybridTable extends Propagator<IntVar> {
 
     public PropHybridTable(IntVar[] vars, HybridTuples tuples) {
         super(vars, PropagatorPriority.QUADRATIC, false);
-        this.table = tuples.get();
+        this.table = tuples.toArray();
         int size = 0;
         if (table.length > 0) {
             size = table[0].length;
