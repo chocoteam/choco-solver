@@ -51,10 +51,8 @@ public class PropHybridTable extends Propagator<IntVar> {
             size = table[0].length;
         }
         str2vars = new StrHVar[size];
-        int max = 0;
         for (int i = 0; i < size; i++) {
             str2vars[i] = new StrHVar(model.getEnvironment(), vars[i], i);
-            max = Math.max(max, vars[i].getUB());
         }
         activeTuples = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
         ssup = new ArrayList<>();
