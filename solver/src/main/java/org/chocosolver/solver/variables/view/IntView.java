@@ -32,7 +32,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
 
 /**
  * Abstract class for defining integer views on integer variables
- *
+ * <br/>
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
  * Invoking an operation on the view executes the appropriate operation on the view's variable."
  * <p/>
