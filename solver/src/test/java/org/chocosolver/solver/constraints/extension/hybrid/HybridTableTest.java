@@ -16,6 +16,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+
 import static org.chocosolver.solver.constraints.extension.hybrid.HybridTuples.*;
 
 /**
@@ -225,26 +227,94 @@ public class HybridTableTest {
         Assert.assertEquals(solver.getSolutionCount(), 8);
     }
 
+    private void run(Model model, IntVar[] vars, HybridTuples tuples, int nbSolutions) {
+        model.table(vars, tuples).post();
+        Solver solver = model.getSolver();
+        while (solver.solve()) {
+            Arrays.stream(vars).forEach(v -> System.out.printf("%d, ", v.getValue()));
+            System.out.print("\n");
+        }
+        Assert.assertEquals(solver.getSolutionCount(), nbSolutions);
+    }
+
     @Test(groups = "1s")
     public void test8() {
-        // |jp[0]| =  2, |jp[1]| =  2
-        //|D_1*D_2...S_n| = 4
         //or(ne(jp[0],0),eq(jp[1],0))
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 1);
         IntVar y = model.intVar("y", 0, 1);
-
         HybridTuples tuples = new HybridTuples();
         tuples.add(ne(0), any());
         tuples.add(any(), eq(0));
+        run(model, new IntVar[]{x, y}, tuples, 3);
+    }
 
+    @Test(groups = "1s")
+    public void test9() {
+        // |done[0]| =  2
+        //|state[1][0]| =  17
+        //|state[1][1]| =  17
+        //or(eq(done[0],0),eq(state[1][0],state[1][1]))
+        Model model = new Model();
+        IntVar b = model.intVar("b", 0, 1);
+        IntVar x = model.intVar("x", 0, 16);
+        IntVar y = model.intVar("y", 0, 16);
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(eq(0), any(), any());
+        tuples.add(any(), any(), col(1));
+        run(model, new IntVar[]{b, x, y}, tuples, 306);
+    }
+
+    @Test(groups = "1s")
+    public void test10() {
+        // |done[0]| =  2
+        // |state[0][0]| =  2
+        // |state[0][1]| =  2
+        // |move[1][0]| =  17
+        // or(iff(ne(state[0][0],state[0][1]),eq(move[1][0],0)),done[0])
+        Model model = new Model();
+        IntVar done = model.intVar("done", 0, 1);
+        IntVar state0 = model.intVar("state0", 0, 1);
+        IntVar state1 = model.intVar("state1", 0, 1);
+        IntVar move = model.intVar("move", 0, 16);
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(eq(1), any(), any(), any());
+        tuples.add(any(), any(), ne(col(1)), eq(0));
+        run(model, new IntVar[]{done, state0, state1, move}, tuples, 70);
+    }
+
+    @Test(groups = "1s")
+    public void test11() {
+        // |locked[1][0]| =  2
+        //|state[1][0]| =  17
+        //|locked[13][0]| =  2
+        //|D_1*D_2...S_n| = 68
+        //eq(and(eq(state[1][0],13),locked[13][0]),locked[1][0])
+        Model model = new Model();
+        IntVar locked1 = model.intVar("locked", 0, 1);
+        IntVar state1 = model.intVar("state0", 0, 16);
+        IntVar locked13 = model.intVar("state1", 0, 1);
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(eq(1), any(), any(), any());
+        tuples.add(any(), any(), ne(col(1)), eq(0));
+        run(model, new IntVar[]{locked1, state1, locked13}, tuples, 70);
+    }
+
+    @Test(groups = "1s")
+    public void testCol() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 3);
+        IntVar y = model.intVar("y", 1, 3);
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(any(), col(0));
         model.table(new IntVar[]{x, y}, tuples).post();
         Solver solver = model.getSolver();
-        solver.setSearch(Search.inputOrderLBSearch(x, y));
+        solver.setSearch(Search.inputOrderLBSearch(y, x));
         while (solver.solve()) {
             System.out.printf("(%d, %d)\n",
                     x.getValue(), y.getValue());
         }
         Assert.assertEquals(solver.getSolutionCount(), 3);
+        Assert.assertEquals(solver.getFailCount(), 0);
     }
 }
