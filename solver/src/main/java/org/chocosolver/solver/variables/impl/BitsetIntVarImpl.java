@@ -191,30 +191,35 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        if (nlb > oub || nub < olb) {
-            return false;
-        }
-        int i;
-        // look for the new lb
-        while (nlb == olb && olb < Integer.MAX_VALUE) {
-            i = VALUES.nextSetBit(nlb + 1 - OFFSET);
-            olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int olb = getLB();
+            int oub = getUB();
             nlb = values.nextValue(olb - 1);
-        }
-        if (nlb <= nub) {
-            // look for the new ub
-            while (nub == oub && oub > Integer.MIN_VALUE) {
-                i = VALUES.prevSetBit(nub - 1 - OFFSET);
-                oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
-                nub = values.previousValue(oub + 1);
+            nub = values.previousValue(oub + 1);
+            if (!hasChanged && (nlb > oub || nub < olb)) {
+                return false;
             }
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(olb, oub, cause);
+            int i;
+            // look for the new lb
+            while (nlb == olb && olb < Integer.MAX_VALUE) {
+                i = VALUES.nextSetBit(nlb + 1 - OFFSET);
+                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                nlb = values.nextValue(olb - 1);
+            }
+            if (nlb <= nub) {
+                // look for the new ub
+                while (nub == oub && oub > Integer.MIN_VALUE) {
+                    i = VALUES.prevSetBit(nub - 1 - OFFSET);
+                    oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                    nub = values.previousValue(oub + 1);
+                }
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(olb, oub, cause);
+            hasChanged |= fixpoint;
+        }while(fixpoint);
         // now deal with holes
         int value = nlb;
         int to = nub;
@@ -254,27 +259,32 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        int i;
-        // look for the new lb
-        while (nlb != olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
-            i = VALUES.nextSetBit(nlb - OFFSET);
-            olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int olb = getLB();
+            int oub = getUB();
             nlb = values.nextValue(olb - 1);
-        }
-        // look for the new ub
-        if (nlb <= nub) {
-            while (nub != oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
-                i = VALUES.prevSetBit(nub - OFFSET);
-                oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
-                nub = values.previousValue(oub + 1);
+            nub = values.previousValue(oub + 1);
+            int i;
+            // look for the new lb
+            while (nlb != olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+                i = VALUES.nextSetBit(nlb - OFFSET);
+                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                nlb = values.nextValue(olb - 1);
             }
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(nlb, nub, cause);
+            // look for the new ub
+            if (nlb <= nub) {
+                while (nub != oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
+                    i = VALUES.prevSetBit(nub - OFFSET);
+                    oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                    nub = values.previousValue(oub + 1);
+                }
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
         // now deal with holes
         boolean hasRemoved = false;
         int count = SIZE.get();
