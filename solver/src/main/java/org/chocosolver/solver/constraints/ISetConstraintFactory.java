@@ -62,6 +62,10 @@ public interface ISetConstraintFactory extends ISelf<Model> {
     /**
      * Creates a constraint which ensures that the union of <i>sets_i</i>, where <i>i</i> in <i>indices</i>,
      * is equal to <i>unionSet</i>.
+     * <br/>
+     *   U = \cup_{i \in I} S_{i - o}
+     * </p>
+     * where U is <i>unionSet</i>, I is <i>indices</i>, o is <i>iOffset</i> and S is <i>sets</i>.
      *
      * @param unionSet set variable representing the union of <i>sets</i>
      * @param indices  set variable representing the indices of selected variables in <i>sets</i>
@@ -76,6 +80,10 @@ public interface ISetConstraintFactory extends ISelf<Model> {
     /**
      * Creates a constraint which ensures that the union of <i>sets_i</i>, where <i>i</i> in <i>indices</i>,
      * is equal to <i>unionSet</i>.
+     * <br/>
+     *   U = \cup_{i \in I} S_{i}
+     * </p>
+     * where U is <i>unionSet</i>, I is <i>indices</i> and S is <i>sets</i>.
      *
      * @param unionSet set variable representing the union of <i>sets</i>
      * @param indices  set variable representing the indices of selected variables in <i>sets</i>
