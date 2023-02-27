@@ -97,7 +97,7 @@ public class UnionTest {
         if (dec) {
             decUnionVar(sets, indices, union, 4);
         } else {
-            model.union(union, 0, indices, 0, sets).post();
+            model.union(union, indices, 0, sets).post();
         }
         indices.getCard().gt(0).post();
         model.getSolver().setSearch(Search.setVarSearch(ArrayUtils.append(sets, new SetVar[]{indices, union})));
@@ -115,7 +115,7 @@ public class UnionTest {
         if (dec) {
             decUnionVar(sets, indices, union, 4);
         } else {
-            model.union(union, 0, indices, 0, sets).post();
+            model.union(union, indices, 0, sets).post();
         }
         indices.getCard().gt(0).post();
         union.getCard().gt(0).post();
@@ -136,7 +136,7 @@ public class UnionTest {
         if (dec) {
             decUnionVar(sets, indices, union, 4);
         } else {
-            model.union(union, 0, indices, 0, sets).post();
+            model.union(union, indices, 0, sets).post();
         }
         indices.getCard().gt(0).post();
         union.getCard().gt(0).post();
@@ -157,7 +157,7 @@ public class UnionTest {
         if (dec) {
             decUnionVar(sets, indices, union, 4);
         } else {
-            model.union(union, 0, indices, 0, sets).post();
+            model.union(union, indices, 0, sets).post();
         }
         model.getSolver().setSearch(Search.setVarSearch(ArrayUtils.append(sets, new SetVar[]{indices, union})));
         assertEquals(checkSolutions(model, sets, indices, union), 4096);
@@ -170,7 +170,7 @@ public class UnionTest {
         SetVar[] sets = model.setVarArray("S", 3, new int[]{}, new int[]{5, 6, 8});
         SetVar indices = model.setVar("I", new int[]{}, new int[]{2, 3, 4});
         SetVar union = model.setVar("U", new int[]{}, new int[]{5, 6, 7, 8});
-        model.union(union, 5, indices, 2, sets).post();
+        model.union(union, indices, 2, sets).post();
         indices.getCard().gt(0).post();
         model.getSolver().setSearch(Search.setVarSearch(ArrayUtils.append(sets, new SetVar[]{indices, union})));
         assertEquals(checkSolutions(model, sets, indices, union), 3584);
@@ -183,7 +183,7 @@ public class UnionTest {
         SetVar[] sets = model.setVarArray("S", 3, new int[]{}, new int[]{5, 6, 8});
         SetVar indices = model.setVar("I", new int[]{}, new int[]{2, 3, 4});
         SetVar union = model.setVar("U", new int[]{}, new int[]{5, 6, 7, 8});
-        model.union(union, 5, indices, 2, sets).post();
+        model.union(union, indices, 2, sets).post();
         model.getSolver().setSearch(Search.setVarSearch(ArrayUtils.append(sets, new SetVar[]{indices, union})));
         assertEquals(checkSolutions(model, sets, indices, union), 4096);
         Assert.assertEquals(model.getSolver().getNodeCount(), 8212);
@@ -209,6 +209,51 @@ public class UnionTest {
             }
             m.addClausesBoolOrArrayEqVar(r, b_u[k]);
         }
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnionBounds() {
+        Model model = new Model();
+        SetVar[] sets = model.setVarArray("S", 3, new int[]{}, new int[]{2, 3, 5, 6});
+        SetVar indices = model.setVar("I", new int[]{}, new int[]{-1, 0, 2, 6});
+        SetVar union = model.setVar("U", new int[]{}, new int[]{1, 2, 3, 6, 7});
+        //model.union(union, indices, sets).post();
+        model.union(union, indices, 0, sets).post();
+        while (model.getSolver().solve());
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 9216);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnionWrongBoundsResult1() {
+        Model model = new Model();
+        SetVar[] sets = model.setVarArray("S", 2, new int[]{}, new int[]{0, 1});
+        SetVar indices = model.setVar("I", new int[]{}, new int[]{0, 1, 2});
+        SetVar union = model.setVar("U", new int[]{}, new int[]{0});
+        model.union(union, indices, sets).post();
+        while (model.getSolver().solve()) ;
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 66);
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnionWrongBoundsResult2() {
+        Model model = new Model();
+        SetVar[] sets = model.setVarArray("S", 2, new int[]{}, new int[]{0, 1, 2});
+        SetVar indices = model.setVar("I", new int[]{0, 1, 2, 3, 4, 5}, new int[]{0, 1, 2, 3, 4, 5});
+        SetVar union = model.setVar("U", new int[]{}, new int[]{0, 1});
+        model.union(union, indices, sets).post();
+        Assert.assertFalse(model.getSolver().solve());
+        model.getSolver().printStatistics();
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnionWrongBoundsResult3() {
+        Model model = new Model();
+        SetVar[] sets = model.setVarArray("S", 2, new int[]{}, new int[]{0, 1, 2});
+        SetVar indices = model.setVar("I", new int[]{}, new int[]{0, 1, 2, 3, 4});
+        SetVar union = model.setVar("U", new int[]{}, new int[]{0, 1});
+        model.union(union, indices, sets).post();
+        while (model.getSolver().solve()) ;
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 487);
     }
 
 }
