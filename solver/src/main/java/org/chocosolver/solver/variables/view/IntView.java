@@ -168,35 +168,35 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
         boolean hasChanged = false, fixpoint;
-        int nlb, nub;
+        int vlb, vub;
         do {
-            int olb = getLB();
-            int oub = getUB();
-            nlb = values.nextValue(olb - 1);
-            nub = values.previousValue(oub + 1);
-            if (!hasChanged && (nlb > oub || nub < olb)) {
+            int nlb = getLB();
+            int nub = getUB();
+            vlb = values.nextValue(nlb - 1);
+            vub = values.previousValue(nub + 1);
+            if (!hasChanged && (vlb > nub || vub < nlb)) {
                 return false;
             }
-            if (nlb == olb) {
+            if (vlb == nlb) {
                 // look for the new lb
                 do {
-                    olb = nextValue(olb);
-                    nlb = values.nextValue(olb - 1);
-                } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
+                    nlb = nextValue(nlb);
+                    vlb = values.nextValue(nlb - 1);
+                } while (nlb < Integer.MAX_VALUE && nub < Integer.MAX_VALUE && vlb == nlb);
             }
-            if (nub == oub) {
+            if (vub == nub) {
                 // look for the new ub
                 do {
-                    oub = previousValue(oub);
-                    nub = values.previousValue(oub + 1);
-                } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
+                    nub = previousValue(nub);
+                    vub = values.previousValue(nub + 1);
+                } while (nlb > Integer.MIN_VALUE && nub > Integer.MIN_VALUE && vub == nub);
             }
             // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(olb, oub, cause);
+            fixpoint = updateBounds(nlb, nub, cause);
             hasChanged |= fixpoint;
         } while (fixpoint);
         // now deal with holes
-        int value = nlb, to = nub;
+        int value = vlb, to = vub;
         boolean hasRemoved = false;
         while (value <= to) {
             model.getSolver().getEventObserver().removeValue(this, value, cause);
@@ -244,10 +244,10 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
         boolean hasChanged = false, fixpoint;
         int nlb, nub;
         do {
-            int olb = getLB();
-            int oub = getUB();
-            nlb = values.nextValue(olb - 1);
-            nub = values.previousValue(oub + 1);
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
             // the new bounds are now known, delegate to the right method
             fixpoint = updateBounds(nlb, nub, cause);
             hasChanged |= fixpoint;

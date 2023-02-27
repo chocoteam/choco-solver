@@ -192,40 +192,39 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
         boolean hasChanged = false, fixpoint;
-        int nlb, nub;
+        int vlb, vub;
         do {
-            int olb = getLB();
-            int oub = getUB();
-            nlb = values.nextValue(olb - 1);
-            nub = values.previousValue(oub + 1);
-            if (!hasChanged && (nlb > oub || nub < olb)) {
+            int nlb = getLB();
+            int nub = getUB();
+            vlb = values.nextValue(nlb - 1);
+            vub = values.previousValue(nub + 1);
+            if (!hasChanged && (vlb > nub || vub < nlb)) {
                 return false;
             }
             int i;
             // look for the new lb
-            while (nlb == olb && olb < Integer.MAX_VALUE) {
-                i = VALUES.nextSetBit(nlb + 1 - OFFSET);
-                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
-                nlb = values.nextValue(olb - 1);
+            while (vlb == nlb && nlb < Integer.MAX_VALUE) {
+                i = VALUES.nextSetBit(vlb + 1 - OFFSET);
+                nlb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                vlb = values.nextValue(nlb - 1);
             }
-            if (nlb <= nub) {
+            if (vlb <= vub) {
                 // look for the new ub
-                while (nub == oub && oub > Integer.MIN_VALUE) {
-                    i = VALUES.prevSetBit(nub - 1 - OFFSET);
-                    oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
-                    nub = values.previousValue(oub + 1);
+                while (vub == nub && nub > Integer.MIN_VALUE) {
+                    i = VALUES.prevSetBit(vub - 1 - OFFSET);
+                    nub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                    vub = values.previousValue(nub + 1);
                 }
             }
             // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(olb, oub, cause);
+            fixpoint = updateBounds(nlb, nub, cause);
             hasChanged |= fixpoint;
-        }while(fixpoint);
+        } while(fixpoint);
         // now deal with holes
-        int value = nlb;
-        int to = nub;
+        int value = vlb;
         boolean hasRemoved = false;
         int count = SIZE.get();
-        while (value <= to) {
+        while (value <= vub) {
             int aValue = value - OFFSET;
             if (aValue >= 0 && aValue <= LENGTH && VALUES.get(aValue)) {
                 model.getSolver().getEventObserver().removeValue(this, value, cause);
@@ -262,23 +261,23 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         boolean hasChanged = false, fixpoint;
         int nlb, nub;
         do {
-            int olb = getLB();
-            int oub = getUB();
-            nlb = values.nextValue(olb - 1);
-            nub = values.previousValue(oub + 1);
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
             int i;
             // look for the new lb
-            while (nlb != olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+            while (nlb != clb && clb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
                 i = VALUES.nextSetBit(nlb - OFFSET);
-                olb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
-                nlb = values.nextValue(olb - 1);
+                clb = i > -1 ? i + OFFSET : Integer.MAX_VALUE;
+                nlb = values.nextValue(clb - 1);
             }
             // look for the new ub
             if (nlb <= nub) {
-                while (nub != oub && oub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
+                while (nub != cub && cub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
                     i = VALUES.prevSetBit(nub - OFFSET);
-                    oub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
-                    nub = values.previousValue(oub + 1);
+                    cub = i > -1 ? i + OFFSET : Integer.MIN_VALUE;
+                    nub = values.previousValue(cub + 1);
                 }
             }
             // the new bounds are now known, delegate to the right method
