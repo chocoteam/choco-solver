@@ -231,7 +231,7 @@ public class UnionTest {
         SetVar union = model.setVar("U", new int[]{}, new int[]{0});
         model.union(union, indices, sets).post();
         while (model.getSolver().solve()) ;
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 66);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 25);
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -242,7 +242,6 @@ public class UnionTest {
         SetVar union = model.setVar("U", new int[]{}, new int[]{0, 1});
         model.union(union, indices, sets).post();
         Assert.assertFalse(model.getSolver().solve());
-        model.getSolver().printStatistics();
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -253,7 +252,7 @@ public class UnionTest {
         SetVar union = model.setVar("U", new int[]{}, new int[]{0, 1});
         model.union(union, indices, sets).post();
         while (model.getSolver().solve()) ;
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 487);
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 144);
     }
 
 }

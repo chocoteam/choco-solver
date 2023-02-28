@@ -39,6 +39,7 @@ public class PropUnionVar extends Propagator<SetVar> {
     private final int iOffset;
     private final TIntObjectHashMap<int[]> mates;
     private final BitSet iii = new BitSet();
+    private boolean firstProp = true;
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -66,8 +67,20 @@ public class PropUnionVar extends Propagator<SetVar> {
     //***********************************************************************************
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        SetVar union = vars[k];
         SetVar indices = vars[k + 1];
+        if (firstProp) {
+            firstProp = false;
+            model.getEnvironment().save(() -> firstProp = true);
+            boundIndices(indices);
+        }
+        SetVar union = vars[k];
+        filter1(indices, union);
+        filter2(indices, union);
+        filter6(indices, union);
+        filter1(indices, union); // again for fx-point
+    }
+
+    private void boundIndices(SetVar indices) throws ContradictionException {
         if (indices.getUB().size() > 0) {
             int min = indices.getUB().min();
             while (min - iOffset < 0 && indices.getUB().size() > 0) {
@@ -77,15 +90,11 @@ public class PropUnionVar extends Propagator<SetVar> {
         }
         if (indices.getUB().size() > 0) {
             int max = indices.getUB().max();
-            while (max - iOffset > k && indices.getUB().size() > 0) {
+            while (max - iOffset >= k && indices.getUB().size() > 0) {
                 indices.remove(max, this);
                 max = indices.getUB().max();
             }
         }
-        filter1(indices, union);
-        filter2(indices, union);
-        filter6(indices, union);
-        filter1(indices, union); // again for fx-point
     }
 
     @Override
@@ -183,7 +192,7 @@ public class PropUnionVar extends Propagator<SetVar> {
      * and the value in lb(sets_i)
      * </p>
      *
-     * @param u position of a variable in sets
+     * @param u       position of a variable in sets
      * @param indices index variable
      * @param union   union variable
      * @throws ContradictionException if failure occurs
