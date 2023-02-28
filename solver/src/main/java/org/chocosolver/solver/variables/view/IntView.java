@@ -32,7 +32,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
 
 /**
  * Abstract class for defining integer views on integer variables
- *
+ * <br/>
  * "A view implements the same operations as a variable. A view stores a reference to a variable.
  * Invoking an operation on the view executes the appropriate operation on the view's variable."
  * <p/>
@@ -167,31 +167,36 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        if (nlb > oub || nub < olb) {
-            return false;
-        }
-        if (nlb == olb) {
-            // look for the new lb
-            do {
-                olb = nextValue(olb);
-                nlb = values.nextValue(olb - 1);
-            } while (olb < Integer.MAX_VALUE && oub < Integer.MAX_VALUE && nlb == olb);
-        }
-        if (nub == oub) {
-            // look for the new ub
-            do {
-                oub = previousValue(oub);
-                nub = values.previousValue(oub + 1);
-            } while (olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE && nub == oub);
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(olb, oub, cause);
+        boolean hasChanged = false, fixpoint;
+        int vlb, vub;
+        do {
+            int nlb = getLB();
+            int nub = getUB();
+            vlb = values.nextValue(nlb - 1);
+            vub = values.previousValue(nub + 1);
+            if (!hasChanged && (vlb > nub || vub < nlb)) {
+                return false;
+            }
+            if (vlb == nlb) {
+                // look for the new lb
+                do {
+                    nlb = nextValue(nlb);
+                    vlb = values.nextValue(nlb - 1);
+                } while (nlb < Integer.MAX_VALUE && nub < Integer.MAX_VALUE && vlb == nlb);
+            }
+            if (vub == nub) {
+                // look for the new ub
+                do {
+                    nub = previousValue(nub);
+                    vub = values.previousValue(nub + 1);
+                } while (nlb > Integer.MIN_VALUE && nub > Integer.MIN_VALUE && vub == nub);
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
         // now deal with holes
-        int value = nlb, to = nub;
+        int value = vlb, to = vub;
         boolean hasRemoved = false;
         while (value <= to) {
             model.getSolver().getEventObserver().removeValue(this, value, cause);
@@ -236,12 +241,17 @@ public abstract class IntView<I extends IntVar> extends AbstractView<I> implemen
 
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(nlb, nub, cause);
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
         // now deal with holes
         int to = previousValue(nub);
         boolean hasRemoved = false;
