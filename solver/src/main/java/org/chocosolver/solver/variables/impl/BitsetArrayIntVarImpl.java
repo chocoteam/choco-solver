@@ -275,11 +275,12 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
             hasChanged |= fixpoint;
         } while (fixpoint);
         // now deal with holes
+        int to = UB.get() - 1;
         boolean hasRemoved = false;
         int count = SIZE.get();
         int value;
         // iterate over the values in the domain, remove the ones that are not in values
-        for (int index = INDICES.nextSetBit(nlb + 1); index > -1 && index <= nub; index = INDICES.nextSetBit(index + 1)) {
+        for (int index = INDICES.nextSetBit(LB.get() + 1); index > -1 && index <= to; index = INDICES.nextSetBit(index + 1)) {
             value = VALUES[index];
             if (!values.contains(value)) {
                 model.getSolver().getEventObserver().removeValue(this, value, cause);
