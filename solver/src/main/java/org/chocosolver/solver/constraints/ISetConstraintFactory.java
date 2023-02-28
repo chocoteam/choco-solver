@@ -62,21 +62,28 @@ public interface ISetConstraintFactory extends ISelf<Model> {
     /**
      * Creates a constraint which ensures that the union of <i>sets_i</i>, where <i>i</i> in <i>indices</i>,
      * is equal to <i>unionSet</i>.
+     * <br/>
+     *   U = \cup_{i \in I} S_{i - o}
+     * </p>
+     * where U is <i>unionSet</i>, I is <i>indices</i>, o is <i>iOffset</i> and S is <i>sets</i>.
      *
      * @param unionSet set variable representing the union of <i>sets</i>
-     * @param vOffset  value offset
      * @param indices  set variable representing the indices of selected variables in <i>sets</i>
      * @param iOffset  index offset
      * @param sets     an array of set variables
      * @return A constraint ensuring that the <i>indices-</i>union of <i>sets</i> is equal to <i>unionSet</i>
      */
-    default Constraint union(SetVar unionSet, int vOffset, SetVar indices, int iOffset, SetVar[] sets) {
-        return new Constraint(ConstraintsName.SETUNION, new PropUnionVar(unionSet, vOffset, indices, iOffset, sets));
+    default Constraint union(SetVar unionSet, SetVar indices, int iOffset, SetVar[] sets) {
+        return new Constraint(ConstraintsName.SETUNION, new PropUnionVar(unionSet, indices, iOffset, sets));
     }
 
     /**
      * Creates a constraint which ensures that the union of <i>sets_i</i>, where <i>i</i> in <i>indices</i>,
      * is equal to <i>unionSet</i>.
+     * <br/>
+     *   U = \cup_{i \in I} S_{i}
+     * </p>
+     * where U is <i>unionSet</i>, I is <i>indices</i> and S is <i>sets</i>.
      *
      * @param unionSet set variable representing the union of <i>sets</i>
      * @param indices  set variable representing the indices of selected variables in <i>sets</i>
@@ -84,7 +91,7 @@ public interface ISetConstraintFactory extends ISelf<Model> {
      * @return A constraint ensuring that the <i>indices-</i>union of <i>sets</i> is equal to <i>unionSet</i>
      */
     default Constraint union(SetVar unionSet, SetVar indices, SetVar[] sets) {
-        return union(unionSet, 0, indices, 0, sets);
+        return union(unionSet, indices, 0, sets);
     }
 
     /**
