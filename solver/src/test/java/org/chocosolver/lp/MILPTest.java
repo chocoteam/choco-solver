@@ -1,3 +1,12 @@
+/*
+ * This file is part of choco-solver, http://choco-solver.org/
+ *
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ *
+ * Licensed under the BSD 4-clause license.
+ *
+ * See LICENSE file in the project root for full license information.
+ */
 package org.chocosolver.lp;
 
 import org.testng.Assert;
@@ -93,13 +102,13 @@ public class MILPTest {
                 int _j = j;
                 int _k = k;
                 // ti + di <= tj + M.(1-y)
-                milp.addLeq(new HashMap<>() {{
+                milp.addLeq(new HashMap<Integer, Double>() {{
                     put(_i, 1.);
                     put(_j, -1.);
                     put(_k, M);
                 }}, -d[i] + M);
                 // tj + dj <= ti + M.y
-                milp.addLeq(new HashMap<>() {{
+                milp.addLeq(new HashMap<Integer, Double>() {{
                     put(_j, 1.);
                     put(_i, -1.);
                     put(_k, -M);
