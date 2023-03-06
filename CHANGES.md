@@ -8,6 +8,7 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- Fix bug #1006, #1011 and #1014
 
 ### Deprecated API (to be removed in next release):
 
@@ -15,7 +16,8 @@ NEXT MILESTONE
 See [milestone 4.10.12](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
     
 4.10.11 - 07 Feb 2023
 -------------------
