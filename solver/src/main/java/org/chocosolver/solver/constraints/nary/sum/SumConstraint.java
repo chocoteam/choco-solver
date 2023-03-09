@@ -11,7 +11,9 @@ package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 
 /**
  * <p>
@@ -26,7 +28,7 @@ public class SumConstraint extends Constraint {
      *
      * @param propagator propagator defining the constraint
      */
-    public SumConstraint(Propagator propagator) {
+    public SumConstraint(Propagator<?> propagator) {
         super(ConstraintsName.SUM, propagator);
     }
 
@@ -40,7 +42,15 @@ public class SumConstraint extends Constraint {
         if (propagators[0] instanceof PropSum) {
             PropSum me = (PropSum) propagators[0];
             return new SumConstraint(me.opposite());
-        } else
-            return super.makeOpposite();
+        } else if (propagators[0] instanceof PropXplusYeqZ) {
+            PropXplusYeqZ me = (PropXplusYeqZ) propagators[0];
+            return new SumConstraint(new PropSum(
+                    me.getVars(),
+                    2,
+                    Operator.NQ,
+                    0
+            ));
+        }
+        return super.makeOpposite();
     }
 }

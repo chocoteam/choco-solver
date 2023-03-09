@@ -150,8 +150,20 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if (isCompletelyInstantiated()) {
-            return ESat.eval(vars[x].getValue() + vars[y].getValue() == vars[z].getValue());
+        int sumUB = 0, sumLB = 0, i = 0;
+        for (; i < 2; i++) { // first the positive coefficients
+            sumLB += vars[i].getLB();
+            sumUB += vars[i].getUB();
+        }
+        for (; i < 3; i++) { // then the negative ones
+            sumLB -= vars[i].getUB();
+            sumUB -= vars[i].getLB();
+        }
+        if (sumLB == 0 && sumUB == 0) {
+            return ESat.TRUE;
+        }
+        if (sumUB < 0 || sumLB > 0) {
+            return ESat.FALSE;
         }
         return ESat.UNDEFINED;
     }
