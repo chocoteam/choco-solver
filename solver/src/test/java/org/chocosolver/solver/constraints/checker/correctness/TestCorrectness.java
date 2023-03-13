@@ -377,4 +377,25 @@ public class TestCorrectness {
             }
         }
     }
+
+    @Test(groups = "checker", timeOut = 60000)
+    public void testMODBC() {
+        for (int i = 0; i < 3; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelmodulobc, 3, -n, 2 * n, seed, false);
+                CorrectnessChecker.checkCorrectness(Modeler.modelmodulobc, 3, 0, 1, seed, false);
+            }
+        }
+    }
+
+    @Test(groups = "checker", timeOut = 60000)
+    public void testMODAC() {
+        for (int i = 0; i < 4; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelmoduloac, 3, -n, 2 * n, seed, false);
+            }
+        }
+    }
 }

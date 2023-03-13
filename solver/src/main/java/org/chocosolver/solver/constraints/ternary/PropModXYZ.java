@@ -30,13 +30,16 @@ public class PropModXYZ extends Propagator<IntVar> {
     private final IntVar y;
     private final IntVar z;
     private IntIterableBitSet usedValues;
+    private final boolean allEnnums;
+    private static final int THRESHOLD = 10_000;
 
     public PropModXYZ(IntVar x, IntVar y, IntVar z) {
         super(new IntVar[]{x, y, z}, PropagatorPriority.TERNARY, false);
         this.x = x;
         this.y = y;
         this.z = z;
-        if(z.hasEnumeratedDomain()) {
+        this.allEnnums = x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && z.hasEnumeratedDomain();
+        if (z.hasEnumeratedDomain()) {
             usedValues = new IntIterableBitSet();
             usedValues.setOffset(z.getLB());
         }
@@ -49,23 +52,27 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if(z.getLB()<0) {
-            z.updateLowerBound(-(Math.max(Math.abs(y.getLB()), y.getUB())-1), this);
-        }
-        if(z.getUB()>0) {
-            z.updateUpperBound(Math.max(Math.abs(y.getLB()), y.getUB())-1, this);
-        }
-        if(x.getUB() <= 0) {
-            z.updateUpperBound(0, this);
-        }
-        if(x.getLB() >= 0) {
-            z.updateLowerBound(0, this);
-        }
-        if(y.hasEnumeratedDomain()) {
-            y.removeValue(0, this);
-        }
+        y.removeValue(0, this);
+        int zlb, zub;
+        int xlb = x.getLB();
+        int xub = x.getUB();
+        int ylb = y.getLB();
+        int yub = y.getUB();
+        if (xlb >= 0) {
+            zlb = 0;
+            zub = Math.min(xub, Math.max(Math.abs(y.getLB()), Math.abs(y.getUB())) - 1);
+        } else if (xub < 0) {
+            zub = 0;
+            zlb = Math.max(xlb, -Math.max(Math.abs(y.getLB()), Math.abs(y.getUB())) + 1);
+        } else {
+            zlb = Math.max(xlb, Math.min(ylb, Math.min(-ylb, -yub)) + 1);
+            zub = Math.min(xub, Math.max(yub, Math.max(-ylb, -yub)) - 1);
 
-        if(x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && z.hasEnumeratedDomain()) {
+        }
+        z.updateBounds(zlb, zub, this);
+
+        long card = (long) x.getDomainSize() * y.getDomainSize();
+        if (allEnnums && card <= THRESHOLD) {
             propagateEnumerated();
         } else {
             propagateBounded();
@@ -74,21 +81,21 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     private void propagateEnumerated() throws ContradictionException {
         usedValues.clear();
-        for(int vx = x.getLB(); vx<=x.getUB(); vx=x.nextValue(vx)) {
+        for (int vx = x.getLB(); vx <= x.getUB(); vx = x.nextValue(vx)) {
             boolean toRemove = true;
-            for(int vy = y.getLB(); vy<=y.getUB(); vy=y.nextValue(vy)) {
-                if(vy!=0 && z.contains(vx%vy)) {
-                    usedValues.add(vx%vy);
+            for (int vy = y.getLB(); vy <= y.getUB(); vy = y.nextValue(vy)) {
+                if (vy != 0 && z.contains(vx % vy)) {
+                    usedValues.add(vx % vy);
                     toRemove = false;
                 }
             }
-            if(toRemove) {
+            if (toRemove) {
                 x.removeValue(vx, this);
             }
         }
         z.removeAllValuesBut(usedValues, this);
-        for(int vy = y.getLB(); vy<=y.getUB(); vy=y.nextValue(vy)) {
-            if(!containsOneDivid(x, vy, z)) {
+        for (int vy = y.getLB(); vy <= y.getUB(); vy = y.nextValue(vy)) {
+            if (!containsOneDivid(x, vy, z)) {
                 y.removeValue(vy, this);
             }
         }
@@ -96,43 +103,37 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     private void propagateBounded() throws ContradictionException {
         boolean hasChange = true;
-        while(hasChange) {
+        while (hasChange) {
             hasChange = false;
             // filter bounds for X
-            while(!containsOneDivid(x.getLB(), y, z)) {
-                x.updateLowerBound(x.getLB()+1, this);
-                hasChange = true;
+            while (!containsOneDivid(x.getLB(), y, z)) {
+                hasChange |= x.updateLowerBound(x.getLB() + 1, this);
             }
-            while(!containsOneDivid(x.getUB(), y, z)) {
-                x.updateUpperBound(x.getUB()-1, this);
-                hasChange = true;
+            while (!containsOneDivid(x.getUB(), y, z)) {
+                hasChange |= x.updateUpperBound(x.getUB() - 1, this);
             }
             // filter bounds for Z
-            while(!containsOneDivid(x, y, z.getLB())) {
-                z.updateLowerBound(z.getLB()+1, this);
-                hasChange = true;
+            while (!containsOneDividLB(x, y, z.getLB())) {
+                hasChange |= z.updateLowerBound(z.getLB() + 1, this);
             }
-            while(!containsOneDivid(x, y, z.getUB())) {
-                z.updateUpperBound(z.getUB()-1, this);
-                hasChange = true;
+            while (!containsOneDividUB(x, y, z.getUB())) {
+                hasChange |= z.updateUpperBound(z.getUB() - 1, this);
             }
             // filter bounds for Y
-            while(y.getLB()==0 || !containsOneDivid(x, y.getLB(), z)) {
-                y.updateLowerBound(y.getLB()+1, this);
-                hasChange = true;
+            while (y.getLB() == 0 || !containsOneDivid(x, y.getLB(), z)) {
+                hasChange |= y.updateLowerBound(y.getLB() + 1, this);
             }
-            while(y.getUB()==0 || !containsOneDivid(x, y.getUB(), z)) {
-                y.updateUpperBound(y.getUB()-1, this);
-                hasChange = true;
+            while (y.getUB() == 0 || !containsOneDivid(x, y.getUB(), z)) {
+                hasChange |= y.updateUpperBound(y.getUB() - 1, this);
             }
         }
     }
 
     private static boolean containsOneDivid(int v, IntVar Y, IntVar Z) {
-        for(int vy = Y.getLB(); vy<=Y.getUB(); vy=Y.nextValue(vy)) {
-            if(vy != 0) {
-                for(int vz = Z.getLB(); vz<=Z.getUB(); vz=Z.nextValue(vz)) {
-                    if(v % vy == vz) {
+        for (int vy = Y.getLB(); vy <= Y.getUB(); vy = Y.nextValue(vy)) {
+            if (vy != 0) {
+                for (int vz = Z.getLB(); vz <= Z.getUB(); vz = Z.nextValue(vz)) {
+                    if (v % vy == vz) {
                         return true;
                     }
                 }
@@ -142,10 +143,10 @@ public class PropModXYZ extends Propagator<IntVar> {
     }
 
     private static boolean containsOneDivid(IntVar X, int v, IntVar Z) {
-        if(v != 0) {
-            for(int vx = X.getLB(); vx<=X.getUB(); vx=X.nextValue(vx)) {
-                for(int vz = Z.getLB(); vz<=Z.getUB(); vz=Z.nextValue(vz)) {
-                    if(vx % v == vz) {
+        if (v != 0) {
+            for (int vx = X.getLB(); vx <= X.getUB(); vx = X.nextValue(vx)) {
+                for (int vz = Z.getLB(); vz <= Z.getUB(); vz = Z.nextValue(vz)) {
+                    if (vx % v == vz) {
                         return true;
                     }
                 }
@@ -154,10 +155,23 @@ public class PropModXYZ extends Propagator<IntVar> {
         return false;
     }
 
-    private static boolean containsOneDivid(IntVar X, IntVar Y, int v) {
-        for(int vx = X.getLB(); vx<=X.getUB(); vx=X.nextValue(vx)) {
-            for(int vy = Y.getLB(); vy<=Y.getUB(); vy=Y.nextValue(vy)) {
-                if(vy!=0 && vx%vy == v) {
+    private static boolean containsOneDividLB(IntVar X, IntVar Y, int v) {
+        for (int vy = Y.getLB(); vy <= Y.getUB(); vy = Y.nextValue(vy)) {
+            if (vy == 0) continue;
+            for (int vx = X.getLB(); vx <= X.getUB(); vx = X.nextValue(vx)) {
+                if (vx % vy == v) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean containsOneDividUB(IntVar X, IntVar Y, int v) {
+        for (int vy = Y.getUB(); vy >= Y.getLB(); vy = Y.previousValue(vy)) {
+            if (vy == 0) continue;
+            for (int vx = X.getUB(); vx >= X.getLB(); vx = X.previousValue(vx)) {
+                if (vx % vy == v) {
                     return true;
                 }
             }
@@ -167,15 +181,15 @@ public class PropModXYZ extends Propagator<IntVar> {
 
     @Override
     public ESat isEntailed() {
-        if(x.isInstantiated() && y.isInstantiated() && z.isInstantiated()) {
-            return y.getValue()!=0 && x.getValue()%y.getValue()==z.getValue() ? ESat.TRUE : ESat.FALSE;
+        if (x.isInstantiated() && y.isInstantiated() && z.isInstantiated()) {
+            return y.getValue() != 0 && x.getValue() % y.getValue() == z.getValue() ? ESat.TRUE : ESat.FALSE;
         }
         return ESat.UNDEFINED;
     }
 
     @Override
     public String toString() {
-        return x.getName()+" % "+y.getName()+" = "+z.getName();
+        return x.getName() + " % " + y.getName() + " = " + z.getName();
     }
 
 }
