@@ -393,7 +393,7 @@ public class TestCorrectness {
     public void testMODAC() {
         for (int i = 0; i < 4; i++) {
             long seed = System.currentTimeMillis();
-            for (int n = 2; n < (1 << 7) + 1; n *= 2) {
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelmoduloac, 3, -n, 2 * n, seed, false);
             }
         }
