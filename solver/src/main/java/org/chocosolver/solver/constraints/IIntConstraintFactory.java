@@ -19,7 +19,8 @@ import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
-
+import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
+import org.chocosolver.solver.constraints.extension.hybrid.PropHybridTable;
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
@@ -2518,6 +2519,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @implNote The filtering algorithm is an adaptation of STR2 to expressions.
      */
     default Constraint table(IntVar[] vars, HybridTuples htuples){
+        assert vars.length == htuples.arity();
         return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
 
