@@ -19,8 +19,7 @@ import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
-import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
-import org.chocosolver.solver.constraints.extension.hybrid.PropHybridTable;
+
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
