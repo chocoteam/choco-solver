@@ -233,7 +233,7 @@ public class HybridTuples {
     /**
      * @param col a reference to a column arithmetical expression
      * @param inc value to be added or subtracted to col
-     * @return an expression that ensures that the column/variable is equal to <code>exp + inc</code>
+     * @return an expression that ensures that the column/variable is equal to <code>col + inc</code>
      */
     public static ISupportable eq(UnCol col, int inc) {
         UnCol copy = col.copy();
@@ -244,7 +244,7 @@ public class HybridTuples {
 
     /**
      * @param col a reference to a column arithmetical expression
-     * @return an expression that ensures that the column/variable is not equal to <code>exp</code>
+     * @return an expression that ensures that the column/variable is not equal to <code>col</code>
      */
     public static ISupportable ne(UnCol col) {
         return ne(col, 0);
@@ -253,7 +253,7 @@ public class HybridTuples {
     /**
      * @param col a reference to a column arithmetical expression
      * @param inc value to be added or subtracted to col
-     * @return an expression that ensures that the column/variable is not equal to <code>exp + inc</code>
+     * @return an expression that ensures that the column/variable is not equal to <code>col + inc</code>
      */
     public static ISupportable ne(UnCol col, int inc) {
         UnCol copy = col.copy();
@@ -265,7 +265,7 @@ public class HybridTuples {
     /**
      * @param col a reference to a column arithmetical expression
      * @return an expression that ensures that the column/variable is greater than
-     * or equal to <code>col</code>
+     * or equal to <code>col + inc</code>
      */
     public static ISupportable ge(UnCol col) {
         return ge(col, 0);
@@ -285,8 +285,24 @@ public class HybridTuples {
 
     /**
      * @param col a reference to a column arithmetical expression
+     * @return an expression that ensures that the column/variable is greater than <code>col</code>
+     */
+    public static ISupportable gt(UnCol col) {
+        return ge(col, 1);
+    }
+
+    /**
+     * @param col a reference to a column arithmetical expression
+     * @return an expression that ensures that the column/variable is greater than <code>col + inc</code>
+     */
+    public static ISupportable gt(UnCol col, int inc) {
+        return ge(col, inc + 1);
+    }
+
+    /**
+     * @param col a reference to a column arithmetical expression
      * @return an expression that ensures that the column/variable is less than
-     * or equal to <code>exp</code>
+     * or equal to <code>col</code>
      */
     public static ISupportable le(UnCol col) {
         return le(col, 0);
@@ -295,13 +311,29 @@ public class HybridTuples {
     /**
      * @param col a reference to a column arithmetical expression
      * @return an expression that ensures that the column/variable is less than
-     * or equal to <code>exp</code>
+     * or equal to <code>col + inc</code>
      */
     public static ISupportable le(UnCol col, int inc) {
         UnCol copy = col.copy();
         copy.op(Operator.LE);
         copy.add(inc);
         return copy;
+    }
+
+    /**
+     * @param col a reference to a column arithmetical expression
+     * @return an expression that ensures that the column/variable is less than <code>col</code>
+     */
+    public static ISupportable lt(UnCol col) {
+        return le(col, -1);
+    }
+
+    /**
+     * @param col a reference to a column arithmetical expression
+     * @return an expression that ensures that the column/variable is less than <code>col + inc</code>
+     */
+    public static ISupportable lt(UnCol col, int inc) {
+        return le(col, inc - 1);
     }
 
     /**
