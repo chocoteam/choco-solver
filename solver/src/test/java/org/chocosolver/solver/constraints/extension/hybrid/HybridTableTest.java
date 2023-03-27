@@ -218,7 +218,7 @@ public class HybridTableTest {
         IntVar y = model.intVar("y", 1, 3);
 
         HybridTuples tuples = new HybridTuples();
-        tuples.add(any(), le(col(0),1));
+        tuples.add(any(), le(col(0), 1));
 
         model.table(new IntVar[]{x, y}, tuples).post();
         Solver solver = model.getSolver();
@@ -320,5 +320,24 @@ public class HybridTableTest {
         }
         Assert.assertEquals(solver.getSolutionCount(), 3);
         Assert.assertEquals(solver.getFailCount(), 0);
+    }
+
+    @Test(groups = "1s")
+    public void test12() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 3);
+        IntVar y = model.intVar("y", 1, 3);
+
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(nin(0, 2, 4, 6), in(-1,1,3, 5));
+
+        model.table(new IntVar[]{x, y}, tuples).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(x, y));
+        while (solver.solve()) {
+            System.out.printf("(%d, %d)\n",
+                    x.getValue(), y.getValue());
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 4);
     }
 }

@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.extension.hybrid;
 
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -208,6 +209,25 @@ public class HybridTuples {
      */
     public static ISupportable lt(int val) {
         return new UnLqXC(val - 1);
+    }
+
+    /**
+     * @param vals set of values
+     * @return an expression that ensures that the column/variable intersects the set <code>vals</code>
+     */
+    public static ISupportable in(int... vals) {
+        IntIterableRangeSet set = new IntIterableRangeSet(vals);
+        return new UnXInS(set);
+    }
+
+    /**
+     * @param vals set of values
+     * @return an expression that ensures that the column/variable does not intersect the set <code>vals</code>
+     */
+    public static ISupportable nin(int... vals) {
+        IntIterableRangeSet set = new IntIterableRangeSet(vals);
+        set.flip();
+        return new UnXInS(set);
     }
 
     /**
@@ -504,6 +524,46 @@ public class HybridTuples {
             int ub = v.var.getUB();
             for (int val = v.var.nextValue(anInt - 1); val <= ub; val = v.var.nextValue(val)) {
                 v.support(val);
+            }
+        }
+    }
+
+    /**
+     * 'X in S' expression
+     */
+    static class UnXInS extends Unary {
+
+        IntIterableRangeSet set;
+
+        UnXInS(IntIterableRangeSet set) {
+            super(0);
+            this.set = set;
+        }
+
+        @Override
+        public boolean satisfiable(PropHybridTable.StrHVar v) {
+            boolean intersect = false;
+            if (v.var.getDomainSize() < set.size()) {
+                int ub = v.var.getUB();
+                for (int i = v.var.getLB(); i <= ub && !intersect; i = v.var.nextValue(i)) {
+                    intersect = set.contains(i);
+                }
+            } else {
+                int max = set.max();
+                for (int i = set.min(); i <= max && !intersect; i = set.nextValue(i)) {
+                    intersect = v.var.contains(i);
+                }
+            }
+            return intersect;
+        }
+
+        @Override
+        public void support(PropHybridTable.StrHVar v) {
+            int ub = v.var.getUB();
+            for (int i = v.var.getLB(); i <= ub; i = v.var.nextValue(i)) {
+                if (set.contains(i)) {
+                    v.support(i);
+                }
             }
         }
     }
