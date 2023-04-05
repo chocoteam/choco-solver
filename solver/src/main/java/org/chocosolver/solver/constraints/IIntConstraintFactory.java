@@ -1766,6 +1766,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param SORTEDvars a tuple of array of variables sorted in increasing order
      * @param K          key prefix size (0 &le; k &le; m, where m is the size of the array of variable)
      * @return a keySort constraint
+     * @implNote an {@link #allDifferent(IntVar...)} constraint is declared on <i>PERMvars</i>
      */
     default Constraint keySort(IntVar[][] vars, IntVar[] PERMvars, IntVar[][] SORTEDvars, int K) {
         if (PERMvars == null) {
@@ -1775,7 +1776,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 PERMvars[p] = vars[0][0].getModel().intVar("p_" + (p + 1), 1, n, true);
             }
         }
-        return new Constraint(ConstraintsName.KEYSORT, new PropKeysorting(vars, SORTEDvars, PERMvars, K));
+        Constraint allDiff = ref().allDifferent(PERMvars);
+        allDiff.ignore();
+        return new Constraint(ConstraintsName.KEYSORT,
+                ArrayUtils.append(
+                        allDiff.propagators,
+
+                        new Propagator[]{
+                                new PropKeysorting(vars, SORTEDvars, PERMvars, K)}));
     }
 
     /**
