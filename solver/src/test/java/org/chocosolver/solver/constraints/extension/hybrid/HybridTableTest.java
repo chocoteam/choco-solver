@@ -11,7 +11,9 @@ package org.chocosolver.solver.constraints.extension.hybrid;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -255,17 +257,17 @@ public class HybridTableTest {
     @Test(groups = "1s")
     public void test9() {
         // |done[0]| =  2
-        //|state[1][0]| =  17
-        //|state[1][1]| =  17
+        //|state[1][0]| =  5
+        //|state[1][1]| =  5
         //or(eq(done[0],0),eq(state[1][0],state[1][1]))
         Model model = new Model();
         IntVar b = model.intVar("b", 0, 1);
-        IntVar x = model.intVar("x", 0, 16);
-        IntVar y = model.intVar("y", 0, 16);
+        IntVar x = model.intVar("x", 0, 4);
+        IntVar y = model.intVar("y", 0, 4);
         HybridTuples tuples = new HybridTuples();
         tuples.add(eq(0), any(), any());
         tuples.add(any(), any(), col(1));
-        run(model, new IntVar[]{b, x, y}, tuples, 306);
+        run(model, new IntVar[]{b, x, y}, tuples, 30);
     }
 
     @Test(groups = "1s")
@@ -329,7 +331,7 @@ public class HybridTableTest {
         IntVar y = model.intVar("y", 1, 3);
 
         HybridTuples tuples = new HybridTuples();
-        tuples.add(nin(0, 2, 4, 6), in(-1,1,3, 5));
+        tuples.add(nin(0, 2, 4, 6), in(-1, 1, 3, 5));
 
         model.table(new IntVar[]{x, y}, tuples).post();
         Solver solver = model.getSolver();
@@ -339,5 +341,68 @@ public class HybridTableTest {
                     x.getValue(), y.getValue());
         }
         Assert.assertEquals(solver.getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void test13() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 6);
+        IntVar y = model.intVar("y", 1, 5);
+
+        x.in(3).post();
+        y.in(2).post();
+
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(eq(2), eq(2));
+        tuples.add(eq(3), eq(3));
+        tuples.add(eq(4), eq(4));
+
+        BoolVar r = model.table(new IntVar[]{x, y}, tuples).reify();
+
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertTrue(r.isInstantiatedTo(0));
+    }
+
+    @Test(groups = "1s")
+    public void test13b() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 5);
+        IntVar y = model.intVar("y", 1, 4);
+        BoolVar r = model.boolVar("r", true);
+
+        //x.in(3).post();
+        //y.in(2).post();
+
+        HybridTuples tuples = new HybridTuples();
+
+        tuples.add(in(2, 3), col(0), eq(1));
+        model.table(new IntVar[]{x, y, r}, tuples).post();
+
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(x, y, r));
+        solver.showSolutions(() -> "(" + x.getValue() + "," + y.getValue() + ") = " + r.getValue());
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void test14() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 1, 2);
+        IntVar y = model.intVar("y", 1, 2);
+
+        HybridTuples tuples = new HybridTuples();
+        tuples.add(col(1), ne(col(0)));
+        model.table(new IntVar[]{x, y}, tuples).post();
+
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(x, y));
+        solver.showSolutions(() -> "(" + x.getValue() + "," + y.getValue() + ")");
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 }

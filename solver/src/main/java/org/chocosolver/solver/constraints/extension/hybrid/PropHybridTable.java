@@ -9,14 +9,12 @@
  */
 package org.chocosolver.solver.constraints.extension.hybrid;
 
-import org.chocosolver.memory.IEnvironment;
-import org.chocosolver.memory.IStateInt;
-import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+import org.chocosolver.util.objects.graphs.UndirectedGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
@@ -35,24 +33,49 @@ import java.util.BitSet;
  */
 public class PropHybridTable extends Propagator<IntVar> {
 
-    private final HybridTuples.ISupportable[][] table;
-    private final StrHVar[] str2vars;
+    private final ISupportable[][] table;
+    private final ASupport.StrHVar[] str2vars;
     private final ISet activeTuples;
     private final BitSet ssup;
     private final BitSet sval;
+    private final UndirectedGraph relationships;
     private boolean firstProp = true;
 
     public PropHybridTable(IntVar[] vars, HybridTuples tuples) {
         super(vars, PropagatorPriority.QUADRATIC, false);
         this.table = tuples.toArray();
         int nbVars = vars.length;
-        str2vars = new StrHVar[nbVars];
+        relationships = new UndirectedGraph(nbVars, SetType.BITSET, SetType.BITSET, true);
+        str2vars = new ASupport.StrHVar[nbVars];
         for (int i = 0; i < nbVars; i++) {
-            str2vars[i] = new StrHVar(model.getEnvironment(), vars[i], i);
+            str2vars[i] = new ASupport.StrHVar(model.getEnvironment(), vars[i], i);
+            for (int t = 0; t < table.length; t++) {
+                connect(table[t][i]);
+            }
         }
         activeTuples = SetFactory.makeStoredSet(SetType.BIPARTITESET, 0, model);
         ssup = new BitSet(vars.length);
         sval = new BitSet(vars.length);
+    }
+
+    /**
+     * Connect variable to each other for any non-unary expression.
+     * @param supportable an expression
+     */
+    private void connect(ISupportable supportable) {
+        if (supportable instanceof ISupportable.Many) {
+            ISupportable.Many many = (ISupportable.Many) supportable;
+            for (ISupportable supp : many.exps) {
+                connect(supp);
+            }
+        } else if (supportable instanceof ISupportable.Nary) {
+            ISupportable.Nary nary = (ISupportable.Nary) supportable;
+            for (int i = 0; i < nary.is.length - 1; i++) {
+                for (int j = i + 1; j < nary.is.length; j++) {
+                    relationships.addEdge(nary.is[i], nary.is[j]);
+                }
+            }
+        }
     }
 
     @Override
@@ -68,10 +91,15 @@ public class PropHybridTable extends Propagator<IntVar> {
     @Override
     public ESat isEntailed() {
         boolean hasSupport = false;
+        l1:
         for (int i = 0; i < table.length && !hasSupport; i++) {
-            if (isTupleSupported(i)) {
-                hasSupport = true;
+            for (int j = 0; j < str2vars.length; j++) {
+                ASupport.StrHVar v = str2vars[j];
+                if (!table[i][v.index].satisfiable(str2vars, v.index)) {
+                    continue l1;
+                }
             }
+            hasSupport = true;
         }
         if (hasSupport) {
             if (isCompletelyInstantiated()) {
@@ -95,7 +123,7 @@ public class PropHybridTable extends Propagator<IntVar> {
 
     private boolean isTupleSupported(int tuple_index) {
         for (int i = sval.nextSetBit(0); i > -1; i = sval.nextSetBit(i + 1)) {
-            StrHVar v = str2vars[i];
+            ASupport.StrHVar v = str2vars[i];
             if (!table[tuple_index][v.index].satisfiable(str2vars, v.index)) {
                 return false;
             }
@@ -116,13 +144,17 @@ public class PropHybridTable extends Propagator<IntVar> {
         ssup.clear();
         sval.clear();
         for (int i = 0; i < str2vars.length; i++) {
-            StrHVar tmp = str2vars[i];
+            ASupport.StrHVar tmp = str2vars[i];
             ssup.set(i);
             tmp.reset();
             if (tmp.last_size.get() != tmp.cnt) {
                 // to get variables modified since last call
                 sval.set(i);
                 tmp.last_size.set(tmp.cnt);
+                // if the modified variable is connected to other ones with expressions...
+                for (int n : relationships.getNeighborsOf(i)/*.toArray()*/) {
+                    sval.set(n);
+                }
             }
         }
         boolean loop;
@@ -131,7 +163,12 @@ public class PropHybridTable extends Propagator<IntVar> {
             for (int tidx : activeTuples/*.toArray()*/) {
                 if (isTupleSupported(tidx)) {
                     for (int i = ssup.nextSetBit(0); i > -1; i = ssup.nextSetBit(i + 1)) {
-                        HybridTuples.ISupportable exp = table[tidx][i];
+                        ISupportable exp = table[tidx][i];
+                        // For Many only, because it computes supports on the call to satisfiable(_,_)
+                        // if the variable was not tagged as modified, then isTupleSupported(_) is outdated
+                        if(!sval.get(i) && exp instanceof ISupportable.Many){
+                            exp.satisfiable(str2vars, i);
+                        }
                         exp.support(str2vars, i);
                         if (str2vars[i].cnt == 0) {
                             ssup.clear(i);
@@ -147,111 +184,15 @@ public class PropHybridTable extends Propagator<IntVar> {
                     if (str2vars[i].removeUnsupportedValue(this)) {
                         loop = true;
                         sval.set(i);
+                        // if the modified variable is connected to other ones with expressions...
+                        for (int n : relationships.getNeighborsOf(i)/*.toArray()*/) {
+                            sval.set(n);
+                        }
                         str2vars[i].last_size.set(str2vars[i].cnt);
                     }
                 }
                 ssup.set(i);
             }
         } while (loop);
-    }
-
-    /**
-     * Class that maintains, for a variable, the supported values
-     */
-    public static class StrHVar {
-        /**
-         * original var
-         */
-        final IntVar var;
-        /**
-         * index in the table
-         */
-        private final int index;
-
-        private final IStateInt last_size;
-        /**
-         * Store consistent values
-         */
-        final BitSet ac;
-        /**
-         * Current offset
-         */
-        private int offset;
-        /**
-         * Count the number of value to remove
-         */
-        int cnt;
-
-        StrHVar(IEnvironment env, IntVar var_, int index_) {
-            var = var_;
-            last_size = env.makeInt(0);
-            index = index_;
-            ac = new BitSet();
-        }
-
-        private void reset() {
-            ac.clear();
-            offset = var.getLB();
-            cnt = var.getDomainSize();
-        }
-
-        private boolean removeUnsupportedValue(ICause cause) throws ContradictionException {
-            boolean filter = false;
-            if (var.hasEnumeratedDomain()) {
-                for (int val = var.getLB(); cnt > 0 && val <= var.getUB(); val = var.nextValue(val)) {
-                    if (!ac.get(val - offset)) {
-                        filter |= var.removeValue(val, cause);
-                        cnt--;
-                    }
-                }
-            } else {
-                int val = var.getLB();
-                while (cnt > 0 && val <= var.getUB()) {
-                    if (!ac.get(val - offset)) {
-                        if (var.removeValue(val, cause)) {
-                            filter = true;
-                            cnt--;
-                        } else break;
-                    }
-                    val = var.nextValue(val);
-                }
-                val = var.getUB();
-                while (cnt > 0 && val >= var.getLB()) {
-                    if (!ac.get(val - offset)) {
-                        if (var.removeValue(val, cause)) {
-                            filter = true;
-                            cnt--;
-                        } else break;
-                    }
-                    val = var.previousValue(val);
-                }
-            }
-            return filter;
-        }
-
-        /**
-         * Set support for <i>value</i>
-         *
-         * @param value a value
-         */
-        public void support(int value) {
-            value -= offset;
-            if (!ac.get(value)) {
-                ac.set(value);
-                cnt--;
-            }
-        }
-
-        /**
-         * Set support for all values.
-         */
-        public void supportAll() {
-            cnt = 0;
-        }
-
-        @Override
-        public String toString() {
-            return var.getName();
-        }
     }
 }
