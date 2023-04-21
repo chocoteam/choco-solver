@@ -126,9 +126,11 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < objectives.length; i++) {
-            computeTightestPoint(i);
-        }
+    	if (!paretoFront.isEmpty()) {
+	        for (int i = 0; i < objectives.length; i++) {
+	            computeTightestPoint(i);
+	        }
+    	}
     }
 
     /**
