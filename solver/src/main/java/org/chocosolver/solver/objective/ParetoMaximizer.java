@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.objective;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Propagator;
@@ -17,10 +20,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Class to store the pareto front (multi-objective optimization).
@@ -31,6 +30,7 @@ import java.util.stream.Stream;
  * @author Charles Vernerey
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
+ * @author Jani Simomaa
  */
 public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolution {
 
@@ -39,13 +39,13 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
     //***********************************************************************************
 
     // Set of incomparable and Pareto-best solutions
-    private final LinkedList<Solution> paretoSolutions;
-    private final LinkedList<int[]> paretoFront;
+    private final List<Solution> paretoSolutions;
+    private final List<int[]> paretoFront;
 
     private final Model model;
 
     // Allow to recycle (dominated) Solution objects
-    private final LinkedList<Solution> poolSols = new LinkedList<>();
+    private final List<Solution> poolSols = new ArrayList<>();
 
     // objective function
     private final IntVar[] objectives;
@@ -71,8 +71,8 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      */
     public ParetoMaximizer(final IntVar[] objectives) {
         super(objectives, PropagatorPriority.QUADRATIC, false);
-        this.paretoSolutions = new LinkedList<>();
-        this.paretoFront = new LinkedList<>();
+        this.paretoSolutions = new ArrayList<>();
+        this.paretoFront = new ArrayList<>();
         this.objectives = objectives.clone();
         n = objectives.length;
         model = objectives[0].getModel();
@@ -93,7 +93,10 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
     @Override
     public void onSolution() {
         // get objective values
-        int[] vals = Stream.of(objectives).mapToInt(IntVar::getValue).toArray();
+        int[] vals = new int[objectives.length];
+        for (int i = 0; i < objectives.length; i++) {
+            vals[i] = objectives[i].getValue();
+        }
         // remove dominated solutions
         for (int i = paretoFront.size() - 1; i >= 0; i--) {
             if (isDominated(paretoSolutions.get(i), vals)) {
@@ -106,7 +109,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
         if (poolSols.isEmpty()) {
             solution = new Solution(model);
         } else {
-            solution = poolSols.remove();
+            solution = poolSols.remove(0);
         }
         solution.record();
         paretoSolutions.add(solution);
@@ -125,8 +128,10 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        for (int i = 0; i < objectives.length; i++) {
-            computeTightestPoint(i);
+        if (paretoFront.size() > 0) {
+            for (int i = 0; i < objectives.length; i++) {
+                computeTightestPoint(i);
+            }
         }
     }
 
@@ -137,19 +142,22 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      * @param i index of the variable
      */
     private void computeTightestPoint(int i) throws ContradictionException {
-        int tightestPoint = Integer.MIN_VALUE;
-        int[] dominatedPoint = computeDominatedPoint(i);
-        for (int[] sol : paretoFront) {
-            int dominates = dominates(sol, dominatedPoint, i);
-            if (dominates > 0) {
-                int currentPoint = dominates == 1 ? sol[i] : sol[i] + 1;
-                if (tightestPoint < currentPoint) {
-                    tightestPoint = currentPoint;
+        // tightest point can not be calculated if paretoFront is empty
+        if (paretoFront.size() > 0) {
+            int tightestPoint = Integer.MIN_VALUE;
+            int[] dominatedPoint = computeDominatedPoint(i);
+            for (int[] sol : paretoFront) {
+                int dominates = dominates(sol, dominatedPoint, i);
+                if (dominates > 0) {
+                    int currentPoint = dominates == 1 ? sol[i] : sol[i] + 1;
+                    if (tightestPoint < currentPoint) {
+                        tightestPoint = currentPoint;
+                    }
                 }
             }
-        }
-        if (tightestPoint > Integer.MIN_VALUE) {
-            objectives[i].updateLowerBound(tightestPoint, this);
+            if (tightestPoint > Integer.MIN_VALUE) {
+                objectives[i].updateLowerBound(tightestPoint, this);
+            }
         }
     }
 
@@ -161,7 +169,10 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      * @return dominated point
      */
     private int[] computeDominatedPoint(int i) {
-        int[] dp = Stream.of(objectives).mapToInt(IntVar::getUB).toArray();
+        int[] dp = new int[objectives.length];
+        for (int j = 0; j < objectives.length; j++) {
+            dp[j] = objectives[j].getUB();
+        }
         dp[i] = objectives[i].getLB();
         return dp;
     }
