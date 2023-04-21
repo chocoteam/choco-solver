@@ -31,6 +31,7 @@ import java.util.stream.Stream;
  * @author Charles Vernerey
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
+ * @author Jani Simomaa
  */
 public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolution {
 
@@ -137,19 +138,22 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      * @param i index of the variable
      */
     private void computeTightestPoint(int i) throws ContradictionException {
-        int tightestPoint = Integer.MIN_VALUE;
-        int[] dominatedPoint = computeDominatedPoint(i);
-        for (int[] sol : paretoFront) {
-            int dominates = dominates(sol, dominatedPoint, i);
-            if (dominates > 0) {
-                int currentPoint = dominates == 1 ? sol[i] : sol[i] + 1;
-                if (tightestPoint < currentPoint) {
-                    tightestPoint = currentPoint;
+        // tightest point can not be calculated if paretoFront is empty
+        if (!paretoFront.isEmpty()) {
+            int tightestPoint = Integer.MIN_VALUE;
+            int[] dominatedPoint = computeDominatedPoint(i);
+            for (int[] sol : paretoFront) {
+                int dominates = dominates(sol, dominatedPoint, i);
+                if (dominates > 0) {
+                    int currentPoint = dominates == 1 ? sol[i] : sol[i] + 1;
+                    if (tightestPoint < currentPoint) {
+                        tightestPoint = currentPoint;
+                    }
                 }
             }
-        }
-        if (tightestPoint > Integer.MIN_VALUE) {
-            objectives[i].updateLowerBound(tightestPoint, this);
+            if (tightestPoint > Integer.MIN_VALUE) {
+                objectives[i].updateLowerBound(tightestPoint, this);
+            }
         }
     }
 
@@ -161,7 +165,10 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      * @return dominated point
      */
     private int[] computeDominatedPoint(int i) {
-        int[] dp = Stream.of(objectives).mapToInt(IntVar::getUB).toArray();
+        int[] dp = new int[objectives.length];
+        for (int j = 0; j < objectives.length; j++) {
+            dp[j] = objectives[j].getUB();
+        }
         dp[i] = objectives[i].getLB();
         return dp;
     }
