@@ -9,6 +9,9 @@
  */
 package org.chocosolver.solver.objective;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Propagator;
@@ -17,10 +20,6 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-
-import java.util.LinkedList;
-import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * Class to store the pareto front (multi-objective optimization).
@@ -94,7 +93,10 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
     @Override
     public void onSolution() {
         // get objective values
-        int[] vals = Stream.of(objectives).mapToInt(IntVar::getValue).toArray();
+        int[] vals = new int[objectives.length];
+        for (int i = 0; i < objectives.length; i++) {
+            vals[i] = objectives[i].getValue();
+        }
         // remove dominated solutions
         for (int i = paretoFront.size() - 1; i >= 0; i--) {
             if (isDominated(paretoSolutions.get(i), vals)) {
