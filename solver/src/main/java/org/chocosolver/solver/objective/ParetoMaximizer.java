@@ -9,7 +9,7 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.chocosolver.solver.Model;
@@ -39,13 +39,13 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
     //***********************************************************************************
 
     // Set of incomparable and Pareto-best solutions
-    private final LinkedList<Solution> paretoSolutions;
-    private final LinkedList<int[]> paretoFront;
+    private final List<Solution> paretoSolutions;
+    private final List<int[]> paretoFront;
 
     private final Model model;
 
     // Allow to recycle (dominated) Solution objects
-    private final LinkedList<Solution> poolSols = new LinkedList<>();
+    private final List<Solution> poolSols = new ArrayList<>();
 
     // objective function
     private final IntVar[] objectives;
@@ -71,8 +71,8 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      */
     public ParetoMaximizer(final IntVar[] objectives) {
         super(objectives, PropagatorPriority.QUADRATIC, false);
-        this.paretoSolutions = new LinkedList<>();
-        this.paretoFront = new LinkedList<>();
+        this.paretoSolutions = new ArrayList<>();
+        this.paretoFront = new ArrayList<>();
         this.objectives = objectives.clone();
         n = objectives.length;
         model = objectives[0].getModel();
@@ -109,7 +109,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
         if (poolSols.isEmpty()) {
             solution = new Solution(model);
         } else {
-            solution = poolSols.remove();
+            solution = poolSols.remove(0);
         }
         solution.record();
         paretoSolutions.add(solution);
@@ -128,7 +128,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (!paretoFront.isEmpty()) {
+        if (paretoFront.size() > 0) {
             for (int i = 0; i < objectives.length; i++) {
                 computeTightestPoint(i);
             }
@@ -143,7 +143,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
      */
     private void computeTightestPoint(int i) throws ContradictionException {
         // tightest point can not be calculated if paretoFront is empty
-        if (!paretoFront.isEmpty()) {
+        if (paretoFront.size() > 0) {
             int tightestPoint = Integer.MIN_VALUE;
             int[] dominatedPoint = computeDominatedPoint(i);
             for (int[] sol : paretoFront) {
