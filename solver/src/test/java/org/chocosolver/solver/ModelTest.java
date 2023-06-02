@@ -473,7 +473,7 @@ public class ModelTest {
     public void testFind() {
         Model m = ProblemMaker.makeGolombRuler(6);
         IntVar[] ticks = (IntVar[]) m.getHook("ticks");
-        m.clearObjective();
+        //m.clearObjective(); --> managed by findParetoFront()
 
         List<Solution> front = m.getSolver().findParetoFront(ticks, false);
         for (Solution s : front) {
