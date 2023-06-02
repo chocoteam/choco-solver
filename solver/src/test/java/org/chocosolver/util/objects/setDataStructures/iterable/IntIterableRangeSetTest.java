@@ -705,6 +705,15 @@ public class IntIterableRangeSetTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
+    public void testUnion6() {
+        IntIterableRangeSet set = new IntIterableRangeSet(1, 2);
+        IntIterableSetUtils.unionOf(set, new IntIterableRangeSet());
+        Assert.assertEquals(set.size(), 2);
+    }
+
+
+
+    @Test(groups = "1s", timeOut = 60000)
     public void testIncludedIn1() {
         Assert.assertTrue(IntIterableSetUtils.includedIn(new IntIterableRangeSet(), new IntIterableRangeSet(0)));
     }
