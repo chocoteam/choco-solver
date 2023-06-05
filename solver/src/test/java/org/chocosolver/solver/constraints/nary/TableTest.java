@@ -838,4 +838,30 @@ public class TableTest {
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 255);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testReify(String a) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 6);
+        IntVar y = model.intVar("y", 1, 5);
+        IntVar z = model.intVar("y", 2, 4);
+
+        x.in(3).post();
+        y.in(2).post();
+        z.in(4).post();
+
+        Tuples tuples = new Tuples();
+        tuples.add(2, 2, 2);
+        tuples.add(3, 3, 3);
+        tuples.add(4, 4, 4);
+
+        BoolVar r = model.table(new IntVar[]{x, y, z}, tuples, a).reify();
+
+        try {
+            model.getSolver().propagate();
+        } catch (ContradictionException e) {
+            Assert.fail();
+        }
+        Assert.assertTrue(r.isInstantiatedTo(0));
+    }
+
 }

@@ -1565,7 +1565,7 @@ public class XCSPParser implements XCallbacks2 {
         } else {
             binLoad = Arrays.stream(capacities).map(c -> model.intVar(0, (int) c.lastValue())).toArray(IntVar[]::new);
             for (int i = 0; i < binLoad.length; i++) {
-                binLoad[i].ge(var(capacities[i])).post();
+                binLoad[i].le(var(capacities[i])).post();
             }
         }
         model.binPacking(vars(list), sizes, binLoad, 0).post();

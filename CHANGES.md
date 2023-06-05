@@ -12,10 +12,40 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 4.10.12](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 4.10.14](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
 
+    
+4.10.13 - 05 Jun 2023
+-------------------
+
+### Major features: 
+Mainly bug fixes and improvements of Pareto front performances.
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.13](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jani Simomaa](https://github.com/jsimomaa) (@jsimomaa)
+    
+4.10.12 - 06 Mar 2023
+-------------------
+
+### Major features:
+- Fix bug #1006, #1011 and #1014
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.12](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
     
 4.10.11 - 07 Feb 2023
 -------------------

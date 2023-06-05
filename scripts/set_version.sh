@@ -44,7 +44,7 @@ then
     sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
     ## For MiniZinc
-    sedInPlace "s#    git fetch -q && git checkout -q .*#    git fetch -q  \&\& git checkout -q 4.10.11 \&\& \\\#"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
+    sedInPlace "s@    git fetch -q  && git checkout -q .*@    git fetch -q  \&\& git checkout -q $VERSION \&\& \\\@"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
     sedInPlace "s%CHOCO_JAR=~/.m2/.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minizinc/fzn-choco
 

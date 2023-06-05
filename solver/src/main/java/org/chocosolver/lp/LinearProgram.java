@@ -77,7 +77,10 @@ public class LinearProgram {
         public Slack(double[][] a, double[] b, double[] c) {
             this.m = b.length;
             this.n = c.length;
-            this.A = a.clone();
+            this.A = new double[a.length][];
+            for(int i = 0; i < a.length; i++){
+                this.A[i] = a[i].clone();
+            }
             this.b = b.clone();
             this.c = c.clone();
             this.N = new int[n];
@@ -99,6 +102,7 @@ public class LinearProgram {
         public Slack(double[][] a, double[] b, double[] c, int[] N, int[] B, double v) {
             this.m = b.length;
             this.n = c.length;
+            //clone?
             this.A = a;
             this.b = b;
             this.c = c;
@@ -204,9 +208,9 @@ public class LinearProgram {
     }
 
     // number of variables
-    private int n;
+    int n;
     // number of constraints
-    private int m;
+    int m;
     // a mxn matrix
     private double[][] A;
     // an m-vector
@@ -214,17 +218,17 @@ public class LinearProgram {
     // an n-vector
     private double[] c;
     // an n-vector
-    private double[] x;
-    private double z;
+    double[] x;
+    double z;
     // feasibility of the LP
-    private Status status = Status.UNKNOWN;
+    Status status = Status.UNKNOWN;
     // trace the resolution
-    private final boolean trace;
+    final boolean trace;
 
     /**
-     * Create a LinearProgram instance that take a linear program in standard form as input.
+     * Create a LinearProgram instance that takes a linear program in standard form as input.
      *
-     * @param matA  is an mxn matrix
+     * @param matA  is a mxn matrix
      * @param vecB  is an m-vector
      * @param vecC  is n-vector
      * @param trace set to <i>true</i> to trace the resolution
@@ -233,7 +237,10 @@ public class LinearProgram {
         super();
         this.m = vecB.length;
         this.n = vecC.length;
-        this.A = matA.clone();
+        this.A = new double[matA.length][];
+        for (int i = 0; i < matA.length; i++) {
+            this.A[i] = matA[i].clone();
+        }
         this.b = vecB.clone();
         this.c = vecC.clone();
         this.x = new double[n];
@@ -241,9 +248,9 @@ public class LinearProgram {
     }
 
     /**
-     * Create a LinearProgram instance that take a linear program in standard form as input.
+     * Create a LinearProgram instance that takes a linear program in standard form as input.
      *
-     * @param matA is an mxn matrix
+     * @param matA is a mxn matrix
      * @param vecB is an m-vector
      * @param vecC is n-vector
      */
@@ -275,7 +282,7 @@ public class LinearProgram {
      */
     public int makeVariable() {
         if (m > 0) {
-            throw new UnsupportedOperationException("Some constraints are alreadey declared");
+            throw new UnsupportedOperationException("Some constraints are already declared");
         }
         return n++;
     }
@@ -285,7 +292,7 @@ public class LinearProgram {
      */
     public void makeVariables(int n) {
         if (m > 0) {
-            throw new UnsupportedOperationException("Some constraints are alreadey declared");
+            throw new UnsupportedOperationException("Some constraints are already declared");
         }
         this.n += n;
     }
@@ -312,6 +319,21 @@ public class LinearProgram {
                 c[i] *= -1;
             }
         }
+    }
+
+    /**
+     * Drop the last declared constraint
+     */
+    public void dropLast() {
+        // decrease capacity of A
+        double[][] At = this.A;
+        A = new double[this.m - 1][this.n];
+        System.arraycopy(At, 0, this.A, 0, m -1);
+        // decrease capacity of b
+        double[] bt = this.b;
+        this.b = new double[this.m - 1];
+        System.arraycopy(bt, 0, this.b, 0, m - 1);
+        m--;
     }
 
     /**
@@ -349,6 +371,12 @@ public class LinearProgram {
         addLeq(ci, b);
     }
 
+    public void addLeq(int var, double c, double b) {
+        double[] ci = new double[n];
+        ci[var] = c;
+        addLeq(ci, b);
+    }
+
     /**
      * Add a linear inequality (&ge;) to the system.
      *
@@ -373,6 +401,12 @@ public class LinearProgram {
     public void addGeq(HashMap<Integer, Double> map, double b) {
         double[] ci = new double[n];
         map.forEach((v, c) -> ci[v] = c);
+        addGeq(ci, b);
+    }
+
+    public void addGeq(int var, double c, double b) {
+        double[] ci = new double[n];
+        ci[var] = c;
         addGeq(ci, b);
     }
 
@@ -401,6 +435,12 @@ public class LinearProgram {
         addEq(ci, b);
     }
 
+    public void addEq(int var, double c, double b) {
+        double[] ci = new double[n];
+        ci[var] = c;
+        addEq(ci, b);
+    }
+
     /**
      * Apply the Simplex algorithm on this linear program.
      * <p>If the problem is infeasible, this method terminates.
@@ -408,7 +448,7 @@ public class LinearProgram {
      * can be read calling {@link #value(int)}.
      * </p>
      *
-     * @return <i>true</i> is this LP is feasible, <i>false</i> otherwise.
+     * @return the resolution status
      */
     public Status simplex() {
         // slack form of the LP
