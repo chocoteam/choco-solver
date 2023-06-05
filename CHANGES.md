@@ -7,7 +7,8 @@ This file is dedicated to sum up the new features added and bugs fixed in Choco-
 NEXT MILESTONE
 -------------------
 
-### Major features:
+### Major features: 
+Mainly bug fixes and improvements of Pareto front performances.
 
 ### Deprecated API (to be removed in next release):
 
@@ -15,7 +16,8 @@ NEXT MILESTONE
 See [milestone 4.10.13](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jani Simomaa](https://github.com/jsimomaa) (@jsimomaa)
     
 4.10.12 - 06 Mar 2023
 -------------------
