@@ -19,6 +19,8 @@ import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
+import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
+import org.chocosolver.solver.constraints.extension.hybrid.PropHybridTable;
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
@@ -75,7 +77,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -2511,6 +2516,19 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 throw new SolverException("Table algorithm " + algo + " is unkown");
         }
         return new Constraint(ConstraintsName.TABLE, p);
+    }
+
+    /**
+     * Create a table constraint based on hybrid tuples.
+     * Such tuples make possible to declare expressions as restriction on values a variable can take.
+     * @param vars scope of the constraint
+     * @param htuples hybrid tuples
+     * @return a hybrid table constraint
+     * @implNote The filtering algorithm is an adaptation of STR2 to expressions.
+     */
+    default Constraint table(IntVar[] vars, HybridTuples htuples){
+        assert vars.length == htuples.arity();
+        return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
 
     /**

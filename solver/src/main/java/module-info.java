@@ -30,6 +30,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.binary.element;
     exports org.chocosolver.solver.constraints.extension;
     exports org.chocosolver.solver.constraints.extension.binary;
+    exports org.chocosolver.solver.constraints.extension.hybrid;
     exports org.chocosolver.solver.constraints.extension.nary;
     exports org.chocosolver.solver.constraints.nary;
     exports org.chocosolver.solver.constraints.nary.alldifferent;
@@ -142,6 +143,10 @@ module org.chocosolver.solver {
     opens org.chocosolver.solver.constraints to org.chocosolver.parsers, org.testng, sizeof;
     opens org.chocosolver.solver.constraints.binary to org.chocosolver.parsers, org.testng, sizeof;
     opens org.chocosolver.solver.constraints.binary.element to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.extension to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.binary to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.hybrid to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.nary to org.chocosolver.parsers, org.testng, sizeof;
     opens org.chocosolver.solver.constraints.reification to org.chocosolver.parsers, sizeof;
     opens org.chocosolver.solver.constraints.nary.among to org.chocosolver.parsers, sizeof;
     opens org.chocosolver.solver.constraints.nary.binPacking to org.chocosolver.parsers, sizeof;
