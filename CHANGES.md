@@ -12,10 +12,11 @@ NEXT MILESTONE
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 4.10.14](https://github.com/chocoteam/choco-solver/milestone/xx)
+See [milestone 4.11.0](https://github.com/chocoteam/choco-solver/milestone/38)
 
 #### Contributors to this release:
 
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.13...v4.11.0
     
 4.10.13 - 05 Jun 2023
 -------------------

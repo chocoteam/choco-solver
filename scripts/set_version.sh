@@ -13,7 +13,8 @@ function sedInPlace() {
 }
 
 if [ $1 == "--next" ]; then
-    VERSION=$(guess $2)
+    OVERSION=$2
+    VERSION=$(guess ${OVERSION})
     NEXTMIL="no"
 else
     VERSION=$1
@@ -25,9 +26,9 @@ mvn -q versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 
 if test "${NEXTMIL}" = "yes"
 then
-    DAT=`LANG=en_US.utf8 date +"%Y-%m"`
-    YEAR=`LANG=en_US.utf8 date +"%Y"`
-    d=`LANG=en_US.utf8 date +"%d %b %Y"`
+    DAT=$(LANG=en_US.utf8 date +"%Y-%m")
+    YEAR=$(LANG=en_US.utf8 date +"%Y")
+    d=$(LANG=en_US.utf8 date +"%d %b %Y")
 
     ## The README.md
     # Update of the version number for maven usage
@@ -70,5 +71,7 @@ See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solve
 \
 #### Contributors to this release:\
 \
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v${OVERSION}...v${VERSION%%-SNAPSHOT}
     ' CHANGES.md
 fi
