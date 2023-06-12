@@ -38,7 +38,7 @@ public class IntSearch {
             model.getSolver().setLubyRestart(500, new FailCounter(model, 0), 500);
             return Search.intVarSearch(variables);
         }
-        return valueSelector(variables, varsel, assignment);
+        return valueSelector(variables, varsel, assignment, model);
     }
 
     private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice, Model model) {
@@ -69,7 +69,7 @@ public class IntSearch {
     }
 
     private static IntStrategy valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
-                                                                            Assignment assignmennt) {
+                                                                            Assignment assignmennt, Model model) {
         IntValueSelector valSelector;
         DecisionOperator<IntVar> assgnt = DecisionOperatorFactory.makeIntEq();
         switch (assignmennt) {
@@ -87,7 +87,7 @@ public class IntSearch {
                 valSelector = new IntDomainMedian();
                 break;
             case indomain_random:
-                valSelector = new IntDomainRandom(scope[0].getModel().getSeed());
+                valSelector = new IntDomainRandom(model.getSeed());
                 break;
             case indomain_split:
             case indomain_interval:

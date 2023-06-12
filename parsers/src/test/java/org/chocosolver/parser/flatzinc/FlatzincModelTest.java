@@ -17,12 +17,12 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 /*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 13 janv. 2010
-* Since : Choco 2.1.1
-* 
-*/
+ * User : CPRUDHOM
+ * Mail : cprudhom(a)emn.fr
+ * Date : 13 janv. 2010
+ * Since : Choco 2.1.1
+ *
+ */
 public class FlatzincModelTest {
 
 
@@ -112,7 +112,7 @@ public class FlatzincModelTest {
         model.getSolver().solve();
         Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
-    
+
     @Test(groups = "1s")
     public void testWarmStart() {
         InputStream in = new ByteArrayInputStream(("array [1..10] of int: X_INTRODUCED_11_ = [1,1,1,1,1,1,1,1,1,1];\n" +
@@ -138,10 +138,23 @@ public class FlatzincModelTest {
         Model model = fzn.getModel();
         //model.getSolver().showDecisions();
         //model.getSolver().limitSolution(3);
-        while(model.getSolver().solve()) {
+        while (model.getSolver().solve()) {
             fzn.datas[0].onSolution();
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 176);
+    }
+
+    @Test(groups = "1s")
+    public void testEmptyListOfVariablesInSearch() {
+        InputStream in = new ByteArrayInputStream(("solve :: int_search([], largest, indomain_random, complete) satisfy;").getBytes());
+        Flatzinc fzn = new Flatzinc(false, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        fzn.configureSearch();
+        Model model = fzn.getModel();
+        model.getSolver().solve();
+        // expecting no error
     }
 
 }
