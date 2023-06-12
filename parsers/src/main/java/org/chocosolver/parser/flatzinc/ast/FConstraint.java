@@ -751,7 +751,7 @@ public enum FConstraint {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             BoolVar b = exps.get(1).boolVarValue(model);
             IntVar count = model.intVar(0, vars.length);
-            model.atMostNValues(vars, count, false).post();
+            model.nValues(vars, count).post();
             model.reifyXeqC(count, 1, b);
         }
     },

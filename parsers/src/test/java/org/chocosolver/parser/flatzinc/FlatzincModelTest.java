@@ -157,4 +157,18 @@ public class FlatzincModelTest {
         // expecting no error
     }
 
+    @Test(groups = "1s")
+    public void testAllEquals() {
+        InputStream in = new ByteArrayInputStream(("predicate fzn_all_equal_int_reif(array [int] of var int: x,var bool: b);\n" +
+                "constraint fzn_all_equal_int_reif([2,2],false);\n" +
+                "solve  satisfy;\n").getBytes());
+        Flatzinc fzn = new Flatzinc(false, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        fzn.configureSearch();
+        Model model = fzn.getModel();
+        Assert.assertFalse(model.getSolver().solve());
+    }
+
 }
