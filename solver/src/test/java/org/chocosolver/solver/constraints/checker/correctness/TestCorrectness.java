@@ -278,7 +278,7 @@ public class TestCorrectness {
         CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * 7 + 1, 1, 7, 29, true);
         for (int i = 0; i < 6; i++) {
             for (int n = 2; n < 25; n += 5) {
-                long seed = i;//System.currentTimeMillis();
+                long seed = System.currentTimeMillis();
                 CorrectnessChecker.checkCorrectness(Modeler.modelCumulative, 4 * n + 1, 1, n, seed, true);
             }
         }
@@ -353,6 +353,29 @@ public class TestCorrectness {
             for (int n = 2; n < (1 << 6) + 1; n *= 2) {
                 CorrectnessChecker.checkCorrectness(Modeler.modelmaxbc, n, -n, 2 * n, seed, false);
                 CorrectnessChecker.checkCorrectness(Modeler.modelmaxbbc, n, 0, 1, seed, false);
+            }
+        }
+    }
+
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMIN() {
+        for (int i = 0; i < 3; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelargminac, n, -n, 2 * n, seed, false);
+                CorrectnessChecker.checkCorrectness(Modeler.modelargminac, n, 0, 1, seed, false);
+            }
+        }
+    }
+
+    // MAX
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMAX() {
+        for (int i = 0; i < 3; i++) {
+            long seed = System.currentTimeMillis();
+            for (int n = 2; n < (1 << 6) + 1; n *= 2) {
+                CorrectnessChecker.checkCorrectness(Modeler.modelargmaxac, n, -n, 2 * n, seed, false);
+                CorrectnessChecker.checkCorrectness(Modeler.modelargmaxac, n, 0, 1, seed, false);
             }
         }
     }

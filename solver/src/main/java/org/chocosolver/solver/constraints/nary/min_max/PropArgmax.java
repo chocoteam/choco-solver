@@ -57,12 +57,13 @@ public class PropArgmax extends Propagator<IntVar> {
         this.proc = j -> {
             int jj = j - o;
             int lbi_ = lbi.get();
-            int ubi_  = ubi.get();
+            int ubi_ = ubi.get();
             Ir.set(jj, vars[jj].getUB() > vars[lbi_].getLB() - (jj <= lbi_ ? 1 : 0));
             if (jj == ubi_) {
                 filterUb();
             } else {
-                vars[jj].updateUpperBound(vars[ubi_].getUB() - (j < lbi_ ? 1 : 0), PropArgmax.this);
+                // Eq (1)
+                vars[jj].updateUpperBound(vars[ubi_].getUB() - (jj < ubi_ ? 1 : 0), PropArgmax.this);
             }
         };
     }
@@ -79,7 +80,14 @@ public class PropArgmax extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         vars[n].updateBounds(o, n + o - 1, this);
-        filterUb();
+        int ubi_ = argmaxub(IntVar::getUB);
+        ubi.set(ubi_);
+        int ub = vars[ubi_].getUB();
+        for (int j = 0; j < n; j++) {
+            if (!vars[n].contains(j + o)) {
+                vars[j].updateUpperBound(ub - (j < ubi_ ? 1 : 0), PropArgmax.this);
+            }
+        }
         int lbi_ = argmaxlb(IntVar::getLB);
         lbi.set(lbi_);
         for (int j = vars[n].nextValueOut(-1 + o); j < n + o; j = vars[n].nextValueOut(j)) {

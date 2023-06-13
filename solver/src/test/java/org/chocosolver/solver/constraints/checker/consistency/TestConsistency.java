@@ -201,6 +201,27 @@ public class TestConsistency {
         }
     }
 
+    // ARGMIN *******************************************************
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMIN() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 299; i++) {
+            checkConsistency(Modeler.modelargminac, 5, -5, 5, null, seed + i, "ac");
+            checkConsistency(Modeler.modelargminac, 10, -2, 3, null, seed + i, "ac");
+        }
+    }
+
+    // MAX *******************************************************
+
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMAX() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 299; i++) {
+            checkConsistency(Modeler.modelargmaxac, 5, -5, 5, null, seed + i, "ac");
+            checkConsistency(Modeler.modelargmaxac, 10, -2, 3, null, seed + i, "ac");
+        }
+    }
+
     // INT VALUE PRECEDE CHAIN *******************************************************
 
     @Test(groups="checker", timeOut=60000)

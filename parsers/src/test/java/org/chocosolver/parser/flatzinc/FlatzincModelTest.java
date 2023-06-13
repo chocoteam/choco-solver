@@ -171,4 +171,50 @@ public class FlatzincModelTest {
         Assert.assertFalse(model.getSolver().solve());
     }
 
+
+    @Test(groups = "1s")
+    public void testMats1() {
+        InputStream in = new ByteArrayInputStream((
+                "predicate fzn_maximum_arg_int(array [int] of var int: x,var int: z);\n" +
+                        "var 1..2: A:: output_var;\n" +
+                        "var 3..4: B:: output_var;\n" +
+                        "var 3..4: E:: output_var;\n" +
+                        "array [1..4] of var int: X_INTRODUCED_0_ ::var_is_introduced  = [E,B,1,4];\n" +
+                        "constraint fzn_maximum_arg_int(X_INTRODUCED_0_,A);\n" +
+                        "solve  satisfy;\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
+    }
+
+    @Test(groups = "1s")
+    public void testMats2() {
+        InputStream in = new ByteArrayInputStream((
+                "predicate fzn_minimum_arg_int(array [int] of var int: x,var int: z);\n" +
+                        "var 1..2: A:: output_var;\n" +
+                        "var {1,6}: B:: output_var;\n" +
+                        "var {1,6}: D:: output_var;\n" +
+                        "array [1..4] of var int: X_INTRODUCED_0_ ::var_is_introduced  = [D,B,7,5];\n" +
+                        "constraint fzn_minimum_arg_int(X_INTRODUCED_0_,A);\n" +
+                        "solve  satisfy;\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 3);
+    }
 }

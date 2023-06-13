@@ -835,6 +835,48 @@ public interface Modeler {
         }
     };
 
+    Modeler modelargmaxac = new Modeler() {
+         @Override
+         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+             Model s = new Model("max" + n);
+             IntVar[] vars = new IntVar[n];
+             for (int i = 0; i < vars.length; i++) {
+                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], false);
+                 if (map != null) map.put(domains[i], vars[i]);
+             }
+
+             s.argmax(vars[0], 1, copyOfRange(vars, 1, vars.length)).post();
+             s.getSolver().setSearch(randomSearch(vars, 0));
+             return s;
+         }
+
+         @Override
+         public String name() {
+             return "modelmaxbc";
+         }
+     };
+
+     Modeler modelargminac = new Modeler() {
+         @Override
+         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+             Model s = new Model("min" + n);
+             IntVar[] vars = new IntVar[n];
+             for (int i = 0; i < vars.length; i++) {
+                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], false);
+                 if (map != null) map.put(domains[i], vars[i]);
+             }
+
+             s.argmin(vars[0], 1, copyOfRange(vars, 1, vars.length)).post();
+             s.getSolver().setSearch(randomSearch(vars, 0));
+             return s;
+         }
+
+         @Override
+         public String name() {
+             return "modelminbc";
+         }
+     };
+
     Modeler modelplusbc = new Modeler() {
         @Override
         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
