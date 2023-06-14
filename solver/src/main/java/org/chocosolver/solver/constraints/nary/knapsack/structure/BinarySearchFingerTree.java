@@ -9,8 +9,6 @@
  */
 package org.chocosolver.solver.constraints.nary.knapsack.structure;
 
-import java.io.FileWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -20,19 +18,6 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     public BinarySearchFingerTree(List<KPItem> sortedItems, Supplier<InnerNode> supplier) {
         super(sortedItems);
         setupTree(supplier);
-    }
-
-    /**
-     * @param sortedWeights sorted items by efficiency !
-     * @param sortedEnergy  sorted items by efficiency !
-     */
-    public BinarySearchFingerTree(int[] sortedWeights, int[] sortedEnergy, Supplier<InnerNode> supplier) {
-        super();
-        List<KPItem> sortedList = new ArrayList<>();
-        for (int i = 0; i < sortedEnergy.length; ++i) {
-            sortedList.set(i, new KPItem(sortedEnergy[i], sortedWeights[i]));
-        }
-        init(sortedList);
     }
 
     private WeightInterface getNodeWeightInterface(int index) {
@@ -69,12 +54,12 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * desactivate leaf and updates inner nodes
+     * deactivate leaf and updates inner nodes
      *
      * @param leafIndex global leaf index
      */
     public void removeLeaf(int leafIndex) {
-        getLeaf(leafIndex).desactivate();
+        getLeaf(leafIndex).deactivate();
         updateTree(leafIndex);
     }
 
@@ -89,7 +74,7 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     /**
-     * updates inner nodes, when we activate/desactivate a leaf
+     * updates inner nodes, when we activate/deactivate a leaf
      *
      * @param leafIndex global leaf index
      */
@@ -148,7 +133,7 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
 
     /**
      * Binary search in the leaves, does not consider "removed" leaves
-     * all informations in () are valid when right=false
+     * all information in () are valid when right=false
      *
      * @param startIndex global starting leaf index
      * @param boundIndex global index that bounds the search
@@ -185,7 +170,7 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
                 if (predicate.test(index) && isInnerNode(index)) {
                     if ((right != comingFromRightLeaf)
                             && predicate.test(childIndex)) {
-                        // the current node accepts the predicate and we can explore the other child
+                        // the current node accepts the predicate, and we can explore the other child
                         index = childIndex;
                         descending = true;
                     } else if (index == 0) {
@@ -193,7 +178,7 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
                         return -1;
                     } else {
                         // the current node accepts the predicate but there are not in the search scope
-                        // ie. behind the starting index
+                        // i.e. behind the starting index
                         comingFromRightLeaf = index % 2 == 0;
                         index = getParentIndex(index);
                     }
@@ -212,31 +197,24 @@ public class BinarySearchFingerTree extends FingerTree<InnerNode, KPItem> {
     }
 
     public String toString() {
-        String str = "digraph fingertree{\n";
+        StringBuilder str = new StringBuilder("digraph FingerTree{\n");
         for (int i = 0; i < getInnerNodeTreeList().size(); ++i) {
-            str += "" + i + " [label=\"" + i + getInnerNode(i) + "\"];\n";
+            str.append(i).append(" [label=\"").append(getInnerNode(i)).append("\"];\n");
             if (i != 0) {
-                str += "" + getParentIndex(i) + "->" + i + ";\n";
+                str.append(getParentIndex(i)).append("->").append(i).append(";\n");
             }
         }
         for (int i = 0; i < getLeafTreeList().size(); ++i) {
-            str += "leaf" + i + " [label=\"" + leafToGlobalIndex(i) + "w=" + getLeafTreeList().get(i).getWeight()
-                    + ",p=" + getLeafTreeList().get(i).getProfit() + "\"];\n";
-            str += "" + getLeafParentIndex(i) + "-> leaf" + i + ";\n";
+            str.append("leaf").append(i).append(" [label=\"")
+                    /*.append(leafToGlobalIndex(i))*/
+                    .append("w=")
+                    .append(getLeafTreeList().get(i).getWeight())
+                    .append(",p=")
+                    .append(getLeafTreeList().get(i).getProfit())
+                    .append("\"];\n");
+            str.append(getLeafParentIndex(i)).append("-> leaf").append(i).append(";\n");
         }
-        str += "}";
-        return str;
-    }
-
-    /**
-     * Create the dot graph of the tree, useful for debug
-     */
-    public void createDotFile(String filename) {
-        try (FileWriter fWriter = new FileWriter(filename)) {
-            fWriter.write(this.toString());
-        } catch (Exception e) {
-            System.err.println("Error trying to create DOT file : ");
-            e.printStackTrace();
-        }
+        str.append("}");
+        return str.toString();
     }
 }

@@ -24,7 +24,7 @@ public class KPItem implements WeightInterface, ProfitInterface {
         this.active = true;
     }
 
-    public void desactivate() {
+    public void deactivate() {
         active = false;
     }
 
