@@ -334,15 +334,15 @@ public class PropagationEngine {
      * @param propagator propagator to execute
      */
     public void onPropagatorExecution(Propagator<?> propagator) {
-        desactivatePropagator(propagator);
+        deactivatePropagator(propagator);
     }
 
     /**
      * Set the propagator as inactivated within the propagation engine
      *
-     * @param propagator propagator to desactivate
+     * @param propagator propagator to deactivate
      */
-    public void desactivatePropagator(Propagator<?> propagator) {
+    public void deactivatePropagator(Propagator<?> propagator) {
         if (propagator.reactToFineEvent()) {
             propagator.doFlush();
         }

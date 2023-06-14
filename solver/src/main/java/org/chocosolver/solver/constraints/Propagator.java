@@ -516,7 +516,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             state = PASSIVE;
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
-            model.getSolver().getEngine().desactivatePropagator(this);
+            model.getSolver().getEngine().deactivatePropagator(this);
             if (swapOnPassivate) {
                 for (int i = 0; i < vars.length; i++) {
                     if (!vars[i].isInstantiated()) {
