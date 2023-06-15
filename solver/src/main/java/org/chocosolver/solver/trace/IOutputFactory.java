@@ -224,6 +224,28 @@ public interface IOutputFactory extends ISelf<Solver> {
     }
 
     /**
+     * Plug a search monitor which outputs {@code message} on each restart.
+     *
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     *
+     * @param message the message to print.
+     */
+    default void showRestarts(final IMessage message) {
+        ref().plugMonitor(new IMonitorRestart() {
+            @Override
+            public void afterRestart() {
+                ref().log().printf("RUNS %d ", ref().getRestartCount());
+                ref().log().printf(" // %s \n", message.print());
+            }
+        });
+    }
+
+    default void showRestarts() {
+        showRestarts(()->ref().toOneLineString());
+    }
+
+    /**
      * Plug a search monitor which outputs the contradictions thrown during the search.
      */
     default void showContradiction() {

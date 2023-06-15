@@ -52,6 +52,7 @@ public class BlackBoxTest {
         solver.setSearch(strat.apply(vars));
         solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
         solver.setNoGoodRecordingFromSolutions(vars);
+        model.getSolver().showRestarts();
         solver.findAllSolutions();
         solver.printShortStatistics();
         Assert.assertEquals(solver.getSolutionCount(), 58);
