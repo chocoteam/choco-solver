@@ -2521,6 +2521,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * Create a table constraint based on hybrid tuples.
      * Such tuples make possible to declare expressions as restriction on values a variable can take.
+     * <p>
+     *     <pre>
+     *         {@code
+     *         HybridTuples tuples = new HybridTuples();
+     *         tuples.add(ne(a), any(), eq(c));
+     *         tuples.add(eq(c), le(b), ne(a));
+     *         tuples.add(lt(c), eq(b), ne(b));
+     *         tuples.add(gt(b), ge(b), any());
+     *         model.table(new IntVar[]{x, y, z}, tuples).post();
+     *         }
+     *     </pre>
+     * </p>
      * @param vars scope of the constraint
      * @param htuples hybrid tuples
      * @return a hybrid table constraint

@@ -8,6 +8,8 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
+- NEW: `solver..showRestarts();` to display the number of restarts during the search. 
+- NEW: hybrid table constraints (see `model.table(...)`)
 
 ### Deprecated API (to be removed in next release):
 
