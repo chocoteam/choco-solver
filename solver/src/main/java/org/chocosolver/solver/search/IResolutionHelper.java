@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -329,6 +329,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      * @param stop      optional criterion to stop the search before finding all/best solution
      * @return a list that contained the solutions found.
      */
+    @SuppressWarnings("UnusedReturnValue")
     default List<Solution> findAllOptimalSolutions(IntVar objective, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
         boolean defaultS = ref().getSearch() == null;// best bound (in default) is only for optim
@@ -451,7 +452,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
-     * Attempts optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria. Finds and stores
+     * Attempts to optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria. Finds and stores
      * all optimal solution. Note that the returned list can be empty.
      * <ul>
      * <li>If the method returns an empty list:</li>
@@ -487,6 +488,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
      */
     default List<Solution> findParetoFront(IntVar[] objectives, boolean maximize, Criterion... stop) {
         ref().addStopCriterion(stop);
+        ref().getModel().clearObjective();
         ParetoMaximizer pareto = new ParetoMaximizer(
                 Stream.of(objectives).map(o -> maximize ? o : ref().getModel().intMinusView(o)).toArray(IntVar[]::new)
         );
@@ -501,7 +503,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
     }
 
     /**
-     * Attempts optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria.
+     * Attempts to optimize the value of the <i>objectives</i> variable w.r.t. to an optimization criteria.
      * Finds and stores the optimal solution, if any.
      * Moreover, the objective variables are ordered wrt their significance.
      * The first objective variable is more significant or equally significant to the second one,
@@ -549,6 +551,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                 plint.update(bestFound, true);
             } else {
                 plint = new PropLexInt(mobj, bestFound, true, true);
+                //noinspection unchecked
                 clint = new Constraint("lex objectives", (Propagator<IntVar>) plint);
                 clint.post();
             }

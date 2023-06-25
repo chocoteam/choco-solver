@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.OptionalInt;
 
 /**
- *
  * arithmetic expression
  * <p>
  * Project: choco-solver.
@@ -143,13 +142,13 @@ public interface ArExpression {
 
             @Override
             int eval(int i1, int i2) {
-                if(i2 == 0){
-                    if(i1>0) {
+                if (i2 == 0) {
+                    if (i1 > 0) {
                         return Integer.MAX_VALUE;
-                    }else{
+                    } else {
                         return Integer.MIN_VALUE;
                     }
-                }else {
+                } else {
                     return i1 / i2;
                 }
             }
@@ -170,13 +169,13 @@ public interface ArExpression {
 
             @Override
             int eval(int i1, int i2) {
-                if(i2 == 0){
-                    if(i1>0) {
+                if (i2 == 0) {
+                    if (i1 > 0) {
                         return Integer.MAX_VALUE;
-                    }else{
+                    } else {
                         return Integer.MIN_VALUE;
                     }
-                }else {
+                } else {
                     return i1 % i2;
                 }
             }
@@ -262,7 +261,7 @@ public interface ArExpression {
                 return Integer.MIN_VALUE;
             }
         },
-        NOP{
+        NOP {
             @Override
             int eval(int i1) {
                 return 0;
@@ -307,19 +306,20 @@ public interface ArExpression {
     /**
      * @return an {@link OptionalInt} which contains an {@code int} this expression is a primitive.
      */
-    default OptionalInt primitive(){
+    default OptionalInt primitive() {
         return OptionalInt.empty();
     }
 
     /**
      * @return <tt>true</tt> if this expression is a leaf, ie a variable, <tt>false</tt> otherwise
      */
-    default boolean isExpressionLeaf(){
+    default boolean isExpressionLeaf() {
         return false;
     }
 
     /**
      * Extract the variables from this expression
+     *
      * @param variables set of variables
      */
     default void extractVar(HashSet<IntVar> variables) {
@@ -334,11 +334,10 @@ public interface ArExpression {
 
     /**
      * @param values int values to evaluate
-     * @param map mapping between variables of the topmost expression and position in <i>values</i>
+     * @param map    mapping between variables of the topmost expression and position in <i>values</i>
      * @return an evaluation of this expression with a tuple
      */
-    @SuppressWarnings("SuspiciousMethodCalls")
-    default int ieval(int[] values, Map<IntVar, Integer> map){
+    default int ieval(int[] values, Map<IntVar, Integer> map) {
         assert this instanceof IntVar;
         return values[map.get(this)];
     }
@@ -346,14 +345,14 @@ public interface ArExpression {
     /**
      * @return the child of this expression, or null if thid
      */
-    default int getNoChild(){
+    default int getNoChild() {
         return 0;
     }
 
     /**
      * @return the child of this expression, or null if thid
      */
-    default ArExpression[] getExpressionChild(){
+    default ArExpression[] getExpressionChild() {
         return NO_CHILD;
     }
 
@@ -384,7 +383,7 @@ public interface ArExpression {
      * @return return the expression "x + y" where this is "x"
      */
     default ArExpression add(ArExpression y) {
-        if(y.primitive().isPresent()){
+        if (y.primitive().isPresent()) {
             return add(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.ADD, this, y);
@@ -431,7 +430,7 @@ public interface ArExpression {
      * @return return the expression "x * y" where this is "x"
      */
     default ArExpression mul(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return mul(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.MUL, this, y);
@@ -458,7 +457,7 @@ public interface ArExpression {
      * @return return the expression "x / y" where this is "x"
      */
     default ArExpression div(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return div(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.DIV, this, y);
@@ -477,7 +476,7 @@ public interface ArExpression {
      * @return return the expression "x % y" where this is "x"
      */
     default ArExpression mod(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return mod(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.MOD, this, y);
@@ -503,7 +502,7 @@ public interface ArExpression {
      * @return return the expression "x + y" where this is "x"
      */
     default ArExpression pow(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return pow(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.POW, this, y);
@@ -522,7 +521,7 @@ public interface ArExpression {
      * @return return the expression "min(x, y)" where this is "x"
      */
     default ArExpression min(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return min(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.MIN, this, y);
@@ -549,7 +548,7 @@ public interface ArExpression {
      * @return return the expression "max(x, y)" where this is "x"
      */
     default ArExpression max(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return max(y.primitive().getAsInt());
         }
         return new BiArExpression(ArExpression.Operator.MAX, this, y);
@@ -592,7 +591,7 @@ public interface ArExpression {
      * @return return the expression "x < y" where this is "x"
      */
     default ReExpression lt(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return lt(y.primitive().getAsInt());
         }
         return new BiReExpression(ReExpression.Operator.LT, this, y);
@@ -630,7 +629,7 @@ public interface ArExpression {
      * @return return the expression "x > y" where this is "x"
      */
     default ReExpression gt(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return gt(y.primitive().getAsInt());
         }
         return new BiReExpression(ReExpression.Operator.GT, this, y);
@@ -668,7 +667,7 @@ public interface ArExpression {
      * @return return the expression "x =/= y" where this is "x"
      */
     default ReExpression ne(ArExpression y) {
-        if(y.primitive().isPresent()) {
+        if (y.primitive().isPresent()) {
             return ne(y.primitive().getAsInt());
         }
         return new BiReExpression(ReExpression.Operator.NE, this, y);
@@ -715,6 +714,22 @@ public interface ArExpression {
      */
     default ReExpression in(ArExpression... ys) {
         return new NaReExpression(ReExpression.Operator.IN, this, ys);
+    }
+
+    /**
+     * @param ys some ints
+     * @return return the expression "(x = y_1) or (x = y_) or ..." where this is "x"
+     */
+    default ReExpression notin(int... ys) {
+        return new NaReExpression(ReExpression.Operator.NIN, this, Arrays.stream(ys).mapToObj(y -> getModel().intVar(y)).toArray(IntVar[]::new));
+    }
+
+    /**
+     * @param ys some expressions
+     * @return return the expression "(x = y_1) or (x = y_) or ..." where this is "x"
+     */
+    default ReExpression notin(ArExpression... ys) {
+        return new NaReExpression(ReExpression.Operator.NIN, this, ys);
     }
 
     class IntPrimitive implements ArExpression {

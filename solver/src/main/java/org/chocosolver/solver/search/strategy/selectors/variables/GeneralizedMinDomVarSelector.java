@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -51,7 +51,7 @@ public class GeneralizedMinDomVarSelector<V extends Variable> implements Variabl
                 int kind = (v.getTypeAndKind() & Variable.KIND);
                 int dsize;
                 if (kind == Variable.INT || kind == Variable.BOOL) {
-                    dsize = ((IntVar) v).getDomainSize();
+                    dsize = v.getDomainSize();
                 } else if (kind == Variable.REAL) {
                     RealVar rv = (RealVar) v;
                     dsize = 2 + (int) ((rv.getUB() - rv.getLB())/rv.getPrecision());

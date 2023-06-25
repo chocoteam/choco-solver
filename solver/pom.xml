@@ -3,7 +3,7 @@
 
     This file is part of choco-solver, http://choco-solver.org/
 
-    Copyright (c) 2022, IMT Atlantique. All rights reserved.
+    Copyright (c) 2023, IMT Atlantique. All rights reserved.
 
     Licensed under the BSD 4-clause license.
 
@@ -17,7 +17,7 @@
     <parent>
         <groupId>org.choco-solver</groupId>
         <artifactId>choco</artifactId>
-        <version>4.10.11-SNAPSHOT</version>
+        <version>4.11.0-SNAPSHOT</version>
     </parent>
     <artifactId>choco-solver</artifactId>
     <packaging>jar</packaging>
@@ -45,7 +45,18 @@
         <dependency>
             <groupId>org.knowm.xchart</groupId>
             <artifactId>xchart</artifactId>
-            <version>3.8.2</version>
+            <version>3.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.ehcache</groupId>
+            <artifactId>sizeof</artifactId>
+            <version>0.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>1.7.36</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -116,6 +127,14 @@
                             </value>
                         </property>
                     </properties>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>16</source>
+                    <target>16</target>
                 </configuration>
             </plugin>
         </plugins>

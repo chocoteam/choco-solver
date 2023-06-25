@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -644,7 +644,7 @@ public class DegreesTest {
         test.getConstraint().post();
         while (test.solver.solve()) {
             for (int i : test.g.getValue().getNodes()) {
-                Assert.assertTrue(test.g.getValue().getNeighborsOf(i).size() == test.degrees[i].getValue());
+                Assert.assertEquals(test.degrees[i].getValue(), test.g.getValue().getNeighborsOf(i).size());
             }
         }
         Assert.assertEquals(test.solver.getSolutionCount(), 1);
@@ -677,7 +677,7 @@ public class DegreesTest {
         test.model.connected(test.g).post();
         while (test.solver.solve()) {
             for (int i : test.g.getValue().getNodes()) {
-                Assert.assertTrue(test.g.getValue().getNeighborsOf(i).size() == test.degrees[i].getValue());
+                Assert.assertEquals(test.degrees[i].getValue(), test.g.getValue().getNeighborsOf(i).size());
             }
         }
         long nbSolutions = test.solver.getSolutionCount();

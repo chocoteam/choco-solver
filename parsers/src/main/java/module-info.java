@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,7 +15,6 @@
  */
 module org.chocosolver.parsers {
     exports org.chocosolver.parser;
-
     requires transitive org.chocosolver.solver;
     requires xcsp3.tools;
     requires args4j;

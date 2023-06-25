@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.nary.knapsack;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -24,8 +26,6 @@ import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Propagator for the 0/1-Knapsack constraint
@@ -121,7 +121,6 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        checkWorld();
         if (mustRecomputeCriticalInfos()) {
             // compute the Dantzig solution and set members variables
             this.criticalItemInfos = this.computingTree.findCriticalItem(this.capacity.getUB() - usedCapacity);
@@ -130,14 +129,16 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
         // if power LB is not reachable so we can't filter
         // (every item would be mandatory and forbidden)
         if (criticalItemInfos.profit + powerCreated >= power.getLB()) {
-            List<Integer> mandatoryList = findMandatoryItems();
-            List<Integer> forbiddenList = findForbiddenItems();
-            for (int unorderedLeafIdx : mandatoryList) {
+            TIntList mandatoryList = findMandatoryItems();
+            TIntList forbiddenList = findForbiddenItems();
+            for (int i = 0; i < mandatoryList.size(); i++) {
+                int unorderedLeafIdx = mandatoryList.get(i);
                 addItemToSolution(unorderedLeafIdx, true);
                 // case 3.  from mustRecomputeCriticalInfos()
                 mustRecomputeCriticalInfos = true;
             }
-            for (int unorderedLeafIdx : forbiddenList) {
+            for (int i = 0; i < forbiddenList.size(); i++) {
+                int unorderedLeafIdx = forbiddenList.get(i);
                 removeItemFromProblem(unorderedLeafIdx, true);
                 // case 3.  from mustRecomputeCriticalInfos()
                 mustRecomputeCriticalInfos = true;
@@ -205,13 +206,13 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             int sortedGlobalIndex = computingTree.leafToGlobalIndex(this.reverseOrder[i]);
             computingTree.removeLeaf(sortedGlobalIndex);
             findingTree.removeLeaf(sortedGlobalIndex);
-            if (removeVarValue) {
-                vars[i].removeValue(0, this);
-            }
-            getEnvironment().save(() -> activateItemToProblem(i, ADDED));
             // we update intern values
             this.usedCapacity += computingTree.getLeaf(sortedGlobalIndex).getActivatedWeight();
             this.powerCreated += computingTree.getLeaf(sortedGlobalIndex).getActivatedProfit();
+            getEnvironment().save(() -> activateItemToProblem(i, ADDED));
+            if (removeVarValue) {
+                vars[i].removeValue(0, this);
+            }
         }
     }
 
@@ -228,10 +229,10 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
             int sortedGlobalIndex = computingTree.leafToGlobalIndex(this.reverseOrder[i]);
             computingTree.removeLeaf(sortedGlobalIndex);
             findingTree.removeLeaf(sortedGlobalIndex);
+            getEnvironment().save(() -> activateItemToProblem(i, REMOVED));
             if (removeVarValue) {
                 vars[i].removeValue(1, this);
             }
-            getEnvironment().save(() -> activateItemToProblem(i, REMOVED));
         }
     }
 
@@ -263,9 +264,9 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      *
      * @return indexes (given by the constructor) of mandatory items
      */
-    private List<Integer> findMandatoryItems() {
+    private TIntList findMandatoryItems() {
 
-        List<Integer> mandatoryList = new LinkedList<>();
+        TIntList mandatoryList = new TIntArrayList();
         double allowedProfitLoss = criticalItemInfos.profit + powerCreated - power.getLB();
         // finding first active item
         int index = computingTree.leafToGlobalIndex(0);
@@ -305,9 +306,9 @@ public class PropKnapsackKatriel01 extends Propagator<IntVar> {
      *
      * @return indexes (given by the constructor) of forbidden items
      */
-    private List<Integer> findForbiddenItems() {
+    private TIntList findForbiddenItems() {
 
-        List<Integer> forbiddenList = new LinkedList<>();
+        TIntList forbiddenList = new TIntArrayList();
         double allowedProfitLoss = criticalItemInfos.profit + powerCreated - power.getLB();
         // finding first active item
         int index = criticalItemInfos.index;

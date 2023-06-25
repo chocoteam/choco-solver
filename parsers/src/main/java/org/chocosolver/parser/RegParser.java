@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -62,6 +62,12 @@ public abstract class RegParser implements IParser {
             usage = "Define log level."
     )
     protected Level level = Level.COMPET;
+
+    @Option(name = "-log",
+            aliases = "--log-file-path",
+            usage = "Define the log file path."
+    )
+    protected String logFilePath = null;
 
     @Option(name = "-limit",
             handler = LimitHandler.class,

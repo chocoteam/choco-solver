@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -83,7 +83,7 @@ public class RLFAP extends AbstractProblem {
         for (int i = 0; i < _var.length; i++) {
             int vidx = _var[i][0] - 1;
             if (vidx > prev) {
-                for (; prev < vidx; ) {
+                while (prev < vidx) {
                     vars[prev++] = model.intVar(0);
                 }
             }
@@ -157,7 +157,7 @@ public class RLFAP extends AbstractProblem {
     }
 
     private void prettyOut() {
-        System.out.println(String.format("RLFAP %s", dir));
+        System.out.printf("RLFAP %s%n", dir);
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() == ESat.TRUE) {
             st.append("\t");

@@ -13,7 +13,8 @@ function sedInPlace() {
 }
 
 if [ $1 == "--next" ]; then
-    VERSION=$(guess $2)
+    OVERSION=$2
+    VERSION=$(guess ${OVERSION})
     NEXTMIL="no"
 else
     VERSION=$1
@@ -25,9 +26,9 @@ mvn -q versions:set -DnewVersion=${VERSION} -DgenerateBackupPoms=false
 
 if test "${NEXTMIL}" = "yes"
 then
-    DAT=`LANG=en_US.utf8 date +"%Y-%m"`
-    YEAR=`LANG=en_US.utf8 date +"%Y"`
-    d=`LANG=en_US.utf8 date +"%d %b %Y"`
+    DAT=$(LANG=en_US.utf8 date +"%Y-%m")
+    YEAR=$(LANG=en_US.utf8 date +"%Y")
+    d=$(LANG=en_US.utf8 date +"%d %b %Y")
 
     ## The README.md
     # Update of the version number for maven usage
@@ -44,7 +45,7 @@ then
     sedInPlace "s%.*Constraint Programming Solver, Copyright.*%        \"** Choco $VERSION \($DAT\) : Constraint Programming Solver, Copyright \(c\) 2010-$YEAR\";%"  ./solver/src/main/java/org/chocosolver/solver/trace/IOutputFactory.java
 
     ## For MiniZinc
-    sedInPlace "s%    git fetch -q && git checkout -q master.*%    git fetch -q && git checkout -q $VERSION && \ %"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
+    sedInPlace "s@    git fetch -q  && git checkout -q .*@    git fetch -q  \&\& git checkout -q $VERSION \&\& \\\@"  ./parsers/src/main/minizinc/docker/Dockerfile_Choco.dms
     sedInPlace "s%  \"version\": .*%  \"version\": \"$VERSION\",%"  ./parsers/src/main/minizinc/choco.msc
     sedInPlace "s%CHOCO_JAR=~/.m2/.*%CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/$VERSION/choco-parsers-$VERSION-jar-with-dependencies.jar%" ./parsers/src/main/minizinc/fzn-choco
 
@@ -70,5 +71,7 @@ See [milestone '${VERSION%%-SNAPSHOT}'](https://github.com/chocoteam/choco-solve
 \
 #### Contributors to this release:\
 \
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v${OVERSION}...v${VERSION%%-SNAPSHOT}
     ' CHANGES.md
 fi

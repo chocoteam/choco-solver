@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -133,19 +133,19 @@ public class Correctness {
         Model test = m.model(nbVar, rvars, _domains, parameters);
         try {
             if (test.getSolver().solve()) {
-                System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
-                        logObjects));
+                System.out.printf("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d%n",
+                        logObjects);
                 System.out.println("REF:\n" + ref + "\n");
                 ref.getEnvironment().worldPop();
-                System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
+                System.out.printf("REF:\n%s\nTEST:\n%s%n", ref, test);
                 fail("one solution found");
             }
         } catch (Exception e) {
-            System.out.println(String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
-                    logObjects));
+            System.out.printf("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d%n",
+                    logObjects);
             System.out.println("REF:\n" + ref + "\n");
             ref.getEnvironment().worldPop();
-            System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
+            System.out.printf("REF:\n%s\nTEST:\n%s%n", ref, test);
             fail();
         }
     }

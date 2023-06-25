@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -46,8 +46,8 @@ public class TestDirectedNodeExcludedSubgraphView {
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 3);
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(0));
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(0));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             for (int i = 1; i < 4; i++) {
                 if (g.getValue().containsNode(i)) {
                     Assert.assertTrue(g2.getValue().containsNode(i));
@@ -110,9 +110,9 @@ public class TestDirectedNodeExcludedSubgraphView {
         m.nbNodes(g2, m.intVar(1, 4)).post();
         m.stronglyConnected(g2).post();
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(0));
+            Assert.assertFalse(g2.getValue().containsNode(0));
             Assert.assertTrue(g.getValue().containsNode(0));
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             Assert.assertTrue(g2.getValue().getNodes().size() >= 1 && g2.getValue().getNodes().size() <= 4);
             for (int i = 0; i < n; i++) {
                 if (!excluded.contains(i)) {

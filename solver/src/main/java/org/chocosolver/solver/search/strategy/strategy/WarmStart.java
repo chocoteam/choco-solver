@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -48,7 +48,7 @@ public class WarmStart extends AbstractStrategy<Variable> implements IMonitorSol
     private final Solver solver;
 
     public WarmStart(Solver solver) {
-        super();
+        super(new Variable[]{});
         this.solver = solver;
         this.hints = new HashMap<>();
     }

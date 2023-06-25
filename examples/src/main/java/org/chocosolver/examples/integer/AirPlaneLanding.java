@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -164,7 +164,7 @@ public class AirPlaneLanding extends AbstractProblem {
     }
 
     private void prettyOut() {
-        System.out.println(String.format("Air plane landing(%s)", mData));
+        System.out.printf("Air plane landing(%s)%n", mData);
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() != ESat.TRUE) {
             st.append("\tINFEASIBLE");

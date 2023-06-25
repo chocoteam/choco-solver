@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,6 +17,9 @@ import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
+
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * A class that binds the parser wrt the input file
@@ -40,6 +43,7 @@ public class Parser {
     private int pa = 0;
 
     public static void main(String[] args) throws Exception {
+        System.out.printf("%s\n", Arrays.toString(args));
         new Parser().main0(args);
     }
 
@@ -65,29 +69,25 @@ public class Parser {
         }
         assert instance != null;
         if (pa == 0) {
-            String[] parts = instance.split("\\.");
-            for (String part : parts) {
-                if (part.equals("fzn")) {
+            Optional<String> part = getExtension(instance);
+            if(part.isPresent()){
+                if (part.get().equals("fzn")) {
                     pa = 1;
-                    break;
                 }
-                if (part.equals("xml")) {
+                if (part.get().equals("xml") || part.get().equals("lzma")) {
                     pa = 2;
-                    break;
                 }
-                if (part.equals("cnf")) {
+                if (part.get().equals("cnf")) {
                     pa = 3;
-                    break;
                 }
-                if (part.equals("mps")) {
+                if (part.get().equals("mps")) {
                     pa = 4;
-                    break;
                 }
             }
             switch (pa) {
                 case 0:
-                    System.err.println("Unknown file type.");
-                    System.err.println("Expected file extensions: *.fzn, *.xml, *.cnf, *.mps");
+                    System.err.println("Unknown file type " + part + ".");
+                    System.err.println("Expected file extensions: *.fzn, *.lzma, *.xml, *.cnf, *.mps");
                     System.err.println();
                     return;
                 case 1:
@@ -104,5 +104,11 @@ public class Parser {
                     break;
             }
         }
+    }
+
+    private static Optional<String> getExtension(String filename) {
+        return Optional.ofNullable(filename)
+          .filter(f -> f.contains("."))
+          .map(f -> f.substring(filename.lastIndexOf(".") + 1));
     }
 }

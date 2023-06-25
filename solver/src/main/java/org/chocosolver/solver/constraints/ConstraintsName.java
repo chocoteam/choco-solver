@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -23,9 +23,7 @@ package org.chocosolver.solver.constraints;
 @SuppressWarnings("ALL")
 public class ConstraintsName {
 
-    public static final String TRUE = "TRUE";
-
-    public static final String FALSE = "FALSE";
+    public static final String BOOLEAN = "BOOLEAN";
 
     public static final String ARITHM = "ARITHM";
 
@@ -33,6 +31,7 @@ public class ConstraintsName {
 
     public static final String DISTANCE = "DISTANCE";
 
+    public static final String POWER = "POWER";
     public static final String SQUARE = "SQUARE";
 
     public static final String TABLE = "TABLE";

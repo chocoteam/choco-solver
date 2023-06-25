@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -571,7 +571,7 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     /**
-     * Add a clause stating that: max(BOOLVARS<sub>i</sub>) &le; TARGET
+     * Add a clause stating that: max(BOOLVARS<sub>i</sub>) = TARGET
      *
      * @param BOOLVARS a list of boolean variables
      * @param TARGET   a boolean variable

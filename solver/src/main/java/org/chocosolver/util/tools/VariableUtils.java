@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -16,6 +16,7 @@ import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.objects.RealInterval;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -417,10 +418,10 @@ public class VariableUtils {
     }
 
     /**
-     * Create a set that stores the union of <i>vars</i> current domain.
+     * Create a set that stores the intersection of <i>vars</i> current domain.
      *
      * @param vars a list of variables
-     * @return the union of <i>vars</i>
+     * @return the intersection of <i>vars</i>
      */
     public static IntIterableRangeSet intersection(IntVar... vars) {
         IntIterableRangeSet set = new IntIterableRangeSet();
@@ -431,8 +432,8 @@ public class VariableUtils {
         IntIterableRangeSet set0 = new IntIterableRangeSet();
         for (int i = 1; i < vars.length && set.size() > 0; i++) {
             set0.clear();
-            set.addAll(vars[i]);
-            set.removeAll(set0);
+            set0.addAll(vars[i]);
+            set = IntIterableSetUtils.intersection(set0, set);
         }
         return set;
     }

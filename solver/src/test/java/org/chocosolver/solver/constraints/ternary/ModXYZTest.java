@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -171,7 +171,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 		model.mod(x, y, z).post();
 		Assert.assertEquals(model.getNbCstrs(), 1);
 		Constraint constraint = model.getCstrs()[0];
-		Assert.assertTrue(constraint.getName().equals(ConstraintsName.TABLE));
+        Assert.assertEquals(constraint.getName(), ConstraintsName.TABLE);
 	}
 
 	@Test(groups="1s", timeOut=60000)
@@ -184,7 +184,7 @@ public class ModXYZTest extends AbstractTernaryTest {
 		Assert.assertEquals(model.getNbCstrs(), 1);
 		Constraint constraint = model.getCstrs()[0];
 		Assert.assertEquals(constraint.getPropagators().length, 1);
-		Assert.assertTrue(constraint.getPropagators()[0].getClass() == PropModXYZ.class);
+        Assert.assertSame(constraint.getPropagators()[0].getClass(), PropModXYZ.class);
 	}
 
 	@Test(groups="1s", timeOut=60000)
@@ -196,9 +196,9 @@ public class ModXYZTest extends AbstractTernaryTest {
 		model.mod(x, y, z).post();
 		model.getSolver().propagate();
 
-		Assert.assertTrue(z.getLB() == 0);
-		Assert.assertTrue(z.getUB() == 8);
+        Assert.assertEquals(z.getLB(), 0);
+        Assert.assertEquals(z.getUB(), 8);
 
-		Assert.assertTrue(y.getLB() == 1);
+        Assert.assertEquals(y.getLB(), 1);
 	}
 }

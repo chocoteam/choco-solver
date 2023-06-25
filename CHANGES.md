@@ -8,7 +8,67 @@ NEXT MILESTONE
 -------------------
 
 ### Major features:
-- Correcting the lack of filtering in `PropIncreasing` 
+- NEW: `solver..showRestarts();` to display the number of restarts during the search. 
+- NEW: hybrid table constraints (see `model.table(...)`)
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.11.0](https://github.com/chocoteam/choco-solver/milestone/38)
+
+#### Contributors to this release:
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.13...v4.11.0
+    
+4.10.13 - 05 Jun 2023
+-------------------
+
+### Major features: 
+Mainly bug fixes and improvements of Pareto front performances.
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.13](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+- [Jani Simomaa](https://github.com/jsimomaa) (@jsimomaa)
+    
+4.10.12 - 06 Mar 2023
+-------------------
+
+### Major features:
+- Fix bug #1006, #1011 and #1014
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.12](https://github.com/chocoteam/choco-solver/milestone/xx)
+
+#### Contributors to this release:
+- [Dimitri Justeau-Allaire](https://github.com/dimitri-justeau) (@dimitri-justeau)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
+    
+4.10.11 - 07 Feb 2023
+-------------------
+
+### Major features:
+- Correcting the lack of filtering in `PropIncreasing`
+- Change the SetType for the undirected graph stored in DiffN for efficiency reason
+- `SparseBitSet` for a backtrackable bitset with mostly 0s (#935)
+- Change the way restarting works: not a `Move` anymore, directly included in `Solver` (#950)
+- Simplification of objective manager (#949)
+- Calling `getValue()` on an uninstantiated variable throws an IllegalStateException (#957)
+- Change the MiniZinc complementary search to a FirstFail (instead of DomOverWDeg) (#958)
+- Reduce object creation during solving (#985)
+- Reduce object creation during propagation (#969)
+- Reduce memory footprint of `Model` (#964)
+- Add `model.getEstimatedMemory()` method
+- Add `Model` analysis (#939)
+- Add log file as RegParser option (for parsers)
+- creation of PropPower propagators with exponent as int
+
 ### Deprecated API (to be removed in next release):
 From `Solver`:
 - `Propagate getPropagate()`
@@ -23,7 +83,10 @@ Others:
 See [milestone 4.10.11](https://github.com/chocoteam/choco-solver/milestone/xx)
 
 #### Contributors to this release:
-
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet) 
+- [Fabien Hermenier](https://github.com/fhermeni) (@fhermeni)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
         
 4.10.10 - 11 Oct 2022
 -------------------

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -121,9 +121,7 @@ public class QuickXPlain {
     private List<Constraint> getAllConstraints() {
         List<Constraint> allConstraints = new ArrayList<>(model.getNbCstrs());
         Constraint[] cstrs = model.getCstrs();
-        for (Constraint cstr : cstrs) {
-            allConstraints.add(cstr);
-        }
+        Collections.addAll(allConstraints, cstrs);
         return allConstraints;
     }
 

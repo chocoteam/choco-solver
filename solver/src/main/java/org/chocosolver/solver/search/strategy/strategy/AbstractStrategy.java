@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -26,8 +26,7 @@ public abstract class AbstractStrategy<V extends Variable>  {
 
     protected final V[] vars;
 
-    @SafeVarargs
-    protected AbstractStrategy(V... variables) {
+    protected AbstractStrategy(V[] variables) {
         this.vars = variables.clone();
     }
 

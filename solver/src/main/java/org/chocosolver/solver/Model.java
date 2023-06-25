@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -13,28 +13,24 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
-import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
 import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
-import org.chocosolver.solver.constraints.nary.cnf.PropFalse;
-import org.chocosolver.solver.constraints.nary.cnf.PropTrue;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
+import org.chocosolver.solver.constraints.unary.BooleanConstraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
 import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.variables.*;
-import org.chocosolver.solver.variables.view.IView;
-import org.chocosolver.util.ESat;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
+import org.ehcache.sizeof.SizeOf;
 
-import java.io.PrintStream;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -68,6 +64,9 @@ public class Model implements IModel {
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
 
+    public static final String TRUE_CONSTRAINT_NAME= "H_TRUE";
+
+    public static final String FALSE_CONSTRAINT_NAME= "H_FALSE";
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
 
     public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
@@ -303,24 +302,6 @@ public class Model implements IModel {
      */
     public TIntObjectHashMap<IntVar> getCachedConstants() {
         return cachedConstants;
-    }
-
-    /**
-     * The basic "true" constraint, which is always satisfied
-     *
-     * @return a "true" constraint
-     */
-    public Constraint trueConstraint() {
-        return new Constraint(ConstraintsName.TRUE, new PropTrue(boolVar(true)));
-    }
-
-    /**
-     * The basic "false" constraint, which is always violated
-     *
-     * @return a "false" constraint
-     */
-    public Constraint falseConstraint() {
-        return new Constraint(ConstraintsName.FALSE, new PropFalse(boolVar(false)));
     }
 
     /**
@@ -574,7 +555,7 @@ public class Model implements IModel {
     /**
      * Returns the object associated with the named <code>hookName</code>
      *
-     * @param hookName the name of the hook to return
+     * @param hookName     the name of the hook to return
      * @param defaultValue the default mapping of the key
      * @return the object associated to the name <code>hookName</code>,
      * or defaultValue if this map contains no mapping for the key
@@ -592,6 +573,25 @@ public class Model implements IModel {
     protected Map<String, Object> getHooks() {
         return hooks;
     }
+
+    /**
+     * The basic "true" constraint, which is always satisfied
+     *
+     * @return a "true" constraint
+     */
+    public BooleanConstraint trueConstraint() {
+        return new BooleanConstraint(this, true);
+    }
+
+    /**
+     * The basic "false" constraint, which is always violated
+     *
+     * @return a "false" constraint
+     */
+    public BooleanConstraint falseConstraint() {
+        return new BooleanConstraint(this, false);
+    }
+
 
     /**
      * Returns the unique constraint embedding a minisat model.
@@ -679,6 +679,16 @@ public class Model implements IModel {
             this.modelAnalyser = new ModelAnalyser(this);
         }
         return this.modelAnalyser;
+    }
+
+    /**
+     * Returns an estimation of the current memory footprint of this.
+     * @return the total size in bytes for this model
+     * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
+     */
+    public long getEstimatedMemory(){
+        SizeOf sizeOf = SizeOf.newInstance();
+        return sizeOf.deepSizeOf(this);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -805,9 +815,7 @@ public class Model implements IModel {
      */
     public void associates(Variable variable) {
         if (vIdx == vars.length) {
-            Variable[] tmp = vars;
-            vars = new Variable[tmp.length * 2];
-            System.arraycopy(tmp, 0, vars, 0, vIdx);
+            vars = Arrays.copyOf(vars, ArrayUtils.newBoundedSize(vars.length, vars.length * 2));
         }
         vars[vIdx++] = variable;
         switch ((variable.getTypeAndKind() & Variable.KIND)) {
@@ -914,9 +922,7 @@ public class Model implements IModel {
             while (cIdx + cs.length >= nsize) {
                 nsize *= 3 / 2 + 1;
             }
-            Constraint[] tmp = cstrs;
-            cstrs = new Constraint[nsize];
-            System.arraycopy(tmp, 0, cstrs, 0, cIdx);
+            cstrs = Arrays.copyOf(cstrs, nsize);
         }
         // specific behavior for dynamic addition and/or reified constraints
         for (Constraint c : cs) {
@@ -953,7 +959,7 @@ public class Model implements IModel {
                 if (!getSolver().getEngine().isInitialized()) {
                     throw new SolverException("Try to post a temporary constraint while the resolution has not begun.\n" +
                             "A call to Model.post(Constraint) is more appropriate.");
-                }else {
+                } else {
                     for (Propagator<?> p : c.getPropagators()) {
                         getSolver().getEngine().execute(p);
                     }
@@ -1084,5 +1090,4 @@ public class Model implements IModel {
     public Model ref() {
         return this;
     }
-
 }

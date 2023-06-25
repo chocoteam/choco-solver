@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -255,7 +255,7 @@ public class FiniteAutomaton implements IAutomaton {
         Set<Transition> nTrans = new HashSet<>();
         char c = getCharFromInt(symbol);
         Iterator<Transition> it = transitions.iterator();
-        for (; it.hasNext(); ) {
+        while (it.hasNext()) {
             Transition t = it.next();
             if (t.getDest().equals(d) && t.getMin() <= c && t.getMax() >= c) {
                 it.remove();

@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -114,7 +114,7 @@ public class OrthoLatinSquare extends AbstractProblem {
     public void solve() {
         model.getSolver().solve();
 
-        System.out.println(String.format("Ortho latin square(%s)", m));
+        System.out.printf("Ortho latin square(%s)%n", m);
         StringBuilder st = new StringBuilder();
         st.append("\t");
         for (int i = 0; i < m; i++) {

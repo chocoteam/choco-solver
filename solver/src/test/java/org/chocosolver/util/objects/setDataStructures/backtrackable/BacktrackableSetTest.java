@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -238,7 +238,7 @@ public abstract class BacktrackableSetTest extends SetTest{
             environment.worldPush();
             for (int i = 0; i < 1000; i++) set.add(i);
             environment.worldPop();
-            assertTrue(set.size() == 1);
+            assertEquals(set.size(), 1);
         }
     }
 }

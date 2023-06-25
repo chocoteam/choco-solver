@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,9 +22,9 @@ import org.testng.annotations.Test;
 import java.util.stream.IntStream;
 
 /**
- *
  * <p>
  * Project: choco-solver.
+ *
  * @author Charles Prud'homme
  * @since 29/04/2016.
  */
@@ -35,8 +35,8 @@ public class ExpressionTest {
         return new Object[][]{{0}, {1}, {2}};
     }
 
-    private void eval(Model model, ReExpression ex, int postAs, int nbsol){
-        switch (postAs){
+    private void eval(Model model, ReExpression ex, int postAs, int nbsol) {
+        switch (postAs) {
             case 0:
                 ex.decompose().post();
                 break;
@@ -193,9 +193,9 @@ public class ExpressionTest {
         eval(model, x.pow(3).eq(y), p, 2);
     }
 
-    @Test(groups="10s", timeOut=60000, dataProvider = "post")
-    public void testLongExpression(int p){
-        Model model  = new Model();
+    @Test(groups = "10s", timeOut = 60000, dataProvider = "post")
+    public void testLongExpression(int p) {
+        Model model = new Model();
         IntVar[] XS = model.intVarArray("X", 10, 0, 4);
         IntVar Y = model.intVar("Y", 0, 2);
         final ArExpression[] r = {XS[0]};
@@ -459,29 +459,29 @@ public class ExpressionTest {
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
-    public void test46(int p){
+    public void test46(int p) {
         Model model = new Model();
         IntVar y = model.intVar(0, 3);
         IntVar w = model.intVar(0, 3);
-        eval(model, y.eq(w.ge(2).ift(2,3)), p, 4);
+        eval(model, y.eq(w.ge(2).ift(2, 3)), p, 4);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
-    public void test47(int p){
+    public void test47(int p) {
         Model model = new Model();
         IntVar y = model.intVar(0, 3);
         IntVar t = model.intVar(0, 3);
         IntVar w = model.intVar(0, 3);
-        eval(model, y.eq(w.ge(2).ift(t.add(1),t.sub(1))), p, 12);
+        eval(model, y.eq(w.ge(2).ift(t.add(1), t.sub(1))), p, 12);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
-    public void test48(int p){
+    public void test48(int p) {
         Model model = new Model();
         IntVar y = model.intVar(0, 3);
         IntVar t = model.intVar(0, 3);
         BoolVar b = model.boolVar();
-        eval(model, y.eq(b.ift(t.add(1),t.sub(1))), p, 6);
+        eval(model, y.eq(b.ift(t.add(1), t.sub(1))), p, 6);
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
@@ -494,17 +494,17 @@ public class ExpressionTest {
         eval(model, n.eq(q.ift(a, b)), p, 6);
     }
 
-    @Test(groups="1s", timeOut=60000, dataProvider = "post")
-    public void test49(int p){
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test49(int p) {
         Model model = new Model();
         //variables
-        IntVar d = model.intVar("D",0,100);
+        IntVar d = model.intVar("D", 0, 100);
         IntVar x1 = model.intVar("X1", 0, 2);
-        IntVar y1= model.intVar("Y1", 0, 2);
-        IntVar x2= model.intVar("X2", 0, 2);
-        IntVar y2= model.intVar("Y2", 0, 2);
-        model.getSolver().showSolutions(()->String.format("%d = V[(%d - %d)^2 + (%d - %d)^2]",
-            d.getValue(), x1.getValue(), x2.getValue(), y1.getValue(), y2.getValue()));
+        IntVar y1 = model.intVar("Y1", 0, 2);
+        IntVar x2 = model.intVar("X2", 0, 2);
+        IntVar y2 = model.intVar("Y2", 0, 2);
+        model.getSolver().showSolutions(() -> String.format("%d = V[(%d - %d)^2 + (%d - %d)^2]",
+                d.getValue(), x1.getValue(), x2.getValue(), y1.getValue(), y2.getValue()));
         eval(model, d.eq(((x1.sub(x2)).pow(2).add((y1.sub(y2)).pow(2))).sqr()), p, 81);
     }
 
@@ -535,12 +535,27 @@ public class ExpressionTest {
                 .or(x.eq(y, new ArExpression.IntPrimitive(5, model))), p, 6);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test53(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar(0, 5);
+        eval(model, x.notin(1, 2, 3), p, 3);
+    }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "post")
+    public void test54(int p) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 5);
+        IntVar y = model.intVar("y", -2, 2);
+        IntVar z = model.intVar("z", 1, 3);
+        model.getSolver().showSolutions();
+        eval(model, x.notin(y, z), p, 68);
+    }
 
     @Test(groups = "1s")
     public void testJoao1() throws ContradictionException {
         Model model = new Model();
-                IntVar qtdActive = model.intVar("qtdActive", 0, 2, true);
+        IntVar qtdActive = model.intVar("qtdActive", 0, 2, true);
         BoolVar active = model.boolVar("active");
         IntVar qtd = model.intVar("qtd", 0, 2, true);
 
@@ -636,5 +651,25 @@ public class ExpressionTest {
         Assert.assertEquals(z.getLB(), 0);
         Assert.assertEquals(z.getUB(), 2);
         Assert.assertEquals(z.getDomainSize(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testGadavidd1() {
+        // OUT OF MEMORY WHEN USING TABLE --> NOW INTENSION CONSTRAINT IS USED
+        Model model = new Model();
+        IntVar xvar = model.intVar("xvar", -10000, 10000, true);
+        IntVar yvar = model.intVar("yvar", -10000, 10000, true);
+        yvar.eq(xvar.pow(2)).post();
+        Assert.assertTrue(model.getSolver().solve());
+    }
+
+    @Test(groups = "1s")
+    public void testGadavidd2() {
+        // OUT OF MEMORY WHEN USING TABLE --> NOW INTENSION CONSTRAINT IS USED
+        Model model = new Model();
+        IntVar xvar = model.intVar("xvar", -1000, 1000, true);
+        IntVar yvar = model.intVar("yvar", -1000, 1000, true);
+        yvar.eq(xvar.pow(3)).post();
+        Assert.assertTrue(model.getSolver().solve());
     }
 }

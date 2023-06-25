@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -17,6 +17,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
@@ -28,7 +29,17 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
  * @since 14/02/2022
  */
 public class PowTest extends AbstractBinaryTest {
-    private static final int TEST_VALUE = 5; // TODO How to change this dependency to use AbstractBinaryTest
+    private int TEST_VALUE = 5; // TODO How to change this dependency to use AbstractBinaryTest
+
+    @DataProvider
+    public static Object[][] even() {
+        return new Object[][]{{2}, {4}, {6}, {8}, {10}};
+    }
+
+    @DataProvider
+    public static Object[][] odd() {
+        return new Object[][]{{1}, {3}, {5}, {7}, {9}};
+    }
 
     @Override
     protected int validTuple(int vx, int vy) {
@@ -38,6 +49,20 @@ public class PowTest extends AbstractBinaryTest {
     @Override
     protected Constraint make(IntVar[] vars, Model s) {
         return s.pow(vars[0], TEST_VALUE, vars[1]);
+    }
+
+    @Test(groups = "1s", dataProvider = "even")
+    public void testEven(int exp) {
+        TEST_VALUE = exp;
+        super.test1();
+        super.test2();
+    }
+
+    @Test(groups = "1s", dataProvider = "odd")
+    public void testOdd(int exp) {
+        TEST_VALUE = exp;
+        super.test1();
+        super.test2();
     }
 
     @Test(groups = "1s", timeOut = 60000)
@@ -89,7 +114,7 @@ public class PowTest extends AbstractBinaryTest {
         model.pow(x, 2, z).post();
         Assert.assertEquals(model.getSolver().findAllSolutions().size(), 4);
     }
-    
+
     @Test(groups = "1s", timeOut = 60000)
     public void testMod2VarNegValues() throws ContradictionException {
         Model model = new Model("model");
@@ -103,16 +128,17 @@ public class PowTest extends AbstractBinaryTest {
     }
 
     @Test(groups = "1s", timeOut = 60000)
-       public void testMod2VarNegValues2() throws ContradictionException {
-           Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
-           IntVar x = model.intVar("x", -5, 5);
-           IntVar z = model.intVar("z", -5, 5);
-           model.pow(x, 3, z).post();
-           model.getSolver().propagate();
-           Assert.assertEquals(z.getDomainSize(), 11);
-           Assert.assertEquals(x.getDomainSize(),11);
-           Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
-       }
+    public void testMod2VarNegValues2() throws ContradictionException {
+        Model model = new Model("model", Settings.init().setEnableTableSubstitution(false));
+        IntVar x = model.intVar("x", -5, 5);
+        IntVar z = model.intVar("z", -5, 5);
+        model.pow(x, 3, z).post();
+        model.getSolver().propagate();
+        Assert.assertEquals(z.getDomainSize(), 3);
+        Assert.assertEquals(x.getDomainSize(), 3);
+        model.getSolver().showSolutions();
+        Assert.assertEquals(model.getSolver().findAllSolutions().size(), 3);
+    }
 
 
     @Test(groups = "1s", timeOut = 60000, expectedExceptions = SolverException.class)

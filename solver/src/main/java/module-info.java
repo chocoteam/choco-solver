@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -30,6 +30,7 @@ module org.chocosolver.solver {
     exports org.chocosolver.solver.constraints.binary.element;
     exports org.chocosolver.solver.constraints.extension;
     exports org.chocosolver.solver.constraints.extension.binary;
+    exports org.chocosolver.solver.constraints.extension.hybrid;
     exports org.chocosolver.solver.constraints.extension.nary;
     exports org.chocosolver.solver.constraints.nary;
     exports org.chocosolver.solver.constraints.nary.alldifferent;
@@ -134,28 +135,66 @@ module org.chocosolver.solver {
     requires org.knowm.xchart;
     requires java.management;
     requires automaton;
+    requires sizeof;
 
-    opens org.chocosolver.memory to org.testng;
-    opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.set to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints to org.chocosolver.parsers, org.testng;
-    opens org.chocosolver.solver.constraints.binary to org.chocosolver.parsers, org.testng;
-    opens org.chocosolver.solver.constraints.binary.element to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.reification to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.among to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.binPacking to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.circuit to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.count to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.element to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers;
-    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, org.testng;
+    opens org.chocosolver.memory to org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.unary to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.set to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.binary to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.binary.element to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.extension to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.binary to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.hybrid to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.extension.nary to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.reification to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.among to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.binPacking to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.circuit to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.count to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.element to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.lex to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.channeling to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.real to org.chocosolver.parsers, org.testng, sizeof;
+    opens org.chocosolver.solver.constraints.nary.sum to sizeof;
     exports org.chocosolver.solver.constraints.nary.flow;
-    opens org.chocosolver.solver.constraints.nary.flow to org.chocosolver.parsers;
+    opens org.chocosolver.solver.constraints.nary.flow to org.chocosolver.parsers, sizeof;
     exports org.chocosolver.solver.constraints.nary.knapsack;
-    opens org.chocosolver.solver.constraints.nary.knapsack to org.chocosolver.parsers;
+    opens org.chocosolver.solver.constraints.nary.knapsack to org.chocosolver.parsers, sizeof;
     exports org.chocosolver.solver.constraints.nary.knapsack.structure;
-    opens org.chocosolver.solver.constraints.nary.knapsack.structure to org.chocosolver.parsers;
+    opens org.chocosolver.solver.constraints.nary.knapsack.structure to org.chocosolver.parsers, sizeof;
+    opens org.chocosolver.solver.constraints.nary.alldifferent to sizeof;
+    opens org.chocosolver.solver.constraints.nary.alldifferent.algo to sizeof;
 
+    // to org.ehcache
+    opens org.chocosolver.solver to sizeof;
+    opens org.chocosolver.solver.variables.impl to sizeof;
+    opens org.chocosolver.solver.variables.delta to sizeof;
+    opens org.chocosolver.solver.variables.delta.monitor to sizeof;
+    opens org.chocosolver.solver.objective to sizeof;
+    opens org.chocosolver.memory.trailing to sizeof;
+    opens org.chocosolver.memory.trailing.trail.flatten to sizeof;
+    opens org.chocosolver.solver.search.restart to sizeof;
+    opens org.chocosolver.solver.propagation to sizeof;
+    opens org.chocosolver.util to sizeof;
+    opens org.chocosolver.util.graphOperations.connectivity to sizeof;
+    opens org.chocosolver.util.graphOperations.dominance to sizeof;
+    opens org.chocosolver.util.objects.graphs to sizeof;
+    opens org.chocosolver.util.iterators to sizeof;
+    opens org.chocosolver.util.logger to sizeof;
+    opens org.chocosolver.util.objects to sizeof;
+    opens org.chocosolver.util.objects.queues to sizeof;
+    opens org.chocosolver.util.objects.setDataStructures to sizeof;
+    opens org.chocosolver.util.objects.setDataStructures.bitset to sizeof;
+    opens org.chocosolver.util.objects.setDataStructures.constant to sizeof;
+    opens org.chocosolver.util.objects.setDataStructures.linkedlist to sizeof;
+    opens org.chocosolver.solver.search.loop.monitors to sizeof;
+    opens org.chocosolver.solver.search.strategy.decision to sizeof;
+    opens org.chocosolver.solver.search.strategy.strategy to sizeof;
+    opens org.chocosolver.solver.search.strategy.selectors.variables to sizeof;
+    opens org.chocosolver.solver.search.measure to sizeof;
+    opens org.chocosolver.solver.search.loop.move to sizeof;
+    opens org.chocosolver.memory.structure to sizeof;
+    opens org.chocosolver.solver.search.loop to sizeof;
 }

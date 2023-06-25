@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -131,7 +131,7 @@ public class MinMaxTest {
                 e.printStackTrace();
             }
             assertEquals(vars[0].getValue(),min?0:1);
-            assertTrue(!vars[1].isInstantiated());
+            assertFalse(vars[1].isInstantiated());
         }
         {
             Model m = new Model();
@@ -155,7 +155,7 @@ public class MinMaxTest {
                 e.printStackTrace();
             }
             assertEquals(vars[0].getValue(),min?0:1);
-            assertTrue(!vars[1].isInstantiated());
+            assertFalse(vars[1].isInstantiated());
         }
     }
 
@@ -282,7 +282,7 @@ public class MinMaxTest {
                 max = Math.max(max, v.getValue());
             }
             int target = minOrMax?min:max;
-            assertTrue(target == sum.getValue());
+            assertEquals(sum.getValue(), target);
         }
         return nbSol;
     }

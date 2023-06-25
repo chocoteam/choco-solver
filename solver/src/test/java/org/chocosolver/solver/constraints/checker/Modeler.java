@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -15,6 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtLeastNValues_AC;
 import org.chocosolver.solver.constraints.nary.nvalue.PropAtMostNValues_BC;
+import org.chocosolver.solver.constraints.ternary.PropModXYZ;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -834,6 +835,48 @@ public interface Modeler {
         }
     };
 
+    Modeler modelargmaxac = new Modeler() {
+         @Override
+         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+             Model s = new Model("max" + n);
+             IntVar[] vars = new IntVar[n];
+             for (int i = 0; i < vars.length; i++) {
+                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], false);
+                 if (map != null) map.put(domains[i], vars[i]);
+             }
+
+             s.argmax(vars[0], 1, copyOfRange(vars, 1, vars.length)).post();
+             s.getSolver().setSearch(randomSearch(vars, 0));
+             return s;
+         }
+
+         @Override
+         public String name() {
+             return "modelmaxbc";
+         }
+     };
+
+     Modeler modelargminac = new Modeler() {
+         @Override
+         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+             Model s = new Model("min" + n);
+             IntVar[] vars = new IntVar[n];
+             for (int i = 0; i < vars.length; i++) {
+                 vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], false);
+                 if (map != null) map.put(domains[i], vars[i]);
+             }
+
+             s.argmin(vars[0], 1, copyOfRange(vars, 1, vars.length)).post();
+             s.getSolver().setSearch(randomSearch(vars, 0));
+             return s;
+         }
+
+         @Override
+         public String name() {
+             return "modelminbc";
+         }
+     };
+
     Modeler modelplusbc = new Modeler() {
         @Override
         public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
@@ -873,6 +916,48 @@ public interface Modeler {
         @Override
         public String name() {
             return "X+Y=Z (ac)";
+        }
+    };
+
+    Modeler modelmodulobc = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("modulo" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = s.intVar("X_" + i, domains[i][0], domains[i][domains[i].length - 1], true);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            new Constraint("MODULO", new PropModXYZ(vars[0], vars[1], vars[2])).post();
+            s.getSolver().setSearch(randomSearch(vars, 0));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "X mod Y=Z (bc)";
+        }
+    };
+
+    Modeler modelmoduloac = new Modeler() {
+        @Override
+        public Model model(int n, int[][] domains, THashMap<int[], IntVar> map, Object parameters) {
+            Model s = new Model("modulo" + n);
+            IntVar[] vars = new IntVar[n];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = s.intVar("X_" + i, domains[i]);
+                if (map != null) map.put(domains[i], vars[i]);
+            }
+
+            new Constraint("MODULO", new PropModXYZ(vars[0], vars[1], vars[2])).post();
+            s.getSolver().setSearch(randomSearch(vars, 0));
+            return s;
+        }
+
+        @Override
+        public String name() {
+            return "X mod Y=Z (ac)";
         }
     };
 }

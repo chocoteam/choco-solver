@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -72,10 +72,9 @@ public class ConsistencyChecker {
                             Model test = modeler.model(nbVar, _domains, map, parameters);
                             try {
                                 if (!test.getSolver().solve()) {
-                                    System.out.println(
-                                            String.format("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d",
-                                            ds, ide, h, rvars[d], val, loop, seed));
-                                    System.out.println(String.format("REF:\n%s\nTEST:\n%s", ref, test));
+                                    System.out.printf("ds :%d, ide:%d, h:%d, var:%s, val:%d, loop:%d, seed: %d%n",
+                                    ds, ide, h, rvars[d], val, loop, seed);
+                                    System.out.printf("REF:\n%s\nTEST:\n%s%n", ref, test);
                                     fail("no solution found");
                                 }
                             } catch (Exception e) {
@@ -101,7 +100,7 @@ public class ConsistencyChecker {
             return null;
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            System.out.println(String.format("REF:\n%s\n", ref));
+            System.out.printf("REF:\n%s\n%n", ref);
             fail();
         }
         return ref;

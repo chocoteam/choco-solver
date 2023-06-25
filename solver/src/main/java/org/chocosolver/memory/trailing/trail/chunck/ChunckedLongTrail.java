@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,6 +12,8 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.trailing.StoredLong;
 import org.chocosolver.memory.trailing.trail.IStoredLongTrail;
+
+import java.util.Arrays;
 
 /**
  * A trail for integers.
@@ -52,15 +54,8 @@ public class ChunckedLongTrail extends ChunckedTrail<LongWorld> implements IStor
             current.clear();
         }
         if (worldIndex == worlds.length - 1) {
-            resizeWorlds();
+            worlds = Arrays.copyOf(worlds, (int) (worlds.length * loadfactor));
         }
-    }
-
-    private void resizeWorlds() {
-        int newCapacity = (int) (worlds.length * loadfactor);
-        LongWorld[] tmp = new LongWorld[newCapacity];
-        System.arraycopy(worlds, 0, tmp, 0, worlds.length);
-        worlds = tmp;
     }
 
     @Override

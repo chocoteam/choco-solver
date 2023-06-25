@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -42,7 +42,7 @@ public interface IOutputFactory extends ISelf<Solver> {
      * Default welcome message
      */
     String WELCOME_MESSAGE =
-        "** Choco 4.10.10 (2022-10) : Constraint Programming Solver, Copyright (c) 2010-2022";
+        "** Choco 4.10.13 (2023-06) : Constraint Programming Solver, Copyright (c) 2010-2023";
     
     /**
      * Print the version message.
@@ -221,6 +221,28 @@ public interface IOutputFactory extends ISelf<Solver> {
      */
     default void showDecisions() {
         showDecisions(new DefaultDecisionMessage(ref()));
+    }
+
+    /**
+     * Plug a search monitor which outputs {@code message} on each restart.
+     *
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     *
+     * @param message the message to print.
+     */
+    default void showRestarts(final IMessage message) {
+        ref().plugMonitor(new IMonitorRestart() {
+            @Override
+            public void afterRestart() {
+                ref().log().printf("RUNS %d ", ref().getRestartCount());
+                ref().log().printf(" // %s \n", message.print());
+            }
+        });
+    }
+
+    default void showRestarts() {
+        showRestarts(()->ref().toOneLineString());
     }
 
     /**

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -22,8 +22,7 @@ import org.testng.annotations.Test;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.FULL_PROPAGATION;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.*;
 
 /**
  * <br/>
@@ -61,7 +60,7 @@ public class TimesTest extends AbstractTernaryTest {
             }
             assertFalse(a.contains(0));
         } catch (ContradictionException e) {
-            assertFalse(true);
+            fail();
         }
     }
 

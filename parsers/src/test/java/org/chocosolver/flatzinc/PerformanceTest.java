@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -220,6 +220,33 @@ public class PerformanceTest {
         Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 2, "Unexpected number of solutions");
         Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 90_150, "Unexpected number of nodes");
         Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 90_147, "Unexpected number of failures");
+        logPerf(fzn);
+    }
+
+    @Test(groups = "mzn", timeOut = 60_000, priority = 1)
+    public void test_arithmetic_target_814() throws SetUpException {
+        // Specific to 2022/arithmetic-target_814.fzn for modulo is extensively used and XplusYeqZ needs accurate isEntailed to be reified
+        String file = Objects.requireNonNull(this.getClass().getResource("/flatzinc/2022/arithmetic-target_814.fzn")).getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[50s]",
+                "-lvl", LEVEL,
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.getModel().getSolver().limitSolution(22);
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.STOPPED, "Unexpected search state");
+        Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), 7422, "Unexpected best solution");
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), 22, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), 313, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), 257, "Unexpected number of failures");
         logPerf(fzn);
     }
 }

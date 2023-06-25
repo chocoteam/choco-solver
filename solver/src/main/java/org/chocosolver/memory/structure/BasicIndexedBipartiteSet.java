@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -71,15 +71,15 @@ public final class BasicIndexedBipartiteSet {
         System.arraycopy(position_, 0, position, 0, position_.length);
     }
 
-    public final int size() {
+    public int size() {
         return size - first.get() + 1;
     }
 
-    public final boolean isEmpty() {
+    public boolean isEmpty() {
         return first.get() == size;
     }
 
-    public final int add() {
+    public int add() {
         if (list.length == size) {
             increaseSize();
         }

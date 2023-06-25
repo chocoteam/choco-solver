@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -109,7 +109,7 @@ public class SetDifferenceViewTest {
         Assert.assertTrue(delta.contains(0));
         Assert.assertTrue(delta.contains(1));
         Assert.assertTrue(delta.contains(2));
-        Assert.assertTrue(delta.size() == 3);
+        Assert.assertEquals(delta.size(), 3);
         // Test remove elements
         delta.clear();
         setB.force(8, fakeCauseB);
@@ -117,6 +117,6 @@ public class SetDifferenceViewTest {
         monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
         Assert.assertTrue(delta.contains(8));
         Assert.assertTrue(delta.contains(7));
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
     }
 }

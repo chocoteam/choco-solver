@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -51,7 +51,7 @@ public class NbConnectedComponentsTest {
             m.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
         Assert.assertTrue(GLB.getNodes().contains(3));
@@ -84,7 +84,7 @@ public class NbConnectedComponentsTest {
             m.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
         Assert.assertTrue(GLB.getNodes().contains(4));
@@ -112,7 +112,7 @@ public class NbConnectedComponentsTest {
             m.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertFalse(GLB.getNodes().contains(1));
     }
@@ -140,7 +140,7 @@ public class NbConnectedComponentsTest {
             m.getSolver().propagate();
         } catch (ContradictionException e) {
             e.printStackTrace();
-            Assert.assertFalse(true);
+            Assert.fail();
         }
         Assert.assertTrue(GLB.getNodes().contains(1));
     }
@@ -185,7 +185,7 @@ public class NbConnectedComponentsTest {
 		IntVar nCC = m.intVar(0,1);
 		m.nbConnectedComponents(graph, nCC).post();
 		Assert.assertTrue(m.getSolver().solve());
-		Assert.assertTrue(nCC.getValue() == 0);
+        Assert.assertEquals(nCC.getValue(), 0);
 	}
 
 	@Test(groups = "10s")
@@ -204,7 +204,7 @@ public class NbConnectedComponentsTest {
 		Assert.assertEquals(m.nbConnectedComponents(graph, m.intVar(1)).isSatisfied(), ESat.UNDEFINED);
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 		while (m.getSolver().solve());
-		Assert.assertTrue(m.getSolver().getSolutionCount() == 2);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 2);
 	}
 
 	@Test(groups = "10s")
@@ -227,7 +227,7 @@ public class NbConnectedComponentsTest {
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 		while (m.getSolver().solve());
 		m.getSolver().printStatistics();
-		Assert.assertTrue(m.getSolver().getSolutionCount() == 0);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 0);
 	}
 
     @Test(groups = "10s")
@@ -248,11 +248,11 @@ public class NbConnectedComponentsTest {
 		Solver s = m.getSolver();
 
 		s.propagate();
-		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+        Assert.assertEquals(g.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
-		Assert.assertTrue(s.getSolutionCount() == 1);
+        Assert.assertEquals(s.getSolutionCount(), 1);
 	}
 
 	@Test(groups = "10s")
@@ -272,11 +272,11 @@ public class NbConnectedComponentsTest {
 		Solver s = m.getSolver();
 
 		s.propagate();
-		Assert.assertTrue(g.getMandatoryNodes().size() == 3);
+        Assert.assertEquals(g.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(g.isInstantiated());
 
 		while (m.getSolver().solve());
-		Assert.assertTrue(s.getSolutionCount() == 1);
+        Assert.assertEquals(s.getSolutionCount(), 1);
 	}
 
 	@Test
@@ -300,9 +300,9 @@ public class NbConnectedComponentsTest {
 		m.arithm(isConnected,"+", nbNodes,"=",3).post();
 
 		m.getSolver().propagate();
-		Assert.assertTrue(!isConnected.isInstantiated());
+        Assert.assertFalse(isConnected.isInstantiated());
 		while (m.getSolver().solve());
-		Assert.assertTrue(m.getSolver().getSolutionCount() == 7);
+        Assert.assertEquals(m.getSolver().getSolutionCount(), 7);
 	}
 
 	@Test
@@ -333,7 +333,7 @@ public class NbConnectedComponentsTest {
 		System.out.println("================== APRES PROPAGATE ================");
 
 		Assert.assertTrue(graph.getMandatoryNodes().contains(31));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==3);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 3);
 	}
 
 
@@ -359,7 +359,7 @@ public class NbConnectedComponentsTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNodes().contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==3);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 3);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -385,7 +385,7 @@ public class NbConnectedComponentsTest {
 		m.nbConnectedComponents(graph, m.intVar(1)).post();
 
 		m.getSolver().propagate();
-		Assert.assertTrue(graph.getMandatoryNodes().size()==1);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 1);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -411,9 +411,9 @@ public class NbConnectedComponentsTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==2);
-		Assert.assertTrue(!graph.getPotentialNodes().contains(4));
-		Assert.assertTrue(!graph.getPotentialNodes().contains(5));
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 2);
+        Assert.assertFalse(graph.getPotentialNodes().contains(4));
+        Assert.assertFalse(graph.getPotentialNodes().contains(5));
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -440,8 +440,8 @@ public class NbConnectedComponentsTest {
 
 		m.getSolver().propagate();
 		Assert.assertTrue(graph.getMandatoryNeighborsOf(0).contains(3));
-		Assert.assertTrue(graph.getMandatoryNodes().size()==5);
-		Assert.assertTrue(graph.getMandatoryNeighborsOf(5).size()==2);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 5);
+        Assert.assertEquals(graph.getMandatoryNeighborsOf(5).size(), 2);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -471,10 +471,10 @@ public class NbConnectedComponentsTest {
 
 		System.out.println(nCC);
 
-		Assert.assertTrue(nCC.getValue()==7);
-		Assert.assertTrue(graph.getMandatoryNodes().size()==7);
+        Assert.assertEquals(nCC.getValue(), 7);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 7);
 		for(int i=0;i<nb;i++)
-			Assert.assertTrue(graph.getPotentialNeighborsOf(i).size()==0);
+            Assert.assertEquals(graph.getPotentialNeighborsOf(i).size(), 0);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 
@@ -507,13 +507,13 @@ public class NbConnectedComponentsTest {
 
 		System.out.println(nCC);
 
-		Assert.assertTrue(nCC.getValue()==5);
-		Assert.assertTrue(graph.getMandatoryNodes().size()==7);
-		Assert.assertTrue(graph.getMandatoryNeighborsOf(2).size()==2);
-		Assert.assertTrue(!graph.getMandatoryNeighborsOf(1).contains(3));
+        Assert.assertEquals(nCC.getValue(), 5);
+        Assert.assertEquals(graph.getMandatoryNodes().size(), 7);
+        Assert.assertEquals(graph.getMandatoryNeighborsOf(2).size(), 2);
+        Assert.assertFalse(graph.getMandatoryNeighborsOf(1).contains(3));
 		Assert.assertTrue(graph.getPotentialNeighborsOf(1).contains(3));
 		for(int i:new int[]{0,4,5,6})
-			Assert.assertTrue(graph.getPotentialNeighborsOf(i).size()==0);
+            Assert.assertEquals(graph.getPotentialNeighborsOf(i).size(), 0);
 		Assert.assertTrue(m.getSolver().solve());
 	}
 

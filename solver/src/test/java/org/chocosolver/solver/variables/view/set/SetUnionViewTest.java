@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -144,13 +144,13 @@ public class SetUnionViewTest {
         Assert.assertTrue(delta.contains(0));
         Assert.assertTrue(delta.contains(1));
         Assert.assertTrue(delta.contains(2));
-        Assert.assertTrue(delta.size() == 3);
+        Assert.assertEquals(delta.size(), 3);
         delta.clear();
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         setB.force(0, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.ADD_TO_KER);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove elements
         delta.clear();
         setA.remove(8, fakeCauseB);
@@ -161,6 +161,6 @@ public class SetUnionViewTest {
         setC.remove(8, fakeCauseB);
         monitor.forEach(addToDelta, SetEventType.REMOVE_FROM_ENVELOPE);
         Assert.assertTrue(delta.contains(8));
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
     }
 }

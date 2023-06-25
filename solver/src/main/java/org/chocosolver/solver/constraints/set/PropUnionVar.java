@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.set;
 
+import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -36,9 +37,9 @@ public class PropUnionVar extends Propagator<SetVar> {
 
     private final int k;
     private final int iOffset;
-    private final int vOffset;
-    private final int[][] mates;
+    private final TIntObjectHashMap<int[]> mates;
     private final BitSet iii = new BitSet();
+    private boolean firstProp = true;
     //***********************************************************************************
     // CONSTRUCTORS
     //***********************************************************************************
@@ -47,19 +48,17 @@ public class PropUnionVar extends Propagator<SetVar> {
      * The union of sets is equal to union
      *
      * @param union   resulting set variable
-     * @param vOffset value offset
      * @param indices set of allowed indices
      * @param iOffset index offset
      * @param sets    set variables to unify
      */
-    public PropUnionVar(SetVar union, int vOffset, SetVar indices, int iOffset, SetVar[] sets) {
+    public PropUnionVar(SetVar union, SetVar indices, int iOffset, SetVar[] sets) {
         super(ArrayUtils.append(sets, new SetVar[]{union, indices}), PropagatorPriority.QUADRATIC, false);
         k = sets.length;
         this.iOffset = iOffset;
-        this.vOffset = vOffset;
-        mates = new int[union.getUB().size()][2];
-        for (int i = 0; i < mates.length; i++) {
-            mates[i] = new int[]{0, 1};
+        mates = new TIntObjectHashMap<>();
+        for (int i : union.getUB()) {
+            mates.put(i, new int[]{0, 1});
         }
     }
 
@@ -68,12 +67,34 @@ public class PropUnionVar extends Propagator<SetVar> {
     //***********************************************************************************
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        SetVar union = vars[k];
         SetVar indices = vars[k + 1];
+        if (firstProp) {
+            firstProp = false;
+            model.getEnvironment().save(() -> firstProp = true);
+            boundIndices(indices);
+        }
+        SetVar union = vars[k];
         filter1(indices, union);
         filter2(indices, union);
         filter6(indices, union);
         filter1(indices, union); // again for fx-point
+    }
+
+    private void boundIndices(SetVar indices) throws ContradictionException {
+        if (indices.getUB().size() > 0) {
+            int min = indices.getUB().min();
+            while (min - iOffset < 0 && indices.getUB().size() > 0) {
+                indices.remove(min, this);
+                min = indices.getUB().min();
+            }
+        }
+        if (indices.getUB().size() > 0) {
+            int max = indices.getUB().max();
+            while (max - iOffset >= k && indices.getUB().size() > 0) {
+                indices.remove(max, this);
+                max = indices.getUB().max();
+            }
+        }
     }
 
     @Override
@@ -89,9 +110,9 @@ public class PropUnionVar extends Propagator<SetVar> {
      * Remove from ub(union) and lb(indices) values from ub(sets)
      * </p>
      *
-     * @param indices
-     * @param union
-     * @throws ContradictionException
+     * @param indices index variable
+     * @param union   union variable
+     * @throws ContradictionException if failure occurs
      */
     private void filter1(SetVar indices, SetVar union) throws ContradictionException {
         ISetIterator it;
@@ -114,9 +135,9 @@ public class PropUnionVar extends Propagator<SetVar> {
      * Remove from ub(indices) wrt to ub(sets) and ub(union)
      * </p>
      *
-     * @param indices
-     * @param union
-     * @throws ContradictionException
+     * @param indices index variable
+     * @param union   union variable
+     * @throws ContradictionException if failure occurs
      */
     private void filter2(SetVar indices, SetVar union) throws ContradictionException {
         ISetIterator it;
@@ -145,9 +166,9 @@ public class PropUnionVar extends Propagator<SetVar> {
      * Filter from ub(union) => {@link #filter66(int, SetVar, SetVar)}
      * </p>
      *
-     * @param indices
-     * @param union
-     * @throws ContradictionException
+     * @param indices index variable
+     * @param union   union variable
+     * @throws ContradictionException if failure occurs
      */
     private void filter6(SetVar indices, SetVar union) throws ContradictionException {
         iii.clear();
@@ -171,13 +192,13 @@ public class PropUnionVar extends Propagator<SetVar> {
      * and the value in lb(sets_i)
      * </p>
      *
-     * @param u
-     * @param indices
-     * @param union
-     * @throws ContradictionException
+     * @param u       position of a variable in sets
+     * @param indices index variable
+     * @param union   union variable
+     * @throws ContradictionException if failure occurs
      */
     private void filter66(int u, SetVar indices, SetVar union) throws ContradictionException {
-        int[] ms = mates[u - vOffset];
+        int[] ms = mates.get(u);
         boolean l0 = iii.get(ms[0]) && vars[ms[0]].getUB().contains(u);
         boolean l1 = iii.get(ms[1]) && vars[ms[1]].getUB().contains(u);
         if (l0 && !l1) {

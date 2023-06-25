@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -102,7 +102,7 @@ public class MeetingScheduling extends AbstractProblem {
     public void solve() {
         model.getSolver().solve();
 
-        System.out.println(String.format("Meeting Scheduling Problem (%s)", mData));
+        System.out.printf("Meeting Scheduling Problem (%s)%n", mData);
 
         StringBuilder st = new StringBuilder();
         if (model.getSolver().isFeasible() != ESat.TRUE) {

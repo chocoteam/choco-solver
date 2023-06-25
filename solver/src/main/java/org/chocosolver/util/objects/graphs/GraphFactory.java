@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -250,9 +250,7 @@ public class GraphFactory {
             remaining -= size;
             boolean[][] adj = generateRandomUndirectedAdjacencyMatrix(size, density);
             for (int i = 0; i < size; i++) {
-                for (int j = i; j < size; j++) {
-                    edges[i + next_node][j + next_node] = adj[i][j];
-                }
+                System.arraycopy(adj[i], i, edges[i + next_node], i + next_node, size - i);
             }
             next_node += size;
         }

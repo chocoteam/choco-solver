@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -368,7 +368,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Returns the specific mask indicating the <b>variable events</b> on which this <code>Propagator</code> object can react.<br/>
      * A mask is a bitwise OR operations over {@link IEventType} this can react on.
-     *
+     * <p>
      * For example, consider a propagator that can deduce filtering based on the lower bound of the integer variable X.
      * Then, for this variable, the mask should be equal to :
      * <pre>
@@ -389,14 +389,14 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *
      * Some combinations are valid.
      * For example, a propagator which reacts on REMOVE and INSTANTIATE should also declare INCLOW and DECUPP as conditions.
-     * Indeed INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
+     * Indeed, INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
      * will automatically be <i>promoted</i> into INCLOW (resp. DECUPP).
      * So, ignoring INCLOW and/or DECUPP in that case may result in a lack of filtering.
-     *
+     * <p>
      * The same goes with events of other variable types, but most of the time, there are only few combinations.
-     *
+     * <p>
      * Reacts to any kind of event by default.
-     *
+     * <p>
      * Alternatively, this method can return {@link IntEventType#VOID} which states
      * that this propagator should not be aware of modifications applied to the variable in position <i>vIdx</i>.
      *
@@ -516,7 +516,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
             state = PASSIVE;
             model.getEnvironment().save(operations[ACTIVE]);
             //TODO: update var mask back
-            model.getSolver().getEngine().desactivatePropagator(this);
+            model.getSolver().getEngine().deactivatePropagator(this);
             if (swapOnPassivate) {
                 for (int i = 0; i < vars.length; i++) {
                     if (!vars[i].isInstantiated()) {
@@ -539,6 +539,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * </ul>
      */
     protected void forcePropagationOnBacktrack() {
+        if (isStateLess()) return; // skip propagation when this is not active
         if (isPassive()) { // force activation on backtrack, because something can have changed on our back
             if (this instanceof UpdatablePropagator<?>) {
                 state = ACTIVE;

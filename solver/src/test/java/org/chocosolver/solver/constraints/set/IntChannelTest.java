@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -74,7 +74,7 @@ public class IntChannelTest {
             solutionFound = true;
             for (int i = 0; i < setVars.length; i++) {
                 for (Integer value : setVars[i].getValue()) {
-                    assertTrue(intVars[value - offset].getValue() - offset == i);
+                    assertEquals(i, intVars[value - offset].getValue() - offset);
                 }
             }
             for (int i = 0; i < intVars.length; i++) {

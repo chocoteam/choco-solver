@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -46,8 +46,8 @@ public class TestNodeInducedSubgraphView {
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 3);
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(3));
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(3));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             for (int i = 0; i < 3; i++) {
                 if (g.getValue().containsNode(i)) {
                     Assert.assertTrue(g2.getValue().containsNode(i));
@@ -105,7 +105,7 @@ public class TestNodeInducedSubgraphView {
         m.nbNodes(g2, m.intVar(1, 4)).post();
         m.connected(g2).post();
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(3));
+            Assert.assertFalse(g2.getValue().containsNode(3));
             Assert.assertTrue(g.getValue().containsNode(3));
             Assert.assertTrue(g2.getValue().getNodes().size() >= 1 && g2.getValue().getNodes().size() <= 3);
             for (int i : nodes) {

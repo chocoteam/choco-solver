@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -201,6 +201,27 @@ public class TestConsistency {
         }
     }
 
+    // ARGMIN *******************************************************
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMIN() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 299; i++) {
+            checkConsistency(Modeler.modelargminac, 5, -5, 5, null, seed + i, "ac");
+            checkConsistency(Modeler.modelargminac, 10, -2, 3, null, seed + i, "ac");
+        }
+    }
+
+    // MAX *******************************************************
+
+    @Test(groups="checker", timeOut=60000)
+    public void testARGMAX() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 299; i++) {
+            checkConsistency(Modeler.modelargmaxac, 5, -5, 5, null, seed + i, "ac");
+            checkConsistency(Modeler.modelargmaxac, 10, -2, 3, null, seed + i, "ac");
+        }
+    }
+
     // INT VALUE PRECEDE CHAIN *******************************************************
 
     @Test(groups="checker", timeOut=60000)
@@ -257,6 +278,26 @@ public class TestConsistency {
         long seed = System.currentTimeMillis();
         for (int i = 0; i < 99; i++) {
             checkConsistency(Modeler.modelplusac, 3, -8, 8, null, seed + i, "ac");
+        }
+    }
+
+    // MODULO *******************************************************
+
+    @Test(groups = "checker", timeOut = 60000)
+    public void testMODBC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++) {
+            checkConsistency(Modeler.modelmodulobc, 3, 0, 1, null, seed + i, "bc");
+            checkConsistency(Modeler.modelmodulobc, 3, 0, 8, null, seed + i, "bc");
+            checkConsistency(Modeler.modelmodulobc, 3, -30, 30, null, seed + i, "bc");
+        }
+    }
+
+    @Test(groups = "checker", timeOut = 60000)
+    public void testMODAC() {
+        long seed = System.currentTimeMillis();
+        for (int i = 0; i < 99; i++) {
+            checkConsistency(Modeler.modelmoduloac, 3, -20, 20, null, seed + i, "ac");
         }
     }
 

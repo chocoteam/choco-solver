@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,13 +12,16 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.trailing.StoredInt;
 
+import java.util.Arrays;
+
 /**
  * A world devoted to integers.
+ *
  * @author Fabien Hermenier
  * @author Charles Prud'homme
  * @since 29/05/2016
  */
-public class IntWorld implements World{
+public class IntWorld implements World {
 
 
     /**
@@ -70,7 +73,10 @@ public class IntWorld implements World{
         stampStack[now] = oldStamp;
         now++;
         if (now == valueStack.length) {
-            resizeUpdateCapacity();
+            int newCapacity = (int) (variableStack.length * loadfactor);
+            valueStack = Arrays.copyOf(valueStack, newCapacity);
+            variableStack = Arrays.copyOf(variableStack, newCapacity);
+            stampStack = Arrays.copyOf(stampStack, newCapacity);
         }
     }
 
@@ -79,19 +85,6 @@ public class IntWorld implements World{
         for (int i = now - 1; i >= 0; i--) {
             variableStack[i]._set(valueStack[i], stampStack[i]);
         }
-    }
-
-    private void resizeUpdateCapacity() {
-        int newCapacity = (int)(variableStack.length * loadfactor);
-        final StoredInt[] tmp1 = new StoredInt[newCapacity];
-        System.arraycopy(variableStack, 0, tmp1, 0, variableStack.length);
-        variableStack = tmp1;
-        final int[] tmp2 = new int[newCapacity];
-        System.arraycopy(valueStack, 0, tmp2, 0, valueStack.length);
-        valueStack = tmp2;
-        final int[] tmp3 = new int[newCapacity];
-        System.arraycopy(stampStack, 0, tmp3, 0, stampStack.length);
-        stampStack = tmp3;
     }
 
     @Override

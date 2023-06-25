@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -204,7 +204,7 @@ public abstract class SetTest {
         Iterator one = set.iterator();
         Iterator two = set.iterator();
         // The iterator instances are be the same, do not use nested loops with this impl
-        assertTrue(one == two);
+        assertSame(one, two);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -213,7 +213,7 @@ public abstract class SetTest {
         Iterator one = set.newIterator();
         Iterator two = set.newIterator();
         // The iterator instances must NOT be the same, otherwise loop issues
-        assertTrue(one != two);
+        assertNotSame(one, two);
     }
 
     @Test(groups="1s", timeOut=60000)

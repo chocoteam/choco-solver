@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,8 +11,12 @@ package org.chocosolver.solver.constraints.reification;
 
 import gnu.trove.set.hash.TIntHashSet;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.annotations.DataProvider;
@@ -58,7 +62,7 @@ public class ReifiedTest {
             s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
-            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, (long) values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -106,7 +110,7 @@ public class ReifiedTest {
             s.getSolver().setSearch(inputOrderLBSearch(vars));
             while (s.getSolver().solve()) ;
             long sol = s.getSolver().getSolutionCount();
-            assertEquals(sol, values[0].length * values[1].length, "nb sol incorrect");
+            assertEquals(sol, (long) values[0].length * values[1].length, "nb sol incorrect");
         }
     }
 
@@ -479,5 +483,29 @@ public class ReifiedTest {
         E.ge(1).post();
         System.out.printf("%s\n", mode);
         mode.getSolver().propagate();
+    }
+    
+    @Test(groups = "1s", expectedExceptions = IllegalArgumentException.class)
+    public void testofir1() {
+        Model choco2 = new Model("wololo");
+        IntVar a = choco2.intVar("a", -4, -3, true);
+        IntVar b = choco2.intVar("b", -4, 20, true);
+
+        Constraint ib = choco2.arithm(a, "=", -4);
+        Constraint den = choco2.arithm(b, "=", 2);
+        choco2.ifThen(ib, den);
+
+        Solver solver2 = choco2.getSolver();
+        solver2.showDecisions();
+        solver2.setSearch(Search.intVarSearch(
+        	   // selects the variable of smallest domain size
+        	   new FirstFail(choco2),
+        	   // selects the smallest domain value (lower bound)
+        	   new IntDomainMin()));
+        while (choco2.getSolver().solve()) {
+            System.out.println("A = " + a.getValue());
+            System.out.println("B = " + b.getValue());
+        }
+        solver2.printShortStatistics();
     }
 }

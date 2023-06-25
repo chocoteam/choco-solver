@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -425,9 +425,11 @@ public class IntIterableSetUtils {
         int s2 = set2.SIZE >> 1;
         if(s1 == 0){
             setr.addAll(set2);
+            return;
         }
         if (s2 == 0) {
             setr.addAll(set1);
+            return;
         }
         if (s1 > 0 && s2 > 0) {
             setr.grow(set1.SIZE);
@@ -494,7 +496,10 @@ public class IntIterableSetUtils {
         if(s1 == 0){
             return set1.addAll(set2);
         }
-        if (s1 > 0 && s2 >= 0) {
+        if(s2 == 0){
+            return false;
+        }
+        if (s1 > 0 && s2 > 0) {
             int i = 0, j = 0;
             int s = 0, c = 0;
             int[] e = new int[set1.SIZE];

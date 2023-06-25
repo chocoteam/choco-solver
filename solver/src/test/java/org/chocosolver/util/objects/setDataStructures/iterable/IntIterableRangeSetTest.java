@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -703,6 +703,15 @@ public class IntIterableRangeSetTest {
         IntIterableSetUtils.unionOf(set, new IntIterableRangeSet());
         Assert.assertEquals(set.size(), 1);
     }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testUnion6() {
+        IntIterableRangeSet set = new IntIterableRangeSet(1, 2);
+        IntIterableSetUtils.unionOf(set, new IntIterableRangeSet());
+        Assert.assertEquals(set.size(), 2);
+    }
+
+
 
     @Test(groups = "1s", timeOut = 60000)
     public void testIncludedIn1() {

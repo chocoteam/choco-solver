@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -19,6 +19,8 @@ import org.chocosolver.solver.constraints.binary.element.ElementFactory;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.constraints.extension.binary.*;
+import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
+import org.chocosolver.solver.constraints.extension.hybrid.PropHybridTable;
 import org.chocosolver.solver.constraints.extension.nary.*;
 import org.chocosolver.solver.constraints.nary.PropDiffN;
 import org.chocosolver.solver.constraints.nary.PropIntValuePrecedeChain;
@@ -75,7 +77,10 @@ import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.BitSet;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -505,20 +510,21 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * <p>Creates a power constraint: X^C = Z.</p>
      *
-     * @param X first variable
-     * @param C an integer, should be positive
-     * @param Y result variable
+     * @param base first variable
+     * @param exponent an integer, should be positive
+     * @param result result variable
      * @implSpec The 'power' propagator does not exist.
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
      */
-    default Constraint pow(IntVar X, int C, IntVar Y) {
-        if (C <= 0) {
+    default Constraint pow(IntVar base, int exponent, IntVar result) {
+        if (exponent <= 0) {
             throw new SolverException("The power parameter should be strictly greater than 0.");
         }
-        if (TuplesFactory.canBeTupled(X, Y)) {
+        /*if (TuplesFactory.canBeTupled(X, Y)) {
             return table(new IntVar[]{Y, X}, TuplesFactory.power(Y, X, C));
-        } else {
+        } else */{
+            /*/ DECOMPOSITION
             final HashMap<Integer, IntVar> mm = new HashMap<>();
             mm.put(1, X);
             int mid = (int) Math.pow(2, Math.ceil(Math.log(C / 2.) / Math.log(2)));
@@ -535,6 +541,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             a = mm.get(mid);
             b = mm.get(C - mid);
             return ref().times(a, b, Y);
+            /*/
+            if((exponent % 2) == 0){
+                return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
+            }else{
+                return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
+            }
+            //*/
         }
     }
 
@@ -774,9 +787,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *                    <b>DEFAULT</b>:
      *                    <br/>
      *                    Uses BC plus a probabilistic AC_ZHANG propagator to get a compromise between BC and AC_ZHANG
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allDifferent(IntVar[] vars, String CONSISTENCY) {
-        if (vars.length <= 1) return ref().trueConstraint();
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new AllDifferent(vars, CONSISTENCY);
     }
 
@@ -905,9 +922,17 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take the same value.
      *
      * @param vars list of variables
+     * @implNote
+     * This constraint is reformulated as an atMostNValues constraint, with bound consistency.
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint allEqual(IntVar... vars) {
-        return atMostNValues(vars, ref().intVar(1), false);
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
+        return new Constraint(ConstraintsName.ATMOSTNVALUES,
+                new PropAtMostNValues_BC(vars, ref().intVar(1)));
     }
 
     /**
@@ -915,8 +940,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take more than a single value.
      *
      * @param vars list of variables
+     *             @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint notAllEqual(IntVar... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return atLeastNValues(vars, ref().intVar(2), false);
     }
 
@@ -945,8 +975,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *
      * @param bools an array of boolean variable
      * @return a constraint and ensuring that variables in <i>bools</i> are all set to true
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint and(BoolVar... bools) {
+        if (bools == null || bools.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (bools.length == 1) return ref().arithm(bools[0], "=", 1);
         Model s = bools[0].getModel();
         IntVar sum = s.intVar(0, bools.length, true);
         s.sum(bools, "=", sum).post();
@@ -1056,7 +1091,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ConstraintsName.BINPACKING,
                 new Constraint(ConstraintsName.BINPACKING, new PropBinPacking(itemBin, itemSize, binLoad, offset)),
                 model.sum(binLoad, "=", sum),
-                model.allDifferent(list.toArray(new IntVar[0]))
+                list.size() > 0 ? model.allDifferent(list.toArray(new IntVar[0])) : null
         );
     }
 
@@ -1736,6 +1771,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param SORTEDvars a tuple of array of variables sorted in increasing order
      * @param K          key prefix size (0 &le; k &le; m, where m is the size of the array of variable)
      * @return a keySort constraint
+     * @implNote an {@link #allDifferent(IntVar...)} constraint is declared on <i>PERMvars</i>
      */
     default Constraint keySort(IntVar[][] vars, IntVar[] PERMvars, IntVar[][] SORTEDvars, int K) {
         if (PERMvars == null) {
@@ -1745,28 +1781,45 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 PERMvars[p] = vars[0][0].getModel().intVar("p_" + (p + 1), 1, n, true);
             }
         }
-        return new Constraint(ConstraintsName.KEYSORT, new PropKeysorting(vars, SORTEDvars, PERMvars, K));
+        Constraint allDiff = ref().allDifferent(PERMvars);
+        allDiff.ignore();
+        return new Constraint(ConstraintsName.KEYSORT,
+                ArrayUtils.append(
+                        allDiff.propagators,
+
+                        new Propagator[]{
+                                new PropKeysorting(vars, SORTEDvars, PERMvars, K)}));
     }
 
     /**
      * Creates a lexChainLess constraint.
      * For each pair of consecutive vectors vars<sub>i</sub> and vars<sub>i+1</sub> of the vars collection
-     * vars<sub>i</sub> is lexicographically strictly less than than vars<sub>i+1</sub>
+     * vars<sub>i</sub> is lexicographically strictly less than vars<sub>i+1</sub>
      *
      * @param vars collection of vectors of variables
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint lexChainLess(IntVar[]... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, true));
     }
 
     /**
      * Creates a lexChainLessEq constraint.
      * For each pair of consecutive vectors vars<sub>i</sub> and vars<sub>i+1</sub> of the vars collection
-     * vars<sub>i</sub> is lexicographically less or equal than than vars<sub>i+1</sub>
+     * vars<sub>i</sub> is lexicographically less or equal than vars<sub>i+1</sub>
      *
      * @param vars collection of vectors of variables
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint lexChainLessEq(IntVar[]... vars) {
+        if (vars == null || vars.length == 0) {
+            throw new IllegalArgumentException("The array of variables cannot be null or empty");
+        }
+        if (vars.length == 1) return ref().trueConstraint();
         return new Constraint(ConstraintsName.LEXCHAIN, new PropLexChain(vars, false));
     }
 
@@ -2463,6 +2516,31 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 throw new SolverException("Table algorithm " + algo + " is unkown");
         }
         return new Constraint(ConstraintsName.TABLE, p);
+    }
+
+    /**
+     * Create a table constraint based on hybrid tuples.
+     * Such tuples make possible to declare expressions as restriction on values a variable can take.
+     * <p>
+     *     <pre>
+     *         {@code
+     *         HybridTuples tuples = new HybridTuples();
+     *         tuples.add(ne(a), any(), eq(c));
+     *         tuples.add(eq(c), le(b), ne(a));
+     *         tuples.add(lt(c), eq(b), ne(b));
+     *         tuples.add(gt(b), ge(b), any());
+     *         model.table(new IntVar[]{x, y, z}, tuples).post();
+     *         }
+     *     </pre>
+     * </p>
+     * @param vars scope of the constraint
+     * @param htuples hybrid tuples
+     * @return a hybrid table constraint
+     * @implNote The filtering algorithm is an adaptation of STR2 to expressions.
+     */
+    default Constraint table(IntVar[] vars, HybridTuples htuples){
+        assert vars.length == htuples.arity();
+        return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
 
     /**

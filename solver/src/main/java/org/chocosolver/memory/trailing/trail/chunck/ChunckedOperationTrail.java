@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -12,6 +12,8 @@ package org.chocosolver.memory.trailing.trail.chunck;
 
 import org.chocosolver.memory.structure.IOperation;
 import org.chocosolver.memory.trailing.trail.IOperationTrail;
+
+import java.util.Arrays;
 
 /**
  * @author Fabien Hermenier
@@ -50,15 +52,8 @@ public class ChunckedOperationTrail extends ChunckedTrail<OperationWorld> implem
             current.clear();
         }
         if (worldIndex == worlds.length - 1) {
-            resizeWorlds();
+            worlds = Arrays.copyOf(worlds, (int) (worlds.length * loadfactor));
         }
-    }
-
-    private void resizeWorlds() {
-        int newCapacity = (int) (worlds.length * loadfactor);
-        OperationWorld[] tmp = new OperationWorld[newCapacity];
-        System.arraycopy(worlds, 0, tmp, 0, worlds.length);
-        worlds = tmp;
     }
 
     @Override

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -38,7 +38,7 @@ public class IntSearch {
             model.getSolver().setLubyRestart(500, new FailCounter(model, 0), 500);
             return Search.intVarSearch(variables);
         }
-        return valueSelector(variables, varsel, assignment);
+        return valueSelector(variables, varsel, assignment, model);
     }
 
     private static VariableSelector<IntVar> variableSelector(IntVar[] variables, VarChoice varChoice, Model model) {
@@ -69,7 +69,7 @@ public class IntSearch {
     }
 
     private static IntStrategy valueSelector(IntVar[] scope, VariableSelector<IntVar> variableSelector,
-                                                                            Assignment assignmennt) {
+                                                                            Assignment assignmennt, Model model) {
         IntValueSelector valSelector;
         DecisionOperator<IntVar> assgnt = DecisionOperatorFactory.makeIntEq();
         switch (assignmennt) {
@@ -87,7 +87,7 @@ public class IntSearch {
                 valSelector = new IntDomainMedian();
                 break;
             case indomain_random:
-                valSelector = new IntDomainRandom(scope[0].getModel().getSeed());
+                valSelector = new IntDomainRandom(model.getSeed());
                 break;
             case indomain_split:
             case indomain_interval:

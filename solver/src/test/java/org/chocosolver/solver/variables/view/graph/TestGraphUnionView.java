@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -176,19 +176,19 @@ public class TestGraphUnionView {
         // Test add nodes
         g1.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(0));
         delta.clear();
         g2.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove node
         g1.removeNode(2, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g2.removeNode(2, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(2));
         delta.clear();
         // Test add edges
@@ -205,21 +205,21 @@ public class TestGraphUnionView {
         g1.enforceEdge(1, 3, fakeCauseB);
         g2.enforceEdge(1, 4, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
         Assert.assertTrue(delta.contains(3));
         Assert.assertTrue(delta.contains(4));
         delta.clear();
         g1.enforceEdge(1, 4, fakeCauseB);
         g2.enforceEdge(1, 3, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove edges
         g1.removeEdge(0, 1, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g2.removeEdge(1, 0, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(0));
     }
 
@@ -243,19 +243,19 @@ public class TestGraphUnionView {
         // Test add nodes
         g1.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(0));
         delta.clear();
         g2.enforceNode(0, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove node
         g1.removeNode(2, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g2.removeNode(2, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(2));
         delta.clear();
         // Test add edges
@@ -272,24 +272,24 @@ public class TestGraphUnionView {
         g1.enforceEdge(1, 3, fakeCauseB);
         g2.enforceEdge(1, 4, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
         Assert.assertTrue(delta.contains(3));
         Assert.assertTrue(delta.contains(4));
         delta.clear();
         g1.enforceEdge(1, 4, fakeCauseB);
         g2.enforceEdge(1, 3, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove edges
         g1.removeEdge(0, 1, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g2.removeEdge(1, 0, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g1.removeEdge(1, 0, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(0));
     }
 }

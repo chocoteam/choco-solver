@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -52,6 +52,7 @@ public class BlackBoxTest {
         solver.setSearch(strat.apply(vars));
         solver.setGeometricalRestart(vars.length * 3L, 1.1d, new FailCounter(model, 0), 1000);
         solver.setNoGoodRecordingFromSolutions(vars);
+        model.getSolver().showRestarts();
         solver.findAllSolutions();
         solver.printShortStatistics();
         Assert.assertEquals(solver.getSolutionCount(), 58);

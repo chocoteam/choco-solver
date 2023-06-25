@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -503,6 +503,12 @@ public enum FConstraint {
                 }
             }
             model.scalar(bs, as, "<=", c).reifyWith(r);
+            // slower version:
+            /* int[] bnds = VariableUtils.boundsForScalar(bs, as);
+            IntVar e = model.intVar(bnds[0], bnds[1]);
+            model.scalar(bs, as, "=", e).post();
+            model.reifyXleY(e, c, r);
+            */
         }
     },
     int_lin_ne {
@@ -745,7 +751,7 @@ public enum FConstraint {
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             BoolVar b = exps.get(1).boolVarValue(model);
             IntVar count = model.intVar(0, vars.length);
-            model.atMostNValues(vars, count, false).post();
+            model.nValues(vars, count).post();
             model.reifyXeqC(count, 1, b);
         }
     },
@@ -1267,10 +1273,16 @@ public enum FConstraint {
     memberChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_member_int.build(model, datas, id, exps, annotations);
+            choco_member_int.build(model, datas, id, exps, annotations);
         }
     },
-    fzn_member_int {
+    fzn_member_int {  // legacy
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_member_int.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_member_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1283,10 +1295,16 @@ public enum FConstraint {
     memberVarChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_member_int_var.build(model, datas, id, exps, annotations);
+            choco_member_int_var.build(model, datas, id, exps, annotations);
         }
     },
-    fzn_member_int_var {
+    fzn_member_int_var { // legacy
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_member_int_var.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_member_int_var {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1299,10 +1317,16 @@ public enum FConstraint {
     memberReifChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_member_int_reif.build(model, datas, id, exps, annotations);
+            choco_member_int_reif.build(model, datas, id, exps, annotations);
         }
     },
-    fzn_member_int_reif {
+    fzn_member_int_reif {  // legacy
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_member_int_reif.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_member_int_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
 
@@ -1316,10 +1340,16 @@ public enum FConstraint {
     memberVarReifChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            fzn_member_int_var_reif.build(model, datas, id, exps, annotations);
+            choco_member_int_var_reif.build(model, datas, id, exps, annotations);
         }
     },
-    fzn_member_int_var_reif {
+    fzn_member_int_var_reif {  // legacy
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            choco_member_int_var_reif.build(model, datas, id, exps, annotations);
+        }
+    },
+    choco_member_int_var_reif {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             IntVar[] xs = exps.get(0).toIntVarArray(model);

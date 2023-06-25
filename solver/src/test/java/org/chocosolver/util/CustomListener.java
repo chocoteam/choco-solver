@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -34,7 +34,7 @@ public class CustomListener extends TestListenerAdapter {
 
     @Override
     public void onTestStart(ITestResult tr) {
-        System.out.print(String.format("\t%s.%s ..", tr.getTestClass().getName(), tr.getName()));
+        System.out.printf("\t%s.%s ..", tr.getTestClass().getName(), tr.getName());
         original = System.out;
         System.setOut(fake);
     }
@@ -56,7 +56,7 @@ public class CustomListener extends TestListenerAdapter {
 
     private void log(ITestResult tr, String RESULT) {
         System.setOut(original);
-        System.out.print(String.format(".. %s (%dms)\n", RESULT, tr.getEndMillis() - tr.getStartMillis()));
+        System.out.printf(".. %s (%dms)\n", RESULT, tr.getEndMillis() - tr.getStartMillis());
     }
 
 }

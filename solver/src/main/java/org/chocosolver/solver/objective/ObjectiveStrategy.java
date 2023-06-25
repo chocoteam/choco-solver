@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -76,7 +76,7 @@ public class ObjectiveStrategy extends AbstractStrategy<IntVar> {
      * @param policy    should be DICHOTOMIC
      */
     public ObjectiveStrategy(IntVar objective, int[] coefs, OptimizationPolicy policy) {
-        super(objective);
+        super(new IntVar[]{objective});
         this.obj = objective;
         this.model = obj.getModel();
         this.firstCall = true;

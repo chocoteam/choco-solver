@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -241,7 +241,7 @@ public class BitsetIntVarImplTest {
         rems.setOffset(0);
         rems.addAll(2, 6, 9);
         x.removeValues(rems, Cause.Null);
-        Assert.assertTrue(x.getDomainSize() == 2);
+        Assert.assertEquals(x.getDomainSize(), 2);
     }
 
     @Test(groups = "1s", timeOut = 60000)

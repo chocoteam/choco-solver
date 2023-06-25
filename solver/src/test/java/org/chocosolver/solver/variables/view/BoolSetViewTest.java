@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -77,7 +77,7 @@ public class BoolSetViewTest {
             }
             boolVars[7].instantiateTo(1, new ICause() {});
             Assert.assertTrue(setVar.isInstantiated());
-            Assert.assertTrue(setVar.getValue().size() == 1);
+            Assert.assertEquals(setVar.getValue().size(), 1);
             Assert.assertTrue(setVar.getValue().contains(9));
         } catch (ContradictionException e) {
             e.printStackTrace();

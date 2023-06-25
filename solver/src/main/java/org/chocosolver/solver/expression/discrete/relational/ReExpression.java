@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -101,6 +101,12 @@ public interface ReExpression extends ArExpression {
             boolean eval(int i1, int i2) {
                 return i1 == i2;
             }
+        },
+        NIN {
+            @Override
+            boolean eval(int i1, int i2) {
+                return i1 != i2;
+            }
         }
         ;
 
@@ -164,7 +170,6 @@ public interface ReExpression extends ArExpression {
      * @param map mapping between variables of the topmost expression and position in <i>values</i>
      * @return an evaluation of this relational expression based on a tuple
      */
-    @SuppressWarnings("SuspiciousMethodCalls")
     default boolean beval(int[] values, Map<IntVar, Integer> map){
         assert this instanceof BoolVar;
         return values[map.get(this)] == 1;

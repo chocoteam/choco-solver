@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -210,15 +210,25 @@ public class Datas {
                         solver.getTimeCount());
             }
             if (level.is(Level.JSON)) {
-                solver.log().printf(Locale.US, "%s{\"bound\":%d,\"time\":%.1f}",
+                solver.log().printf(Locale.US, "%s\n\t\t{\"bound\":%d, \"time\":%.1f, " +
+                                "\"solutions\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d}",
                         solver.getSolutionCount() > 1 ? "," : "",
                         solver.getObjectiveManager().getBestSolutionValue().intValue(),
-                        solver.getTimeCount());
+                        solver.getTimeCount(),
+                        solver.getSolutionCount(),
+                        solver.getNodeCount(),
+                        solver.getFailCount(),
+                        solver.getRestartCount());
             }
         } else {
             if (level.is(Level.JSON)) {
-                solver.log().printf("{\"time\":%.1f},",
-                        solver.getTimeCount());
+                solver.log().printf(Locale.US, "\t\t{\"time\":%.1f," +
+                                "\"solutions\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d}",
+                        solver.getTimeCount(),
+                        solver.getSolutionCount(),
+                        solver.getNodeCount(),
+                        solver.getFailCount(),
+                        solver.getRestartCount());
             }
         }
     }
@@ -267,8 +277,14 @@ public class Datas {
                     solver.getTimeCount());
         }
         if (level.is(Level.JSON)) {
-            solver.log().printf(Locale.US, "],\"exit\":{\"time\":%.1f,\"status\":\"%s\"}}",
-                    solver.getTimeCount(), complete ? "terminated" : "stopped");
+            solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
+                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                    solver.getTimeCount(),
+                    solver.getNodeCount(),
+                    solver.getFailCount(),
+                    solver.getRestartCount(),
+                    solver.getSearchState()
+            );
         }
         if (level.is(Level.IRACE)) {
             /*long obj = solver.getObjectiveManager().isOptimization() ?

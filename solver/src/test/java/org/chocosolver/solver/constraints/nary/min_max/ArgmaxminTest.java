@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -256,7 +256,7 @@ public class ArgmaxminTest {
     public void testAAA0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{0+o, 1+o, 2+o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 1+o, 2+o, 3+o});
         x[0] = model.intVar("x1", 1, 3);
         x[1] = model.intVar("x2", 2, 4);
         x[2] = model.intVar("x3", 3, 5);
@@ -319,7 +319,7 @@ public class ArgmaxminTest {
     public void testAAD0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{0+o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 3+o});
         x[0] = model.intVar("x1", 4, 5);
         x[1] = model.intVar("x2", 1);
         x[2] = model.intVar("x3", 2);
@@ -340,7 +340,7 @@ public class ArgmaxminTest {
     public void testAAE0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{0+o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 3+o});
         x[0] = model.intVar("x1", 4);
         x[1] = model.intVar("x2", 1);
         x[2] = model.intVar("x3", 2);

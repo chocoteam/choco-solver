@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -65,7 +65,7 @@ public class NoGoodOnSolutionTest {
         Model s = makeProblem();
         while (s.getSolver().solve()) ;
 
-        assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
+        assertEquals(s.getSolver().getSolutionCount(), NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -75,7 +75,7 @@ public class NoGoodOnSolutionTest {
         s.getSolver().setRestartOnSolutions();
         while (s.getSolver().solve()) ;
 
-        assertTrue(s.getSolver().getSolutionCount() == MAX_NB_SOLS);
+        assertEquals(s.getSolver().getSolutionCount(), MAX_NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -86,7 +86,7 @@ public class NoGoodOnSolutionTest {
         s.getSolver().setRestartOnSolutions();
         while (s.getSolver().solve()) ;
 
-        assertTrue(s.getSolver().getSolutionCount() == NB_SOLS);
+        assertEquals(s.getSolver().getSolutionCount(), NB_SOLS);
     }
 
     @Test(groups="1s", timeOut=60000)
@@ -132,7 +132,7 @@ public class NoGoodOnSolutionTest {
         model.getSolver().setRestartOnSolutions();
         while (model.getSolver().solve()) ;
 
-        assertTrue(model.getSolver().getSolutionCount() == 92);
+        assertEquals(model.getSolver().getSolutionCount(), 92);
     }
 
     @Test(groups="1s", timeOut=60000)

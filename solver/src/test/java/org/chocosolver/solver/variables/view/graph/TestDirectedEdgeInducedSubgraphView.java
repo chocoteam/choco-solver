@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -52,7 +52,7 @@ public class TestDirectedEdgeInducedSubgraphView {
         Assert.assertEquals(g2.getMandatoryNodes().size(), 0);
         Assert.assertEquals(g2.getPotentialNodes().size(), 4);
         while (m.getSolver().solve()) {
-            Assert.assertTrue(!g2.getValue().containsNode(4));
+            Assert.assertFalse(g2.getValue().containsNode(4));
             for (int i : g.getValue().getNodes()) {
                 for (int j : g.getValue().getPredecessorsOf(i)) {
                     if (pred[i].contains(j)) {
@@ -186,23 +186,23 @@ public class TestDirectedEdgeInducedSubgraphView {
         // Test add nodes
         g.enforceEdge(8, 9, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.enforceEdge(4, 1, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 2);
+        Assert.assertEquals(delta.size(), 2);
         Assert.assertTrue(delta.contains(4));
         Assert.assertTrue(delta.contains(1));
         delta.clear();
         monitor.forEachNode(nodeProc, GraphEventType.ADD_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         // Test remove node
         g.removeNode(7, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.removeNode(3, fakeCauseB);
         monitor.forEachNode(nodeProc, GraphEventType.REMOVE_NODE);
         Assert.assertTrue(delta.contains(3));
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         delta.clear();
         // Test add edges
         // First clear monitor from node operations that can cause edge operations
@@ -217,19 +217,19 @@ public class TestDirectedEdgeInducedSubgraphView {
         };
         g.enforceEdge(0, 9, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.enforceEdge(1, 5, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.ADD_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(5));
         delta.clear();
         // Test remove edges
         g.removeEdge(8, 1, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 0);
+        Assert.assertEquals(delta.size(), 0);
         g.removeEdge(1, 2, fakeCauseB);
         monitor.forEachEdge(edgeProc, GraphEventType.REMOVE_EDGE);
-        Assert.assertTrue(delta.size() == 1);
+        Assert.assertEquals(delta.size(), 1);
         Assert.assertTrue(delta.contains(2));
     }
 }

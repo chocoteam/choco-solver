@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -24,8 +24,7 @@ import org.testng.annotations.Test;
 
 import static org.chocosolver.solver.Cause.Null;
 import static org.chocosolver.util.tools.ArrayUtils.append;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class SubcircuitTest {
 
@@ -101,11 +100,11 @@ public class SubcircuitTest {
 			vars[6].removeValue(6, Null);
 		} catch (Exception e) {
 			e.printStackTrace();
-			assertTrue(false);
+            fail();
 		}
 		model.subCircuit(vars, 0, model.intVar("length", 0, vars.length - 1, true)).post();
 		model.getSolver().solve();
-		assertTrue(model.getSolver().getSolutionCount() == 0);
+        assertEquals(model.getSolver().getSolutionCount(), 0);
 	}
 
 	@Test(groups="1s", timeOut=60000)

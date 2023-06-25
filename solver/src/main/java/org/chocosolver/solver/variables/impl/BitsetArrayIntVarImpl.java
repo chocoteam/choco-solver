@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -191,36 +191,40 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
     @Override
     public boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
         assert cause != null;
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        if (nlb > oub || nub < olb) {
-            return false;
-        }
-        int i;
-        // look for the new lb
-        while (nlb == olb && olb < Integer.MAX_VALUE) {
-            i = INDICES.nextSetBit(V2I.get(olb) + 1);
-            olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
-            nlb = values.nextValue(olb - 1);
-        }
-        if (nlb <= nub) {
-            // look for the new ub
-            while (nub == oub && oub > Integer.MIN_VALUE) {
-                i = INDICES.prevSetBit(V2I.get(oub) - 1);
-                oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
-                nub = values.previousValue(oub + 1);
+        boolean hasChanged = false, fixpoint;
+        int vlb, vub;
+        do {
+            int nlb = getLB();
+            int nub = getUB();
+            vlb = values.nextValue(nlb - 1);
+            vub = values.previousValue(nub + 1);
+            if (!hasChanged && (vlb > nub || vub < nlb)) {
+                return false;
             }
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(olb, oub, cause);
+            int i;
+            // look for the new lb
+            while (vlb == nlb && nlb < Integer.MAX_VALUE) {
+                i = INDICES.nextSetBit(V2I.get(nlb) + 1);
+                nlb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
+                vlb = values.nextValue(nlb - 1);
+            }
+            if (vlb <= vub) {
+                // look for the new ub
+                while (vub == nub && nub > Integer.MIN_VALUE) {
+                    i = INDICES.prevSetBit(V2I.get(nub) - 1);
+                    nub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
+                    vub = values.previousValue(nub + 1);
+                }
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
         // now deal with holes
-        int value = nlb;
-        int to = nub;
+        int value = vlb;
         boolean hasRemoved = false;
         int count = SIZE.get();
-        while (value <= to) {
+        while (value <= vub) {
             int index = V2I.get(value);
             if (index > -1 && this.INDICES.get(index)) {
                 model.getSolver().getEventObserver().removeValue(this, value, cause);
@@ -244,27 +248,32 @@ public final class BitsetArrayIntVarImpl extends AbstractVariable implements Int
 
     @Override
     public boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        int olb = getLB();
-        int oub = getUB();
-        int nlb = values.nextValue(olb - 1);
-        int nub = values.previousValue(oub + 1);
-        int i;
-        // look for the new lb
-        while (nlb != olb && olb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
-            i = INDICES.nextSetBit(V2I.get(olb) + 1);
-            olb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
-            nlb = values.nextValue(olb - 1);
-        }
-        if (nlb <= nub) {
-            // look for the new ub
-            while (nub != oub && olb > Integer.MIN_VALUE && oub > Integer.MIN_VALUE) {
-                i = INDICES.prevSetBit(V2I.get(oub) - 1);
-                oub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
-                nub = values.previousValue(oub + 1);
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
+            int i;
+            // look for the new lb
+            while (nlb != clb && clb < Integer.MAX_VALUE && nlb < Integer.MAX_VALUE) {
+                i = INDICES.nextSetBit(V2I.get(clb) + 1);
+                clb = i > -1 ? VALUES[i] : Integer.MAX_VALUE;
+                nlb = values.nextValue(clb - 1);
             }
-        }
-        // the new bounds are now known, delegate to the right method
-        boolean hasChanged = updateBounds(nlb, nub, cause);
+            if (nlb <= nub) {
+                // look for the new ub
+                while (nub != cub && cub > Integer.MIN_VALUE && nub > Integer.MIN_VALUE) {
+                    i = INDICES.prevSetBit(V2I.get(cub) - 1);
+                    cub = i > -1 ? VALUES[i] : Integer.MIN_VALUE;
+                    nub = values.previousValue(cub + 1);
+                }
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
         // now deal with holes
         int to = UB.get() - 1;
         boolean hasRemoved = false;

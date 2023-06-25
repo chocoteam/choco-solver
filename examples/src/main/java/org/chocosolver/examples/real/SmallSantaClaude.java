@@ -1,7 +1,7 @@
 /*
  * This file is part of examples, http://choco-solver.org/
  *
- * Copyright (c) 2022, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2023, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -77,12 +77,12 @@ public class SmallSantaClaude {
         model.getSolver().plugMonitor((IMonitorSolution) () -> {
             out.println("*******************");
             for (int i = 0; i < n_kids; i++) {
-                out.println(format("Kids #%d has received the gift #%d at a cost of %d euros",
-                        i, kid_gift[i].getValue(), kid_price[i].getValue()));
+                out.printf("Kids #%d has received the gift #%d at a cost of %d euros%n",
+                        i, kid_gift[i].getValue(), kid_price[i].getValue());
             }
-            out.println(format("Total cost: %d euros", total_cost.getValue()));
-            out.println(format("Average: %.3f euros per kid", average.getLB()));
-            out.println(format("Average deviation: %.3f ", average_deviation.getLB()));
+            out.printf("Total cost: %d euros%n", total_cost.getValue());
+            out.printf("Average: %.3f euros per kid%n", average.getLB());
+            out.printf("Average deviation: %.3f %n", average_deviation.getLB());
         });
         // find optimal solution (Santa Claus is stingy)
         model.setObjective(false, average_deviation);
