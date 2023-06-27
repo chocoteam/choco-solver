@@ -223,4 +223,40 @@ public class IReificationFactoryTest {
             Assert.assertTrue(B.isInstantiatedTo(0) | !S.contains(X.getValue()));
         }
     }
+
+    @Test(groups = "1s")
+    public void testReifyXgeY1() {
+        Model m = new Model();
+        IntVar X = m.intVar(0, 3);
+        BoolVar B = m.boolVar();
+        m.reifyXgeY(X, X, B);
+        Assert.assertEquals(m.getSolver().findAllSolutions().size(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testReifyXleY1() {
+        Model m = new Model();
+        IntVar X = m.intVar(0, 3);
+        BoolVar B = m.boolVar();
+        m.reifyXleY(X, X, B);
+        Assert.assertEquals(m.getSolver().findAllSolutions().size(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testReifyXeqY1() {
+        Model m = new Model();
+        IntVar X = m.intVar(0, 3);
+        BoolVar B = m.boolVar();
+        m.reifyXeqY(X, X, B);
+        Assert.assertEquals(m.getSolver().findAllSolutions().size(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testReifyXneY1() {
+        Model m = new Model();
+        IntVar X = m.intVar(0, 3);
+        BoolVar B = m.boolVar();
+        m.reifyXneY(X, X, B);
+        Assert.assertEquals(m.getSolver().findAllSolutions().size(), 4);
+    }
 }
