@@ -357,4 +357,16 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getNodeCount(), 3);
     }
 
+    @Test(groups = "1s")
+    public void testMats2() {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{4, 5, 7});
+        IntVar one = model.intVar(1);
+        IntVar[] vs = new IntVar[]{one, one, one, C, C};
+        model.argmax(model.intVar(5), 1, vs).post();
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
 }

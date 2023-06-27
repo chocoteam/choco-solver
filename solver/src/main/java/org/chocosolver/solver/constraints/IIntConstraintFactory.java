@@ -1867,6 +1867,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars   a vector of variables, of size > 0
      */
     default Constraint argmax(IntVar z, int offset, IntVar[] vars) {
+        Object[] args = uniquesafe(vars, new IntVar[]{z});
+        vars = (IntVar[]) args[0];
+        z = (IntVar) args[1];
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
     }
 
@@ -1882,6 +1885,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * on this views.
      */
     default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
+        Object[] args = uniquesafe(vars, new IntVar[]{z});
+        vars = (IntVar[]) args[0];
+        z = (IntVar) args[1];
         IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
