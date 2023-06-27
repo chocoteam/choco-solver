@@ -246,10 +246,11 @@ public class PropCumulative extends Propagator<IntVar> {
         int[] indD = IntStream.range(n, n * 2).toArray();
         int t = e.readValue(p);
         int ipivot = getInd(pivot);
-        int dpivot = e.domain(vars[ipivot + n]).min();
         if (ipivot >= n) {
-            throw new UnsupportedOperationException("Try to explain an event not on a start variable");
+            throw new UnsupportedOperationException("Try to explain an event not on a start variable. " +
+                    "Only Cumulative.Filter.NAIVETIME algorithm is currently supported with explanations.");
         }
+        int dpivot = e.domain(vars[ipivot + n]).min();
         switch (e.readMask(p)) {
             case 2://INCLOW
                 if (explainOverlap(e, X, t, indD)) {
