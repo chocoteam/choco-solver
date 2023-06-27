@@ -880,4 +880,39 @@ public class TableTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testForbidden1(String a) {
+        if (a.equals("CT+")) return;
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2);
+        IntVar y = model.intVar("y", 0, 2);
+        Tuples t = new Tuples(false);
+        t.add(0, 0);
+        t.add(1, 1);
+        t.add(2, 2);
+        model.table(x, y, t, a).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d\n", x.getValue(), y.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 2) - 3);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testForbidden2(String a) {
+        if (a.contains("+")) return;
+        Model model = new Model();
+        IntVar x = model.intVar("x", 0, 2);
+        IntVar y = model.intVar("y", 0, 2);
+        IntVar z = model.intVar("z", 0, 2);
+        Tuples t = new Tuples(false);
+        t.add(0, 0, 0);
+        t.add(1, 1, 1);
+        t.add(2, 2, 2);
+        model.table(new IntVar[]{x, y, z}, t, a).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), z.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), (int) Math.pow(3, 3) - 3);
+    }
+
 }
