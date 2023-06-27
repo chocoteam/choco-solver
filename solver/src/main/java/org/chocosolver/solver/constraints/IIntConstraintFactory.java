@@ -511,9 +511,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * <p>Creates a power constraint: X^C = Z.</p>
      *
-     * @param base first variable
+     * @param base     first variable
      * @param exponent an integer, should be positive
-     * @param result result variable
+     * @param result   result variable
      * @implSpec The 'power' propagator does not exist.
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
@@ -543,9 +543,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             b = mm.get(C - mid);
             return ref().times(a, b, Y);
             /*/
-            if((exponent % 2) == 0){
+            if ((exponent % 2) == 0) {
                 return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
-            }else{
+            } else {
                 return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
             }
             //*/
@@ -941,7 +941,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take more than a single value.
      *
      * @param vars list of variables
-     *             @throws IllegalArgumentException when the array of variables is either null or empty.
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint notAllEqual(IntVar... vars) {
         if (vars == null || vars.length == 0) {
@@ -1526,7 +1526,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
         assert values.length == occurrences.length;
-        if (closed) {   
+        if (closed) {
             TIntArrayList toAdd = new TIntArrayList();
             TIntSet givenValues = new TIntHashSet();
             for (int i : values) {
@@ -1726,15 +1726,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         List<Integer> ws = new ArrayList<>();
         for (int i = 0; i < occurrences.length; i++) {
             if (occurrences[i].isBool()) {
-                bs.add((BoolVar)occurrences[i]);
+                bs.add((BoolVar) occurrences[i]);
                 es.add(energy[i]);
                 ws.add(weight[i]);
-            }else{
+            } else {
                 assert occurrences[i].getLB() >= 0;
                 int nb = occurrences[i].getUB();
                 BoolVar[] doms = new BoolVar[nb];
                 for (int k = 0; k < nb; k++) {
-                    doms[k] = ref().intGeView(occurrences[i], k+1 );
+                    doms[k] = ref().intGeView(occurrences[i], k + 1);
                     bs.add(doms[k]);
                     es.add(energy[i]);
                     ws.add(weight[i]);
@@ -2010,6 +2010,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
+        Object[] args = replaceByViews(vars, new IntVar[]{nValues});
+        vars = (IntVar[]) args[0];
+        nValues = (IntVar) args[1];
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
@@ -2460,7 +2463,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
-        replaceByViews(vars);
+        vars = (IntVar[]) replaceByViews(vars)[0];
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2525,7 +2528,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Create a table constraint based on hybrid tuples.
      * Such tuples make possible to declare expressions as restriction on values a variable can take.
      * <p>
-     *     <pre>
+     * <pre>
      *         {@code
      *         HybridTuples tuples = new HybridTuples();
      *         tuples.add(ne(a), any(), eq(c));
@@ -2536,12 +2539,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *         }
      *     </pre>
      * </p>
-     * @param vars scope of the constraint
+     *
+     * @param vars    scope of the constraint
      * @param htuples hybrid tuples
      * @return a hybrid table constraint
      * @implNote The filtering algorithm is an adaptation of STR2 to expressions.
      */
-    default Constraint table(IntVar[] vars, HybridTuples htuples){
+    default Constraint table(IntVar[] vars, HybridTuples htuples) {
         assert vars.length == htuples.arity();
         return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
@@ -2624,13 +2628,43 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
+     * This method prepares the replacement of multiple occurrences of a same variable by views.
+     */
+    private static Object[] replaceByViews(Object[]... vars) {
+        List<IntVar> allvars = new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
+        for (Object o : vars) {
+            if (o instanceof IntVar) {
+                allvars.add((IntVar) o);
+                ids.add(1);
+            } else if (o instanceof IntVar[]) {
+                allvars.addAll(Arrays.asList((IntVar[]) o));
+                ids.add(((IntVar[]) o).length);
+            }
+        }
+        replaceByViews(allvars);
+        Object[] nvars = new Object[vars.length];
+        int cnt = 0;
+        int idx = 0;
+        for (int c : ids) {
+            if (c == 1) {
+                nvars[cnt++] = allvars.get(idx);
+            } else {
+                nvars[cnt++] = allvars.subList(idx, idx + c).toArray(new IntVar[c]);
+            }
+            idx += c;
+        }
+        return nvars;
+    }
+
+    /**
      * This method replaces multiple occurrences of a same variable by views.
      */
-    private static void replaceByViews(IntVar[] vars) {
-        for (int i = 0; i < vars.length; i++) {
-            for (int j = i + 1; j < vars.length; j++) {
-                if (vars[i].getId() == vars[j].getId()) {
-                    vars[j] = new IntOffsetView<IntVar>(vars[i], 0);
+    private static void replaceByViews(List<IntVar> vars) {
+        for (int i = 0; i < vars.size(); i++) {
+            for (int j = i + 1; j < vars.size(); j++) {
+                if (vars.get(i).equals(vars.get(j))) {
+                    vars.set(j, new IntOffsetView<IntVar>(vars.get(i), 0));
                 }
             }
         }

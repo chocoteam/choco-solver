@@ -15,6 +15,7 @@
 package org.chocosolver.solver.constraints.nary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
@@ -171,5 +172,18 @@ public class NValueTest {
             model.getSolver().findAllSolutions();
             Assert.assertEquals(model.getSolver().getSolutionCount(), 3720, "Seed:" + i);
         }
+    }
+
+    @Test(groups = "1s")
+    public void testMats1() {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{2, 3});
+        IntVar D = model.intVar("D", new int[]{3, 4});
+        IntVar _1 = model.intVar("1", 1);
+        model.nValues(new IntVar[]{_1, D, C, _1}, D).post();
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(C, D, _1));
+        solver.findAllSolutions();
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 1);
     }
 }
