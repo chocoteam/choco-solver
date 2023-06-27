@@ -1832,6 +1832,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
+        Object[] args = uniquesafe(vars1, vars2);
+        vars1 = (IntVar[]) args[0];
+        vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
@@ -1846,6 +1849,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
+        Object[] args = uniquesafe(vars1, vars2);
+        vars1 = (IntVar[]) args[0];
+        vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
@@ -2010,7 +2016,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
-        Object[] args = replaceByViews(vars, new IntVar[]{nValues});
+        Object[] args = uniquesafe(vars, new IntVar[]{nValues});
         vars = (IntVar[]) args[0];
         nValues = (IntVar) args[1];
         Gci gci = new Gci(vars);
@@ -2463,7 +2469,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
-        vars = (IntVar[]) replaceByViews(vars)[0];
+        vars = (IntVar[]) uniquesafe(vars)[0];
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2629,8 +2635,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
 
     /**
      * This method prepares the replacement of multiple occurrences of a same variable by views.
+     * <p>
+     *     Example of usage:
+     *     <pre>
+     *         {@code
+     *         Object[] args = replaceByViews(vars1, vars2);
+     *         vars1 = (IntVar[]) args[0];
+     *         vars2 = (IntVar[]) args[1];
+     *         }
+     *     </pre>
+     * The arguments, namely <tt>vars1</tt> and <tt>vars2</tt> are turned into <i>uniquesafe</i> arguments.
      */
-    private static Object[] replaceByViews(Object[]... vars) {
+    private static Object[] uniquesafe(Object[]... vars) {
         List<IntVar> allvars = new ArrayList<>();
         List<Integer> ids = new ArrayList<>();
         for (Object o : vars) {
@@ -2642,7 +2658,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 ids.add(((IntVar[]) o).length);
             }
         }
-        replaceByViews(allvars);
+        uniquesafe(allvars);
         Object[] nvars = new Object[vars.length];
         int cnt = 0;
         int idx = 0;
@@ -2660,7 +2676,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * This method replaces multiple occurrences of a same variable by views.
      */
-    private static void replaceByViews(List<IntVar> vars) {
+    private static void uniquesafe(List<IntVar> vars) {
         for (int i = 0; i < vars.size(); i++) {
             for (int j = i + 1; j < vars.size(); j++) {
                 if (vars.get(i).equals(vars.get(j))) {
