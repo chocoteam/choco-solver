@@ -864,4 +864,20 @@ public class TableTest {
         Assert.assertTrue(r.isInstantiatedTo(0));
     }
 
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
+    public void testMany1(String a) {
+        Model model = new Model();
+        IntVar x = model.intVar("x", new int[]{-4, -1, 2});
+        IntVar y = model.intVar("y", -2, -1);
+        Tuples t = new Tuples();
+        t.add(2, -2, -4);
+        t.add(-1, -2, 2);
+        model.table(new IntVar[]{x, y, x}, t, a).post();
+        while (model.getSolver().solve()) {
+            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), x.getValue());
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
 }

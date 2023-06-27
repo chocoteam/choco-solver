@@ -70,6 +70,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.view.integer.IntOffsetView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -2451,13 +2452,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <br/>
      * - <b>FC</b>: Forward Checking.
      * <br/>
-     * - <b>MDD+</b>: uses a multi-valued decision diagram for allowed tuples (see mddc constraint),
+     * - <b>MDD+</b>: uses a multivalued decision diagram for allowed tuples (see mddc constraint),
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
      * @param algo   to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
+        // if some variables appears more than one time, the filtering algorithm can be not correct
+        replaceByViews(vars);
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2618,5 +2621,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             vs[k++] = i + m;
         }
         return vs;
+    }
+
+    /**
+     * This method replaces multiple occurrences of a same variable by views.
+     */
+    private static void replaceByViews(IntVar[] vars) {
+        for (int i = 0; i < vars.length; i++) {
+            for (int j = i + 1; j < vars.length; j++) {
+                if (vars[i].getId() == vars[j].getId()) {
+                    vars[j] = new IntOffsetView<IntVar>(vars[i], 0);
+                }
+            }
+        }
     }
 }
