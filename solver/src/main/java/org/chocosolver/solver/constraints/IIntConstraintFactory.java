@@ -70,6 +70,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
+import org.chocosolver.solver.variables.view.integer.IntOffsetView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -510,9 +511,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * <p>Creates a power constraint: X^C = Z.</p>
      *
-     * @param base first variable
+     * @param base     first variable
      * @param exponent an integer, should be positive
-     * @param result result variable
+     * @param result   result variable
      * @implSpec The 'power' propagator does not exist.
      * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
      * 'times' constraints.
@@ -542,9 +543,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             b = mm.get(C - mid);
             return ref().times(a, b, Y);
             /*/
-            if((exponent % 2) == 0){
+            if ((exponent % 2) == 0) {
                 return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
-            }else{
+            } else {
                 return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
             }
             //*/
@@ -922,9 +923,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take the same value.
      *
      * @param vars list of variables
-     * @implNote
-     * This constraint is reformulated as an atMostNValues constraint, with bound consistency.
      * @throws IllegalArgumentException when the array of variables is either null or empty.
+     * @implNote This constraint is reformulated as an atMostNValues constraint, with bound consistency.
      */
     default Constraint allEqual(IntVar... vars) {
         if (vars == null || vars.length == 0) {
@@ -940,7 +940,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take more than a single value.
      *
      * @param vars list of variables
-     *             @throws IllegalArgumentException when the array of variables is either null or empty.
+     * @throws IllegalArgumentException when the array of variables is either null or empty.
      */
     default Constraint notAllEqual(IntVar... vars) {
         if (vars == null || vars.length == 0) {
@@ -1525,7 +1525,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint globalCardinality(IntVar[] vars, int[] values, IntVar[] occurrences, boolean closed) {
         assert values.length == occurrences.length;
-        if (closed) {   
+        if (closed) {
             TIntArrayList toAdd = new TIntArrayList();
             TIntSet givenValues = new TIntHashSet();
             for (int i : values) {
@@ -1725,15 +1725,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         List<Integer> ws = new ArrayList<>();
         for (int i = 0; i < occurrences.length; i++) {
             if (occurrences[i].isBool()) {
-                bs.add((BoolVar)occurrences[i]);
+                bs.add((BoolVar) occurrences[i]);
                 es.add(energy[i]);
                 ws.add(weight[i]);
-            }else{
+            } else {
                 assert occurrences[i].getLB() >= 0;
                 int nb = occurrences[i].getUB();
                 BoolVar[] doms = new BoolVar[nb];
                 for (int k = 0; k < nb; k++) {
-                    doms[k] = ref().intGeView(occurrences[i], k+1 );
+                    doms[k] = ref().intGeView(occurrences[i], k + 1);
                     bs.add(doms[k]);
                     es.add(energy[i]);
                     ws.add(weight[i]);
@@ -1831,6 +1831,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
+        Object[] args = variableUniqueness(vars1, vars2);
+        vars1 = (IntVar[]) args[0];
+        vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
@@ -1845,6 +1848,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
+        Object[] args = variableUniqueness(vars1, vars2);
+        vars1 = (IntVar[]) args[0];
+        vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
             throw new SolverException("vars1 and vars2 should have the same length for lexLess constraint");
         }
@@ -1860,6 +1866,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars   a vector of variables, of size > 0
      */
     default Constraint argmax(IntVar z, int offset, IntVar[] vars) {
+        Object[] args = variableUniqueness(vars, new IntVar[]{z});
+        vars = (IntVar[]) args[0];
+        z = ((IntVar[]) args[1])[0];
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
     }
 
@@ -1875,6 +1884,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * on this views.
      */
     default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
+        Object[] args = variableUniqueness(vars, new IntVar[]{z});
+        vars = (IntVar[]) args[0];
+        z = ((IntVar[]) args[1])[0];
         IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
@@ -2009,6 +2021,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
+        Object[] args = variableUniqueness(vars, new IntVar[]{nValues});
+        vars = (IntVar[]) args[0];
+        nValues = ((IntVar[]) args[1])[0];
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
@@ -2451,13 +2466,15 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * <br/>
      * - <b>FC</b>: Forward Checking.
      * <br/>
-     * - <b>MDD+</b>: uses a multi-valued decision diagram for allowed tuples (see mddc constraint),
+     * - <b>MDD+</b>: uses a multivalued decision diagram for allowed tuples (see mddc constraint),
      *
      * @param vars   variables forming the tuples
      * @param tuples the relation between the variables (list of allowed/forbidden tuples). Should not be modified once passed to the constraint.
      * @param algo   to choose among {"CT+", "GAC3rm", "GAC2001", "GACSTR", "GAC2001+", "GAC3rm+", "FC", "STR2+"}
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
+        // if some variables appears more than one time, the filtering algorithm can be not correct
+        vars = (IntVar[]) variableUniqueness(vars)[0];
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2522,7 +2539,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Create a table constraint based on hybrid tuples.
      * Such tuples make possible to declare expressions as restriction on values a variable can take.
      * <p>
-     *     <pre>
+     * <pre>
      *         {@code
      *         HybridTuples tuples = new HybridTuples();
      *         tuples.add(ne(a), any(), eq(c));
@@ -2533,12 +2550,13 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *         }
      *     </pre>
      * </p>
-     * @param vars scope of the constraint
+     *
+     * @param vars    scope of the constraint
      * @param htuples hybrid tuples
      * @return a hybrid table constraint
      * @implNote The filtering algorithm is an adaptation of STR2 to expressions.
      */
-    default Constraint table(IntVar[] vars, HybridTuples htuples){
+    default Constraint table(IntVar[] vars, HybridTuples htuples) {
         assert vars.length == htuples.arity();
         return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
@@ -2618,5 +2636,43 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             vs[k++] = i + m;
         }
         return vs;
+    }
+
+    /**
+     * This method ensures that no variable occurs more than once in the list of variables.
+     * If this is the case, it replaces the duplicate variables by views.
+     * <p>
+     *     Example of usage:
+     *     <pre>
+     *         {@code
+     *         Object[] args = variableUniqueness(vars1, vars2);
+     *         vars1 = (IntVar[]) args[0];
+     *         vars2 = (IntVar[]) args[1];
+     *         }
+     *     </pre>
+     * The arguments, namely <tt>vars1</tt> and <tt>vars2</tt>, are turned into <i>unique-safe</i> arguments.
+     */
+    static Object[] variableUniqueness(Object[]... vars) {
+        List<IntVar> allvars = new ArrayList<>();
+        List<Integer> ids = new ArrayList<>();
+        for (Object o : vars) {
+            allvars.addAll(Arrays.asList((IntVar[]) o));
+            ids.add(((IntVar[]) o).length);
+        }
+        for (int i = 0; i < allvars.size(); i++) {
+            for (int j = i + 1; j < allvars.size(); j++) {
+                if (allvars.get(i).equals(allvars.get(j))) {
+                    allvars.set(j, new IntOffsetView<IntVar>(allvars.get(i), 0));
+                }
+            }
+        }
+        Object[] nvars = new Object[vars.length];
+        int cnt = 0;
+        int idx = 0;
+        for (int c : ids) {
+            nvars[cnt++] = allvars.subList(idx, idx + c).toArray(new IntVar[c]);
+            idx += c;
+        }
+        return nvars;
     }
 }

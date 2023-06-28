@@ -10,9 +10,13 @@
 package org.chocosolver.solver.constraints.nary.min_max;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMiddle;
+import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
 import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
@@ -33,7 +37,7 @@ import java.util.Random;
 public class ArgmaxminTest {
 
     @DataProvider
-    private Object[][] dec() {
+    private Object[][] decAndOffset() {
         List<Object[]> args = new ArrayList<>();
         for (int offset = -3; offset < 4; offset++) {
             args.add(new Object[]{true, offset});
@@ -252,11 +256,11 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
-    @Test(groups = "1s", dataProvider = "dec")
+    @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAA0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{o, 1+o, 2+o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 1 + o, 2 + o, 3 + o});
         x[0] = model.intVar("x1", 1, 3);
         x[1] = model.intVar("x2", 2, 4);
         x[2] = model.intVar("x3", 3, 5);
@@ -273,11 +277,11 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getNodeCount(), 161);
     }
 
-    @Test(groups = "1s", dataProvider = "dec")
+    @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAB0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{3+o});
+        IntVar z = model.intVar("z", new int[]{3 + o});
         x[0] = model.intVar("x1", 1);
         x[1] = model.intVar("x2", 2);
         x[2] = model.intVar("x3", 3, 5);
@@ -294,11 +298,11 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getNodeCount(), 11);
     }
 
-    @Test(groups = "1s", dataProvider = "dec")
+    @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAC0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{2+o, 3+o});
+        IntVar z = model.intVar("z", new int[]{2 + o, 3 + o});
         x[0] = model.intVar("x1", 4, 5);
         x[1] = model.intVar("x2", 1);
         x[2] = model.intVar("x3", 2);
@@ -315,11 +319,11 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getNodeCount(), 5);
     }
 
-    @Test(groups = "1s", dataProvider = "dec")
+    @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAD0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 3 + o});
         x[0] = model.intVar("x1", 4, 5);
         x[1] = model.intVar("x2", 1);
         x[2] = model.intVar("x3", 2);
@@ -336,11 +340,11 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getNodeCount(), 7);
     }
 
-    @Test(groups = "1s", dataProvider = "dec")
+    @Test(groups = "1s", dataProvider = "decAndOffset")
     public void testAAE0(boolean dec, int o) {
         Model model = new Model(Settings.init());
         IntVar[] x = new IntVar[4];
-        IntVar z = model.intVar("z", new int[]{o, 3+o});
+        IntVar z = model.intVar("z", new int[]{o, 3 + o});
         x[0] = model.intVar("x1", 4);
         x[1] = model.intVar("x2", 1);
         x[2] = model.intVar("x3", 2);
@@ -355,6 +359,48 @@ public class ArgmaxminTest {
         solver.findAllSolutions();
         Assert.assertEquals(solver.getSolutionCount(), 2);
         Assert.assertEquals(solver.getNodeCount(), 3);
+    }
+
+    @Test(groups = "1s", dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+    public void testMats1(boolean dec) {
+        Model model = new Model(Settings.init());
+        IntVar[] x = new IntVar[5];
+        x[0] = model.intVar("B", new int[]{1, 7});
+        x[1] = model.intVar("E", new int[]{1, 7});
+        x[2] = x[0];
+        x[3] = model.intVar("1", 1);
+        x[4] = model.intVar("7", 7);
+
+        IntVar z = model.intVar("C", 1, 4);
+        if (dec) {
+            model.argminDec(z, 1, x);
+        } else {
+            model.argmin(z, 1, x).post();
+        }
+        Solver solver = model.getSolver();
+        //int_search([B,C,E],occurrence,indomain_reverse_split,complete)
+        solver.showDecisions(() -> "");
+        solver.showSolutions();
+        solver.setSearch(
+                Search.intVarSearch(
+                        new Occurrence<>(),
+                        new IntDomainMiddle(!IntDomainMiddle.FLOOR),
+                        DecisionOperatorFactory.makeIntReverseSplit(),
+                        x[0], z, x[1]));
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 4);
+    }
+
+    @Test(groups = "1s")
+    public void testMats2() {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{4, 5, 7});
+        IntVar one = model.intVar(1);
+        IntVar[] vs = new IntVar[]{one, one, one, C, C};
+        model.argmax(model.intVar(5), 1, vs).post();
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
 }

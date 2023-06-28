@@ -9,8 +9,9 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
-import org.chocosolver.solver.Settings;
+import org.chocosolver.solver.Providers;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.binary.PropModXY;
@@ -200,5 +201,17 @@ public class ModXYZTest extends AbstractTernaryTest {
         Assert.assertEquals(z.getUB(), 8);
 
         Assert.assertEquals(y.getLB(), 1);
+	}
+
+
+
+	@Test(groups = "1s", timeOut = 60000, dataProvider = "trueOrFalse", dataProviderClass = Providers.class)
+	public void testMats1(boolean tableSubs) {
+		Model model = new Model("model", Settings.prod().setEnableTableSubstitution(tableSubs));
+		IntVar x = model.intVar("A", new int[]{-8,-1});
+		IntVar y = model.intVar("B", new int[]{-8,-7,-2});
+		model.mod(y, y, x).post();
+		model.getSolver().findAllSolutions();
+		Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
 	}
 }
