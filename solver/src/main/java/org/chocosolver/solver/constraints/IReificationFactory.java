@@ -206,7 +206,9 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXeqY(IntVar X, IntVar Y, BoolVar B) {
-        if (X.isAConstant()) {
+        if(X == Y){
+            ref().arithm(B, "=", 1).post();
+        }else if (X.isAConstant()) {
             reifyXeqC(Y, X.getValue(), B);
         } else if (Y.isAConstant()) {
             reifyXeqC(X, Y.getValue(), B);
@@ -247,7 +249,9 @@ public interface IReificationFactory extends ISelf<Model> {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXeqYC(IntVar X, IntVar Y, int C, BoolVar B) {
-        if (X.isAConstant()) {
+        if(C == 0){
+            reifyXeqY(X, Y, B);
+        }else if (X.isAConstant()) {
             reifyXeqC(Y, X.getValue() - C, B);
         } else if (Y.isAConstant()) {
             reifyXeqC(X, Y.getValue() + C, B);
@@ -383,7 +387,13 @@ public interface IReificationFactory extends ISelf<Model> {
     @SuppressWarnings("SuspiciousNameCombination")
     default void reifyXltYC(IntVar X, IntVar Y, int C, BoolVar B) {
         // no check to allow addition during resolution
-        if (X.isAConstant()) {
+        if(X == Y){
+            if(C > 0){
+                ref().arithm(B, "=", 1).post();
+            }else{
+                ref().arithm(B, "=", 0).post();
+            }
+        }else if (X.isAConstant()) {
             reifyXgtC(Y, X.getValue() - C, B);
         } else if (Y.isAConstant()) {
             reifyXltC(X, Y.getValue() + C, B);
