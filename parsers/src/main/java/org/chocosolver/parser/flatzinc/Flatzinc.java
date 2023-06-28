@@ -227,7 +227,6 @@ public class Flatzinc extends RegParser {
                         valueSelector = new IntDomainMin();
                     } else {
                         valueSelector = new IntDomainBest();
-                        m.getSolver().attach(m.getSolver().defaultSolution());
                         valueSelector = new IntDomainLast(m.getSolver().defaultSolution(), valueSelector, null);
                     }
                     strats.add(Search.lastConflict(new IntStrategy(ivars, new FirstFail(m), valueSelector)));

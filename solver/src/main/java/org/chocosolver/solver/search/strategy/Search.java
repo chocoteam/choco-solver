@@ -464,8 +464,14 @@ public class Search {
             valueSelector = new IntDomainMin();
         } else {
             valueSelector = new IntDomainBest();
-            model.getSolver().attach(model.getSolver().defaultSolution());
-            valueSelector = new IntDomainLast(model.getSolver().defaultSolution(), valueSelector, null);
+            Solution solution;
+            if (model.getSolver().defaultSolutionExists()) {
+                solution = model.getSolver().defaultSolution(); // already attached
+            } else {
+                solution = new Solution(model, vars);
+                model.getSolver().attach(solution);
+            }
+            valueSelector = new IntDomainLast(solution, valueSelector, null);
         }
         return intVarSearch(new DomOverWDeg<>(vars, 0), valueSelector, vars);
     }
@@ -1179,7 +1185,6 @@ public class Search {
                 if (model.getResolutionPolicy() == ResolutionPolicy.SATISFACTION) {
                     return selector;
                 }
-                model.getSolver().attach(model.getSolver().defaultSolution());
                 return new IntDomainLast(model.getSolver().defaultSolution(), selector, null);
             } else {
                 return selector;
