@@ -923,9 +923,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Ensures that all variables from vars take the same value.
      *
      * @param vars list of variables
-     * @implNote
-     * This constraint is reformulated as an atMostNValues constraint, with bound consistency.
      * @throws IllegalArgumentException when the array of variables is either null or empty.
+     * @implNote This constraint is reformulated as an atMostNValues constraint, with bound consistency.
      */
     default Constraint allEqual(IntVar... vars) {
         if (vars == null || vars.length == 0) {
@@ -2652,7 +2651,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      *     </pre>
      * The arguments, namely <tt>vars1</tt> and <tt>vars2</tt> are turned into <i>uniquesafe</i> arguments.
      */
-    private static Object[] uniquesafe(Object[]... vars) {
+    static Object[] uniquesafe(Object[]... vars) {
         List<IntVar> allvars = new ArrayList<>();
         List<Integer> ids = new ArrayList<>();
         for (Object o : vars) {
@@ -2682,7 +2681,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     /**
      * This method replaces multiple occurrences of a same variable by views.
      */
-    private static void uniquesafe(List<IntVar> vars) {
+    static void uniquesafe(List<IntVar> vars) {
         for (int i = 0; i < vars.size(); i++) {
             for (int j = i + 1; j < vars.size(); j++) {
                 if (vars.get(i).equals(vars.get(j))) {
