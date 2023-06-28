@@ -1831,7 +1831,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLess(IntVar[] vars1, IntVar[] vars2) {
-        Object[] args = uniquesafe(vars1, vars2);
+        Object[] args = variableUniqueness(vars1, vars2);
         vars1 = (IntVar[]) args[0];
         vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
@@ -1848,7 +1848,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars2 vector of variables
      */
     default Constraint lexLessEq(IntVar[] vars1, IntVar[] vars2) {
-        Object[] args = uniquesafe(vars1, vars2);
+        Object[] args = variableUniqueness(vars1, vars2);
         vars1 = (IntVar[]) args[0];
         vars2 = (IntVar[]) args[1];
         if (vars1.length != vars2.length) {
@@ -1866,9 +1866,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param vars   a vector of variables, of size > 0
      */
     default Constraint argmax(IntVar z, int offset, IntVar[] vars) {
-        Object[] args = uniquesafe(vars, new IntVar[]{z});
+        Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
-        z = (IntVar) args[1];
+        z = ((IntVar[]) args[1])[0];
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
     }
 
@@ -1884,9 +1884,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * on this views.
      */
     default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
-        Object[] args = uniquesafe(vars, new IntVar[]{z});
+        Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
-        z = (IntVar) args[1];
+        z = ((IntVar[]) args[1])[0];
         IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
@@ -2021,9 +2021,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @return the conjunction of atleast_nvalue and atmost_nvalue
      */
     default Constraint nValues(IntVar[] vars, IntVar nValues) {
-        Object[] args = uniquesafe(vars, new IntVar[]{nValues});
+        Object[] args = variableUniqueness(vars, new IntVar[]{nValues});
         vars = (IntVar[]) args[0];
-        nValues = (IntVar) args[1];
+        nValues = ((IntVar[]) args[1])[0];
         Gci gci = new Gci(vars);
         R[] rules = new R[]{new R1(), new R3(vars.length, nValues.getModel())};
         return new Constraint(
@@ -2474,7 +2474,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
-        vars = (IntVar[]) uniquesafe(vars)[0];
+        vars = (IntVar[]) variableUniqueness(vars)[0];
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2639,55 +2639,40 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     }
 
     /**
-     * This method prepares the replacement of multiple occurrences of a same variable by views.
+     * This method ensures that no variable occurs more than once in the list of variables.
+     * If this is the case, it replaces the duplicate variables by views.
      * <p>
      *     Example of usage:
      *     <pre>
      *         {@code
-     *         Object[] args = replaceByViews(vars1, vars2);
+     *         Object[] args = variableUniqueness(vars1, vars2);
      *         vars1 = (IntVar[]) args[0];
      *         vars2 = (IntVar[]) args[1];
      *         }
      *     </pre>
-     * The arguments, namely <tt>vars1</tt> and <tt>vars2</tt> are turned into <i>uniquesafe</i> arguments.
+     * The arguments, namely <tt>vars1</tt> and <tt>vars2</tt>, are turned into <i>unique-safe</i> arguments.
      */
-    static Object[] uniquesafe(Object[]... vars) {
+    static Object[] variableUniqueness(Object[]... vars) {
         List<IntVar> allvars = new ArrayList<>();
         List<Integer> ids = new ArrayList<>();
         for (Object o : vars) {
-            if (o instanceof IntVar) {
-                allvars.add((IntVar) o);
-                ids.add(1);
-            } else if (o instanceof IntVar[]) {
-                allvars.addAll(Arrays.asList((IntVar[]) o));
-                ids.add(((IntVar[]) o).length);
+            allvars.addAll(Arrays.asList((IntVar[]) o));
+            ids.add(((IntVar[]) o).length);
+        }
+        for (int i = 0; i < allvars.size(); i++) {
+            for (int j = i + 1; j < allvars.size(); j++) {
+                if (allvars.get(i).equals(allvars.get(j))) {
+                    allvars.set(j, new IntOffsetView<IntVar>(allvars.get(i), 0));
+                }
             }
         }
-        uniquesafe(allvars);
         Object[] nvars = new Object[vars.length];
         int cnt = 0;
         int idx = 0;
         for (int c : ids) {
-            if (c == 1) {
-                nvars[cnt++] = allvars.get(idx);
-            } else {
-                nvars[cnt++] = allvars.subList(idx, idx + c).toArray(new IntVar[c]);
-            }
+            nvars[cnt++] = allvars.subList(idx, idx + c).toArray(new IntVar[c]);
             idx += c;
         }
         return nvars;
-    }
-
-    /**
-     * This method replaces multiple occurrences of a same variable by views.
-     */
-    static void uniquesafe(List<IntVar> vars) {
-        for (int i = 0; i < vars.size(); i++) {
-            for (int j = i + 1; j < vars.size(); j++) {
-                if (vars.get(i).equals(vars.get(j))) {
-                    vars.set(j, new IntOffsetView<IntVar>(vars.get(i), 0));
-                }
-            }
-        }
     }
 }
