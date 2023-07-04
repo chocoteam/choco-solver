@@ -307,4 +307,27 @@ public class FlatzincModelTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
     }
 
+    @Test(groups = "1s")
+    public void testMats7() {
+        InputStream in = new ByteArrayInputStream((
+                "predicate choco_fzn_table(array [int] of var int: x,array [int] of int: t);\n" +
+                        "array [1..12] of int: X_INTRODUCED_2_ = [1,4,2,1,4,7,7,2,7,7,18,18];\n" +
+                        "var {1,2,4,7,18}: A:: output_var;\n" +
+                        "array [1..2] of var int: X_INTRODUCED_1_ ::var_is_introduced  = [A,A];\n" +
+                        "constraint choco_fzn_table(X_INTRODUCED_1_,X_INTRODUCED_2_);\n" +
+                        "solve :: int_search([A],largest,indomain_interval,complete) satisfy;" +
+                        "\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+    }
+
 }

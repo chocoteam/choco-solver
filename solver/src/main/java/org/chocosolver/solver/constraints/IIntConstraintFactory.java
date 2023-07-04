@@ -448,6 +448,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param tuples the relation between the two variables, among {"AC3", "AC3rm", "AC3bit+rm", "AC2001", "CT+", "FC"}
      */
     default Constraint table(IntVar var1, IntVar var2, Tuples tuples, String algo) {
+        Object[] args = variableUniqueness(new IntVar[]{var1, var2});
+        var1 = ((IntVar[]) args[0])[0];
+        var2 = ((IntVar[]) args[0])[1];
         Propagator<IntVar> p;
         if (tuples.allowUniversalValue()) {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);

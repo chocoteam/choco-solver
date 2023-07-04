@@ -23,6 +23,7 @@ import org.chocosolver.solver.constraints.extension.nary.TuplesTable;
 import org.chocosolver.solver.constraints.extension.nary.TuplesVeryLargeTable;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -867,17 +868,43 @@ public class TableTest {
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "algos")
     public void testMany1(String a) {
-        Model model = new Model();
-        IntVar x = model.intVar("x", new int[]{-4, -1, 2});
-        IntVar y = model.intVar("y", -2, -1);
-        Tuples t = new Tuples();
-        t.add(2, -2, -4);
-        t.add(-1, -2, 2);
-        model.table(new IntVar[]{x, y, x}, t, a).post();
-        while (model.getSolver().solve()) {
-            out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), x.getValue());
+        for(int i = 0; i < 200; i++) {
+            Model model = new Model();
+            IntVar x = model.intVar("x", new int[]{-4, -1, 2});
+            IntVar y = model.intVar("y", -2, -1);
+            Tuples t = new Tuples();
+            t.add(2, -2, -4);
+            t.add(-1, -2, 2);
+            model.table(new IntVar[]{x, y, x}, t, a).post();
+            Solver solver = model.getSolver();
+            solver.setSearch(new FullyRandom(new IntVar[]{x}, i));
+            while (model.getSolver().solve()) {
+                out.printf("%d - %d - %d\n", x.getValue(), y.getValue(), x.getValue());
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
         }
-        Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
+
+    @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
+    public void testMany2(String a) {
+        for(int i = 0; i < 200; i++) {
+            Model model = new Model();
+            IntVar x = model.intVar("x", new int[]{1, 2, 4, 7, 18});
+            Tuples t = new Tuples();
+            t.add(1, 4);
+            t.add(2, 1);
+            t.add(4, 7);
+            t.add(7, 2);
+            t.add(7, 7);
+            t.add(18, 18);
+            model.table(x, x, t, a).post();
+            Solver solver = model.getSolver();
+            solver.setSearch(new FullyRandom(new IntVar[]{x}, i));
+            while (model.getSolver().solve()) {
+                out.printf("%d - %d\n", x.getValue(), x.getValue());
+            }
+            Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+        }
     }
 
     @Test(groups = "1s", timeOut = 60000, dataProvider = "balgos")
