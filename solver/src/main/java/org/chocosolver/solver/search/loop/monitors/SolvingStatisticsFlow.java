@@ -11,7 +11,7 @@ package org.chocosolver.solver.search.loop.monitors;
 
 import org.chocosolver.solver.Solver;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
@@ -38,7 +38,7 @@ import java.util.function.Function;
  *     "memory": "123456"
  * </pre>
  * <br/>
- * The time is given in seconds, and the memory usage in MB.
+ * The time is given in seconds, and the memory usage in bytes.
  * When the objective is not set, the value is "--".
  * When an error occurs when estimating the memory usage, the value is "-1".
  * <br/>
@@ -63,7 +63,7 @@ import java.util.function.Function;
  */
 public class SolvingStatisticsFlow {
 
-    private static final HashMap<String, Function<Solver, String>> elements = new HashMap<>();
+    private static final LinkedHashMap<String, Function<Solver, String>> elements = new LinkedHashMap<>();
 
     static {
         elements.put("variables", solver -> Long.toString(solver.getModel().getNbVars()));
@@ -104,9 +104,7 @@ public class SolvingStatisticsFlow {
     public static String toJSON(Solver solver) {
         StringBuilder sb = new StringBuilder();
         sb.append("{");
-        elements.forEach((k, v) -> {
-            sb.append("\"").append(k).append("\":\"").append(v.apply(solver)).append("\",");
-        });
+        elements.forEach((k, v) -> sb.append("\"").append(k).append("\":\"").append(v.apply(solver)).append("\","));
         sb.deleteCharAt(sb.length() - 1);
         sb.append("}");
         return sb.toString();

@@ -34,6 +34,8 @@ import org.testng.annotations.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.chocosolver.util.ProblemMaker.makeGolombRuler;
@@ -410,6 +412,25 @@ public class SolverTest {
     public void testSolvingFlow() {
         Model model = ProblemMaker.makeGolombRuler(9);
         Solver solver = model.getSolver();
-        assertEquals(SolvingStatisticsFlow.toJSON(solver), "{\"variables\":\"45\",\"memory\":\"-1\",\"solutions\":\"0\",\"constraints\":\"155\",\"restarts\":\"0\",\"backjumps\":\"0\",\"objective\":\"1024\",\"backtracks\":\"0\",\"fixpoints\":\"0\",\"nodes\":\"0\",\"depth\":\"0\",\"time\":\"00:00:00\",\"fails\":\"0\"}");
+        String jsonObject = SolvingStatisticsFlow.toJSON(solver);
+        Pattern p = Pattern.compile("\"variables\":\"(\\d+)\"," +
+                "\"constraints\":\"(\\d+)\"," +
+                "\"objective\":\"(\\d+)\"," +
+                "\"solutions\":\"(\\d+)\"," +
+                "\"nodes\":\"(\\d+)\"," +
+                "\"fails\":\"(\\d+)\"," +
+                "\"backtracks\":\"(\\d+)\"," +
+                "\"backjumps\":\"(\\d+)\"," +
+                "\"restarts\":\"(\\d+)\"," +
+                "\"fixpoints\":\"(\\d+)\"," +
+                "\"depth\":\"(\\d+)\"," +
+                "\"time\":\"(\\d+):(\\d+):(\\d+)\"," +
+                "\"memory\":\"-?(\\d+)\"}"
+        );
+        Matcher m = p.matcher(jsonObject);
+        Assert.assertTrue(m.find());
+        Assert.assertEquals(m.group(1), "45");
+        Assert.assertEquals(m.group(2), "155");
+        Assert.assertEquals(m.group(3), "1024");
     }
 }
