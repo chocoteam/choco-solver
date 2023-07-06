@@ -106,7 +106,6 @@ module org.chocosolver.solver {
     //exports org.chocosolver.solver.variables.impl.scheduler;
     exports org.chocosolver.solver.variables.view;
     exports org.chocosolver.solver.trace;
-    exports org.chocosolver.solver.trace.frames;
 
     exports org.chocosolver.util;
     exports org.chocosolver.util.criteria;
@@ -131,9 +130,6 @@ module org.chocosolver.solver {
 
     requires trove4j;
     requires org.jgrapht.core;
-    requires java.desktop;
-    requires org.knowm.xchart;
-    requires java.management;
     requires automaton;
     requires sizeof;
 

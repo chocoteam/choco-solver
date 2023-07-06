@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.search.loop;
 
-import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
@@ -17,8 +16,10 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.propagation.PropagationProfiler;
 import org.chocosolver.solver.search.limits.NodeCounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.RandomNeighborhood;
+import org.chocosolver.solver.search.loop.monitors.SolvingStatisticsFlow;
 import org.chocosolver.solver.search.loop.move.MoveBinaryDFS;
 import org.chocosolver.solver.search.loop.move.MoveBinaryLDS;
+import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
@@ -26,6 +27,7 @@ import org.chocosolver.solver.search.strategy.strategy.FullyRandom;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -402,5 +404,12 @@ public class SolverTest {
                 " 7              1         0         0         0         0  \"binLoad[1]\"\n" +
                 " 8              1         0         0         0         0  \"binLoad[2]\"\n" +
                 " 9              0         0         0         0         0  \"cste -- 24576\"\n\n");
+    }
+
+    @Test(groups = "1s")
+    public void testSolvingFlow() {
+        Model model = ProblemMaker.makeGolombRuler(9);
+        Solver solver = model.getSolver();
+        assertEquals(SolvingStatisticsFlow.toJSON(solver), "{\"variables\":\"45\",\"memory\":\"-1\",\"solutions\":\"0\",\"constraints\":\"155\",\"restarts\":\"0\",\"backjumps\":\"0\",\"objective\":\"1024\",\"backtracks\":\"0\",\"fixpoints\":\"0\",\"nodes\":\"0\",\"depth\":\"0\",\"time\":\"00:00:00\",\"fails\":\"0\"}");
     }
 }

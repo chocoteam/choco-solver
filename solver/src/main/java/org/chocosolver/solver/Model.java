@@ -686,7 +686,7 @@ public class Model implements IModel {
      * @return the total size in bytes for this model
      * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
      */
-    public long getEstimatedMemory(){
+    public long getEstimatedMemory() throws UnsupportedOperationException{
         SizeOf sizeOf = SizeOf.newInstance();
         return sizeOf.deepSizeOf(this);
     }
