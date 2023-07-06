@@ -6,7 +6,7 @@ DATE := $(shell date +'%y%m%d')
 CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep -v "\[INFO\]" | grep -v "\[WARNING\]")
 
 .PHONY: all clean compile tests 1s 10s ibex checker mzn xcsp mps dimacs expl update_date compet msc delmsc help
-
+.DEFAULT_GOAL := package
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  all        			to clean, compile and package the project"
