@@ -10,13 +10,16 @@
 package org.chocosolver.solver.search.restart;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.limits.NodeCounter;
+import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.ProblemMaker;
 import org.testng.annotations.Test;
 
-import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
+import static org.chocosolver.solver.search.strategy.Search.*;
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -113,5 +116,22 @@ public class RestartTest {
         // not 2, because of restart, that found twice the same solution
 //        Assert.assertEquals(solver.getSolutionCount(), 92);
         assertEquals(model.getSolver().getRestartCount(), 2);
+    }
+
+    @Test(groups = "1s")
+    public void testGolombRuler(){
+        Model model = ProblemMaker.makeGolombRuler(10);
+        IntVar[] ticks = (IntVar[]) model.getHook("ticks");
+        Solver solver = model.getSolver();
+        solver.setGeometricalRestart(10, 1.05, new FailCounter(model, 2), 2);
+        solver.setNoGoodRecordingFromRestarts();
+        solver.setSearch(
+                Search.generatePartialAssignment(ticks, 5, false,
+                        domOverWDegSearch(ticks)
+                )
+        );
+        while (solver.solve()) ;
+        assertEquals(solver.getRestartCount(), 2);
+        assertEquals(solver.getSolutionCount(), 9);
     }
 }

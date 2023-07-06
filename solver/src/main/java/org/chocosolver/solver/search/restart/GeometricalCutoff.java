@@ -55,7 +55,7 @@ public final class GeometricalCutoff extends AbstractCutoff {
      */
     @Override
     public long getNextCutoff() {
-        final long cutoff = (long) Math.ceil(scaleFactor * geometricalFactorPower);
+        final long cutoff = (long) Math.ceil(scaleFactor * geometricalFactorPower) * grower.getAsInt();
         geometricalFactorPower *= geometricalFactor;
         return cutoff;
     }

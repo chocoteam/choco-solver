@@ -110,6 +110,29 @@ public class Search {
     }
 
     /**
+     * Use the Generating Partial Assignment procedure as a plug-in to improve a former search heuristic
+     * for COPs.
+     * <br/>
+     * The aim of the approach is to find promising partial assignments that have a higher possibility of being optimal,
+     * or can be extended to a high-quality solution whose objective is close to that of an optimal one.
+     * </br>
+     * This meta-heuristic is described in:
+     * "Finding Good Partial Assignments During Restart-based Branch and Bound Search, AAAI'23".
+     *
+     * @param ivars      variables to generate partial assignment from
+     * @param maxSolNum  maximum number of solutions to store
+     * @param largerCutoff whether to use larger cutoff when looking for solutions
+     * @param formerSearch former search heuristic
+     * @return good partial assignment strategy to plug in as first strategy
+     */
+    public static AbstractStrategy<?> generatePartialAssignment(IntVar[] ivars,
+                                                                int maxSolNum,
+                                                                boolean largerCutoff,
+                                                                AbstractStrategy<?> formerSearch) {
+        return new PartialAssignmentGenerator<>(ivars, maxSolNum, largerCutoff, formerSearch);
+    }
+
+    /**
      * Make the input search strategy greedy, that is, decisions can be applied but not refuted.
      *
      * @param search a search heuristic building branching decisions

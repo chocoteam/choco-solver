@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import java.util.function.IntSupplier;
+
 /**
  * Abstract class to generate cutoff sequence
  * <br/>
@@ -24,6 +26,8 @@ public abstract class AbstractCutoff implements ICutoff {
      */
     protected final long scaleFactor;
 
+    protected IntSupplier grower =  () -> 1;
+
     /**
      * Create an abstract class with the specific <i>scaleFactor</i>.
      * @param s scale factor (should be strictly positive)
@@ -35,5 +39,10 @@ public abstract class AbstractCutoff implements ICutoff {
             throw new IllegalArgumentException("The scale factor of a restart strategy must be strictly positive.");
         }
         this.scaleFactor = s;
+    }
+
+    @Override
+    public void setGrower(IntSupplier grower) {
+        this.grower = grower;
     }
 }

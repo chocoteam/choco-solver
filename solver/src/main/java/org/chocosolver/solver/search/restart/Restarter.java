@@ -12,6 +12,8 @@ package org.chocosolver.solver.search.restart;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.util.criteria.LongCriterion;
 
+import java.util.function.IntSupplier;
+
 /**
  * This enables restarting a search on certain conditions
  * (most of the time based on a counter).
@@ -98,5 +100,11 @@ public final class Restarter extends AbstractRestart {
             return true;
         }
         return next.mustRestart(solver);
+    }
+
+    @Override
+    public void setGrower(IntSupplier grower) {
+        this.restartStrategy.setGrower(grower);
+        this.next.setGrower(grower);
     }
 }

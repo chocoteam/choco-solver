@@ -12,6 +12,8 @@ package org.chocosolver.solver.search.restart;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.SolverException;
 
+import java.util.function.IntSupplier;
+
 /**
  * Defines the methods of a restart policy.
  * The main one is `mustRestart` which check wether a restort should be done.
@@ -47,6 +49,9 @@ public abstract class AbstractRestart {
 
     public boolean mustRestart(Solver solver) {
         return false;
+    }
+
+    public void setGrower(IntSupplier grower) {
     }
 
 }

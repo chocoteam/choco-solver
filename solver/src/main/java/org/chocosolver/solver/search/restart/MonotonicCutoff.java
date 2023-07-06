@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import java.util.function.IntSupplier;
+
 /**
  * Restart strategy to restart every <tt>gap</tt> restarts
  * <p/>
@@ -32,6 +34,11 @@ public class MonotonicCutoff implements ICutoff {
 
     @Override
     public void reset() {
+        // nothing
+    }
+
+    @Override
+    public void setGrower(IntSupplier grower) {
         // nothing
     }
 }
