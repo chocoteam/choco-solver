@@ -11,10 +11,17 @@ package org.chocosolver.solver.search.strategy.selectors.values;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solution;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.search.limits.SolutionCounter;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 /**
  * <br/>
@@ -49,6 +56,39 @@ public class IntDomainMiddleTest {
             int val = sel.selectValue(x);
             Assert.assertEquals(val, order[i++]);
             x.removeValue(val, Cause.Null);
+        }
+    }
+
+    @Test(groups = "1s")
+    public void test3() {
+        // Create a constraint network
+        Model net = new Model();
+        Solver solver = net.getSolver();
+
+        IntVar x = net.intVar(//
+                "x", //
+                -1000, //
+                1000);
+        IntVar y = net.intVar(//
+                "y", //
+                -1000, //
+                1000);
+        IntVar[] vars = new IntVar[]{x, y};
+        IntValueSelector sel = var -> {
+            int pos = var.nextValue(-1);
+            int neg = var.nextValue(-1);
+            return pos < -neg? pos:neg;
+        };
+        solver.setSearch(new IntStrategy(vars, new InputOrder<>(net), sel));
+        x.add(y).gt(5).and(x.mul(y).ne(0)).post();
+        solver.showDecisions(()->"");
+        List<Solution> res = net.getSolver().findAllSolutions(new SolutionCounter(net, 10));
+        // System.out.println(res.toString());
+        for (int i = 0; i < res.size(); i++) {
+            Solution solution = res.get(i);
+            if (solution != null) {
+                System.out.println(solution);
+            }
         }
     }
 }
