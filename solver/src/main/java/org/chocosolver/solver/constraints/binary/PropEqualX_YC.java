@@ -84,19 +84,12 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             idms[0].startMonitoring();
             idms[1].startMonitoring();
         }
-        if (x.isInstantiated()) {
-            assert (y.isInstantiated());
-            setPassive();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         updateBounds();
-        if (x.isInstantiated()) {
-            assert (y.isInstantiated());
-            setPassive();
-        } else if (bothEnumerated) {
+        if (bothEnumerated && (!x.isInstantiated() || !y.isInstantiated())) {
             if (varIdx == 0) {
                 indexToFilter = 1;
                 offSet = -cste;
