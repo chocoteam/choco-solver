@@ -24,6 +24,7 @@ import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 import org.chocosolver.util.tools.ArrayUtils;
 
+import java.util.Arrays;
 import java.util.Random;
 
 /**
@@ -55,6 +56,7 @@ public class PropNValue extends Propagator<IntVar> {
             }
         }
         concernedValues = set.toArray();
+        Arrays.sort(concernedValues);
         possibleValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         mandatoryValues = SetFactory.makeStoredSet(SetType.BITSET, min, model);
         listForRandomPick = new TIntArrayList();
@@ -75,17 +77,8 @@ public class PropNValue extends Propagator<IntVar> {
         }
     }
 
-    private int contains(int v) {
-        for(int i = 0; i < concernedValues.length; i++) {
-            if(concernedValues[i] == v) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
     private void instantiateTo(int idxVar, int value) {
-        int idxConcernedValue = contains(value);
+        int idxConcernedValue = Arrays.binarySearch(concernedValues, value);
         mandatoryValues.add(vars[idxVar].getValue());
         witness[idxConcernedValue] = idxVar;
         for(int i = 0; i < concernedValues.length; i++) {
@@ -141,7 +134,7 @@ public class PropNValue extends Propagator<IntVar> {
             ISetIterator iterator = possibleValues.iterator();
             while(iterator.hasNext()) {
                 int value = iterator.nextInt();
-                int idxConcernedValue = contains(value);
+                int idxConcernedValue = Arrays.binarySearch(concernedValues, value);
                 if(
                     witness[idxConcernedValue] == NO_WITNESS
                         || !vars[witness[idxConcernedValue]].contains(concernedValues[idxConcernedValue])
