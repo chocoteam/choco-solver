@@ -736,7 +736,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     @SuppressWarnings("SuspiciousNameCombination")
     default Constraint times(IntVar X, IntVar Y, IntVar Z) {
-        if (Y.isInstantiated()) {
+        if (X == Y) {
+            return square(Z, X);
+        } else if (Y.isInstantiated()) {
             return times(X, Y.getValue(), Z);
         } else if (X.isInstantiated()) {
             return times(Y, X.getValue(), Z);

@@ -117,7 +117,6 @@ public class PropSquare extends Propagator<IntVar> {
 
     protected void updateUpperBoundofX() throws ContradictionException {
         vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), this);
-
     }
 
     protected boolean updateHolesinX() throws ContradictionException {
@@ -158,7 +157,11 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     protected boolean updateLowerBoundofY() throws ContradictionException {
-        return vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), this);
+        if (vars[1].getLB() >= 0) {
+            return vars[1].updateLowerBound(ceil_sqrt(vars[0].getLB()), this);
+        } else {
+            return vars[1].updateLowerBound(-floor_sqrt(vars[0].getUB()), this);
+        }
     }
 
     protected boolean updateUpperBoundofY() throws ContradictionException {
@@ -166,8 +169,19 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     protected boolean updateHolesinY() throws ContradictionException {
-        // remove intervals to deal with consecutive value removal and upper bound modification
-        if (bothEnum) {
+        if (vars[0].isInstantiatedTo(0)) {
+            return vars[1].instantiateTo(0, this);
+        }
+        boolean impact = false;
+        // remove interval around 0 based on X LB
+        if (vars[1].hasEnumeratedDomain()) {
+            int val = ceil_sqrt(vars[0].getLB()) - 1;
+            if (val >= 0) {
+                impact = vars[1].removeInterval(-val, val, this);
+            }
+        }
+        // remove values based on X holes
+        if (bothEnum && hasHoles(vars[0])) {
             int ub = vars[1].getUB();
             vrms.clear();
             vrms.setOffset(vars[1].getLB());
@@ -176,24 +190,12 @@ public class PropSquare extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            return vars[1].removeValues(vrms, this);
-        } else if (vars[1].hasEnumeratedDomain()) {
-            int lb = vars[1].getLB();
-            int ub = vars[1].getUB();
-            while (!vars[0].contains(sqr(lb))) {
-                lb = vars[1].nextValue(lb);
-                if (lb > ub) break;
-            }
-            boolean filter = vars[1].updateLowerBound(lb, this);
-
-            while (!vars[0].contains(sqr(ub))) {
-                ub = vars[1].nextValue(ub);
-                if (ub < lb) break;
-            }
-            return filter | vars[1].updateUpperBound(ub, this);
+            impact |= vars[1].removeValues(vrms, this);
         }
-        return false;
+        return impact;
     }
 
-
+    private boolean hasHoles(IntVar var) {
+        return (var.getUB() - var.getLB() + 1) > var.getDomainSize();
+    }
 }
