@@ -23,6 +23,57 @@ import static org.testng.Assert.assertEquals;
  */
 public class SquareTest {
 
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigBoundBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, true);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 184320);
+        assertEquals(m.getSolver().getFailCount(), 209153);
+        assertEquals(m.getSolver().getNodeCount(), 577792);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 184320);
+        assertEquals(m.getSolver().getFailCount(), 28397);
+        assertEquals(m.getSolver().getNodeCount(), 397036);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumEnum() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, false);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+        while (m.getSolver().solve()) ;
+        assertEquals(m.getSolver().getSolutionCount(), 184320);
+        assertEquals(m.getSolver().getFailCount(), 0);
+        assertEquals(m.getSolver().getNodeCount(), 368639);
+    }
+
     @Test(groups = "1s", timeOut = 60000)
     public void testCst() {
         Model m = new Model();

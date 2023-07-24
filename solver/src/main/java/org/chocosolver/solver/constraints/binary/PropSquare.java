@@ -57,22 +57,11 @@ public class PropSquare extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (vars[0].getUB() < 0) {
             return ESat.FALSE;
-        } else if (vars[0].isInstantiated()) {
-            if (vars[1].isInstantiated()) {
-                return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
-            } else if (vars[1].getDomainSize() == 2 &&
-                    vars[1].contains(-floor_sqrt(vars[0].getValue())) &&
-                    vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
-                return ESat.TRUE;
-            } else if (!vars[1].contains(floor_sqrt(vars[0].getValue())) &&
-                    !vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
-                return ESat.FALSE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else {
-            return ESat.UNDEFINED;
         }
+        if (isCompletelyInstantiated()) {
+            return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
+        }
+        return ESat.UNDEFINED;
     }
 
     @Override
@@ -89,14 +78,16 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     private static int floor_sqrt(int n) {
-        if (n < 0)
+        if (n < 0) {
             return 0;
+        }
         return (int) Math.floor(Math.sqrt(n));
     }
 
     private static int ceil_sqrt(int n) {
-        if (n < 0)
+        if (n < 0) {
             return 0;
+        }
         return (int) Math.ceil(Math.sqrt(n));
     }
 
@@ -165,7 +156,11 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     protected boolean updateUpperBoundofY() throws ContradictionException {
-        return vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
+        if (vars[1].getUB() < 0) {
+            return vars[1].updateUpperBound(-ceil_sqrt(vars[0].getLB()), this);
+        } else {
+            return vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
+        }
     }
 
     protected boolean updateHolesinY() throws ContradictionException {
