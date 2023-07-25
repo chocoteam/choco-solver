@@ -10,9 +10,11 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -34,10 +36,13 @@ public class SquareTest {
         }
         m.allDifferent(x).post();
         m.allDifferent(x2).post();
-        while (m.getSolver().solve()) ;
-        assertEquals(m.getSolver().getSolutionCount(), 184320);
-        assertEquals(m.getSolver().getFailCount(), 209153);
-        assertEquals(m.getSolver().getNodeCount(), 577792);
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 412230);
+        assertEquals(solver.getNodeCount(), 780869);
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -51,10 +56,13 @@ public class SquareTest {
         }
         m.allDifferent(x).post();
         m.allDifferent(x2).post();
-        while (m.getSolver().solve()) ;
-        assertEquals(m.getSolver().getSolutionCount(), 184320);
-        assertEquals(m.getSolver().getFailCount(), 28397);
-        assertEquals(m.getSolver().getNodeCount(), 397036);
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 11417);
+        assertEquals(solver.getNodeCount(), 380056);
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -68,10 +76,13 @@ public class SquareTest {
         }
         m.allDifferent(x).post();
         m.allDifferent(x2).post();
-        while (m.getSolver().solve()) ;
-        assertEquals(m.getSolver().getSolutionCount(), 184320);
-        assertEquals(m.getSolver().getFailCount(), 0);
-        assertEquals(m.getSolver().getNodeCount(), 368639);
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 247);
+        assertEquals(solver.getNodeCount(), 368886);
     }
 
     @Test(groups = "1s", timeOut = 60000)
