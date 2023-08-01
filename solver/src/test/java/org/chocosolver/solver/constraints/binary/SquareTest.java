@@ -10,9 +10,11 @@
 package org.chocosolver.solver.constraints.binary;
 
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -22,6 +24,66 @@ import static org.testng.Assert.assertEquals;
  * @author Jean-Guillaume Fages
  */
 public class SquareTest {
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigBoundBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, true);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 412230);
+        assertEquals(solver.getNodeCount(), 780869);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 11417);
+        assertEquals(solver.getNodeCount(), 380056);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumEnum() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, false);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 247);
+        assertEquals(solver.getNodeCount(), 368886);
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testCst() {

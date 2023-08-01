@@ -57,22 +57,11 @@ public class PropSquare extends Propagator<IntVar> {
     public ESat isEntailed() {
         if (vars[0].getUB() < 0) {
             return ESat.FALSE;
-        } else if (vars[0].isInstantiated()) {
-            if (vars[1].isInstantiated()) {
-                return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
-            } else if (vars[1].getDomainSize() == 2 &&
-                    vars[1].contains(-floor_sqrt(vars[0].getValue())) &&
-                    vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
-                return ESat.TRUE;
-            } else if (!vars[1].contains(floor_sqrt(vars[0].getValue())) &&
-                    !vars[1].contains(-floor_sqrt(vars[0].getValue()))) {
-                return ESat.FALSE;
-            } else {
-                return ESat.UNDEFINED;
-            }
-        } else {
-            return ESat.UNDEFINED;
         }
+        if (isCompletelyInstantiated()) {
+            return ESat.eval(vars[0].getValue() == sqr(vars[1].getValue()));
+        }
+        return ESat.UNDEFINED;
     }
 
     @Override
@@ -89,14 +78,16 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     private static int floor_sqrt(int n) {
-        if (n < 0)
+        if (n < 0) {
             return 0;
+        }
         return (int) Math.floor(Math.sqrt(n));
     }
 
     private static int ceil_sqrt(int n) {
-        if (n < 0)
+        if (n < 0) {
             return 0;
+        }
         return (int) Math.ceil(Math.sqrt(n));
     }
 
@@ -117,57 +108,95 @@ public class PropSquare extends Propagator<IntVar> {
 
     protected void updateUpperBoundofX() throws ContradictionException {
         vars[0].updateUpperBound(Math.max(sqr(vars[1].getLB()), sqr(vars[1].getUB())), this);
-
     }
 
     protected boolean updateHolesinX() throws ContradictionException {
+        if (!vars[0].hasEnumeratedDomain()) {
+            return false;
+        }
+        boolean impact = false;
+        boolean isFirstPropagation = model.getSolver().getNodeCount() == 0;
+        if (isFirstPropagation) {
+            // check perfect squares once and for all
+            int ub = vars[0].getUB();
+            vrms.clear();
+            vrms.setOffset(vars[0].getLB());
+            for (int value = vars[0].getLB(); value <= ub; value = vars[0].nextValue(value)) {
+                if (!MathUtils.isPerfectSquare(value)) {
+                    vrms.add(value);
+                }
+            }
+            impact = vars[0].removeValues(vrms, this);
+        }
+
         // remove intervals to deal with consecutive value removal and upper bound modification
         if (bothEnum) {
             int ub = vars[0].getUB();
             vrms.clear();
             vrms.setOffset(vars[0].getLB());
             for (int value = vars[0].getLB(); value <= ub; value = vars[0].nextValue(value)) {
-                if (!(MathUtils.isPerfectSquare(value) &&
-                        (vars[1].contains(floor_sqrt(value)) || vars[1].contains(-floor_sqrt(value))))) {
+                int sqrt = floor_sqrt(value);
+                if (!vars[1].contains(sqrt) && !vars[1].contains(-sqrt)) {
                     vrms.add(value);
                 }
             }
-            return vars[0].removeValues(vrms, this);
-        } else if (vars[0].hasEnumeratedDomain()) {
+            impact |= vars[0].removeValues(vrms, this);
+        } else {
             int value = vars[0].getLB();
             int nlb = value - 1;
             while (nlb == value - 1) {
-                if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
+                int sqrt = floor_sqrt(value);
+                if (!vars[1].contains(sqrt) && !vars[1].contains(-sqrt)) {
                     nlb = value;
                 }
                 value = vars[0].nextValue(value);
             }
-            boolean filter = vars[0].updateLowerBound(nlb, this);
+            impact |= vars[0].updateLowerBound(nlb, this);
 
             value = vars[0].getUB();
             int nub = value + 1;
             while (nub == value + 1) {
-                if (!vars[1].contains(floor_sqrt(value)) && !vars[1].contains(-floor_sqrt(value))) {
+                int sqrt = floor_sqrt(value);
+                if (!vars[1].contains(sqrt) && !vars[1].contains(-sqrt)) {
                     nub = value;
                 }
                 value = vars[0].previousValue(value);
             }
-            return filter | vars[0].updateUpperBound(nub, this);
+            impact |= vars[0].updateUpperBound(nub, this);
         }
-        return false;
+        return impact;
     }
 
     protected boolean updateLowerBoundofY() throws ContradictionException {
-        return vars[1].updateLowerBound(-ceil_sqrt(vars[0].getUB()), this);
+        if (vars[1].getLB() >= 0) {
+            return vars[1].updateLowerBound(ceil_sqrt(vars[0].getLB()), this);
+        } else {
+            return vars[1].updateLowerBound(-floor_sqrt(vars[0].getUB()), this);
+        }
     }
 
     protected boolean updateUpperBoundofY() throws ContradictionException {
-        return vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
+        if (vars[1].getUB() < 0) {
+            return vars[1].updateUpperBound(-ceil_sqrt(vars[0].getLB()), this);
+        } else {
+            return vars[1].updateUpperBound(floor_sqrt(vars[0].getUB()), this);
+        }
     }
 
     protected boolean updateHolesinY() throws ContradictionException {
-        // remove intervals to deal with consecutive value removal and upper bound modification
-        if (bothEnum) {
+        if (vars[0].isInstantiatedTo(0)) {
+            return vars[1].instantiateTo(0, this);
+        }
+        boolean impact = false;
+        // remove interval around 0 based on X LB
+        if (vars[1].hasEnumeratedDomain()) {
+            int val = ceil_sqrt(vars[0].getLB()) - 1;
+            if (val >= 0) {
+                impact = vars[1].removeInterval(-val, val, this);
+            }
+        }
+        // remove values based on X holes
+        if (bothEnum && hasHoles(vars[0])) {
             int ub = vars[1].getUB();
             vrms.clear();
             vrms.setOffset(vars[1].getLB());
@@ -176,24 +205,12 @@ public class PropSquare extends Propagator<IntVar> {
                     vrms.add(value);
                 }
             }
-            return vars[1].removeValues(vrms, this);
-        } else if (vars[1].hasEnumeratedDomain()) {
-            int lb = vars[1].getLB();
-            int ub = vars[1].getUB();
-            while (!vars[0].contains(sqr(lb))) {
-                lb = vars[1].nextValue(lb);
-                if (lb > ub) break;
-            }
-            boolean filter = vars[1].updateLowerBound(lb, this);
-
-            while (!vars[0].contains(sqr(ub))) {
-                ub = vars[1].nextValue(ub);
-                if (ub < lb) break;
-            }
-            return filter | vars[1].updateUpperBound(ub, this);
+            impact |= vars[1].removeValues(vrms, this);
         }
-        return false;
+        return impact;
     }
 
-
+    private boolean hasHoles(IntVar var) {
+        return (var.getUB() - var.getLB() + 1) > var.getDomainSize();
+    }
 }
