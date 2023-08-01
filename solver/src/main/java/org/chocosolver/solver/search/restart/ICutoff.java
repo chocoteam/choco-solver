@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.search.restart;
 
+import java.util.function.IntSupplier;
+
 /**
  * Interface defining service for cutoff strategy: a sequence of cutoff
  * <br/>
@@ -27,4 +29,6 @@ public interface ICutoff {
      * Reset the sequence
      */
     void reset();
+
+    void setGrower(IntSupplier grower);
 }

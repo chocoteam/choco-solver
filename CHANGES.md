@@ -10,6 +10,7 @@ NEXT MILESTONE
 ### Major features:
 - NEW: `solver..showRestarts();` to display the number of restarts during the search. 
 - NEW: hybrid table constraints (see `model.table(...)`)
+- NEW: partial assignement generator for COP (see `Search.generatePartialAssignment()`)
 
 ### Deprecated API (to be removed in next release):
 

@@ -43,8 +43,8 @@ public class PropXltYCReif extends Propagator<IntVar> {
                     this.setPassive();
                 }
             } else {
-                vars[0].updateLowerBound(vars[1].getLB() + cste, this);
-                vars[1].updateUpperBound(vars[0].getUB() - cste, this);
+                while(vars[0].updateLowerBound(vars[1].getLB() + cste, this) |
+                        vars[1].updateUpperBound(vars[0].getUB() - cste, this));
                 if (vars[0].getLB() >= vars[1].getUB() + cste) {
                     setPassive();
                 }

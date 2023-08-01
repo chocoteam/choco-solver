@@ -66,7 +66,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         updateBounds();
         // ensure that, in case of enumerated domains, holes are also propagated
-        if (bothEnumerated) {
+        if (bothEnumerated && (!x.isInstantiated() || !y.isInstantiated())) {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(cste - val)) {
@@ -82,19 +82,12 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             idms[0].startMonitoring();
             idms[1].startMonitoring();
         }
-        if (x.isInstantiated()) {
-            assert (y.isInstantiated());
-            setPassive();
-        }
     }
 
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         updateBounds();
-        if (x.isInstantiated()) {
-            assert (y.isInstantiated());
-            setPassive();
-        } else if (bothEnumerated) {
+        if (bothEnumerated) {
             indexToFilter = 1 - varIdx;
             idms[varIdx].forEachRemVal(rem_proc);
         }

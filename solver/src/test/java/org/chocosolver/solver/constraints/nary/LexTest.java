@@ -360,4 +360,26 @@ public class LexTest {
         solver.printShortStatistics();
     }
 
+    @Test(groups = "1s")
+    public void testMats1() {
+        Model model = new Model();
+        IntVar[] X0 = new IntVar[]{model.intVar("A", 1, 3), model.intVar("0", 0)};
+        model.lexLess(X0, X0).post();
+        Solver solver = model.getSolver();
+        Assert.assertEquals(solver.findAllSolutions().size(), 0);
+    }
+
+    @Test(groups = "1s")
+    public void testMats2() {
+        Model model = new Model();
+        IntVar A = model.intVar("A", 1, 3);
+        IntVar B = model.intVar("B", 1, 3);
+        IntVar _0 =  model.intVar("0", 0);
+        IntVar[] X0 = new IntVar[]{B, A, _0};
+        IntVar[] X1 = new IntVar[]{A, B, _0};
+        model.lexLessEq(X0, X1).post();
+        Solver solver = model.getSolver();
+        Assert.assertEquals(solver.findAllSolutions().size(), 6);
+    }
+
 }

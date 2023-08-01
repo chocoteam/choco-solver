@@ -28,7 +28,7 @@ public class LinearCutoff extends AbstractCutoff {
     @Override
     public long getNextCutoff() {
         calls++;
-        return scaleFactor * calls;
+        return scaleFactor * calls * grower.getAsInt();
     }
 
     @Override

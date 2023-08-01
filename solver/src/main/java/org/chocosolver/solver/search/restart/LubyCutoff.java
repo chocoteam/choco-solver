@@ -55,7 +55,7 @@ public final class LubyCutoff extends AbstractCutoff {
      */
     @Override
     public long getNextCutoff() {
-        final long cutoff = scaleFactor * this.vn;
+        final long cutoff = scaleFactor * this.vn * grower.getAsInt();
         if ((this.un & -this.un) == this.vn) {
             this.un = this.un + 1;
             this.vn = 1;
