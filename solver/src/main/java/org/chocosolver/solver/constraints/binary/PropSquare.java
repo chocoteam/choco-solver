@@ -47,11 +47,7 @@ public class PropSquare extends Propagator<IntVar> {
         do {
             setBounds();
         } while (updateHolesinX() | updateHolesinY());
-        if (vars[1].isInstantiated()) {
-            vars[0].instantiateTo(sqr(vars[1].getValue()), this);
-        }
     }
-
 
     @Override
     public ESat isEntailed() {
@@ -115,8 +111,7 @@ public class PropSquare extends Propagator<IntVar> {
             return false;
         }
         boolean impact = false;
-        boolean isFirstPropagation = model.getSolver().getNodeCount() == 0;
-        if (isFirstPropagation) {
+        if (model.getSolver().getNodeCount() == 0) { // only at root node propagation
             // check perfect squares once and for all
             int ub = vars[0].getUB();
             vrms.clear();
@@ -141,28 +136,6 @@ public class PropSquare extends Propagator<IntVar> {
                 }
             }
             impact |= vars[0].removeValues(vrms, this);
-        } else {
-            int value = vars[0].getLB();
-            int nlb = value - 1;
-            while (nlb == value - 1) {
-                int sqrt = floor_sqrt(value);
-                if (!vars[1].contains(sqrt) && !vars[1].contains(-sqrt)) {
-                    nlb = value;
-                }
-                value = vars[0].nextValue(value);
-            }
-            impact |= vars[0].updateLowerBound(nlb, this);
-
-            value = vars[0].getUB();
-            int nub = value + 1;
-            while (nub == value + 1) {
-                int sqrt = floor_sqrt(value);
-                if (!vars[1].contains(sqrt) && !vars[1].contains(-sqrt)) {
-                    nub = value;
-                }
-                value = vars[0].previousValue(value);
-            }
-            impact |= vars[0].updateUpperBound(nub, this);
         }
         return impact;
     }
@@ -184,19 +157,17 @@ public class PropSquare extends Propagator<IntVar> {
     }
 
     protected boolean updateHolesinY() throws ContradictionException {
-        if (vars[0].isInstantiatedTo(0)) {
-            return vars[1].instantiateTo(0, this);
+        if (!vars[1].hasEnumeratedDomain()) {
+            return false;
         }
         boolean impact = false;
         // remove interval around 0 based on X LB
-        if (vars[1].hasEnumeratedDomain()) {
-            int val = ceil_sqrt(vars[0].getLB()) - 1;
-            if (val >= 0) {
-                impact = vars[1].removeInterval(-val, val, this);
-            }
+        int val = ceil_sqrt(vars[0].getLB()) - 1;
+        if (val >= 0) {
+            impact = vars[1].removeInterval(-val, val, this);
         }
-        // remove values based on X holes
-        if (bothEnum && hasHoles(vars[0])) {
+        // remove values based on X domain
+        if (bothEnum) {
             int ub = vars[1].getUB();
             vrms.clear();
             vrms.setOffset(vars[1].getLB());
@@ -208,9 +179,5 @@ public class PropSquare extends Propagator<IntVar> {
             impact |= vars[1].removeValues(vrms, this);
         }
         return impact;
-    }
-
-    private boolean hasHoles(IntVar var) {
-        return (var.getUB() - var.getLB() + 1) > var.getDomainSize();
     }
 }
