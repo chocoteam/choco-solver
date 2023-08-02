@@ -9,19 +9,83 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * @author Jean-Guillaume Fages
  */
 public class SquareTest {
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigBoundBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, true);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 412230);
+        assertEquals(solver.getNodeCount(), 780869);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumBound() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, true);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 11417);
+        assertEquals(solver.getNodeCount(), 380056);
+    }
+
+    @Test(groups = "10s", timeOut = 60000)
+    public void testBigEnumEnum() {
+        Model m = new Model();
+        int n = 6;
+        IntVar[] x = m.intVarArray(n, -n, n, false);
+        IntVar[] x2 = m.intVarArray(n, -n*n,n*n, false);
+        for (int i=0;i<x.length;i++) {
+            m.square(x2[i], x[i]).post();
+        }
+        m.allDifferent(x).post();
+        m.allDifferent(x2).post();
+
+        Solver solver = m.getSolver();
+        solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
+        while (solver.solve()) ;
+        assertEquals(solver.getSolutionCount(), 184320);
+        assertEquals(solver.getFailCount(), 247);
+        assertEquals(solver.getNodeCount(), 368886);
+    }
 
     @Test(groups = "1s", timeOut = 60000)
     public void testCst() {
@@ -140,5 +204,83 @@ public class SquareTest {
         Assert.assertEquals(1, model.getSolver().getSolutionCount());
         Assert.assertEquals(83, model.getSolver().getNodeCount());
 
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testInstZero() {
+        Model m = new Model();
+        IntVar x = m.intVar(0);
+        IntVar y = m.intVar(-5, 5, false);
+        IntVar z = m.intVar(-5, 5, true);
+        m.square(x, y).post();
+        m.square(x, z).post();
+
+        try {
+            m.getSolver().propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        assertTrue(y.isInstantiatedTo(0));
+        assertTrue(z.isInstantiatedTo(0));
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testInst() {
+        Model m = new Model();
+        IntVar x1 = m.intVar(9);
+        IntVar y1 = m.intVar(-5, 5, false);
+        IntVar z1 = m.intVar(-5, 5, true);
+        m.square(x1, y1).post();
+        m.square(x1, z1).post();
+
+        IntVar x2 = m.intVar(-50, 50, false);
+        IntVar y2 = m.intVar(-50, 50, true);
+        IntVar z2 = m.intVar(-3);
+        m.square(x2, z2).post();
+        m.square(y2, z2).post();
+
+        try {
+            m.getSolver().propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+
+        assertEquals(y1.getLB(), -3);
+        assertEquals(y1.getUB(), 3);
+        assertEquals(y1.getDomainSize(), 2);
+        assertEquals(z1.getLB(), -3);
+        assertEquals(z1.getUB(), 3);
+        assertEquals(z1.getDomainSize(), 7);
+
+        assertTrue(x2.isInstantiatedTo(9));
+        assertTrue(y2.isInstantiatedTo(9));
+    }
+
+    @Test(groups = "1s", timeOut = 60000)
+    public void testPropBounds() {
+        Model m = new Model();
+        IntVar x = m.intVar(0, 50, false);
+        IntVar y = m.intVar(3, 5, false);
+        m.square(x, y).post();
+        m.arithm(x, "!=", 16).post();
+
+        try {
+            m.getSolver().propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        assertEquals(x.getLB(), 9);
+        assertEquals(x.getUB(), 25);
+        assertEquals(y.getLB(), 3);
+        assertEquals(y.getUB(), 5);
+
+        try {
+            y.updateLowerBound(4, Cause.Null);
+            m.getSolver().propagate();
+        } catch (ContradictionException ex) {
+            Assert.fail();
+        }
+        assertTrue(x.isInstantiatedTo(25));
+        assertTrue(y.isInstantiatedTo(5));
     }
 }
