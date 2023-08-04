@@ -10,7 +10,6 @@
 package org.chocosolver.solver.expression.discrete.arithmetic;
 
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.VariableUtils;
 
@@ -106,19 +105,10 @@ public class BiArExpression implements ArExpression {
                     me = model.intVar(model.generateName("mod_exp_"), bounds[0], bounds[1]);
                     model.mod(v1, v2, me).post();
                     break;
-                case POW: // todo as intension constraint
+                case POW:
                     bounds = VariableUtils.boundsForPow(v1, v2);
                     me = model.intVar(model.generateName("pow_exp_"), bounds[0], bounds[1]);
-                    Tuples tuples = new Tuples(true);
-                    for(int val1 : v1){
-                        for(int val2 : v2){
-                            int res = (int)Math.pow(val1, val2);
-                            if(me.contains(res)) {
-                                tuples.add(val1, val2, res);
-                            }
-                        }
-                    }
-                    model.table(new IntVar[]{v1, v2, me}, tuples).post();
+                    model.pow(v1, v2, me).post();
                     break;
                 case MIN:
                     bounds = VariableUtils.boundsForMinimum(v1, v2);
