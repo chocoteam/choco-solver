@@ -546,6 +546,9 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             b = mm.get(C - mid);
             return ref().times(a, b, Y);
             /*/
+            if (exponent == 2) {
+                return square(result, base);
+            }
             if ((exponent % 2) == 0) {
                 return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
             } else {
@@ -553,6 +556,23 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             }
             //*/
         }
+    }
+
+    default Constraint pow(IntVar base, IntVar exponent, IntVar result) {
+        if (exponent.isInstantiated()) {
+            return pow(base, exponent.getValue(), result);
+        }
+        // table decomposition todo as intension constraint
+        Tuples tuples = new Tuples(true);
+        for (int val1 : base) {
+            for (int val2 : exponent) {
+                int res = (int) Math.pow(val1, val2);
+                if (result.contains(res)) {
+                    tuples.add(val1, val2, res);
+                }
+            }
+        }
+        return base.getModel().table(new IntVar[]{base, exponent, result}, tuples);
     }
 
     //##################################################################################################################
