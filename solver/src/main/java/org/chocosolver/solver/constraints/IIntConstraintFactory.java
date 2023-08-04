@@ -558,6 +558,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         }
     }
 
+    /**
+     * <p>Creates a power constraint: X^Y = Z.</p>
+     *
+     * @param base     first variable
+     * @param exponent second variable
+     * @param result   result variable
+     * @implSpec The 'power' propagator does not exist. The general case is handled by a table decomposition.
+     */
     default Constraint pow(IntVar base, IntVar exponent, IntVar result) {
         if (exponent.isInstantiated()) {
             return pow(base, exponent.getValue(), result);
