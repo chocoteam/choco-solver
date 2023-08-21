@@ -563,8 +563,69 @@ public class XCSPParser implements XCallbacks2 {
 
     @Override
     public void buildCtrPrimitive(String id, XVariables.XVarInteger x, Types.TypeArithmeticOperator opa, XVariables.XVarInteger y, Types.TypeConditionOperatorRel op, int k) {
-        // TODO
+        //System.out.printf("%s %s %s %s %d\n", x.id, opa.toString(), y.id, op.toString(), k);
+        if (opa.equals(Types.TypeArithmeticOperator.MOD) || opa.equals(Types.TypeArithmeticOperator.POW)) {
         rel(ari(var(x), opa, var(y)), op, k).post();
+        } else if (opa.equals(Types.TypeArithmeticOperator.DIST)) {
+            switch (op) {
+                case LT:
+                    model.distance(var(x), var(y), "<", k).post();
+                    break;
+                case LE:
+                    model.distance(var(x), var(y), "<", k + 1).post();
+                    break;
+                case GE:
+                    model.distance(var(x), var(y), ">", k - 1).post();
+                    break;
+                case GT:
+                    model.distance(var(x), var(y), ">", k).post();
+                    break;
+                case NE:
+                    model.distance(var(x), var(y), "!=", k).post();
+                    break;
+                case EQ:
+                    model.distance(var(x), var(y), "=", k).post();
+                    break;
+            }
+        } else {
+            String o = "";
+            switch (opa) {
+                case ADD:
+                    o = "+";
+                    break;
+                case SUB:
+                    o = "-";
+                    break;
+                case MUL:
+                    o = "*";
+                    break;
+                case DIV:
+                    o = "/";
+                    break;
+                default:
+                    throw new IllegalStateException("Unexpected value: " + opa);
+            }
+            switch (op) {
+                case LT:
+                    model.arithm(var(x), o, var(y), "<", k).post();
+                    break;
+                case LE:
+                    model.arithm(var(x), o, var(y), "<=", k).post();
+                    break;
+                case GE:
+                    model.arithm(var(x), o, var(y), ">=", k).post();
+                    break;
+                case GT:
+                    model.arithm(var(x), o, var(y), ">", k).post();
+                    break;
+                case NE:
+                    model.arithm(var(x), o, var(y), "!=", k).post();
+                    break;
+                case EQ:
+                    model.arithm(var(x), o, var(y), "=", k).post();
+                    break;
+            }
+        }
     }
 
     @Override
