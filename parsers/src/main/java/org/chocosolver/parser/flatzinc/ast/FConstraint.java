@@ -711,7 +711,6 @@ public enum FConstraint {
     fzn_all_different_int {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
-            boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
                 if (annotations.stream().anyMatch(a -> a.id.toString().equals("domain"))) {
