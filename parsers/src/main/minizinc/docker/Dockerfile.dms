@@ -1,0 +1,35 @@
+#------------------------------------------------------------------------------#
+# This file contains the setup for the Choco submission to the MiniZinc
+# challenge. It uses two stages. In the first stage, it builds/compiles
+# Choco in the same OS as the MiniZinc Challenge docker image. The second
+# stage extends the provided MiniZinc Challenge docker image by copying the
+# Choc executable and its MiniZinc library across from the first stage as
+# well as installing Java for running Choco.
+#------------------------------------------------------------------------------#
+#
+# 1. Stage: Setup of Choco in the MiniZinc Challenge docker image
+
+# Using the MiniZinc Challenge docker image
+FROM minizinc/mznc2023:latest
+
+# Install Java 17               @
+RUN apt-get update && \
+	apt-get install -y  \
+	openjdk-17-jre-headless vim
+
+# The following command is used to disable caching for the ADD command and the next ones
+ADD "https://www.random.org/cgi-bin/randbyte?nbytes=10&format=h" skipcache
+# Copy Choco's files from the local repository
+COPY ./parsers/target/choco-parsers-*-light.jar /choco/choco.jar
+COPY ./parsers/src/main/minizinc/fzn-choco /choco/fzn-choco
+COPY ./parsers/src/main/minizinc/choco.msc /choco/choco.msc
+COPY ./parsers/src/main/minizinc/mzn_lib/* /choco/mzn-lib/
+
+# Update files
+RUN sed -i 's&CHOCO_JAR=.*&CHOCO_JAR=/choco/choco.jar&g' /choco/fzn-choco && \
+    sed -i 's&"mznlib".*&"mznlib":"/choco/mzn-lib/",&g' /choco/choco.msc && \
+    sed -i 's&"executable".*&"executable":"/choco/fzn-choco",&g' /choco/choco.msc
+
+ENV MZN_SOLVER_PATH=/choco:${MZN_SOLVER_PATH}
+
+RUN echo '{"tagDefaults": [["", "org.choco.choco"]]}' > $HOME/.minizinc/Preferences.json

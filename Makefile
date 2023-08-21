@@ -7,6 +7,7 @@ CURRENT_VERSION := $(shell mvn help:evaluate -Dexpression=project.version | grep
 
 .PHONY: all clean compile tests 1s 10s ibex checker mzn xcsp mps dimacs expl update_date compet msc delmsc help
 .DEFAULT_GOAL := package
+
 help:
 	@echo "Please use \`make <target>' where <target> is one of"
 	@echo "  all        			to clean, compile and package the project"
@@ -64,3 +65,6 @@ msc: compet
 
 delmsc:
 	@rm ~/.minizinc/solvers/choco-$(VERSION).msc
+
+docker: compet
+	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION) $(ROOT_DIR)
