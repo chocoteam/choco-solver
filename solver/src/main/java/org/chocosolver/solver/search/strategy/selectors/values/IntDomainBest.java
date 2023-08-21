@@ -18,6 +18,7 @@ import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactor
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 
 /**
  * Value selector for optimization problems:
@@ -45,7 +46,7 @@ public final class IntDomainBest implements IntValueSelector {
 
     private final IntValueSelector fallbackValueSelector;
 
-    private final int frequency;
+    private final Function<IntVar, Boolean> trigger;
 
     /**
      * Create a value selector that returns the best value wrt to the objective to optimize.
@@ -60,18 +61,18 @@ public final class IntDomainBest implements IntValueSelector {
      *
      * @param maxdom           a maximum domain size to satisfy to use this value selector
      * @param intValueSelector fallback value selector
-     * @param frequency        the frequency of application of the best value selector.
-     *                         If f is the value indicated, the selector will be applied when restarts mod f = 0.
-     *                         In the other case, the fallback value selector is applied.
+     * @param trigger          the function that indicates when the best value selector is applied.
+     *                         When it returns true, the best value selector is applied.
+     *                         Otherwise, the fallback value selector is applied.
      * @param dop              the decision operator used to make the decision
      * @param condition        predicate to break ties
      */
-    public IntDomainBest(int maxdom, IntValueSelector intValueSelector, int frequency, DecisionOperator<IntVar> dop, BiPredicate<IntVar, Integer> condition) {
+    public IntDomainBest(int maxdom, IntValueSelector intValueSelector, Function<IntVar, Boolean> trigger, DecisionOperator<IntVar> dop, BiPredicate<IntVar, Integer> condition) {
         this.maxdom = maxdom;
         this.dop = dop;
         this.condition = condition;
         this.fallbackValueSelector = intValueSelector;
-        this.frequency = frequency;
+        this.trigger = trigger;
     }
 
     /**
@@ -86,12 +87,12 @@ public final class IntDomainBest implements IntValueSelector {
      * </p>
      *
      * @param intValueSelector fallback value selector
-     * @param frequency        the frequency of applying best value selector.
-     *                         If f is the value indicated, the selector will be applied when restarts mod f = 0.
-     *                         In the other case, the fallback value selector is applied.
+     * @param trigger          the function that indicates when the best value selector is applied.
+     *                         When it returns true, the best value selector is applied.
+     *                         Otherwise, the fallback value selector is applied.
      */
-        public IntDomainBest(IntValueSelector intValueSelector, int frequency) {
-            this(100, intValueSelector, frequency, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
+    public IntDomainBest(IntValueSelector intValueSelector, Function<IntVar, Boolean> trigger) {
+        this(100, intValueSelector, trigger, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
     }
 
     /**
@@ -106,9 +107,19 @@ public final class IntDomainBest implements IntValueSelector {
      * </p>
      *
      * @param condition predicate to break ties
+     * @apiNote The default values are:
+     * <ul>
+     *     <li>maxdom is set to 100</li>
+     *     <li>the trigger is set to restart count % 16 == 0</li>
+     *     <li>the decision operator is set to '='</li>
+     * </ul>
      */
     public IntDomainBest(BiPredicate<IntVar, Integer> condition) {
-        this(100, new IntDomainMin(), 16, DecisionOperatorFactory.makeIntEq(), condition);
+        this(100,
+                new IntDomainMin(),
+                v -> v.getModel().getSolver().getRestartCount() % 16 == 0,
+                DecisionOperatorFactory.makeIntEq(),
+                condition);
     }
 
 
@@ -116,9 +127,21 @@ public final class IntDomainBest implements IntValueSelector {
      * Create a value selector for assignments that returns the best value wrt to the objective to
      * optimize. When an enumerated variable domain exceeds 100, only bounds are considered.
      * Always-false condition is set by default.
+     *
+     * @apiNote The default values are:
+     * <ul>
+     *     <li>maxdom is set to 100</li>
+     *     <li>the trigger is set to restart count % 16 == 0</li>
+     *     <li>the decision operator is set to '='</li>
+     *     <li>the predicate to break ties is lexico</li>
+     * </ul>
      */
     public IntDomainBest() {
-        this(100, new IntDomainMin(), 16, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
+        this(100,
+                new IntDomainMin(),
+                v -> v.getModel().getSolver().getRestartCount() % 16 == 0,
+                DecisionOperatorFactory.makeIntEq(),
+                (k, v) -> false);
     }
 
     /**
@@ -126,7 +149,7 @@ public final class IntDomainBest implements IntValueSelector {
      */
     @Override
     public int selectValue(IntVar var) {
-        if (var.getModel().getSolver().getRestartCount() % frequency > 0) {
+        if (!trigger.apply(var)) {
             return fallbackValueSelector.selectValue(var);
         }
         assert var.getModel().getObjective() != null;
