@@ -1162,8 +1162,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * @see #clearRestarter()
      */
     public void addRestarter(AbstractRestart restarter) {
-        restarter.setNext(this.restarter);
-        this.restarter = restarter;
+        if(restarter != AbstractRestart.NO_RESTART) {
+            restarter.setNext(this.restarter);
+            this.restarter = restarter;
+        }
     }
 
     /**
