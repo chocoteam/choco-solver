@@ -714,9 +714,14 @@ public enum FConstraint {
             boolean AC = annotations.stream().anyMatch(a -> a.id.toString().equals("domain"));
             IntVar[] vars = exps.get(0).toIntVarArray(model);
             if (vars.length > 1) {
-                model.allDifferent(vars, AC ? "AC" : "").post();
+                if (annotations.stream().anyMatch(a -> a.id.toString().equals("domain"))) {
+                    model.allDifferent(vars, "AC").post();
+                } else if (annotations.stream().anyMatch(a -> a.id.toString().startsWith("bounds"))) {
+                    model.allDifferent(vars, "BC").post();
+                } else {
+                    model.allDifferent(vars).post();
+                }
             }
-
         }
     },
     alldifferentBut0Choco {
