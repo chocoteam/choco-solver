@@ -1733,6 +1733,21 @@ public enum FConstraint {
 
         }
     },
+    fzn_disjoint{
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            SetVar a = exps.get(0).setVarValue(model);
+            SetVar b = exps.get(1).setVarValue(model);
+            model.disjoint(a, b).post();
+        }
+    },
+    fzn_all_disjoint {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            SetVar[] as = exps.get(0).toSetVarArray(model);
+            model.allDisjoint(as).post();
+        }
+    },
     set_card {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
