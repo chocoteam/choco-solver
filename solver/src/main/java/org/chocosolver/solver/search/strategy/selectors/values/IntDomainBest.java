@@ -43,6 +43,10 @@ public final class IntDomainBest implements IntValueSelector {
      */
     private final BiPredicate<IntVar, Integer> condition;
 
+    private final IntValueSelector fallbackValueSelector;
+
+    private final int frequency;
+
     /**
      * Create a value selector that returns the best value wrt to the objective to optimize.
      * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
@@ -54,14 +58,40 @@ public final class IntDomainBest implements IntValueSelector {
      * is kept.
      * </p>
      *
-     * @param maxdom    a maximum domain size to satisfy to use this value selector.
-     * @param dop       the decision operator used to make the decision
-     * @param condition predicate to break ties
+     * @param maxdom           a maximum domain size to satisfy to use this value selector
+     * @param intValueSelector fallback value selector
+     * @param frequency        the frequency of application of the best value selector.
+     *                         If f is the value indicated, the selector will be applied when restarts mod f = 0.
+     *                         In the other case, the fallback value selector is applied.
+     * @param dop              the decision operator used to make the decision
+     * @param condition        predicate to break ties
      */
-    public IntDomainBest(int maxdom, DecisionOperator<IntVar> dop, BiPredicate<IntVar, Integer> condition) {
+    public IntDomainBest(int maxdom, IntValueSelector intValueSelector, int frequency, DecisionOperator<IntVar> dop, BiPredicate<IntVar, Integer> condition) {
         this.maxdom = maxdom;
         this.dop = dop;
         this.condition = condition;
+        this.fallbackValueSelector = intValueSelector;
+        this.frequency = frequency;
+    }
+
+    /**
+     * Create a value selector that returns the best value wrt to the objective to optimize.
+     * When an enumerated variable domain exceeds {@link #maxdom}, only bounds are considered.
+     *
+     * <p>
+     * {@code condition} is called when the evaluated {@code value} returns a score
+     * equals to the current best one. In that case, if {@code condition} returns {@code true}
+     * then {@code value} is retained as the new best candidate, otherwise the previous one
+     * is kept.
+     * </p>
+     *
+     * @param intValueSelector fallback value selector
+     * @param frequency        the frequency of applying best value selector.
+     *                         If f is the value indicated, the selector will be applied when restarts mod f = 0.
+     *                         In the other case, the fallback value selector is applied.
+     */
+        public IntDomainBest(IntValueSelector intValueSelector, int frequency) {
+            this(100, intValueSelector, frequency, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
     }
 
     /**
@@ -78,7 +108,7 @@ public final class IntDomainBest implements IntValueSelector {
      * @param condition predicate to break ties
      */
     public IntDomainBest(BiPredicate<IntVar, Integer> condition) {
-        this(100, DecisionOperatorFactory.makeIntEq(), condition);
+        this(100, new IntDomainMin(), 16, DecisionOperatorFactory.makeIntEq(), condition);
     }
 
 
@@ -88,7 +118,7 @@ public final class IntDomainBest implements IntValueSelector {
      * Always-false condition is set by default.
      */
     public IntDomainBest() {
-        this(100, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
+        this(100, new IntDomainMin(), 16, DecisionOperatorFactory.makeIntEq(), (k, v) -> false);
     }
 
     /**
@@ -96,6 +126,9 @@ public final class IntDomainBest implements IntValueSelector {
      */
     @Override
     public int selectValue(IntVar var) {
+        if (var.getModel().getSolver().getRestartCount() % frequency > 0) {
+            return fallbackValueSelector.selectValue(var);
+        }
         assert var.getModel().getObjective() != null;
         if (var.hasEnumeratedDomain() && var.getDomainSize() < maxdom) {
             int bestCost = Integer.MAX_VALUE;
