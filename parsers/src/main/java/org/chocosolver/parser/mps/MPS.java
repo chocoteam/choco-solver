@@ -13,9 +13,8 @@ import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
 import org.chocosolver.solver.variables.IntVar;
@@ -71,11 +70,6 @@ public class MPS extends RegParser {
 
     public MPS() {
         super("ChocoMPS");
-    }
-
-    @Override
-    public void createSettings() {
-        defaultSettings = Settings.prod();
     }
 
     @Override
@@ -156,7 +150,6 @@ public class MPS extends RegParser {
     public void parse(Model target, MPSParser parser, int i) throws Exception {
         parser.model(target, instance, maximize, ninf, pinf, ibex, noeq);
         if (i == 0) {
-            Solver solver = target.getSolver();
             if (target.getNbRealVar() == 0) {
                 target.getSolver().setSearch(
                         Search.intVarSearch(new FirstFail(target),
@@ -166,8 +159,7 @@ public class MPS extends RegParser {
                                 target.retrieveIntVars(true))
                 );
             } else {
-                solver.setSearch(Search.defaultSearch(target));
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+                BlackBoxConfigurator.init().make(target);
             }
         }
     }

@@ -362,7 +362,7 @@ public class StrategyTest {
 			Model model = ProblemMaker.makeGolombRuler(8);
 			{
 				Solver s = model.getSolver();
-				s.setSearch(Search.defaultSearch(model));
+				Search.defaultSearch(model);
 				while (s.solve()) ;
 			}
 			Model modelBound = ProblemMaker.makeGolombRuler(8);

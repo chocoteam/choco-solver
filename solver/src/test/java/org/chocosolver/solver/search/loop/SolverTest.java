@@ -73,7 +73,7 @@ public class SolverTest {
         m.getSolver().reset();
         m.clearObjective();
         m.unpost(x_lesser_y);
-        m.getSolver().setSearch(Search.defaultSearch(m));
+        Search.defaultSearch(m);
         while (m.getSolver().solve()) ;
         assertEquals(m.getSolver().getSolutionCount(), 20);
     }

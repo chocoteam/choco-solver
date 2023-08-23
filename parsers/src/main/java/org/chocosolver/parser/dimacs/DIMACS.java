@@ -15,8 +15,7 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
 
@@ -135,16 +134,7 @@ public class DIMACS extends RegParser {
     public void parse(Model target, DIMACSParser parser, int i) throws Exception {
         parser.model(target, instance);
         if (i == 0) {
-            Solver solver = target.getSolver();
-            if (target.getNbRealVar() == 0) {
-                target.getSolver().setSearch(
-                        Search.domOverWDegSearch(getModel().retrieveBoolVars())
-                );
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
-            } else {
-                solver.setSearch(Search.defaultSearch(target));
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
-            }
+            BlackBoxConfigurator.init().make(target);
         }
     }
 

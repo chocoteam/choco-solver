@@ -9,15 +9,14 @@
  */
 package org.chocosolver.parser.xcsp;
 
-import org.chocosolver.solver.search.restart.LubyCutoff;
 import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.search.strategy.SearchParams;
 import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
 import org.xcsp.parser.callbacks.SolutionChecker;
@@ -26,8 +25,6 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -58,11 +55,6 @@ public class XCSP extends RegParser {
     }
 
     @Override
-    public void createSettings() {
-        defaultSettings = Settings.prod();
-    }
-
-    @Override
     public Thread actionOnKill() {
         return new Thread(() -> {
             if (userinterruption) {
@@ -78,7 +70,7 @@ public class XCSP extends RegParser {
     public void createSolver() {
         super.createSolver();
         if (level.isLoggable(Level.COMPET)) {
-            System.out.print("c Choco e747e1e\n");
+            System.out.println("c Choco 230706");
         }
         String iname = Paths.get(instance).getFileName().toString();
         parsers = new XCSPParser[nb_cores];
@@ -98,11 +90,11 @@ public class XCSP extends RegParser {
             Solver s = m.getSolver();
             try {
                 long ptime = -System.currentTimeMillis();
-                parse(m, parsers[i], i);
-                if(logFilePath != null) {
+                parse(m, parsers[i]);
+                if (logFilePath != null) {
                     s.log().remove(System.out);
                     s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFilePath)), true));
-                }else {
+                } else {
                     s.logWithANSI(ansi);
                 }
                 if (level.isLoggable(Level.INFO)) {
@@ -139,21 +131,39 @@ public class XCSP extends RegParser {
         }
     }
 
-    public void parse(Model target, XCSPParser parser, int i) throws Exception {
+    public void parse(Model target, XCSPParser parser) throws Exception {
         parser.model(target, instance);
-        if (i == 0) {
-            IntVar[] decVars = (IntVar[]) getModel().getHook("decisions");
-            if (decVars == null) {
-                decVars = parser.mvars.values().toArray(new IntVar[0]);
-            }
-            Arrays.sort(decVars, Comparator.comparingInt(IntVar::getId));
-            Solver solver = target.getSolver();
-            solver.setSearch(Search.defaultSearch(target));
-            solver.setNoGoodRecordingFromRestarts();
-            solver.setRestarts(count -> solver.getFailCount() >= count, new LubyCutoff(500), 5000);
-        }
+        // and define a search strategy
+        // Since there is no search strategy in XCSP3, we define a default one as the free search
+        freesearch(target.getSolver());
     }
 
+
+    @Override
+    public void freesearch(Solver solver) {
+        BlackBoxConfigurator bb = BlackBoxConfigurator.init();
+        boolean opt = solver.getObjectiveManager().isOptimization();
+        // variable selection
+        SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
+                SearchParams.ValueSelection.MIN, opt, 1, opt);
+        SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
+                SearchParams.VariableSelection.DOMWDEG, Integer.MAX_VALUE);
+        bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
+        // restart policy
+        SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
+                SearchParams.Restart.LUBY, 500, 50_000, true);
+        bb.setRestartPolicy(defaultResConf.make());
+        // other parameters
+        bb.setNogoodOnRestart(true)
+                .setRestartOnSolution(true)
+                .setExcludeObjective(true)
+                .setExcludeViews(false)
+                .setMetaStrategy(m -> Search.lastConflict(m, 1));
+        if (level.isLoggable(Level.INFO)) {
+            solver.log().println(bb.toString());
+        }
+        bb.make(solver.getModel());
+    }
 
     protected void singleThread() {
         Model model = portfolio.getModels().get(0);
@@ -229,7 +239,7 @@ public class XCSP extends RegParser {
                         solver.getRestartCount());
             }
         }
-        
+
         if (level.isLoggable(Level.INFO)) {
             solver.log().white().printf("%s %n", solver.getMeasures().toOneLineString());
         }
@@ -272,8 +282,11 @@ public class XCSP extends RegParser {
         }
         if (level.is(Level.JSON)) {
             solver.log().printf(Locale.US, "\n\t],\n\t\"exit\":{\"time\":%.1f, " +
-                            "\"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
+                            "\"bound\":%d, \"nodes\":%d, \"failures\":%d, \"restarts\":%d, \"status\":\"%s\"}\n}",
                     solver.getTimeCount(),
+                    solver.getObjectiveManager().isOptimization() ?
+                            solver.getObjectiveManager().getBestSolutionValue().intValue() :
+                            solver.getSolutionCount(),
                     solver.getNodeCount(),
                     solver.getFailCount(),
                     solver.getRestartCount(),
@@ -291,7 +304,7 @@ public class XCSP extends RegParser {
                             Integer.MAX_VALUE);
         }
         if (level.isLoggable(Level.INFO)) {
-            solver.getMeasures().toOneLineString();
+            solver.log().bold().white().printf("%s \n", solver.getMeasures().toOneLineString());
         }
         if (csv) {
             solver.printCSVStatistics();

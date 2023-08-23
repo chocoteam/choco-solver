@@ -9,7 +9,7 @@
  */
 package org.chocosolver.parser;
 
-import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.SearchParams;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.testng.Assert;
@@ -77,33 +77,33 @@ public class RegParserTest {
     public void testLimit1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.limits.time, -1);
+        Assert.assertEquals(parser.limits.getTime(), -1);
         p.parseArgument("-limit=[1]", "/file");
-        Assert.assertEquals(parser.limits.time, 1);
+        Assert.assertEquals(parser.limits.getTime(), 1);
         p.parseArgument("-limit=[1s]", "/file");
-        Assert.assertEquals(parser.limits.time, 1000);
+        Assert.assertEquals(parser.limits.getTime(), 1000);
         p.parseArgument("-limit=[1m1s]", "/file");
-        Assert.assertEquals(parser.limits.time, 61000);
+        Assert.assertEquals(parser.limits.getTime(), 61000);
         p.parseArgument("-limit=[1h1m1s]", "/file");
-        Assert.assertEquals(parser.limits.time, 3661000);
+        Assert.assertEquals(parser.limits.getTime(), 3661000);
     }
 
     @Test(groups = "1s")
     public void testLimit2() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.limits.sols, -1);
+        Assert.assertEquals(parser.limits.getSols(), -1);
         p.parseArgument("-limit=[2sols]", "/file");
-        Assert.assertEquals(parser.limits.sols, 2);
+        Assert.assertEquals(parser.limits.getSols(), 2);
     }
 
     @Test(groups = "1s")
     public void testLimit3() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.limits.runs, -1);
+        Assert.assertEquals(parser.limits.getRuns(), -1);
         p.parseArgument("-limit=[2runs]", "/file");
-        Assert.assertEquals(parser.limits.runs, 2);
+        Assert.assertEquals(parser.limits.getRuns(), 2);
     }
 
 
@@ -111,9 +111,9 @@ public class RegParserTest {
     public void testLimit4() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("-limit=[2s,2sols,2runs]", "/file");
-        Assert.assertEquals(parser.limits.time, 2000);
-        Assert.assertEquals(parser.limits.sols, 2);
-        Assert.assertEquals(parser.limits.runs, 2);
+        Assert.assertEquals(parser.limits.getTime(), 2000);
+        Assert.assertEquals(parser.limits.getSols(), 2);
+        Assert.assertEquals(parser.limits.getRuns(), 2);
     }
 
     @Test(groups = "1s")
@@ -138,9 +138,9 @@ public class RegParserTest {
     public void testVarh1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.varH, Search.VarH.DEFAULT);
-        p.parseArgument("-f", "-varh", "input", "/file");
-        Assert.assertEquals(parser.varH, Search.VarH.INPUT);
+        Assert.assertEquals(parser.varH, SearchParams.VariableSelection.DOMWDEG_CACD);
+        p.parseArgument("-f", "-varh", "chs", "/file");
+        Assert.assertEquals(parser.varH, SearchParams.VariableSelection.CHS);
     }
 
     @Test(groups = "1s", expectedExceptions = CmdLineException.class)
@@ -150,18 +150,37 @@ public class RegParserTest {
     }
 
     @Test(groups = "1s")
+    public void testVarsel1() throws CmdLineException {
+        CmdLineParser p = new CmdLineParser(parser);
+        p.parseArgument("/file");
+        Assert.assertNull(parser.varsel);
+        p.parseArgument("-f", "-varsel", "[CHS,LARGEST_DOMAIN,64]", "/file");
+        Assert.assertEquals(parser.varsel, new SearchParams.VarSelConf(
+                SearchParams.VariableSelection.CHS, 64));
+    }
+
+    @Test(groups = "1s")
     public void testVarl1() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.valH, Search.ValH.DEFAULT);
+        Assert.assertEquals(parser.valH, SearchParams.ValueSelection.MIN);
         p.parseArgument("-f", "-valh", "max", "/file");
-        Assert.assertEquals(parser.valH, Search.ValH.MAX);
+        Assert.assertEquals(parser.valH, SearchParams.ValueSelection.MAX);
     }
 
     @Test(groups = "1s", expectedExceptions = CmdLineException.class)
     public void testVarl2() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("-varl", "max", "/file");
+    }
+
+    @Test(groups = "1s")
+    public void testValsel1() throws CmdLineException {
+        CmdLineParser p = new CmdLineParser(parser);
+        p.parseArgument("/file");
+        Assert.assertNull(parser.valsel);
+        p.parseArgument("-f", "-valsel", "[MAX,true,32,true]", "/file");
+        Assert.assertEquals(parser.valsel, new SearchParams.ValSelConf(SearchParams.ValueSelection.MAX, true, 32, true));
     }
 
     @Test(groups = "1s")
