@@ -61,12 +61,11 @@ public class PerformanceTest {
                 fzn.getModel().getName(), fzn.getModel().getSolver().getTimeCount()));
     }
 
-    @DataProvider()
-    public Object[][] instances() {
+    public Object[][] getInstances(String name) {
         List<Object[]> parameters = new ArrayList<>();
         try (BufferedReader br = Files.newBufferedReader(
                 Paths.get(Objects.requireNonNull(this.getClass().getResource(
-                        ROOT + "instances.csv")).getPath()))) {
+                        ROOT + name)).getPath()))) {
             // read the file line by line
             String line;
             while ((line = br.readLine()) != null) {
@@ -89,12 +88,49 @@ public class PerformanceTest {
         return parameters.toArray(new Object[0][0]);
     }
 
-    @Test(groups = "mzn", dataProvider = "instances", timeOut = 60000, priority = 2)
+    @DataProvider()
+    public Object[][] instances() {
+        return getInstances("instances.csv");
+    }
+
+    @Test(groups = "mzn", dataProvider = "instances", timeOut = 60_000, priority = 2)
     public void testThemAll(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
         String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
         String[] args = new String[]{
                 file,
-                "-limit", "[50s]", // but, problems are expected to end within 30s max
+                "-limit", "[50s]", // but, problems are expected to end within 15s max
+                "-lvl", LEVEL,
+                "-p", "1"
+        };
+        Flatzinc fzn = new Flatzinc();
+        fzn.setUp(args);
+        fzn.createSolver();
+        fzn.buildModel();
+        fzn.configureSearch();
+        //fzn.getModel().displayVariableOccurrences();
+        //fzn.getModel().displayPropagatorOccurrences();
+        fzn.solve();
+        Assert.assertEquals(fzn.getModel().getSolver().getSearchState(), SearchState.TERMINATED, "Unexpected search state");
+        if (bst != null) {
+            Assert.assertEquals(fzn.getModel().getSolver().getObjectiveManager().getBestSolutionValue(), bst, "Unexpected best solution");
+        }
+        Assert.assertEquals(fzn.getModel().getSolver().getSolutionCount(), solutions, "Unexpected number of solutions");
+        Assert.assertEquals(fzn.getModel().getSolver().getNodeCount(), nodes, "Unexpected number of nodes");
+        Assert.assertEquals(fzn.getModel().getSolver().getFailCount(), failures, "Unexpected number of failures");
+        logPerf(fzn);
+    }
+
+    @DataProvider()
+    public Object[][] hardInstances() {
+        return getInstances("hard_instances.csv");
+    }
+
+    @Test(groups = "mzn", dataProvider = "hardInstances", timeOut = 120_000, priority = 2)
+    public void testHardInstances(String path, int solutions, Integer bst, int nodes, int failures) throws SetUpException {
+        String file = Objects.requireNonNull(this.getClass().getResource(path)).getFile();
+        String[] args = new String[]{
+                file,
+                "-limit", "[110s]", // but, problems are expected to end within 30s max
                 "-lvl", LEVEL,
                 "-p", "1"
         };
