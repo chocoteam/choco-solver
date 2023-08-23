@@ -117,7 +117,7 @@ public final class IntDomainBest implements IntValueSelector {
     public IntDomainBest(BiPredicate<IntVar, Integer> condition) {
         this(100,
                 new IntDomainMin(),
-                v -> v.getModel().getSolver().getRestartCount() % 16 == 0,
+                v -> true,
                 DecisionOperatorFactory.makeIntEq(),
                 condition);
     }
@@ -139,7 +139,7 @@ public final class IntDomainBest implements IntValueSelector {
     public IntDomainBest() {
         this(100,
                 new IntDomainMin(),
-                v -> v.getModel().getSolver().getRestartCount() % 16 == 0,
+                v -> true,
                 DecisionOperatorFactory.makeIntEq(),
                 (k, v) -> false);
     }
