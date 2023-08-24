@@ -13,11 +13,13 @@ import org.chocosolver.parser.Level;
 import org.chocosolver.parser.RegParser;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.restart.LubyCutoff;
+import org.chocosolver.solver.search.restart.Restarter;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest;
 import org.chocosolver.solver.search.strategy.selectors.variables.FirstFail;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
@@ -74,11 +76,6 @@ public class MPS extends RegParser {
     }
 
     @Override
-    public void createSettings() {
-        defaultSettings = Settings.prod();
-    }
-
-    @Override
     public Thread actionOnKill() {
         return new Thread(() -> {
             if (userinterruption) {
@@ -113,10 +110,10 @@ public class MPS extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(m, parsers[i], i);
-                if(logFilePath != null) {
+                if (logFilePath != null) {
                     s.log().remove(System.out);
                     s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFilePath)), true));
-                }else {
+                } else {
                     s.logWithANSI(ansi);
                 }
                 if (level.isLoggable(Level.INFO)) {
@@ -156,18 +153,21 @@ public class MPS extends RegParser {
     public void parse(Model target, MPSParser parser, int i) throws Exception {
         parser.model(target, instance, maximize, ninf, pinf, ibex, noeq);
         if (i == 0) {
-            Solver solver = target.getSolver();
             if (target.getNbRealVar() == 0) {
-                target.getSolver().setSearch(
-                        Search.intVarSearch(new FirstFail(target),
-                                /*new org.chocosolver.parser.mps.IntDomainBest()*/
-                                new org.chocosolver.solver.search.strategy.selectors.values.IntDomainBest(),
-//                                new IntDomainMin(),
-                                target.retrieveIntVars(true))
-                );
+                BlackBoxConfigurator.init()
+                        .setIntVarStrategy(vs -> new IntStrategy(
+                                vs,
+                                new FirstFail(target),
+                                new IntDomainBest()))
+                        .make(target);
             } else {
-                solver.setSearch(Search.defaultSearch(target));
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
+                BlackBoxConfigurator.init()
+                        .setRestartPolicy(
+                                s -> new Restarter(
+                                        new LubyCutoff(500),
+                                        c -> s.getFailCount() >= c, 50_000, true))
+                        .setNogoodOnRestart(false) // not supported for real variables
+                        .make(target);
             }
         }
     }

@@ -343,7 +343,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             Constraint forceOptimal = ref().getModel().arithm(objective, "=", opt);
             forceOptimal.post();
             if (defaultS)
-                ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
+                Search.defaultSearch(ref().getModel());// best bound (in default) is only for optim
             List<Solution> solutions = findAllSolutions(stop);
             ref().getModel().unpost(forceOptimal);
             return solutions;
@@ -413,7 +413,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
             forceOptimal.post();
             ref().getModel().getEnvironment().save(() -> ref().getModel().unpost(forceOptimal));
             if (defaultS)
-                ref().setSearch(Search.defaultSearch(ref().getModel()));// best bound (in default) is only for optim
+                Search.defaultSearch(ref().getModel());// best bound (in default) is only for optim
             /*CPRU cannot infer type arguments for java.util.Spliterator<T>*/
             Spliterator<Solution> it = new Spliterator<Solution>() {
 

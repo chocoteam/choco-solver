@@ -13,11 +13,12 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.real.Ibex;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
 import java.util.function.Predicate;
@@ -52,7 +53,7 @@ public class Settings {
 
     private int maxPropagatorPriority = PropagatorPriority.VERY_SLOW.getValue();
 
-    private Function<Model, AbstractStrategy<?>> defaultSearch = Search::defaultSearch;
+    private Consumer<Model> defaultSearch = m -> BlackBoxConfigurator.init().make(m);
 
     private boolean warnUser = false;
 
@@ -330,14 +331,13 @@ public class Settings {
 
 
     /**
-     * Creates a default search strategy for the input model
+     * Set default search strategy for the input model
      *
      * @param model a model requiring a default search strategy
-     * @return a default search strategy for model
      * @see Search#defaultSearch(Model)
      */
-    public AbstractStrategy<?> makeDefaultSearch(Model model) {
-        return defaultSearch.apply(model);
+    public void makeDefaultSearch(Model model) {
+        defaultSearch.accept(model);
     }
 
     /**
@@ -346,7 +346,7 @@ public class Settings {
      * @param defaultSearch what default search strategy should be
      * @return the current instance
      */
-    public Settings setDefaultSearch(Function<Model, AbstractStrategy<?>> defaultSearch) {
+    public Settings setDefaultSearch(Consumer<Model> defaultSearch) {
         this.defaultSearch = defaultSearch;
         return this;
     }

@@ -7,8 +7,9 @@
  *
  * See LICENSE file in the project root for full license information.
  */
-package org.chocosolver.parser;
+package org.chocosolver.parser.handlers;
 
+import org.chocosolver.solver.search.strategy.SearchParams;
 import org.chocosolver.util.tools.TimeUtils;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -22,9 +23,9 @@ import org.kohsuke.args4j.spi.Setter;
  * @author Charles Prud'homme
  * @since 15/06/2020
  */
-public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimConf> {
+public class LimitHandler extends OneArgumentOptionHandler<SearchParams.LimConf> {
 
-    public LimitHandler(CmdLineParser parser, OptionDef option, Setter<? super ParserParameters.LimConf> setter) {
+    public LimitHandler(CmdLineParser parser, OptionDef option, Setter<? super SearchParams.LimConf> setter) {
         super(parser, option, setter);
     }
 
@@ -40,7 +41,7 @@ public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimC
 
 
     @Override
-    protected ParserParameters.LimConf parse(String argument) throws NumberFormatException, CmdLineException {
+    protected SearchParams.LimConf parse(String argument) throws NumberFormatException, CmdLineException {
         if (argument.startsWith("[")) argument = argument.substring(1);
         if (argument.endsWith("]")) argument = argument.substring(0, argument.length() - 1);
         String[] pars = argument.split(",");
@@ -60,6 +61,6 @@ public class LimitHandler extends OneArgumentOptionHandler<ParserParameters.LimC
             }
             time = TimeUtils.convertInMilliseconds(params);
         }
-        return new ParserParameters.LimConf(time, sols, runs);
+        return new SearchParams.LimConf(time, sols, runs);
     }
 }

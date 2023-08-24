@@ -9,12 +9,14 @@
  */
 package org.chocosolver.xscp;
 
-import org.chocosolver.parser.PerformanceListener;
 import org.chocosolver.parser.SetUpException;
 import org.chocosolver.parser.xcsp.XCSP;
 import org.chocosolver.solver.search.SearchState;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,7 +35,7 @@ import java.util.Objects;
  * @author Charles Prud'homme
  * @since 30/09/2020
  */
-@Listeners(PerformanceListener.class)
+//@Listeners(PerformanceListener.class)
 public class PerformanceTest {
     private static final String ROOT = "/xcsp/";
     private static final String COMMENT = "#";

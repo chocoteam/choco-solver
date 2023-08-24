@@ -28,4 +28,6 @@ module org.chocosolver.parsers {
     opens org.chocosolver.parser.flatzinc to args4j;
     opens org.chocosolver.parser.xcsp to args4j;
     opens org.chocosolver.parser.dimacs to args4j;
+    exports org.chocosolver.parser.handlers;
+    opens org.chocosolver.parser.handlers to args4j, org.testng;
 }

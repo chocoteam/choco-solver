@@ -15,8 +15,9 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.search.limits.FailCounter;
-import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.restart.GeometricalCutoff;
+import org.chocosolver.solver.search.restart.Restarter;
+import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.util.logger.Logger;
 import org.kohsuke.args4j.Option;
 
@@ -88,10 +89,10 @@ public class DIMACS extends RegParser {
             try {
                 long ptime = -System.currentTimeMillis();
                 parse(m, parsers[i], i);
-                if(logFilePath != null) {
+                if (logFilePath != null) {
                     s.log().remove(System.out);
                     s.log().add(new PrintStream(Files.newOutputStream(Paths.get(logFilePath)), true));
-                }else {
+                } else {
                     s.logWithANSI(ansi);
                 }
                 if (level.isLoggable(Level.INFO)) {
@@ -135,16 +136,12 @@ public class DIMACS extends RegParser {
     public void parse(Model target, DIMACSParser parser, int i) throws Exception {
         parser.model(target, instance);
         if (i == 0) {
-            Solver solver = target.getSolver();
-            if (target.getNbRealVar() == 0) {
-                target.getSolver().setSearch(
-                        Search.domOverWDegSearch(getModel().retrieveBoolVars())
-                );
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
-            } else {
-                solver.setSearch(Search.defaultSearch(target));
-                solver.setLubyRestart(500, new FailCounter(target, 0), 5000);
-            }
+            BlackBoxConfigurator.init()
+                    .setRestartPolicy(
+                            s -> new Restarter(
+                                    new GeometricalCutoff(5, 1.05),
+                                    c -> s.getFailCount() >= c, 50_000, true))
+                    .make(target);
         }
     }
 
