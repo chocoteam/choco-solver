@@ -130,7 +130,7 @@ public class BlackBoxConfigurator {
                 .setMetaStrategy(Search::lastConflict)
                 .setRestartPolicy(solver -> AbstractRestart.NO_RESTART)
                 .setRestartOnSolution(false)
-                .setNogoodOnRestart(false)
+                .setNogoodOnRestart(true)
                 .setExcludeViews(false)
                 .setExcludeObjective(true);
     }
