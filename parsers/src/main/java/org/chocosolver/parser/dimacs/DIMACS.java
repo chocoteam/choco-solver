@@ -137,6 +137,7 @@ public class DIMACS extends RegParser {
         parser.model(target, instance);
         if (i == 0) {
             BlackBoxConfigurator.init()
+                    .setNogoodOnRestart(true)
                     .setRestartPolicy(
                             s -> new Restarter(
                                     new GeometricalCutoff(5, 1.05),

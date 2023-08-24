@@ -85,7 +85,7 @@ public class BlackBoxConfigurator {
     Function<Solver, AbstractRestart> restartPolicy;
 
     /**
-     * Set nogood recording in restart (default is true)
+     * Set nogood recording in restart (default is false)
      */
     boolean nogoodOnRestart;
 
@@ -130,7 +130,7 @@ public class BlackBoxConfigurator {
                 .setMetaStrategy(Search::lastConflict)
                 .setRestartPolicy(solver -> AbstractRestart.NO_RESTART)
                 .setRestartOnSolution(false)
-                .setNogoodOnRestart(true)
+                .setNogoodOnRestart(false)
                 .setExcludeViews(false)
                 .setExcludeObjective(true);
     }
