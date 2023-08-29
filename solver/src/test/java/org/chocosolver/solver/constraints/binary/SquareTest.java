@@ -43,8 +43,8 @@ public class SquareTest {
         solver.setSearch(Search.randomSearch(ArrayUtils.append(x,x2), 0));
         while (solver.solve()) ;
         assertEquals(solver.getSolutionCount(), 184320);
-        assertEquals(solver.getFailCount(), 412230);
-        assertEquals(solver.getNodeCount(), 780869);
+        assertEquals(solver.getFailCount(), 270905);
+        assertEquals(solver.getNodeCount(), 639544);
     }
 
     @Test(groups = "10s", timeOut = 60000)
@@ -199,7 +199,7 @@ public class SquareTest {
         totalSum = model.intVar(0, LANDSCAPE_SIZE);
         model.sum(sumOfPatchSizes, "=", totalSum).post();
         model.getSolver().setSearch(Search.inputOrderLBSearch(model.retrieveIntVars(true)));
-        model.getSolver().showStatistics();
+//        model.getSolver().showStatistics();
         model.getSolver().solve();
         Assert.assertEquals(1, model.getSolver().getSolutionCount());
         Assert.assertEquals(83, model.getSolver().getNodeCount());

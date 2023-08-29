@@ -32,7 +32,6 @@ public class ConstraintsName {
     public static final String DISTANCE = "DISTANCE";
 
     public static final String POWER = "POWER";
-    public static final String SQUARE = "SQUARE";
 
     public static final String TABLE = "TABLE";
 
