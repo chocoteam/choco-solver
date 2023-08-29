@@ -946,6 +946,89 @@ public enum FConstraint {
 
         }
     },
+    fzn_count_geq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            IntVar c2;
+            if (c.isAConstant()) {
+                c2 = model.intVar(c.getName() + "_2", 0, c.getValue());
+            } else {
+                c2 = model.intVar(c.getName() + "_2", 0, x.length);
+                model.arithm(c, ">=", c2).post();
+            }
+            model.count(y, x, c2).post();
+        }
+    },
+    fzn_count_gt {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            IntVar c2;
+            if (c.isAConstant()) {
+                c2 = model.intVar(c.getName() + "_2", 0, c.getValue() - 1);
+            } else {
+                c2 = model.intVar(c.getName() + "_2", 0, x.length);
+                model.arithm(c, ">", c2).post();
+            }
+            model.count(y, x, c2).post();
+
+        }
+    },
+    fzn_count_leq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            IntVar c2;
+            if (c.isAConstant()) {
+                c2 = model.intVar(c.getName() + "_2", c.getValue(), x.length);
+            } else {
+                c2 = model.intVar(c.getName() + "_2", 0, x.length);
+                model.arithm(c, "<=", c2).post();
+            }
+            model.count(y, x, c2).post();
+        }
+    },
+    fzn_count_lt {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            IntVar c2;
+            if (c.isAConstant()) {
+                c2 = model.intVar(c.getName() + "_2", c.getValue() + 1, x.length);
+            } else {
+                c2 = model.intVar(c.getName() + "_2", 0, x.length);
+                model.arithm(c, "<", c2).post();
+            }
+            model.count(y, x, c2).post();
+
+        }
+    },
+    fzn_count_neq {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar y = exps.get(1).intVarValue(model);
+            IntVar c = exps.get(2).intVarValue(model);
+            IntVar c2 = model.intVar(c.getName() + "_2", 0, x.length);
+            model.count(y, x, c2).post();
+            model.arithm(c2, "!=", c).post();
+
+        }
+    },
     cumulativeChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
