@@ -1146,6 +1146,35 @@ public enum FConstraint {
             }
         }
     },
+    fzn_disjunctive {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] s = exps.get(0).toIntVarArray(model);
+            IntVar[] d = exps.get(1).toIntVarArray(model);
+            Task[] t = new Task[s.length];
+            IntVar[] h = new IntVar[s.length];
+            for (int i = 0; i < s.length; i++) {
+                t[i] = model.taskVar(s[i], d[i]);
+                h[i] = model.intVar(1);
+            }
+            model.cumulative(t, h, model.intVar(1)).post();
+        }
+    },
+    fzn_disjunctive_strict {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+            IntVar[] s = exps.get(0).toIntVarArray(model);
+            IntVar[] d = exps.get(1).toIntVarArray(model);
+            Task[] t = new Task[s.length];
+            IntVar[] h = new IntVar[s.length];
+            for (int i = 0; i < s.length; i++) {
+                t[i] = model.taskVar(s[i], d[i]);
+                h[i] = model.intVar(1);
+                d[i].gt(0).post();
+            }
+            model.cumulative(t, h, model.intVar(1)).post();
+        }
+    },
     diffnChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
