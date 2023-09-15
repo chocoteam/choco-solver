@@ -179,7 +179,7 @@ public class PropagationEngine {
     }
 
     /**
-     * Launch the proapagation, ie, active propagators if necessary, then reach a fix point
+     * Launch the propagation, ie, active propagators if necessary, then reach a fix point
      *
      * @throws ContradictionException if a contradiction occurs
      */
