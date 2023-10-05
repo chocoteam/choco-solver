@@ -109,6 +109,28 @@ public class SparseBitSetTest {
   }
 
   @Test
+  public void testNextClearBit2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(0);
+    bs.set(63);
+    bs.set(138);
+    
+    Assert.assertEquals(bs.nextClearBit(0), 1);
+    Assert.assertEquals(bs.nextClearBit(63), 64);
+    Assert.assertEquals(bs.nextClearBit(138), 139);
+  }
+
+  @Test
+  public void testNextClearBit3() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(62);
+    bs.set(63);
+    Assert.assertEquals(bs.nextClearBit(62), 64);
+  }
+
+  @Test
   public void testPrevClearBit() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet bs = env.makeSparseBitset(64);
@@ -118,6 +140,19 @@ public class SparseBitSetTest {
     Assert.assertEquals(bs.prevClearBit(192), 192);
     bs.set(32, 257);
     Assert.assertEquals(bs.prevClearBit(256), 31);
+  }
+
+  @Test
+  public void testPrevClearBit2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(0);
+    bs.set(64);
+    bs.set(138);
+
+    Assert.assertEquals(bs.prevClearBit(138), 137);
+    Assert.assertEquals(bs.prevClearBit(64), 63);
+    Assert.assertEquals(bs.prevClearBit(0), -1);
   }
 
   @Test
@@ -165,6 +200,24 @@ public class SparseBitSetTest {
     bs.clear();
     Assert.assertEquals(bs.cardinality(), 0);
     Assert.assertEquals(bs.nextSetBit(0), -1);
+  }
+
+  @Test
+  public void testClear2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(50);
+    bs.set(100);
+    bs.clear(49, 101);
+  }
+
+  @Test
+  public void testClear3() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(100);
+    bs.set(200);
+    bs.clear(101, 199);
   }
 
   @DataProvider(name = "invalidRanges")

@@ -58,6 +58,19 @@ public class S64BitSet implements IStateBitSet {
     }
 
     /**
+     * Check that the given index is strictly positive.
+     *
+     * @param index the index
+     * @throws IndexOutOfBoundsException if the index is negative
+     */
+    private static void requirePositiveIndex(final int index) {
+        if (index < 0) {
+            throw new IndexOutOfBoundsException(
+                    "Positive index expected. Got " + index);
+        }
+    }
+
+    /**
      * Every public method must preserve these invariants.
      */
     private void checkInvariants() {
@@ -192,8 +205,7 @@ public class S64BitSet implements IStateBitSet {
      * @since JDK1.0
      */
     public void set(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
         if (CHECK) checkInvariants();
         int wordIndex = wordIndex(bitIndex);
         expandTo(wordIndex);
@@ -269,8 +281,7 @@ public class S64BitSet implements IStateBitSet {
      * @since JDK1.0
      */
     public void clear(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
 
         int wordIndex = wordIndex(bitIndex);
         int n = wordsInUse.get();
@@ -362,8 +373,7 @@ public class S64BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      */
     final public boolean get(final int bitIndex) {
-        //if (bitIndex < 0)
-        //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
 
         if (CHECK) checkInvariants();
 
