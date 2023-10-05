@@ -30,6 +30,7 @@ import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.iterators.IntVarValueIterator;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
+import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Iterator;
 
@@ -105,7 +106,11 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
         IEnvironment env = model.getEnvironment();
         OFFSET = sortedValues[0];
         int capacity = sortedValues[sortedValues.length - 1] - OFFSET + 1;
-        this.VALUES = env.makeBitSet(capacity);
+        if (capacity > 30 && capacity / sortedValues.length > 5) {
+            this.VALUES = env.makeSparseBitset(64);
+        }else {
+            this.VALUES = env.makeBitSet(capacity);
+        }
         for (int sortedValue : sortedValues) {
             this.VALUES.set(sortedValue - OFFSET);
         }
@@ -124,16 +129,7 @@ public final class BitsetIntVarImpl extends AbstractVariable implements IntVar {
      * @param model declaring model
      */
     public BitsetIntVarImpl(String name, int min, int max, Model model) {
-        super(name, model);
-        IEnvironment env = this.model.getEnvironment();
-        this.OFFSET = min;
-        int capacity = max - min + 1;
-        this.VALUES = env.makeBitSet(capacity);
-        this.VALUES.set(0, max - min + 1);
-        this.LB = env.makeInt(0);
-        this.UB = env.makeInt(max - min);
-        this.SIZE = env.makeInt(capacity);
-        LENGTH = capacity;
+        this(name, ArrayUtils.array(min, max), model);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
