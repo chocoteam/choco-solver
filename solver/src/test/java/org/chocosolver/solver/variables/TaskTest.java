@@ -16,7 +16,7 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
-import org.chocosolver.solver.variables.impl.BitsetArrayIntVarImpl;
+import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
 import org.chocosolver.solver.variables.view.integer.IntOffsetView;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
@@ -283,8 +283,8 @@ public class TaskTest {
     @Test(groups = "1s")
     public void testMonitor2() {
         Model model = new Model();
-        IntVar first = new BitsetArrayIntVarImpl("first", new int[]{1, 2, 3, 4, 5}, model);
-        IntVar dur = new BitsetArrayIntVarImpl("dur", new int[]{1, 2, 4, 5}, model);
+        IntVar first = new BitsetIntVarImpl("first", new int[]{1, 2, 3, 4, 5}, model);
+        IntVar dur = new BitsetIntVarImpl("dur", new int[]{1, 2, 4, 5}, model);
         IntVar last = model.intVar("last", 5, 6);
         IntVar IV390 = model.intVar("IV390", 6);
         new Constraint("", new PropXplusYeqZ(first, dur, last)).post();

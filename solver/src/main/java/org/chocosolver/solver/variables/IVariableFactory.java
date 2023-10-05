@@ -265,12 +265,7 @@ public interface IVariableFactory extends ISelf<Model> {
         } else if (values.length == 2 && values[0] == 0 && values[1] == 1) {
             return boolVar(name);
         } else {
-            int gap = values[values.length - 1] - values[0];
-            if (gap > 30 && gap / values.length > 5) {
-                return new BitsetArrayIntVarImpl(name, values, ref());
-            } else {
-                return new BitsetIntVarImpl(name, values, ref());
-            }
+            return new BitsetIntVarImpl(name, values, ref());
         }
     }
 
