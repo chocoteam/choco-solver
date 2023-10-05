@@ -938,6 +938,9 @@ public interface IVariableFactory extends ISelf<Model> {
         if (MAX < MIN) {
             throw new SolverException(NAME + ": wrong domain definition, lower bound > upper bound");
         }
+        if ((long) MAX - MIN > Integer.MAX_VALUE) {
+            throw new SolverException(NAME + ": too large domain, consider reducing the bounds to avoid unexpected results");
+        }
     }
 
     /**
