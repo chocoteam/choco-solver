@@ -58,6 +58,19 @@ public class S64BitSet implements IStateBitSet {
     }
 
     /**
+     * Check that the given index is strictly positive.
+     *
+     * @param index the index
+     * @throws IndexOutOfBoundsException if the index is negative
+     */
+    private static void requirePositiveIndex(final int index) {
+        if (index < 0) {
+            throw new IndexOutOfBoundsException(
+                    "Positive index expected. Got " + index);
+        }
+    }
+
+    /**
      * Every public method must preserve these invariants.
      */
     private void checkInvariants() {
@@ -192,8 +205,7 @@ public class S64BitSet implements IStateBitSet {
      * @since JDK1.0
      */
     public void set(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
         if (CHECK) checkInvariants();
         int wordIndex = wordIndex(bitIndex);
         expandTo(wordIndex);
@@ -269,8 +281,7 @@ public class S64BitSet implements IStateBitSet {
      * @since JDK1.0
      */
     public void clear(int bitIndex) {
-        if (bitIndex < 0)
-            throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
 
         int wordIndex = wordIndex(bitIndex);
         int n = wordsInUse.get();
@@ -362,8 +373,7 @@ public class S64BitSet implements IStateBitSet {
      * @throws IndexOutOfBoundsException if the specified index is negative.
      */
     final public boolean get(final int bitIndex) {
-        //if (bitIndex < 0)
-        //    throw new IndexOutOfBoundsException("bitIndex < 0: " + bitIndex);
+        requirePositiveIndex(bitIndex);
 
         if (CHECK) checkInvariants();
 
@@ -580,25 +590,27 @@ public class S64BitSet implements IStateBitSet {
         return words.length * BITS_PER_WORD;
     }
 
-    public boolean equals(Object obj) {
-        if (!(obj instanceof S64BitSet))
-            return false;
-        if (this == obj)
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
             return true;
-
-        S64BitSet set = (S64BitSet) obj;
-
-        if (CHECK) checkInvariants();
-        if (CHECK) set.checkInvariants();
-
-        if (wordsInUse != set.wordsInUse)
+        }
+        if (!(o instanceof IStateBitSet)) {
             return false;
+        }
 
-        // Check words in use by both BitSets
-        for (int i = 0; i < wordsInUse.get(); i++)
-            if (words[i] != set.words[i])
+        final IStateBitSet that = (IStateBitSet) o;
+        // Fail fast.
+        if (this.cardinality() != that.cardinality()) {
+            return false;
+        }
+        // Same cardinality. Iterate over the bit sets. Those must be sets in 'that'
+        // as well.
+        for (int i = nextSetBit(0); i >= 0; i = nextSetBit(i + 1)) {
+            if (!that.get(i)) {
                 return false;
-
+            }
+        }
         return true;
     }
 

@@ -283,7 +283,7 @@ public class SparseBitSet implements IStateBitSet {
       }
       final int st;
       if (bIdx == blockIndex(from)) {
-        st = from;
+        st = localIndex(from);
       } else {
         st = 0;
       }
@@ -330,8 +330,10 @@ public class SparseBitSet implements IStateBitSet {
   }
 
   @Override
-  public int nextSetBit(final int fromIndex) {
-    requirePositiveIndex(fromIndex);
+  public int nextSetBit(int fromIndex) {
+    if (fromIndex < 0) {
+      fromIndex = 0;
+    }
     final int startingBlock = blockIndex(fromIndex);
 
     // Iterate over all the blocks starting from the current index to pick the
@@ -358,7 +360,9 @@ public class SparseBitSet implements IStateBitSet {
 
   @Override
   public int prevSetBit(final int fromIndex) {
-    requirePositiveIndex(fromIndex);
+  if (fromIndex < 0) {
+    return -1;
+  }
     final int lastBlockIdx = blockIndex(fromIndex);
     // Iterate over all the blocks backward, starting from the current index to
     // pick the first bit set.
@@ -381,16 +385,21 @@ public class SparseBitSet implements IStateBitSet {
   }
 
   @Override
-  public int nextClearBit(final int fromIndex) {
-    requirePositiveIndex(fromIndex);
+  public int nextClearBit(int fromIndex) {
+    if (fromIndex < 0) {
+      fromIndex = 0;
+    }
     final int fromBlock = blockIndex(fromIndex);
     int curBlock = fromBlock;
+    if (!index.get(curBlock)) {
+      return fromIndex;
+    }
     while (curBlock < blocks.length) {
-      if (blocks[curBlock] == null || !index.get(curBlock)) {
+      if (!index.get(curBlock)) {
         // null block. fromIndex is then clear for sure.
         // In case the block is not null, check  the index in case we have set
         // bits but a cleared block that only clear the index.
-        return fromIndex;
+        break;
       }
       // local offset depending on the block under inspection.
       final int localOff;
@@ -409,12 +418,14 @@ public class SparseBitSet implements IStateBitSet {
       // All the bits are set, check the next block.
       curBlock++;
     }
-    return fromIndex;
+    return absIndex(curBlock, 0);
   }
 
   @Override
   public int prevClearBit(final int fromIndex) {
-    requirePositiveIndex(fromIndex);
+    if (fromIndex < 0) {
+      return -1;
+    }
     final int fromBlock = blockIndex(fromIndex);
     if (fromBlock >= index.length()) {
       // Outside the current index. For sure there is a cleared bit at fromIndex.
@@ -425,7 +436,7 @@ public class SparseBitSet implements IStateBitSet {
       if (!index.get(curBlock)) {
         // null block. fromIndex is then clear for sure. Possibly also a cleared
         // block.
-        return fromIndex;
+        break;
       }
       // local offset depending on the block under inspection.
       final int localOff;
@@ -445,7 +456,7 @@ public class SparseBitSet implements IStateBitSet {
       curBlock--;
     }
     // No cleared bit in any block.
-    return -1;
+    return absIndex(curBlock + 1, 0) - 1;
   }
 
   @Override

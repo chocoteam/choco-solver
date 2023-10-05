@@ -24,7 +24,7 @@ import java.util.Random;
  */
 public class SparseBitSetTest {
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testNew() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -33,7 +33,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(-1, bs.nextSetBit(0));
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testSetGet() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -55,7 +55,7 @@ public class SparseBitSetTest {
     Assert.assertFalse(bs.get(0));
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testNextSetBit() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -82,7 +82,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(bs.nextSetBit(65445), -1);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testNextClearBit() {
     final IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -109,6 +109,28 @@ public class SparseBitSetTest {
   }
 
   @Test
+  public void testNextClearBit2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(0);
+    bs.set(63);
+    bs.set(138);
+    
+    Assert.assertEquals(bs.nextClearBit(0), 1);
+    Assert.assertEquals(bs.nextClearBit(63), 64);
+    Assert.assertEquals(bs.nextClearBit(138), 139);
+  }
+
+  @Test
+  public void testNextClearBit3() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(62);
+    bs.set(63);
+    Assert.assertEquals(bs.nextClearBit(62), 64);
+  }
+
+  @Test
   public void testPrevClearBit() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet bs = env.makeSparseBitset(64);
@@ -118,6 +140,19 @@ public class SparseBitSetTest {
     Assert.assertEquals(bs.prevClearBit(192), 192);
     bs.set(32, 257);
     Assert.assertEquals(bs.prevClearBit(256), 31);
+  }
+
+  @Test
+  public void testPrevClearBit2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(0);
+    bs.set(64);
+    bs.set(138);
+
+    Assert.assertEquals(bs.prevClearBit(138), 137);
+    Assert.assertEquals(bs.prevClearBit(64), 63);
+    Assert.assertEquals(bs.prevClearBit(0), -1);
   }
 
   @Test
@@ -147,7 +182,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(-1, bs.prevSetBit(0));
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testClear() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -167,12 +202,30 @@ public class SparseBitSetTest {
     Assert.assertEquals(bs.nextSetBit(0), -1);
   }
 
+  @Test
+  public void testClear2() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(50);
+    bs.set(100);
+    bs.clear(49, 101);
+  }
+
+  @Test
+  public void testClear3() {
+    IEnvironment env = new EnvironmentTrailing();
+    IStateBitSet bs = env.makeSparseBitset(64);
+    bs.set(100);
+    bs.set(200);
+    bs.clear(101, 199);
+  }
+
   @DataProvider(name = "invalidRanges")
   public Object[][] invalidRanges() {
     return new Object[][]{{-1, 3}, {5, 4}, {-1, -1}};
   }
 
-  @Test(dataProvider = "invalidRanges",
+  @Test(groups = "1s", timeOut = 60000, dataProvider = "invalidRanges",
       expectedExceptions = IndexOutOfBoundsException.class)
   public void testBadSetRanges(final int from, final int to) {
     final IEnvironment env = new EnvironmentTrailing();
@@ -180,7 +233,7 @@ public class SparseBitSetTest {
     bs.set(from, to);
   }
 
-  @Test(dataProvider = "invalidRanges",
+  @Test(groups = "1s", timeOut = 60000, dataProvider = "invalidRanges",
       expectedExceptions = IndexOutOfBoundsException.class)
   public void testBadClearRanges(final int from, final int to) {
     final IEnvironment env = new EnvironmentTrailing();
@@ -188,7 +241,7 @@ public class SparseBitSetTest {
     bs.clear(from, to);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testSetRange() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -224,7 +277,7 @@ public class SparseBitSetTest {
     Assert.assertFalse(bs.get(155));
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testMemorySize() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet ref = new S64BitSet(env);
@@ -245,7 +298,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(sparse.size(), 128 * 64);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testSize() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet sparse = env.makeSparseBitset(64);
@@ -257,7 +310,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(sparse.size(), 128 * 64);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testClearRange() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -287,7 +340,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(bs.nextSetBit(64), 64);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testEmpty() {
     IEnvironment env = new EnvironmentTrailing();
     IStateBitSet bs = env.makeSparseBitset(64);
@@ -298,7 +351,7 @@ public class SparseBitSetTest {
     Assert.assertTrue(bs.isEmpty());
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testBacktracking() {
     final Model mo = new Model(new EnvironmentTrailing(), "foo");
     final IEnvironment env = mo.getEnvironment();
@@ -350,7 +403,7 @@ public class SparseBitSetTest {
     Assert.assertEquals(ref.toString(), got.toString());
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testEquals() {
     final IEnvironment env = new EnvironmentTrailing();
     final IStateBitSet ref = new S64BitSet(env, 64);
@@ -389,7 +442,7 @@ public class SparseBitSetTest {
     Assert.assertNotEquals(sparse, null);
   }
 
-  @Test
+  @Test(groups = "1s", timeOut = 60000)
   public void testHashCode() {
     final IEnvironment env = new EnvironmentTrailing();
     // Different block sizes but same content.
