@@ -387,35 +387,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint square(IntVar var1, IntVar var2) {
         assert var2.getModel() == var1.getModel();
-        if (var2.isInstantiated()) {
-            int v1 = var2.getValue();
-            if (var1.isInstantiated()) {
-                int v2 = var1.getValue();
-                if (v1 * v1 == v2) {
-                    return ref().trueConstraint();
-                } else {
-                    return ref().falseConstraint();
-                }
-            } else {
-                return ref().arithm(var1, "=", v1 * v1);
-            }
-        } else {
-            if (var1.isInstantiated()) {
-                int v2 = var1.getValue();
-                if (v2 == 0) {
-                    return ref().arithm(var2, "=", 0);
-                } else {
-                    if (v2 > 0 && MathUtils.isPerfectSquare(v2)) {
-                        int sqt = (int) Math.sqrt(v2);
-                        return ref().member(var2, new int[]{-sqt, sqt});
-                    } else {
-                        return ref().falseConstraint();
-                    }
-                }
-            } else {
-                return new Constraint(ConstraintsName.SQUARE, new PropSquare(var1, var2));
-            }
-        }
+        return pow(var2, 2, var1);
     }
 
     /**
@@ -517,44 +489,18 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param base     first variable
      * @param exponent an integer, should be positive
      * @param result   result variable
-     * @implSpec The 'power' propagator does not exist.
-     * So, if the constraint can be posted in extension, then it will be, otherwise, the constraint is decomposed into
-     * 'times' constraints.
      */
     default Constraint pow(IntVar base, int exponent, IntVar result) {
         if (exponent <= 0) {
             throw new SolverException("The power parameter should be strictly greater than 0.");
         }
-        /*if (TuplesFactory.canBeTupled(X, Y)) {
-            return table(new IntVar[]{Y, X}, TuplesFactory.power(Y, X, C));
-        } else */{
-            /*/ DECOMPOSITION
-            final HashMap<Integer, IntVar> mm = new HashMap<>();
-            mm.put(1, X);
-            int mid = (int) Math.pow(2, Math.ceil(Math.log(C / 2.) / Math.log(2)));
-            IntVar a, b, c;
-            for (int i = 2; i <= mid; i++) {
-                int m = (int) Math.pow(2, Math.ceil(Math.log(i / 2.) / Math.log(2)));
-                a = mm.get(m);
-                b = mm.get(i - m);
-                int[] bnds = VariableUtils.boundsForMultiplication(a, b);
-                c = ref().intVar(X.getName() + "^" + i, bnds[0], bnds[1]);
-                ref().times(a, b, c).post();
-                mm.put(i, c);
-            }
-            a = mm.get(mid);
-            b = mm.get(C - mid);
-            return ref().times(a, b, Y);
-            /*/
-            if (exponent == 2) {
-                return square(result, base);
-            }
-            if ((exponent % 2) == 0) {
-                return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
-            } else {
-                return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
-            }
-            //*/
+        if (exponent == 1) {
+            return arithm(result, "=", base);
+        }
+        if ((exponent % 2) == 0) {
+            return new Constraint(ConstraintsName.POWER, new PropPowEven(result, base, exponent));
+        } else {
+            return new Constraint(ConstraintsName.POWER, new PropPowOdd(result, base, exponent));
         }
     }
 
