@@ -32,7 +32,7 @@ import static org.testng.Assert.assertTrue;
  * @since 14/02/2022
  */
 public class PowTest extends AbstractBinaryTest {
-    private int TEST_VALUE = 5; // TODO How to change this dependency to use AbstractBinaryTest
+    private int TEST_VALUE = 5;
 
     @DataProvider
     public static Object[][] even() {

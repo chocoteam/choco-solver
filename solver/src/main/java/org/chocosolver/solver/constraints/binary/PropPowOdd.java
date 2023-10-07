@@ -22,8 +22,6 @@ import org.chocosolver.util.tools.MathUtils;
  * @since 18/05/11
  */
 public class PropPowOdd extends PropPowEven {
-    private static final double PRECISION = 1e-9;
-
     public PropPowOdd(IntVar X, IntVar Y, int n) {
         super(X, Y, n);
     }

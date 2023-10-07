@@ -27,6 +27,7 @@ import org.chocosolver.util.tools.MathUtils;
  * @since 18/05/11
  */
 public class PropPowEven extends Propagator<IntVar> {
+    protected static final double PRECISION = 1e-9;
     final IntIterableBitSet vrms;
     final boolean bothEnum;
     final int exponent;
@@ -79,14 +80,14 @@ public class PropPowEven extends Propagator<IntVar> {
         if (n < 0) {
             return 0;
         }
-        return MathUtils.safeCast((long) Math.floor(Math.pow(n, 1. / exponent)));
+        return MathUtils.safeCast((long) Math.floor(Math.pow(n, 1. / (exponent - PRECISION))));
     }
 
     int ceil_nroot(int n) {
         if (n < 0) {
             return 0;
         }
-        return MathUtils.safeCast((long) Math.ceil(Math.pow(n, 1. / exponent)));
+        return MathUtils.safeCast((long) Math.ceil(Math.pow(n, 1. / (exponent + PRECISION))));
     }
 
     int pow(int n) {
