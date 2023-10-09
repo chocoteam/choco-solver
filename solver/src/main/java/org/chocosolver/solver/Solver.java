@@ -1014,7 +1014,10 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * @return <tt>true</tt> if the time limit is met.
      */
     public boolean isTimeLimitMet() {
-        return timeCounter.isMet();
+        if (timeCounter != null) {
+            return timeCounter.isMet();
+        }
+        return false;
     }
 
     /**
