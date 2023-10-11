@@ -77,7 +77,7 @@ public class PerformanceTest {
                 parameters.add(new Object[]{
                         ROOT + columns[0] + File.separator + columns[1], // path
                         Integer.parseInt(columns[2]), // solutions
-                        Integer.getInteger(columns[3]), // best
+                        "_".equals(columns[3]) ? null : Integer.parseInt(columns[3]), // best
                         Integer.parseInt(columns[4]), // nodes
                         Integer.parseInt(columns[5]) // failures
                 });
