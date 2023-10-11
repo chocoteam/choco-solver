@@ -162,6 +162,105 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
+     * Create a view based on <i>var</i>, i.e. <i>view = |var|</i>
+     *
+     * @param var an integer variable
+     * @return an abs view
+     * @see #intAbsView(IntVar)
+     */
+    default IntVar abs(IntVar var) {
+        return intAbsView(var);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = var + b</i>
+     * @param var an integer variable
+     * @param b a constant
+     * @return a plus view
+     * @see #intView(IntVar, int, int)
+     */
+    default IntVar add(IntVar var, int b){
+        return intView(var, 1, b);
+    }
+
+    /**
+     * Create an affine view based on <i>var</i>, i.e. <i>view = a * var + b</i>
+     * @param var an integer variable
+     * @param a a coefficient
+     * @param b a constant
+     * @return an affine view
+     * @see #intView(IntVar, int, int)
+     */
+    default IntVar aff(IntVar var, int a, int b) {
+        return intView(var, a, b);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var == v)</i>
+     * @param var an integer variable
+     * @param v a constant
+     * @return a boolean view
+     * @see #intEqView(IntVar, int)
+     */
+    default BoolVar eq(IntVar var, int v){
+        return intEqView(var, v);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var >= v)</i>
+     * @param var an integer variable
+     * @param v a constant
+     * @return a boolean view
+     * @see #intGeView(IntVar, int)
+     */
+    default BoolVar ge(IntVar var, int v){
+        return intGeView(var, v);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var <= v)</i>
+     * @param var an integer variable
+     * @param v a constant
+     * @return a boolean view
+     * @see #intGeView(IntVar, int)
+     */
+    default BoolVar le(IntVar var, int v){
+        return intLeView(var, v);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = var * a</i>
+     * @param var an integer variable
+     * @param a a coefficient
+     * @return a mul view
+     * @see #intView(IntVar, int, int)
+     */
+    default IntVar mul(IntVar var, int a){
+        return intView(var, a, 0);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var != v)</i>
+     * @param var an integer variable
+     * @param v a constant
+     * @return a boolean view
+     * @see #intNeView(IntVar, int)
+     */
+    default BoolVar ne(IntVar var, int v){
+        return intNeView(var, v);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = -var</i>
+     * @param var an integer variable
+     * @return a neg view
+     * @see #intView(IntVar, int, int)
+     */
+    default IntVar neg(IntVar var) {
+        return intView(var, -1, 0);
+    }
+
+    /**
      * @see #intView(IntVar, int, int)
      * @deprecated
      */
