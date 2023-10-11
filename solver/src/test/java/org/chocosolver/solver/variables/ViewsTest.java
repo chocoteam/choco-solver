@@ -185,7 +185,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.intOffsetView(x, 1);
+                IntVar z = model.intView(x, 1, 1);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -209,7 +209,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.intScaleView(x, 2);
+                IntVar z = model.intView(x, 2, 0);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -233,7 +233,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
-                IntVar z = model.intMinusView(x);
+                IntVar z = model.intView(x, -1, 0);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
             }
@@ -293,7 +293,7 @@ public class ViewsTest {
         {
             IntVar x = model.intVar("x", 160, 187, false);
             IntVar y = model.intVar("y", -999, 999, false);
-            IntVar z = model.intOffsetView(model.intMinusView(x), 180);
+            IntVar z = model.intView(x, -1, 180);
             model.max(y, model.intVar(0), z).post();
 
             check(ref, model, 0, false, true);
@@ -508,7 +508,7 @@ public class ViewsTest {
     public void testJL1() throws ContradictionException {
         Model s = new Model();
         IntVar v1 = s.intVar("v1", -2, 2, false);
-        IntVar v2 = s.intMinusView(s.intMinusView(s.intVar("v2", -2, 2, false)));
+        IntVar v2 = s.intView(s.intView(s.intVar("v2", -2, 2, false), -1, 0), -1, 0);
         s.arithm(v1, "=", v2).post();
         s.arithm(v2, "!=", 1).post();
 
@@ -532,9 +532,9 @@ public class ViewsTest {
     public void testJL3() {
         Model model = new Model();
         model.arithm(
-            model.intVar("int", -3, 3, false),
-            "=",
-            model.intMinusView(model.boolVar("bool"))).post();
+                model.intVar("int", -3, 3, false),
+                "=",
+                model.intView(model.boolVar("bool"), -1, 0)).post();
         while (model.getSolver().solve()) {
         }
         assertEquals(model.getSolver().getSolutionCount(), 2);
@@ -596,7 +596,7 @@ public class ViewsTest {
     public void testJG4() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
-        IntVar view = s.intMinusView(var);
+        IntVar view = s.intView(var, -1, 0);
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -681,7 +681,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intOffsetView(x[i], 42);
+            y[i] = model.intView(x[i], 1, 42);
         }
         checkDomains(true, x, y);
 
@@ -694,7 +694,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intScaleView(x[i], 42);
+            y[i] = model.intView(x[i], 42, 0);
         }
         checkDomains(false, x, y);
 
@@ -707,7 +707,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intMinusView(x[i]);
+            y[i] = model.intView(x[i], -1, 0);
         }
         checkDomains(true, x, y);
 
@@ -833,7 +833,7 @@ public class ViewsTest {
                 Model base = new Model(Settings.init().setEnableViews(false));
                 {
                     IntVar i = base.intVar("i", -5, 5);
-                    IntVar f = base.intAffineView(a, i, b);
+                    IntVar f = base.intView(i, a, b);
                     base.arithm(f, ">", -12).post();
                     base.arithm(f, "<", 17).post();
                     Solver s = base.getSolver();
@@ -842,7 +842,7 @@ public class ViewsTest {
                 Model comp = new Model(Settings.init().setEnableViews(true));
                 {
                     IntVar i = comp.intVar("i", -5, 5);
-                    IntVar f = comp.intAffineView(a, i, b);
+                    IntVar f = comp.intView(i, a, b);
                     comp.arithm(f, ">", -12).post();
                     comp.arithm(f, "<", 17).post();
                     Solver s = comp.getSolver();

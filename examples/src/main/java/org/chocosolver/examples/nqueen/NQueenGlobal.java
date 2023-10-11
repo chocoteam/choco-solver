@@ -32,8 +32,8 @@ public class NQueenGlobal extends AbstractNQueen {
 
         for (int i = 0; i < n; i++) {
             vars[i] = model.intVar("Q_" + i, 1, n, false);
-            diag1[i] = model.intOffsetView(vars[i], i);
-            diag2[i] = model.intOffsetView(vars[i], -i);
+            diag1[i] = model.intView(vars[i], 1, i);
+            diag2[i] = model.intView(vars[i], 1, -i);
         }
 
         model.allDifferent(vars, "BC").post();

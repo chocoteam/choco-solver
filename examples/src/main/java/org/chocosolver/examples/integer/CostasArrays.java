@@ -48,7 +48,7 @@ public class CostasArrays extends AbstractProblem {
 				IntVar d = model.intVar(model.generateName(), -n, n, false);
 				model.arithm(d, "!=", 0).post();
 				model.sum(new IntVar[]{vars[i], d}, "=", vars[j]).post();
-				vectors[k] = model.intOffsetView(d, 2 * n * (j - i));
+                vectors[k] = model.intView(d, 1, 2 * n * (j - i));
 			}
 		}
 		model.allDifferent(vars, "AC").post();

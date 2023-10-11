@@ -301,7 +301,7 @@ public class ReifiedTest {
         row[2] = s.intVar(16);
 
         IntVar[] calc = new IntVar[2];
-        calc[0] = s.intOffsetView(row[0], 2);
+        calc[0] = s.intView(row[0], 1, 2);
         calc[1] = s.intVar("C", 0, 80, true);
         s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]).post();
 
@@ -337,7 +337,7 @@ public class ReifiedTest {
         row[2] = s.intVar(16);
 
         IntVar[] calc = new IntVar[2];
-        calc[0] = s.intScaleView(row[0], 2);
+        calc[0] = s.intView(row[0], 2, 0);
         calc[1] = s.intVar("C", 0, 1600, true);
         s.times(row[0], row[1], calc[1]).post();
 

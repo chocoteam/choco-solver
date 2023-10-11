@@ -1164,7 +1164,7 @@ public class XCSPParser implements XCallbacks2 {
         IntVar max = condToVar(condition, 0, vars.length);
         if (rank.equals(Types.TypeRank.LAST)) {
             ArrayUtils.reverse(vars);
-            IntVar max2 = model.intOffsetView(model.intMinusView(max), vars.length);
+            IntVar max2 = model.intView(max, -1, vars.length);
             model.argmin(max2, 0, vars).post();
         } else {
             model.argmin(max, 0, vars).post();
@@ -1257,7 +1257,7 @@ public class XCSPParser implements XCallbacks2 {
         IntVar max = condToVar(condition, 0, vars.length);
         if (rank.equals(Types.TypeRank.LAST)) {
             ArrayUtils.reverse(vars);
-            IntVar max2 = model.intOffsetView(model.intMinusView(max), vars.length);
+            IntVar max2 = model.intView(max, -1, vars.length);
             model.argmax(max2, 0, vars).post();
         } else {
             model.argmax(max, 0, vars).post();

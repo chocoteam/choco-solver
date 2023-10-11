@@ -9,9 +9,6 @@
  */
 package org.chocosolver.solver.objective;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solution;
 import org.chocosolver.solver.constraints.Propagator;
@@ -20,6 +17,9 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class to store the pareto front (multi-objective optimization).
@@ -59,7 +59,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
 
     /**
      * Create an object to compute the Pareto front of a multi-objective problem.
-     * Objectives are expected to be maximized (use {@link org.chocosolver.solver.variables.IViewFactory#intMinusView(IntVar)} in case of minimisation).
+     * Objectives are expected to be maximized (use {@link org.chocosolver.solver.variables.IViewFactory#intView(IntVar, int, int)} in case of minimisation).
      * <p>
      * Maintain the set of dominating solutions and
      * posts constraints dynamically to prevent search from computing dominated ones.

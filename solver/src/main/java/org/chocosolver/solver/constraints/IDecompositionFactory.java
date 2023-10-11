@@ -305,7 +305,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         z.ge(offset).post();
         z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
-            q[j] = ref().intAffineView(n, vars[j], n - j);
+            q[j] = ref().intView(vars[j], n, n - j);
             z.ne(j + offset).iff(M.gt(q[j])).post();
         }
         ref().max(M, q).post();
@@ -329,7 +329,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         z.ge(offset).post();
         z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
-            q[j] = ref().intAffineView(n, vars[j], j);
+            q[j] = ref().intView(vars[j], n, j);
             z.ne(j + offset).iff(M.lt(q[j])).post();
         }
         ref().min(M, q).post();

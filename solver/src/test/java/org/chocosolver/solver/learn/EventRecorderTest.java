@@ -275,7 +275,7 @@ public class EventRecorderTest {
                 IntVar k = model.intVar(model.generateName(), -n, n, false);
                 model.arithm(k, "!=", 0).post();
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
-                vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));
+                vectors[idx] = model.intView(k, 1, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }
@@ -370,7 +370,7 @@ public class EventRecorderTest {
         IntVar[] position = model.intVarArray("p", n * k, 0, k * n - 1, false);
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < k - 1; j++) {
-                model.arithm(model.intOffsetView(position[i + j * n], i + 2), "=", position[i + (j + 1) * n]).post();
+                model.arithm(model.intView(position[i + j * n], 1, i + 2), "=", position[i + (j + 1) * n]).post();
             }
         }
         model.allDifferent(position, "FC").post();

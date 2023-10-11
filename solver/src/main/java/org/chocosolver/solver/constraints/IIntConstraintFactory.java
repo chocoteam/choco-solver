@@ -70,7 +70,7 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.view.integer.IntOffsetView;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
@@ -466,7 +466,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (Y == 1) {
             return arithm(X, "=", Z);
         } else if (Y < 0) {
-            return times(X.getModel().intMinusView(X), -Y, Z);
+            return times(X.getModel().intView(X, -1, 0), -Y, Z);
         } else {
             return new Constraint(ConstraintsName.TIMES, new PropScale(X, Y, Z));
         }
@@ -1858,7 +1858,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param z      a variable
      * @param offset offset wrt to 'z'
      * @param vars   a vector of variables, of size > 0
-     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntMinusView}[]
+     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntAffineView}[]
      * and returns an {@link #argmax(IntVar, int, IntVar[])} constraint
      * on this views.
      */
@@ -1866,7 +1866,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
         z = ((IntVar[]) args[1])[0];
-        IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().intView(v, -1, 0)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 
@@ -2272,7 +2272,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             default:
                 return Constraint.merge(ConstraintsName.SUBPATH,
                         arithm(start, "<", vars.length + offset),
-                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intOffsetView(SIZE, 1)),
+                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intView(SIZE, 1, 1)),
                         element(end.getModel().intVar(vars.length + offset), vars, end, offset)
                 );
         }
@@ -2641,7 +2641,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         for (int i = 0; i < allvars.size(); i++) {
             for (int j = i + 1; j < allvars.size(); j++) {
                 if (allvars.get(i).equals(allvars.get(j))) {
-                    allvars.set(j, new IntOffsetView<IntVar>(allvars.get(i), 0));
+                    allvars.set(j, IntAffineView.make(allvars.get(i), 1, 0));
                 }
             }
         }

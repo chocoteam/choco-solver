@@ -22,9 +22,7 @@ import org.chocosolver.solver.variables.view.graph.directed.DirectedNodeInducedS
 import org.chocosolver.solver.variables.view.graph.undirected.EdgeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.NodeInducedSubgraphView;
 import org.chocosolver.solver.variables.view.graph.undirected.UndirectedGraphUnionView;
-import org.chocosolver.solver.variables.view.integer.IntMinusView;
-import org.chocosolver.solver.variables.view.integer.IntOffsetView;
-import org.chocosolver.solver.variables.view.integer.IntScaleView;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.solver.variables.view.set.*;
 import org.chocosolver.util.objects.graphs.IGraph;
 import org.chocosolver.util.objects.setDataStructures.ISet;
@@ -35,7 +33,7 @@ import static java.lang.Math.max;
 
 /**
  * Interface to make views (BoolVar, IntVar, RealVar and SetVar)
- *
+ * <p>
  * A kind of factory relying on interface default implementation to allow (multiple) inheritance
  *
  * @author Jean-Guillaume FAGES
@@ -48,6 +46,7 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a view over <i>bool</i> holding the logical negation of <i>bool</i> (ie, &not;BOOL).
+     *
      * @param bool a boolean variable.
      * @return a BoolVar equal to <i>not(bool)</i> (or 1-bool)
      */
@@ -75,12 +74,12 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a boolean view b over a set variable S such that:
-     *
+     * <p>
      * given v an integer, b = true iff S contains v.
      *
      * @param setVar The set variable to observe.
-     * @param v The value to observe in the set variable.
-     * @return A boolvar equals to S.contains(v).
+     * @param v      The value to observe in the set variable.
+     * @return A BoolVar equals to S.contains(v).
      */
     default BoolVar setBoolView(SetVar setVar, int v) {
         return new BoolSetView<>(v, setVar);
@@ -88,13 +87,13 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates an array of boolean views b over a set variable S such that:
-     *
+     * <p>
      * b[i - offset] = true <=> i in S.
      *
      * @param setVar The set variable to observe
-     * @param size The size of the bool var array
+     * @param size   The size of the bool var array
      * @param offset The offset
-     * @return A boolvar array such that b[i - offset] = true <=> i in S.
+     * @return A BoolVar array such that b[i - offset] = true <=> i in S.
      */
     default BoolVar[] setBoolsView(SetVar setVar, int size, int offset) {
         BoolVar[] bools = new BoolVar[size];
@@ -109,138 +108,84 @@ public interface IViewFactory extends ISelf<Model> {
     //*************************************************************************************
 
     /**
-     * Creates a view based on <i>var</i>, equal to <i>var+cste</i>.
-     * @param var  an integer variable
-     * @param cste a constant (can be either negative or positive)
-     * @return an IntVar equal to <i>var+cste</i>
-     */
-    default IntVar intOffsetView(IntVar var, int cste) {
-        if (cste == 0) {
-            return var;
-        }
-        String name = "(" + var.getName() + (cste >= 0 ? "+" : "-") + Math.abs(cste) + ")";
-        if (var.isInstantiated()) {
-            return ref().intVar(name, var.getValue() + cste);
-        }
-        if (ref().getSettings().enableViews()) {
-            int p = checkDeclaredView(var, cste, IntOffsetView.class, ref().getSettings().checkDeclaredViews());
-            if(p>-1){
-                return var.getView(p).asIntVar();
-            }else {
-                return new IntOffsetView<>(var, cste);
-            }
-        } else {
-            int lb = var.getLB() + cste;
-            int ub = var.getUB() + cste;
-            IntVar ov;
-            if (var.hasEnumeratedDomain()) {
-                ov = ref().intVar(name, lb, ub, false);
-            } else {
-                ov = ref().intVar(name, lb, ub, true);
-            }
-            ref().arithm(ov, "-", var, "=", cste).post();
-            return ov;
-        }
-    }
-
-    /**
-     * Creates a view over <i>var</i> equal to -<i>var</i>.
-     * That is if <i>var</i> = [a,b], then this = [-b,-a].
+     * Create an affine view based on <i>var</i>, i.e. <i>view = a * var + b</i>
      *
      * @param var an integer variable
-     * @return an IntVar equal to <i>-var</i>
+     * @param a   a coefficient
+     * @param b   a constant
+     * @return an affine view
      */
-    default IntVar intMinusView(IntVar var) {
-        if (var.isInstantiated()) {
-            return ref().intVar(-var.getValue());
-        }
-        if (ref().getSettings().enableViews()) {
-            if (var instanceof IntMinusView) {
-                //noinspection rawtypes
-                return ((IntMinusView) var).getVariable();
-            } else {
-                int p = checkDeclaredView(var, -1, IntMinusView.class, ref().getSettings().checkDeclaredViews());
-                if(p>-1){
-                    return var.getView(p).asIntVar();
-                }else {
-                    return new IntMinusView<>(var);
+    default IntVar intView(IntVar var, int a, int b) {
+        if (a == 1 && b == 0) {
+            return var;
+        } else if (a == 0) {
+            return ref().intVar(b);
+        } else if (var.isInstantiated()) {
+            return ref().intVar(var.getValue() * a + b);
+        } else if (ref().getSettings().enableViews()) {
+            for (int i = 0; i < var.getNbViews(); i++) {
+                if (var.getView(i) instanceof IntAffineView) {
+                    IntAffineView<?> v = (IntAffineView<?>) var.getView(i);
+                    if (v.equals(var, a, b)) {
+                        return var.getView(i).asIntVar();
+                    }
                 }
             }
+            return IntAffineView.make(var, a, b);
         } else {
-            int ub = -var.getLB();
-            int lb = -var.getUB();
-            String name = "-(" + var.getName() + ")";
+            int lb, ub;
+            if (a > 0) {
+                lb = var.getLB() * a + b;
+                ub = var.getUB() * a + b;
+            } else {
+                lb = var.getUB() * a + b;
+                ub = var.getLB() * a + b;
+            }
+            String name = "(" + var.getName() + "*" + a + "+" + b + ")";
             IntVar ov;
             if (var.hasEnumeratedDomain()) {
                 ov = ref().intVar(name, lb, ub, false);
             } else {
                 ov = ref().intVar(name, lb, ub, true);
             }
-            ref().arithm(ov, "+", var, "=", 0).post();
+            if (a == 1) {
+                ref().arithm(var, "-", ov, "=", -b).post();
+            } else if (a == -1) {
+                ref().arithm(var, "+", ov, "=", b).post();
+            } else if (b == 0) {
+                ref().scalar(new IntVar[]{var}, new int[]{a}, "=", ov).post();
+            } else {
+                ref().scalar(new IntVar[]{var, ov}, new int[]{a, -1}, "=", -b).post();
+            }
             return ov;
         }
     }
 
     /**
-     * Creates a view over <i>var</i> equal to <i>var*cste</i>.
-     * Requires <i>cste</i> > -2
-     * <p>
-     * <br/>- if <i>cste</i> &lt; -1, throws an exception;
-     * <br/>- if <i>cste</i> = -1, returns a minus view;
-     * <br/>- if <i>cste</i> = 0, returns a fixed variable;
-     * <br/>- if <i>cste</i> = 1, returns <i>var</i>;
-     * <br/>- otherwise, returns a scale view;
-     * <p>
-     * @param var  an integer variable
-     * @param cste a constant.
-     * @return an IntVar equal to <i>var*cste</i>
+     * @see #intView(IntVar, int, int)
+     * @deprecated
      */
+    @Deprecated
+    default IntVar intOffsetView(IntVar var, int cste) {
+        return intView(var, 1, cste);
+    }
+
+    /**
+     * @see #intView(IntVar, int, int)
+     * @deprecated
+     */
+    @Deprecated
+    default IntVar intMinusView(IntVar var) {
+        return intView(var, -1, 0);
+    }
+
+    /**
+     * @see #intView(IntVar, int, int)
+     * @deprecated
+     */
+    @Deprecated
     default IntVar intScaleView(IntVar var, int cste) {
-        if (cste == -1) {
-            return intMinusView(var);
-        }
-        IntVar v2;
-        if (cste == 0) {
-            v2 = ref().intVar(0);
-        } else if (cste == 1) {
-            v2 = var;
-        } else {
-            if (var.isInstantiated()) {
-                return ref().intVar(var.getValue() * cste);
-            }
-            if (ref().getSettings().enableViews()) {
-                boolean rev = cste < 0;
-                cste = Math.abs(cste);
-                int p = checkDeclaredView(var, cste, IntScaleView.class, ref().getSettings().checkDeclaredViews());
-                if(p>-1){
-                    return var.getView(p).asIntVar();
-                }else {
-                    v2 = new IntScaleView<>(var, cste);
-                }
-                if(rev){
-                    v2 = intMinusView(v2);
-                }
-        } else {
-                int lb, ub;
-                if (cste > 0) {
-                    lb = var.getLB() * cste;
-                    ub = var.getUB() * cste;
-                } else {
-                    lb = var.getUB() * cste;
-                    ub = var.getLB() * cste;
-                }
-                String name = "(" + var.getName() + "*" + cste + ")";
-                IntVar ov;
-                if (var.hasEnumeratedDomain()) {
-                    ov = ref().intVar(name, lb, ub, false);
-                } else {
-                    ov = ref().intVar(name, lb, ub, true);
-                }
-                ref().times(var, cste, ov).post();
-                return ov;
-            }
-        }
-        return v2;
+        return intView(var, cste, 0);
     }
 
     /**
@@ -251,6 +196,7 @@ public interface IViewFactory extends ISelf<Model> {
      * <br/>- if the upper bound of <i>var</i> is less or equal to 0, return a minus view;
      * <br/>- otherwise, returns an absolute view;
      * <p>
+     *
      * @param var an integer variable.
      * @return an IntVar equal to the absolute value of <i>var</i>
      */
@@ -260,7 +206,7 @@ public interface IViewFactory extends ISelf<Model> {
         } else if (var.getLB() >= 0) {
             return var;
         } else if (var.getUB() <= 0) {
-            return intMinusView(var);
+            return intView(var, -1, 0);
         } else {
             int ub = max(-var.getLB(), var.getUB());
             String name = "|" + var.getName() + "|";
@@ -276,26 +222,19 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an affine view over <i>x</i> such that: <i>a.x + b</i>.
-     * <p>
-     *
-     * @param a a coefficient
-     * @param x an integer variable.
-     * @param b a constant
-     * @return an IntVar equal to the absolute value of <i>var</i>
+     * @see #intView(IntVar, int, int)
+     * @deprecated
      */
+    @Deprecated//(since = "4.11.0", forRemoval = true)
     default IntVar intAffineView(int a, IntVar x, int b) {
-        if (x.isInstantiated()) {
-            return ref().intVar(a * x.getValue() + b);
-        } else {
-            return intOffsetView(intScaleView(x, a), b);
-        }
+        return intView(x, a, b);
     }
 
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x = c) &hArr; b</i>.
+     * Creates a view over <i>x</i> such that: <i>(x = c) &hArr; b</i>.
      * <p>
+     *
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x = c</i>
@@ -313,7 +252,7 @@ public interface IViewFactory extends ISelf<Model> {
                 } else {
                     return new BoolEqView<>(x, c);
                 }
-            }else{
+            } else {
                 BoolVar b = ref().boolVar();
                 ref().reifyXeqC(x, c, b);
                 return b;
@@ -322,8 +261,9 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x != c) &hArr; b</i>.
+     * Creates a view over <i>x</i> such that: <i>(x != c) &hArr; b</i>.
      * <p>
+     *
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x != c</i>
@@ -350,8 +290,9 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x &le; c) &hArr; b</i>.
+     * Creates a view over <i>x</i> such that: <i>(x &le; c) &hArr; b</i>.
      * <p>
+     *
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &le; c</i>
@@ -369,17 +310,18 @@ public interface IViewFactory extends ISelf<Model> {
                 } else {
                     return new BoolLeqView<>(x, c);
                 }
-            }else {
+            } else {
                 BoolVar b = ref().boolVar();
-                ref().reifyXltC(x, c +1, b);
+                ref().reifyXltC(x, c + 1, b);
                 return b;
             }
         }
     }
 
     /**
-     * Creates an view over <i>x</i> such that: <i>(x &ge; c) &hArr; b</i>.
+     * Creates a view over <i>x</i> such that: <i>(x &ge; c) &hArr; b</i>.
      * <p>
+     *
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &ge; c</i>
@@ -397,7 +339,7 @@ public interface IViewFactory extends ISelf<Model> {
                 } else {
                     return new BoolLeqView<>(x, c - 1).not();
                 }
-            }else {
+            } else {
                 BoolVar b = ref().boolVar();
                 ref().reifyXgtC(x, c - 1, b);
                 return b;
@@ -406,29 +348,17 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     @SuppressWarnings("rawtypes")
-    static int checkDeclaredView(IntVar x, int c, Class clazz, boolean check){
-        for(int i = 0; check && i < x.getNbViews(); i++)
+    static int checkDeclaredView(IntVar x, int c, Class clazz, boolean check) {
+        for (int i = 0; check && i < x.getNbViews(); i++)
             if (clazz.isInstance(x.getView(i))) {
-                if(clazz  == BoolEqView.class){
+                if (clazz == BoolEqView.class) {
                     BoolEqView v = (BoolEqView) x.getView(i);
-                    if(v.cste == c){
+                    if (v.cste == c) {
                         return i;
                     }
-                }else if(clazz  == BoolLeqView.class){
+                } else if (clazz == BoolLeqView.class) {
                     BoolLeqView v = (BoolLeqView) x.getView(i);
-                    if(v.cste == c){
-                        return i;
-                    }
-                }else if(clazz == IntMinusView.class){
-                    return i;
-                }else if(clazz == IntOffsetView.class){
-                    IntOffsetView v = (IntOffsetView) x.getView(i);
-                    if(v.cste == c){
-                        return i;
-                    }
-                }else if(clazz == IntScaleView.class){
-                    IntScaleView v = (IntScaleView) x.getView(i);
-                    if(v.cste == c){
+                    if (v.cste == c) {
                         return i;
                     }
                 }
@@ -444,7 +374,8 @@ public interface IViewFactory extends ISelf<Model> {
     /**
      * Creates a real view of <i>var</i>, i.e. a RealVar of domain equal to the domain of <i>var</i>.
      * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param var the integer variable to be viewed as a RealVar
+     *
+     * @param var       the integer variable to be viewed as a RealVar
      * @param precision double precision (e.g., 0.00001d)
      * @return a RealVar of domain equal to the domain of <i>var</i>
      */
@@ -463,7 +394,8 @@ public interface IViewFactory extends ISelf<Model> {
     /**
      * Creates an array of real views for a set of integer variables
      * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param ints the array of integer variables to be viewed as real variables
+     *
+     * @param ints      the array of integer variables to be viewed as real variables
      * @param precision double precision (e.g., 0.00001d)
      * @return a real view of <i>ints</i>
      */
@@ -489,7 +421,8 @@ public interface IViewFactory extends ISelf<Model> {
     /**
      * Creates a matrix of real views for a matrix of integer variables
      * This should be used to include an integer variable in an expression/constraint requiring RealVar
-     * @param ints the matrix of integer variables to be viewed as real variables
+     *
+     * @param ints      the matrix of integer variables to be viewed as real variables
      * @param precision double precision (e.g., 0.00001d)
      * @return a real view of <i>ints</i>
      */
@@ -511,8 +444,9 @@ public interface IViewFactory extends ISelf<Model> {
      * Create a set view over an array of boolean variables defined such that:
      * boolVars[x - offset] = True <=> x in setView
      * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropBoolChannel} constraint.
+     *
      * @param boolVars observed boolean variables
-     * @param offset Offset between boolVars array indices and set elements
+     * @param offset   Offset between boolVars array indices and set elements
      * @return a set view such that boolVars[x - offset] = True <=> x in setView
      */
     default SetVar boolsSetView(BoolVar[] boolVars, int offset) {
@@ -526,8 +460,8 @@ public interface IViewFactory extends ISelf<Model> {
      * intVars[x - offset] = v[x - offset] <=> x in set view.
      *
      * @param intVars array of integer variables
-     * @param v array of integers that "toggle" integer variables index inclusion in the set view
-     * @param offset offset between intVars indices and setViews elements
+     * @param v       array of integers that "toggle" integer variables index inclusion in the set view
+     * @param offset  offset between intVars indices and setViews elements
      * @return a set view such that intVars[x - offset] = v[x - offset] <=> x in setView.
      */
     default SetVar intsSetView(IntVar[] intVars, int[] v, int offset) {
@@ -539,8 +473,8 @@ public interface IViewFactory extends ISelf<Model> {
      * intVars[x - offset] = v <=> x in set view.
      *
      * @param intVars array of integer variables
-     * @param v integer that "toggle" integer variables index inclusion in the set view
-     * @param offset offset between intVars indices and setViews elements
+     * @param v       integer that "toggle" integer variables index inclusion in the set view
+     * @param offset  offset between intVars indices and setViews elements
      * @return a set view such that intVars[x - offset] = v <=> x in setView.
      */
     default SetVar intsSetView(IntVar[] intVars, int v, int offset) {
@@ -552,11 +486,11 @@ public interface IViewFactory extends ISelf<Model> {
     /**
      * Instantiate an array of set views over an array of integer variables, such that:
      * x in setViews[y - offset1] <=> intVars[x - offset2] = y.
-     *
+     * <p>
      * This view is equivalent to the {@link org.chocosolver.solver.constraints.set.PropIntChannel} constraint.
      *
      * @param intVars array of integer variables
-     * @param nbSets number of set views to create
+     * @param nbSets  number of set views to create
      * @param offset1 offset between setViews indices and intVars values
      * @param offset2 offset between intVars indices and setViews elements
      * @return an array of set views such that x in setViews[y - offset1] <=> intVars[x - offset2] = y.
@@ -573,6 +507,7 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view representing the union of a list of set variables.
+     *
      * @param sets The set variables to observe.
      * @return A set union view.
      */
@@ -582,6 +517,7 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view representing the intersection of a list of set variables.
+     *
      * @param sets The set variables to observe.
      * @return A set intersection view.
      */
@@ -591,6 +527,7 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view z representing the set difference between x and y: z = x \ y.
+     *
      * @param x A set variable.
      * @param y A set variable.
      * @return A set difference z view such that z = x \ y.
@@ -603,6 +540,7 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view over the set of nodes of a graph variable.
+     *
      * @param g observed graph variable
      * @return a set view over the set of nodes of a graph variable
      */
@@ -612,7 +550,8 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view over the set of successors of a node of a directed graph variable.
-     * @param g observed graph variable
+     *
+     * @param g    observed graph variable
      * @param node observed node
      * @return a set view over the set of successors of a node of a directed graph variable.
      */
@@ -622,7 +561,8 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view over the set of predecessors of a node of a directed graph variable.
-     * @param g observed graph variable
+     *
+     * @param g    observed graph variable
      * @param node observed node
      * @return a set view over the set of predecessors of a node of a directed graph variable.
      */
@@ -632,9 +572,10 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a set view over the set of neighbors of a node of an undirected graph variable.
-     * @param g observed graph variable
+     *
+     * @param g    observed graph variable
      * @param node observed node
-     * @return a set view over the set of neighbors of a node of an udirected graph variable.
+     * @return a set view over the set of neighbors of a node of an undirected graph variable.
      */
     default SetVar graphNeighborsSetView(UndirectedGraphVar g, int node) {
         return new SetSuccessorsGraphView<>(g, node);
@@ -646,11 +587,11 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
-     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
-     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     * E' = { (x, y) \in E | x \in V' \land y \in V' }.
      *
-     * @param g The graph variable to observe
-     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param g       The graph variable to observe
+     * @param nodes   the set of nodes to construct the view from (see exclude parameter)
      * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
     default UndirectedGraphVar nodeInducedSubgraphView(UndirectedGraphVar g, ISet nodes, boolean exclude) {
@@ -659,11 +600,11 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Creates a graph view G' = (V', E') from another graph G = (V, E) such that:
-     *      V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
-     *      E' = { (x, y) \in E | x \in V' \land y \in V' }.
+     * V' = V \ nodes (set difference) if exclude = true, else V' = V \cap nodes (set intersection)
+     * E' = { (x, y) \in E | x \in V' \land y \in V' }.
      *
-     * @param g The graph variable to observe
-     * @param nodes the set of nodes to construct the view from (see exclude parameter)
+     * @param g       The graph variable to observe
+     * @param nodes   the set of nodes to construct the view from (see exclude parameter)
      * @param exclude if true, V' = V \ nodes (set difference), else V' = V \cap nodes (set intersection)
      */
     default DirectedGraphVar nodeInducedSubgraphView(DirectedGraphVar g, ISet nodes, boolean exclude) {
@@ -672,11 +613,11 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
-     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
-     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     * V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     * E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
      *
-     * @param g observed variable
-     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param g       observed variable
+     * @param edges   the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
      * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
      */
     default UndirectedGraphVar edgeInducedSubgraphView(UndirectedGraphVar g, int[][] edges, boolean exclude) {
@@ -685,11 +626,11 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Construct an edge-induced subgraph view G = (V', E') from G = (V, E) such that:
-     *     V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
-     *     E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
+     * V' = { x \in V | \exists y \in V s.t. (x, y) \in E' }
+     * E' = E \ edges (set difference) if exclude = true, else E' = E \cap edges (set intersection).
      *
-     * @param g observed variable
-     * @param edges the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
+     * @param g       observed variable
+     * @param edges   the set of edges (array of couples) to construct the subgraph from (see exclude parameter)
      * @param exclude if true, E' = E \ edges (set difference), else E' = E \cap edges (set intersection)
      */
     default DirectedGraphVar edgeInducedSubgraphView(DirectedGraphVar g, int[][] edges, boolean exclude) {
@@ -698,8 +639,9 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Construct an undirected graph union view G = (V, E) from a set of undirected graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
-     *     V = V_1 \cup ... \cup V_k (\cup = set union);
-     *     E = E_1 \cup ... \cup E_k.
+     * V = V_1 \cup ... \cup V_k (\cup = set union);
+     * E = E_1 \cup ... \cup E_k.
+     *
      * @param graphVars the graphs to construct the union view from
      * @return An undirected graph union view
      */
@@ -709,8 +651,9 @@ public interface IViewFactory extends ISelf<Model> {
 
     /**
      * Construct a directed graph union view G = (V, E) from a set of directed graphs {G_1 = (V_1, E_1), ..., G_k = (V_k, E_k)} such that :
-     *     V = V_1 \cup ... \cup V_k (\cup = set union);
-     *     E = E_1 \cup ... \cup E_k.
+     * V = V_1 \cup ... \cup V_k (\cup = set union);
+     * E = E_1 \cup ... \cup E_k.
+     *
      * @param graphVars the graphs to construct the union view from
      * @return A directed graph union view
      */

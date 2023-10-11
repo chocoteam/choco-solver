@@ -490,7 +490,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         ref().addStopCriterion(stop);
         ref().getModel().clearObjective();
         ParetoMaximizer pareto = new ParetoMaximizer(
-                Stream.of(objectives).map(o -> maximize ? o : ref().getModel().intMinusView(o)).toArray(IntVar[]::new)
+                Stream.of(objectives).map(o -> maximize ? o : ref().getModel().intView(o, -1, 0)).toArray(IntVar[]::new)
         );
         Constraint c = new Constraint("PARETO", pareto);
         c.post();
@@ -533,7 +533,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
         // 1. copy objective variables and transform it if necessary
         IntVar[] mobj = new IntVar[objectives.length];
         for (int i = 0; i < objectives.length; i++) {
-            mobj[i] = maximize ? ref().getModel().intMinusView(objectives[i]) : objectives[i];
+            mobj[i] = maximize ? ref().getModel().intView(objectives[i], -1, 0) : objectives[i];
         }
         // 2. try to find a first solution
         while (ref().solve()) {

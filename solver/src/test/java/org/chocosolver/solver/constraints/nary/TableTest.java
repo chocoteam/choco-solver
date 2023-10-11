@@ -785,7 +785,7 @@ public class TableTest {
         if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
-        IntVar x1 = cp.intOffsetView(x0, 10);
+        IntVar x1 = cp.intView(x0, 1, 10);
         IntVar x2 = cp.intVar(new int[]{2, 3});
         Tuples t = new Tuples();
         {
@@ -812,7 +812,7 @@ public class TableTest {
         if (a.equals("FC")) return;
         Model cp = new Model();
         IntVar x0 = cp.intVar(new int[]{-1, 1, 4});
-        IntVar x1 = cp.intOffsetView(x0, 10);
+        IntVar x1 = cp.intView(x0, 1, 10);
         IntVar x2 = cp.intVar(new int[]{2, 3});
         Tuples t = new Tuples();
         {
