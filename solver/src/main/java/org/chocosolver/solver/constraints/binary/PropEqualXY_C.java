@@ -66,7 +66,7 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
     public void propagate(int evtmask) throws ContradictionException {
         updateBounds();
         // ensure that, in case of enumerated domains, holes are also propagated
-        if (bothEnumerated && (!x.isInstantiated() || !y.isInstantiated())) {
+        if (bothEnumerated) {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(cste - val)) {
