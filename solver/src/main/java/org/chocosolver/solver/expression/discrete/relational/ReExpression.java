@@ -153,16 +153,30 @@ public interface ReExpression extends ArExpression {
     }
 
     /**
+     * @param algo an indication for the algorithm to use for the table constraint
      * @return a TABLE constraint that captures the expression
+     * @see Model#table(IntVar[], Tuples, String)
+     * @see Model#table(IntVar, IntVar, Tuples, String)
      */
-    default Constraint extension() {
+    default Constraint extension(String algo) {
         HashSet<IntVar> avars = new LinkedHashSet<>();
         extractVar(avars);
         IntVar[] uvars = avars.stream().sorted().toArray(IntVar[]::new);
         Map<IntVar, Integer> map = IntStream.range(0, uvars.length).boxed().collect(Collectors.toMap(i -> uvars[i], i -> i));
         Tuples tuples = TuplesFactory.generateTuples(values -> beval(values, map), true, uvars);
 //        System.out.printf("%d -> %d\n", VariableUtils.domainCardinality(uvars), tuples.nbTuples());
-        return getModel().table(uvars, tuples);
+        if(algo.equals("")){
+            return getModel().table(uvars, tuples);
+        }else{
+            return getModel().table(uvars, tuples, algo);
+        }
+    }
+
+    /**
+     * @return a TABLE constraint that captures the expression
+     */
+    default Constraint extension() {
+        return extension("");
     }
 
     /**
