@@ -331,7 +331,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @return a neg view
      * @see #intView(int, IntVar, int)
      */
-    default IntVar negView(IntVar var) {
+    default IntVar neg(IntVar var) {
         return intView(-1, var, 0);
     }
 

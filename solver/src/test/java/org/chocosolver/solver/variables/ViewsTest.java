@@ -233,7 +233,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
-                IntVar z = model.negView(x);
+                IntVar z = model.neg(x);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
             }
@@ -508,7 +508,7 @@ public class ViewsTest {
     public void testJL1() throws ContradictionException {
         Model s = new Model();
         IntVar v1 = s.intVar("v1", -2, 2, false);
-        IntVar v2 = s.negView(s.negView(s.intVar("v2", -2, 2, false)));
+        IntVar v2 = s.neg(s.neg(s.intVar("v2", -2, 2, false)));
         s.arithm(v1, "=", v2).post();
         s.arithm(v2, "!=", 1).post();
 
@@ -534,7 +534,7 @@ public class ViewsTest {
         model.arithm(
                 model.intVar("int", -3, 3, false),
                 "=",
-                model.negView(model.boolVar("bool"))).post();
+                model.neg(model.boolVar("bool"))).post();
         while (model.getSolver().solve()) {
         }
         assertEquals(model.getSolver().getSolutionCount(), 2);
@@ -596,7 +596,7 @@ public class ViewsTest {
     public void testJG4() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
-        IntVar view = s.negView(var);
+        IntVar view = s.neg(var);
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -707,7 +707,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.negView(x[i]);
+            y[i] = model.neg(x[i]);
         }
         checkDomains(true, x, y);
 

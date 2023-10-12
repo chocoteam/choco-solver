@@ -82,7 +82,7 @@ public class UnArExpression implements ArExpression {
             IntVar v = e.intVar();
             switch (op){
                 case NEG:
-                    me = model.negView(v);
+                    me = model.neg(v);
                     break;
                 case ABS:
                     me = model.abs(v);

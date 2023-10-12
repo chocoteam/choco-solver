@@ -465,7 +465,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (Y == 1) {
             return arithm(X, "=", Z);
         } else if (Y < 0) {
-            return times(X.getModel().negView(X), -Y, Z);
+            return times(X.getModel().neg(X), -Y, Z);
         } else {
             return new Constraint(ConstraintsName.TIMES, new PropScale(X, Y, Z));
         }
@@ -1865,7 +1865,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
         z = ((IntVar[]) args[1])[0];
-        IntVar[] views = Arrays.stream(vars).map(v -> ref().negView(v)).toArray(IntVar[]::new);
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().neg(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 

@@ -425,7 +425,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
         Model model = new Model();
-        IntVar var = model.negView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -447,7 +447,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
         Model model = new Model();
-        IntVar var = model.negView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -469,7 +469,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
         Model model = new Model();
-        IntVar var = model.negView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -493,7 +493,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
         Model model = new Model();
-        IntVar var = model.negView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
