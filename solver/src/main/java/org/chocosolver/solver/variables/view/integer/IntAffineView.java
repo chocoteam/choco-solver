@@ -151,11 +151,11 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         } else {
             change = var.updateLowerBound(value + 1, this);
         }
-        IntEventType e = IntEventType.INCLOW;
-        if (isInstantiated()) {
-            e = IntEventType.INSTANTIATE;
-        }
         if (change) {
+            IntEventType e = IntEventType.INCLOW;
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
             this.notifyPropagators(e, cause);
             return true;
         } else {
@@ -180,11 +180,11 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         } else {
             change = var.updateUpperBound(value, this);
         }
-        IntEventType e = IntEventType.DECUPP;
-        if (isInstantiated()) {
-            e = IntEventType.INSTANTIATE;
-        }
         if (change) {
+            IntEventType e = IntEventType.DECUPP;
+            if (isInstantiated()) {
+                e = IntEventType.INSTANTIATE;
+            }
             this.notifyPropagators(e, cause);
             return true;
         } else {
