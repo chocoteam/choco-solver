@@ -87,7 +87,7 @@ public class UnCArExpression implements ArExpression {
                     break;
                 case MUL:
                     if(e2 > 0){
-                        me = model.mulView(v1, e2);
+                        me = model.mul(v1, e2);
                     }else{
                         bounds = new int[]{
                                 Math.min(v1.getLB()*e2, v1.getUB()*e2),Math.max(v1.getLB()*e2, v1.getUB()*e2)};

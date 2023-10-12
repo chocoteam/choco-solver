@@ -207,7 +207,7 @@ public class IntAffineViewTest {
     public void test1() {
         Model m = new Model();
         IntVar X = m.intVar("X", 1, 3, false);
-        IntVar Y = m.mulView(X, 2);
+        IntVar Y = m.mul(X, 2);
         IntVar[] vars = {X, Y};
         m.arithm(Y, "!=", 4).post();
         m.getSolver().setSearch(inputOrderLBSearch(vars));

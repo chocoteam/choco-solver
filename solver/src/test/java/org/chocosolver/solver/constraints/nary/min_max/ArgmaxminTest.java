@@ -182,7 +182,7 @@ public class ArgmaxminTest {
         for (int i = 0; i < n; i++) {
             IntVar[] xx = new IntVar[n];
             for (int j = 0; j < n; j++) {
-                xx[j] = model.mulView(x[j], pi[i][j]);
+                xx[j] = model.mul(x[j], pi[i][j]);
             }
             model.argmax(x[i], 0, xx).post();
         }
@@ -246,7 +246,7 @@ public class ArgmaxminTest {
         for (int i = 0; i < n; i++) {
             IntVar[] xx = new IntVar[n];
             for (int j = 0; j < n; j++) {
-                xx[j] = model.mulView(x[j], pi[i][j]);
+                xx[j] = model.mul(x[j], pi[i][j]);
             }
             model.argmin(x[i], 0, xx).post();
         }

@@ -35,7 +35,7 @@ public class IntScaleViewTest {
     public void test1() {
         Model s = new Model();
         IntVar X = s.intVar("X", 1, 3, false);
-        IntVar Y = s.mulView(X, 2);
+        IntVar Y = s.mul(X, 2);
         IntVar[] vars = {X, Y};
         s.arithm(Y, "!=", 4).post();
         s.getSolver().setSearch(inputOrderLBSearch(vars));
@@ -48,7 +48,7 @@ public class IntScaleViewTest {
         Model m = new Model();
         IntVar y = m.intVar("y", -3, 1);
         IntVar z = m.intVar("z", new int[]{-4});
-        m.arithm(m.mulView(y, 3), "!=", z).post();
+        m.arithm(m.mul(y, 3), "!=", z).post();
         Solver s = m.getSolver();
         while (s.solve()) {
             Assert.assertNotEquals(3 * y.getValue(), z.getValue());
@@ -62,7 +62,7 @@ public class IntScaleViewTest {
         Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 4, false);
-        IntVar Y = s.mulView(X, 3);
+        IntVar Y = s.mul(X, 3);
         IntVar[] vars = {X, Y};
 
         s.arithm(Y, "!=", -2).post();
@@ -76,7 +76,7 @@ public class IntScaleViewTest {
         Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
-        IntVar Y = s.mulView(X, coeff);
+        IntVar Y = s.mul(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -140,7 +140,7 @@ public class IntScaleViewTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = model.mulView(o, 2);
+            IntVar v = model.mul(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() / 2));
@@ -174,7 +174,7 @@ public class IntScaleViewTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0]);
-            IntVar v = model.mulView(o, 2);
+            IntVar v = model.mul(o, 2);
             if (!model.getSettings().enableViews()) {
                 try {
                     // currently, the propagation is not sufficient (bound)
@@ -214,7 +214,7 @@ public class IntScaleViewTest {
     public void testJL01() {
         Model m = new Model();
         IntVar i = m.intVar("i", 0, 4);
-        m.arithm(m.mulView(i, 10), "=", 11).post();
+        m.arithm(m.mul(i, 10), "=", 11).post();
 
         Solver s = m.getSolver();
         Assert.assertFalse(s.solve());
@@ -225,7 +225,7 @@ public class IntScaleViewTest {
     public void testCP01() {
         Model m = new Model(Settings.init().setEnableViews(true));
         IntVar i = m.intVar("i", 0, 4);
-        m.arithm(m.mulView(i, -3), "<", -7).post();
+        m.arithm(m.mul(i, -3), "<", -7).post();
 
         Solver s = m.getSolver();
         Assert.assertEquals(s.findAllSolutions().size(), 2);

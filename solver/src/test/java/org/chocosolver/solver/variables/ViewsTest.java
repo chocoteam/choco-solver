@@ -209,7 +209,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.mulView(x, 2);
+                IntVar z = model.mul(x, 2);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -694,7 +694,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.mulView(x[i], 42);
+            y[i] = model.mul(x[i], 42);
         }
         checkDomains(false, x, y);
 

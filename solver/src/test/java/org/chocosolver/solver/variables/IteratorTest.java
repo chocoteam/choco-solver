@@ -325,7 +325,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale1() {
         Model model = new Model();
-        IntVar var = model.mulView(model.intVar("b", 1, 4, true), 2);
+        IntVar var = model.mul(model.intVar("b", 1, 4, true), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -341,7 +341,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale2() {
         Model model = new Model();
-        IntVar var = model.mulView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -365,7 +365,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale3() {
         Model model = new Model();
-        IntVar var = model.mulView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -395,7 +395,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale4() {
         Model model = new Model();
-        IntVar var = model.mulView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)

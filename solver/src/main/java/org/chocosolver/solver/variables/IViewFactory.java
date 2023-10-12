@@ -292,7 +292,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @return a mul view
      * @see #intView(int, IntVar, int)
      */
-    default IntVar mulView(IntVar var, int a) {
+    default IntVar mul(IntVar var, int a) {
         return intView(a, var, 0);
     }
 
