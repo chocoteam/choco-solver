@@ -215,9 +215,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t4));
 
         IntVar s5 = m.intVar(0, 10);
-        Task t5 = new Task(s5, d, m.intView(s5, 1, d));
+        Task t5 = new Task(s5, d, m.addView(s5, d));
         IntVar s6 = m.intVar(0, 10);
-        Task t6 = m.taskVar(s6, d, m.intView(s6, 1, d));
+        Task t6 = m.taskVar(s6, d, m.addView(s6, d));
         Assert.assertTrue(sameTaskVars(t5, t6));
         Assert.assertFalse(hasTaskMonitor(t5));
         Assert.assertFalse(hasTaskMonitor(t6));
@@ -230,9 +230,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t8));
 
         IntVar s9 = m.intVar(0, 10);
-        Task t9 = new Task(s9, m.intVar(d), m.intView(s9, 1, d));
+        Task t9 = new Task(s9, m.intVar(d), m.addView(s9, d));
         IntVar s10 = m.intVar(0, 10);
-        Task t10 = m.taskVar(s10, m.intVar(d), m.intView(s10, 1, d));
+        Task t10 = m.taskVar(s10, m.intVar(d), m.addView(s10, d));
         Assert.assertTrue(sameTaskVars(t9, t10));
         Assert.assertFalse(hasTaskMonitor(t9));
         Assert.assertFalse(hasTaskMonitor(t10));
@@ -245,9 +245,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t12));
 
         IntVar s13 = m.intVar(0, 10);
-        Task t13 = new Task(s13, m.intVar(d), m.intView(s13, 1, d));
+        Task t13 = new Task(s13, m.intVar(d), m.addView(s13, d));
         IntVar s14 = m.intVar(0, 10);
-        Task t14 = m.taskVar(s14, m.intVar(d), m.intView(s14, 1, d));
+        Task t14 = m.taskVar(s14, m.intVar(d), m.addView(s14, d));
         Assert.assertTrue(sameTaskVars(t13, t14));
         Assert.assertFalse(hasTaskMonitor(t13));
         Assert.assertFalse(hasTaskMonitor(t14));
@@ -297,10 +297,10 @@ public class TaskTest {
     @Test(groups = "1s")
     public void testMonitorAndView() {
         Model model = new Model();
-        IntVar first = model.intView(model.intVar("first", new int[]{1, 2, 3, 4, 5}), 1, 2);
-        IntVar dur = model.intView(model.intVar("dur", new int[]{1, 2, 4, 5}), 1, 2);
-        IntVar last = model.intView(model.intVar("last", 5, 6), 1, 2);
-        IntVar IV390 = model.intView(model.intVar("IV390", 6), 1, 2);
+        IntVar first = model.addView(model.intVar("first", new int[]{1, 2, 3, 4, 5}), 2);
+        IntVar dur = model.addView(model.intVar("dur", new int[]{1, 2, 4, 5}), 2);
+        IntVar last = model.addView(model.intVar("last", 5, 6), 2);
+        IntVar IV390 = model.addView(model.intVar("IV390", 6), 2);
         new Constraint("", new PropXplusYeqZ(first, dur, last)).post();
         new Task(first, dur, IV390);
         Solver s = model.getSolver();

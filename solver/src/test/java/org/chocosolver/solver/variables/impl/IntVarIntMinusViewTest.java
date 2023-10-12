@@ -31,7 +31,7 @@ public class IntVarIntMinusViewTest extends IntVarTest {
     public void setup() {
         Model model = new Model();
         original = model.intVar(-4, -1);
-        var = model.intView(original, -1, 0);
+        var = model.negView(original);
     }
 
     @Override

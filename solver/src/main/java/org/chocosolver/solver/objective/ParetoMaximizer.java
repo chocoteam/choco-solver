@@ -59,7 +59,7 @@ public class ParetoMaximizer extends Propagator<IntVar> implements IMonitorSolut
 
     /**
      * Create an object to compute the Pareto front of a multi-objective problem.
-     * Objectives are expected to be maximized (use {@link org.chocosolver.solver.variables.IViewFactory#intView(IntVar, int, int)} in case of minimisation).
+     * Objectives are expected to be maximized (use {@link org.chocosolver.solver.variables.IViewFactory#intView(int, IntVar, int)} in case of minimisation).
      * <p>
      * Maintain the set of dominating solutions and
      * posts constraints dynamically to prevent search from computing dominated ones.

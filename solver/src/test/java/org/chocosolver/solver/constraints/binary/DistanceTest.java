@@ -43,7 +43,7 @@ public class DistanceTest {
                 IntVar Y = model.intVar("Y", 1, 10, false);
                 IntVar diff = model.intVar("X-Y", -9, 9, true);
                 model.sum(new IntVar[]{Y, diff}, "=", X).post();
-                IntVar Z = model.intAbsView(diff);
+                IntVar Z = model.absView(diff);
                 model.arithm(Z, "=", 5).post();
 
 

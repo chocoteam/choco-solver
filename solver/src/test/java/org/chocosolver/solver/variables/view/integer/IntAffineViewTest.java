@@ -49,7 +49,15 @@ public class IntAffineViewTest {
                 {2, 3, -7, -4, -1},
                 {2, -3, -7, -4, -1},
                 {-2, 3, -7, -4, -1},
-                {-2, -3, -7, -4, -1}
+                {-2, -3, -7, -4, -1},
+                {5, 7, 7, 8, 9},
+                {-5, 7, 7, 8, 9},
+                {5, -7, 7, 8, 9},
+                {-5, -7, 7, 8, 9},
+                {5, 7, -9, -8, -7},
+                {-5, 7, -9, -8, -7},
+                {5, -7, -9, -8, -7},
+                {-5, -7, -9, -8, -7},
         };
     }
 
@@ -68,6 +76,15 @@ public class IntAffineViewTest {
         Assert.assertEquals(y.nextValue(values[1]), values[2]);
         Assert.assertEquals(y.nextValue(values[2] - 1), values[2]);
         Assert.assertEquals(y.nextValue(values[2]), Integer.MAX_VALUE);
+    }
+
+    @Test(groups = "1s")
+    public void testNextValue2() {
+        Model model = new Model();
+        IntVar x = model.intVar("x", 2, 9);
+        IntVar y = IntAffineView.make(x, 5, 7);
+
+
     }
 
     @Test(groups = "1s", dataProvider = "configurations")
@@ -190,13 +207,13 @@ public class IntAffineViewTest {
     public void test1() {
         Model m = new Model();
         IntVar X = m.intVar("X", 1, 3, false);
-        IntVar Y = m.intView(X, 2, 0);
+        IntVar Y = m.mulView(X, 2);
         IntVar[] vars = {X, Y};
         m.arithm(Y, "!=", 4).post();
         m.getSolver().setSearch(inputOrderLBSearch(vars));
         while (m.getSolver().solve()) ;
         assertEquals(m.getSolver().getSolutionCount(), 2);
     }
-    
+
 
 }

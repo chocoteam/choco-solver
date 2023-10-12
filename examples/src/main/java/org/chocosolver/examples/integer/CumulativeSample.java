@@ -57,7 +57,7 @@ public class CumulativeSample extends AbstractProblem{
 		for (int i = 0; i < n; i++) {
 			duration[i] = model.intVar(rd.nextInt(20) + 1);
 			height[i] = model.intVar(rd.nextInt(5) + 1);
-			end[i] = model.intView(start[i], 1, duration[i].getValue());
+			end[i] = model.addView(start[i], duration[i].getValue());
 			task[i] = new Task(start[i], duration[i], end[i]);
 		}
 		model.cumulative(task, height, capa).post();

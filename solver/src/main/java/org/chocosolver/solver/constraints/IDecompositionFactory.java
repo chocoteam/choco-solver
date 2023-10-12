@@ -96,8 +96,8 @@ public interface IDecompositionFactory extends ISelf<Model> {
             for (int i = 0; i < n; i++) {
                 ref().addClausesBoolAndArrayEqVar(
                         new BoolVar[]{
-                                ref().intLeView(starts[i], t),
-                                ref().intGeView(starts[i], t - durations[i] + 1)
+                                ref().leqView(starts[i], t),
+                                ref().geqView(starts[i], t - durations[i] + 1)
                         },
                         bit[i]);
             }
@@ -256,7 +256,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         for (int i = 0; i < load.length; i++) {
             BoolVar[] in = new BoolVar[bin.length];
             for (int j = 0; j < bin.length; j++) {
-                in[j] = ref().intEqView(bin[j], i + offset);
+                in[j] = ref().eqView(bin[j], i + offset);
             }
             ref().scalar(in, w, "=", load[i]).post();
         }
@@ -305,7 +305,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         z.ge(offset).post();
         z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
-            q[j] = ref().intView(vars[j], n, n - j);
+            q[j] = ref().intView(n, vars[j], n - j);
             z.ne(j + offset).iff(M.gt(q[j])).post();
         }
         ref().max(M, q).post();
@@ -329,7 +329,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         z.ge(offset).post();
         z.lt(vars.length + offset).post();
         for (int j = 0; j < n; j++) {
-            q[j] = ref().intView(vars[j], n, j);
+            q[j] = ref().intView(n, vars[j], j);
             z.ne(j + offset).iff(M.lt(q[j])).post();
         }
         ref().min(M, q).post();

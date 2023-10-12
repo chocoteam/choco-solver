@@ -148,13 +148,14 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
             hasChanged |= fixpoint;
         } while (fixpoint);
         // now deal with holes
-        int value = vlb, to = vub;
-        boolean hasRemoved = false;
-        while (value <= to) {
-            hasRemoved |= removeValue(value, cause);
-            value = values.nextValue(value);
+        if(hasEnumeratedDomain()){
+            int value = vlb;
+            while (value <= vub) {
+                hasChanged |= removeValue(value, cause);
+                value = values.nextValue(value);
+            }
         }
-        return hasRemoved || hasChanged;
+        return hasChanged;
     }
 
     /**
@@ -188,15 +189,16 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         } while (fixpoint);
         // now deal with holes
         int to = previousValue(nub);
-        boolean hasRemoved = false;
-        int value = nextValue(nlb);
-        // iterate over the values in the domain, remove the ones that are not in values
-        for (; value <= to; value = nextValue(value)) {
-            if (!values.contains(value)) {
-                hasRemoved |= removeValue(value, cause);
+        if(hasEnumeratedDomain()) {
+            int value = nextValue(nlb);
+            // iterate over the values in the domain, remove the ones that are not in values
+            for (; value <= to; value = nextValue(value)) {
+                if (!values.contains(value)) {
+                    hasChanged |= removeValue(value, cause);
+                }
             }
         }
-        return hasRemoved || hasChanged;
+        return hasChanged;
     }
 
     /**

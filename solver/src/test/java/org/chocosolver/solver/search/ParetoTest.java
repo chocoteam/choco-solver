@@ -150,7 +150,7 @@ public class ParetoTest {
         m.scalar(ArrayUtils.flatten(dist), ArrayUtils.flatten(w2), "=", obj2).post();
 
         m.getSolver().setSearch(Search.inputOrderLBSearch(x));
-        List<Solution> front = m.getSolver().findParetoFront(new IntVar[]{m.intView(obj1, -1, 0), m.intView(obj2, -1, 0)}, Model.MAXIMIZE);
+        List<Solution> front = m.getSolver().findParetoFront(new IntVar[]{m.negView(obj1), m.negView(obj2)}, Model.MAXIMIZE);
         Assert.assertEquals(26, front.size());
         Assert.assertEquals(233, m.getSolver().getSolutionCount());
         Assert.assertEquals(95208, m.getSolver().getNodeCount());

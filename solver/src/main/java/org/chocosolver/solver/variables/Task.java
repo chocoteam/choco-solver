@@ -59,7 +59,7 @@ public class Task {
         start = model.intVar(est, lst);
         duration = model.intVar(d);
         if(ect == est+d && lct == lst+d) {
-            end = start.getModel().intView(start, 1, d);
+            end = start.getModel().addView(start, d);
         } else {
             end = model.intVar(ect, lct);
             declareMonitor();
@@ -76,7 +76,7 @@ public class Task {
     public Task(IntVar s, int d) {
         start = s;
         duration = start.getModel().intVar(d);
-        end = start.getModel().intView(start, 1, d);
+        end = start.getModel().addView(start, d);
     }
 
     /**

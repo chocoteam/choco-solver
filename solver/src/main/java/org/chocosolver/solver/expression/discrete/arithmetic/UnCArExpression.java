@@ -80,14 +80,14 @@ public class UnCArExpression implements ArExpression {
             int[] bounds;
             switch (op) {
                 case ADD:
-                    me = model.intView(v1, 1, e2);
+                    me = model.addView(v1, e2);
                     break;
                 case SUB:
-                    me = model.intView(v1, 1, -e2);
+                    me = model.addView(v1, -e2);
                     break;
                 case MUL:
                     if(e2 > 0){
-                        me = model.intView(v1, e2, 0);
+                        me = model.mulView(v1, e2);
                     }else{
                         bounds = new int[]{
                                 Math.min(v1.getLB()*e2, v1.getUB()*e2),Math.max(v1.getLB()*e2, v1.getUB()*e2)};

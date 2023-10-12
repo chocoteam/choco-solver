@@ -145,7 +145,7 @@ public class SetGraphPredecessorsViewTest {
         m.member(2, s).post();
         IntVar card = s.getCard();
         m.arithm(card, "<=", 4).post();
-        Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.intView(card, 1, 1)));
+        Constraint nbNodes = new Constraint("NbNodes", new PropNbNodes(g, m.addView(card, 1)));
         m.post(nbNodes);
         while (m.getSolver().solve()) {
             Assert.assertTrue(g.getValue().getNodes().contains(0));

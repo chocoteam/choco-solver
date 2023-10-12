@@ -75,7 +75,6 @@ import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -466,7 +465,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (Y == 1) {
             return arithm(X, "=", Z);
         } else if (Y < 0) {
-            return times(X.getModel().intView(X, -1, 0), -Y, Z);
+            return times(X.getModel().negView(X), -Y, Z);
         } else {
             return new Constraint(ConstraintsName.TIMES, new PropScale(X, Y, Z));
         }
@@ -1712,7 +1711,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 int nb = occurrences[i].getUB();
                 BoolVar[] doms = new BoolVar[nb];
                 for (int k = 0; k < nb; k++) {
-                    doms[k] = ref().intGeView(occurrences[i], k + 1);
+                    doms[k] = ref().geqView(occurrences[i], k + 1);
                     bs.add(doms[k]);
                     es.add(energy[i]);
                     ws.add(weight[i]);
@@ -1866,7 +1865,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
         z = ((IntVar[]) args[1])[0];
-        IntVar[] views = Arrays.stream(vars).map(v -> ref().intView(v, -1, 0)).toArray(IntVar[]::new);
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().negView(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 
@@ -2272,7 +2271,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             default:
                 return Constraint.merge(ConstraintsName.SUBPATH,
                         arithm(start, "<", vars.length + offset),
-                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intView(SIZE, 1, 1)),
+                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().addView(SIZE, 1)),
                         element(end.getModel().intVar(vars.length + offset), vars, end, offset)
                 );
         }

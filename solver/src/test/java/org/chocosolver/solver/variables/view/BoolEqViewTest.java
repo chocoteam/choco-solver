@@ -446,7 +446,7 @@ public class BoolEqViewTest {
     public void test1() {
         BoolVar[] doms = new BoolVar[6];
         for (int i = 0; i < 6; i++) {
-            doms[i] = model.intEqView(x, i);
+            doms[i] = model.eqView(x, i);
         }
         while (model.getSolver().solve()) {
             System.out.printf("%s\n", x);
@@ -659,7 +659,7 @@ public class BoolEqViewTest {
             IntVar[] xs = mod.intVarArray(5, new int[]{1, 2, 3});
             BoolVar[] vs = new BoolVar[5];
             for (int j = 0; j < 5; j++) {
-                vs[j] = mod.intEqView(xs[j], 2);
+                vs[j] = mod.eqView(xs[j], 2);
                 /*vs[j] = mod.boolVar();
                 mod.reifyXeqC(xs[j], 2, vs[j]);*/
             }
@@ -689,7 +689,7 @@ public class BoolEqViewTest {
             IntVar[] xs = mod.intVarArray(5, new int[]{1, 2, 3});
             BoolVar[] vs = new BoolVar[5];
             for (int j = 0; j < 5; j++) {
-                vs[j] = mod.intEqView(xs[j], 2).not();
+                vs[j] = mod.eqView(xs[j], 2).not();
             }
             int[] coeffs = new int[]{
                     1, 1, 1, 1, 1000

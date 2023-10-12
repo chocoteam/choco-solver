@@ -120,8 +120,8 @@ public class BoolsIntChannelingTest {
     private IntVar makeVariable(Model model, int lb, int ub, boolean bounded) {
         IntVar var = model.intVar(lb, ub, bounded);
         if(model.getSettings().enableViews()) {
-            IntVar first = model.intView(var, 1, 1);
-            return model.intView(first, 1, -1);
+            IntVar first = model.addView(var, 1);
+            return model.addView(first, -1);
         } else {
             return var;
         }

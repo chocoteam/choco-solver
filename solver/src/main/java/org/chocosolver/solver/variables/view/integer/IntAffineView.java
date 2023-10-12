@@ -40,11 +40,12 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
 
     public static IntAffineView<IntVar> make(IntVar var, int a, int b) {
-        return new IntAffineView<>(var, a >= 0, Math.abs(a), b);
-    }
-
-    public static IntAffineView<IntVar> make(IntAffineView<IntVar> var, int a, int b) {
-        return new IntAffineView<>(var.getVariable(), var.p & (a >= 0), var.a * Math.abs(a), var.a * b + var.b);
+        if (var instanceof IntAffineView) {
+            IntAffineView<?> view = (IntAffineView<?>) var;
+            return new IntAffineView<>(view.getVariable(), view.p & (a >= 0), view.a * Math.abs(a), view.a * b + view.b);
+        } else {
+            return new IntAffineView<>(var, a >= 0, Math.abs(a), b);
+        }
     }
 
     /**
@@ -92,8 +93,8 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             value = -value;
         }
-        IntEventType e = IntEventType.REMOVE;
         if (var.removeValue(value, this)) {
+            IntEventType e = IntEventType.REMOVE;
             if (value == inf) {
                 e = IntEventType.INCLOW;
             } else if (value == sup) {
@@ -173,7 +174,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (a > 1) {
             value = value / a - (value % a < 0 ? 1 : 0);
         }
-        boolean change = false;
+        boolean change;
         if (!p) {
             change = var.updateLowerBound(-value, this);
         } else {
@@ -437,7 +438,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         // y = p * a * x + b where p in {-1,1}, a and b in Z.
         // => x = (y - b) / (p * a)
         v -= b;
-        v = (v < 0 && a > 1) ? v - 1 : v;
+        v = (v < 0 && a > 1 && v % a != 0) ? v - a : v;
         v /= (p ? a : -a);
 
         if (p) {
@@ -481,7 +482,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         // y = p * a * x + b where p in {-1,1}, a and b in Z.
         // => x = (y - b) / (p * a)
         v -= b;
-        v = (v > 0 && a > 1) ? v + 1 : v;
+        v = (v > 0 && a > 1 && v % a != 0) ? v + a : v;
         v /= (p ? a : -a);
 
         if (p) {

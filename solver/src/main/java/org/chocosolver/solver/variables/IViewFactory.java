@@ -110,12 +110,12 @@ public interface IViewFactory extends ISelf<Model> {
     /**
      * Create an affine view based on <i>var</i>, i.e. <i>view = a * var + b</i>
      *
-     * @param var an integer variable
      * @param a   a coefficient
+     * @param var an integer variable
      * @param b   a constant
      * @return an affine view
      */
-    default IntVar intView(IntVar var, int a, int b) {
+    default IntVar intView(int a, IntVar var, int b) {
         if (a == 1 && b == 0) {
             return var;
         } else if (a == 0) {
@@ -166,146 +166,14 @@ public interface IViewFactory extends ISelf<Model> {
      *
      * @param var an integer variable
      * @return an abs view
-     * @see #intAbsView(IntVar)
      */
-    default IntVar abs(IntVar var) {
-        return intAbsView(var);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = var + b</i>
-     * @param var an integer variable
-     * @param b a constant
-     * @return a plus view
-     * @see #intView(IntVar, int, int)
-     */
-    default IntVar add(IntVar var, int b){
-        return intView(var, 1, b);
-    }
-
-    /**
-     * Create an affine view based on <i>var</i>, i.e. <i>view = a * var + b</i>
-     * @param var an integer variable
-     * @param a a coefficient
-     * @param b a constant
-     * @return an affine view
-     * @see #intView(IntVar, int, int)
-     */
-    default IntVar aff(IntVar var, int a, int b) {
-        return intView(var, a, b);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = (var == v)</i>
-     * @param var an integer variable
-     * @param v a constant
-     * @return a boolean view
-     * @see #intEqView(IntVar, int)
-     */
-    default BoolVar eq(IntVar var, int v){
-        return intEqView(var, v);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = (var >= v)</i>
-     * @param var an integer variable
-     * @param v a constant
-     * @return a boolean view
-     * @see #intGeView(IntVar, int)
-     */
-    default BoolVar ge(IntVar var, int v){
-        return intGeView(var, v);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = (var <= v)</i>
-     * @param var an integer variable
-     * @param v a constant
-     * @return a boolean view
-     * @see #intGeView(IntVar, int)
-     */
-    default BoolVar le(IntVar var, int v){
-        return intLeView(var, v);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = var * a</i>
-     * @param var an integer variable
-     * @param a a coefficient
-     * @return a mul view
-     * @see #intView(IntVar, int, int)
-     */
-    default IntVar mul(IntVar var, int a){
-        return intView(var, a, 0);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = (var != v)</i>
-     * @param var an integer variable
-     * @param v a constant
-     * @return a boolean view
-     * @see #intNeView(IntVar, int)
-     */
-    default BoolVar ne(IntVar var, int v){
-        return intNeView(var, v);
-    }
-
-    /**
-     * Create a view based on <i>var</i>, i.e. <i>view = -var</i>
-     * @param var an integer variable
-     * @return a neg view
-     * @see #intView(IntVar, int, int)
-     */
-    default IntVar neg(IntVar var) {
-        return intView(var, -1, 0);
-    }
-
-    /**
-     * @see #intView(IntVar, int, int)
-     * @deprecated
-     */
-    @Deprecated
-    default IntVar intOffsetView(IntVar var, int cste) {
-        return intView(var, 1, cste);
-    }
-
-    /**
-     * @see #intView(IntVar, int, int)
-     * @deprecated
-     */
-    @Deprecated
-    default IntVar intMinusView(IntVar var) {
-        return intView(var, -1, 0);
-    }
-
-    /**
-     * @see #intView(IntVar, int, int)
-     * @deprecated
-     */
-    @Deprecated
-    default IntVar intScaleView(IntVar var, int cste) {
-        return intView(var, cste, 0);
-    }
-
-    /**
-     * Creates a view over <i>var</i> such that: |<i>var</i>|.
-     * <p>
-     * <br/>- if <i>var</i> is already instantiated, returns a fixed variable;
-     * <br/>- if the lower bound of <i>var</i> is greater or equal to 0, returns <i>var</i>;
-     * <br/>- if the upper bound of <i>var</i> is less or equal to 0, return a minus view;
-     * <br/>- otherwise, returns an absolute view;
-     * <p>
-     *
-     * @param var an integer variable.
-     * @return an IntVar equal to the absolute value of <i>var</i>
-     */
-    default IntVar intAbsView(IntVar var) {
+    default IntVar absView(IntVar var) {
         if (var.isInstantiated()) {
             return ref().intVar(Math.abs(var.getValue()));
         } else if (var.getLB() >= 0) {
             return var;
         } else if (var.getUB() <= 0) {
-            return intView(var, -1, 0);
+            return intView(-1, var, 0);
         } else {
             int ub = max(-var.getLB(), var.getUB());
             String name = "|" + var.getName() + "|";
@@ -321,12 +189,205 @@ public interface IViewFactory extends ISelf<Model> {
     }
 
     /**
-     * @see #intView(IntVar, int, int)
+     * Create a view based on <i>var</i>, i.e. <i>view = var + b</i>
+     *
+     * @param var an integer variable
+     * @param b   a constant
+     * @return a plus view
+     * @see #intView(int, IntVar, int)
+     */
+    default IntVar addView(IntVar var, int b) {
+        return intView(1, var, b);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var == v)</i>
+     *
+     * @param var an integer variable
+     * @param v   a constant
+     * @return a boolean view
+     */
+    default BoolVar eqView(IntVar var, int v) {
+        if (var.isInstantiatedTo(v)) {
+            return ref().boolVar(true);
+        } else if (!var.contains(v)) {
+            return ref().boolVar(false);
+        } else {
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(var, v, BoolEqView.class, ref().getSettings().checkDeclaredViews());
+                if (p >= 0) {
+                    return var.getView(p).asBoolVar();
+                } else {
+                    return new BoolEqView<>(var, v);
+                }
+            } else {
+                BoolVar b = ref().boolVar();
+                ref().reifyXeqC(var, v, b);
+                return b;
+            }
+        }
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var >= v)</i>
+     *
+     * @param var an integer variable
+     * @param v   a constant
+     * @return a boolean view
+     */
+    default BoolVar geqView(IntVar var, int v) {
+        if (var.getLB() >= v) {
+            return ref().boolVar(true);
+        } else if (var.getUB() < v) {
+            return ref().boolVar(false);
+        } else {
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(var, v - 1, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
+                if (p >= 0) {
+                    return var.getView(p).asBoolVar().not();
+                } else {
+                    return new BoolLeqView<>(var, v - 1).not();
+                }
+            } else {
+                BoolVar b = ref().boolVar();
+                ref().reifyXgtC(var, v - 1, b);
+                return b;
+            }
+        }
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var <= v)</i>
+     *
+     * @param var an integer variable
+     * @param v   a constant
+     * @return a boolean view
+     */
+    default BoolVar leqView(IntVar var, int v) {
+        if (var.getUB() <= v) {
+            return ref().boolVar(true);
+        } else if (var.getLB() > v) {
+            return ref().boolVar(false);
+        } else {
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(var, v, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
+                if (p >= 0) {
+                    return var.getView(p).asBoolVar();
+                } else {
+                    return new BoolLeqView<>(var, v);
+                }
+            } else {
+                BoolVar b = ref().boolVar();
+                ref().reifyXltC(var, v + 1, b);
+                return b;
+            }
+        }
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = var * a</i>
+     *
+     * @param var an integer variable
+     * @param a   a coefficient
+     * @return a mul view
+     * @see #intView(int, IntVar, int)
+     */
+    default IntVar mulView(IntVar var, int a) {
+        return intView(a, var, 0);
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = (var != v)</i>
+     *
+     * @param var an integer variable
+     * @param v   a constant
+     * @return a boolean view
+     */
+    default BoolVar neqView(IntVar var, int v) {
+        if (var.isInstantiatedTo(v)) {
+            return ref().boolVar(false);
+        } else if (!var.contains(v)) {
+            return ref().boolVar(true);
+        } else {
+            if (ref().getSettings().enableViews()) {
+                int p = checkDeclaredView(var, v, BoolEqView.class, ref().getSettings().checkDeclaredViews());
+                if (p >= 0) {
+                    return var.getView(p).asBoolVar().not();
+                } else {
+                    return new BoolEqView<>(var, v).not();
+                }
+            } else {
+                BoolVar b = ref().boolVar();
+                ref().reifyXneC(var, v, b);
+                return b;
+            }
+        }
+    }
+
+    /**
+     * Create a view based on <i>var</i>, i.e. <i>view = -var</i>
+     *
+     * @param var an integer variable
+     * @return a neg view
+     * @see #intView(int, IntVar, int)
+     */
+    default IntVar negView(IntVar var) {
+        return intView(-1, var, 0);
+    }
+
+    /**
+     * @see #intView(int, IntVar, int)
+     * @deprecated
+     */
+    @Deprecated
+    default IntVar intOffsetView(IntVar var, int cste) {
+        return intView(1, var, cste);
+    }
+
+    /**
+     * @see #intView(int, IntVar, int)
+     * @deprecated
+     */
+    @Deprecated
+    default IntVar intMinusView(IntVar var) {
+        return intView(-1, var, 0);
+    }
+
+    /**
+     * @see #intView(int, IntVar, int)
+     * @deprecated
+     */
+    @Deprecated
+    default IntVar intScaleView(IntVar var, int cste) {
+        return intView(cste, var, 0);
+    }
+
+    /**
+     * Creates a view over <i>var</i> such that: |<i>var</i>|.
+     * <p>
+     * <br/>- if <i>var</i> is already instantiated, returns a fixed variable;
+     * <br/>- if the lower bound of <i>var</i> is greater or equal to 0, returns <i>var</i>;
+     * <br/>- if the upper bound of <i>var</i> is less or equal to 0, return a minus view;
+     * <br/>- otherwise, returns an absolute view;
+     * <p>
+     *
+     * @param var an integer variable.
+     * @return an IntVar equal to the absolute value of <i>var</i>
+     * @see #absView(IntVar)
+     * @deprecated
+     */
+    @Deprecated
+    default IntVar intAbsView(IntVar var) {
+        return absView(var);
+    }
+
+    /**
+     * @see #intView(int, IntVar, int)
      * @deprecated
      */
     @Deprecated//(since = "4.11.0", forRemoval = true)
     default IntVar intAffineView(int a, IntVar x, int b) {
-        return intView(x, a, b);
+        return intView(a, x, b);
     }
 
 
@@ -337,26 +398,12 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x = c</i>
+     * @deprecated
+     * @see #eqView(IntVar, int)
      */
+    @Deprecated
     default BoolVar intEqView(IntVar x, int c) {
-        if (x.isInstantiatedTo(c)) {
-            return ref().boolVar(true);
-        } else if (!x.contains(c)) {
-            return ref().boolVar(false);
-        } else {
-            if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, BoolEqView.class, ref().getSettings().checkDeclaredViews());
-                if (p >= 0) {
-                    return x.getView(p).asBoolVar();
-                } else {
-                    return new BoolEqView<>(x, c);
-                }
-            } else {
-                BoolVar b = ref().boolVar();
-                ref().reifyXeqC(x, c, b);
-                return b;
-            }
-        }
+        return eqView(x, c);
     }
 
     /**
@@ -366,26 +413,12 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x != c</i>
+     * @deprecated
+     * @see #neqView(IntVar, int)
      */
+    @Deprecated
     default BoolVar intNeView(IntVar x, int c) {
-        if (x.isInstantiatedTo(c)) {
-            return ref().boolVar(false);
-        } else if (!x.contains(c)) {
-            return ref().boolVar(true);
-        } else {
-            if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, BoolEqView.class, ref().getSettings().checkDeclaredViews());
-                if (p >= 0) {
-                    return x.getView(p).asBoolVar().not();
-                } else {
-                    return new BoolEqView<>(x, c).not();
-                }
-            } else {
-                BoolVar b = ref().boolVar();
-                ref().reifyXneC(x, c, b);
-                return b;
-            }
-        }
+        return neqView(x, c);
     }
 
     /**
@@ -395,26 +428,12 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &le; c</i>
+     * @deprecated
+     * @see #leqView(IntVar, int)
      */
+    @Deprecated
     default BoolVar intLeView(IntVar x, int c) {
-        if (x.getUB() <= c) {
-            return ref().boolVar(true);
-        } else if (x.getLB() > c) {
-            return ref().boolVar(false);
-        } else {
-            if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
-                if (p >= 0) {
-                    return x.getView(p).asBoolVar();
-                } else {
-                    return new BoolLeqView<>(x, c);
-                }
-            } else {
-                BoolVar b = ref().boolVar();
-                ref().reifyXltC(x, c + 1, b);
-                return b;
-            }
-        }
+        return leqView(x, c);
     }
 
     /**
@@ -424,26 +443,12 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &ge; c</i>
+     * @see #geqView(IntVar, int)
+     * @deprecated
      */
+    @Deprecated
     default BoolVar intGeView(IntVar x, int c) {
-        if (x.getLB() >= c) {
-            return ref().boolVar(true);
-        } else if (x.getUB() < c) {
-            return ref().boolVar(false);
-        } else {
-            if (ref().getSettings().enableViews()) {
-                int p = checkDeclaredView(x, c - 1, BoolLeqView.class, ref().getSettings().checkDeclaredViews());
-                if (p >= 0) {
-                    return x.getView(p).asBoolVar().not();
-                } else {
-                    return new BoolLeqView<>(x, c - 1).not();
-                }
-            } else {
-                BoolVar b = ref().boolVar();
-                ref().reifyXgtC(x, c - 1, b);
-                return b;
-            }
-        }
+        return geqView(x, c);
     }
 
     @SuppressWarnings("rawtypes")

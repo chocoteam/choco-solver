@@ -54,7 +54,7 @@ public class KnapsackTest {
         }
         Solver s = m.getSolver();
         IntVar[] xCost = new IntVar[N];
-        for (int i = 0; i < N; i++) xCost[i] = m.intView(x[i], c[i], 0);
+        for (int i = 0; i < N; i++) xCost[i] = m.mulView(x[i], c[i]);
         s.setSearch(Search.intVarSearch(new Largest(), new IntDomainMax(), xCost));
         while (s.solve()) ;
         s.printShortStatistics();
@@ -77,7 +77,7 @@ public class KnapsackTest {
         }
         Solver s = m.getSolver();
         IntVar[] xCost = new IntVar[N];
-        for (int i = 0; i < N; i++) xCost[i] = m.intView(x[i], c[i], 0);
+        for (int i = 0; i < N; i++) xCost[i] = m.mulView(x[i], c[i]);
         s.setSearch(Search.intVarSearch(new Largest(), new IntDomainBest(), xCost));
         while (s.solve()) ;
         s.printShortStatistics();

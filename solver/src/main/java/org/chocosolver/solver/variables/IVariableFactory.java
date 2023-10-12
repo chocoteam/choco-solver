@@ -529,7 +529,7 @@ public interface IVariableFactory extends ISelf<Model> {
      */
     default Task taskVar(IntVar s, IntVar d) {
         if(d.isInstantiated()) {
-            return new Task(s, d, ref().intView(s, 1, d.getValue()));
+            return new Task(s, d, ref().addView(s, d.getValue()));
         } else {
             int[] bounds = VariableUtils.boundsForAddition(s, d);
             IntVar end = ref().intVar(bounds[0], bounds[1]);

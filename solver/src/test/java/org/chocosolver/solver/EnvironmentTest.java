@@ -54,7 +54,7 @@ public class EnvironmentTest {
 					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
 					// just to create many variables
 					model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).reify();
-					vectors[idx] = model.intView(k, 1, 2 * n * (j - i));
+					vectors[idx] = model.addView(k, 2 * n * (j - i));
 					idx++;
 				}
 			}
