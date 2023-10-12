@@ -263,7 +263,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param v   a constant
      * @return a boolean view
      */
-    default BoolVar leqView(IntVar var, int v) {
+    default BoolVar isLeq(IntVar var, int v) {
         if (var.getUB() <= v) {
             return ref().boolVar(true);
         } else if (var.getLB() > v) {
@@ -429,11 +429,11 @@ public interface IViewFactory extends ISelf<Model> {
      * @param c a constant
      * @return a BoolVar that reifies <i>x &le; c</i>
      * @deprecated
-     * @see #leqView(IntVar, int)
+     * @see #isLeq(IntVar, int)
      */
     @Deprecated
     default BoolVar intLeView(IntVar x, int c) {
-        return leqView(x, c);
+        return isLeq(x, c);
     }
 
     /**

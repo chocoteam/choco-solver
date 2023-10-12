@@ -862,7 +862,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                    v -> model.leqView(v, n / 2)
+                    v -> model.isLeq(v, n / 2)
             ).toArray(IntVar[]::new);
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();

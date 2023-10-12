@@ -96,7 +96,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
             for (int i = 0; i < n; i++) {
                 ref().addClausesBoolAndArrayEqVar(
                         new BoolVar[]{
-                                ref().leqView(starts[i], t),
+                                ref().isLeq(starts[i], t),
                                 ref().isGeq(starts[i], t - durations[i] + 1)
                         },
                         bit[i]);

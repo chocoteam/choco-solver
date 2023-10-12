@@ -586,7 +586,7 @@ public class BoolLeqViewTest {
             IntVar[] xs = mod.intVarArray(5, new int[]{2, 3, 4, 5});
             BoolVar[] vs = new BoolVar[5];
             for (int j = 0; j < 5; j++) {
-                vs[j] = mod.leqView(xs[j], 3);
+                vs[j] = mod.isLeq(xs[j], 3);
                 /*vs[j] = mod.boolVar();
                 mod.reifyXltC(xs[j], 4, vs[j]);*/
             }

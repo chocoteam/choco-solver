@@ -87,10 +87,10 @@ public class UnCReExpression implements ReExpression {
             //me = model.boolVar(model.generateName(op+"_exp_"));
             switch (op) {
                 case LT:
-                    me = model.leqView(v1, e2 - 1);
+                    me = model.isLeq(v1, e2 - 1);
                     break;
                 case LE:
-                    me = model.leqView(v1, e2);
+                    me = model.isLeq(v1, e2);
                     break;
                 case GE:
                     me = model.isGeq(v1, e2);
