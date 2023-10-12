@@ -1711,7 +1711,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 int nb = occurrences[i].getUB();
                 BoolVar[] doms = new BoolVar[nb];
                 for (int k = 0; k < nb; k++) {
-                    doms[k] = ref().geqView(occurrences[i], k + 1);
+                    doms[k] = ref().isGeq(occurrences[i], k + 1);
                     bs.add(doms[k]);
                     es.add(energy[i]);
                     ws.add(weight[i]);

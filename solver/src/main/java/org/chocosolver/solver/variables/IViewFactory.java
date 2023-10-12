@@ -235,7 +235,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param v   a constant
      * @return a boolean view
      */
-    default BoolVar geqView(IntVar var, int v) {
+    default BoolVar isGeq(IntVar var, int v) {
         if (var.getLB() >= v) {
             return ref().boolVar(true);
         } else if (var.getUB() < v) {
@@ -443,12 +443,12 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &ge; c</i>
-     * @see #geqView(IntVar, int)
+     * @see #isGeq(IntVar, int)
      * @deprecated
      */
     @Deprecated
     default BoolVar intGeView(IntVar x, int c) {
-        return geqView(x, c);
+        return isGeq(x, c);
     }
 
     @SuppressWarnings("rawtypes")

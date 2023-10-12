@@ -880,7 +880,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                            v -> model.geqView(v, n / 2)
+                            v -> model.isGeq(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 

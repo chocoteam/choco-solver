@@ -93,10 +93,10 @@ public class UnCReExpression implements ReExpression {
                     me = model.leqView(v1, e2);
                     break;
                 case GE:
-                    me = model.geqView(v1, e2);
+                    me = model.isGeq(v1, e2);
                     break;
                 case GT:
-                    me = model.geqView(v1, e2 + 1);
+                    me = model.isGeq(v1, e2 + 1);
                     break;
                 case NE:
                     me = model.neqView(v1, e2);

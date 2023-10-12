@@ -570,7 +570,7 @@ public class BoolLeqViewTest {
         Model model = new Model();
         final IntVar[] xs = model.intVarArray("x", 5, 0, 5);
         final BoolVar[] bs = Stream.of(xs).map(x ->
-                model.geqView(x, 1)
+                model.isGeq(x, 1)
         ).toArray(BoolVar[]::new);
 
         final IntVar count = model.intVar(0, 5);
