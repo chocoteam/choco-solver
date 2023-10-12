@@ -167,7 +167,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param var an integer variable
      * @return an abs view
      */
-    default IntVar absView(IntVar var) {
+    default IntVar abs(IntVar var) {
         if (var.isInstantiated()) {
             return ref().intVar(Math.abs(var.getValue()));
         } else if (var.getLB() >= 0) {
@@ -373,12 +373,12 @@ public interface IViewFactory extends ISelf<Model> {
      *
      * @param var an integer variable.
      * @return an IntVar equal to the absolute value of <i>var</i>
-     * @see #absView(IntVar)
+     * @see #abs(IntVar)
      * @deprecated
      */
     @Deprecated
     default IntVar intAbsView(IntVar var) {
-        return absView(var);
+        return abs(var);
     }
 
     /**

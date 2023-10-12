@@ -162,7 +162,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.absView(x);
+                IntVar z = model.abs(x);
                 model.getSolver().setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
             }
@@ -394,7 +394,7 @@ public class ViewsTest {
                 IntVar y = model.intVar("y", 0, 2, false);
                 IntVar z = model.intVar("Z", -2, 2, false);
                 model.arithm(x, "-", y, "=", z).post();
-                IntVar az = model.absView(z);
+                IntVar az = model.abs(z);
                 model.getSolver().setSearch(
                     intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
             }
@@ -425,7 +425,7 @@ public class ViewsTest {
                 IntVar z = model.intVar("z", -2, 2, false);
                 new Constraint("SP",
                     new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
-                IntVar az = model.absView(z);
+                IntVar az = model.abs(z);
                 model.allDifferent(new IntVar[]{x, y, az}, "BC").post();
                 model.getSolver().setSearch(randomSearch(new IntVar[]{x, y, az}, seed));
             }
@@ -464,7 +464,7 @@ public class ViewsTest {
                     new Constraint("SP",
                         new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, EQ,
                             0)).post();
-                    t[i] = model.absView(z);
+                    t[i] = model.abs(z);
                 }
                 model.allDifferent(x, "BC").post();
                 model.allDifferent(t, "BC").post();
@@ -481,8 +481,8 @@ public class ViewsTest {
     public void test6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 10, false);
-        IntVar y = model.absView(x);
-        IntVar z = model.absView(model.absView(x));
+        IntVar y = model.abs(x);
+        IntVar z = model.abs(model.abs(x));
 
         for (int j = 0; j < 200; j++) {
 //            long t = -System.nanoTime();

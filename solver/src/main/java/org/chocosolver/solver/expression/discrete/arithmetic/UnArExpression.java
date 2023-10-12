@@ -85,7 +85,7 @@ public class UnArExpression implements ArExpression {
                     me = model.negView(v);
                     break;
                 case ABS:
-                    me = model.absView(v);
+                    me = model.abs(v);
                     break;
                 case SQR:
                     int[] bounds = VariableUtils.boundsForMultiplication(v, v);

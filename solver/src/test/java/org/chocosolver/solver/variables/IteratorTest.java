@@ -517,7 +517,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
         Model model = new Model();
-        IntVar var = model.absView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -536,7 +536,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
         Model model = new Model();
-        IntVar var = model.absView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -555,7 +555,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
         Model model = new Model();
-        IntVar var = model.absView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -576,7 +576,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
         Model model = new Model();
-        IntVar var = model.absView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
