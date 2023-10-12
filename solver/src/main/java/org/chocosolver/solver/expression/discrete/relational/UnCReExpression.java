@@ -102,7 +102,7 @@ public class UnCReExpression implements ReExpression {
                     me = model.neqView(v1, e2);
                     break;
                 case EQ:
-                    me = model.eqView(v1, e2);
+                    me = model.isEq(v1, e2);
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());

@@ -207,7 +207,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param v   a constant
      * @return a boolean view
      */
-    default BoolVar eqView(IntVar var, int v) {
+    default BoolVar isEq(IntVar var, int v) {
         if (var.isInstantiatedTo(v)) {
             return ref().boolVar(true);
         } else if (!var.contains(v)) {
@@ -399,11 +399,11 @@ public interface IViewFactory extends ISelf<Model> {
      * @param c a constant
      * @return a BoolVar that reifies <i>x = c</i>
      * @deprecated
-     * @see #eqView(IntVar, int)
+     * @see #isEq(IntVar, int)
      */
     @Deprecated
     default BoolVar intEqView(IntVar x, int c) {
-        return eqView(x, c);
+        return isEq(x, c);
     }
 
     /**

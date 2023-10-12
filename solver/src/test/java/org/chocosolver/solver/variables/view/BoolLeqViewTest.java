@@ -432,7 +432,7 @@ public class BoolLeqViewTest {
     public void test1() {
         BoolVar[] doms = new BoolVar[6];
         for (int i = 0; i < 6; i++) {
-            doms[i] = model.eqView(x, i);
+            doms[i] = model.isEq(x, i);
         }
         while (model.getSolver().solve()) {
             System.out.printf("%s\n", x);

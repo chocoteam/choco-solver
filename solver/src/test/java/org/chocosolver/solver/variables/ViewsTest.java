@@ -900,7 +900,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                            v -> model.eqView(v, n / 2)
+                            v -> model.isEq(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 

@@ -256,7 +256,7 @@ public interface IDecompositionFactory extends ISelf<Model> {
         for (int i = 0; i < load.length; i++) {
             BoolVar[] in = new BoolVar[bin.length];
             for (int j = 0; j < bin.length; j++) {
-                in[j] = ref().eqView(bin[j], i + offset);
+                in[j] = ref().isEq(bin[j], i + offset);
             }
             ref().scalar(in, w, "=", load[i]).post();
         }
