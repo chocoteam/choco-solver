@@ -303,7 +303,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @param v   a constant
      * @return a boolean view
      */
-    default BoolVar neqView(IntVar var, int v) {
+    default BoolVar isNeq(IntVar var, int v) {
         if (var.isInstantiatedTo(v)) {
             return ref().boolVar(false);
         } else if (!var.contains(v)) {
@@ -414,11 +414,11 @@ public interface IViewFactory extends ISelf<Model> {
      * @param c a constant
      * @return a BoolVar that reifies <i>x != c</i>
      * @deprecated
-     * @see #neqView(IntVar, int)
+     * @see #isNeq(IntVar, int)
      */
     @Deprecated
     default BoolVar intNeView(IntVar x, int c) {
-        return neqView(x, c);
+        return isNeq(x, c);
     }
 
     /**

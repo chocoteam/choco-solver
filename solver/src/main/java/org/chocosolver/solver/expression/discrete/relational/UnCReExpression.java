@@ -99,7 +99,7 @@ public class UnCReExpression implements ReExpression {
                     me = model.isGeq(v1, e2 + 1);
                     break;
                 case NE:
-                    me = model.neqView(v1, e2);
+                    me = model.isNeq(v1, e2);
                     break;
                 case EQ:
                     me = model.isEq(v1, e2);
