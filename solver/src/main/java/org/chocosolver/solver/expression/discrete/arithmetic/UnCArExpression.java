@@ -80,10 +80,10 @@ public class UnCArExpression implements ArExpression {
             int[] bounds;
             switch (op) {
                 case ADD:
-                    me = model.addView(v1, e2);
+                    me = model.offset(v1, e2);
                     break;
                 case SUB:
-                    me = model.addView(v1, -e2);
+                    me = model.offset(v1, -e2);
                     break;
                 case MUL:
                     if(e2 > 0){

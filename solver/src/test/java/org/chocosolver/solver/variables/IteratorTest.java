@@ -233,7 +233,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
         Model model = new Model();
-        IntVar var = model.addView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -255,7 +255,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
         Model model = new Model();
-        IntVar var = model.addView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -277,7 +277,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
         Model model = new Model();
-        IntVar var = model.addView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -301,7 +301,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
         Model model = new Model();
-        IntVar var = model.addView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();

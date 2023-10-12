@@ -196,7 +196,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @return a plus view
      * @see #intView(int, IntVar, int)
      */
-    default IntVar addView(IntVar var, int b) {
+    default IntVar offset(IntVar var, int b) {
         return intView(1, var, b);
     }
 

@@ -301,7 +301,7 @@ public class ReifiedTest {
         row[2] = s.intVar(16);
 
         IntVar[] calc = new IntVar[2];
-        calc[0] = s.addView(row[0], 2);
+        calc[0] = s.offset(row[0], 2);
         calc[1] = s.intVar("C", 0, 80, true);
         s.sum(new IntVar[]{row[0], row[1]}, "=", calc[1]).post();
 

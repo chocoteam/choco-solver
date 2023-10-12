@@ -185,7 +185,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.addView(x, 1);
+                IntVar z = model.offset(x, 1);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -681,7 +681,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.addView(x[i], 42);
+            y[i] = model.offset(x[i], 42);
         }
         checkDomains(true, x, y);
 

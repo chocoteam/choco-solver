@@ -2271,7 +2271,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             default:
                 return Constraint.merge(ConstraintsName.SUBPATH,
                         arithm(start, "<", vars.length + offset),
-                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().addView(SIZE, 1)),
+                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().offset(SIZE, 1)),
                         element(end.getModel().intVar(vars.length + offset), vars, end, offset)
                 );
         }

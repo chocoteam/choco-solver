@@ -31,7 +31,7 @@ public class IntVarOffSetViewTest extends IntVarTest {
     public void setup() {
         Model model = new Model();
         original = model.intVar(0, 3);
-        var = model.addView(original, 1);
+        var = model.offset(original, 1);
     }
 
     @Override
