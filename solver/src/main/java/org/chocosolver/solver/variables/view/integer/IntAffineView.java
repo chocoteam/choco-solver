@@ -34,30 +34,21 @@ import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
  */
 public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
-    final boolean p; // positive
-    final int a;
-    final int b;
-
-
-    public static IntAffineView<IntVar> make(IntVar var, int a, int b) {
-        if (var instanceof IntAffineView) {
-            IntAffineView<?> view = (IntAffineView<?>) var;
-            return new IntAffineView<>(view.getVariable(), view.p & (a >= 0), view.a * Math.abs(a), view.a * b + view.b);
-        } else {
-            return new IntAffineView<>(var, a >= 0, Math.abs(a), b);
-        }
-    }
+    public final boolean p; // positive
+    public final int a;
+    public final int b;
 
     /**
-     * <i>y</i> is an affine view of <i>x</i>: <i>y = (-1)a*x + b</i>.
+     * <i>y</i> is an affine view of <i>x</i>: <i>y = a*x + b</i>.
      *
      * @param var a integer variable
+     * @param a   a coefficient
+     * @param b   a constant
      */
-    private IntAffineView(final I var, boolean p, int a, int b) {
-        super((p ? "" : "-") + a + ".(" + var.getName() + ") + " + b, var);
-        assert a > 0;
-        this.p = p;
-        this.a = a;
+    public IntAffineView(final I var, int a, int b) {
+        super(a + ".(" + var.getName() + ") + " + b, var);
+        this.p = a >= 0;
+        this.a = Math.abs(a);
         this.b = b;
     }
 

@@ -65,7 +65,7 @@ public class IntAffineViewTest {
     public void testNextValue(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> (a * i) + b).sorted().toArray();
 
@@ -78,20 +78,11 @@ public class IntAffineViewTest {
         Assert.assertEquals(y.nextValue(values[2]), Integer.MAX_VALUE);
     }
 
-    @Test(groups = "1s")
-    public void testNextValue2() {
-        Model model = new Model();
-        IntVar x = model.intVar("x", 2, 9);
-        IntVar y = IntAffineView.make(x, 5, 7);
-
-
-    }
-
     @Test(groups = "1s", dataProvider = "configurations")
     public void testPreviousValue(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> a * i + b).sorted().toArray();
 
@@ -108,7 +99,7 @@ public class IntAffineViewTest {
     public void testNextValueOut(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> (a * i) + b).sorted().toArray();
         BitSet valuesOut = new BitSet();
@@ -129,7 +120,7 @@ public class IntAffineViewTest {
     public void testPreviousValueOut(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> (a * i) + b).sorted().toArray();
         BitSet valuesOut = new BitSet();
@@ -151,7 +142,7 @@ public class IntAffineViewTest {
     public void testValueIterator(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> a * i + b).sorted().toArray();
 
@@ -178,7 +169,7 @@ public class IntAffineViewTest {
     public void testRangeIterator(int a, int b, int... domain) {
         Model model = new Model();
         IntVar x = model.intVar("x", domain);
-        IntVar y = IntAffineView.make(x, a, b);
+        IntVar y = new IntAffineView<>(x, a, b);
 
         int[] values = Arrays.stream(domain).map(i -> a * i + b).sorted().toArray();
 

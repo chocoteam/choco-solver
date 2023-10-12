@@ -2582,7 +2582,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Get the list of values in the domains of vars
      *
      * @param vars an array of integer variables
-     * @return the list of values in the domains of vars
+     * @return the array of values in the domains of vars
      */
     default int[] getDomainUnion(IntVar... vars) {
         int m = vars[0].getLB(), M = vars[0].getUB(), j, k;
@@ -2640,7 +2640,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         for (int i = 0; i < allvars.size(); i++) {
             for (int j = i + 1; j < allvars.size(); j++) {
                 if (allvars.get(i).equals(allvars.get(j))) {
-                    allvars.set(j, IntAffineView.make(allvars.get(i), 1, 0));
+                    // force the view to be created, no call to ref().intView() here !
+                    allvars.set(j, new IntAffineView<>(allvars.get(i), 1, 0));
                 }
             }
         }
