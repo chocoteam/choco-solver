@@ -98,7 +98,7 @@ public class ProblemMaker {
                 IntVar k = model.intVar(model.generateName(), -n, n, false);
                 model.arithm(k, "!=", 0).post();
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[j]).post();
-                vectors[idx] = model.intOffsetView(k, 2 * n * (j - i));
+                vectors[idx] = model.offset(k, 2 * n * (j - i));
                 diff[i][j] = k;
                 idx++;
             }

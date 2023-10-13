@@ -57,7 +57,7 @@ public class AllIntervalSeries extends AbstractProblem {
             for (int i = 0; i < m - 1; i++) {
                 IntVar k = model.intVar(model.generateName(), -20000, 20000, true);
                 model.sum(new IntVar[]{vars[i], k}, "=", vars[i + 1]).post();
-                dist[i] = model.intAbsView(k);
+                dist[i] = model.abs(k);
                 model.member(dist[i], 1, m - 1).post();
             }
         }

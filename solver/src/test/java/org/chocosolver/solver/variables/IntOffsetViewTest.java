@@ -34,7 +34,7 @@ public class IntOffsetViewTest {
         Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 3, false);
-        IntVar Y = s.intOffsetView(X, 2);
+        IntVar Y = s.offset(X, 2);
 
         IntVar[] vars = {X, Y};
 
@@ -51,7 +51,7 @@ public class IntOffsetViewTest {
         Model s = new Model();
 
         IntVar X = s.intVar("X", 1, 4, false);
-        IntVar Y = s.intOffsetView(X, 3);
+        IntVar Y = s.offset(X, 3);
 
         IntVar[] vars = {X, Y};
 
@@ -66,7 +66,7 @@ public class IntOffsetViewTest {
         Model s = new Model();
 
         IntVar X = s.intVar("X", low, upp, false);
-        IntVar Y = s.intOffsetView(X, coeff);
+        IntVar Y = s.offset(X, coeff);
 
         IntVar[] vars = {X, Y};
 
@@ -145,7 +145,7 @@ public class IntOffsetViewTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = model.intOffsetView(o, 2);
+            IntVar v = model.offset(o, 2);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(vit.next() - 2));
@@ -179,7 +179,7 @@ public class IntOffsetViewTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0]);
-            IntVar v = model.intOffsetView(o, 2);
+            IntVar v = model.offset(o, 2);
 			if(!model.getSettings().enableViews()){
 				try {
 					model.getSolver().propagate();

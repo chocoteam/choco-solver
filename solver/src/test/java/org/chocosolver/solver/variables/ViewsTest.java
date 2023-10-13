@@ -162,7 +162,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.intAbsView(x);
+                IntVar z = model.abs(x);
                 model.getSolver().setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
             }
@@ -185,7 +185,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.intOffsetView(x, 1);
+                IntVar z = model.offset(x, 1);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -209,7 +209,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", -2, 2, false);
-                IntVar z = model.intScaleView(x, 2);
+                IntVar z = model.mul(x, 2);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
 
@@ -233,7 +233,7 @@ public class ViewsTest {
             }
             {
                 IntVar x = model.intVar("x", 0, 2, false);
-                IntVar z = model.intMinusView(x);
+                IntVar z = model.neg(x);
                 Solver r = model.getSolver();
                 r.setSearch(randomSearch(new IntVar[]{x, z}, seed));
             }
@@ -293,7 +293,7 @@ public class ViewsTest {
         {
             IntVar x = model.intVar("x", 160, 187, false);
             IntVar y = model.intVar("y", -999, 999, false);
-            IntVar z = model.intOffsetView(model.intMinusView(x), 180);
+            IntVar z = model.intView(-1, x, 180);
             model.max(y, model.intVar(0), z).post();
 
             check(ref, model, 0, false, true);
@@ -394,7 +394,7 @@ public class ViewsTest {
                 IntVar y = model.intVar("y", 0, 2, false);
                 IntVar z = model.intVar("Z", -2, 2, false);
                 model.arithm(x, "-", y, "=", z).post();
-                IntVar az = model.intAbsView(z);
+                IntVar az = model.abs(z);
                 model.getSolver().setSearch(
                     intVarSearch(new Random<>(seed), new IntDomainRandomBound(seed), x, y, az));
             }
@@ -425,7 +425,7 @@ public class ViewsTest {
                 IntVar z = model.intVar("z", -2, 2, false);
                 new Constraint("SP",
                     new PropScalar(new IntVar[]{x, y, z}, new int[]{1, -1, -1}, 1, EQ, 0)).post();
-                IntVar az = model.intAbsView(z);
+                IntVar az = model.abs(z);
                 model.allDifferent(new IntVar[]{x, y, az}, "BC").post();
                 model.getSolver().setSearch(randomSearch(new IntVar[]{x, y, az}, seed));
             }
@@ -464,7 +464,7 @@ public class ViewsTest {
                     new Constraint("SP",
                         new PropScalar(new IntVar[]{x[i + 1], x[i], z}, new int[]{1, -1, -1}, 1, EQ,
                             0)).post();
-                    t[i] = model.intAbsView(z);
+                    t[i] = model.abs(z);
                 }
                 model.allDifferent(x, "BC").post();
                 model.allDifferent(t, "BC").post();
@@ -481,8 +481,8 @@ public class ViewsTest {
     public void test6() throws ContradictionException {
         Model model = new Model();
         IntVar x = model.intVar("x", 0, 10, false);
-        IntVar y = model.intAbsView(x);
-        IntVar z = model.intAbsView(model.intAbsView(x));
+        IntVar y = model.abs(x);
+        IntVar z = model.abs(model.abs(x));
 
         for (int j = 0; j < 200; j++) {
 //            long t = -System.nanoTime();
@@ -508,7 +508,7 @@ public class ViewsTest {
     public void testJL1() throws ContradictionException {
         Model s = new Model();
         IntVar v1 = s.intVar("v1", -2, 2, false);
-        IntVar v2 = s.intMinusView(s.intMinusView(s.intVar("v2", -2, 2, false)));
+        IntVar v2 = s.neg(s.neg(s.intVar("v2", -2, 2, false)));
         s.arithm(v1, "=", v2).post();
         s.arithm(v2, "!=", 1).post();
 
@@ -532,9 +532,9 @@ public class ViewsTest {
     public void testJL3() {
         Model model = new Model();
         model.arithm(
-            model.intVar("int", -3, 3, false),
-            "=",
-            model.intMinusView(model.boolVar("bool"))).post();
+                model.intVar("int", -3, 3, false),
+                "=",
+                model.neg(model.boolVar("bool"))).post();
         while (model.getSolver().solve()) {
         }
         assertEquals(model.getSolver().getSolutionCount(), 2);
@@ -596,7 +596,7 @@ public class ViewsTest {
     public void testJG4() throws ContradictionException {
         Model s = new Model();
         IntVar var = s.intVar("int", 0, 2, true);
-        IntVar view = s.intMinusView(var);
+        IntVar view = s.neg(var);
         IntVar sum = s.intVar("sum", 0, 6, true);
         s.scalar(new IntVar[]{view, var}, new int[]{1, 5}, "=", sum).post();
         s.arithm(sum, ">", 2).post();
@@ -681,7 +681,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intOffsetView(x[i], 42);
+            y[i] = model.offset(x[i], 42);
         }
         checkDomains(true, x, y);
 
@@ -694,7 +694,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intScaleView(x[i], 42);
+            y[i] = model.mul(x[i], 42);
         }
         checkDomains(false, x, y);
 
@@ -707,7 +707,7 @@ public class ViewsTest {
         IntVar[] x = model.intVarArray(n, 0, n - 1);
         IntVar[] y = new IntVar[n];
         for (int i = 0; i < n; i++) {
-            y[i] = model.intMinusView(x[i]);
+            y[i] = model.neg(x[i]);
         }
         checkDomains(true, x, y);
 
@@ -833,7 +833,7 @@ public class ViewsTest {
                 Model base = new Model(Settings.init().setEnableViews(false));
                 {
                     IntVar i = base.intVar("i", -5, 5);
-                    IntVar f = base.intAffineView(a, i, b);
+                    IntVar f = base.intView(a, i, b);
                     base.arithm(f, ">", -12).post();
                     base.arithm(f, "<", 17).post();
                     Solver s = base.getSolver();
@@ -842,7 +842,7 @@ public class ViewsTest {
                 Model comp = new Model(Settings.init().setEnableViews(true));
                 {
                     IntVar i = comp.intVar("i", -5, 5);
-                    IntVar f = comp.intAffineView(a, i, b);
+                    IntVar f = comp.intView(a, i, b);
                     comp.arithm(f, ">", -12).post();
                     comp.arithm(f, "<", 17).post();
                     Solver s = comp.getSolver();
@@ -862,7 +862,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intLeView(v, n / 2)
+                    v -> model.isLeq(v, n / 2)
             ).toArray(IntVar[]::new);
             final IntVar sum = model.intVar("sum", 0, ges.length);
             model.sum(ges, "=", sum).post();
@@ -880,7 +880,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intGeView(v, n / 2)
+                            v -> model.isGeq(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 
@@ -900,7 +900,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intEqView(v, n / 2)
+                            v -> model.isEq(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 
@@ -920,7 +920,7 @@ public class ViewsTest {
             final IntVar[] vars = model.intVarArray(n, 0, n);
             model.allDifferent(vars).post();
             final IntVar[] ges = Stream.of(vars).map(
-                v -> model.intNeView(v, n / 2)
+                            v -> model.isNeq(v, n / 2)
             )
                 .toArray(IntVar[]::new);
 

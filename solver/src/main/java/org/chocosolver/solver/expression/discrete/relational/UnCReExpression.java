@@ -87,22 +87,22 @@ public class UnCReExpression implements ReExpression {
             //me = model.boolVar(model.generateName(op+"_exp_"));
             switch (op) {
                 case LT:
-                    me = model.intLeView(v1, e2 - 1);
+                    me = model.isLeq(v1, e2 - 1);
                     break;
                 case LE:
-                    me = model.intLeView(v1, e2);
+                    me = model.isLeq(v1, e2);
                     break;
                 case GE:
-                    me = model.intGeView(v1, e2);
+                    me = model.isGeq(v1, e2);
                     break;
                 case GT:
-                    me = model.intGeView(v1, e2 + 1);
+                    me = model.isGeq(v1, e2 + 1);
                     break;
                 case NE:
-                    me = model.intNeView(v1, e2);
+                    me = model.isNeq(v1, e2);
                     break;
                 case EQ:
-                    me = model.intEqView(v1, e2);
+                    me = model.isEq(v1, e2);
                     break;
                 default:
                     throw new UnsupportedOperationException("Binary arithmetic expressions does not support " + op.name());

@@ -82,10 +82,10 @@ public class UnArExpression implements ArExpression {
             IntVar v = e.intVar();
             switch (op){
                 case NEG:
-                    me = model.intMinusView(v);
+                    me = model.neg(v);
                     break;
                 case ABS:
-                    me = model.intAbsView(v);
+                    me = model.abs(v);
                     break;
                 case SQR:
                     int[] bounds = VariableUtils.boundsForMultiplication(v, v);

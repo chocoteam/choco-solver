@@ -117,7 +117,46 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if at least a value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException;
+    default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException{
+        assert cause != null;
+        boolean hasChanged = false, fixpoint;
+        int vlb, vub;
+        do {
+            int nlb = getLB();
+            int nub = getUB();
+            vlb = values.nextValue(nlb - 1);
+            vub = values.previousValue(nub + 1);
+            if (!hasChanged && (vlb > nub || vub < nlb)) {
+                return false;
+            }
+            if (vlb == nlb) {
+                // look for the new lb
+                do {
+                    nlb = nextValue(nlb);
+                    vlb = values.nextValue(nlb - 1);
+                } while (nlb < Integer.MAX_VALUE && nub < Integer.MAX_VALUE && vlb == nlb);
+            }
+            if (vub == nub) {
+                // look for the new ub
+                do {
+                    nub = previousValue(nub);
+                    vub = values.previousValue(nub + 1);
+                } while (nlb > Integer.MIN_VALUE && nub > Integer.MIN_VALUE && vub == nub);
+            }
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
+        // now deal with holes
+        if(hasEnumeratedDomain()){
+            int value = vlb;
+            while (value <= vub) {
+                hasChanged |= removeValue(value, cause);
+                value = values.nextValue(value);
+            }
+        }
+        return hasChanged;
+    }
 
     /**
      * Removes all values from the domain of <code>this</code> except those in <code>values</code>. The instruction comes from <code>propagator</code>.
@@ -136,7 +175,31 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if a at least a value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException;
+    default boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
+        // now deal with holes
+        int to = previousValue(nub);
+        if(hasEnumeratedDomain()) {
+            int value = nextValue(nlb);
+            // iterate over the values in the domain, remove the ones that are not in values
+            for (; value <= to; value = nextValue(value)) {
+                if (!values.contains(value)) {
+                    hasChanged |= removeValue(value, cause);
+                }
+            }
+        }
+        return hasChanged;
+    }
 
     /**
      * Removes values between [<code>from, to</code>] from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -155,7 +218,21 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeInterval(int from, int to, ICause cause) throws ContradictionException;
+    default boolean removeInterval(int from, int to, ICause cause) throws ContradictionException{
+        assert cause != null;
+        if (from <= getLB()) {
+            return updateLowerBound(to + 1, cause);
+        } else if (getUB() <= to) {
+            return updateUpperBound(from - 1, cause);
+        } else if (hasEnumeratedDomain()) {
+            boolean done = false;
+            for (int v = from; v <= to; v++) {
+                done |= removeValue(v, cause);
+            }
+            return done;
+        }
+        return false;
+    }
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
@@ -334,7 +411,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException;
+    default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException{
+        return updateLowerBound(lb, cause) | updateUpperBound(ub, cause);
+    }
 
     /**
      * Checks if a value <code>v</code> belongs to the domain of <code>this</code>

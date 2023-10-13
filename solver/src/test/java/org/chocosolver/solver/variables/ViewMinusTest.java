@@ -37,7 +37,7 @@ public class ViewMinusTest {
         Model model = new Model();
 
         IntVar X = model.intVar("X", 1, 10, false);
-        IntVar Y = model.intMinusView(X);
+        IntVar Y = model.neg(X);
 
         try {
 			if(!model.getSettings().enableViews())
@@ -102,7 +102,7 @@ public class ViewMinusTest {
         Model model = new Model();
 
         IntVar X = model.intVar("X", 1, 10, false);
-        IntVar var = model.intMinusView(X);
+        IntVar var = model.neg(X);
         var.updateBounds(1,-1, Cause.Null);
     }
 
@@ -123,7 +123,7 @@ public class ViewMinusTest {
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = model.intVar("x", 1, 15, true);
-                xs[1] = model.intMinusView(xs[0]);
+                xs[1] = model.neg(xs[0]);
                 model.sum(xs, "=", 0).post();
                 model.getSolver().setSearch(randomSearch(xs, seed));
             }
@@ -151,7 +151,7 @@ public class ViewMinusTest {
             {
                 IntVar[] xs = new IntVar[2];
                 xs[0] = model.intVar("x", 1, 15, false);
-                xs[1] = model.intMinusView(xs[0]);
+                xs[1] = model.neg(xs[0]);
                 model.sum(xs, "=", 0).post();
                 model.getSolver().setSearch(randomSearch(xs, seed));
             }
@@ -170,7 +170,7 @@ public class ViewMinusTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0][0], domains[0][domains[0].length - 1], true);
-            IntVar v = model.intMinusView(o);
+            IntVar v = model.neg(o);
             DisposableValueIterator vit = v.getValueIterator(true);
             while (vit.hasNext()) {
                 Assert.assertTrue(o.contains(-vit.next()));
@@ -204,7 +204,7 @@ public class ViewMinusTest {
             Model model = new Model();
             int[][] domains = DomainBuilder.buildFullDomains(1, -5, 5, random, random.nextDouble(), random.nextBoolean());
             IntVar o = model.intVar("o", domains[0]);
-            IntVar v = model.intMinusView(o);
+            IntVar v = model.neg(o);
 			if(!model.getSettings().enableViews()){
 				try {
 					model.getSolver().propagate();

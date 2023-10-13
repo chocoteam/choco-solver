@@ -70,12 +70,11 @@ import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.Variable;
-import org.chocosolver.solver.variables.view.integer.IntOffsetView;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.graphs.MultivaluedDecisionDiagram;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
-import org.chocosolver.util.tools.MathUtils;
 import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.ArrayList;
@@ -466,7 +465,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         } else if (Y == 1) {
             return arithm(X, "=", Z);
         } else if (Y < 0) {
-            return times(X.getModel().intMinusView(X), -Y, Z);
+            return times(X.getModel().neg(X), -Y, Z);
         } else {
             return new Constraint(ConstraintsName.TIMES, new PropScale(X, Y, Z));
         }
@@ -1712,7 +1711,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
                 int nb = occurrences[i].getUB();
                 BoolVar[] doms = new BoolVar[nb];
                 for (int k = 0; k < nb; k++) {
-                    doms[k] = ref().intGeView(occurrences[i], k + 1);
+                    doms[k] = ref().isGeq(occurrences[i], k + 1);
                     bs.add(doms[k]);
                     es.add(energy[i]);
                     ws.add(weight[i]);
@@ -1858,7 +1857,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param z      a variable
      * @param offset offset wrt to 'z'
      * @param vars   a vector of variables, of size > 0
-     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntMinusView}[]
+     * @implNote This introduces {@link org.chocosolver.solver.variables.view.integer.IntAffineView}[]
      * and returns an {@link #argmax(IntVar, int, IntVar[])} constraint
      * on this views.
      */
@@ -1866,7 +1865,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(vars, new IntVar[]{z});
         vars = (IntVar[]) args[0];
         z = ((IntVar[]) args[1])[0];
-        IntVar[] views = Arrays.stream(vars).map(v -> ref().intMinusView(v)).toArray(IntVar[]::new);
+        IntVar[] views = Arrays.stream(vars).map(v -> ref().neg(v)).toArray(IntVar[]::new);
         return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
     }
 
@@ -2272,7 +2271,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
             default:
                 return Constraint.merge(ConstraintsName.SUBPATH,
                         arithm(start, "<", vars.length + offset),
-                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().intOffsetView(SIZE, 1)),
+                        subCircuit(ArrayUtils.concat(vars, start), offset, end.getModel().offset(SIZE, 1)),
                         element(end.getModel().intVar(vars.length + offset), vars, end, offset)
                 );
         }
@@ -2583,7 +2582,7 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * Get the list of values in the domains of vars
      *
      * @param vars an array of integer variables
-     * @return the list of values in the domains of vars
+     * @return the array of values in the domains of vars
      */
     default int[] getDomainUnion(IntVar... vars) {
         int m = vars[0].getLB(), M = vars[0].getUB(), j, k;
@@ -2641,7 +2640,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         for (int i = 0; i < allvars.size(); i++) {
             for (int j = i + 1; j < allvars.size(); j++) {
                 if (allvars.get(i).equals(allvars.get(j))) {
-                    allvars.set(j, new IntOffsetView<IntVar>(allvars.get(i), 0));
+                    // force the view to be created, no call to ref().intView() here !
+                    allvars.set(j, new IntAffineView<>(allvars.get(i), 1, 0));
                 }
             }
         }

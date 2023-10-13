@@ -616,7 +616,7 @@ public interface IGraphConstraintFactory extends ISelf<Model> {
             // Graphs with one node and a loop must be accepted
             IntVar nbNodes = g.getModel().intVar(g.getMandatoryNodes().size(), g.getPotentialNodes().size());
             g.getModel().ifThenElse(
-                    g.getModel().intGeView(nbNodes, 2),
+                    g.getModel().isGeq(nbNodes, 2),
                     new Constraint("minDeg >= 2", new PropNodeDegreeAtLeastIncr(g, 2)),
                     new Constraint("minDeg >= 1", new PropNodeDegreeAtLeastIncr(g, 1))
             );

@@ -62,8 +62,8 @@ public class EqTest {
         IntVar three = s.intVar("X", 0, 2000);
         IntVar two = s.intVar("Y", 0, 2000);
         IntVar one = s.intVar("Z", 0, 2000);
-        s.arithm(s.intOffsetView(three, 3), "+", s.intOffsetView(two, -2), "=", 1000).post();
-        s.arithm(s.intOffsetView(one, 10), "+", s.intOffsetView(two, -8), "=", 999).post();
+        s.arithm(s.offset(three, 3), "+", s.intView(1, two, -2), "=", 1000).post();
+        s.arithm(s.offset(one, 10), "+", s.intView(1, two, -8), "=", 999).post();
         s.ifThen(three.ge(10).boolVar(),s.mod(two, 2, 1));
         s.getSolver().findAllSolutions();
         assertEquals(503, s.getSolver().getSolutionCount());

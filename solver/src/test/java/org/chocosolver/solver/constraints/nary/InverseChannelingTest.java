@@ -91,8 +91,8 @@ public class InverseChannelingTest {
     private IntVar makeVariable(Model model, int lb, int ub, boolean bounded) {
         IntVar var = model.intVar(lb, ub, bounded);
         if(model.getSettings().enableViews()) {
-            IntVar first = model.intOffsetView(var, 1);
-            return model.intOffsetView(first, -1);
+            IntVar first = model.offset(var, 1);
+            return model.offset(first, -1);
         } else {
             return var;
         }
@@ -103,11 +103,11 @@ public class InverseChannelingTest {
         if(model.getSettings().enableViews()) {
             IntVar[] view1 = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                view1[i] = model.intOffsetView(var[i], 1);
+                view1[i] = model.offset(var[i], 1);
             }
             IntVar[] view2 = new IntVar[n];
             for (int i = 0; i < n; i++) {
-                view2[i] = model.intOffsetView(view1[i], -1);
+                view2[i] = model.offset(view1[i], -1);
             }
             return view2;
         } else {

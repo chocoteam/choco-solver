@@ -14,7 +14,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
-import org.chocosolver.solver.variables.view.integer.IntOffsetView;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.ArrayList;
@@ -59,7 +59,7 @@ public class Task {
         start = model.intVar(est, lst);
         duration = model.intVar(d);
         if(ect == est+d && lct == lst+d) {
-            end = start.getModel().intOffsetView(start, d);
+            end = start.getModel().offset(start, d);
         } else {
             end = model.intVar(ect, lct);
             declareMonitor();
@@ -76,7 +76,7 @@ public class Task {
     public Task(IntVar s, int d) {
         start = s;
         duration = start.getModel().intVar(d);
-        end = start.getModel().intOffsetView(start, d);
+        end = start.getModel().offset(start, d);
     }
 
     /**
@@ -114,9 +114,9 @@ public class Task {
     }
 
     private static boolean isOffsetView(IntVar s, int d, IntVar e) {
-        if(e instanceof IntOffsetView) {
-            IntOffsetView intOffsetView = (IntOffsetView) e;
-            return intOffsetView.cste == d && intOffsetView.getVariable().equals(s);
+        if(e instanceof IntAffineView) {
+            IntAffineView<?> intOffsetView = (IntAffineView<?>) e;
+            return intOffsetView.equals(s, 1, d);
         }
         return false;
     }

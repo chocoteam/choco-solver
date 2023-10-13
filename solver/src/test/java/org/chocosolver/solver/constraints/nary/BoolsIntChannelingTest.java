@@ -120,8 +120,8 @@ public class BoolsIntChannelingTest {
     private IntVar makeVariable(Model model, int lb, int ub, boolean bounded) {
         IntVar var = model.intVar(lb, ub, bounded);
         if(model.getSettings().enableViews()) {
-            IntVar first = model.intOffsetView(var, 1);
-            return model.intOffsetView(first, -1);
+            IntVar first = model.offset(var, 1);
+            return model.offset(first, -1);
         } else {
             return var;
         }

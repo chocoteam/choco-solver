@@ -17,7 +17,7 @@ import org.chocosolver.solver.constraints.ternary.PropXplusYeqZ;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.impl.BitsetIntVarImpl;
-import org.chocosolver.solver.variables.view.integer.IntOffsetView;
+import org.chocosolver.solver.variables.view.integer.IntAffineView;
 import org.chocosolver.util.ESat;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -193,7 +193,7 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t1));
 
         Task t2 = m.taskVar(s, m.intVar(2));
-        Assert.assertTrue(t2.getEnd() instanceof IntOffsetView);
+        Assert.assertTrue(t2.getEnd() instanceof IntAffineView);
         Assert.assertFalse(hasTaskMonitor(t2));
     }
 
@@ -215,9 +215,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t4));
 
         IntVar s5 = m.intVar(0, 10);
-        Task t5 = new Task(s5, d, m.intOffsetView(s5, d));
+        Task t5 = new Task(s5, d, m.offset(s5, d));
         IntVar s6 = m.intVar(0, 10);
-        Task t6 = m.taskVar(s6, d, m.intOffsetView(s6, d));
+        Task t6 = m.taskVar(s6, d, m.offset(s6, d));
         Assert.assertTrue(sameTaskVars(t5, t6));
         Assert.assertFalse(hasTaskMonitor(t5));
         Assert.assertFalse(hasTaskMonitor(t6));
@@ -230,9 +230,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t8));
 
         IntVar s9 = m.intVar(0, 10);
-        Task t9 = new Task(s9, m.intVar(d), m.intOffsetView(s9, d));
+        Task t9 = new Task(s9, m.intVar(d), m.offset(s9, d));
         IntVar s10 = m.intVar(0, 10);
-        Task t10 = m.taskVar(s10, m.intVar(d), m.intOffsetView(s10, d));
+        Task t10 = m.taskVar(s10, m.intVar(d), m.offset(s10, d));
         Assert.assertTrue(sameTaskVars(t9, t10));
         Assert.assertFalse(hasTaskMonitor(t9));
         Assert.assertFalse(hasTaskMonitor(t10));
@@ -245,9 +245,9 @@ public class TaskTest {
         Assert.assertTrue(hasTaskMonitor(t12));
 
         IntVar s13 = m.intVar(0, 10);
-        Task t13 = new Task(s13, m.intVar(d), m.intOffsetView(s13, d));
+        Task t13 = new Task(s13, m.intVar(d), m.offset(s13, d));
         IntVar s14 = m.intVar(0, 10);
-        Task t14 = m.taskVar(s14, m.intVar(d), m.intOffsetView(s14, d));
+        Task t14 = m.taskVar(s14, m.intVar(d), m.offset(s14, d));
         Assert.assertTrue(sameTaskVars(t13, t14));
         Assert.assertFalse(hasTaskMonitor(t13));
         Assert.assertFalse(hasTaskMonitor(t14));
@@ -297,10 +297,10 @@ public class TaskTest {
     @Test(groups = "1s")
     public void testMonitorAndView() {
         Model model = new Model();
-        IntVar first = model.intOffsetView(model.intVar("first", new int[]{1, 2, 3, 4, 5}), 2);
-        IntVar dur = model.intOffsetView(model.intVar("dur", new int[]{1, 2, 4, 5}), 2);
-        IntVar last = model.intOffsetView(model.intVar("last", 5, 6), 2);
-        IntVar IV390 = model.intOffsetView(model.intVar("IV390", 6), 2);
+        IntVar first = model.offset(model.intVar("first", new int[]{1, 2, 3, 4, 5}), 2);
+        IntVar dur = model.offset(model.intVar("dur", new int[]{1, 2, 4, 5}), 2);
+        IntVar last = model.offset(model.intVar("last", 5, 6), 2);
+        IntVar IV390 = model.offset(model.intVar("IV390", 6), 2);
         new Constraint("", new PropXplusYeqZ(first, dur, last)).post();
         new Task(first, dur, IV390);
         Solver s = model.getSolver();

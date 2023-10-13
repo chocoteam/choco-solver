@@ -432,7 +432,7 @@ public class BoolLeqViewTest {
     public void test1() {
         BoolVar[] doms = new BoolVar[6];
         for (int i = 0; i < 6; i++) {
-            doms[i] = model.intEqView(x, i);
+            doms[i] = model.isEq(x, i);
         }
         while (model.getSolver().solve()) {
             System.out.printf("%s\n", x);
@@ -570,7 +570,7 @@ public class BoolLeqViewTest {
         Model model = new Model();
         final IntVar[] xs = model.intVarArray("x", 5, 0, 5);
         final BoolVar[] bs = Stream.of(xs).map(x ->
-                model.intGeView(x, 1)
+                model.isGeq(x, 1)
         ).toArray(BoolVar[]::new);
 
         final IntVar count = model.intVar(0, 5);
@@ -586,7 +586,7 @@ public class BoolLeqViewTest {
             IntVar[] xs = mod.intVarArray(5, new int[]{2, 3, 4, 5});
             BoolVar[] vs = new BoolVar[5];
             for (int j = 0; j < 5; j++) {
-                vs[j] = mod.intLeView(xs[j], 3);
+                vs[j] = mod.isLeq(xs[j], 3);
                 /*vs[j] = mod.boolVar();
                 mod.reifyXltC(xs[j], 4, vs[j]);*/
             }

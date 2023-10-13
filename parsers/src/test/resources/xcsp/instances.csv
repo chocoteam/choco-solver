@@ -22,7 +22,7 @@ basics;driverlogw-09.xml.lzma;1;_;2738;2649
 basics;Fapp-m2s-ex2_c18.xml.lzma;5;13871;167;158
 basics;Filters-dct_2_3.xml.lzma;17;16;55552;53838
 basics;FlexibleJobshop-easy01.xml.lzma;94;253;768;565
-basics;FlexibleJobshop-easy02.xml.lzma;27;11;4486;4057
+basics;FlexibleJobshop-easy02.xml.lzma;28;11;3174;2811
 basics;Furniture.xml.lzma;1;603;21;20
 basics;GracefulGraph-K02-P04.xml.lzma;1;_;73;64
 basics;GraphColoring-3-fullins-4.xml.lzma;1;6;22854;22403
@@ -44,8 +44,8 @@ basics;MagicSquare-6-sum.xml.lzma;1;_;960;928
 basics;Mapping-full2x2_mp3.xml.lzma;4;1100;1815;1722
 basics;Mario-easy-4.xml.lzma;4;545;1913;1883
 basics;MarketSplit-01.xml.lzma;1;_;1243457;1236746
-basics;MSPSP-easy_01.xml.lzma;5;26;281;272
-basics;MSPSP-hard_01.xml.lzma;22;35;1792;1703
+basics;MSPSP-easy_01.xml.lzma;7;26;248;235
+basics;MSPSP-hard_01.xml.lzma;11;35;2402;2310
 basics;MultiKnapsack-1-0_X2.xml.lzma;1;_;2;0
 basics;MultiKnapsack-1-01.xml.lzma;1;_;2;0
 basics;NFC-12_2_10.xml.lzma;1;848;12;11
@@ -98,7 +98,7 @@ basics;testExtension2.xml.lzma;1;_;4;0
 basics;testExtension3.xml.lzma;0;_;15;16
 basics;testObjective1.xml.lzma;3;11;11;6
 basics;testPrimitive.xml.lzma;1;_;3;1
-basics;TestSchedulingM18-t30m10r3-15.xml.lzma;93;4149;3450;2650
+#basics;TestSchedulingM18-t30m10r3-15.xml.lzma;93;4149;3450;2650
 basics;Tpp-3-3-20-1.xml.lzma;5;126;87;78
 basics;TravelingTournament-a3-galaxy04_c18.xml.lzma;4;416;4180;4139
 basics;Warehouse-opl.xml.lzma;1;383;568;557

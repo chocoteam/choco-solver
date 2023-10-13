@@ -233,7 +233,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset1() {
         Model model = new Model();
-        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -255,7 +255,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset2() {
         Model model = new Model();
-        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -277,7 +277,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset3() {
         Model model = new Model();
-        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -301,7 +301,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testOffset4() {
         Model model = new Model();
-        IntVar var = model.intOffsetView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.offset(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -325,7 +325,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale1() {
         Model model = new Model();
-        IntVar var = model.intScaleView(model.intVar("b", 1, 4, true), 2);
+        IntVar var = model.mul(model.intVar("b", 1, 4, true), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -341,7 +341,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale2() {
         Model model = new Model();
-        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -365,7 +365,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale3() {
         Model model = new Model();
-        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -395,7 +395,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testScale4() {
         Model model = new Model();
-        IntVar var = model.intScaleView(model.intVar("b", new int[]{1, 2, 4}), 2);
+        IntVar var = model.mul(model.intVar("b", new int[]{1, 2, 4}), 2);
         if (!model.getSettings().enableViews()) {
             try {
                 // currently, the propagation is not sufficient (bound)
@@ -425,7 +425,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus1() {
         Model model = new Model();
-        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -447,7 +447,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus2() {
         Model model = new Model();
-        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -469,7 +469,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus3() {
         Model model = new Model();
-        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -493,7 +493,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testMinus4() {
         Model model = new Model();
-        IntVar var = model.intMinusView(model.intVar("b", new int[]{1, 2, 4}));
+        IntVar var = model.neg(model.intVar("b", new int[]{1, 2, 4}));
         if (!model.getSettings().enableViews()) {
             try {
                 model.getSolver().propagate();
@@ -517,7 +517,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs1() {
         Model model = new Model();
-        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -536,7 +536,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs2() {
         Model model = new Model();
-        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -555,7 +555,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs3() {
         Model model = new Model();
-        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
@@ -576,7 +576,7 @@ public class IteratorTest {
     @Test(groups="1s", timeOut=60000)
     public void testAbs4() {
         Model model = new Model();
-        IntVar var = model.intAbsView(model.intVar("b", new int[]{-2, 1, 4}));
+        IntVar var = model.abs(model.intVar("b", new int[]{-2, 1, 4}));
         try {
             model.getSolver().propagate();
         } catch (ContradictionException e) {
