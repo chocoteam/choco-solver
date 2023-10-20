@@ -142,23 +142,42 @@ public class XCSP extends RegParser {
     @Override
     public void freesearch(Solver solver) {
         BlackBoxConfigurator bb = BlackBoxConfigurator.init();
-        boolean opt = solver.getObjectiveManager().isOptimization();
-        // variable selection
-        SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
-                SearchParams.ValueSelection.MIN, opt, 1, opt);
-        SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
-                SearchParams.VariableSelection.DOMWDEG, Integer.MAX_VALUE);
-        bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
-        // restart policy
-        SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
-                SearchParams.Restart.LUBY, 500, 50_000, true);
-        bb.setRestartPolicy(defaultResConf.make());
-        // other parameters
-        bb.setNogoodOnRestart(true)
-                .setRestartOnSolution(true)
-                .setExcludeObjective(true)
-                .setExcludeViews(false)
-                .setMetaStrategy(m -> Search.lastConflict(m, 1));
+        if (solver.getObjectiveManager().isOptimization()) {
+            // For COP
+            SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
+                    SearchParams.ValueSelection.MIN, true, 16, true);
+            SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
+                    SearchParams.VariableSelection.DOMWDEG, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
+            bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
+            // restart policy
+            SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
+                   SearchParams.Restart.GEOMETRIC, 10, 1.05, 50_000, true);
+            bb.setRestartPolicy(defaultResConf.make());
+            // complementary settings
+            bb.setNogoodOnRestart(true)
+                    .setRestartOnSolution(true)
+                    .setExcludeObjective(true)
+                    .setExcludeViews(false)
+                    .setMetaStrategy(m -> Search.lastConflict(m, 1))
+                    .setRefinedPartialAssignmentGeneration(gpa);
+        } else {
+            // For CSP
+            SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
+                    SearchParams.ValueSelection.MIN, false, 16, true);
+            SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
+                    SearchParams.VariableSelection.DOMWDEG_CACD, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
+            bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
+            // restart policy
+            SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
+                    SearchParams.Restart.GEOMETRIC, 5, 1.05, 50_000, true);
+            bb.setRestartPolicy(defaultResConf.make());
+            // complementary settings
+            bb.setNogoodOnRestart(true)
+                    .setRestartOnSolution(false)
+                    .setExcludeObjective(true)
+                    .setExcludeViews(false)
+                    .setMetaStrategy(m -> Search.lastConflict(m, 4));
+        }
         if (level.isLoggable(Level.INFO)) {
             solver.log().println(bb.toString());
         }

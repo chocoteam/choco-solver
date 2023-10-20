@@ -13,8 +13,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.search.restart.AbstractRestart;
-import org.chocosolver.solver.search.restart.GeometricalCutoff;
-import org.chocosolver.solver.search.restart.Restarter;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMax;
 import org.chocosolver.solver.search.strategy.selectors.values.RealDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.Cyclic;
@@ -161,11 +159,12 @@ public class BlackBoxConfigurator {
         SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
                 SearchParams.ValueSelection.MIN, false, 16, true);
         SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
-                SearchParams.VariableSelection.DOMWDEG_CACD, 32);
+                SearchParams.VariableSelection.DOMWDEG_CACD, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
         bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
         // restart policy
-        bb.setRestartPolicy(s -> new Restarter(new GeometricalCutoff(5, 1.05),
-                                    c -> s.getFailCount() >= c, 50_000, true));
+        SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
+                SearchParams.Restart.GEOMETRIC, 5, 1.05, 50_000, true);
+        bb.setRestartPolicy(defaultResConf.make());
         // complementary settings
         bb.setNogoodOnRestart(true)
                 .setRestartOnSolution(false)
@@ -186,7 +185,7 @@ public class BlackBoxConfigurator {
         SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
                 SearchParams.ValueSelection.MIN, true, 16, true);
         SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
-                SearchParams.VariableSelection.DOMWDEG, 32);
+                SearchParams.VariableSelection.DOMWDEG, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
         bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
         // restart policy
         SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
