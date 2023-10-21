@@ -14,6 +14,8 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
 
+import java.util.Comparator;
+
 /**
  * Implementation of refined DowOverWDeg.
  *
@@ -26,28 +28,28 @@ public class DomOverWDegRef<V extends Variable> extends DomOverWDeg<V> {
 
     /**
      * Creates a DomOverWDegRef variable selector with "CACD" as weight incrementer.
+     * The default tiebreaker is lexical ordering.
+     * The default flush rate is 32.
      *
      * @param variables decision variables
-     * @param seed      seed for breaking ties randomly
      */
-    public DomOverWDegRef(V[] variables, long seed) {
-        super(variables, seed);
+    public DomOverWDegRef(V[] variables) {
+        this(variables, (v1, v2) -> 0, 32);
     }
 
     /**
      * Creates a DomOverWDegRef variable selector with "CACD" as weight incrementer.
      *
-     * @param variables decision variables
-     * @param seed      seed for breaking ties randomly
-     * @param flushThs flush threshold, when reached, it flushes scores
+     * @param variables  scope variables
+     * @param tieBreaker a tiebreaker comparator when two variables have the same score
+     * @param flushRate  the number of restarts before forgetting scores
      */
-    public DomOverWDegRef(V[] variables, long seed, int flushThs) {
-        super(variables, seed, flushThs);
+    public DomOverWDegRef(V[] variables, Comparator<V> tieBreaker, int flushRate) {
+        super(variables, tieBreaker, flushRate);
     }
 
     /**
-     * @implNote
-     * This is the reason this class exists.
+     * @implNote This is the reason this class exists.
      * The only difference with {@link DomOverWDeg} is the increment
      * which is not 1 for each variable.
      */
