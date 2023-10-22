@@ -48,7 +48,6 @@ public class VarSelHandler extends OneArgumentOptionHandler<SearchParams.VarSelC
         if (pars.length == 3) {
             return new SearchParams.VarSelConf(
                     SearchParams.VariableSelection.valueOf(pars[0].toUpperCase()),
-                    SearchParams.VariableTieBreaker.valueOf(pars[1].toUpperCase()),
                     Integer.parseInt(pars[2])
             );
         }
