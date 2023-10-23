@@ -443,7 +443,7 @@ public class ObjectiveTest {
         solver.attach(solution);
         int[] t = new int[2];
 
-        solver.setSearch(new IntStrategy(ticks, new DomOverWDeg(ticks, 0L),
+        solver.setSearch(new IntStrategy(ticks, new DomOverWDeg<>(ticks),
             new IntDomainLast(solution, new IntDomainBest(),
             (x, v) -> {
                 int c = 0;

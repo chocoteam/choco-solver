@@ -16,8 +16,10 @@ import org.chocosolver.solver.search.strategy.selectors.values.*;
 import org.chocosolver.solver.search.strategy.selectors.variables.*;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.TimeUtils;
 
+import java.util.Comparator;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -224,16 +226,20 @@ public interface SearchParams {
      */
     class VarSelConf {
         final SearchParams.VariableSelection varsel;
+        final SearchParams.VariableTieBreaker tiebreaker;
         final int flushRate;
 
         /**
          * Configure the variable selection strategy
          *
          * @param varsel     variable selection strategy
+         * @param tiebreaker variable tie-breaker strategy, ignored if the variable selection strategy is not
+         *                   CHS, DOMWDEG or DOMWDEG_CACD. It is used to break ties between variables with the same score
          * @param flushRate  number of restarts before flushing the scores of the variables
          */
-        public VarSelConf(SearchParams.VariableSelection varsel, int flushRate) {
+        public VarSelConf(SearchParams.VariableSelection varsel, SearchParams.VariableTieBreaker tiebreaker, int flushRate) {
             this.varsel = varsel;
+            this.tiebreaker = tiebreaker;
             this.flushRate = flushRate;
         }
 
@@ -243,20 +249,39 @@ public interface SearchParams {
          * @return the variable selection strategy as a function of variables
          */
         public BiFunction<IntVar[], IntValueSelector, AbstractStrategy<IntVar>> make() {
+            final Comparator<IntVar> tie;
+            switch (tiebreaker) {
+                default:
+                case LEX:
+                    tie = (v1, v2) -> 0;
+                    break;
+                case SMALLEST_DOMAIN:
+                    tie = Comparator.comparingInt(Variable::getDomainSize);
+                    break;
+                case LARGEST_DOMAIN:
+                    tie = (v1, v2) -> -Comparator.comparingInt(Variable::getDomainSize).compare(v1, v2);
+                    break;
+                case SMALLEST_VALUE:
+                    tie = Comparator.comparingInt(IntVar::getLB);
+                    break;
+                case LARGEST_VALUE:
+                    tie = Comparator.comparingInt(IntVar::getUB);
+                    break;
+            }
             switch (varsel) {
                 case ACTIVITY:
                     return (vars, vsel) -> new ActivityBased(vars[0].getModel(), vars, vsel,
                             0.999d, 0.2d, 8, 1, 0);
                 case CHS:
-                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new ConflictHistorySearch<>(vars, tie, flushRate), vsel, vars);
                 case DOM:
                 case FIRST_FAIL:
                     return (vars, vsel) -> Search.intVarSearch(new FirstFail(vars[0].getModel()), vsel, vars);
                 default:
                 case DOMWDEG:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDeg<>(vars, tie, flushRate), vsel, vars);
                 case DOMWDEG_CACD:
-                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars, 0, flushRate), vsel, vars);
+                    return (vars, vsel) -> Search.intVarSearch(new DomOverWDegRef<>(vars, tie, flushRate), vsel, vars);
                 case FLBA:
                     return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars, 0, 4), vsel, vars);
                 case FRBA:

@@ -187,7 +187,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<SetVar> domOverWDegSearch(SetVar... vars) {
-        return setVarSearch(new DomOverWDeg<>(vars, 0), new SetDomainMin(), true, vars);
+        return setVarSearch(new DomOverWDeg<>(vars), new SetDomainMin(), true, vars);
     }
 
     /**
@@ -200,7 +200,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<SetVar> domOverWDegRefSearch(SetVar... vars) {
-        return setVarSearch(new DomOverWDegRef<>(vars, 0), new SetDomainMin(), true, vars);
+        return setVarSearch(new DomOverWDegRef<>(vars), new SetDomainMin(), true, vars);
     }
 
     /**
@@ -214,7 +214,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<SetVar> conflictHistorySearch(SetVar... vars) {
-        return setVarSearch(new ConflictHistorySearch<>(vars, 0), new SetDomainMin(), true, vars);
+        return setVarSearch(new ConflictHistorySearch<>(vars), new SetDomainMin(), true, vars);
     }
 
     /**
@@ -482,7 +482,9 @@ public class Search {
             }
             valueSelector = new IntDomainLast(solution, valueSelector, null);
         }
-        return intVarSearch(new DomOverWDeg<>(vars, 0), valueSelector, vars);
+        return intVarSearch(
+                new DomOverWDegRef<>(vars),
+                valueSelector, vars);
     }
 
     /**
@@ -496,7 +498,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ecai/BoussemartHLS04">https://dblp.org/rec/conf/ecai/BoussemartHLS04</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegSearch(IntVar... vars) {
-        return intVarSearch(new DomOverWDeg<>(vars, 0), new IntDomainMin(), vars);
+        return intVarSearch(new DomOverWDeg<>(vars), new IntDomainMin(), vars);
     }
 
     /**
@@ -509,7 +511,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/ictai/WattezLPT19">https://dblp.org/rec/conf/ictai/WattezLPT19</a>
      */
     public static AbstractStrategy<IntVar> domOverWDegRefSearch(IntVar... vars) {
-        return intVarSearch(new DomOverWDegRef<>(vars, 0), new IntDomainMin(), vars);
+        return intVarSearch(new DomOverWDegRef<>(vars), new IntDomainMin(), vars);
     }
 
     /**
@@ -543,7 +545,7 @@ public class Search {
      * <a href="https://dblp.org/rec/conf/sac/HabetT19">https://dblp.org/rec/conf/sac/HabetT19</a>
      */
     public static AbstractStrategy<IntVar> conflictHistorySearch(IntVar... vars) {
-        return intVarSearch(new ConflictHistorySearch<>(vars, 0), new IntDomainMin(), vars);
+        return intVarSearch(new ConflictHistorySearch<>(vars), new IntDomainMin(), vars);
     }
 
     /**
