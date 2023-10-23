@@ -14,9 +14,9 @@ import gnu.trove.map.TObjectIntMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.Variable;
 
-import java.util.Comparator;
 import java.util.stream.Stream;
 
 /**
@@ -28,7 +28,9 @@ import java.util.stream.Stream;
  * @since 25/02/2020.
  */
 @SuppressWarnings("rawtypes")
-public class ConflictHistorySearch<V extends Variable> extends AbstractFailureBasedVariableSelector<V> {
+public class ConflictHistorySearch<V extends Variable>
+        extends AbstractCriterionBasedVariableSelector<V>
+        implements IMonitorRestart {
 
     /**
      * Related to CHS,
@@ -55,25 +57,12 @@ public class ConflictHistorySearch<V extends Variable> extends AbstractFailureBa
      */
     private final TObjectIntMap<Propagator> conflict = new TObjectIntHashMap<>(10, 0.5f, 0);
 
-    /**
-     * Create a Conflict History Search variable selector.
-     * The default tie-breaker is lexico.
-     * The default flush rate is 32.
-     * @param vars variables to branch on
-     */
-    public ConflictHistorySearch(V[] vars) {
-        this(vars, (v1, v2) -> 0, 32);
+    public ConflictHistorySearch(V[] vars, long seed) {
+        this(vars, seed, Integer.MAX_VALUE);
     }
 
-
-    /**
-     * Create a Conflict History Search variable selector.
-     * @param vars variables to branch on
-     * @param tieBreaker a tiebreaker comparator when two variables have the same score
-     * @param flushRate the number of restarts before forgetting scores
-     */
-    public ConflictHistorySearch(V[] vars, Comparator<V> tieBreaker, int flushRate) {
-        super(vars, tieBreaker, flushRate);
+    public ConflictHistorySearch(V[] vars, long seed, int flushThs) {
+        super(vars, seed, flushThs);
     }
 
     @Override
@@ -92,9 +81,9 @@ public class ConflictHistorySearch<V extends Variable> extends AbstractFailureBa
     }
 
     @Override
-    protected double score(Variable v) {
+    protected double weight(Variable v) {
         double[] w = {0.};
-        v.streamPropagators().forEach(prop -> {
+        v.streamPropagators().forEach(prop ->{
             long fut = Stream.of(prop.getVars())
                     .filter(Variable::isInstantiated)
                     .limit(2)
@@ -120,20 +109,18 @@ public class ConflictHistorySearch<V extends Variable> extends AbstractFailureBa
 
     @Override
     public void afterRestart() {
-        for (Propagator p : q.keySet()) {
-            double qj = q.get(p);
-            q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+        if (flushWeights(q)) {
+            q.clear();
+            conflict.forEachEntry((a1, b) -> {
+                conflict.put(a1, conflicts);
+                return true;
+            });
+        } else {
+            for (Propagator p : q.keySet()) {
+                double qj = q.get(p);
+                q.put(p, qj * Math.pow(DECAY, (conflicts - conflict.get(p))));
+            }
+            alpha = .4d;
         }
-        alpha = .4d;
-        super.afterRestart();
-    }
-
-    @Override
-    public void flushScores() {
-        q.clear();
-        conflict.forEachEntry((a1, b) -> {
-            conflict.put(a1, conflicts);
-            return true;
-        });
     }
 }

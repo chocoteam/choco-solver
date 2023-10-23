@@ -92,12 +92,6 @@ public abstract class RegParser implements IParser {
             usage = "Define the variable heuristic to use.")
     public SearchParams.VariableSelection varH = SearchParams.VariableSelection.DOMWDEG_CACD;
 
-    @SuppressWarnings("FieldMayBeFinal")
-    @Option(name = "-tie",
-            forbids = {"-varsel"},
-            usage = "Define the variable tie breaker to use with black-box strategies.")
-    private SearchParams.VariableTieBreaker tie = SearchParams.VariableTieBreaker.SMALLEST_DOMAIN;
-
     @Option(name = "-flush",
             forbids = {"-varsel"},
             usage = "Autoflush weights on black-box strategies (default: 32).")
@@ -178,9 +172,6 @@ public abstract class RegParser implements IParser {
 
     @Option(name = "-dfx", usage = "Force default explanation algorithm.")
     public boolean dftexp = false;
-
-    @Option(name = "-gpa", usage = "Use the Generating Partial Assignment procedure (default: false).")
-    public boolean gpa = false;
 
     /**
      * Default settings to apply
@@ -263,7 +254,7 @@ public abstract class RegParser implements IParser {
             System.out.printf("%s\n", Arrays.toString(args));
         }
         if(varsel == null){
-            varsel = new SearchParams.VarSelConf(varH, tie, flushRate);
+            varsel = new SearchParams.VarSelConf(varH, flushRate);
         }
         if(valsel == null){
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
