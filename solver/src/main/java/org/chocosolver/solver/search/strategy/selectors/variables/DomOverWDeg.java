@@ -10,11 +10,10 @@
 package org.chocosolver.solver.search.strategy.selectors.variables;
 
 import org.chocosolver.solver.constraints.Propagator;
+import org.chocosolver.solver.search.loop.monitors.IMonitorRestart;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.util.tools.VariableUtils;
-
-import java.util.Comparator;
 
 /**
  * Implementation of DowOverWDeg[1].
@@ -25,27 +24,27 @@ import java.util.Comparator;
  * @author Charles Prud'homme
  * @since 12/07/12
  */
-public class DomOverWDeg<V extends Variable> extends AbstractFailureBasedVariableSelector<V> {
+public class DomOverWDeg<V extends Variable> extends AbstractCriterionBasedVariableSelector<V> implements IMonitorRestart {
 
     /**
-     * Creates a DomOverWDeg variable selector.
-     * The default tiebreaker is lexical ordering.
-     * The default flush rate is 32.
+     * Creates a DomOverWDeg variable selector
      *
      * @param variables decision variables
+     * @param seed      seed for breaking ties randomly
      */
-    public DomOverWDeg(V[] variables) {
-        this(variables, (v1, v2)->0, 32);
+    public DomOverWDeg(V[] variables, long seed) {
+        this(variables, seed, Integer.MAX_VALUE);
     }
 
     /**
      * Creates a DomOverWDeg variable selector
-     * @param variables scope variables
-     * @param tieBreaker a tiebreaker comparator when two variables have the same score
-     * @param flushRate the number of restarts before forgetting scores
+     *
+     * @param variables decision variables
+     * @param seed      seed for breaking ties randomly
+     * @param flushThs flush threshold, when reached, it flushes scores
      */
-    public DomOverWDeg(V[] variables, Comparator<V> tieBreaker, int flushRate) {
-        super(variables, tieBreaker, flushRate);
+    public DomOverWDeg(V[] variables, long seed,int flushThs) {
+        super(variables, seed, flushThs);
     }
 
 
@@ -65,7 +64,7 @@ public class DomOverWDeg<V extends Variable> extends AbstractFailureBasedVariabl
     }
 
     @Override
-    protected final double score(Variable v) {
+    protected final double weight(Variable v) {
         //assert weightW(v) == weights.get(v) : "wrong weight for " + v + ", expected " + weightW(v) + ", but found " + weights.get(v);
         return 1 + weights.get(v);
     }
@@ -97,13 +96,19 @@ public class DomOverWDeg<V extends Variable> extends AbstractFailureBasedVariabl
     final int remapInc() {
         return 1;
     }
-    
+
     @Override
-    public void flushScores() {
-        weights.forEachEntry((a1, b) -> {
-            weights.put(a1, 0.);
-            return true;
-        });
+    public void afterRestart() {
+        /*if (vars[0].getModel().getSolver().getSolutionCount() > solution) {
+            solution = vars[0].getModel().getSolver().getSolutionCount();
+        }
+        if (solution > 0 && top(20)) {*/
+        if (flushWeights(weights)) {
+            weights.forEachEntry((a1, b) -> {
+                weights.put(a1, 0.);
+                return true;
+            });
+        }
     }
 
     // <-- FOR DEBUGGING PURPOSE ONLY
