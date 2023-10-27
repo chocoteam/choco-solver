@@ -134,7 +134,7 @@ public interface IViewFactory extends ISelf<Model> {
             if (var instanceof IntAffineView) {
                 IntAffineView<?> view = (IntAffineView<?>) var;
                 int av = (view.p ? 1 : -1) * view.a * a;
-                int bv = view.a * b + view.b;
+                int bv = a * view.b + b;
                 if (av == 1 && bv == 0) {
                     return view.getVariable();
                 }else{

@@ -206,5 +206,12 @@ public class IntAffineViewTest {
         assertEquals(m.getSolver().getSolutionCount(), 2);
     }
 
-
+    @Test(groups = "1s", timeOut = 60000)
+    public void testNegIntAffineView() {
+        Model m = new Model();
+        IntVar x = m.intVar("x", 1, 3, false);
+        IntVar y = m.neg(m.offset(x, 5));
+        assertEquals(-8, y.getLB());
+        assertEquals(-6, y.getUB());
+    }
 }
