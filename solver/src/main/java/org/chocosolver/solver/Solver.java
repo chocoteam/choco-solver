@@ -781,7 +781,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * <p>
      * Steps 1. and 2. are ignored when <i>dec</i> is <i>null</i>.
      * <p>
-     * In case of success, a call {@link #moveForward(Decision)} is possible.
+     * In case of success, a call moveForward(Decision) is possible.
      * Otherwise, a call {@link #moveBackward()} is required to keep on exploring the search space.
      * If no such call is done, the state maybe inconsistent with the decision path.
      * </p>

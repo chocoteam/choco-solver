@@ -1478,7 +1478,7 @@ public enum FConstraint {
                     eqs.add(model.arithm(x, "=", y).reify());
                 }
             }
-            if (eqs.size() == 0) {
+            if (eqs.isEmpty()) {
                 model.arithm(b, "=", 0).post();
             } else {
                 model.addClausesBoolOrArrayEqVar(eqs.toArray(new BoolVar[0]), b);
