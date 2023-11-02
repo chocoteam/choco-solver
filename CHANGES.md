@@ -4,6 +4,20 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
+NEXT MILESTONE
+-------------------
+
+### Major features:
+
+### Deprecated API (to be removed in next release):
+
+### Other closed issues and pull requests:
+See [milestone 4.10.15](https://github.com/chocoteam/choco-solver/milestone/39)
+
+#### Contributors to this release:
+
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.14...v4.10.15
+
 4.10.14 - 02 Nov 2023
 ---------------------
 
