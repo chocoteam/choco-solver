@@ -61,7 +61,7 @@ public class IntSearch {
             case max_regret:
                 return new MaxRegret();
             case dom_w_deg:
-                return new DomOverWDeg<>(variables, variables[0].getModel().getSeed());
+                return new DomOverWDeg<>(variables);
             default:
                 System.err.println("% No implementation for " + varChoice.name() + ". Set default.");
                 return null;

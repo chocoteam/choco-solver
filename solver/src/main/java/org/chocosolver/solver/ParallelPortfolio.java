@@ -437,7 +437,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG, 32);
+                        SearchParams.VariableSelection.DOMWDEG, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -451,7 +451,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.CHS, 32);
+                        SearchParams.VariableSelection.CHS, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -465,7 +465,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG_CACD, 32);
+                        SearchParams.VariableSelection.DOMWDEG_CACD, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -479,7 +479,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.FRBA, 32);
+                        SearchParams.VariableSelection.FRBA, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -493,7 +493,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.ACTIVITY, 32);
+                        SearchParams.VariableSelection.ACTIVITY, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -504,7 +504,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG_CACD, 32);
+                        SearchParams.VariableSelection.DOMWDEG_CACD, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -515,7 +515,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.DOMWDEG, 32);
+                        SearchParams.VariableSelection.DOMWDEG, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -529,7 +529,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.FRBA, 32);
+                        SearchParams.VariableSelection.FRBA, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 2));
@@ -540,7 +540,7 @@ public class ParallelPortfolio {
                         SearchParams.ValueSelection.MIN, opt, 16, true);
                 intValSel = intValConf.make();
                 intVarConf = new SearchParams.VarSelConf(
-                        SearchParams.VariableSelection.CHS, 32);
+                        SearchParams.VariableSelection.CHS, SearchParams.VariableTieBreaker.SMALLEST_DOMAIN, 32);
                 intVarSel = intVarConf.make();
                 bb.setIntVarStrategy((vars) -> intVarSel.apply(vars, intValSel.apply(worker)));
                 bb.setMetaStrategy(m -> Search.lastConflict(m, 1));

@@ -156,7 +156,7 @@ public class RegParserTest {
         Assert.assertNull(parser.varsel);
         p.parseArgument("-f", "-varsel", "[CHS,LARGEST_DOMAIN,64]", "/file");
         Assert.assertEquals(parser.varsel, new SearchParams.VarSelConf(
-                SearchParams.VariableSelection.CHS, 64));
+                SearchParams.VariableSelection.CHS, SearchParams.VariableTieBreaker.LARGEST_DOMAIN, 64));
     }
 
     @Test(groups = "1s")
