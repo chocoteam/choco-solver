@@ -13,7 +13,6 @@ import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.events.PropagatorEventType;
@@ -22,11 +21,9 @@ import org.chocosolver.util.objects.setDataStructures.ISet;
 import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetFactory;
 import org.chocosolver.util.objects.setDataStructures.SetType;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 /**
  * Cumulative propagator
@@ -204,79 +201,5 @@ public class PropCumulative extends Propagator<IntVar> {
         }
         sb.append(vars[4 * n].toString()).append(")");
         return sb.toString();
-    }
-
-    /**
-     * Return the index of an IntVar
-     *
-     * @param pivot variable
-     */
-    private int getInd(IntVar pivot) {
-        int ind = -1;
-        for (int i = 0; i < vars.length; i++) {
-            if (vars[i] == pivot) {
-                ind = i;
-            }
-        }
-        if (ind == -1) throw new UnsupportedOperationException("pivot variable cannot be found");
-        return ind;
-    }
-
-    private boolean explainOverlap(ExplanationForSignedClause e, int[] indexes, int t, int[] indD) {
-        boolean flag = false;
-        for (int i : indexes) {
-            if (e.domain(vars[i]).max() < t && e.domain(vars[i]).min() >= t - e.domain(vars[indD[i]]).min()) {
-                vars[i].unionLit(t, IntIterableRangeSet.MAX, e);
-                vars[i].unionLit(IntIterableRangeSet.MIN, t - 1 - e.domain(vars[indD[i]]).min(), e);
-                flag = true;
-            }
-        }
-        return flag;
-    }
-
-    /**
-     * Detect and explain the event at pivot variable p
-     *
-     * @param p pivot variable
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause e) {
-        IntVar pivot = e.readVar(p);
-        int[] X = IntStream.range(0, n).filter(i -> vars[i] != pivot).toArray();
-        int[] indD = IntStream.range(n, n * 2).toArray();
-        int t = e.readValue(p);
-        int ipivot = getInd(pivot);
-        if (ipivot >= n) {
-            throw new UnsupportedOperationException("Try to explain an event not on a start variable. " +
-                    "Only Cumulative.Filter.NAIVETIME algorithm is currently supported with explanations.");
-        }
-        int dpivot = e.domain(vars[ipivot + n]).min();
-        switch (e.readMask(p)) {
-            case 2://INCLOW
-                if (explainOverlap(e, X, t, indD)) {
-                    IntIterableRangeSet set = e.empty();
-                    set.addBetween(t - dpivot, t - 1);
-                    pivot.intersectLit(set.flip(), e);
-                }else{
-                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
-                }
-                break;
-            case 4://DECUPP
-                t++;// required due to decomposition
-                if (explainOverlap(e, X, t + dpivot, indD)) {
-                    IntIterableRangeSet set = e.empty();
-                    set.addBetween(t, t - 1 + dpivot);
-                    pivot.intersectLit(set.flip(), e);
-                } else {
-                    throw new UnsupportedOperationException("Unable to find overlapping tasks");
-                }
-                break;
-            case 8://INSTANTIATE
-            case 1://REMOVE
-            case 0://VOID
-            case 6://BOUND inclow+decup
-            default:
-                throw new UnsupportedOperationException("Unknown event type explanation");
-        }
     }
 }

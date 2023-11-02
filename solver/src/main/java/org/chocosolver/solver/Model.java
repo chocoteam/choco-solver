@@ -14,8 +14,6 @@ import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseBuilder;
-import org.chocosolver.solver.constraints.nary.clauses.ClauseConstraint;
 import org.chocosolver.solver.constraints.nary.cnf.SatConstraint;
 import org.chocosolver.solver.constraints.real.IbexHandler;
 import org.chocosolver.solver.constraints.unary.BooleanConstraint;
@@ -63,16 +61,7 @@ public class Model implements IModel {
      * Name of internal hook dedicated to store declared {@link org.chocosolver.solver.variables.Task}.
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
-
-    public static final String TRUE_CONSTRAINT_NAME= "H_TRUE";
-
-    public static final String FALSE_CONSTRAINT_NAME= "H_FALSE";
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
-
-    public static final String CLAUSES_HOOK_NAME = "H_CLAUSES";
-
-    public static final String CLAUSESBUILDER_HOOK_NAME = "H_CLAUSESBUILDER";
-
     public static final String IBEX_HOOK_NAME = "H_IBEX";
 
     /**
@@ -619,31 +608,6 @@ public class Model implements IModel {
         }
     }
 
-    /**
-     * Return a constraint embedding a signed-clauses store.
-     * A call to this method will create and post the constraint if it does not exist already.
-     *
-     * @return the signed-clauses store constraint
-     */
-    public ClauseConstraint getClauseConstraint() {
-        if (getHook(CLAUSES_HOOK_NAME) == null) {
-            ClauseConstraint clauses = new ClauseConstraint(this);
-            clauses.post();
-            addHook(CLAUSES_HOOK_NAME, clauses);
-        }
-        return (ClauseConstraint) getHook(CLAUSES_HOOK_NAME);
-    }
-
-    /**
-     * @return an instance of {@link ClauseBuilder} that helps creating clause <b>during</b> resolution.
-     */
-    public ClauseBuilder getClauseBuilder() {
-        if (getHook(CLAUSESBUILDER_HOOK_NAME) == null) {
-            ClauseBuilder builder = new ClauseBuilder(this);
-            addHook(CLAUSESBUILDER_HOOK_NAME, builder);
-        }
-        return (ClauseBuilder) getHook(CLAUSESBUILDER_HOOK_NAME);
-    }
 
     /**
      * Return a constraint embedding an instance of Ibex (continuous solver).
@@ -683,10 +647,11 @@ public class Model implements IModel {
 
     /**
      * Returns an estimation of the current memory footprint of this.
+     *
      * @return the total size in bytes for this model
      * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
      */
-    public long getEstimatedMemory() throws UnsupportedOperationException{
+    public long getEstimatedMemory() throws UnsupportedOperationException {
         SizeOf sizeOf = SizeOf.newInstance();
         return sizeOf.deepSizeOf(this);
     }

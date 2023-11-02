@@ -14,7 +14,6 @@ import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.lns.neighbors.INeighbor;
 import org.chocosolver.solver.search.strategy.decision.RootDecision;
@@ -23,8 +22,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -320,14 +317,6 @@ public class MoveLNS implements Move {
         @Override
         public ESat isEntailed() {
             return ESat.TRUE;
-        }
-
-        @Override
-        public void explain(int p, ExplanationForSignedClause explanation) {
-            IntVar pivot = explanation.readVar(p);
-            IntIterableRangeSet dom = explanation.complement(pivot);
-            IntIterableSetUtils.unionOf(dom, explanation.readDom(p));
-            pivot.intersectLit(dom, explanation);
         }
     }
 }

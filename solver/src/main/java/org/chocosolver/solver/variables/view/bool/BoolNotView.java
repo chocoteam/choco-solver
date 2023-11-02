@@ -11,21 +11,17 @@ package org.chocosolver.solver.variables.view.bool;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.IntView;
 import org.chocosolver.solver.variables.view.ViewDeltaMonitor;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.EvtScheduler;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 /**
@@ -87,7 +83,6 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
             } else if (to == 0) {
                 hasChanged = instantiateTo(1, cause);
             } else {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, 0, 1);
                 this.contradiction(cause, AbstractVariable.MSG_EMPTY);
             }
         }
@@ -97,10 +92,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             boolean done = var.instantiateTo(1 - value, this);
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return done;
@@ -269,40 +262,5 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public int getTypeAndKind() {
         return Variable.VIEW | Variable.BOOL;
-    }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        assert mask == IntEventType.INSTANTIATE;
-        model.getSolver().getEventObserver().instantiateTo(this, 1 - one, this, 0, 1);
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        if(this == pivot){
-            this.intersectLit(getValue(), explanation);
-            var.unionLit(getValue(), explanation);
-        }else{
-            this.unionLit(1 - getValue(), explanation);
-            var.intersectLit(1 - getValue(), explanation);
-        }
-    }
-
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if(this.literal != null){
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Boolean();
-    }
-
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
     }
 }

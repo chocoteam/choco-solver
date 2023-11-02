@@ -132,7 +132,6 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
             } else if (to == kFALSE) {
                 hasChanged = instantiateTo(kTRUE, cause);
             } else {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, AbstractVariable.MSG_EMPTY);
             }
         }
@@ -155,7 +154,6 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     public final boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
-            model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_EMPTY);
         } else {
             if (lb == kTRUE) {

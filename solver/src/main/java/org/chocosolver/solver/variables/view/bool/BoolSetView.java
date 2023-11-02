@@ -12,7 +12,6 @@ package org.chocosolver.solver.variables.view.bool;
 import org.chocosolver.memory.IStateBool;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
@@ -25,11 +24,9 @@ import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.solver.variables.view.AbstractView;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.*;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Iterator;
@@ -84,11 +81,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
      * Value iterator allowing for(int i:this) loops
      */
     private final IntVarValueIterator _javaIterator = new IntVarValueIterator(this);
-    /**
-     * Signed Literal
-     */
-    protected SignedLiteral literal;
-
 
     public BoolSetView(int v, S setVar) {
         super("boolSetView[" + v + " in " + setVar.getName() + "]", setVar);
@@ -123,10 +115,8 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
         assert cause != null;
         boolean done = false;
         if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, v, cause, getLB(), getUB());
             this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.fixed.set(true);
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
@@ -350,7 +340,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
             } else if (to == kFALSE) {
                 hasChanged = instantiateTo(kTRUE, cause);
             } else {
-                model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
                 this.contradiction(cause, AbstractVariable.MSG_EMPTY);
             }
         }
@@ -373,7 +362,6 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     public final boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
         boolean hasChanged = false;
         if (lb > kTRUE || ub < kFALSE) {
-            model.getSolver().getEventObserver().instantiateTo(this, 2, cause, kFALSE, kTRUE);
             this.contradiction(cause, MSG_EMPTY);
         } else {
             if (lb == kTRUE) {
@@ -416,32 +404,5 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     public Iterator<Integer> iterator() {
         _javaIterator.reset();
         return _javaIterator;
-    }
-
-    @Override
-    public void createLit(IntIterableRangeSet rootDomain) {
-        if(this.literal != null){
-            throw new IllegalStateException("createLit(Implications) called twice");
-        }
-        this.literal = new SignedLiteral.Boolean();
-    }
-
-
-    @Override
-    public SignedLiteral getLit() {
-        if (this.literal == null) {
-            throw new NullPointerException("getLit() called on null, a call to createLit(Implications) is required");
-        }
-        return this.literal;
-    }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        throw new UnsupportedOperationException("Bool view over set variables does not support explanations");
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        throw new UnsupportedOperationException("Bool view over set variables does not support explanations");
     }
 }

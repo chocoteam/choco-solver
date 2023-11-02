@@ -14,7 +14,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.InvalidSolutionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.AbstractEventObserver;
 import org.chocosolver.solver.objective.IBoundsManager;
 import org.chocosolver.solver.objective.IObjectiveManager;
 import org.chocosolver.solver.objective.ObjectiveFactory;
@@ -182,11 +181,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean completeSearch = false;
 
     /**
-     * An events observer
-     */
-    private AbstractEventObserver eventObserver;
-
-    /**
      * List of search monitors attached to this search loop
      */
     @SuppressWarnings("WeakerAccess")
@@ -256,7 +250,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         mModel = aModel;
         engine = new PropagationEngine(mModel);
         exception = new ContradictionException();
-        eventObserver = AbstractEventObserver.SILENT_OBSERVER;
         objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
         action = initialize;
@@ -1039,15 +1032,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
-     * Return the events observer plugged into {@code this}.
-     *
-     * @return this events observer
-     */
-    public AbstractEventObserver getEventObserver() {
-        return eventObserver;
-    }
-
-    /**
      * @return the propagation engine used in {@code this}.
      */
     public PropagationEngine getEngine() {
@@ -1228,15 +1212,6 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                 M.setStrategy(Search.sequencer(strategies));
             }
         }
-    }
-
-    /**
-     * Overrides the explanation engine.
-     *
-     * @param explainer the explanation to use
-     */
-    public void setEventObserver(AbstractEventObserver explainer) {
-        this.eventObserver = explainer;
     }
 
     /**
