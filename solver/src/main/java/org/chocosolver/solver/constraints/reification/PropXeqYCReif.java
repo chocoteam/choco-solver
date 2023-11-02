@@ -12,7 +12,6 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
@@ -115,11 +114,6 @@ public class PropXeqYCReif extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        Propagator.defaultExplain(this, p, explanation);
     }
 
     @Override

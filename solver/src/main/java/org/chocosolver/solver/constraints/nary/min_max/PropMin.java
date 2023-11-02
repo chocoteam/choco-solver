@@ -11,11 +11,9 @@ package org.chocosolver.solver.constraints.nary.min_max;
 
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
 import static org.chocosolver.util.tools.ArrayUtils.concat;
@@ -110,43 +108,6 @@ public class PropMin extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    @SuppressWarnings("Duplicates")
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        int mask = explanation.readMask(p);
-        int m = explanation.readValue(p);
-        if (pivot == vars[n]) {
-            if (IntEventType.isInclow(mask)) {
-                vars[n].intersectLit(m, IntIterableRangeSet.MAX, explanation);
-                for (int i = 0; i < n; i++) {
-                    if (explanation.readDom(vars[i]).min() == m) {
-                        IntIterableRangeSet seti = explanation.universe();
-                        seti.removeBetween(m, IntIterableRangeSet.MAX);
-                        vars[i].unionLit(seti, explanation);
-                    }
-                }
-            } else if (IntEventType.isDecupp(mask)) {
-                vars[n].intersectLit(IntIterableRangeSet.MIN, m, explanation);
-                for (int i = 0; i < n; i++) {
-                    if (explanation.readDom(vars[i]).max() == m) {
-                        IntIterableRangeSet seti = explanation.universe();
-                        seti.removeBetween(IntIterableRangeSet.MIN, m);
-                        vars[i].unionLit(seti, explanation);
-                    }
-                }
-            }
-        } else {
-            if (IntEventType.isInclow(mask)) {
-                vars[n].unionLit(IntIterableRangeSet.MIN, m - 1, explanation);
-                pivot.intersectLit(m, IntIterableRangeSet.MAX, explanation);
-            } else if (IntEventType.isDecupp(mask)) {
-                vars[n].unionLit(m + 1, IntIterableRangeSet.MAX, explanation);
-                pivot.intersectLit(IntIterableRangeSet.MIN, m, explanation);
-            }
-        }
     }
 
     @Override

@@ -12,9 +12,7 @@ package org.chocosolver.solver.objective;
 import org.chocosolver.solver.ResolutionPolicy;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -196,12 +194,6 @@ class MinIntObjManager extends AbstractIntObjManager {
     public Number getBestSolutionValue() {
         return bestProvedUB;
     }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(IntIterableRangeSet.MIN, bestProvedUB - 1, explanation);
-    }
-
 }
 
 class MaxIntObjManager extends AbstractIntObjManager {
@@ -230,10 +222,5 @@ class MaxIntObjManager extends AbstractIntObjManager {
     @Override
     public Number getBestSolutionValue() {
         return bestProvedLB;
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        objective.intersectLit(bestProvedLB + 1, IntIterableRangeSet.MAX, explanation);
     }
 }

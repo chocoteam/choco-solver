@@ -12,11 +12,9 @@ package org.chocosolver.solver.constraints.reification;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A propagator dedicated to express in a compact way: (x = c) &hArr; b
@@ -67,74 +65,6 @@ public class PropXeqCReif extends Propagator<IntVar> {
             }
         }
         return ESat.UNDEFINED;
-    }
-
-    /**
-     * @implSpec Premise: (x = c) &hArr; b
-     * <p>
-     * 4 cases here (only cases that triggered filtering are reported):
-     * <ol type="a">
-     *  <li>
-     *  <pre>
-     *      (b = 1 &and; x &isin; (-&infin;, +&infin;)) &rarr; x &isin; {c}
-     *  </pre>
-     *  <pre>
-     *      &hArr; (b = 0 &or; x &isin; {c})
-     *  </pre>
-     *  </li>
-     *  <li>
-     *  <pre>
-     *      (b = [0,1] &and; x &isin; {c}) &rarr; b = 1
-     *  </pre>
-     *  <pre>
-     *      &hArr; (b = 1 &or; x &isin; (U \ c))
-     *  </pre>
-     *  </li>
-     *  <li>
-     *  <pre>
-     *      (b = 0 &and; x &isin; (-&infin;, +&infin;)) &rarr; x &isin; (U \ c)
-     *  </pre>
-     *  <pre>
-     *      &hArr; (b = 1 &or; x &isin; (U \ c))
-     *  </pre>
-     *  </li>
-     *  <li>
-     *  <pre>
-     *      (b = [0,1] &and; x &isin; (U \ c)) &rarr; b = 0
-     *  </pre>
-     *  <pre>
-     *      &hArr; (b = 0 &or; x &isin; {c})
-     *  </pre>
-     *  </li>
-     * </ol>
-     * </p>
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        if (vars[1].isInstantiatedTo(1)) { // b is true and X = c holds
-            if (pivot == vars[1]) { // b is the pivot
-                vars[1].intersectLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                vars[0].unionLit(dom0, explanation);
-            } else if (pivot == vars[0]) { // x is the pivot
-                vars[1].unionLit(0, explanation);
-                vars[0].intersectLit(cste, explanation);
-            }
-        } else if (vars[1].isInstantiatedTo(0)) {
-            if (pivot == vars[1]) { // b is the pivot
-                vars[1].intersectLit(0, explanation);
-                vars[0].unionLit(cste, explanation);
-            } else if (pivot == vars[0]) { // x is the pivot, case e. in javadoc
-                vars[1].unionLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                vars[0].intersectLit(dom0, explanation);
-            }
-        } else {
-            throw new UnsupportedOperationException();
-        }
     }
 
     @Override

@@ -11,18 +11,15 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
-import org.chocosolver.solver.constraints.Explainer;
 import org.chocosolver.solver.constraints.extension.TuplesFactory;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import java.util.HashMap;
 import java.util.Random;
 
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
@@ -152,71 +149,7 @@ public class BoolNotViewTest {
         model.arithm(a, "+", model.boolNotView(b), "=", 2).post();
         assertTrue(model.getSolver().solve());
     }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testExpl11() throws ContradictionException {
-        Model ref = new Model();
-        BoolVar o = ref.boolVar("b");
-        BoolVar v = ref.boolNotView(o);
-        HashMap<IntVar, IntIterableRangeSet> lits =
-                Explainer.execute(ref.getSolver(),
-                        i -> o.instantiateTo(0, Cause.Null),
-                        v, v);
-        Assert.assertTrue(lits.containsKey(o));
-        Assert.assertTrue(lits.containsKey(v));
-        IntIterableRangeSet rng = new IntIterableRangeSet(1);
-        Assert.assertEquals(lits.get(o), rng);
-        Assert.assertEquals(lits.get(v), rng);
-    }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testExpl12() throws ContradictionException {
-        Model ref = new Model();
-        BoolVar o = ref.boolVar("b");
-        BoolVar v = ref.boolNotView(o);
-        HashMap<IntVar, IntIterableRangeSet> lits =
-                Explainer.execute(ref.getSolver(),
-                        i -> o.instantiateTo(1, Cause.Null),
-                        v, v);
-        Assert.assertTrue(lits.containsKey(o));
-        Assert.assertTrue(lits.containsKey(v));
-        IntIterableRangeSet rng = new IntIterableRangeSet(0);
-        Assert.assertEquals(lits.get(o), rng);
-        Assert.assertEquals(lits.get(v), rng);
-    }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testExpl21() throws ContradictionException {
-        Model ref = new Model();
-        BoolVar o = ref.boolVar("b");
-        BoolVar v = ref.boolNotView(o);
-        HashMap<IntVar, IntIterableRangeSet> lits =
-                Explainer.execute(ref.getSolver(),
-                        i -> v.instantiateTo(0, Cause.Null),
-                        v, o);
-        Assert.assertTrue(lits.containsKey(o));
-        Assert.assertTrue(lits.containsKey(v));
-        IntIterableRangeSet rng = new IntIterableRangeSet(1);
-        Assert.assertEquals(lits.get(o), rng);
-        Assert.assertEquals(lits.get(v), rng);
-    }
-
-    @Test(groups = "1s", timeOut = 60000)
-    public void testExpl22() throws ContradictionException {
-        Model ref = new Model();
-        BoolVar o = ref.boolVar("b");
-        BoolVar v = ref.boolNotView(o);
-        HashMap<IntVar, IntIterableRangeSet> lits =
-                Explainer.execute(ref.getSolver(),
-                        i -> v.instantiateTo(1, Cause.Null),
-                        v, o);
-        Assert.assertTrue(lits.containsKey(o));
-        Assert.assertTrue(lits.containsKey(v));
-        IntIterableRangeSet rng = new IntIterableRangeSet(0);
-        Assert.assertEquals(lits.get(o), rng);
-        Assert.assertEquals(lits.get(v), rng);
-    }
-
+    
     @Test(groups = "1s")
     public void testToTable() throws ContradictionException {
         for (int i = 0; i < 100; i++) {

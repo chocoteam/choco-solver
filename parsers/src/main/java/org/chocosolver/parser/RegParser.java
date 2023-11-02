@@ -18,7 +18,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ParallelPortfolio;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Solver;
-import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.search.strategy.BlackBoxConfigurator;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.SearchParams;
@@ -301,22 +300,6 @@ public abstract class RegParser implements IParser {
             solver.verboseSolving(1000);
         }
         if (nb_cores == 1) {
-            if (exp) {
-                if (level.isLoggable(Level.INFO)) {
-                    solver.log().white().println("exp is on");
-                }
-                solver.setLearningSignedClauses();
-                // THEN PARAMETERS
-                XParameters.DEFAULT_X = dftexp;
-                XParameters.PROOF = XParameters.FINE_PROOF = false;
-                XParameters.PRINT_CLAUSE = false;
-                XParameters.ASSERT_UNIT_PROP = true; // todo : attention aux clauses globales
-                XParameters.ASSERT_NO_LEFT_BRANCH = false;
-                XParameters.INTERVAL_TREE = true;
-                if (solver.hasObjective()) {
-                    solver.setRestartOnSolutions();
-                }
-            }
             if (free) {
                 freesearch(solver);
             }

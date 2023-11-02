@@ -11,12 +11,10 @@ package org.chocosolver.solver.variables.view.bool;
 
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.BoolIntView;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 
 /**
@@ -54,10 +52,8 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
         assert cause != null;
         boolean done = false;
         if (!this.contains(value)) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             this.contradiction(cause, MSG_EMPTY);
         } else if (!isInstantiated()) {
-            model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
             if (reactOnRemoval) {
                 delta.add(1 - value, cause);
             }
@@ -163,68 +159,6 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
             return lb - 1;
         } else {
             return v - 1;
-        }
-    }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        if (this.isInstantiated()) return;
-        switch (mask) {
-            case DECUPP:
-                if (one < cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getLB() == cste && (one == cste || this.var.previousValue(one + 1) == cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case INCLOW:
-                if (cste < one) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getUB() == cste && (one == cste || this.var.nextValue(one - 1) == cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case REMOVE:
-                if (one == cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                } else if (this.var.getDomainSize() == 2 && this.var.contains(cste)) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                }
-                break;
-            case INSTANTIATE:
-                if (one == cste) {
-                    model.getSolver().getEventObserver().instantiateTo(this, 1, this, 0, 1);
-                } else {
-                    model.getSolver().getEventObserver().instantiateTo(this, 0, this, 0, 1);
-                }
-                break;
-        }
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        int value = getValue();
-        if (value == 1) { // b is true and X = c holds
-            if (pivot == this) { // b is the pivot
-                this.intersectLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                var.unionLit(dom0, explanation);
-            } else if (pivot == var) { // x is the pivot
-                this.unionLit(0, explanation);
-                var.intersectLit(cste, explanation);
-            }
-        } else if (value == 0) {
-            if (pivot == this) { // b is the pivot
-                this.intersectLit(0, explanation);
-                var.unionLit(cste, explanation);
-            } else if (pivot == var) { // x is the pivot, case e. in javadoc
-                this.unionLit(1, explanation);
-                IntIterableRangeSet dom0 = explanation.universe();
-                dom0.remove(cste);
-                var.intersectLit(dom0, explanation);
-            }
         }
     }
 }

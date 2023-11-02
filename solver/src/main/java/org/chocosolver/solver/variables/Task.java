@@ -11,7 +11,6 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.events.IEventType;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.view.integer.IntAffineView;
@@ -19,8 +18,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
-
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 /**
  * Container representing a task:
@@ -49,11 +46,11 @@ public class Task {
      * It ensures that: start + duration = end, end being an offset view of start + duration.
      *
      * @param model the Model of the variables
-     * @param est earliest starting time
-     * @param lst latest starting time
-     * @param d duration
-     * @param ect earliest completion time
-     * @param lct latest completion time time
+     * @param est   earliest starting time
+     * @param lst   latest starting time
+     * @param d     duration
+     * @param ect   earliest completion time
+     * @param lct   latest completion time time
      */
     public Task(Model model, int est, int lst, int d, int ect, int lct) {
         start = model.intVar(est, lst);
@@ -91,7 +88,7 @@ public class Task {
         start = s;
         duration = start.getModel().intVar(d);
         end = e;
-        if(!isOffsetView(s, d, e)) {
+        if (!isOffsetView(s, d, e)) {
             declareMonitor();
         }
     }
@@ -108,7 +105,7 @@ public class Task {
         start = s;
         duration = d;
         end = e;
-        if(!d.isInstantiated() || !isOffsetView(s, d.getValue(), e)) {
+        if (!d.isInstantiated() || !isOffsetView(s, d.getValue(), e)) {
             declareMonitor();
         }
     }
@@ -130,7 +127,7 @@ public class Task {
         Model model = start.getModel();
         //noinspection unchecked
         ArrayList<Task> tset = (ArrayList<Task>) model.getHook(Model.TASK_SET_HOOK_NAME);
-        if(tset == null){
+        if (tset == null) {
             tset = new ArrayList<>();
             model.addHook(Model.TASK_SET_HOOK_NAME, tset);
         }
@@ -170,41 +167,13 @@ public class Task {
         return update;
     }
 
-    private static void doExplain(IntVar S, IntVar D, IntVar E,
-                                  int p,
-                                  ExplanationForSignedClause explanation) {
-        IntVar pivot = explanation.readVar(p);
-        IntIterableRangeSet dom;
-        dom = explanation.complement(S);
-        if (S == pivot) {
-            unionOf(dom, explanation.readDom(p));
-            S.intersectLit(dom, explanation);
-        } else {
-            S.unionLit(dom, explanation);
-        }
-        dom = explanation.complement(D);
-        if (D == pivot) {
-            unionOf(dom, explanation.readDom(p));
-            D.intersectLit(dom, explanation);
-        } else {
-            D.unionLit(dom, explanation);
-        }
-        dom = explanation.complement(E);
-        if (E == pivot) {
-            unionOf(dom, explanation.readDom(p));
-            E.intersectLit(dom, explanation);
-        } else {
-            E.unionLit(dom, explanation);
-        }
-    }
-
     @Override
     public String toString() {
         return "Task[" +
-            "start=" + start +
-            ", duration=" + duration +
-            ", end=" + end +
-            ']';
+                "start=" + start +
+                ", duration=" + duration +
+                ", end=" + end +
+                ']';
     }
 
     private static class TaskMonitor implements IVariableMonitor<IntVar> {
@@ -235,11 +204,6 @@ public class Task {
         }
 
         @Override
-        public void explain(int p, ExplanationForSignedClause explanation) {
-            doExplain(S, D, E, p, explanation);
-        }
-
-        @Override
         public void forEachIntVar(Consumer<IntVar> action) {
             action.accept(S);
             action.accept(D);
@@ -248,7 +212,7 @@ public class Task {
 
         @Override
         public String toString() {
-            return "Task["+S.getName()+"+"+D.getName()+"="+E.getName()+"]";
+            return "Task[" + S.getName() + "+" + D.getName() + "=" + E.getName() + "]";
         }
     }
 }

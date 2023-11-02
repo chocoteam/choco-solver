@@ -14,7 +14,6 @@ import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
@@ -69,11 +68,6 @@ public class BooleanConstraint extends Constraint {
         @Override
         public ESat isEntailed() {
             return ESat.eval(bool);
-        }
-
-        @Override
-        public void explain(int p, ExplanationForSignedClause explanation) {
-            // nothing to do
         }
     }
 }

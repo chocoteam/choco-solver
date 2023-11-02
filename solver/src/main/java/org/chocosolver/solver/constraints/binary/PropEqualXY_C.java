@@ -12,12 +12,10 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.procedure.IntProcedure;
 
 /**
@@ -121,27 +119,6 @@ public final class PropEqualXY_C extends Propagator<IntVar> {
             if (y.contains(cste - lb)) return true;
         }
         return false;
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet set0, set1;
-        if (explanation.readVar(p) == vars[0]) { // case a. (see javadoc)
-            set1 = explanation.complement(vars[1]);
-            set0 = explanation.domain(vars[1]);
-            set0.times(-1);
-            set0.plus(cste);
-            vars[0].intersectLit(set0, explanation);
-            vars[1].unionLit(set1, explanation);
-        } else { // case b. (see javadoc)
-            assert explanation.readVar(p) == vars[1];
-            set0 = explanation.complement(vars[0]);
-            set1 = explanation.domain(vars[0]);
-            set1.times(-1);
-            set1.plus(cste);
-            vars[0].unionLit(set0, explanation);
-            vars[1].intersectLit(set1, explanation);
-        }
     }
 
     @Override

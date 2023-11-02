@@ -12,7 +12,6 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IntEventType;
@@ -120,38 +119,6 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             if (y.contains(lb)) return true;
         }
         return false;
-    }
-
-    /**
-     * @implSpec
-     * Premise: x = y
-     * <p>
-     *     Two cases here, either a) x was filtered from y, or b) y was filtered from x.
-     *     Both cases are explained the same way, just swap the variables.
-     * </p>
-     * <p>
-     *     Consider Dy = dom(y), Dx = dom(x) before propagation, Dx'= dom(x) after propagation.
-     *     <pre>
-     *         ( y &isin; Dy &and; x &isn; Dx ) &rarr; x &isin; Dx'
-     *     </pre>
-     *     Note that, due to premise, Dy = Dx', so:
-     *     <pre>
-     *         ( y &notin; Dy &or; x &isin; Dy  )
-     *     </pre>
-     * </p>
-     *
-     *
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        if(explanation.readVar(p) == vars[0]) { // case a. (see javadoc)
-            vars[0].intersectLit(explanation.domain(vars[1]), explanation);
-            vars[1].unionLit(explanation.complement(vars[1]), explanation);
-        }else { // case b. (see javadoc)
-            assert explanation.readVar(p) == vars[1];
-            vars[0].unionLit(explanation.complement(vars[0]), explanation);
-            vars[1].intersectLit(explanation.domain(vars[0]), explanation);
-        }
     }
 
     @Override

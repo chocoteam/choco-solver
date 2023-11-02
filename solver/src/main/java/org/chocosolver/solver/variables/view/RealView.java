@@ -13,7 +13,6 @@ package org.chocosolver.solver.variables.view;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.continuous.arithmetic.CArExpression;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -52,16 +51,6 @@ public class RealView<I extends IntVar> extends AbstractView<I> implements RealV
     @Override
     protected EvtScheduler createScheduler() {
         return new RealEvtScheduler();
-    }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        throw new UnsupportedOperationException("RealView does not support explanation.");
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause clause) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -165,7 +154,7 @@ public class RealView<I extends IntVar> extends AbstractView<I> implements RealV
     }
 
     public IEventType transformEvent(IntEventType evt) {
-        switch (evt){
+        switch (evt) {
             case REMOVE:
                 throw new UnsupportedOperationException("Cannot transform REMOVE event from int to real");
             case INCLOW:

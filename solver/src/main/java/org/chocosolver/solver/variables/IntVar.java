@@ -12,14 +12,10 @@ package org.chocosolver.solver.variables;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
-import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.events.IEventType;
-import org.chocosolver.solver.variables.impl.siglit.SignedLiteral;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
 import java.util.Spliterator;
@@ -75,9 +71,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -93,7 +89,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeValue(long value, ICause cause) throws ContradictionException{
+    default boolean removeValue(long value, ICause cause) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             return false;
         } else {
@@ -255,9 +251,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
@@ -273,7 +269,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean instantiateTo(long value, ICause cause) throws ContradictionException{
+    default boolean instantiateTo(long value, ICause cause) throws ContradictionException {
         if ((int) value != value) { // cannot be cast to an int
             return instantiateTo(value < getLB() ? getLB() - 1 : getUB() + 1, cause);
         } else {
@@ -304,9 +300,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
      * The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -357,9 +353,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
      * The instruction comes from <code>propagator</code>.
      * <p>
-     *     This method deals with <code>value</code> as <b>long</b>.
-     *     If such a long can be safely cast to an int, this falls back to regular case (int).
-     *     Otherwise, it can either trivially do nothing or fail.
+     * This method deals with <code>value</code> as <b>long</b>.
+     * If such a long can be safely cast to an int, this falls back to regular case (int).
+     * Otherwise, it can either trivially do nothing or fail.
      * </p>
      * <ul>
      * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
@@ -643,207 +639,6 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         return true;
     }
 
-    /**
-     * Create the signed literal.
-     * @param rootDomain the domain at root node
-     */
-    void createLit(IntIterableRangeSet rootDomain);
-
-    /**
-     * @return the current signed literal
-     * @implSpec a call to {@link #createLit(IntIterableRangeSet)} is required
-     */
-    SignedLiteral getLit();
-
-    /**
-     * Flush the current signed literal
-     */
-    default void flushLit() {
-        this.getLit().clear();
-    }
-
-    /**
-     * Perform the union of this internal signed literal and {@code set}:
-     * <p>{@code lit} = {@code set} ∪ {@code lit}
-     *
-     * @param set         set of ints to join this signed literal with
-     * @param explanation the explanation
-     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
-     * Before this methods ends, {@code set} is recycled and <b>must not be used</b>.
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ %s\n", getName(), getLit(), set);
-        }
-        this.getLit().addAll(set);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-        explanation.returnSet(set);
-    }
-
-    /**
-     * Perform the union of this internal signed literal and the range [{@code l}, {@code u}]:
-     * <p>{@code lit} = [{@code l}, {@code u}] ∪ {@code lit}
-     *
-     * @param l           inclusive lower bound
-     * @param u           inclusive upper bound
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(int l, int u, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ [%d, %d]", getName(), getLit(), l, u);
-        }
-        this.getLit().addBetween(l, u);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("-- skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-    }
-
-    /**
-     * Perform the union of this internal signed literal and {{@code v}}:
-     * <p>{@code lit} = {{@code v}} ∪ {@code lit}
-     *
-     * @param v           int value
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>non-pivot</b> variables only.
-     * It can be called many times on the same variable while explaning a cause
-     * since it applies a union operation on signed literal.
-     */
-    default void unionLit(int v, ExplanationForSignedClause explanation) {
-        if (XParameters.FINE_PROOF) {
-            System.out.printf("%s: %s ∪ {%d}", getName(), getLit(), v);
-        }
-        this.getLit().add(v);
-        if (this.getLit().isEmpty()) {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("skip\n");
-            }
-        } else {
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.addLit(this);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and {@code set}:
-     * <p>{@code lit} = {@code set} ∩ {@code lit}
-     *
-     * @param set         set of ints to cross this signed literal with.
-     * @param explanation the explanation
-     * @implNote {@code set} is considered as <b>read-only</b> and is not intended to modified.
-     * Before this methods ends, {@code set} is recycled and <b>must no be used</b>.
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(IntIterableRangeSet set, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ %s", getName(), getLit(), set);
-            }
-            this.getLit().retainAll(set);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-            explanation.returnSet(set);
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(set, explanation);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and the range [{@code l}, {@code u}]:
-     * <p>{@code lit} = [{@code l}, {@code u}] ∩ {@code lit}
-     *
-     * @param l           inclusive lower bound
-     * @param u           inclusive upper bound
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(int l, int u, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ [%d,%d]", getName(), getLit(), l, u);
-            }
-            this.getLit().retainBetween(l, u);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(l, u, explanation);
-        }
-    }
-
-    /**
-     * Perform the intersection of this internal signed literal and {{@code v}}:
-     * <p>{@code lit} = {{@code v}} ∩ {@code lit}
-     *
-     * @param v           int value
-     * @param explanation the explanation
-     * @apiNote This method is supposed to be called on <b>pivot</b> variables only.
-     * It can be called only once on the pivot variable while explaining a cause
-     * since it applies an intersection operation on signed literal.
-     */
-    default void intersectLit(int v, ExplanationForSignedClause explanation) {
-        if (explanation.contains(this)) {
-            if (XParameters.FINE_PROOF) {
-                System.out.printf("%s: %s ∩ {%d}", getName(), getLit(), v);
-            }
-            this.getLit().retain(v);
-            if (this.getLit().isEmpty()) {
-                if (XParameters.FINE_PROOF) {
-                    System.out.print(" -- remove");
-                }
-                explanation.removeLit(this);
-            }
-            if (XParameters.FINE_PROOF) {
-                System.out.print("\n");
-            }
-        } else {
-            // this is the first occurrence of the variable during explanation
-            this.unionLit(v, explanation);
-        }
-    }
-
     default IntStream stream() {
         Spliterators.AbstractIntSpliterator it = new Spliterators.AbstractIntSpliterator(IntVar.this.getDomainSize(),
                 Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL) {
@@ -861,4 +656,5 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         };
         return StreamSupport.intStream(it, false);
     }
+
 }

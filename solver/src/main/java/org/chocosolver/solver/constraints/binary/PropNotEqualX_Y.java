@@ -12,11 +12,9 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 import org.chocosolver.util.tools.ArrayUtils;
 
 /**
@@ -83,32 +81,6 @@ public class PropNotEqualX_Y extends Propagator<IntVar> {
         else
             return ESat.UNDEFINED;
     }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        int m;
-        IntIterableRangeSet set0, set1;
-        if (explanation.readVar(p) == vars[0]) {
-            assert explanation.readDom(vars[1]).size() == 1;
-            m = explanation.readDom(vars[1]).min();
-            set0 = explanation.universe();
-            set1 = explanation.universe();
-            set0.remove(m);
-            set1.remove(m);
-            vars[0].intersectLit(set0, explanation);
-            vars[1].unionLit(set1, explanation);
-        } else {
-            assert explanation.readDom(vars[0]).size() == 1;
-            m = explanation.readDom(vars[0]).min();
-            set0 = explanation.universe();
-            set1 = explanation.universe();
-            set0.remove(m);
-            set1.remove(m);
-            vars[0].unionLit(set0, explanation);
-            vars[1].intersectLit(set1, explanation);
-        }
-    }
-
 
     @Override
     public String toString() {
