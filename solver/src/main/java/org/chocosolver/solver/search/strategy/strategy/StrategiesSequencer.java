@@ -22,7 +22,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  * calls the delegate <code>getDecision()</code> method.
  * <br/>
  * A <code>AbstractStrategy</code> becomes "inactive" when no more decision can be computed,
- * ie every decisions have been computed and used.
+ * ie every decision has been computed and used.
  * <br/>
  *
  * @author Charles Prud'homme
@@ -126,5 +126,13 @@ public class StrategiesSequencer<U extends Variable> extends AbstractStrategy<U>
             st.append("\t").append(strategies[i].toString()).append("\n");
         }
         return st.toString();
+    }
+
+    /**
+     * Return the sub-strategies of <code>this</code>.
+     * @return the sub-strategies of <code>this</code>.
+     */
+    public AbstractStrategy<U>[] getStrategies() {
+        return strategies;
     }
 }

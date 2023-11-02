@@ -38,6 +38,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.search.strategy.decision.Decision;
 import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.search.strategy.strategy.WarmStart;
 import org.chocosolver.solver.trace.IOutputFactory;
 import org.chocosolver.solver.variables.IntVar;
@@ -49,6 +50,7 @@ import org.chocosolver.util.logger.ANSILogger;
 import org.chocosolver.util.logger.Logger;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.chocosolver.solver.Solver.Action.*;
 import static org.chocosolver.solver.constraints.Constraint.Status.FREE;
@@ -1214,6 +1216,9 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     "A strategy must be attached to each of them independently, and it cannot be achieved calling this method." +
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
+            strategies = Arrays.stream(strategies).filter(Objects::nonNull)
+                    .flatMap(s -> (s instanceof StrategiesSequencer) ? Arrays.stream(((StrategiesSequencer<?>) s).getStrategies()) : Stream.of(s))
+                    .toArray(AbstractStrategy[]::new);
             //noinspection unchecked
             M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
         }

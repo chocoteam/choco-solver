@@ -13,6 +13,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.chocosolver.parser.ParserException;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.automata.FA.FiniteAutomaton;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
@@ -21,6 +22,9 @@ import org.chocosolver.solver.expression.discrete.logical.LoExpression;
 import org.chocosolver.solver.expression.discrete.logical.NaLoExpression;
 import org.chocosolver.solver.expression.discrete.relational.NaReExpression;
 import org.chocosolver.solver.expression.discrete.relational.ReExpression;
+import org.chocosolver.solver.search.strategy.Search;
+import org.chocosolver.solver.search.strategy.selectors.values.IntValueSelector;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
@@ -1962,5 +1966,21 @@ public class XCSPParser implements XCallbacks2 {
     @Override
     public void buildObjToMaximize(String id, Types.TypeObjective type, XNode<XVariables.XVarInteger>[] trees, int[] coeffs) {
         buildObjective(true, type, vars(trees), coeffs);
+    }
+
+    @Override
+    public void buildAnnotationValHeuristicStatic(XVariables.XVarInteger[] list, int[] order) {
+        Solver solver = model.getSolver();
+        IntValueSelector valueSelector = var -> {
+            for (int j : order) {
+                if (var.contains(j)) {
+                    return j;
+                }
+            }
+            return var.getLB();
+        };
+        solver.setSearch(
+                solver.getSearch(),
+                Search.intVarSearch(new InputOrder<>(model), valueSelector, vars(list)));
     }
 }
