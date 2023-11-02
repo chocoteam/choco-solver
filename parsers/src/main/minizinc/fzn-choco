@@ -10,7 +10,7 @@ SEED=0
 NB_NODES=1
 TIME_LIMIT=-1
 DIR=`dirname "$0"`
-CHOCO_JAR=~/.m2/repository/org/choco-solver/choco-parsers/4.10.13/choco-parsers-4.10.13-jar-with-dependencies.jar
+CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.14-SNAPSHOT-light.jar
 #${DIR}/${JAR_NAME}
 usage="\
 
@@ -153,7 +153,7 @@ fi
 
 if test "${FREE_SEARCH}" = "yes"
 then
-    ARGS=$ARGS" -f -varh DOMWDEGR -valh BMIN -last -restarts '[luby,200,50000]' -flush 32 -lc 1 -ocs OUTPUT"
+    ARGS=$ARGS" -f"
 fi
 
 if test "${STAT_SOL}" = "yes"
