@@ -73,7 +73,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         int inf = getLB();
         int sup = getUB();
         if (inf > value || value > sup) return false;
-        model.getSolver().getEventObserver().removeValue(this, value, cause);
         value -= b;
         if (a > 1) {
             if ((value % a) != 0) {
@@ -97,7 +96,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             this.notifyPropagators(e, cause);
             return true;
         } else {
-            model.getSolver().getEventObserver().undo();
             return false;
         }
     }
@@ -105,7 +103,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
     @Override
     public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
         assert cause != null;
-        model.getSolver().getEventObserver().instantiateTo(this, value, cause, getLB(), getUB());
         value -= b;
         if (a > 1) {
             if ((value % a) != 0) {
@@ -120,7 +117,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         } else {
-            model.getSolver().getEventObserver().undo();
             return false;
         }
     }
@@ -130,7 +126,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         assert cause != null;
         int old = this.getLB();
         if (old >= value) return false;
-        model.getSolver().getEventObserver().updateLowerBound(this, value, getLB(), cause);
         value--;
         value -= b;
         if (a > 1) {
@@ -150,7 +145,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             this.notifyPropagators(e, cause);
             return true;
         } else {
-            model.getSolver().getEventObserver().undo();
             return false;
         }
     }
@@ -160,7 +154,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         assert cause != null;
         int old = this.getUB();
         if (old <= value) return false;
-        model.getSolver().getEventObserver().updateUpperBound(this, value, getUB(), cause);
         value -= b;
         if (a > 1) {
             value = value / a - (value % a < 0 ? 1 : 0);
@@ -179,7 +172,6 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             this.notifyPropagators(e, cause);
             return true;
         } else {
-            model.getSolver().getEventObserver().undo();
             return false;
         }
     }
@@ -541,31 +533,4 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!this.var.equals(v)) return false;
         return this.a == Math.abs(a) && this.b == b && this.p == (a >= 0);
     }
-
-    @Override
-    public void justifyEvent(IntEventType mask, int one, int two, int three) {
-        switch (mask) {
-            case DECUPP:
-                if (p) {
-                    model.getSolver().getEventObserver().updateUpperBound(this, -one * a + b, -two * a + b, this);
-                } else {
-                    model.getSolver().getEventObserver().updateLowerBound(this, one * a + b, two * a + b, this);
-                }
-                break;
-            case INCLOW:
-                if (p) {
-                    model.getSolver().getEventObserver().updateLowerBound(this, one * a + b, two * a + b, this);
-                } else {
-                    model.getSolver().getEventObserver().updateUpperBound(this, -one * a + b, -two * a + b, this);
-                }
-                break;
-            case REMOVE:
-                model.getSolver().getEventObserver().removeValue(this, one * (p ? 1 : -1) * a + b, this);
-            case INSTANTIATE:
-                model.getSolver().getEventObserver().instantiateTo(this, one * (p ? 1 : -1) * a + b, this,
-                        (p ? two : -three) * a + b, (p ? three : -two) * a + b);
-                break;
-        }
-    }
-
 }

@@ -12,11 +12,9 @@ package org.chocosolver.solver.constraints.binary;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.util.ESat;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 /**
  * A specific <code>Propagator</code> extension defining filtering algorithm for:
@@ -70,30 +68,6 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
             }
         } else if (x.getLB() + y.getLB() > cste || x.getUB() + y.getUB() < cste) {
             setPassive();
-        }
-    }
-
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        int m;
-        IntIterableRangeSet set0, set1;
-        if (explanation.readVar(p) == vars[0]) {
-            m = explanation.readDom(vars[1]).min();
-            set0 = explanation.universe();
-            set1 = explanation.universe();
-            set0.remove(cste - m);
-            set1.remove(m);
-            vars[0].intersectLit(set0, explanation);
-            vars[1].unionLit(set1, explanation);
-        } else {
-            assert explanation.readDom(vars[0]).size() == 1;
-            m = explanation.readDom(vars[0]).min();
-            set1 = explanation.universe();
-            set0 = explanation.universe();
-            set0.remove(m);
-            set1.remove(cste - m);
-            vars[0].unionLit(set0, explanation);
-            vars[1].intersectLit(set1, explanation);
         }
     }
 

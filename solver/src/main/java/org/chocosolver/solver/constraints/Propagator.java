@@ -17,7 +17,6 @@ import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Priority;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
@@ -27,7 +26,6 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntCircularQueue;
 import org.chocosolver.util.objects.queues.CircularQueue;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -37,7 +35,6 @@ import static java.util.Arrays.copyOf;
 import static org.chocosolver.solver.constraints.PropagatorPriority.LINEAR;
 import static org.chocosolver.solver.variables.events.IEventType.ALL_EVENTS;
 import static org.chocosolver.solver.variables.events.PropagatorEventType.CUSTOM_PROPAGATION;
-import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils.unionOf;
 
 
 /**
@@ -70,6 +67,7 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * this prevents from wrong references when a variable occurs more than once in the scope (See {@link org.chocosolver.solver.constraints.nary.count.PropCount_AC} for instance).
  * <br/>- //to complete
  *
+ * @param <V> type of variables involved in this propagator
  * @author Xavier Lorca
  * @author Charles Prud'homme
  * @author Jean-Guillaume Fages
@@ -77,7 +75,6 @@ import static org.chocosolver.util.objects.setDataStructures.iterable.IntIterabl
  * @see org.chocosolver.solver.variables.Variable
  * @see Constraint
  * @since 0.01
- * @param <V> type of variables involved in this propagator
  */
 public abstract class Propagator<V extends Variable> implements ICause, Identity, Comparable<Propagator<V>> {
 
@@ -197,14 +194,15 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * A bi-int-consumer
      */
-    private interface IntIntConsumer{
+    private interface IntIntConsumer {
         void accept(int a, int b);
     }
 
     /**
      * Default action to do on fine event : nothing
      */
-    private IntIntConsumer fineevt = (i, m) -> {};
+    private IntIntConsumer fineevt = (i, m) -> {
+    };
 
     /**
      * Denotes the reifying variable when this propagator is reified, null otherwise.
@@ -304,7 +302,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     @SafeVarargs
     protected final void addVariable(V... nvars) {
-        assert !swapOnPassivate:"Cannot add variable to a propagator that allows being swapped on passivate";
+        assert !swapOnPassivate : "Cannot add variable to a propagator that allows being swapped on passivate";
         V[] tmp = vars;
         vars = copyOf(vars, vars.length + nvars.length);
         arraycopy(nvars, 0, vars, tmp.length, nvars.length);
@@ -314,7 +312,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         for (int v = tmp.length; v < vars.length; v++) {
             vars[v].link(this, v);
         }
-        if(reactToFineEvt) {
+        if (reactToFineEvt) {
             itmp = this.eventmasks;
             eventmasks = new int[vars.length];
             arraycopy(itmp, 0, eventmasks, 0, itmp.length);
@@ -378,7 +376,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * <pre>
      *     int mask = IntEvtType.combine(IntEventType.INCLOW,IntEventType.INSTANTIATE);
      * </pre>
-     *
+     * <p>
      * That indicates the following behavior:
      * <ol>
      *     <li>if X is instantiated, this propagator will be executed,</li>
@@ -386,7 +384,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *     <li>if the lower bound of X is removed, the event is promoted from REMOVE to INCLOW and this propagator will NOT be executed,</li>
      *     <li>otherwise, this propagator will NOT be executed</li>
      * </ol>
-     *
+     * <p>
      * Some combinations are valid.
      * For example, a propagator which reacts on REMOVE and INSTANTIATE should also declare INCLOW and DECUPP as conditions.
      * Indeed, INCLOW (resp. DECUPP), for efficiency purpose, removing the lower bound (resp. upper bound) of an integer variable
@@ -459,6 +457,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this propagator is now active. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
     public void setActive() throws SolverException {
@@ -477,6 +476,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this reified propagator must hold. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be activated due to its current state
      */
     public void setReifiedTrue() throws SolverException {
@@ -491,6 +491,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * informs that this reified propagator may not hold. Should not be called by the user.
+     *
      * @param boolVar the reifying variable
      * @throws SolverException if the propagator cannot be reified due to its current state
      */
@@ -507,6 +508,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * informs that this propagator is now passive : it holds but no further filtering can occur,
      * so it is useless to propagate it. Should not be called by the user.
+     *
      * @throws SolverException if the propagator cannot be set passive due to its current state
      */
     public void setPassive() throws SolverException {
@@ -586,6 +588,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Return the dynamic priority of this propagator.
      * It excludes from the arity variables instantiated.
      * But may be time consuming.
+     *
      * @return a more accurate priority excluding instantiated variables.
      */
     @SuppressWarnings("unused")
@@ -615,8 +618,8 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails(String message) throws ContradictionException {
-         model.getSolver().throwsException(this, null, message);
-     }
+        model.getSolver().throwsException(this, null, message);
+    }
 
     @Override
     public int compareTo(Propagator<V> o) {
@@ -634,7 +637,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @return <i>true</i> if this is reified.
      * Call {@link #reifiedWith()} to get the reifying variable.
      */
-    public boolean isReified(){
+    public boolean isReified() {
         return reifVar != null;
     }
 
@@ -792,58 +795,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         return st.toString();
     }
 
-    /**
-     * @implSpec
-     * Based on the scope of this propagator, domains of variables are extracted as they
-     * were just before propagation that leads to node <i>p</i>.
-     * <p>
-     *     Consider that v_1 has been modified by propagation of this.
-     *     Before the propagation, the domains were like:
-     * <pre>
-     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n)
-     *     </pre>
-     * Then this propagates v1 &isin; D1', then:
-     * <pre>
-     *         (v1 &isin; D1 &and; v2 &isin; D2 &and; .... &and; vn &isin; D_n) &rarr; v1 &isin; D1'
-     *     </pre>
-     * Converting to DNF:
-     * <pre>
-     *         (v1 &isin; (U \ D1) &cup; D'1  &or; v2 &isin; (U \ D2) &or; .... &or; vn &isin; (U \ Dn))
-     *     </pre>
-     * </p>
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        if (DEFAULT_EXPL) {
-            if(OUTPUT_DEFAULT_EXPL)model.getSolver().log().bold().printf("-- default explain for %s \n",this.getClass().getSimpleName());
-            defaultExplain(this, p, explanation);
-        } else {
-            ICause.super.explain(p, explanation);
-        }
-    }
-
-    public static void defaultExplain(Propagator<?> prop, int p, ExplanationForSignedClause explanation) {
-        IntVar pivot = p > -1 ? explanation.readVar(p) : null;
-        IntIterableRangeSet dom;
-        IntVar var;
-        boolean found = false;
-        for (int i = 0; i < prop.vars.length; i++) {
-            var = (IntVar) prop.vars[i];
-            if (var == pivot) {
-                if (!found) {
-                    dom = explanation.complement(var);
-                    // when a variable appears more than once AND is pivot : should be treated only once
-                    unionOf(dom, explanation.readDom(p));
-                    found = true;
-                    var.intersectLit(dom, explanation);
-                }
-            }else{
-                var.unionLit(explanation.complement(var), explanation);
-            }
-        }
-        assert found || p == -1 : pivot + " not declared in scope of " + prop;
-    }
-
     @Override
     public void forEachIntVar(Consumer<IntVar> action) {
         for (int i = 0; i < vars.length; i++) {
@@ -858,26 +809,27 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * @return the position of this in the propagation engine
      */
-    public int getPosition(){
+    public int getPosition() {
         return position;
     }
 
     /**
      * Set the position of this in the propagation engine or -1 if removed.
+     *
      * @param p position of this in the propagation engine or -1 if removed.
      */
-    public void setPosition(int p){
+    public void setPosition(int p) {
         this.position = p;
     }
 
     /**
      * Set this as unscheduled
      */
-    public final void unschedule(){
+    public final void unschedule() {
         scheduled = false;
     }
 
-    private void schedule(){
+    private void schedule() {
         scheduled = true;
     }
 
@@ -891,25 +843,27 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     /**
      * Apply scheduling instruction
+     *
      * @param queues array of queues in which this can be scheduled
      * @return propagator priority
      */
-    public int doSchedule(CircularQueue<Propagator<?>>[] queues){
+    public int doSchedule(CircularQueue<Propagator<?>>[] queues) {
         int prio = priority.getValue();
-        if(!scheduled) {
+        if (!scheduled) {
             queues[prio].addLast(this);
             schedule();
         }
         return prio;
     }
 
-    public void doScheduleEvent(int pindice, int mask){
+    public void doScheduleEvent(int pindice, int mask) {
         fineevt.accept(pindice, mask);
     }
 
     /**
      * Apply fine event propagation of this.
      * It iterates over pending modified variables and run propagation on each of them.
+     *
      * @throws ContradictionException if a contradiction occurred.
      */
     public void doFinePropagation() throws ContradictionException {
@@ -927,7 +881,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * Flush pending events
      */
-    public void doFlush(){
+    public void doFlush() {
         if (reactToFineEvent()) {
             while (eventsets.size() > 0) {
                 int v = eventsets.pollLast();

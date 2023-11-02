@@ -11,7 +11,6 @@ package org.chocosolver.util.objects.setDataStructures.iterable;
 
 
 import org.chocosolver.solver.exception.SolverException;
-import org.chocosolver.solver.learn.XParameters;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.objects.setDataStructures.AbstractSet;
@@ -59,11 +58,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * Create an ISet iterator
      */
     private ISetIterator iter;
-
-    /**
-     * Makes this structure immutable
-     */
-    private boolean lock;
 
     /**
      * Every public method must preserve these invariants.
@@ -144,7 +138,7 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     public String toString() {
         StringBuilder st = new StringBuilder();
         if (SIZE == 0) {
-            st.append('\u2205');
+            st.append('∅');
         } else {
             for (int i = 0; i < SIZE - 1; i += 2) {
                 if (i == 0 && ELEMENTS[i] == MIN) {
@@ -177,15 +171,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
         if (SIZE > 0) st.deleteCharAt(st.length() - 1);
         st.append("}");
         return st.toString();
-    }
-
-    public void lock() {
-        //noinspection PointlessBooleanExpression
-        this.lock = true && XParameters.ALLOW_LOCK;
-    }
-
-    public void unlock() {
-        this.lock = false;
     }
 
     /**
@@ -224,9 +209,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean add(int e) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         boolean modified = false;
         int p = rangeOf(e);
         // if e is not in a range
@@ -270,9 +252,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean addAll(int... values) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         for (int i = 0; i < values.length; i++) {
             add(values[i]);
@@ -282,9 +261,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean addAll(IntIterableSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         if (set.isEmpty()) return false;
         int c = CARDINALITY;
         if (!set.isEmpty()) {
@@ -298,9 +274,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean addAll(IntVar var) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = this.CARDINALITY;
         DisposableRangeIterator rit = var.getRangeIterator(true);
         while (rit.hasNext()) {
@@ -311,9 +284,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean addAll(IntIterableRangeSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         if (!set.isEmpty()) {
             int s2 = set.SIZE >> 1;
@@ -330,9 +300,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean retainAll(IntIterableSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         if (set.isEmpty()) {
             this.clear();
@@ -348,9 +315,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean retainAll(IntIterableRangeSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         if (set.isEmpty()) {
             this.clear();
@@ -366,9 +330,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean remove(int e) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         boolean modified = false;
         int p = rangeOf(e);
         // if e is not in a range
@@ -410,9 +371,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean removeAll(IntIterableSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         if (!set.isEmpty()) {
             int v = set.min();
@@ -425,9 +383,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean removeAll(IntIterableRangeSet set) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         int c = CARDINALITY;
         if (!set.isEmpty()) {
             int s2 = set.SIZE >> 1;
@@ -444,9 +399,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public void clear() {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         CARDINALITY = 0;
         SIZE = 0;
         notifyObservingCleared();
@@ -458,9 +410,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean addBetween(int a, int b) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         if (a > b) {
             throw new IndexOutOfBoundsException("Incorrect bounds [" + a + "," + b + "]");
         }
@@ -555,9 +504,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
 
     @Override
     public boolean removeBetween(int f, int t) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         boolean rem = false;
         if (f > t) {
             throw new IllegalArgumentException("Cannot remove from empty range [" + f + "," + t + "]");
@@ -628,9 +574,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public boolean retainBetween(int f, int t) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         if (f > t) {
             throw new IllegalArgumentException("Cannot retain from empty range [" + f + "," + t + "]");
         }
@@ -752,9 +695,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
     }
 
     public IntIterableRangeSet copyFrom(IntIterableRangeSet me) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         this.clear();
         for (int s = 0; s < me.SIZE; s += 2) {
             pushRange(me.ELEMENTS[s], me.ELEMENTS[s + 1]);
@@ -770,9 +710,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * @param var an integer variable
      */
     public void copyFrom(IntVar var) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         this.clear();
         DisposableRangeIterator rit = var.getRangeIterator(true);
         while (rit.hasNext()) {
@@ -828,9 +765,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * @param x value to add
      */
     public void plus(int x) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         for (int i = 0; i < SIZE; i++) {
             ELEMENTS[i] += x;
         }
@@ -851,9 +785,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * @param x value to add
      */
     public void minus(int x) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         for (int i = 0; i < SIZE; i++) {
             ELEMENTS[i] -= x;
         }
@@ -866,9 +797,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * @param x value to add
      */
     public void times(int x) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         if (x > 0) {
             for (int i = 0; i < SIZE; i++) {
                 ELEMENTS[i] *= x;
@@ -1001,9 +929,6 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      * @return this turned into its complement, based on <i>lb</i>, <i>ub</i>
      */
     public IntIterableRangeSet flip(int lb, int ub) {
-        if (lock) {
-            throw new IllegalStateException("This set is immutable");
-        }
         if (SIZE == 0) { // empty set
             pushRange(lb, ub);
         } else if (ELEMENTS[0] <= lb && ELEMENTS[1] >= ub) { // all

@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver;
 
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.variables.IntVar;
 
 import java.util.function.Consumer;
@@ -21,12 +20,7 @@ import java.util.function.Consumer;
  * @since 26/08/11
  */
 public enum Cause implements ICause {
-    Null{
-        @Override
-        public void explain(int pivot, ExplanationForSignedClause explanation) {
-
-        }
-
+    Null {
         @Override
         public void forEachIntVar(Consumer<IntVar> action) {
 

@@ -10,13 +10,10 @@
 package org.chocosolver.solver.search.strategy.decision;
 
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.learn.ExplanationForSignedClause;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperator;
 import org.chocosolver.solver.search.strategy.assignments.DecisionOperatorFactory;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.PoolManager;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
-import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUtils;
 
 import java.util.function.Consumer;
 
@@ -61,7 +58,6 @@ public class IntDecision extends Decision<IntVar> {
     @Override
     public void apply() throws ContradictionException {
         if (branch == 1) {
-            var.getModel().getSolver().getEventObserver().pushDecisionLevel();
             assignment.apply(var, value, this);
         } else if (branch == 2) {
             assignment.unapply(var, value, this);
@@ -181,34 +177,6 @@ public class IntDecision extends Decision<IntVar> {
                     nonrefuted ? assignment.toString() : assignment.opposite().toString(),
                     value);
         }
-    }
-
-    /**
-     * @implSpec
-     * <p>Since a decision only relies on a unique variable, designed by 'p' and this decision,
-     * this can be treated as unary constraint, depending on this {@link #assignment}
-     * and {@link #branch}.
-     * </p>
-     * <p>
-     *  Let's consider an assignment decisions, (X = a) and that Dx is the domain of x just
-     *  before applying this decision.
-     *  Then, we can formalize the application of this like:
-     *
-     *     <pre>
-     *         (v1 &isin; D1) &rarr; v1 &isin; a
-     *     </pre>
-     *      Converting to DNF:
-     *     <pre>
-     *         (v1 &isin; (U \ D1) &cup; a)
-     *     </pre>
-     *
-     * </p>
-     */
-    @Override
-    public void explain(int p, ExplanationForSignedClause explanation) {
-        IntIterableRangeSet dom = explanation.complement(var);
-        IntIterableSetUtils.unionOf(dom, explanation.readDom(p));
-        var.intersectLit(dom, explanation);
     }
 
     @Override
