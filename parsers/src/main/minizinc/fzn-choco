@@ -10,7 +10,7 @@ SEED=0
 NB_NODES=1
 TIME_LIMIT=-1
 DIR=`dirname "$0"`
-CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.14-SNAPSHOT-light.jar
+CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.14-light.jar
 #${DIR}/${JAR_NAME}
 usage="\
 

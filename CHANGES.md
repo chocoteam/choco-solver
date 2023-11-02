@@ -4,8 +4,8 @@ Choco Solver ChangeLog
 This file is dedicated to sum up the new features added and bugs fixed in Choco-solver since the version, 4.0.0.
 **Note**: double-space is replaced by "\t" character on release process. Make sure the format is ok.
 
-NEXT MILESTONE
--------------------
+4.10.14 - 02 Nov 2023
+---------------------
 
 ### Major features:
 - NEW: `solver..showRestarts();` to display the number of restarts during the search. 
@@ -30,7 +30,7 @@ See [milestone 4.10.14](https://github.com/chocoteam/choco-solver/milestone/38)
 **Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.13...v4.10.14
     
 4.10.13 - 05 Jun 2023
--------------------
+---------------------
 
 ### Major features: 
 Mainly bug fixes and improvements of Pareto front performances.
@@ -60,7 +60,7 @@ See [milestone 4.10.12](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
     
 4.10.11 - 07 Feb 2023
--------------------
+---------------------
 
 ### Major features:
 - Correcting the lack of filtering in `PropIncreasing`
@@ -98,7 +98,7 @@ See [milestone 4.10.11](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
         
 4.10.10 - 11 Oct 2022
--------------------
+---------------------
 
 ### Major features:
 - Fix performance issue of ViewDeltaMonitor
@@ -120,7 +120,7 @@ See [milestone 4.10.10](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Mehmet Hakan Satman](https://github.com/jbytecode) (@jbytecode)
       
 4.10.9 - 22 Aug 2022
--------------------
+--------------------
 
 ### Major features:
 - It is now possible to declare hints to help the search finding a first solution. See `solver.addHint(var, val)`.
@@ -187,7 +187,7 @@ See [milestone 4.10.9](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet)
     
 4.10.8 - 07 Jan 2022
--------------------
+--------------------
 
 ### Major features:
 - Propagation is now observable, `solver.observePropagation(PropagationObserver)`. 
@@ -211,7 +211,7 @@ See [milestone 4.10.8](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 
 4.10.7 - 11 Oct 2021
--------------------
+--------------------
 
 ### Major features:
 - Simplify the way deltamonitors work. There is no need to `freeze` and `unfreeze` 
@@ -252,7 +252,7 @@ See [milestone 4.10.7](https://github.com/chocoteam/choco-solver/milestone/xx)
 - [Charles Vernerey](https://github.com/ChaVer) (@chaver)
 
 4.10.6 - 11 Dec 2020
--------------------             
+--------------------             
 
 ### Major features:
 - Add new resolution helper in `Solver`, namely `findOptimalSolutionWithBounds`. See Javadoc for details and usages.
