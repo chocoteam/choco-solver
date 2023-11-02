@@ -11,15 +11,23 @@ NEXT MILESTONE
 - NEW: `solver..showRestarts();` to display the number of restarts during the search. 
 - NEW: hybrid table constraints (see `model.table(...)`)
 - NEW: partial assignement generator for COP (see `Search.generatePartialAssignment()`)
+- NEW: Add Blackbox configuration (#1058)
+- Revamp views (#564)
+- Improve `pow(base, exponent, result)`
+- Remove `BitsetArrayIntVarImpl` now managed in `BitSetIntVarImpl`
 
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
-See [milestone 4.11.0](https://github.com/chocoteam/choco-solver/milestone/38)
+See [milestone 4.10.14](https://github.com/chocoteam/choco-solver/milestone/38)
 
 #### Contributors to this release:
+- [Jean-Guillaume Fages](https://github.com/jgFages) (@jgFages)
+- [Arthur Godet](https://github.com/ArthurGodet) (@ArthurGodet) 
+- [Fabien Hermenier](https://github.com/fhermeni) (@fhermeni)
+- [Charles Prud'homme](https://github.com/cprudhom) (@cprudhom)
 
-**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.13...v4.11.0
+**Full Changelog**: https://github.com/chocoteam/choco-solver/compare/v4.10.13...v4.10.14
     
 4.10.13 - 05 Jun 2023
 -------------------

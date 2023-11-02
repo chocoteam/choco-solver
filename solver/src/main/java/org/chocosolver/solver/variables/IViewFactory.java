@@ -396,7 +396,7 @@ public interface IViewFactory extends ISelf<Model> {
      * @see #intView(int, IntVar, int)
      * @deprecated
      */
-    @Deprecated//(since = "4.11.0", forRemoval = true)
+    @Deprecated
     default IntVar intAffineView(int a, IntVar x, int b) {
         return intView(a, x, b);
     }
