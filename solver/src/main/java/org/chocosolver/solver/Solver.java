@@ -1207,6 +1207,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param strategies the search strategies to use.
      */
+    @SuppressWarnings({"rawtypes", "ReassignedVariable", "unchecked"})
     public void setSearch(AbstractStrategy... strategies) {
         if (strategies == null || strategies.length == 0) {
             throw new UnsupportedOperationException("no search strategy has been specified");
@@ -1217,10 +1218,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
                     "An iteration over it child moves is needed: this.getMove().getChildMoves().");
         } else {
             strategies = Arrays.stream(strategies).filter(Objects::nonNull)
-                    .flatMap(s -> (s instanceof StrategiesSequencer) ? Arrays.stream(((StrategiesSequencer<?>) s).getStrategies()) : Stream.of(s))
-                    .toArray(AbstractStrategy[]::new);
-            //noinspection unchecked
-            M.setStrategy(strategies.length == 1 ? strategies[0] : Search.sequencer(strategies));
+                            .flatMap(s -> (s instanceof StrategiesSequencer) ? Arrays.stream(((StrategiesSequencer<?>) s).getStrategies()) : Stream.of(s))
+                            .toArray(AbstractStrategy[]::new);
+            if(strategies.length == 0){
+                M.removeStrategy();
+            }else if(strategies.length == 1) {
+                M.setStrategy(strategies[0]);
+            }else{
+                M.setStrategy(Search.sequencer(strategies));
+            }
         }
     }
 
