@@ -1609,6 +1609,21 @@ public enum FConstraint {
 
         }
     },
+    choco_stable_keysort {
+        @Override
+        public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
+
+            IntVar[] x = exps.get(0).toIntVarArray(model);
+            IntVar[] permutations = exps.get(1).toIntVarArray(model);
+            IntVar[] y = exps.get(2).toIntVarArray(model);
+            int keys = exps.get(3).intValue();
+
+            IntVar[][] unsorted = matrixfy(x, x.length / permutations.length);
+            IntVar[][] sorted = matrixfy(y, y.length / permutations.length);
+
+            model.keySort(unsorted, permutations, sorted, keys).post();
+        }
+    },
     subcircuitChoco {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
@@ -1645,11 +1660,7 @@ public enum FConstraint {
             IntVar[] x = exps.get(0).toIntVarArray(model);
             int[] f_t = exps.get(1).toIntArray();
             int d2 = x.length;
-            int d1 = f_t.length / d2;
-            List<int[]> t = new ArrayList<>();
-            for (int i = 0; i < d1; i++) {
-                t.add(Arrays.copyOfRange(f_t, i * d2, (i + 1) * d2));
-            }
+            int[][] t = matrixfy(f_t, d2);
             Tuples tuples = new Tuples(true);
             for (int[] couple : t) {
                 tuples.add(couple);
@@ -1844,7 +1855,7 @@ public enum FConstraint {
 
         }
     },
-    fzn_disjoint{
+    fzn_disjoint {
         @Override
         public void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations) {
             SetVar a = exps.get(0).setVarValue(model);
@@ -2541,4 +2552,23 @@ public enum FConstraint {
 
 
     public abstract void build(Model model, Datas datas, String id, List<Expression> exps, List<EAnnotation> annotations);
+
+    public int[][] matrixfy(int[] es, int d) {
+        int d1 = es.length / d;
+        int[][] t = new int[d1][d];
+        for (int i = 0; i < d1; i++) {
+            t[i] = Arrays.copyOfRange(es, i * d, (i + 1) * d);
+        }
+        return t;
+    }
+
+    public IntVar[][] matrixfy(IntVar[] es, int d) {
+        int d1 = es.length / d;
+        IntVar[][] t = new IntVar[d1][d];
+        for (int i = 0; i < d1; i++) {
+            t[i] = Arrays.copyOfRange(es, i * d, (i + 1) * d);
+        }
+        return t;
+    }
+
 }
