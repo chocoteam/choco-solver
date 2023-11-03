@@ -142,22 +142,40 @@ public class XCSP extends RegParser {
     public void freesearch(Solver solver) {
         BlackBoxConfigurator bb = BlackBoxConfigurator.init();
         boolean opt = solver.getObjectiveManager().isOptimization();
-        // variable selection
-        SearchParams.ValSelConf defaultValSel = new SearchParams.ValSelConf(
-                SearchParams.ValueSelection.MIN, opt, 1, opt);
-        SearchParams.VarSelConf defaultVarSel = new SearchParams.VarSelConf(
-                SearchParams.VariableSelection.DOMWDEG, Integer.MAX_VALUE);
+        final SearchParams.ValSelConf defaultValSel;
+        final SearchParams.VarSelConf defaultVarSel;
+        final SearchParams.ResConf defaultResConf;
+        if (free) {
+            defaultValSel = valsel;
+            defaultVarSel = varsel;
+            defaultResConf = restarts;
+            bb.setNogoodOnRestart(true)
+                    .setRestartOnSolution(true)
+                    .setExcludeObjective(true)
+                    .setExcludeViews(false)
+                    .setMetaStrategy(
+                            lc > 0 ? m -> Search.lastConflict(m, 1) :
+                                    cos ? Search::conflictOrderingSearch :
+                                            m -> m);
+        } else {
+            // variable selection
+            defaultValSel = new SearchParams.ValSelConf(
+                    SearchParams.ValueSelection.MIN, opt, 1, opt);
+            defaultVarSel = new SearchParams.VarSelConf(
+                    SearchParams.VariableSelection.DOMWDEG, Integer.MAX_VALUE);
+            // restart policy
+            defaultResConf = new SearchParams.ResConf(
+                    SearchParams.Restart.LUBY, 500, 50_000, true);
+            // other parameters
+            bb.setNogoodOnRestart(true)
+                    .setRestartOnSolution(true)
+                    .setExcludeObjective(true)
+                    .setExcludeViews(false)
+                    .setMetaStrategy(m -> Search.lastConflict(m, 1));
+        }
         bb.setIntVarStrategy((vars) -> defaultVarSel.make().apply(vars, defaultValSel.make().apply(vars[0].getModel())));
-        // restart policy
-        SearchParams.ResConf defaultResConf = new SearchParams.ResConf(
-                SearchParams.Restart.LUBY, 500, 50_000, true);
         bb.setRestartPolicy(defaultResConf.make());
-        // other parameters
-        bb.setNogoodOnRestart(true)
-                .setRestartOnSolution(true)
-                .setExcludeObjective(true)
-                .setExcludeViews(false)
-                .setMetaStrategy(m -> Search.lastConflict(m, 1));
+
         if (level.isLoggable(Level.INFO)) {
             solver.log().println(bb.toString());
         }

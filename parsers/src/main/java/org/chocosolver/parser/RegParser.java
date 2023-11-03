@@ -150,7 +150,7 @@ public abstract class RegParser implements IParser {
             depends = {"-f"},
             forbids = {"-cos"},
             usage = "Tell the solver to use last-conflict reasoning.")
-    protected int lc = 1;
+    protected int lc = 0;
     @Option(name = "-cos",
             depends = {"-f"},
             forbids = {"-lc"},
@@ -229,7 +229,7 @@ public abstract class RegParser implements IParser {
         }
     }
 
-    public void freesearch(Solver solver){
+    public void freesearch(Solver solver) {
         BlackBoxConfigurator bb;
         if (solver.getObjectiveManager().isOptimization()) {
             bb = BlackBoxConfigurator.forCOP();
@@ -253,10 +253,10 @@ public abstract class RegParser implements IParser {
         if (level.isLoggable(Level.INFO)) {
             System.out.printf("%s\n", Arrays.toString(args));
         }
-        if(varsel == null){
+        if (varsel == null) {
             varsel = new SearchParams.VarSelConf(varH, flushRate);
         }
-        if(valsel == null){
+        if (valsel == null) {
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
         }
         createSettings();
