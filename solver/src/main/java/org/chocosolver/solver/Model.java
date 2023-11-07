@@ -179,19 +179,18 @@ public class Model implements IModel {
 
     /**
      * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
+     * The model is named <code>name</code> and is set up with paramaters defined in <code>settings</code>.
      *
-     * @param environment a backtracking environment to allow search
      * @param name        The name of the model (for logging purpose)
      * @param settings    settings to use
      */
-    public Model(IEnvironment environment, String name, Settings settings) {
+    public Model(String name, Settings settings) {
         this.name = name;
         this.vars = new Variable[32];
         this.vIdx = 0;
         this.cstrs = new Constraint[32];
         this.cIdx = 0;
-        this.environment = environment;
+        this.environment = settings.getEnvironmentSupplier().get();
         this.creationTime = System.nanoTime();
         this.cachedConstants = new TIntObjectHashMap<>(16, 1.5f, Integer.MAX_VALUE);
         this.objective = null;
@@ -203,35 +202,13 @@ public class Model implements IModel {
 
     /**
      * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
-     *
-     * @param environment a backtracking environment to allow search
-     * @param name        The name of the model (for logging purpose)
-     */
-    public Model(IEnvironment environment, String name) {
-        this(environment, name, Settings.init());
-    }
-
-    /**
-     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
-     * The model is named <code>name</code> and it uses a specific backtracking <code>environment</code>.
-     *
-     * @param name     The name of the model (for logging purpose)
-     * @param settings settings to use
-     */
-    public Model(String name, Settings settings) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, settings);
-    }
-
-    /**
-     * Creates a Model object to formulate a decision problem by declaring variables and posting constraints.
      * The model is named <code>name</code> and uses the default (trailing) backtracking environment.
      *
      * @param name The name of the model (for logging purpose)
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
+     * @see Model#Model(String, Settings)
      */
     public Model(String name) {
-        this(new EnvironmentBuilder().fromFlat().build(), name, Settings.init());
+        this(name, Settings.init());
     }
 
     /**
@@ -239,10 +216,10 @@ public class Model implements IModel {
      * The model is uses the default (trailing) backtracking environment.
      *
      * @param settings settings to use
-     * @see Model#Model(org.chocosolver.memory.IEnvironment, String, Settings)
+     * @see Model#Model(String, Settings)
      */
     public Model(Settings settings) {
-        this(new EnvironmentBuilder().fromFlat().build(), "Model-" + nextModelNum(), settings);
+        this("Model-" + nextModelNum(), settings);
     }
 
     /**

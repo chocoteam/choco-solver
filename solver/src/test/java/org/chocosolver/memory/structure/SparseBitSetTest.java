@@ -13,6 +13,7 @@ import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateBitSet;
 import org.chocosolver.memory.trailing.EnvironmentTrailing;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.Settings;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -353,7 +354,7 @@ public class SparseBitSetTest {
 
   @Test(groups = "1s", timeOut = 60000)
   public void testBacktracking() {
-    final Model mo = new Model(new EnvironmentTrailing(), "foo");
+    final Model mo = new Model("foo", Settings.init().setEnvironmentSupplier(EnvironmentTrailing::new));
     final IEnvironment env = mo.getEnvironment();
 
     final IStateBitSet ref = env.makeBitSet(1000);
