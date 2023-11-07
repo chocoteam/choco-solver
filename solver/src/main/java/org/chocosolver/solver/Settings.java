@@ -96,6 +96,8 @@ public class Settings {
 
     private final HashMap<String, Object> additionalSettings = new HashMap<>();
 
+    private boolean lcg = false;
+
     private Settings() {
     }
 
@@ -547,7 +549,7 @@ public class Settings {
     }
 
     /**
-     * This method is called in {@link Model#Model(IEnvironment, String, Settings)} to create the
+     * This method is called in {@link Model#Model(String, Settings)} to create the
      * solver to associate with a model.
      *
      * @param model a model to initialize with a solver
@@ -592,6 +594,23 @@ public class Settings {
         return this;
     }
 
+
+    /**
+     * Set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode).
+     * @param isLCG true to set the solver in LCG mode
+     * @return the current instance
+     */
+    public Settings setLCG(boolean isLCG) {
+        this.lcg = isLCG;
+        return this;
+    }
+
+    /**
+     * @return true if the solver is in Lazy Clause Generation mode (in opposition to the full CP mode).
+     */
+    public boolean isLCG() {
+        return this.lcg;
+    }
 
     /**
      * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
