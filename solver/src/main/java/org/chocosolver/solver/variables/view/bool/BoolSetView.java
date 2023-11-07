@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables.view.bool;
 
 import org.chocosolver.memory.IStateBool;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -111,7 +112,7 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean done = false;
         if (!this.contains(value)) {
@@ -298,7 +299,7 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public final boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public final boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)
             return instantiateTo(kTRUE, cause);
@@ -347,13 +348,13 @@ public class BoolSetView<S extends SetVar> extends AbstractView<S> implements Bo
     }
 
     @Override
-    public final boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public final boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value > kFALSE && instantiateTo(value, cause);
     }
 
     @Override
-    public final boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public final boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value < kTRUE && instantiateTo(value, cause);
     }

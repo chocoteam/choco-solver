@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.expression.discrete.arithmetic.ArExpression;
@@ -66,7 +67,28 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean removeValue(int value, ICause cause) throws ContradictionException;
+    default boolean removeValue(int value, ICause cause) throws ContradictionException {
+        return removeValue(value, cause, Reason.undef());
+    }
+
+    /**
+     * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing <code>value</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  value to remove from the domain (int)
+     * @param cause  removal releaser
+     * @param reason the reason why the value is removed
+     * @return true if the value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -110,10 +132,11 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      *
      * @param values set of ordered values to remove
      * @param cause  removal release
+     * @param reason the reason why the values are removed
      * @return true if at least a value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException{
+    default boolean removeValues(IntIterableSet values, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean hasChanged = false, fixpoint;
         int vlb, vub;
@@ -140,15 +163,79 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
                 } while (nlb > Integer.MIN_VALUE && nub > Integer.MIN_VALUE && vub == nub);
             }
             // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(nlb, nub, cause);
+            fixpoint = updateBounds(nlb, nub, cause, reason);
             hasChanged |= fixpoint;
         } while (fixpoint);
         // now deal with holes
-        if(hasEnumeratedDomain()){
+        if (hasEnumeratedDomain()) {
             int value = vlb;
             while (value <= vub) {
-                hasChanged |= removeValue(value, cause);
+                hasChanged |= removeValue(value, cause, reason);
                 value = values.nextValue(value);
+            }
+        }
+        return hasChanged;
+    }
+
+    /**
+     * Removes the value in <code>values</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if removing a value leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if removing the <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to remove
+     * @param cause  removal release
+     * @return true if at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
+        return removeValues(values, cause, Reason.undef());
+    }
+
+    /**
+     * Removes all values from the domain of <code>this</code> except those in <code>values</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If all values are out of the domain,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>if the domain is a subset of values,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>otherwise, if removing all values but <code>values</code> from the domain can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param values set of ordered values to keep in the domain
+     * @param cause  removal cause
+     * @param reason the reason why the values are removed
+     * @return true if a at least a value has been removed, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean removeAllValuesBut(IntIterableSet values, ICause cause, Reason reason) throws ContradictionException {
+        boolean hasChanged = false, fixpoint;
+        int nlb, nub;
+        do {
+            int clb = getLB();
+            int cub = getUB();
+            nlb = values.nextValue(clb - 1);
+            nub = values.previousValue(cub + 1);
+            // the new bounds are now known, delegate to the right method
+            fixpoint = updateBounds(nlb, nub, cause, reason);
+            hasChanged |= fixpoint;
+        } while (fixpoint);
+        // now deal with holes
+        int to = previousValue(nub);
+        if (hasEnumeratedDomain()) {
+            int value = nextValue(nlb);
+            // iterate over the values in the domain, remove the ones that are not in values
+            for (; value <= to; value = nextValue(value)) {
+                if (!values.contains(value)) {
+                    hasChanged |= removeValue(value, cause, reason);
+                }
             }
         }
         return hasChanged;
@@ -172,29 +259,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        boolean hasChanged = false, fixpoint;
-        int nlb, nub;
-        do {
-            int clb = getLB();
-            int cub = getUB();
-            nlb = values.nextValue(clb - 1);
-            nub = values.previousValue(cub + 1);
-            // the new bounds are now known, delegate to the right method
-            fixpoint = updateBounds(nlb, nub, cause);
-            hasChanged |= fixpoint;
-        } while (fixpoint);
-        // now deal with holes
-        int to = previousValue(nub);
-        if(hasEnumeratedDomain()) {
-            int value = nextValue(nlb);
-            // iterate over the values in the domain, remove the ones that are not in values
-            for (; value <= to; value = nextValue(value)) {
-                if (!values.contains(value)) {
-                    hasChanged |= removeValue(value, cause);
-                }
-            }
-        }
-        return hasChanged;
+        return removeAllValuesBut(values, cause, Reason.undef());
     }
 
     /**
@@ -214,7 +279,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the value has been removed, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean removeInterval(int from, int to, ICause cause) throws ContradictionException{
+    default boolean removeInterval(int from, int to, ICause cause) throws ContradictionException {
         assert cause != null;
         if (from <= getLB()) {
             return updateLowerBound(to + 1, cause);
@@ -246,7 +311,28 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the instantiation is done, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean instantiateTo(int value, ICause cause) throws ContradictionException;
+    default boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+        return instantiateTo(value, cause, Reason.undef());
+    }
+
+    /**
+     * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If the domain of <code>this</code> is already instantiated to <code>value</code>,
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>If the domain of <code>this</code> is already instantiated to another value,
+     * then a <code>ContradictionException</code> is thrown,</li>
+     * <li>Otherwise, the domain of <code>this</code> is restricted to <code>value</code> and the observers are notified
+     * and the return value is <code>true</code>.</li>
+     * </ul>
+     *
+     * @param value  instantiation value (int)
+     * @param cause  instantiation releaser
+     * @param reason the reason why the variable is instantiated
+     * @return true if the instantiation is done, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Instantiates the domain of <code>this</code> to <code>value</code>. The instruction comes from <code>propagator</code>.
@@ -294,7 +380,29 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the lower bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateLowerBound(int value, ICause cause) throws ContradictionException;
+    default boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+        return updateLowerBound(value, cause, Reason.undef());
+    }
+
+    /**
+     * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is smaller than the lower bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  new lower bound (included)
+     * @param cause  updating releaser
+     * @param reason the reason why the lower bound is updated
+     * @return true if the lower bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Updates the lower bound of the domain of <code>this</code> to <code>value</code>.
@@ -347,7 +455,29 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    boolean updateUpperBound(int value, ICause cause) throws ContradictionException;
+    default boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+        return updateUpperBound(value, cause, Reason.undef());
+    }
+
+    /**
+     * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <ul>
+     * <li>If <code>value</code> is greater than the upper bound of the domain, nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the upper bound to <code>value</code> leads to a dead-end (domain wipe-out),
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the upper bound to <code>value</code> can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param value  new upper bound (included)
+     * @param cause  update releaser
+     * @param reason the reason why the upper bound is updated
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException;
 
     /**
      * Updates the upper bound of the domain of <code>this</code> to <code>value</code>.
@@ -407,8 +537,37 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @return true if the upper bound has been updated, false otherwise
      * @throws ContradictionException if the domain become empty due to this action
      */
-    default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException{
-        return updateLowerBound(lb, cause) | updateUpperBound(ub, cause);
+    default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
+        return updateBounds(lb, ub, cause, Reason.undef());
+    }
+
+    /**
+     * Updates the lower bound and the upper bound of the domain of <code>this</code> to, resp. <code>lb</code> and <code>ub</code>.
+     * The instruction comes from <code>propagator</code>.
+     * <p>
+     * <ul>
+     * <li>If <code>lb</code> is smaller than the lower bound of the domain
+     * and <code>ub</code> is greater than the upper bound of the domain,
+     * <p>
+     * nothing is done and the return value is <code>false</code>,</li>
+     * <li>if updating the lower bound to <code>lb</code>, or updating the upper bound to <code>ub</code> leads to a dead-end (domain wipe-out),
+     * or if <code>lb</code> is strictly greater than <code>ub</code>,
+     * a <code>ContradictionException</code> is thrown,</li>
+     * <li>otherwise, if updating the lower bound to <code>lb</code> and/or the upper bound to <code>ub</code>
+     * can be done safely can be done safely,
+     * the event type is created (the original event can be promoted) and observers are notified
+     * and the return value is <code>true</code></li>
+     * </ul>
+     *
+     * @param lb     new lower bound (included)
+     * @param ub     new upper bound (included)
+     * @param cause  update cause
+     * @param reason the reason why the bounds are updated
+     * @return true if the upper bound has been updated, false otherwise
+     * @throws ContradictionException if the domain become empty due to this action
+     */
+    default boolean updateBounds(int lb, int ub, ICause cause, Reason reason) throws ContradictionException {
+        return updateLowerBound(lb, cause, reason) | updateUpperBound(ub, cause, reason);
     }
 
     /**
