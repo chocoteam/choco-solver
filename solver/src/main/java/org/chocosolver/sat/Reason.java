@@ -39,6 +39,7 @@ public class Reason implements ICause {
 
     /**
      * Create an undefined reason
+     *
      * @return
      */
     public static Reason undef() {
@@ -47,6 +48,7 @@ public class Reason implements ICause {
 
     /**
      * Create a reason from a clause
+     *
      * @param cl a clause
      * @return a reason
      */
@@ -60,15 +62,17 @@ public class Reason implements ICause {
 
     /**
      * Create a reason from one or more literals
-     * @param p a literal
+     *
      * @param ps other literals
      * @return a reason
      */
-    public static Reason r(int p, int... ps) {
-        if (ps.length == 0) {
-            return new Reason(null, 2, p, 0, 0);
-        } else if (ps.length == 1) {
-            return new Reason(null, 3, p, ps[0], 0);
+    public static Reason r(int... ps) {
+        if (ps.length == 1) {
+            return new Reason(null, 2, ps[0], 0, 0);
+        } else if (ps.length == 2) {
+            return new Reason(null, 3, ps[0], ps[1], 0);
+        } else if (ps.length > 2) {
+            return Reason.r(new MiniSat.Clause(ps));
         } else {
             throw new UnsupportedOperationException();
         }
@@ -85,7 +89,7 @@ public class Reason implements ICause {
             case 2:
                 return "lit:" + d1;
             case 3:
-                return "lits:" + d1 + " /\\ " + d2;
+                return "lits:" + d1 + " ∨ " + d2;
             default:
                 return "undef";
         }
