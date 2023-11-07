@@ -32,7 +32,7 @@ public class SatTest {
 
     @Test(groups = "1s")
     public void test1() {
-        MiniSat sat = new MiniSat();
+        MiniSat sat = new MiniSat(false);
         int a = sat.newVariable();
         int b = sat.newVariable();
         sat.addClause(MiniSat.makeLiteral(a), MiniSat.neg(MiniSat.makeLiteral(b)));
@@ -76,7 +76,7 @@ public class SatTest {
 
     private void run(String path, boolean sat) throws FileNotFoundException {
         String file = this.getClass().getResource(path).getFile();
-        MiniSat solver = new MiniSat();
+        MiniSat solver = new MiniSat(false);
         solver.solve();
         solver.parse(file);
         ESat ret = solver.solve();

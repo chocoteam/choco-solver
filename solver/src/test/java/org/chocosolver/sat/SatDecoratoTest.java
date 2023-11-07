@@ -181,7 +181,7 @@ public class SatDecoratoTest {
         sat.addBoolOrArrayEqualTrue(a, b, c, d);
         sat.addBoolOrArrayEqualTrue(b, c, d);
         sat.addBoolOrArrayEqualTrue(a, c, d);
-        Assert.assertEquals(sat.propagate(), MiniSat.CR_Undef);
+        Assert.assertTrue(sat.propagate());
         Assert.assertTrue(sat.propagateOneLiteral(MiniSat.makeLiteral(a, false)));
         Assert.assertTrue(sat.propagateOneLiteral(MiniSat.makeLiteral(b, false)));
         Assert.assertTrue(sat.propagateOneLiteral(MiniSat.makeLiteral(c, false)));

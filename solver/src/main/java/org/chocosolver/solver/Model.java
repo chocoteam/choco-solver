@@ -10,7 +10,6 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -61,7 +60,6 @@ public class Model implements IModel {
      * Name of internal hook dedicated to store declared {@link org.chocosolver.solver.variables.Task}.
      */
     public static final String TASK_SET_HOOK_NAME = "H_TASKSET";
-
     public static final String MINISAT_HOOK_NAME = "H_MINISAT";
     public static final String IBEX_HOOK_NAME = "H_IBEX";
 
@@ -173,6 +171,8 @@ public class Model implements IModel {
 
     private ModelAnalyser modelAnalyser = null;
 
+    private final boolean lcg;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,6 +198,7 @@ public class Model implements IModel {
         this.settings = settings;
         this.solver = settings.initSolver(this);
         this.groups = new ArrayList<>();
+        this.lcg = settings.isLCG();
     }
 
     /**
