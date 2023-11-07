@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables.view;
 
 import org.chocosolver.memory.IStateBool;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -90,7 +91,7 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public final boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)
             return instantiateTo(kTRUE, cause);
@@ -139,13 +140,13 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public final boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value > kFALSE && instantiateTo(value, cause);
     }
 
     @Override
-    public final boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public final boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value < kTRUE && instantiateTo(value, cause);
     }
