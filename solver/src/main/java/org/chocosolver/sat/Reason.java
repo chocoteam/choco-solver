@@ -21,7 +21,7 @@ import org.chocosolver.solver.ICause;
  */
 public class Reason implements ICause {
 
-    private static final Reason UNDEF = new Reason(null, -1, -1, -1, -1);
+    private static final Reason UNDEF = new Reason(MiniSat.Clause.undef(), 0, -1, -1, -1);
 
     MiniSat.Clause cl;
     int type;
