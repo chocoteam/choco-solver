@@ -10,6 +10,7 @@
 package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -105,7 +106,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)
             return instantiateTo(kTRUE, cause);
@@ -170,7 +171,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         // BEWARE: THIS CODE SHOULD NOT BE MOVED TO THE DOMAIN TO NOT DECREASE PERFORMANCES!
         assert cause != null;
         if ((mValue < kUNDEF && mValue != value) || (value < kFALSE || value > kTRUE)) {
@@ -206,7 +207,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value > kFALSE && instantiateTo(value, cause);
     }
@@ -229,7 +230,7 @@ public class BoolVarImpl extends AbstractVariable implements BoolVar {
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         return value < kTRUE && instantiateTo(value, cause);
     }

@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.impl;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -105,7 +106,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * Any other value removals will be ignored.
      */
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == getLB()) {
             return updateLowerBound(value + 1, cause);
@@ -192,7 +193,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (!this.contains(value)) {
             this.contradiction(cause, MSG_INST);
@@ -230,7 +231,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old < value) {
@@ -271,7 +272,7 @@ public final class IntervalIntVarImpl extends AbstractVariable implements IntVar
      * @throws ContradictionException if the domain become empty due to this action
      */
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old > value) {

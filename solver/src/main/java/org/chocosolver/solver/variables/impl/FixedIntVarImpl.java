@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.impl;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -74,7 +75,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value == constante) {
             assert cause != null;
             this.contradiction(cause, "unique value removal");
@@ -110,7 +111,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value != constante) {
             assert cause != null;
             this.contradiction(cause, "outside domain instantitation");
@@ -119,7 +120,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value > constante) {
             assert cause != null;
             this.contradiction(cause, "outside domain update bound");
@@ -128,7 +129,7 @@ public class FixedIntVarImpl extends AbstractVariable implements IntVar {
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value < constante) {
             assert cause != null;
             this.contradiction(cause, "outside domain update bound");
