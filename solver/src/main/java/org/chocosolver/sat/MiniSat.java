@@ -13,6 +13,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntHeap;
 
@@ -44,8 +45,15 @@ public class MiniSat implements SatFactory, Dimacs {
     // value of an undefined literal
     private static final int litUndef = -2;
     // undefined clause
-    static final Clause CR_Undef = new Clause(new int[0]);
-    static final VarData VD_Undef = new VarData(CR_Undef, -1);
+    public static final Clause C_Undef = Clause.undef();
+    public static final Reason R_Undef = Reason.undef();
+    static final VarData VD_Undef = new VarData(R_Undef, -1);
+    public Clause confl = C_Undef;
+
+    public static final Clause C_Fail = new Clause(new int[]{0, 0});
+    public final Clause short_expl_2 = new Clause(new int[]{0, 0});
+    public final Clause short_expl_3 = new Clause(new int[]{0, 0, 0});
+    static final ChannelInfo CI_Null = new ChannelInfo(null, 0, 0, 0);
 
     // If false, the constraints are already unsatisfiable. No part of
     // the solver state may be used!
@@ -96,6 +104,7 @@ public class MiniSat implements SatFactory, Dimacs {
     ArrayList<Boolean> model = new ArrayList<>();
     TIntArrayList conflict = new TIntArrayList();
     ArrayList<VarData> vardata = new ArrayList<>();
+    ArrayList<ChannelInfo> cinfo = new ArrayList<>();
     int conflicts;
     int decisions;
     int max_literals;
@@ -112,17 +121,24 @@ public class MiniSat implements SatFactory, Dimacs {
     IntHeap order_heap = new IntHeap((a, b) -> activity.get(a) > activity.get(b));
     Random rand;
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
-    public TIntArrayList touched_variables_ = new TIntArrayList();
+    private static boolean debug = false;
 
     /**
      * Create a new instance of MiniSat solver.
      */
-    protected MiniSat() {
+    public MiniSat(boolean addTautology) {
         this.ok_ = true;
         this.qhead_ = 0;
         num_vars_ = 0;
         rand = new Random(random_seed);
-        assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
+        if(addTautology) {
+            int varTrue = newVariable();
+            uncheckedEnqueue(makeLiteral(varTrue, true), R_Undef);
+            int varFalse = newVariable();
+            uncheckedEnqueue(makeLiteral(varFalse, false), R_Undef);
+        }else{
+            assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
+        }
     }
 
     @Override
@@ -136,9 +152,20 @@ public class MiniSat implements SatFactory, Dimacs {
      * @return a variable
      */
     public int newVariable() {
+        return newVariable(CI_Null);
+    }
+
+    /**
+     * Create and return a new variable
+     *
+     * @param ci channel info
+     * @return a variable
+     */
+    public int newVariable(ChannelInfo ci) {
         int v = incrementVariableCounter();
         assignment_.add(v, Boolean.lUndef);
-        vardata.add(new VarData(CR_Undef, 0));
+        vardata.add(new VarData(R_Undef, 0));
+        cinfo.add(ci);
         //activity .push(0);
         activity.add(rnd_init_act ? rand.nextDouble() * 0.00001 : 0);
         seen.clear(v);
@@ -166,7 +193,7 @@ public class MiniSat implements SatFactory, Dimacs {
         assert 0 == trailMarker();
         if (!ok_) return false;
 
-        // Check if clause is satisfied and remove false/duplicated literals:
+        // Check if the clause is satisfied and remove false/duplicated literals:
         ps.sort();
         int lit = litUndef;
         int j = 0;
@@ -188,7 +215,8 @@ public class MiniSat implements SatFactory, Dimacs {
                 return (ok_ = false);
             case 1:
                 uncheckedEnqueue(ps.get(0));
-                return (ok_ = propagate() == CR_Undef);
+                propagate();
+                return (ok_ = (confl == C_Undef));
             default:
                 Clause cr = new Clause(ps.toArray());
                 clauses.add(cr);
@@ -241,18 +269,36 @@ public class MiniSat implements SatFactory, Dimacs {
         return addClause(temporary_add_vector_);
     }
 
-    // Incremental propagation.
-    boolean initPropagator() {
-        touched_variables_.resetQuick();
-        return !ok_;
+    public void addLearnt(TIntList learnt_clause) {
+        for (int v = 0; v < nVars(); v++) {
+            assert valueVar(v) != MiniSat.Boolean.lUndef || order_heap.contains(v) : v + " not heaped";
+        }
+        if (learnt_clause.size() == 1) {
+            uncheckedEnqueue(learnt_clause.get(0));
+        } else {
+            MiniSat.Clause cr = new MiniSat.Clause(learnt_clause.toArray(), true);
+            learnts.add(cr);
+            attachClause(cr);
+            claBumpActivity(cr);
+            uncheckedEnqueue(learnt_clause.get(0), Reason.r(cr));
+        }
+        varDecayActivity();
+        claDecayActivity();
+
+        if (--learntsize_adjust_cnt == 0) {
+            learntsize_adjust_confl *= learntsize_adjust_inc;
+            learntsize_adjust_cnt = (int) learntsize_adjust_confl;
+            max_learnts *= learntsize_inc;
+        }
     }
 
     // Backtrack until a certain level.
-    void cancelUntil(int level) {
+    public void cancelUntil(int level) {
         if (trailMarker() > level) {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
                 assignment_.set(x, Boolean.lUndef);
+                if (debug) System.out.printf("Unfix %s\n", printLit(trail_.get(c)));
                 if (phase_saving > 1 || (phase_saving == 1) && c > trail_markers_.get(trail_markers_.size() - 1))
                     polarity.set(x, sgn(trail_.get(c)));
                 insertVarOrder(x);
@@ -264,7 +310,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // Gives the current decisionlevel.
-    int trailMarker() {
+    public int trailMarker() {
         return trail_markers_.size();
     }
 
@@ -289,32 +335,63 @@ public class MiniSat implements SatFactory, Dimacs {
         return num_vars_++;
     }
 
-    int nVars() {
+    public int nVars() {
         return num_vars_;
     }
 
     // Begins a new decision level.
-    void pushTrailMarker() {
+    public void pushTrailMarker() {
         trail_markers_.add(trail_.size());
     }
 
     // Enqueue a literal. Assumes value of literal is undefined.
-    void uncheckedEnqueue(int l, Clause from) {
+    public void uncheckedEnqueue(int l, Reason from) {
         assert valueLit(l) == Boolean.lUndef;
-        if (assignment_.get(var(l)) == Boolean.lUndef) {
-            touched_variables_.add(l);
+        int v = var(l);
+        if (assignment_.get(v) == Boolean.lUndef) {
+            onLiteralPushed(l);
         }
-        assignment_.set(var(l), makeBoolean(sgn(l)));
-        //vardata.ensureCapacity(var(l));
-        while (vardata.size() < var(l)) {
+        assignment_.set(v, makeBoolean(sgn(l)));
+        //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), from);
+        if (debug) System.out.printf("Fix %s @ %d due to %s\n", printLit(l), trailMarker(), showReason(from));
+        // ensure capacity of vardata
+        while (vardata.size() < v) {
             vardata.add(VD_Undef);
         }
-        vardata.set(var(l), new VarData(from, trailMarker()));
+        vardata.set(v, new VarData(from, trailMarker()));
         trail_.add(l);
+        cinfo.get(v).channel(sgn(l));
     }
 
-    void uncheckedEnqueue(int l) {
-        uncheckedEnqueue(l, CR_Undef);
+    public void onLiteralPushed(int l) {
+        // nothing to do by default.
+    }
+
+    public void uncheckedEnqueue(int l) {
+        uncheckedEnqueue(l, R_Undef);
+    }
+
+    public void cEnqueue(int l, Reason r) {
+        assert valueLit(l) != Boolean.lTrue;
+        int v = var(l);
+        if (valueLit(l) == Boolean.lFalse) {
+            if (r == null || r == R_Undef) {
+                // assert(decisionLevel() == 0);
+                confl = C_Fail; // todo: check
+            } else {
+                confl = getConfl(r, l);
+                confl._s(0, l);
+            }
+            return;
+        }
+        assignment_.set(v, makeBoolean(sgn(l)));
+        //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), r);
+        if (debug) System.out.printf("Fix %s @ %d due to %s\n", printLit(l), trailMarker(), showReason(r));
+        while (vardata.size() < v) {
+            vardata.add(VD_Undef);
+        }
+        vardata.set(v, new VarData(r, trailMarker()));
+        trail_.add(l);
     }
 
     // Attach a clause to watcher lists.
@@ -354,8 +431,8 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // Perform unit propagation. returns true upon success.
-    Clause propagate() {
-        Clause confl = CR_Undef;
+    public boolean propagate() {
+        confl = C_Undef;
         int num_props = 0;
         while (qhead_ < trail_.size()) {
             int p = trail_.get(qhead_++);
@@ -418,9 +495,9 @@ public class MiniSat implements SatFactory, Dimacs {
                         while (i < ws.size()) {
                             ws.set(j++, ws.get(i++));
                         }
-                        touched_variables_.add(first);
+                        onLiteralPushed(first);
                     } else {
-                        uncheckedEnqueue(first, cr);
+                        uncheckedEnqueue(first, Reason.r(cr));
                     }
                 }
             }
@@ -431,7 +508,7 @@ public class MiniSat implements SatFactory, Dimacs {
             }
         }
         propagations += num_props;
-        return confl;
+        return (confl == C_Undef);
     }
 
 
@@ -499,8 +576,8 @@ public class MiniSat implements SatFactory, Dimacs {
         TIntList learnt_clause = new TIntArrayList();
 
         for (; ; ) {
-            Clause confl = propagate();
-            if (confl != CR_Undef) {
+            propagate();
+            if (confl != C_Undef) {
                 // CONFLICT
                 conflicts++;
                 conflictC++;
@@ -509,30 +586,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 learnt_clause.clear();
                 backtrack_level = analyze(confl, learnt_clause);
                 cancelUntil(backtrack_level);
-
-                for (int v = 0; v < nVars(); v++) {
-                    assert valueVar(v) != Boolean.lUndef || order_heap.contains(v) : v + " not heaped";
-                }
-
-                if (learnt_clause.size() == 1) {
-                    uncheckedEnqueue(learnt_clause.get(0));
-                } else {
-                    Clause cr = new Clause(learnt_clause.toArray(), true);
-                    learnts.add(cr);
-                    attachClause(cr);
-                    claBumpActivity(cr);
-                    uncheckedEnqueue(learnt_clause.get(0), cr);
-                }
-
-                varDecayActivity();
-                claDecayActivity();
-
-
-                if (--learntsize_adjust_cnt == 0) {
-                    learntsize_adjust_confl *= learntsize_adjust_inc;
-                    learntsize_adjust_cnt = (int) learntsize_adjust_confl;
-                    max_learnts *= learntsize_inc;
-                }
+                addLearnt(learnt_clause);
 
             } else {
                 // NO CONFLICT
@@ -546,9 +600,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 if (trailMarker() == 0 && !simplify())
                     return ESat.FALSE;
 
-                if (learnts.size() - trail_.size() >= max_learnts)
-                    // Reduce the set of learnt clauses:
-                    reduceDB();
+                reduceDB();
 
                 // New variable decision:
                 decisions++;
@@ -560,7 +612,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
                 // Increase decision level and enqueue 'next'
                 pushTrailMarker();
-                uncheckedEnqueue(next, CR_Undef);
+                uncheckedEnqueue(next, R_Undef);
             }
         }
 
@@ -590,7 +642,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 makeLiteral(next, rnd_pol ? rand.nextDouble() < 0.5 : polarity.get(next));
     }
 
-    int analyze(Clause confl, TIntList out_learnt) {
+    public int analyze(Clause confl, TIntList out_learnt) {
         int pathC = 0;
         int p = litUndef;
 
@@ -600,8 +652,15 @@ public class MiniSat implements SatFactory, Dimacs {
         int index = trail_.size() - 1;
 
         do {
-            assert (confl != CR_Undef); // (otherwise should be UIP)
+            assert (confl != C_Undef); // (otherwise should be UIP)
             Clause c = confl;
+
+            if (debug) {
+                if (p != litUndef) {
+                    c._s(0, p);
+                }
+                System.out.printf("analyze: %s\n", c);
+            }
 
             if (c.learnt())
                 claBumpActivity(c);
@@ -623,7 +682,7 @@ public class MiniSat implements SatFactory, Dimacs {
             //noinspection StatementWithEmptyBody
             while (!seen.get(var(trail_.get(index--)))) ;
             p = trail_.get(index + 1);
-            confl = reason(var(p));
+            confl = getExpl(p);
             seen.clear(var(p));
             pathC--;
 
@@ -632,7 +691,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
         // Simplify conflict clause:
         //
-        int i, j;
+        int i, j = 1;
         analyze_toclear.clear();
         analyze_toclear.addAll(out_learnt);
         /*if (ccmin_mode == 2) {
@@ -649,10 +708,10 @@ public class MiniSat implements SatFactory, Dimacs {
             for (i = j = 1; i < out_learnt.size(); i++) {
                 int x = var(out_learnt.get(i));
 
-                if (reason(x) == CR_Undef)
+                if (getExpl(x) == C_Undef)
                     out_learnt.set(j++, out_learnt.get(i));
                 else {
-                    Clause c = reason(var(out_learnt.get(i)));
+                    Clause c = getExpl(var(out_learnt.get(i)));
                     for (int k = 1; k < c.size(); k++)
                         if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > 0) {
                             out_learnt.set(j++, out_learnt.get(i));
@@ -693,7 +752,8 @@ public class MiniSat implements SatFactory, Dimacs {
     boolean simplify() {
         assert (trailMarker() == 0);
 
-        if (!ok_ || propagate() != CR_Undef)
+        if (ok_) propagate();
+        if (!ok_ || (confl != C_Undef))
             return ok_ = false;
         //System.err.println("TODO : simplify() ");
         // TODO
@@ -721,7 +781,12 @@ public class MiniSat implements SatFactory, Dimacs {
         order_heap.build(vs);
     }
 
-    void reduceDB() {
+    public void reduceDB() {
+        if (learnts.size() - trail_.size() >= max_learnts)
+            doReduceDB();
+    }
+
+    void doReduceDB() {
         int i, j;
         double extra_lim = cla_inc / learnts.size();    // Remove any clause below this activity
 
@@ -745,7 +810,43 @@ public class MiniSat implements SatFactory, Dimacs {
                 (propagation_budget < 0 || propagations < propagation_budget);
     }
 
-    Clause reason(int x) {
+    private Clause getConfl(Reason r, int l) {
+        switch (r.type) {
+            case 0:
+                return r.cl;
+            case 1:
+                throw new UnsupportedOperationException();
+            default:
+                if (r.type == 3) {
+                    short_expl_3._s(1, r.d1);
+                    short_expl_3._s(2, r.d2);
+                    return short_expl_3;
+                } else {
+                    short_expl_2._s(1, r.d1);
+                    return short_expl_2;
+                }
+
+        }
+    }
+
+    Clause getExpl(int p) {
+        Reason r = reason(var(p));
+        switch (r.type) {
+            case 0:
+                return r.cl;
+            case 2:
+                short_expl_2._s(1, r.d1);
+                return short_expl_2;
+            case 3:
+                short_expl_3._s(1, r.d1);
+                short_expl_3._s(2, r.d2);
+                return short_expl_3;
+            default:
+                throw new UnsupportedOperationException();
+        }
+    }
+
+    Reason reason(int x) {
         return vardata.get(x).cr;
     }
 
@@ -754,16 +855,18 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     boolean locked(Clause c) {
+        assert vardata.get(var(c._g(0))).cr.type == 0;
+        Clause cr = vardata.get(var(c._g(0))).cr.cl;
         return valueLit(c._g(0)) == Boolean.lTrue
-                && reason(var(c._g(0))) != CR_Undef
-                && reason(var(c._g(0))) == c;
+                && cr != C_Undef
+                && cr == c;
     }
 
     void removeClause(Clause cr) {
         detachClause(cr);
         // Don't leave pointers to free'd memory!
         if (locked(cr)) {
-            vardata.get(var(cr._g(0))).cr = CR_Undef;
+            vardata.get(var(cr._g(0))).cr = R_Undef;
         }
     }
 
@@ -892,6 +995,54 @@ public class MiniSat implements SatFactory, Dimacs {
         return Boolean.make((byte) (a.value() ^ (b ? 1 : 0)));
     }
 
+    private String printLit(int p) {
+        ChannelInfo ci = cinfo.get(var(p));
+        if (ci != null) {
+            switch (ci.cons_type) {
+                case 1:
+                    int op = ci.val_type * 3 ^ (sgn(p) ? 1 : 0);
+                    switch (op) {
+                        case 0:
+                            return p + ":" + ci.var.getName() + " != " + ci.val;
+                        case 1:
+                            return p + ":" + ci.var.getName() + " == " + ci.val;
+                        case 2:
+                            return p + ":" + ci.var.getName() + " >= " + (ci.val + 1);
+                        case 3:
+                            return p + ":" + ci.var.getName() + " <= " + ci.val;
+                    }
+                default:
+                    throw new UnsupportedOperationException();
+            }
+        }
+        return String.valueOf(p);
+    }
+
+    private String showReason(Reason r) {
+        if (r == null || r == MiniSat.R_Undef) {
+            return "no reason";
+        }
+        StringBuilder st = new StringBuilder();
+        switch (r.type) {
+            case 0:
+                st.append("clause");
+                st.append(" ").append(printLit(r.cl._g(0))).append(" <- ");
+                for (int i = 1; i < r.cl.size(); i++) {
+                    st.append(" ").append(printLit(neg(r.cl._g(i))));//ss << " " << getLitString(toInt(~c[i]));
+                }
+                break;
+            //case 1:
+            //    ss << "absorbed binary clause?";
+            //    break;
+            case 2:
+                st.append("single literal ").append(printLit(neg(r.d1)));
+                break;
+            case 3:
+                st.append("two literals ").append(printLit(neg(r.d1))).append(" & ").append(printLit(neg(r.d2)));
+                break;
+        }
+        return st.toString();
+    }
 
     /**
      * Clause -- a simple class for representing a clause
@@ -902,17 +1053,23 @@ public class MiniSat implements SatFactory, Dimacs {
      */
     public static class Clause {
 
+        private static Clause UNDEF = new Clause(new int[0]);
+
         private final int[] literals_;
         private final boolean learnt;
         private double activity;
 
-        Clause(int[] ps, boolean learnt) {
+        public Clause(int[] ps, boolean learnt) {
             literals_ = ps.clone();
             this.learnt = learnt;
         }
 
         Clause(int[] ps) {
             this(ps, false);
+        }
+
+        public static Clause undef(){
+            return UNDEF;
         }
 
         public int size() {
@@ -933,7 +1090,15 @@ public class MiniSat implements SatFactory, Dimacs {
         }
 
         public String toString() {
-            return Arrays.toString(literals_);
+            StringBuilder st = new StringBuilder();
+            st.append("Size:").append(literals_.length).append(" - ");
+            if (literals_.length > 0) {
+                st.append(literals_[0]).append(" <- ");
+            }
+            for (int i = 1; i < literals_.length; i++) {
+                st.append(neg(literals_[i])).append(" ");
+            }
+            return st.toString();
         }
     }
 
@@ -970,7 +1135,7 @@ public class MiniSat implements SatFactory, Dimacs {
         lUndef((byte) 2);
 
 
-        byte value;
+        final byte value;
 
         Boolean(byte value) {
             this.value = value;
@@ -989,12 +1154,35 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     static class VarData {
-        Clause cr;
+        Reason cr;
         int level;
 
-        public VarData(Clause cr, int level) {
+        public VarData(Reason cr, int level) {
             this.cr = cr;
             this.level = level;
+        }
+    }
+
+    public static interface Channeler {
+        void channel(boolean sign);
+    }
+
+    public static class ChannelInfo implements Channeler {
+        IntVar var;
+        int cons_type;
+        int val_type;
+        int val;
+
+        public ChannelInfo(IntVar var, int ct, int vt, int v) {
+            this.var = var;
+            this.cons_type = ct;
+            this.val_type = vt;
+            this.val = v;
+        }
+
+        @Override
+        public void channel(boolean sign) {
+            // TODO
         }
     }
 }

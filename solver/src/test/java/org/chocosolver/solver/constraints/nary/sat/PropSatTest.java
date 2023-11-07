@@ -240,7 +240,7 @@ public class PropSatTest {
         IntVar var = vars[0].getModel().intVar("X4", -1, 1, false);
         declareDomainNogood(var);
         try {
-            PNG.getMiniSat().touched_variables_.add(7);
+            PNG.getMiniSat().onLiteralPushed(7);
             ((SatDecorator)PNG.getMiniSat()).storeEarlyDeductions();
             ((SatDecorator)PNG.getMiniSat()).applyEarlyDeductions(Cause.Null);
             PNG.doBound(0);

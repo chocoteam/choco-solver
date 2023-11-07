@@ -10,7 +10,6 @@
 package org.chocosolver.solver;
 
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.Propagator;
@@ -167,6 +166,8 @@ public class Model implements IModel {
 
     private ModelAnalyser modelAnalyser = null;
 
+    private final boolean lcg;
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,6 +192,7 @@ public class Model implements IModel {
         this.hooks = new HashMap<>();
         this.settings = settings;
         this.solver = settings.initSolver(this);
+        this.lcg = settings.isLCG();
     }
 
     /**
