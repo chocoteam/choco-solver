@@ -102,11 +102,10 @@ public class TimesTest extends AbstractTernaryTest {
     @Test(groups = "1s", timeOut = 60000)
     public void testJL5() {
         Model s = new Model(
-                new EnvironmentBuilder()
+                Settings.init().setEnvironmentSupplier(() -> new EnvironmentBuilder()
                         .setWorldNumber(65536)
                         .setWorldSize(16)
-                        .build(),
-                "");
+                        .build()));
         IntVar i1 = s.intVar("i1", MIN_VALUE / 10, MAX_VALUE / 10, true);
         IntVar i2 = s.intVar("i2", MIN_VALUE / 10, MAX_VALUE / 10, true);
         s.times(i1, 10000, i2).post();

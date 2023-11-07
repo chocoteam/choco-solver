@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.memory.EnvironmentBuilder;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.solver.constraints.ISatFactory;
 import org.chocosolver.solver.constraints.PropagatorPriority;
@@ -18,10 +19,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Settings for Model and Solver.
@@ -92,6 +90,10 @@ public class Settings {
     private Function<Model, Solver> initSolver = Solver::new;
 
     private final HashMap<String, Object> additionalSettings = new HashMap<>();
+
+    private boolean lcg = false;
+
+    private Supplier<IEnvironment> environmentSupplier = () -> new EnvironmentBuilder().fromFlat().build();
 
     private Settings() {
     }
@@ -167,6 +169,23 @@ public class Settings {
     public Settings setModelChecker(Predicate<Solver> modelChecker) {
         this.modelChecker = modelChecker;
         return this;
+    }
+
+    /**
+     * Set the environment to be used
+     * @param environmentSupplier provide an environment
+     * @return the current instance
+     */
+    public Settings setEnvironmentSupplier(Supplier<IEnvironment> environmentSupplier) {
+        this.environmentSupplier = environmentSupplier;
+        return this;
+    }
+
+    /**
+     * @return the environment builder
+     */
+    public Supplier<IEnvironment> getEnvironmentSupplier() {
+        return environmentSupplier;
     }
 
     /**
@@ -523,7 +542,7 @@ public class Settings {
     }
 
     /**
-     * This method is called in {@link Model#Model(IEnvironment, String, Settings)} to create the
+     * This method is called in {@link Model#Model(String, Settings)} to create the
      * solver to associate with a model.
      *
      * @param model a model to initialize with a solver
@@ -568,6 +587,23 @@ public class Settings {
         return this;
     }
 
+
+    /**
+     * Set the solver to be in Lazy Clause Generation mode (in opposition to the full CP mode).
+     * @param isLCG true to set the solver in LCG mode
+     * @return the current instance
+     */
+    public Settings setLCG(boolean isLCG) {
+        this.lcg = isLCG;
+        return this;
+    }
+
+    /**
+     * @return true if the solver is in Lazy Clause Generation mode (in opposition to the full CP mode).
+     */
+    public boolean isLCG() {
+        return this.lcg;
+    }
 
     /**
      * @return maximum number of learnt clauses to store. When reached, a reduction is applied.
