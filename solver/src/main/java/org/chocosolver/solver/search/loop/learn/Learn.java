@@ -9,9 +9,6 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import org.chocosolver.solver.Solver;
-
-
 
 /**
  * The "Learn" component
@@ -28,11 +25,11 @@ public interface Learn {
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
      * @return <i>true</i> if something is learned (one or more clauses)
      */
-    boolean record(Solver solver);
+    boolean record();
 
     /**
      * Forget some pieces of knowledge.
      */
-    void forget(Solver solver);
+    void forget();
 
 }
