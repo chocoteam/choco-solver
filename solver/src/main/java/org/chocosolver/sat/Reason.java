@@ -74,10 +74,33 @@ public class Reason implements ICause {
         } else if (ps.length > 2) {
             return Reason.r(new MiniSat.Clause(ps));
         } else {
-            throw new UnsupportedOperationException();
+            return Reason.undef();
         }
     }
 
+    public static Reason r(Reason r, int p) {
+        switch (r.type) {
+            case 0: {
+                int[] ps = new int[r.cl.size() + 1];
+                for (int i = 0; i < r.cl.size(); i++) {
+                    ps[i] = r.cl._g(i);
+                }
+                ps[r.cl.size()] = p;
+                return Reason.r(ps);
+            }
+            case 2:
+                return Reason.r(r.d1, p);
+            case 3: {
+                int[] ps = new int[3];
+                ps[0] = r.d1;
+                ps[1] = r.d2;
+                ps[2] = p;
+                return Reason.r(ps);
+            }
+            default:
+                return Reason.r(p);
+        }
+    }
 
     @Override
     public String toString() {
