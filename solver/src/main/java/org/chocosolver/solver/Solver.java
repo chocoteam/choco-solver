@@ -383,22 +383,22 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         // Indicates which decision was previously applied before selecting the move.
         // Always sets to ROOT for the first move
         M.setTopDecisionPosition(0);
-        mModel.getEnvironment().worldPush(); // store state before initial propagation; w = 0 -> 1
+        pushTrail(); // store state before initial propagation; w = 0 -> 1
         try {
             checkTasks();
             mMeasures.incFixpointCount();
             doPropagate();
             action = extend;
-            mModel.getEnvironment().worldPush(); // store state after initial propagation; w = 1 -> 2
+            pushTrail(); // store state after initial propagation; w = 1 -> 2
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
-            mModel.getEnvironment().worldPush(); // store another time for restart purpose: w = 2 -> 3
+            pushTrail(); // store another time for restart purpose: w = 2 -> 3
         } catch (ContradictionException ce) {
             engine.flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
             L.record();
             L.forget();
-            mModel.getEnvironment().worldPop();
+            cancelTrail();
             stop = true;
             ok = false;
         }
@@ -423,7 +423,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         }
         restarter.init();
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
-            mModel.getEnvironment().worldPop();
+            cancelTrail();
             feasible = FALSE;
             engine.flush();
             getMeasures().incFailCount();
@@ -464,6 +464,20 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                 tset.get(i).ensureBoundConsistency();
             }
         }
+    }
+
+    /**
+     * Push a world on the environment's stack, and same for MiniSat if relevant
+     */
+    public void pushTrail() {
+        mModel.getEnvironment().worldPush();
+    }
+
+    /**
+     * Cancel the last pushed world, and same for MiniSat if relevant
+     */
+    public void cancelTrail() {
+        mModel.getEnvironment().worldPop();
     }
 
     /**
@@ -552,7 +566,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param left true if we are branching on the left false otherwise
      */
-    protected void propagate(boolean left) {
+    private void propagate(boolean left) {
         searchMonitors.beforeDownBranch(left);
         try {
             mMeasures.incFixpointCount();
@@ -571,7 +585,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Search loop extend phase
      */
-    protected void extend() {
+    private void extend() {
         searchMonitors.beforeOpenNode();
         mMeasures.incNodeCount();
         action = propagate;
@@ -586,7 +600,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Search loop repair phase
      */
-    protected void repair() {
+    private void repair() {
         L.record();
         // this is done before the reparation,
         // since restart is a move which can stop the search if the cut fails
@@ -779,7 +793,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     public void restart() {
         searchMonitors.beforeRestart();
         restoreRootNode();
-        mModel.getEnvironment().worldPush();
+        pushTrail();
         getMeasures().incRestartCount();
         try {
             objectivemanager.postDynamicCut();
@@ -801,7 +815,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         IEnvironment environment = mModel.getEnvironment();
         while (environment.getWorldIndex() > searchWorldIndex) {
             getMeasures().incBackTrackCount();
-            environment.worldPop();
+            cancelTrail();
         }
         dpath.synchronize();
     }
