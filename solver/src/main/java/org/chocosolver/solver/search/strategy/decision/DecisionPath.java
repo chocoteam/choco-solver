@@ -85,7 +85,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      *
      * @param decision the decision to add
      */
-    public void pushDecision(Decision decision) {
+    public void pushDecision(Decision<?> decision) {
         int p = last.get();
         decision.setPosition(p);
         if(decisions.size() == p){
@@ -96,7 +96,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     }
 
     /**
-     * Synchronizes the decision path after a backtrack.
+     * Synchronizes the decision path after a backtracking.
      * Removes and frees all decisions with level greater or equal to the current level.
      * Recall that the very first decision, {@link RootDecision#ROOT}, can not be removed from this.
      */
@@ -105,7 +105,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
     }
 
     /**
-     * Synchronizes the decision path after a backtrack.
+     * Synchronizes the decision path after a backtracking.
      * Removes all decisions with level greater or equal to the current level.
      * Recall that the very first decision, {@link RootDecision#ROOT}, can not be removed from this.
      * @param free set to <i>true</i> to synchronize <b>and</b> free out-dated decisions
@@ -114,7 +114,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         if (decisions.size() > 1) { // never remove ROOT decision.
             int t = last.get();
             for (int f = decisions.size() - 1; f >= t; f--) {
-                Decision d = decisions.remove(f);
+                Decision<?> d = decisions.remove(f);
                 if(free)d.free();
             }
         }
@@ -150,7 +150,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
      * @throws IndexOutOfBoundsException if the index is out of range
      *         (<tt>index &lt; 0 || index &gt;= size()</tt>)
      */
-    public Decision getDecision(int i) {
+    public Decision<?> getDecision(int i) {
         if (i < 0 || i >= decisions.size()) {
             throw new IndexOutOfBoundsException("Index: " + i + ", Size: " + decisions.size());
         }
@@ -176,7 +176,7 @@ public class DecisionPath extends DecisionMaker implements Serializable {
         StringBuilder st = new StringBuilder();
         int lst = last.get();
         if (lst < decisions.size()) {
-            Decision decision = decisions.get(lst);
+            Decision<?> decision = decisions.get(lst);
             st.append(String.format("[%d/%d] %s",
                     decision.getArity() - decision.triesLeft() + 1, decision.getArity(), decision)
             );
