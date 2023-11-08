@@ -110,7 +110,7 @@ public final class IntDomainImpact implements IntValueSelector {
                 || dop == DecisionOperatorFactory.makeIntReverseSplit() && val == var.getLB()) {
             return 1D;
         }
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
         try {
             var.instantiateTo(val, Cause.Null);
             model.getSolver().getEngine().propagate();
@@ -118,8 +118,8 @@ public final class IntDomainImpact implements IntValueSelector {
             return 1D - (after / before);
         } catch (ContradictionException e) {
             model.getSolver().getEngine().flush();
-            model.getEnvironment().worldPop();
-            model.getEnvironment().worldPush();
+            model.getSolver().cancelTrail();
+            model.getSolver().pushTrail();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 var.removeValue(val, Cause.Null);
@@ -129,7 +129,7 @@ public final class IntDomainImpact implements IntValueSelector {
             }
             return 1D;
         }finally {
-            model.getEnvironment().worldPop();
+            model.getSolver().cancelTrail();
         }
     }
 }

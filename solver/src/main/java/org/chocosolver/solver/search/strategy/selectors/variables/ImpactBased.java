@@ -309,7 +309,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * @return the impact I(v = a)
      */
     private double computeImpact(IntVar v, int a, double before) {
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
         double after;
         try {
             v.instantiateTo(a, this);
@@ -318,8 +318,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
             model.getSolver().getEngine().flush();
-            model.getEnvironment().worldPop();
-            model.getEnvironment().worldPush();
+            model.getSolver().cancelTrail();
+            model.getSolver().pushTrail();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 v.removeValue(a, this);
@@ -330,7 +330,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             return 1.0d;
         } finally {
-            model.getEnvironment().worldPop();
+            model.getSolver().cancelTrail();
         }
     }
 
@@ -343,7 +343,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
      * @return the impact I(v = a)
      */
     private double computeImpactB(IntVar v, int a, int b, double before) {
-        model.getEnvironment().worldPush();
+        model.getSolver().pushTrail();
         double after;
         try {
             v.updateBounds(a, b, this);
@@ -352,8 +352,8 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             return 1.0d - (after / before);
         } catch (ContradictionException e) {
             model.getSolver().getEngine().flush();
-            model.getEnvironment().worldPop();
-            model.getEnvironment().worldPush();
+            model.getSolver().cancelTrail();
+            model.getSolver().pushTrail();
             // if the value leads to fail, then the value can be removed from the domain
             try {
                 v.removeInterval(a, b, this);
@@ -364,7 +364,7 @@ public class ImpactBased extends AbstractStrategy<IntVar> implements IMonitorDow
             }
             return 1.0d;
         } finally {
-            model.getEnvironment().worldPop();
+            model.getSolver().cancelTrail();
         }
     }
 

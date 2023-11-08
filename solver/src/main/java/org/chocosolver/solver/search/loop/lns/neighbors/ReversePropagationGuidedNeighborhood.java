@@ -9,18 +9,15 @@
  */
 package org.chocosolver.solver.search.loop.lns.neighbors;
 
-import java.util.ArrayList;
-import java.util.BitSet;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.MathUtils;
+
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * A Propagation Guided LNS
@@ -125,7 +122,7 @@ public class ReversePropagationGuidedNeighborhood extends IntNeighbor{
             if (variables[id].contains(values[id])) {  // to deal with objective variable and related
                 logSum += MathUtils.log2(variables[id].getDomainSize());
 
-                mModel.getEnvironment().worldPush();
+                mModel.getSolver().pushTrail();
                 variables[id].instantiateTo(values[id], Cause.Null);
                 mModel.getSolver().propagate();
                 fragment.clear(id);
@@ -141,7 +138,7 @@ public class ReversePropagationGuidedNeighborhood extends IntNeighbor{
                         }
                     }
                 }
-                mModel.getEnvironment().worldPop();
+                mModel.getSolver().cancelTrail();
                 candidates = IntStream.range(0, n)
                         .filter(i -> fragment.get(i) && all[i] > 0)
                         .boxed()
