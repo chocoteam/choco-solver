@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.propagation;
 
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
@@ -26,6 +28,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static org.chocosolver.sat.MiniSat.C_Undef;
 
 /**
  * This engine is priority-driven constraint-oriented seven queues engine.
@@ -46,6 +50,10 @@ public class PropagationEngine {
      * The model declaring this engine
      */
     final Model model;
+    /**
+     * The SAT solver, required for LCG mode
+     */
+    final MiniSat sat;
     /**
      * The array of propagators to execute
      */
@@ -81,13 +89,13 @@ public class PropagationEngine {
     private boolean init;
     /**
      * When set to '0b00', this works as a constraint-oriented propagation engine;
-     * when set to '0b01', this workds as an hybridization between variable and constraint oriented
+     * when set to '0b01', this works as a hybridization between variable and constraint oriented
      * propagation engine.
-     * when set to '0b10', this workds as a variable- oriented propagation engine.
+     * when set to '0b10', this works as a variable-oriented propagation engine.
      */
     private final byte hybrid;
     /**
-     * For dynamyc addition, avoid creating a new lambda at each call
+     * For dynamic addition, avoid creating a new lambda at each call
      */
     @SuppressWarnings("Convert2Diamond")
     private final Consumer<Propagator<?>> consumer = new Consumer<Propagator<?>>() {
@@ -101,11 +109,12 @@ public class PropagationEngine {
      * A seven-queue propagation engine.
      * Each of the seven queues deals with on priority.
      * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
-     * The lowest priority queue is emptied before one element of the second lowest queue is popped, etc.
+     * The lowest priority queue is emptied before one element of the second-lowest queue is popped, etc.
      *
      * @param model the declaring model
+     * @param sat   the SAT solver, required for LCG mode
      */
-    public PropagationEngine(Model model) {
+    public PropagationEngine(Model model, MiniSat sat) {
         this.model = model;
         int nbQueues = model.getSettings().getMaxPropagatorPriority() + 1;
         //noinspection unchecked
@@ -118,6 +127,19 @@ public class PropagationEngine {
         this.dynPropagators = new DynPropagators();
         this.propagators = new ArrayList<>();
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
+        this.sat = sat;
+    }
+
+    /**
+     * A seven-queue propagation engine.
+     * Each of the seven queues deals with on priority.
+     * When a propagator needs to be executed, it is scheduled in the queue corresponding to its priority.
+     * The lowest priority queue is emptied before one element of the second-lowest queue is popped, etc.
+     *
+     * @param model the declaring model
+     */
+    public PropagationEngine(Model model) {
+        this(model, null);
     }
 
     /**
@@ -148,24 +170,29 @@ public class PropagationEngine {
                     });
             }
             for (int i = 0; i < propagators.size(); i++) {
-                Propagator<?> propagator = propagators.get(i);
-                if (propagator.getPriority().getValue() >= pro_queue.length) {
-                    throw new SolverException(
-                            propagator+
-                            "\nThis propagator declares a priority (" +
-                            propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
-                            ") is greater than the maximum allowed priority (" +
-                            model.getSettings().getMaxPropagatorPriority() +
-                            ").\n" +
-                            "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
-                            (propagator.getPriority().getValue() + 1) +
-                            "));`)  " +
-                            "or decrease the propagator priority.");
-                }
-                propagator.setPosition(i);
+                Propagator<?> propagator = getPropagator(i);
                 awake_queue.addLast(propagator);
             }
         }
+    }
+
+    private Propagator<?> getPropagator(int i) {
+        Propagator<?> propagator = propagators.get(i);
+        if (propagator.getPriority().getValue() >= pro_queue.length) {
+            throw new SolverException(
+                    propagator+
+                    "\nThis propagator declares a priority (" +
+                    propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
+                    ") is greater than the maximum allowed priority (" +
+                    model.getSettings().getMaxPropagatorPriority() +
+                    ").\n" +
+                    "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
+                    (propagator.getPriority().getValue() + 1) +
+                    "));`)  " +
+                    "or decrease the propagator priority.");
+        }
+        propagator.setPosition(i);
+        return propagator;
     }
 
     /**
@@ -184,6 +211,7 @@ public class PropagationEngine {
      * @throws ContradictionException if a contradiction occurs
      */
     public void propagate() throws ContradictionException {
+        propagateSat();
         activatePropagators();
         do {
             manageModifications();
@@ -200,8 +228,18 @@ public class PropagationEngine {
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
+                propagateSat();
             }
         } while (!var_queue.isEmpty());
+    }
+
+    private void propagateSat() throws ContradictionException {
+        if (sat != null) {
+            sat.propagate();
+            if (sat.confl != C_Undef) {
+                model.getSolver().throwsException(Cause.Sat, null, null); //todo better !
+            }
+        }
     }
 
     protected void propagateEvents() throws ContradictionException {
@@ -244,6 +282,7 @@ public class PropagationEngine {
             while (!var_queue.isEmpty()) {
                 var_queue.pollFirst().schedulePropagators(this);
             }
+            propagateSat();
         }
     }
 
@@ -261,7 +300,7 @@ public class PropagationEngine {
     }
 
     /**
-     * Flush <code>this</code>, ie. remove every pending events
+     * Flush <code>this</code>, i.e. remove every pending events
      */
     public void flush() {
         if (lastProp != null) {
@@ -310,7 +349,7 @@ public class PropagationEngine {
     }
 
     /**
-     * Exeucte a delayed propagator
+     * Execute a delayed propagator
      *
      * @param propagator propagator to execute
      * @param type       type of event to execute
