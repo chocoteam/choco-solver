@@ -10,6 +10,7 @@
 package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
+import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.InvalidSolutionException;
@@ -83,7 +84,7 @@ import static org.chocosolver.util.ESat.*;
  * @author Charles Prud'homme
  * @since 01/09/15.
  */
-public class Solver implements ISolver, IMeasures, IOutputFactory {
+public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     /**
      * Define the possible actions of SearchLoop
@@ -118,40 +119,44 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * The learning component of this search loop
      */
-    protected Learn L;
+    private Learn L;
 
     /**
      * The moving component of this search loop
      */
-    protected Move M;
+    private Move M;
 
     /**
      * The declaring model
      */
-    protected final Model mModel;
+    private final Model mModel;
 
+    /**
+     * SAT solver, only for LCG
+     */
+    private final MiniSat mSat;
     /**
      * The objective manager declare
      */
     @SuppressWarnings({"WeakerAccess", "rawtypes"})
-    protected IObjectiveManager objectivemanager;
+    private IObjectiveManager objectivemanager;
 
     /**
      * The next action to execute in the search <u>loop</u>
      */
-    protected Action action;
+    private Action action;
 
     /**
      * The measure recorder to keep up to date
      */
     @SuppressWarnings("WeakerAccess")
-    protected MeasuresRecorder mMeasures;
+    private final MeasuresRecorder mMeasures;
 
     /**
      * The current decision
      */
     @SuppressWarnings("WeakerAccess")
-    protected DecisionPath dpath;
+    private final DecisionPath dpath;
     /**
      * Index of the initial world, before initialization.
      * May be different from 0 if some external backups have been made.
@@ -166,7 +171,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * List of stopping criteria.
      * When at least one is satisfied, the search loop ends.
      */
-    protected List<Criterion> criteria;
+    private final List<Criterion> criteria;
 
     /**
      * Indicates if the default search loop is in use (set to <tt>true</tt> in that case).
@@ -182,23 +187,23 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * List of search monitors attached to this search loop
      */
     @SuppressWarnings("WeakerAccess")
-    protected SearchMonitorList searchMonitors;
+    private final SearchMonitorList searchMonitors;
 
     /**
      * The propagation engine to use
      */
-    protected PropagationEngine engine;
+    private PropagationEngine engine;
     /**
      * Internal unique contradiction exception, used on propagation failures
      */
-    protected final ContradictionException exception;
+    private final ContradictionException exception;
     /**
      * Problem feasbility:
      * - UNDEFINED if unknown,
      * - TRUE if satisfiable,
      * - FALSE if unsatisfiable
      */
-    protected ESat feasible = ESat.UNDEFINED;
+    private ESat feasible = ESat.UNDEFINED;
 
     /**
      * Counter that indicates how many world should be rolled back when backtracking
@@ -208,7 +213,7 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
     /**
      * Set to <tt>true</tt> to stop the search loop
      **/
-    protected boolean stop;
+    private boolean stop;
 
     /**
      * Set to <tt>true</tt> when no more reparation can be achieved, ie entire search tree explored.
@@ -244,9 +249,8 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      *
      * @param aModel the target model
      */
-    protected Solver(Model aModel) {
+    Solver(Model aModel) {
         mModel = aModel;
-        engine = new PropagationEngine(mModel);
         exception = new ContradictionException();
         objectivemanager = ObjectiveFactory.SAT();
         dpath = new DecisionPath(aModel.getEnvironment());
@@ -259,9 +263,15 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
         M = new MoveBinaryDFS();
         L = new LearnNothing();
         restarter = AbstractRestart.NO_RESTART;
+        if (aModel.getSettings().isLCG()) {
+            mSat = new MiniSat(true);
+        }else{
+            mSat = null;
+        }
+        engine = new PropagationEngine(mModel, mSat);
     }
 
-    public final void throwsException(ICause c, Variable v, String s) throws ContradictionException {
+    public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
         throw exception.set(c, v, s);
     }
 
@@ -357,11 +367,11 @@ public class Solver implements ISolver, IMeasures, IOutputFactory {
      * Preparation of the search:
      * - start time recording,
      * - store root world
-     * - push a back up world,
+     * - push a backup world,
      * - run the initial propagation,
      * - initialize the Move and the search strategy
      */
-    protected boolean initialize() {
+    private boolean initialize() {
         boolean ok = true;
         checkDeclaredConstraints();
         engine.initialize();
