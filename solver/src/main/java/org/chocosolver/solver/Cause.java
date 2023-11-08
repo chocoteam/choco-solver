@@ -25,5 +25,12 @@ public enum Cause implements ICause {
         public void forEachIntVar(Consumer<IntVar> action) {
 
         }
+    },
+
+    Sat {
+        @Override
+        public void forEachIntVar(Consumer<IntVar> action) {
+
+        }
     }
 }
