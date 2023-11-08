@@ -746,7 +746,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                 added.clear();
                 while (solutions.size() == 0 || solutions.size() == pivot) {
                     solver.reset();
-                    model.getEnvironment().worldPush(); // required to make sure initial propagation can be undone
+                    solver.pushTrail(); // required to make sure initial propagation can be undone
                     try {
                         solver.propagate();
                     } catch (ContradictionException e) {
@@ -771,7 +771,7 @@ public interface IResolutionHelper extends ISelf<Solver> {
                     }
                     IntVar[] chosenVars = selectedVariables.toArray(new IntVar[0]);
                     Tuples tuples = TuplesFactory.randomTuples(probaTuple, random, chosenVars);
-                    model.getEnvironment().worldPop(); // undo initial propagation
+                    solver.cancelTrail(); // undo initial propagation
                     solver.getEngine().reset(); // prepare the addition of the new constraint
                     Constraint currentConstraint = model.table(chosenVars, tuples);
                     currentConstraint.post();

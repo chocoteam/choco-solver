@@ -129,7 +129,7 @@ public class MoveLNS implements Move {
             if (freshRestart) {
                 assert solver.getDecisionPath().size() == 1;
                 assert solver.getDecisionPath().getDecision(0) == RootDecision.ROOT;
-                solver.getEnvironment().worldPush();
+                solver.pushTrail();
                 if(prop == null){
                     prop = new PropLNS(solver.getModel().intVar(2));
                     new Constraint("LNS", prop).post();
