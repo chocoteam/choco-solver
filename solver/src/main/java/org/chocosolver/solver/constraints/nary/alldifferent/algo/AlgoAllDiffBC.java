@@ -13,9 +13,8 @@ import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.sort.ArraySort;
+import org.chocosolver.util.sort.IntComparator;
 import org.chocosolver.util.tools.MathUtils;
-
-import java.util.Comparator;
 
 public class AlgoAllDiffBC {
 
@@ -26,7 +25,13 @@ public class AlgoAllDiffBC {
 
     private int nbBounds;
 
-    private Interval[] intervals, minsorted, maxsorted;
+    private Interval[] intervals;
+    private int[] minsorted;
+    private int[] maxsorted;
+
+    private IntComparator minComp;
+    private IntComparator maxComp;
+
 
     private final Propagator<?> aCause;
     private IntVar[] vars;
@@ -46,50 +51,31 @@ public class AlgoAllDiffBC {
             h = new int[2 * n + 2];
             bounds = new int[2 * n + 2];
             intervals = new Interval[n];
-            minsorted = new Interval[n];
-            maxsorted = new Interval[n];
+            minsorted = new int[n];
+            maxsorted = new int[n];
             for (int i = 0; i < n; i++) {
                 intervals[i] = new Interval();
             }
-            sorter = new ArraySort<>(n, true, false);
+            sorter = new ArraySort<>(n, false, true);
         }
         for (int i = 0; i < n; i++) {
-            Interval interval = intervals[i];
-            interval.var = vars[i];
-            minsorted[i] = interval;
-            maxsorted[i] = interval;
+            minsorted[i] = i;
+            maxsorted[i] = i;
         }
+        minComp = (i1, i2) -> MathUtils.safeSubstract(intervals[i1].lb, intervals[i2].lb);
+        maxComp = (i1, i2) -> MathUtils.safeSubstract(intervals[i1].ub, intervals[i2].ub);
     }
 
     //****************************************************************************************************************//
     //****************************************************************************************************************//
     //****************************************************************************************************************//
-
-    private enum SORT implements Comparator<Interval> {
-        MAX {
-            @Override
-            public final int compare(Interval o1, Interval o2) {
-                return MathUtils.safeSubstract(o1.ub, o2.ub);
-            }
-        },
-        MIN {
-            @Override
-            public final int compare(Interval o1, Interval o2) {
-                return MathUtils.safeSubstract(o1.lb,o2.lb);
-            }
-        },
-    }
 
     // returns true iff at least one bound update has been done
     public boolean filter() throws ContradictionException {
-        boolean again;
         boolean hasFiltered = false;
-        do {
-            sortIt();
-            again = filterLower();
-            again |= filterUpper();
-            hasFiltered |= again;
-        } while (again);
+        sortIt();
+        filterLower();
+        filterUpper();
         return hasFiltered;
     }
 
@@ -97,14 +83,14 @@ public class AlgoAllDiffBC {
         int n = vars.length;
         IntVar vt;
         for (int i = 0; i < n; i++) {
-            vt = intervals[i].var;
+            vt = vars[i];
             intervals[i].lb = vt.getLB();
-            intervals[i].ub = vt.getUB();
+            intervals[i].ub = vt.getUB() + 1;
         }
-        sorter.sort(minsorted, n, SORT.MIN);
-        sorter.sort(maxsorted, n, SORT.MAX);
-        int min = minsorted[0].lb;
-        int max = maxsorted[0].ub + 1;
+        sorter.sort(minsorted, n, minComp);
+        sorter.sort(maxsorted, n, maxComp);
+        int min = intervals[minsorted[0]].lb;
+        int max = intervals[maxsorted[0]].ub;
         int last = min - 2;
         int nb = 0;
         bounds[0] = last;
@@ -114,19 +100,19 @@ public class AlgoAllDiffBC {
                 if (min != last) {
                     bounds[++nb] = last = min;
                 }
-                minsorted[i].minrank = nb;
+                intervals[minsorted[i]].minrank = nb;
                 if (++i < this.vars.length) {
-                    min = minsorted[i].lb;
+                    min = intervals[minsorted[i]].lb;
                 }
             } else {
                 if (max != last) {
                     bounds[++nb] = last = max;
                 }
-                maxsorted[j].maxrank = nb;
+                intervals[maxsorted[j]].maxrank = nb;
                 if (++j == this.vars.length) {
                     break;
                 }
-                max = maxsorted[j].ub + 1;
+                max = intervals[maxsorted[j]].ub;
             }
         }
         this.nbBounds = nb;
@@ -164,9 +150,9 @@ public class AlgoAllDiffBC {
             d[i] = bounds[i] - bounds[i - 1];
         }
         for (int i = 0; i < this.vars.length; i++) {
-            int x = maxsorted[i].minrank;
-            int y = maxsorted[i].maxrank;
-            int z = pathmax(t, x + 1);
+            int minrank = intervals[maxsorted[i]].minrank;
+            int y = intervals[maxsorted[i]].maxrank;
+            int z = pathmax(t, minrank + 1);
             int j = t[z];
 
             if (--d[z] == 0) {
@@ -174,17 +160,18 @@ public class AlgoAllDiffBC {
                 z = pathmax(t, t[z]);
                 t[z] = j;
             }
-            pathset(t, x + 1, z, z);
+            pathset(t, minrank + 1, z, z);
             if (d[z] < bounds[z] - bounds[y]) {
                 aCause.fails();
             }
-            if (h[x] > x) {
-                int w = pathmax(h, h[x]);
-                if (maxsorted[i].var.updateLowerBound(bounds[w], aCause)) {
+            if (h[minrank] > minrank) {
+                int maxrank = pathmax(h, h[minrank]);
+                int hall_max = bounds[maxrank];
+                if (vars[maxsorted[i]].updateLowerBound(hall_max, aCause)) {
                     filter = true;
-                    maxsorted[i].lb = maxsorted[i].var.getLB();//bounds[w];
+                    intervals[maxsorted[i]].lb = hall_max;//bounds[maxrank];
                 }
-                pathset(h, x, w, w);
+                pathset(h, minrank, maxrank, maxrank);
             }
             if (d[z] == bounds[z] - bounds[y]) {
                 pathset(h, h[y], j - 1, y);
@@ -201,38 +188,38 @@ public class AlgoAllDiffBC {
             d[i] = bounds[i + 1] - bounds[i];
         }
         for (int i = this.vars.length - 1; i >= 0; i--) {
-            int x = minsorted[i].maxrank;
-            int y = minsorted[i].minrank;
-            int z = pathmin(t, x - 1);
+            int maxrank = intervals[minsorted[i]].maxrank;
+            int minrank = intervals[minsorted[i]].minrank;
+            int z = pathmin(t, maxrank - 1);
             int j = t[z];
             if (--d[z] == 0) {
                 t[z] = z - 1;
                 z = pathmin(t, t[z]);
                 t[z] = j;
             }
-            pathset(t, x - 1, z, z);
-            if (d[z] < bounds[y] - bounds[z]) {
+            pathset(t, maxrank - 1, z, z);
+            if (d[z] < bounds[minrank] - bounds[z]) {
                 aCause.fails();
             }
-            if (h[x] < x) {
-                int w = pathmin(h, h[x]);
-                if (minsorted[i].var.updateUpperBound(bounds[w] - 1, aCause)) {
+            if (h[maxrank] < maxrank) {
+                int w = pathmin(h, h[maxrank]);
+                int hall_min = bounds[w];
+                if (vars[minsorted[i]].updateUpperBound(hall_min - 1, aCause)) {
                     filter = true;
-                    minsorted[i].ub = minsorted[i].var.getUB();//bounds[w] - 1;
+                    intervals[minsorted[i]].ub = hall_min;//bounds[w] - 1;
                 }
-                pathset(h, x, w, w);
+                pathset(h, maxrank, w, w);
             }
-            if (d[z] == bounds[y] - bounds[z]) {
-                pathset(h, h[y], j + 1, y);
-                h[y] = j + 1;
+            if (d[z] == bounds[minrank] - bounds[z]) {
+                pathset(h, h[minrank], j + 1, minrank);
+                h[minrank] = j + 1;
             }
         }
         return filter;
     }
 
-    private static class Interval  {
+    private static class Interval {
         private int minrank, maxrank;
-        private IntVar var;
         private int lb, ub;
     }
 }
