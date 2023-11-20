@@ -77,8 +77,8 @@ public class MiniSat implements SatFactory, Dimacs {
     int qhead_;
     // Number of variables
     int num_vars_;
-
-    int ccmin_mode = 1; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
+    int rootlvl = 0;
+    int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
     int phase_saving = 2; // Controls the level of phase saving (0=none, 1=limited, 2=full)
     double cla_inc = 1;
     double var_inc = 1;
@@ -131,13 +131,17 @@ public class MiniSat implements SatFactory, Dimacs {
         this.qhead_ = 0;
         num_vars_ = 0;
         rand = new Random(random_seed);
-        if(addTautology) {
+        if (addTautology) {
             int varTrue = newVariable();
-            uncheckedEnqueue(makeLiteral(varTrue, true), R_Undef);
+            uncheckedEnqueue(makeLiteral(varTrue, true));
             int varFalse = newVariable();
-            uncheckedEnqueue(makeLiteral(varFalse, false), R_Undef);
-        }else{
-            assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
+            uncheckedEnqueue(makeLiteral(varFalse, false));
+            // permanently seen, todo: check others?
+            seen.set(varTrue);
+            seen.set(varFalse);
+        } else {
+            // required because variable are numbered from 1
+            assignment_.add(Boolean.lUndef);
         }
         Clause.counter = 0;
     }
@@ -165,7 +169,7 @@ public class MiniSat implements SatFactory, Dimacs {
     public int newVariable(ChannelInfo ci) {
         int v = incrementVariableCounter();
         assignment_.add(v, Boolean.lUndef);
-        vardata.add(new VarData(R_Undef, 0));
+        vardata.add(VD_Undef);
         cinfo.add(ci);
         //activity .push(0);
         activity.add(rnd_init_act ? rand.nextDouble() * 0.00001 : 0);
@@ -293,6 +297,12 @@ public class MiniSat implements SatFactory, Dimacs {
         }
     }
 
+
+    // Backtrack to the previous level.
+    public void cancel() {
+        cancelUntil(trailMarker() - 1);
+    }
+
     // Backtrack until a certain level.
     public void cancelUntil(int level) {
         if (trailMarker() > level) {
@@ -313,6 +323,11 @@ public class MiniSat implements SatFactory, Dimacs {
     // Gives the current decisionlevel.
     public int trailMarker() {
         return trail_markers_.size();
+    }
+
+    // Overwrite the default root level (namely 0) -- for lcg
+    public void setRootLevel() {
+        rootlvl = trailMarker();
     }
 
     // The current value of a variable.
@@ -347,7 +362,7 @@ public class MiniSat implements SatFactory, Dimacs {
 
     // Enqueue a literal. Assumes value of literal is undefined.
     public void uncheckedEnqueue(int l, Reason from) {
-        assert valueLit(l) == Boolean.lUndef;
+        assert valueLit(l) == Boolean.lUndef : "l: " + printLit(l) + " from: " + from;
         int v = var(l);
         if (assignment_.get(v) == Boolean.lUndef) {
             onLiteralPushed(l);
@@ -668,11 +683,11 @@ public class MiniSat implements SatFactory, Dimacs {
 
             for (int j = (p == litUndef) ? 0 : 1; j < c.size(); j++) {
                 int q = c._g(j);
-
-                if (!seen.get(var(q)) && level(var(q)) > 0) {
-                    varBumpActivity(var(q));
-                    seen.set(var(q));
-                    if (level(var(q)) >= trailMarker())
+                int x = var(q);
+                if (!seen.get(x) && level(x) > rootlvl) {
+                    varBumpActivity(x);
+                    seen.set(x);
+                    if (level(x) >= trailMarker())
                         pathC++;
                     else
                         out_learnt.add(q);
@@ -714,7 +729,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 else {
                     Clause c = getExpl(var(out_learnt.get(i)));
                     for (int k = 1; k < c.size(); k++)
-                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > 0) {
+                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
                             out_learnt.set(j++, out_learnt.get(i));
                             break;
                         }
@@ -731,7 +746,7 @@ public class MiniSat implements SatFactory, Dimacs {
         //
         int out_btlevel;
         if (out_learnt.size() == 1)
-            out_btlevel = 0;
+            out_btlevel = rootlvl;
         else {
             int max_i = 1;
             // Find the first literal assigned at the next-highest level:
