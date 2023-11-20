@@ -139,6 +139,7 @@ public class MiniSat implements SatFactory, Dimacs {
         }else{
             assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
         }
+        Clause.counter = 0;
     }
 
     @Override
@@ -545,7 +546,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 model.add(valueLit(i));
             }
 
-        } else if (status == ESat.FALSE && conflict.size() == 0)
+        } else if (status == ESat.FALSE && conflict.isEmpty())
             ok_ = false;
 
         cancelUntil(0);
@@ -890,9 +891,7 @@ public class MiniSat implements SatFactory, Dimacs {
         double a = activity.get(v);
         activity.setQuick(v, a + inc);
         if (a + inc > 1e100) {
-            // Rescale:
-            for (int i = 0; i < nVars(); i++)
-                activity.transformValues(value -> value * 1e-100);
+            activity.transformValues(value -> value * 1e-100);
             var_inc *= 1e-100;
         }
         // Update order_heap with respect to new activity:
@@ -1052,23 +1051,26 @@ public class MiniSat implements SatFactory, Dimacs {
      * @since 12/07/13
      */
     public static class Clause {
-
+        private static int counter = 0;
         private static Clause UNDEF = new Clause(new int[0]);
 
         private final int[] literals_;
         private final boolean learnt;
         private double activity;
 
+        private final int id;
+
         public Clause(int[] ps, boolean learnt) {
             literals_ = ps.clone();
             this.learnt = learnt;
+            this.id = counter++;
         }
 
         Clause(int[] ps) {
             this(ps, false);
         }
 
-        public static Clause undef(){
+        public static Clause undef() {
             return UNDEF;
         }
 
