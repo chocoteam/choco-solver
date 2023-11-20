@@ -65,6 +65,8 @@ public class Reason implements ICause {
      *
      * @param ps other literals
      * @return a reason
+     * @implSpec if ength of ps is strictly greater than 2,
+     * then the literal at index 0 should be left empty for the asserting literal
      */
     public static Reason r(int... ps) {
         if (ps.length == 1) {
