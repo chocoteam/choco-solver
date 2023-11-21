@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.variables.view.bool;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -48,7 +49,7 @@ public final class BoolEqView<I extends IntVar> extends BoolIntView<I> {
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         boolean done = false;
         if (!this.contains(value)) {
