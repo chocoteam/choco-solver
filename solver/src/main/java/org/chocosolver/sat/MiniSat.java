@@ -701,10 +701,9 @@ public class MiniSat implements SatFactory, Dimacs {
             confl = getExpl(p);
             seen.clear(var(p));
             pathC--;
-
-        } while (pathC > 0);
+        } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
-
+        replaceUnreliableLits(out_learnt);
         // Simplify conflict clause:
         //
         int i, j = 1;
@@ -764,6 +763,42 @@ public class MiniSat implements SatFactory, Dimacs {
             seen.clear(var(analyze_toclear.get(j)));    // ('seen[]' is now cleared)
         return out_btlevel;
     }
+
+    /**
+     * Some lits cannot be used in clause (the ones related to instantiation in lazy lits vars).
+     * They need to be replaced by their explanation.
+     *
+     * @param out_learnt the current clause
+     */
+    private void replaceUnreliableLits(TIntList out_learnt) {
+        temporary_add_vector_.clear();
+        for (int i = 1; i < out_learnt.size(); i++) {
+            int p = out_learnt.get(i);
+            if (cinfo.get(var(p)).reliable) {
+                continue;
+            }
+            if (DEBUG > 0) {
+                System.out.printf("replacing %s in %s\n", p, out_learnt);
+            }
+            Clause c = getExpl(neg(p));
+            temporary_add_vector_.add(p);
+            int at = out_learnt.size() - 1;
+            out_learnt.set(i, out_learnt.get(at));
+            out_learnt.removeAt(at);
+            i--;
+            for (int j = 1; j < c.size(); j++) {
+                int q = c._g(j);
+                if (!seen.get(var(q))) {
+                    seen.set(var(q));
+                    out_learnt.add(q);
+                }
+            }
+        }
+        while (!temporary_add_vector_.isEmpty()) {
+            seen.clear(var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1)));
+        }
+    }
+
 
     boolean simplify() {
         assert (trailMarker() == 0);
@@ -1009,21 +1044,25 @@ public class MiniSat implements SatFactory, Dimacs {
         return Boolean.make((byte) (a.value() ^ (b ? 1 : 0)));
     }
 
-    private String printLit(int p) {
+    public String printLit(int p) {
         ChannelInfo ci = cinfo.get(var(p));
-        if (ci != null) {
+        if (ci != null && ci != CI_Null) {
             switch (ci.cons_type) {
                 case 1:
                     int op = ci.val_type * 3 ^ (sgn(p) ? 1 : 0);
                     switch (op) {
                         case 0:
-                            return p + ":" + ci.var.getName() + " != " + ci.val;
+                            return (ci.reliable ? "" : "*") + p + ":" + ci.var.getName() + " != " + ci.val;
                         case 1:
-                            return p + ":" + ci.var.getName() + " == " + ci.val;
+                            return (ci.reliable ? "" : "*") + p + ":" + ci.var.getName() + " == " + ci.val;
                         case 2:
-                            return p + ":" + ci.var.getName() + " >= " + (ci.val + 1);
+                            return (ci.reliable ? "" : "*") + p + ":" + ci.var.getName() + " >= " + (ci.val + 1);
                         case 3:
-                            return p + ":" + ci.var.getName() + " <= " + ci.val;
+                            return (ci.reliable ? "" : "*") + p + ":" + ci.var.getName() + " <= " + ci.val;
+                        case 6:
+                            return "*" + p + ":~" + ci.var.getName() + " fixed";
+                        case 7:
+                            return "*" + p + ":" + ci.var.getName() + " fixed";
                     }
                 default:
                     throw new UnsupportedOperationException();
@@ -1189,17 +1228,25 @@ public class MiniSat implements SatFactory, Dimacs {
         int cons_type;
         int val_type;
         int val;
+        boolean reliable;
 
         public ChannelInfo(IntVar var, int ct, int vt, int v) {
+            this(var, ct, vt, v, true);
+        }
+
+        public ChannelInfo(IntVar var, int ct, int vt, int v, boolean reliable) {
             this.var = var;
             this.cons_type = ct;
             this.val_type = vt;
             this.val = v;
+            this.reliable = reliable;
         }
 
         @Override
         public void channel(boolean sign) {
-            // TODO
+            if (cons_type == 1) {
+                var.channel(val, val_type, sign ? 1 : 0);
+            }
         }
     }
 }
