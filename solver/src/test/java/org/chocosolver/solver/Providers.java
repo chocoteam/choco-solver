@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.annotations.DataProvider;
 
 import java.util.ArrayList;
@@ -27,5 +28,26 @@ public class Providers {
         args.add(new Object[]{true});
         args.add(new Object[]{false});
         return args.toArray(new Object[0][0]);
+    }
+
+    public static Object[][] merge(Object[][] data1, Object[][] data2) {
+        int totalRows = data1.length * data2.length;
+        Object[][] result = new Object[totalRows][2];
+
+        int resultRow = 0;
+        for (Object[] row1 : data1) {
+            for (Object[] row2 : data2) {
+                result[resultRow++] = ArrayUtils.append(row1, row2);
+            }
+        }
+        return result;
+    }
+
+    public static Object[][] merge(Object[][] data1, Object[][] data2, Object[][]... datas) {
+        Object[][] result = merge(data1, data2);
+        for(Object[][] data: datas){
+            result = merge(result, data);
+        }
+        return result;
     }
 }
