@@ -47,7 +47,7 @@ public class MiniSat implements SatFactory, Dimacs {
     // undefined clause
     public static final Clause C_Undef = Clause.undef();
     public static final Reason R_Undef = Reason.undef();
-    static final VarData VD_Undef = new VarData(R_Undef, -1);
+    static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
     public static final Clause C_Fail = new Clause(new int[]{0, 0});
@@ -374,7 +374,7 @@ public class MiniSat implements SatFactory, Dimacs {
         while (vardata.size() < v) {
             vardata.add(VD_Undef);
         }
-        vardata.set(v, new VarData(from, trailMarker()));
+        vardata.set(v, new VarData(from, trailMarker(), trail_.size()));
         trail_.add(l);
         cinfo.get(v).channel(sgn(l));
     }
@@ -406,7 +406,7 @@ public class MiniSat implements SatFactory, Dimacs {
         while (vardata.size() < v) {
             vardata.add(VD_Undef);
         }
-        vardata.set(v, new VarData(r, trailMarker()));
+        vardata.set(v, new VarData(r, trailMarker(), trail_.size()));
         trail_.add(l);
     }
 
@@ -685,6 +685,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 int q = c._g(j);
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
+                    assert p == litUndef || pos(var(p)) > pos(x):"chronological inconsistency :("+printLit(p)+") is explained by a previous event ("+printLit(x)+")";
                     varBumpActivity(x);
                     seen.set(x);
                     if (level(x) >= trailMarker())
@@ -903,6 +904,10 @@ public class MiniSat implements SatFactory, Dimacs {
 
     int level(int x) {
         return vardata.get(x).level;
+    }
+
+    int pos(int x) {
+        return vardata.get(x).pos;
     }
 
     boolean locked(Clause c) {
@@ -1212,10 +1217,12 @@ public class MiniSat implements SatFactory, Dimacs {
     static class VarData {
         Reason cr;
         int level;
+        int pos;
 
-        public VarData(Reason cr, int level) {
+        public VarData(Reason cr, int level, int pos) {
             this.cr = cr;
             this.level = level;
+            this.pos = pos;
         }
     }
 
