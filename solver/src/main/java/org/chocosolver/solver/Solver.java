@@ -11,7 +11,10 @@ package org.chocosolver.solver;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Constraint;
+import org.chocosolver.solver.constraints.Explained;
+import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.InvalidSolutionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -22,6 +25,7 @@ import org.chocosolver.solver.propagation.PropagationEngine;
 import org.chocosolver.solver.search.SearchState;
 import org.chocosolver.solver.search.limits.ICounter;
 import org.chocosolver.solver.search.loop.Reporting;
+import org.chocosolver.solver.search.loop.learn.LazyClauseGeneration;
 import org.chocosolver.solver.search.loop.learn.Learn;
 import org.chocosolver.solver.search.loop.learn.LearnNothing;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
@@ -51,6 +55,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.logger.ANSILogger;
 import org.chocosolver.util.logger.Logger;
 
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -263,9 +268,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         M = new MoveBinaryDFS();
         L = new LearnNothing();
         restarter = AbstractRestart.NO_RESTART;
-        if (aModel.getSettings().isLCG()) {
+        if (mModel.getSettings().isLCG()) {
             mSat = new MiniSat(true);
-        }else{
+            setLearner(new LazyClauseGeneration(this, mSat));
+        } else {
             mSat = null;
         }
         engine = new PropagationEngine(mModel, mSat);
@@ -273,6 +279,13 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     public void throwsException(ICause c, Variable v, String s) throws ContradictionException {
         throw exception.set(c, v, s);
+    }
+
+    public void throwsException(ICause c, Variable v, String s, Reason reason) throws ContradictionException {
+        if (isLCG()) {
+            mSat.cEnqueue(0, reason);
+        }
+        throwsException(c, v, s);
     }
 
     public ContradictionException getContradictionException() {
@@ -374,6 +387,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean initialize() {
         boolean ok = true;
         checkDeclaredConstraints();
+        checkExplainedConstraints();
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
         // end note
@@ -392,6 +406,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             pushTrail(); // store state after initial propagation; w = 1 -> 2
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
             pushTrail(); // store another time for restart purpose: w = 2 -> 3
+            if (isLCG()) {
+                mSat.setRootLevel();
+            }
         } catch (ContradictionException ce) {
             engine.flush();
             mMeasures.incFailCount();
@@ -420,6 +437,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             AbstractStrategy<Variable> declared = M.getStrategy();
             warmStart.setStrategy(declared);
             setSearch(warmStart);
+        }
+        if (isLCG() && getObjectiveManager().isOptimization()) {
+            setRestartOnSolutions();
         }
         restarter.init();
         if (!M.init()) { // the initialisation of the Move and strategy can detect inconsistency
@@ -456,6 +476,56 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         }
     }
 
+    /**
+     * Check the number of explained propagators
+     */
+    private void checkExplainedConstraints() {
+        if (isLCG()) {
+            HashSet<String> warned = new HashSet<>();
+            int c = 0, e = 0;
+            for (Constraint cstr : getModel().getCstrs()) {
+                for (Propagator<?> propagator : cstr.getPropagators()) {
+                    boolean isExplained = false;
+                    boolean isPartial = false;
+                    // Check if the instance supports annotations
+                    Annotation[] annotations = propagator.getClass().getAnnotations();
+                    String comment = "";
+                    for (Annotation annotation : annotations) {
+                        if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                            isExplained = true;
+                            isPartial |= ((Explained) annotation).partial();
+                            comment = ((Explained) annotation).comment();
+                            e++;
+                        }
+                    }
+                    c++;
+                    if (!isExplained) {
+                        if (getModel().getSettings().warnUser() && !warned.contains(propagator.getClass().getSimpleName())) {
+                            warned.add(propagator.getClass().getSimpleName());
+                            logger.white().println(
+                                    "Warning: " + propagator.getClass().getSimpleName() + " is not explained.");
+                        }
+                    } else if (isPartial) {
+                        if (getModel().getSettings().warnUser() && !warned.contains(propagator.getClass().getSimpleName())) {
+                            warned.add(propagator.getClass().getSimpleName());
+                            logger.white().println(
+                                    "Warning: " + propagator.getClass().getSimpleName() + " is partially explained.");
+                            if(!comment.isEmpty()) {
+                                logger.white().println(
+                                        "Warning: " + comment + ".");
+                            }
+                        }
+                    }
+                }
+            }
+            if (getModel().getSettings().warnUser() && e < c) {
+                logger.printf(
+                        "%.2f%% propagators are explained\n", e * 100. / c);
+            }
+            warned.clear();
+        }
+    }
+
     private void checkTasks() throws ContradictionException {
         if (mModel.getHook(Model.TASK_SET_HOOK_NAME) != null) {
             //noinspection unchecked
@@ -471,6 +541,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void pushTrail() {
         mModel.getEnvironment().worldPush();
+        if (isLCG()) {
+            mSat.pushTrailMarker();
+        }
     }
 
     /**
@@ -478,6 +551,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void cancelTrail() {
         mModel.getEnvironment().worldPop();
+        if (isLCG()) {
+            mSat.cancel();
+        }
     }
 
     /**
@@ -979,6 +1055,17 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     }
 
     /**
+     * @return <i>true</i> if LCG is on, <i>false</i> otherwise
+     */
+    public boolean isLCG() {
+        return mSat != null;
+    }
+
+    public MiniSat getSat() {
+        return mSat;
+    }
+
+    /**
      * @return the current learn.
      */
     public Learn getLearner() {
@@ -1155,13 +1242,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public int getJumpTo() {
         return jumpTo;
-    }
-
-    /**
-     * @return <i>true</i> when learning algorithm is not plugged in
-     */
-    public boolean isLearnOff() {
-        return L instanceof LearnNothing;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
