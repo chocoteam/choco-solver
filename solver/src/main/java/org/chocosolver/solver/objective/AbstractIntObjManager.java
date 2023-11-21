@@ -102,8 +102,8 @@ public abstract class AbstractIntObjManager implements IObjectiveManager<IntVar>
     }
 
     public final void setCutComputer(IntUnaryOperator cutComputer) {
-            this.cutComputer = cutComputer;
-        }
+        this.cutComputer = cutComputer;
+    }
 
     @Override
     public void setStrictDynamicCut() {
@@ -187,7 +187,8 @@ class MinIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(bestProvedLB, cutComputer.applyAsInt(bestProvedUB), this);
+        objective.updateUpperBound(cutComputer.applyAsInt(bestProvedUB), this);
+        objective.updateLowerBound(bestProvedLB, this);
     }
 
     @Override
@@ -216,7 +217,8 @@ class MaxIntObjManager extends AbstractIntObjManager {
 
     @Override
     public void postDynamicCut() throws ContradictionException {
-        objective.updateBounds(cutComputer.applyAsInt(bestProvedLB), bestProvedUB, this);
+        objective.updateLowerBound(cutComputer.applyAsInt(bestProvedLB), this);
+        objective.updateUpperBound(bestProvedUB, this);
     }
 
     @Override
