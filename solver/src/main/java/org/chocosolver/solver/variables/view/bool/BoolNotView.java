@@ -9,8 +9,11 @@
  */
 package org.chocosolver.solver.variables.view.bool;
 
+import org.chocosolver.sat.MiniSat;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -34,6 +37,7 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
 
     /**
      * Create a not view based on <i>var<i/>
+     *
      * @param var a boolean variable
      */
     public BoolNotView(B var) {
@@ -46,8 +50,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return contains(value) && instantiateTo(1 - value, cause);
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
+        return contains(value) && instantiateTo(1 - value, cause, reason);
     }
 
     @Override
@@ -90,7 +94,7 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (!this.contains(value)) {
             this.contradiction(cause, MSG_INST);
         } else if (!isInstantiated()) {
@@ -102,13 +106,13 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return value > 0 && instantiateTo(value, cause);
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
+        return value > 0 && instantiateTo(value, cause, reason);
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return value < 1 && instantiateTo(value, cause);
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
+        return value < 1 && instantiateTo(value, cause, reason);
     }
 
     @Override
@@ -140,8 +144,8 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     }
 
     @Override
-    public int getValue() throws IllegalStateException{
-        if(!isInstantiated()){
+    public int getValue() throws IllegalStateException {
+        if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
         }
@@ -262,5 +266,30 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public int getTypeAndKind() {
         return Variable.VIEW | Variable.BOOL;
+    }
+
+    @Override
+    public int getLit(int val, int t) {
+        val = 1 - val;
+        if (val == 0 || val == 1) {
+            return var.getLit(val, t);
+        }
+        //return MiniSat.falseLit;
+        throw new SolverException("Check falseLit");
+    }
+
+    @Override
+    public int getMinLit() {
+        return var.getMaxLit();
+    }
+
+    @Override
+    public int getMaxLit() {
+        return var.getMinLit();
+    }
+
+    @Override
+    public int getValLit() {
+        return var.getValLit();
     }
 }
