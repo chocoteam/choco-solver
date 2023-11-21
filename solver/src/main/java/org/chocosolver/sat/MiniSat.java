@@ -658,6 +658,17 @@ public class MiniSat implements SatFactory, Dimacs {
                 makeLiteral(next, rnd_pol ? rand.nextDouble() < 0.5 : polarity.get(next));
     }
 
+    public int findConflictLevel() {
+        int lvl = -1;
+        for (int i = 0; i < confl.size(); i++) {
+            int l = vardata.get(var(confl._g(i))).level;
+            if (l > lvl) {
+                lvl = l;
+            }
+        }
+        return lvl;
+    }
+
     public int analyze(Clause confl, TIntList out_learnt) {
         int pathC = 0;
         int p = litUndef;
