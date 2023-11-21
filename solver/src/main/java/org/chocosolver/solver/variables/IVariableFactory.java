@@ -206,6 +206,9 @@ public interface IVariableFactory extends ISelf<Model> {
             return ref().getCachedConstants().get(value);
         }
         IntVar cste = new FixedIntVarImpl(name, value, ref());
+        if (ref().getSolver().isLCG()) {
+            cste = new IntVarEagerLit(cste);
+        }
         if (name.equals(CSTE_NAME + value)) {
             ref().getCachedConstants().put(value, cste);
         }
@@ -229,9 +232,17 @@ public interface IVariableFactory extends ISelf<Model> {
         } else if (lb == 0 && ub == 1) {
             return boolVar(name);
         } else if (boundedDomain) {
-            return new IntervalIntVarImpl(name, lb, ub, ref());
+            IntVar v = new IntervalIntVarImpl(name, lb, ub, ref());
+            if (ref().getSolver().isLCG()) {
+                v = new IntVarLazyLit(v);
+            }
+            return v;
         } else {
-            return new BitsetIntVarImpl(name, lb, ub, ref());
+            IntVar v = new BitsetIntVarImpl(name, lb, ub, ref());
+            if (ref().getSolver().isLCG()) {
+                v = new IntVarEagerLit(v);
+            }
+            return v;
         }
     }
 
@@ -265,7 +276,11 @@ public interface IVariableFactory extends ISelf<Model> {
         } else if (values.length == 2 && values[0] == 0 && values[1] == 1) {
             return boolVar(name);
         } else {
-            return new BitsetIntVarImpl(name, values, ref());
+            IntVar v = new BitsetIntVarImpl(name, values, ref());
+            if(ref().getSettings().isLCG()){
+                v = new IntVarEagerLit(v);
+            }
+            return v;
         }
     }
 
