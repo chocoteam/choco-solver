@@ -9,8 +9,10 @@
  */
 package org.chocosolver.solver.variables.view.integer;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.exception.ContradictionException;
+import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
 import org.chocosolver.solver.variables.delta.NoDelta;
@@ -68,7 +70,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
 
     @Override
-    public boolean removeValue(int value, ICause cause) throws ContradictionException {
+    public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int inf = getLB();
         int sup = getUB();
@@ -83,7 +85,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             value = -value;
         }
-        if (var.removeValue(value, this)) {
+        if (var.removeValue(value, this, reason)) {// todo channel??
             IntEventType e = IntEventType.REMOVE;
             if (value == inf) {
                 e = IntEventType.INCLOW;
@@ -95,13 +97,12 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean instantiateTo(int value, ICause cause) throws ContradictionException {
+    public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         value -= b;
         if (a > 1) {
@@ -113,16 +114,15 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             value = -value;
         }
-        if (var.instantiateTo(value, this)) {
+        if (var.instantiateTo(value, this, reason)) { // todo channel??
             notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getLB();
         if (old >= value) return false;
@@ -133,9 +133,9 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         }
         boolean change;
         if (!p) {
-            change = var.updateUpperBound(-value - 1, this);
+            change = var.updateUpperBound(-value - 1, this, reason); // todo channel??
         } else {
-            change = var.updateLowerBound(value + 1, this);
+            change = var.updateLowerBound(value + 1, this, reason); // todo channel??
         }
         if (change) {
             IntEventType e = IntEventType.INCLOW;
@@ -144,13 +144,12 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
-    public boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
+    public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         int old = this.getUB();
         if (old <= value) return false;
@@ -160,9 +159,9 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         }
         boolean change;
         if (!p) {
-            change = var.updateLowerBound(-value, this);
+            change = var.updateLowerBound(-value, this, reason); // todo channel??
         } else {
-            change = var.updateUpperBound(value, this);
+            change = var.updateUpperBound(value, this, reason); // todo channel??
         }
         if (change) {
             IntEventType e = IntEventType.DECUPP;
@@ -171,9 +170,8 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
             }
             this.notifyPropagators(e, cause);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -532,5 +530,52 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
     public boolean equals(IntVar v, int a, int b) {
         if (!this.var.equals(v)) return false;
         return this.a == Math.abs(a) && this.b == b && this.p == (a >= 0);
+    }
+
+    @Override
+    public int getLit(int val, int t) {
+        val -= b;
+        if (a > 1) {
+            int k = val % a;
+            val = val / a;
+            if (k != 0) {
+                if (t == 0) {
+                    throw new SolverException("Cannot compute lit from " + this + " and " + val + " and " + t);
+                }
+                if (t == 1) {
+                    //return MiniSat.falseLit;
+                    throw new SolverException("Check falseLit");
+                }
+                if (t == 2 && k > 0) {
+                    val++;
+                }
+                if (t == 3 && k < 0) {
+                    val--;
+                }
+            }
+        }
+        if (!p) {
+            val = -val;
+            if (t >= 2) {
+                assert (5 - t >= 0 && 5 - t <= 3);
+                return var.getLit(val, 5 - t);
+            }
+        }
+        return var.getLit(val, t);
+    }
+
+    @Override
+    public int getMinLit() {
+        return p ? var.getMinLit() : var.getMaxLit();
+    }
+
+    @Override
+    public int getMaxLit() {
+        return p ? var.getMaxLit() : var.getMinLit();
+    }
+
+    @Override
+    public int getValLit() {
+        return var.getValLit();
     }
 }

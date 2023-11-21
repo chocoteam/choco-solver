@@ -50,6 +50,10 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * Do not prevent from overflow, but may avoid it, somehow.
      */
     int MAX_INT_BOUND = Integer.MAX_VALUE / 100;
+    int LR_NE = 0; // [x != v]
+    int LR_EQ = 1; // [x = v]
+    int LR_GE = 2; // [x >= v]
+    int LR_LE = 3; // [x <= v]
 
     /**
      * Removes <code>value</code>from the domain of <code>this</code>. The instruction comes from <code>propagator</code>.
@@ -814,6 +818,93 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
 
         };
         return StreamSupport.intStream(it, false);
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    // FOR LAZY CLAUSE GENERATION ONLY
+    ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Channeling between an instantiation of a SAT variable and the modification of the related variable in CP.
+     *
+     * @param val      the corresponding value
+     * @param val_type the corresponding type (EQ-NE or GE-LE)
+     * @param sign     the sign of the literal (0 or 1)
+     */
+    default void channel(int val, int val_type, int sign) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to the value v and the type t
+     *
+     * @param val
+     * @param type the corresponding type (NE, EQ, GE or LE)
+     * @return the literal
+     */
+    default int getLit(int val, int type) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the literal corresponding to current lower bound
+     */
+    default int getMinLit() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the literal corresponding to current upper bound
+     */
+    default int getMaxLit() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return the literal corresponding to current instantiation value
+     */
+    default int getValLit() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to [[x != v]]
+     *
+     * @param v a value
+     * @return the literal
+     */
+    default int getNELit(int v) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to [[x == v]]
+     *
+     * @param v a value
+     * @return the literal
+     */
+    default int getEQLit(int v) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to [[x >= v]]
+     *
+     * @param v a value
+     * @return the literal
+     */
+    default int getGELit(int v) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Get the literal corresponding to [[x <= v]]
+     *
+     * @param v a value
+     * @return the literal
+     */
+    default int getLELit(int v) {
+        throw new UnsupportedOperationException();
     }
 
 }
