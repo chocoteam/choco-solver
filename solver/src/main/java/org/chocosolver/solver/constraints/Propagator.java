@@ -10,7 +10,10 @@
 package org.chocosolver.solver.constraints;
 
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.memory.structure.IOperation;
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
 import org.chocosolver.solver.Identity;
 import org.chocosolver.solver.Model;
@@ -608,17 +611,16 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        model.getSolver().throwsException(this, null, null);
+        fails(getModel().getSolver().isLCG()?defaultReason(null):Reason.undef());
     }
 
     /**
-     * Throws a contradiction exception with a specific message
+     * Throws a contradiction exception
      *
-     * @param message the message associated with the failure
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
-    public void fails(String message) throws ContradictionException {
-        model.getSolver().throwsException(this, null, message);
+    public void fails(Reason reason) throws ContradictionException {
+        model.getSolver().throwsException(this, null, null, reason);
     }
 
     @Override
@@ -802,6 +804,33 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         }
     }
 
+    /**
+     * @implSpec by default, all variables but the pivot are the reason of the modification
+     */
+    @Override
+    public Reason defaultReason(Variable pivot) {
+        TIntList ps = new TIntArrayList();
+        for (int i = 0; i < getNbVars(); i++) {
+            IntVar var = (IntVar) getVar(i);
+            if (var != pivot) {
+                if (var.isInstantiated()) {
+                    ps.add(var.getValLit());
+                } else {
+                    ps.add(var.getMinLit());
+                    ps.add(var.getMinLit());
+                    int j = var.nextValueOut(var.getLB());
+                    int to = var.previousValueOut(var.getUB());
+                    while (j <= to) {
+                        ps.add(var.getLit(j, 1));
+                        j = var.nextValueOut(j);
+                    }
+                }
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // FOR PROPAGATION PURPOSE
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -867,7 +896,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws ContradictionException if a contradiction occurred.
      */
     public void doFinePropagation() throws ContradictionException {
-        while (eventsets.size() > 0) {
+        while (!eventsets.isEmpty()) {
             int v = eventsets.pollFirst();
             assert isActive() : "propagator is not active:" + this.getClass();
             // clear event
@@ -883,7 +912,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public void doFlush() {
         if (reactToFineEvent()) {
-            while (eventsets.size() > 0) {
+            while (!eventsets.isEmpty()) {
                 int v = eventsets.pollLast();
                 eventmasks[v] = 0;
             }
