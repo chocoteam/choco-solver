@@ -328,6 +328,16 @@ public class MiniSat implements SatFactory, Dimacs {
     // Overwrite the default root level (namely 0) -- for lcg
     public void setRootLevel() {
         rootlvl = trailMarker();
+        if(DEBUG>1) System.out.println("root level: " + rootlvl);
+        topLevelCleanUp();
+    }
+
+    public void topLevelCleanUp() {
+        //todo simplifydb?
+        for (int i = 0; i < trail_.size(); i++) {
+            int x = var(trail_.get(i));
+            seen.set(x);
+        }
     }
 
     // The current value of a variable.
