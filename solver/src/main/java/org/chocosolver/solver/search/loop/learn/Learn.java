@@ -21,6 +21,8 @@ package org.chocosolver.solver.search.loop.learn;
  */
 public interface Learn {
 
+    void init();
+
     /**
      * Validate and record a new piece of knowledge, that is, the current position is a dead-end.
      * @return <i>true</i> if something is learned (one or more clauses)

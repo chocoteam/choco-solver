@@ -25,7 +25,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
 import java.util.Arrays;
 
 /**
- *
  * This class aims at defining a lazy clause generation algorithm as a {@link Learn} object.
  * <br/>
  * It is based on :
@@ -62,6 +61,11 @@ public class LazyClauseGeneration implements Learn {
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
         this.mSat = sat;
+    }
+
+    @Override
+    public void init() {
+        mSat.setRootLevel();
     }
 
     @Override
