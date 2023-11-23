@@ -104,7 +104,7 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         valLit = lit(sat.nVars(), true);
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 2, 0, false));
         if (var.isInstantiated()) {
-            sat.cEnqueue(getEQLit(valLit), null);
+            sat.cEnqueue(getEQLit(valLit), Reason.undef());
         }
     }
 
@@ -187,7 +187,7 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         if (v > getUB()) {
             return getMaxLit();
         }
-        assert (v >= getLB());
+        assert (v >= getLB()) : var + " >= " + v ;
         int ni = li.get();
         int prev = previousValue(v);
         prev = (prev == Integer.MIN_VALUE) ? v - 1 : prev;
