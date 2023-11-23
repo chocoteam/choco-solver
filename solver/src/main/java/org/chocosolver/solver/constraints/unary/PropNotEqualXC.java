@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -23,6 +25,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
+@Explained
 public class PropNotEqualXC extends Propagator<IntVar> {
 
     private final int constant;
@@ -34,7 +37,7 @@ public class PropNotEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        if (vars[0].removeValue(constant, this) || !vars[0].contains(constant)) {
+        if (vars[0].removeValue(constant, this, Reason.undef()) || !vars[0].contains(constant)) {
             this.setPassive();
         }
     }
