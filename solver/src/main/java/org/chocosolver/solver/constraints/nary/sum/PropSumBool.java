@@ -121,7 +121,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (F < 0 || E < 0) {
+        if (!model.getSolver().isLCG() && (F < 0 || E < 0)) {
             fails();
         }
         int lb, ub, i = 0;
@@ -170,7 +170,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (F < 0) {
+        if (!model.getSolver().isLCG() && F < 0) {
             fails();
         }
         int lb, ub, i = 0;
@@ -208,7 +208,7 @@ public class PropSumBool extends PropSum {
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
         int E = sumUB - b;
-        if (E < 0) {
+        if (!model.getSolver().isLCG() && E < 0) {
             fails();
         }
         int lb, ub, i = 0;
