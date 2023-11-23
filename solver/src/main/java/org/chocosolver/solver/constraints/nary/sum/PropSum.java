@@ -201,7 +201,7 @@ public class PropSum extends Propagator<IntVar> {
         do {
             anychange = false;
             // When explanations are on, no global failure allowed
-            if (model.getSolver().isLearnOff() && (F < 0 || E < 0)) {
+            if (!model.getSolver().isLCG() && (F < 0 || E < 0)) {
                 fails();
             }
             if (maxI > F || maxI > E) {
@@ -274,7 +274,7 @@ public class PropSum extends Propagator<IntVar> {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (model.getSolver().isLearnOff() && F < 0) {
+        if (!model.getSolver().isLCG() && F < 0) {
             fails();
         }
         if (maxI > F) {
@@ -322,7 +322,7 @@ public class PropSum extends Propagator<IntVar> {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (model.getSolver().isLearnOff() && E < 0) {
+        if (!model.getSolver().isLCG() && E < 0) {
             fails();
         }
         if(maxI > E) {
