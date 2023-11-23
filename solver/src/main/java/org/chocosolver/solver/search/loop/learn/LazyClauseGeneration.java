@@ -82,14 +82,15 @@ public class LazyClauseGeneration implements Learn {
     @Override
     public void forget() {
         // required because MoveBinaryDFS add a useless decision level on refutation
-        if(nbRestarts == mSolver.getRestartCount()){
+        if (nbRestarts == mSolver.getRestartCount()) {
             mSolver.cancelTrail();
             mSolver.getDecisionPath().synchronize(true);
             if (!learnt_clause.isEmpty()) {
                 mSat.addLearnt(learnt_clause);
             }
-        }else{
+        } else {
             nbRestarts++;
+            mSat.topLevelCleanUp();
         }
     }
 
@@ -176,11 +177,11 @@ public class LazyClauseGeneration implements Learn {
             level = mSat.findConflictLevel();
             mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
-            if(false)
+            if (false)
                 System.out.printf("On SAT failure, learn %s\n",
-                    Arrays.stream(learnt_clause.toArray())
-                            .mapToObj(v -> mSat.printLit(v) + ", ")
-                            .reduce("", (s1, s2) -> s1 + " " + s2));
+                        Arrays.stream(learnt_clause.toArray())
+                                .mapToObj(v -> mSat.printLit(v) + ", ")
+                                .reduce("", (s1, s2) -> s1 + " " + s2));
             mSat.confl = MiniSat.C_Undef;
         } else {
             System.err.print("On CP failure -- no learn\n");
