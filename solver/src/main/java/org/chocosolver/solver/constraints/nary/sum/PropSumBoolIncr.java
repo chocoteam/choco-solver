@@ -10,6 +10,7 @@
 package org.chocosolver.solver.constraints.nary.sum;
 
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -26,6 +27,7 @@ import org.chocosolver.solver.variables.events.PropagatorEventType;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained
 public class PropSumBoolIncr extends PropSumBool {
 
     /**
