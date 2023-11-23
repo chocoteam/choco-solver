@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.UpdatablePropagator;
@@ -28,6 +30,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSetUti
  * @author Charles Prud'homme
  * @since 12/10/2016.
  */
+@Explained
 public class PropNotMember extends Propagator<IntVar> implements UpdatablePropagator<IntIterableRangeSet> {
 
     /**
@@ -59,7 +62,7 @@ public class PropNotMember extends Propagator<IntVar> implements UpdatablePropag
     }
 
     private static boolean enforce(IntVar var, IntIterableRangeSet fset, Propagator<IntVar> prop) throws ContradictionException {
-        return var.removeValues(fset, prop)
+        return var.removeValues(fset, prop, Reason.undef())
                 && (var.hasEnumeratedDomain() || IntIterableSetUtils.notIncludedIn(var, fset));
     }
 
