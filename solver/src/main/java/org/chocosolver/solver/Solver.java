@@ -406,15 +406,14 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             pushTrail(); // store state after initial propagation; w = 1 -> 2
             searchWorldIndex = mModel.getEnvironment().getWorldIndex(); // w = 2
             pushTrail(); // store another time for restart purpose: w = 2 -> 3
-            if (isLCG()) {
-                mSat.setRootLevel();
-            }
+            L.init();
         } catch (ContradictionException ce) {
             engine.flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
-            L.record();
-            L.forget();
+            //L.init();
+            //L.record();
+            //L.forget();
             cancelTrail();
             stop = true;
             ok = false;

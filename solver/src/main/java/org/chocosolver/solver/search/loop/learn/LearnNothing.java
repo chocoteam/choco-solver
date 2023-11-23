@@ -15,6 +15,11 @@ package org.chocosolver.solver.search.loop.learn;
  */
 public class LearnNothing implements Learn {
     @Override
+    public void init() {
+        // nothing to do by default
+    }
+
+    @Override
     public boolean record() {
         return false;
     }
