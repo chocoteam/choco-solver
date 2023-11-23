@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -25,6 +27,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 16/06/11
  */
+@Explained
 public class PropEqualXC extends Propagator<IntVar> {
 
     private final int constant;
@@ -36,7 +39,7 @@ public class PropEqualXC extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        vars[0].instantiateTo(constant, this);
+        vars[0].instantiateTo(constant, this, Reason.undef());
     }
 
     @Override

@@ -9,9 +9,11 @@
  */
 package org.chocosolver.solver.constraints.unary;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ConstraintsName;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
@@ -38,6 +40,7 @@ public class BooleanConstraint extends Constraint {
         return b ? propagators[0].getModel().falseConstraint() : propagators[0].getModel().trueConstraint();
     }
 
+    @Explained
     public static class PropBoolean extends Propagator<BoolVar> {
         public final boolean bool;
 
@@ -51,7 +54,7 @@ public class BooleanConstraint extends Constraint {
             if (bool) {
                 setPassive();
             } else {
-                fails();
+                fails(Reason.undef());
             }
         }
 
