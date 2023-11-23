@@ -74,11 +74,11 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         for (int v = lit_min; v <= lit_max; v++) {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, v));
             if (!var.contains(v)) {
-                sat.cEnqueue(getNELit(v), null);
+                sat.cEnqueue(getNELit(v), Reason.undef());
             }
         }
         if (var.isInstantiated()) {
-            sat.cEnqueue(getEQLit(lit_min), null);
+            sat.cEnqueue(getEQLit(lit_min), Reason.undef());
         }
         // init blits
         base_blit = 2 * (sat.nVars() - lit_min) + 1;
@@ -86,10 +86,10 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, v));
         }
         for (int i = lit_min; i <= min; i++) {
-            sat.cEnqueue(getGELit(i), null);
+            sat.cEnqueue(getGELit(i), Reason.undef());
         }
         for (int i = max; i <= lit_max; i++) {
-            sat.cEnqueue(getLELit(i), null);
+            sat.cEnqueue(getLELit(i), Reason.undef());
         }
     }
 
