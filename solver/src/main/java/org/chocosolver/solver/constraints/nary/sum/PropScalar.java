@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -24,6 +25,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained
 public class PropScalar extends PropSum {
 
     /**
@@ -89,7 +91,7 @@ public class PropScalar extends PropSum {
                     if (I[i] - F > 0) {
                         lb = vars[i].getLB() * c[i];
                         ub = lb + I[i];
-                        if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this)) {
+                        if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this, explainMax(i))) {
                             int nub = vars[i].getUB() * c[i];
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -99,7 +101,7 @@ public class PropScalar extends PropSum {
                     if (I[i] - E > 0) {
                         ub = vars[i].getUB() * c[i];
                         lb = ub - I[i];
-                        if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this)) {
+                        if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainMin(i))) {
                             int nlb = vars[i].getLB() * c[i];
                             F -= nlb - lb;
                             I[i] = ub - nlb;
@@ -114,7 +116,7 @@ public class PropScalar extends PropSum {
                     if (I[i] - F > 0) {
                         lb = vars[i].getUB() * c[i];
                         ub = lb + I[i];
-                        if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this)) {
+                        if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainMax(i))) {
                             int nub = vars[i].getLB() * c[i];
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -124,7 +126,7 @@ public class PropScalar extends PropSum {
                     if (I[i] - E > 0) {
                         ub = vars[i].getLB() * c[i];
                         lb = ub - I[i];
-                        if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this)) {
+                        if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainMin(i))) {
                             int nlb = vars[i].getUB() * c[i];
                             F -= nlb - lb;
                             I[i] = ub - nlb;
@@ -159,7 +161,7 @@ public class PropScalar extends PropSum {
                 if (I[i] - F > 0) {
                     lb = vars[i].getLB() * c[i];
                     ub = lb + I[i];
-                    if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this)) {
+                    if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this, explainMax(i))) {
                         int nub = vars[i].getUB() * c[i];
                         E += nub - ub;
                         I[i] = nub - lb;
@@ -173,7 +175,7 @@ public class PropScalar extends PropSum {
                 if (I[i] - F > 0) {
                     lb = vars[i].getUB() * c[i];
                     ub = lb + I[i];
-                    if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this)) {
+                    if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainMax(i))) {
                         int nub = vars[i].getLB() * c[i];
                         E += nub - ub;
                         I[i] = nub - lb;
@@ -204,7 +206,7 @@ public class PropScalar extends PropSum {
                 if (I[i] - E > 0) {
                     ub = vars[i].getUB() * c[i];
                     lb = ub - I[i];
-                    if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this)) {
+                    if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainMin(i))) {
                         int nlb = vars[i].getLB() * c[i];
                         F -= nlb - lb;
                         I[i] = ub - nlb;
@@ -218,7 +220,7 @@ public class PropScalar extends PropSum {
                 if (I[i] - E > 0) {
                     ub = vars[i].getLB() * c[i];
                     lb = ub - I[i];
-                    if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this)) {
+                    if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainMin(i))) {
                         int nlb = vars[i].getUB() * c[i];
                         F -= nlb - lb;
                         I[i] = ub - nlb;
@@ -252,10 +254,11 @@ public class PropScalar extends PropSum {
         }
         if (w == -1) {
             if (sum == b) {
+                // default reason is ok
                 this.fails();
             }
         } else if(c[w]!=0 && (b - sum)%c[w]==0){
-            vars[w].removeValue((b - sum)/c[w], this);
+            vars[w].removeValue((b - sum)/c[w], this, this.defaultReason(vars[w]));
         }
     }
 

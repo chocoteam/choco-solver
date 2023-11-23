@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -25,6 +26,7 @@ import org.chocosolver.solver.variables.events.IntEventType;
  * @author Charles Prud'homme
  * @since 18/03/11
  */
+@Explained
 public class PropSumFullBool extends PropSum {
 
     /**
@@ -87,7 +89,6 @@ public class PropSumFullBool extends PropSum {
         sumUB = ub;
     }
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnEq() throws ContradictionException {
         int F = b - sumLB;
@@ -97,11 +98,11 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (F <= 0 && vars[i].updateUpperBound(F + lb, this)) {
+                if (F <= 0 && vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
                     E++;
                 }
                 ub = vars[i].getUB();
-                if (E <= 0 && vars[i].updateLowerBound(ub - E, this)) {
+                if (E <= 0 && vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
                     F++;
                 }
                 i++;
@@ -109,11 +110,11 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 lb = vars[i].getUB();
-                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this)) {
+                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
                     E--;
                 }
                 ub = vars[i].getLB();
-                if (E <= 0 && vars[i].updateUpperBound(ub + E, this)) {
+                if (E <= 0 && vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
                     F--;
                 }
                 i++;
@@ -122,7 +123,6 @@ public class PropSumFullBool extends PropSum {
     }
 
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnLeq() throws ContradictionException {
         int F = b - sumLB;
@@ -132,7 +132,7 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (vars[i].updateUpperBound(F + lb, this)) {
+                if (vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
                     E++;
                 }
                 i++;
@@ -140,7 +140,7 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 lb = vars[i].getUB();
-                if (vars[i].updateLowerBound(-F + lb, this)) {
+                if (vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
                     E--;
                 }
                 i++;
@@ -151,7 +151,6 @@ public class PropSumFullBool extends PropSum {
         }
     }
 
-    @SuppressWarnings({"NullableProblems"})
     @Override
     protected void filterOnGeq() throws ContradictionException {
         int F = b - sumLB;
@@ -162,7 +161,7 @@ public class PropSumFullBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 ub = vars[i].getUB();
-                if (vars[i].updateLowerBound(ub - E, this)) {
+                if (vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
                     F++;
                 }
                 i++;
@@ -170,7 +169,7 @@ public class PropSumFullBool extends PropSum {
             // then negative ones
             while (i < l) {
                 ub = vars[i].getLB();
-                if (vars[i].updateUpperBound(ub + E, this)) {
+                if (vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
                     F--;
                 }
                 i++;

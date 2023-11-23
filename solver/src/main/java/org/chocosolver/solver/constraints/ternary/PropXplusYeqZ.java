@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.ternary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -25,6 +27,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeS
  * @author Charles Prud'homme
  * @since 03/02/2016.
  */
+@Explained(partial = true, comment = "AC disabled due to lack of explanation")
 public class PropXplusYeqZ extends Propagator<IntVar> {
 
     private static final int THRESHOLD = 300;
@@ -86,8 +89,11 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     private boolean filterPlus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() + vars[v2].getLB();
         int ub = vars[v1].getUB() + vars[v2].getUB();
-        boolean change = vars[vr].updateBounds(lb, ub, this);
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
+        boolean change = vars[vr].updateLowerBound(lb, this,
+                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMinLit(), vars[v2].getMinLit()));
+        change |= vars[vr].updateUpperBound(ub, this,
+                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMaxLit(), vars[v2].getMaxLit()));
+        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || getModel().getSolver().isLCG()) return change;
         if (!allbounded) {
             set.clear();
             int ub1 = vars[v1].getUB();
@@ -105,7 +111,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this);
+            change |= vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }
@@ -122,8 +128,11 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
     private boolean filterMinus(int vr, int v1, int v2) throws ContradictionException {
         int lb = vars[v1].getLB() - vars[v2].getUB();
         int ub = vars[v1].getUB() - vars[v2].getLB();
-        boolean change = vars[vr].updateBounds(lb, ub, this);
-        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD) return change;
+        boolean change = vars[vr].updateLowerBound(lb, this,
+                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMinLit(), vars[v2].getMaxLit()));
+        change |= vars[vr].updateUpperBound(ub, this,
+                !getModel().getSolver().isLCG() ? Reason.undef() : Reason.r(vars[v1].getMaxLit(), vars[v2].getMinLit()));
+        if ((long) vars[v1].getDomainSize() * vars[v2].getDomainSize() > THRESHOLD || getModel().getSolver().isLCG()) return change;
         if (!allbounded) {
             set.clear();
             int ub1 = vars[v1].getUB();
@@ -141,7 +150,7 @@ public class PropXplusYeqZ extends Propagator<IntVar> {
                 l1 = vars[v1].nextValue(u1);
                 u1 = vars[v1].nextValueOut(l1) - 1;
             }
-            change |= vars[vr].removeAllValuesBut(set, this);
+            change |= vars[vr].removeAllValuesBut(set, this); // todo explain
         }
         return change;
     }

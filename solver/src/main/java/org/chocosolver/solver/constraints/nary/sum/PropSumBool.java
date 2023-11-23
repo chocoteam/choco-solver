@@ -141,11 +141,11 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (F <= 0 && vars[i].updateUpperBound(F + lb, this)) {
+                if (F <= 0 && vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
                     E++;
                 }
                 ub = vars[i].getUB();
-                if (E <= 0 && vars[i].updateLowerBound(ub - E, this)) {
+                if (E <= 0 && vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
                     F++;
                 }
                 i++;
@@ -153,11 +153,11 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 lb = vars[i].getUB();
-                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this)) {
+                if (F <= 0 && vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
                     E--;
                 }
                 ub = vars[i].getLB();
-                if (E <= 0 && vars[i].updateUpperBound(ub + E, this)) {
+                if (E <= 0 && vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
                     F--;
                 }
                 i++;
@@ -185,7 +185,7 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 lb = vars[i].getLB();
-                if (vars[i].updateUpperBound(F + lb, this)) {
+                if (vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
                     E++;
                 }
                 i++;
@@ -193,7 +193,7 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 lb = vars[i].getUB();
-                if (vars[i].updateLowerBound(-F + lb, this)) {
+                if (vars[i].updateLowerBound(-F + lb, this, explainMax(i))) {
                     E--;
                 }
                 i++;
@@ -223,7 +223,7 @@ public class PropSumBool extends PropSum {
             // positive coefficients first
             while (i < pos) {
                 ub = vars[i].getUB();
-                if (vars[i].updateLowerBound(ub - E, this)) {
+                if (vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
                     F++;
                 }
                 i++;
@@ -231,7 +231,7 @@ public class PropSumBool extends PropSum {
             // then negative ones
             while (i < l - 1) {
                 ub = vars[i].getLB();
-                if (vars[i].updateUpperBound(ub + E, this)) {
+                if (vars[i].updateUpperBound(ub + E, this, explainMin(i))) {
                     F--;
                 }
                 i++;
