@@ -817,7 +817,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
                     ps.add(var.getValLit());
                 } else {
                     ps.add(var.getMinLit());
-                    ps.add(var.getMinLit());
+                    ps.add(var.getMaxLit());
                     int j = var.nextValueOut(var.getLB());
                     int to = var.previousValueOut(var.getUB());
                     while (j <= to) {
