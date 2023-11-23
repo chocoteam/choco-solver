@@ -509,11 +509,8 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                         if (getModel().getSettings().warnUser() && !warned.contains(propagator.getClass().getSimpleName())) {
                             warned.add(propagator.getClass().getSimpleName());
                             logger.white().println(
-                                    "Warning: " + propagator.getClass().getSimpleName() + " is partially explained.");
-                            if(!comment.isEmpty()) {
-                                logger.white().println(
-                                        "Warning: " + comment + ".");
-                            }
+                                    "Warning: " + propagator.getClass().getSimpleName() + " is partially explained" +
+                                            (!comment.isEmpty() ? " (" + comment + ".)" : "."));
                         }
                     }
                 }
@@ -551,7 +548,9 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
      */
     public void cancelTrail() {
         mModel.getEnvironment().worldPop();
-        if (isLCG()) {
+        if (isLCG() && mSat.trailMarker() > mModel.getEnvironment().getWorldIndex()) {
+            // the second condition is required because of LCG
+            // (more precisely LazyClauseGeneration.analyse() -> findConflictLevel())
             mSat.cancel();
         }
     }
