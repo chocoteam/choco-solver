@@ -34,14 +34,14 @@ import static org.chocosolver.sat.MiniSat.R_Undef;
  * This class is based on the paper: "Lazy Clause Generation Reengineered", Thibaut Feydy & Peter J. Stuckey , CP 2009.
  * <br/>
  * It is designed to manage bound lits and also value lits.
- * So, the domain is supposed to be small enough to avoid too much lits.
+ * So, the domain is supposed to be small enough to avoid too many lits.
  * Consequently, the observed variable can either be of type {@link org.chocosolver.solver.variables.impl.BitsetIntVarImpl}
  * or {@link org.chocosolver.solver.variables.impl.FixedIntVarImpl}.
  *
  * @author Charles Prud'homme
  * @since 04/09/2023
  */
-public class IntVarEagerLit extends AbstractVariable implements IntVar {
+public final class IntVarEagerLit extends AbstractVariable implements IntVar {
 
     IntVar var; // the observed variable
     MiniSat sat; // the sat solver
@@ -124,20 +124,20 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
     @Override
     public int getLit(int v, int t) {
         if (v < lit_min) {
-            return 1 ^ (t & 1);  // 1, 0, 1, 0
+            return 1 ^ (t & 1);  // true, false, true, false
         }
         if (v > lit_max) {
-            return t - 1 >> 1 & 1;  // 1, 0, 0, 1
+            return t - 1 >> 1 & 1;  // true, false, false, true
         }
         switch (t) {
             case LR_NE:
-                return getNELit(v);
+                return base_vlit + 2 * v;
             case LR_EQ:
-                return getEQLit(v);
+                return base_vlit + 2 * v + 1;
             case LR_GE:
-                return getGELit(v);
+                return base_blit + 2 * v;
             case LR_LE:
-                return getLELit(v);
+                return base_blit + 2 * v + 1;
             default:
                 throw new UnsupportedOperationException("IntVarEagerLit#getLit");
         }
@@ -155,28 +155,28 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
 
     @Override
     public int getValLit() {
-        assert (isInstantiated()):var + " is not instantiated";
-        return MiniSat.neg(getEQLit(getLB()));
+        assert (isInstantiated()) : var + " is not instantiated";
+        return getNELit(getLB());
     }
 
-    public int getNELit(int v) {
-        return base_vlit + 2 * v;
+    private int getNELit(int v) {
+        return getLit(v, LR_NE);
     }
 
-    public int getEQLit(int v) {
-        return base_vlit + 2 * v + 1;
+    private int getEQLit(int v) {
+        return getLit(v, LR_EQ);
     }
 
-    public int getGELit(int v) {
-        return base_blit + 2 * v;
+    private int getGELit(int v) {
+        return getLit(v, LR_GE);
     }
 
-    public int getLELit(int v) {
-        return base_blit + 2 * v + 1;
+    private int getLELit(int v) {
+        return getLit(v, LR_LE);
     }
 
     // Use when you've just set [x >= v]
-    void channelMin(int v) {
+    private void channelMin(int v) {
         // Set [x >= v-1] to [x >= min+1] using [x >= i] \/ ![x >= v]
         // Set [x != v-1] to [x != min] using [x != i] \/ ![x >= v]
         Reason r = Reason.r(MiniSat.neg(getGELit(v)));
@@ -190,7 +190,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         sat.cEnqueue(getNELit(min), r);
     }
 
-    void updateMin(int oldMin, int newMin) {
+    private void updateMin(int oldMin, int newMin) {
         int v = oldMin;
         while (v < newMin) {
             // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
@@ -200,7 +200,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         }
     }
 
-    void channelMax(int v) {
+    private void channelMax(int v) {
         // Set [x <= v+1] to [x <= max-1] to using [x <= i] \/ ![x <= v]
         // Set [x != v+1] to [x != max] to using ![x = i] \/ ![x <= v]
         Reason r = Reason.r(MiniSat.neg(getLELit(v)));
@@ -214,7 +214,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         sat.cEnqueue(getNELit(max), r);
     }
 
-    void updateMax(int oldMax, int newMax) {
+    private void updateMax(int oldMax, int newMax) {
         int v = oldMax;
         while (v > newMax) {
             // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
@@ -224,7 +224,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         }
     }
 
-    void channelFix(int v) {
+    private void channelFix(int v) {
         Reason r = Reason.r(getNELit(v));
         if (getLB() < v) {
             // Set [x >= v] using [x >= v] \/ ![x = v]
@@ -238,7 +238,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
         }
     }
 
-    void updateFixed(int v) {
+    private void updateFixed(int v) {
         // Set [x = v] using [x = v] \/ [x <= v-1] \/ [x >= v+1]
         Reason r = Reason.r(getLELit(v - 1), getGELit(v + 1));
         sat.cEnqueue(getEQLit(v), r);
@@ -314,7 +314,7 @@ public class IntVarEagerLit extends AbstractVariable implements IntVar {
 
     @Override
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
-        if (!isInstantiated()) {
+        if (!isInstantiatedTo(value)) {
             if (channeling) {
                 if (reason == Reason.undef()) {
                     reason = cause.defaultReason(this);

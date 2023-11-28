@@ -141,30 +141,32 @@ public class LazyClauseGeneration implements Learn {
                 IntVar var = dec.getDecisionVariable();
                 if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntEq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getNELit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
                     } else {
-                        learnt_clause.add(var.getEQLit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntNeq())) {
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getEQLit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_EQ));
                     } else {
-                        learnt_clause.add(var.getNELit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_NE));
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntSplit())) { // <=
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getGELit(dec.getDecisionValue() + 1));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue() + 1, IntVar.LR_GE));
                     } else {
-                        learnt_clause.add(var.getLELit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_LE));
                     }
                 } else if (dec.getDecOp().equals(DecisionOperatorFactory.makeIntReverseSplit())) { // >=
                     if (dec.hasNext() || dec.getArity() == 1) {
-                        learnt_clause.add(var.getLELit(dec.getDecisionValue() - 1));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue() - 1, IntVar.LR_LE));
                     } else {
-                        learnt_clause.add(var.getGELit(dec.getDecisionValue()));
+                        learnt_clause.add(var.getLit(dec.getDecisionValue(), IntVar.LR_GE));
                     }
                 }
             }
+        } else {
+            learnt_clause.add(0);
         }
 
     }
