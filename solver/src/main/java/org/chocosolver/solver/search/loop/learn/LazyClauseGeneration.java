@@ -37,6 +37,10 @@ import java.util.Arrays;
  * @since 08/11/2023
  */
 public class LazyClauseGeneration implements Learn {
+
+    private static final String ON_FAILURE = "On SAT failure,";
+    private static final String ON_SOLUTION = "On solution,";
+
     /**
      * The solver that is watched
      */
@@ -84,7 +88,7 @@ public class LazyClauseGeneration implements Learn {
         // required because MoveBinaryDFS add a useless decision level on refutation
         if (nbRestarts == mSolver.getRestartCount()) {
             mSolver.cancelTrail();
-            mSolver.getDecisionPath().synchronize(true);
+            mSolver.getDecisionPath().synchronize(true, true);
             if (!learnt_clause.isEmpty()) {
                 mSat.addLearnt(learnt_clause);
             }
@@ -96,7 +100,7 @@ public class LazyClauseGeneration implements Learn {
 
     private void onFailure() {
         ContradictionException cex = mSolver.getContradictionException();
-        int backtrack_level = analyze(cex);
+        int backtrack_level = analyze(cex, ON_FAILURE);
         int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
         if (upto > 1) {
             mSolver.getMeasures().incBackjumpCount();
@@ -110,7 +114,7 @@ public class LazyClauseGeneration implements Learn {
             extractFromVariables();
             //extractFromDecisions();
             mSat.confl = new MiniSat.Clause(learnt_clause.toArray(), false /*?*/);
-            int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null));
+            int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
             int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
             mSolver.setJumpTo(upto);
         } // else  always restart on a solution, managed in Solver
@@ -171,7 +175,7 @@ public class LazyClauseGeneration implements Learn {
 
     }
 
-    private int analyze(ContradictionException cex) {
+    private int analyze(ContradictionException cex, String message) {
         int level;
         learnt_clause.clear();
         if (mSat.confl != MiniSat.C_Undef) {
@@ -180,7 +184,8 @@ public class LazyClauseGeneration implements Learn {
             mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
             if (false)
-                System.out.printf("On SAT failure, learn %s\n",
+                System.out.printf("%s learn %s\n",
+                        message,
                         Arrays.stream(learnt_clause.toArray())
                                 .mapToObj(v -> mSat.printLit(v) + ", ")
                                 .reduce("", (s1, s2) -> s1 + " " + s2));
