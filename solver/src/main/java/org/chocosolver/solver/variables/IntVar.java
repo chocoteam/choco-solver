@@ -867,44 +867,4 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
         throw new UnsupportedOperationException();
     }
 
-    /**
-     * Get the literal corresponding to [[x != v]]
-     *
-     * @param v a value
-     * @return the literal
-     */
-    default int getNELit(int v) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get the literal corresponding to [[x == v]]
-     *
-     * @param v a value
-     * @return the literal
-     */
-    default int getEQLit(int v) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get the literal corresponding to [[x >= v]]
-     *
-     * @param v a value
-     * @return the literal
-     */
-    default int getGELit(int v) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * Get the literal corresponding to [[x <= v]]
-     *
-     * @param v a value
-     * @return the literal
-     */
-    default int getLELit(int v) {
-        throw new UnsupportedOperationException();
-    }
-
 }

@@ -45,9 +45,9 @@ import static org.chocosolver.sat.MiniSat.R_Undef;
  * @author Charles Prud'homme
  * @since 12/10/2023
  */
-public class IntVarLazyLit extends AbstractVariable implements IntVar {
+public final class IntVarLazyLit extends AbstractVariable implements IntVar {
 
-    private class Node {
+    private static class Node {
         int var;
         int val;
         int prev;
@@ -76,10 +76,6 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
     int min0;
     int max0;
 
-    private static int lit(int var, boolean sign) {
-        return 2 * var + (sign ? 1 : 0);
-    }
-
     /**
      * Create a variable wrapper with eager literals
      *
@@ -101,10 +97,10 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         ld.add(new Node(1, getUB(), 0, -1));
         li = model.getEnvironment().makeInt(0);
         hi = model.getEnvironment().makeInt(1);
-        valLit = lit(sat.nVars(), true);
+        valLit = MiniSat.makeLiteral(sat.nVars(), true);
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 2, 0, false));
         if (var.isInstantiated()) {
-            sat.cEnqueue(getEQLit(valLit), Reason.undef());
+            sat.cEnqueue(getLit(valLit, LR_EQ), Reason.undef());
         }
     }
 
@@ -151,10 +147,10 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
     @Override
     public int getLit(int val, int type) {
         if (val < getLB()) {
-            return 1 ^ (type & 1);  // _, _, 1, 0
+            return 1 ^ (type & 1);  // undefined, undefined, true, false
         }
         if (val > getUB()) {
-            return type & 1;  // _, _, 0, 1
+            return type & 1;  // undefined, undefined, false, true
         }
         switch (type) {
             case LR_GE:
@@ -168,12 +164,12 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
 
     @Override
     public int getMinLit() {
-        return lit(ld.get(li.get()).var, false);
+        return MiniSat.makeLiteral(ld.get(li.get()).var, false);
     }
 
     @Override
     public int getMaxLit() {
-        return lit(ld.get(hi.get()).var, true);
+        return MiniSat.makeLiteral(ld.get(hi.get()).var, true);
     }
 
     @Override
@@ -182,12 +178,15 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         return MiniSat.neg(valLit);
     }
 
-    @Override
-    public int getGELit(int v) {
-        if (v > getUB()) {
+    private int getGELit(int v) {
+        if (v < min0) {
+            return 1;
+        } else if (v > max0) {
+            return 0;
+        } else if (v > getUB()) {
             return getMaxLit();
         }
-        assert (v >= getLB()) : var + " >= " + v ;
+        assert (v >= getLB()) : var + " >= " + v;
         int ni = li.get();
         int prev = previousValue(v);
         prev = (prev == Integer.MIN_VALUE) ? v - 1 : prev;
@@ -196,7 +195,7 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
             assert (0 <= ni && ni < ld.size());
         }
         if (ld.get(ni).val == prev) {
-            return lit(ld.get(ni).var, true);
+            return MiniSat.makeLiteral(ld.get(ni).var, true);
         }
         // create new var and insert before ni
         int mi = getLitNode();
@@ -207,12 +206,15 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         ld.get(ni).prev = mi;
         ld.get(ld.get(mi).prev).next = mi;
 
-        return lit(ld.get(mi).var, true);
+        return MiniSat.makeLiteral(ld.get(mi).var, true);
     }
 
-    @Override
-    public int getLELit(int v) {
-        if (v < getLB()) {
+    private int getLELit(int v) {
+        if (v < min0) {
+            return 0;
+        } else if (v > max0) {
+            return 1;
+        } else if (v < getLB()) {
             return getMinLit();
         }
         return MiniSat.neg(getGELit(v + 1));
@@ -223,7 +225,7 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         int prev = previousValue(v);
         int ni;
         for (ni = ld.get(li.get()).next; ld.get(ni).val < prev; ni = ld.get(ni).next) {
-            sat.cEnqueue(lit(ld.get(ni).var, true), r);
+            sat.cEnqueue(MiniSat.makeLiteral(ld.get(ni).var, true), r);
         }
         assert (ld.get(ni).val == prev);
         li.set(ni);
@@ -233,7 +235,7 @@ public class IntVarLazyLit extends AbstractVariable implements IntVar {
         Reason r = Reason.r(MiniSat.neg(p));
         int ni;
         for (ni = ld.get(hi.get()).prev; ld.get(ni).val > v; ni = ld.get(ni).prev) {
-            sat.cEnqueue(lit(ld.get(ni).var, false), r);
+            sat.cEnqueue(MiniSat.makeLiteral(ld.get(ni).var, false), r);
         }
         assert (ld.get(ni).val == v);
         hi.set(ni);
