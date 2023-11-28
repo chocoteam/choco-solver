@@ -810,6 +810,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     @Override
     public Reason defaultReason(Variable pivot) {
         TIntList ps = new TIntArrayList();
+        ps.add(0);
         for (int i = 0; i < getNbVars(); i++) {
             IntVar var = (IntVar) getVar(i);
             if (var != pivot) {
