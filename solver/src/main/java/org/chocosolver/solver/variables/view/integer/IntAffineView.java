@@ -557,7 +557,7 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         if (!p) {
             val = -val;
             if (t >= 2) {
-                assert (5 - t >= 0 && 5 - t <= 3);
+                assert 5 - t >= 0;
                 return var.getLit(val, 5 - t);
             }
         }
