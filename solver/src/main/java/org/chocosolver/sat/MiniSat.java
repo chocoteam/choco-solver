@@ -346,7 +346,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // The current value of a literal.
-    Boolean valueLit(int l) {
+    public Boolean valueLit(int l) {
         Boolean b = assignment_.get(var(l));
         return b == Boolean.lUndef ? Boolean.lUndef : xor(b, sgn(l));
     }
