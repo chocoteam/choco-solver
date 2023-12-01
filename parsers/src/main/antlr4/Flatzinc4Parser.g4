@@ -190,7 +190,10 @@ expr    returns[Expression exp]
     {
     $exp = new EString($STRING.text);
     }
-//    |   FLOAT_
+    |   f1=FLOAT_CONST
+    {
+    $exp = EFloat.make($f1.text);
+    }
     ;
 
 id_expr returns [Expression exp]

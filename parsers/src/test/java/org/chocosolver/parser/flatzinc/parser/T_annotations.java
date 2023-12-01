@@ -125,6 +125,13 @@ public class T_annotations extends GrammarTest {
     public void test14() throws IOException {
         fastcheck("::int_search([a],dom_w_deg,indomain_min,complete)");
     }
+
+    @Test(groups = "1s")
+    public void test15() throws IOException {
+        fastcheck("solve :: int_search(q, input_order, indomain_min);\n" +
+                "      :: restart_linear(1000)\n" +
+                "      satisfy");
+    }
 //
 //    @Test( groups = "1s" )
 //    public void testOutput() {
