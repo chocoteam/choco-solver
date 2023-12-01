@@ -53,7 +53,7 @@ public class T_annotations extends GrammarTest {
     private void fastcheck(String toParse) throws IOException {
         Flatzinc4Parser fp = parser(toParse);
         List<EAnnotation> as = fp.annotations().anns;
-        Assert.assertTrue(as.size() > 0);
+        Assert.assertFalse(as.isEmpty());
     }
 
     @Test(groups = "1s")
@@ -124,6 +124,12 @@ public class T_annotations extends GrammarTest {
     @Test(groups = "1s")
     public void test14() throws IOException {
         fastcheck("::int_search([a],dom_w_deg,indomain_min,complete)");
+    }
+
+    @Test(groups = "1s")
+    public void test15() throws IOException {
+        fastcheck(":: int_search(q, input_order, indomain_min)\n" +
+                "      :: restart_linear(1000)\n");
     }
 //
 //    @Test( groups = "1s" )

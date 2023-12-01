@@ -109,4 +109,15 @@ public class T_solve_goal extends GrammarTest {
         );
         fp.solve_goal();
     }
+
+    @Test(groups = "1s")
+    public void testRestart() throws IOException {
+        datas.register("y", mSolver.intVar("y", 0, 10, true));
+        Flatzinc4Parser fp = parser(
+                "solve :: int_search([y], input_order, indomain_min)\n" +
+                        "      :: restart_linear(1000)\n" +
+                        "      satisfy;", mSolver, datas
+        );
+        fp.solve_goal();
+    }
 }

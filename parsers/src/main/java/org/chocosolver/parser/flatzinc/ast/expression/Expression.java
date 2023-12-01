@@ -18,17 +18,17 @@ import org.chocosolver.solver.variables.SetVar;
 import org.chocosolver.solver.variables.Variable;
 
 /*
-* User : CPRUDHOM
-* Mail : cprudhom(a)emn.fr
-* Date : 8 janv. 2010
-* Since : Choco 2.1.1
-*
-* Class for expression definition based on flatzinc-like objects.
-*/
+ * User : CPRUDHOM
+ * Mail : cprudhom(a)emn.fr
+ * Date : 8 janv. 2010
+ * Since : Choco 2.1.1
+ *
+ * Class for expression definition based on flatzinc-like objects.
+ */
 public abstract class Expression {
 
     public enum EType {
-        ANN, ARR, BOO, IDA, IDE, INT, SET_B, SET_L, STR
+        ANN, ARR, BOO, IDA, IDE, INT, SET_B, SET_L, STR, FLT
     }
 
     @SuppressWarnings({"InstantiatingObjectToGetClassObject"})
@@ -117,6 +117,16 @@ public abstract class Expression {
     public int[][] toSetArray() {
         Exit.log();
         return null;
+    }
+
+    /**
+     * Get the int value of the {@link Expression}
+     *
+     * @return int
+     */
+    public float floatValue() {
+        Exit.log();
+        return 0f;
     }
 
     /**

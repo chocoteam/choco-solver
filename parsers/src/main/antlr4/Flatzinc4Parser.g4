@@ -170,6 +170,10 @@ expr    returns[Expression exp]
         $exp = new ESetBounds(EInt.make($i1.text), EInt.make($i2.text));
     }
     }
+    |   f1=FLOAT_CONST
+    {
+    $exp = EFloat.make($f1.text);
+    }
     |
     {
     ArrayList<Expression> exps = new ArrayList();
@@ -190,7 +194,6 @@ expr    returns[Expression exp]
     {
     $exp = new EString($STRING.text);
     }
-//    |   FLOAT_
     ;
 
 id_expr returns [Expression exp]

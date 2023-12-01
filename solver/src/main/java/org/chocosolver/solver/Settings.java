@@ -18,6 +18,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.IntPredicate;
@@ -749,8 +750,8 @@ public class Settings {
         return ibexRestoreRounding;
     }
 
-    public Object get(String key) {
-        return additionalSettings.get(key);
+    public Optional<Object> get(String key) {
+        return Optional.ofNullable(additionalSettings.get(key));
     }
 
     public Settings set(String key, Object value) {

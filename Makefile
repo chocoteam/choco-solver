@@ -29,6 +29,7 @@ help:
 	@echo "  compet     			to update the date, clean and package the project"
 	@echo "  msc        			for MiniZincIDE, to install the msc file in ~/.minizinc/solvers"
 	@echo "  delmsc VERSION=xxx     for MiniZincIDE, to delete the msc file in ~/.minizinc/solvers"
+	@echo "  antlr					to compile the antlr grammar"
 
 all: clean package
 
@@ -68,3 +69,8 @@ delmsc:
 
 docker: compet
 	@docker build -f $(ROOT_DIR)/parsers/src/main/minizinc/docker/Dockerfile.dms -t chocoteam/choco-solver-mzn:$(CURRENT_VERSION) $(ROOT_DIR)
+
+antlr:
+	cd parsers/
+	mvn org.antlr:antlr4-maven-plugin:antlr4
+	cd ..
