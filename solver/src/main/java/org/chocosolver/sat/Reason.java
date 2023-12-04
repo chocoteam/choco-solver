@@ -9,6 +9,7 @@
  */
 package org.chocosolver.sat;
 
+import gnu.trove.list.TIntList;
 import org.chocosolver.solver.ICause;
 
 /**
@@ -37,11 +38,6 @@ public class Reason implements ICause {
         this.a = a;
     }
 
-    /**
-     * Create an undefined reason
-     *
-     * @return
-     */
     public static Reason undef() {
         return UNDEF;
     }
@@ -76,11 +72,31 @@ public class Reason implements ICause {
         } else if (ps.length > 2) {
             return Reason.r(new MiniSat.Clause(ps));
         } else {
-            return Reason.undef();
+            return Reason.UNDEF;
         }
     }
 
-    public static Reason r(Reason r, int p) {
+    /**
+     * Create a reason from one or more literals
+     *
+     * @param ps other literals
+     * @return a reason
+     * @implSpec if ength of ps is strictly greater than 2,
+     * then the literal at index 0 should be left empty for the asserting literal
+     */
+    public static Reason r(TIntList ps) {
+        if (ps.size() == 1) {
+            return new Reason(null, 2, ps.get(0), 0, 0);
+        } else if (ps.size() == 2) {
+            return new Reason(null, 3, ps.get(0), ps.get(1), 0);
+        } else if (ps.size() > 2) {
+            return Reason.r(new MiniSat.Clause(ps));
+        } else {
+            return Reason.UNDEF;
+        }
+    }
+
+    public static Reason gather(Reason r, int p) {
         switch (r.type) {
             case 0: {
                 int[] ps = new int[r.cl.size() + 1];
