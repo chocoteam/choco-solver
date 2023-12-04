@@ -9,11 +9,10 @@
  */
 package org.chocosolver.solver.variables.view.bool;
 
-import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
-import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.delta.IIntDeltaMonitor;
@@ -33,6 +32,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  * @author Charles Prud'homme
  * @since 31/07/12
  */
+@Explained
 public final class BoolNotView<B extends BoolVar> extends IntView<B> implements BoolVar {
 
     /**
@@ -270,12 +270,17 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
 
     @Override
     public int getLit(int val, int t) {
-        val = 1 - val;
-        if (val == 0 || val == 1) {
-            return var.getLit(val, t);
+        if (val < 0) {
+            return 1 ^ (t & 1);  // true, false, true, false
         }
-        //return MiniSat.falseLit;
-        throw new SolverException("Check falseLit");
+        if (val > 1) {
+            return t - 1 >> 1 & 1;  // true, false, false, true
+        }
+        if (t >= 2) {
+            assert 5 - t >= 0;
+            return var.getLit(1 - val, 5 - t);
+        }
+        return var.getLit(1 - val, t);
     }
 
     @Override
@@ -291,5 +296,10 @@ public final class BoolNotView<B extends BoolVar> extends IntView<B> implements 
     @Override
     public int getValLit() {
         return var.getValLit();
+    }
+
+    @Override
+    public int satVar() {
+        return (var.satVar() + 1) * -1; // for SatFactory
     }
 }
