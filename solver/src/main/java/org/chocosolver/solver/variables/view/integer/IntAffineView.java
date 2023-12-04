@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables.view.integer;
 
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
 import org.chocosolver.solver.variables.IntVar;
@@ -34,6 +35,7 @@ import static org.chocosolver.solver.variables.events.IntEventType.INCLOW;
  * @author Charles Prud'homme
  * @since 05/10/2023
  */
+@Explained
 public final class IntAffineView<I extends IntVar> extends IntView<I> {
 
     public final boolean p; // positive

@@ -16,6 +16,7 @@ import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -30,9 +31,9 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.chocosolver.sat.MiniSat.C_Undef;
-import static org.chocosolver.sat.MiniSat.R_Undef;
 
 /**
  * A wrapper for integer variables, that maintains an internal data structure to ease the creation of clauses.
@@ -45,7 +46,8 @@ import static org.chocosolver.sat.MiniSat.R_Undef;
  * @author Charles Prud'homme
  * @since 12/10/2023
  */
-public final class IntVarLazyLit extends AbstractVariable implements IntVar {
+@Explained
+public final class IntVarLazyLit extends AbstractVariable implements IntVar, LitVar {
 
     private static class Node {
         int var;
@@ -123,16 +125,16 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar {
         try {
             switch (op) {
                 case LR_NE:
-                    removeValue(val, Cause.Null, R_Undef);
+                    removeValue(val, Cause.Null, Reason.undef());
                     break;
                 case LR_EQ:
-                    instantiateTo(val, Cause.Null, R_Undef);
+                    instantiateTo(val, Cause.Null, Reason.undef());
                     break;
                 case LR_GE:
-                    updateLowerBound(val + 1, Cause.Null, R_Undef);
+                    updateLowerBound(val + 1, Cause.Null, Reason.undef());
                     break;
                 case LR_LE:
-                    updateUpperBound(val, Cause.Null, R_Undef);
+                    updateUpperBound(val, Cause.Null, Reason.undef());
                     break;
                 default:
                     throw new UnsupportedOperationException("IntVarLazyLit#channel : are you trying to fix valLit?");
@@ -249,14 +251,12 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar {
 
     @Override
     public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
-        //*
-        //TODO: updating bounds on removal is not explained correctly by default
         assert cause != null;
         if (value == getLB()) {
-            return updateLowerBound(value + 1, cause, Reason.r(reason, getMinLit()));
+            return updateLowerBound(value + 1, cause, Reason.gather(reason, getMinLit()));
         } else if (value == getUB()) {
-            return updateUpperBound(value - 1, cause, Reason.r(reason, getMaxLit()));
-        }//*/
+            return updateUpperBound(value - 1, cause, Reason.gather(reason, getMaxLit()));
+        }
         return false;
     }
 
@@ -280,15 +280,12 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar {
         if (value > getLB()) {
             int p = getGELit(value);
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(p, reason);
+                this.notify( reason, cause, sat, p);
             }
             if (value > getUB()) {
                 // ignore: should be detected by the SAT
                 assert (sat.confl != C_Undef);
-                return var.updateLowerBound(value, cause);
+                this.contradiction(cause, "sat failure");
             }
             channelMin(value, p);
             int ub = getUB();
@@ -310,15 +307,12 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar {
         if (value < getUB()) {
             int p = getLELit(value);
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(p, reason);
+                this.notify(reason, cause, sat, p);
             }
             if (value < getLB()) {
                 // ignore: should be detected by the SAT
                 assert (sat.confl != C_Undef);
-                return var.updateUpperBound(value, cause);
+                this.contradiction(cause, "sat failure");
             }
             channelMax(value, p);
             int lb = getLB();
