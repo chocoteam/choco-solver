@@ -13,6 +13,7 @@ import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.delta.IDelta;
@@ -27,7 +28,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import java.util.Iterator;
 
 import static org.chocosolver.sat.MiniSat.C_Undef;
-import static org.chocosolver.sat.MiniSat.R_Undef;
 
 /**
  * A wrapper for integer variables, that maintains an internal data structure to ease the creation of clauses.
@@ -41,7 +41,8 @@ import static org.chocosolver.sat.MiniSat.R_Undef;
  * @author Charles Prud'homme
  * @since 04/09/2023
  */
-public final class IntVarEagerLit extends AbstractVariable implements IntVar {
+@Explained
+public final class IntVarEagerLit extends AbstractVariable implements IntVar, LitVar {
 
     IntVar var; // the observed variable
     MiniSat sat; // the sat solver
@@ -100,16 +101,16 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar {
         try {
             switch (op) {
                 case LR_NE:
-                    removeValue(val, Cause.Null, R_Undef);
+                    removeValue(val, Cause.Null, Reason.undef());
                     break;
                 case LR_EQ:
-                    instantiateTo(val, Cause.Null, R_Undef);
+                    instantiateTo(val, Cause.Null, Reason.undef());
                     break;
                 case LR_GE:
-                    updateLowerBound(val + 1, Cause.Null, R_Undef);
+                    updateLowerBound(val + 1, Cause.Null, Reason.undef());
                     break;
                 case LR_LE:
-                    updateUpperBound(val, Cause.Null, R_Undef);
+                    updateUpperBound(val, Cause.Null, Reason.undef());
                     break;
                 default:
                     throw new UnsupportedOperationException("IntVarEagerLit#channel");
@@ -249,14 +250,11 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar {
     public boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         if (contains(value)) {
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(getLit(value, LR_NE), reason);
+                this.notify(reason, cause, sat, getLit(value, LR_NE));
             }
             if (isInstantiated()) {
                 assert (sat.confl != C_Undef);
-                return var.removeValue(value, cause); // should fail
+                this.contradiction(cause, "sat failure");
             }
             IntEventType e = IntEventType.REMOVE;
             // clear value
@@ -316,14 +314,11 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar {
     public boolean instantiateTo(int value, ICause cause, Reason reason) throws ContradictionException {
         if (!isInstantiatedTo(value)) {
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(getLit(value, LR_EQ), reason);
+                this.notify(reason, cause, sat, getLit(value, LR_EQ));
             }
             if (!var.contains(value)) {
                 assert (sat.confl != C_Undef);
-                return var.instantiateTo(value, cause);
+                this.contradiction(cause, "sat failure");
             }
             channelFix(value);
             var.instantiateTo(value, Cause.Null);
@@ -337,15 +332,12 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar {
     public boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value > getLB()) {
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(getLit(value, LR_GE), reason);
+                this.notify(reason, cause, sat, getLit(value, LR_GE));
             }
             if (value > getUB()) {
                 // ignore: should be detected by the SAT
                 assert (sat.confl != C_Undef);
-                return var.updateLowerBound(value, cause);
+                this.contradiction(cause, "sat failure");
             }
             channelMin(value);
             updateMin(value, var.nextValue(value - 1));
@@ -367,15 +359,12 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar {
     public boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         if (value < getUB()) {
             if (channeling) {
-                if (reason == Reason.undef()) {
-                    reason = cause.defaultReason(this);
-                }
-                sat.cEnqueue(getLit(value, LR_LE), reason);
+                this.notify(reason, cause, sat, getLit(value, LR_LE));
             }
             if (value < getLB()) {
                 // ignore: should be detected by the SAT
                 assert (sat.confl != C_Undef);
-                return var.updateUpperBound(value, cause);
+                this.contradiction(cause, "sat failure");
             }
             channelMax(value);
             updateMax(value, var.previousValue(value + 1));
