@@ -10,21 +10,23 @@
 // Generated from Flatzinc4Parser.g4 by ANTLR 4.9.3
 package org.chocosolver.parser.flatzinc;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATN;
-import org.antlr.v4.runtime.atn.ATNDeserializer;
-import org.antlr.v4.runtime.atn.ParserATNSimulator;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
-import org.antlr.v4.runtime.dfa.DFA;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.chocosolver.parser.flatzinc.ast.*;
 import org.chocosolver.parser.flatzinc.ast.declaration.*;
 import org.chocosolver.parser.flatzinc.ast.expression.*;
-import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
+import org.chocosolver.solver.Model;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.atn.*;
+import org.antlr.v4.runtime.dfa.DFA;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Flatzinc4Parser extends Parser {

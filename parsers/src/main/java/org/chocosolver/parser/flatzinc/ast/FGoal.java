@@ -88,7 +88,7 @@ public class FGoal {
                 strategies[a] = readSearchAnnotation(annotation, aModel, description);
             }
         }
-        strategies = Arrays.stream(strategies).filter(Objects::isNull).toArray(AbstractStrategy[]::new);
+        strategies = Arrays.stream(strategies).filter(Objects::nonNull).toArray(AbstractStrategy[]::new);
         if(strategies.length > 0){
             aModel.getSolver().setSearch(strategies);
         }
