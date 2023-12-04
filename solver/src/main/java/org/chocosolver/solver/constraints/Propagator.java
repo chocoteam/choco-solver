@@ -32,6 +32,7 @@ import org.chocosolver.util.objects.queues.CircularQueue;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static java.lang.System.arraycopy;
 import static java.util.Arrays.copyOf;
@@ -105,17 +106,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * Ignore propagation during execution.
      */
     private boolean enabled = true;
-
-    /**
-     * For debugging purpose only, set to true to use default explanation schema, false to fail
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static boolean DEFAULT_EXPL = true;
-    /**
-     * Set to true to output the name of the constraint that use the default explanation schema
-     */
-    @SuppressWarnings("WeakerAccess")
-    public static boolean OUTPUT_DEFAULT_EXPL = false;
 
 
     /**
@@ -223,7 +213,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      *                        filtering
      * @param priority        priority of this propagator (lowest priority propagators are called
      *                        first)
-     * @param reactToFineEvt  indicates whether or not this propagator must be informed of every
+     * @param reactToFineEvt  indicates whether this propagator must be informed of every
      *                        variable modification, i.e. if it should be incremental or not
      * @param swapOnPassivate indicates if, on propagator passivation, the propagator should be
      *                        ignored in its variables' propagators list.
@@ -473,10 +463,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
         }
     }
 
-    protected void setActive0() {
-        state = ACTIVE;
-    }
-
     /**
      * informs that this reified propagator must hold. Should not be called by the user.
      *
@@ -611,7 +597,7 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      * @throws org.chocosolver.solver.exception.ContradictionException expected behavior
      */
     public void fails() throws ContradictionException {
-        fails(getModel().getSolver().isLCG()?defaultReason(null):Reason.undef());
+        fails(defaultReason(null));
     }
 
     /**
@@ -629,18 +615,23 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     }
 
     /**
-     * @return the boolean variable that reifies this propagator, null otherwise.
-     */
-    public BoolVar reifiedWith() {
-        return reifVar;
-    }
-
-    /**
      * @return <i>true</i> if this is reified.
-     * Call {@link #reifiedWith()} to get the reifying variable.
      */
     public boolean isReified() {
         return reifVar != null;
+    }
+
+    @Override
+    public Function<Reason, Reason> manageReification() {
+        if (isReified() && reifVar.isInstantiated()) {
+            return r -> Reason.gather(r, reifVar.isInstantiated() ? reifVar.getValLit() : 1);
+        } else {
+            return ICause.super.manageReification();
+        }
+    }
+
+    public final boolean lcg() {
+        return getModel().getSolver().isLCG();
     }
 
     //***********************************************************************************
@@ -807,28 +798,29 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
     /**
      * @implSpec by default, all variables but the pivot are the reason of the modification
      */
-    @Override
     public Reason defaultReason(Variable pivot) {
-        TIntList ps = new TIntArrayList();
-        ps.add(0);
-        for (int i = 0; i < getNbVars(); i++) {
-            IntVar var = (IntVar) getVar(i);
-            if (var != pivot) {
-                if (var.isInstantiated()) {
-                    ps.add(var.getValLit());
-                } else {
-                    ps.add(var.getMinLit());
-                    ps.add(var.getMaxLit());
-                    int j = var.nextValueOut(var.getLB());
-                    int to = var.previousValueOut(var.getUB());
-                    while (j <= to) {
-                        ps.add(var.getLit(j, 1));
-                        j = var.nextValueOut(j);
+        if (lcg()) {
+            TIntList ps = new TIntArrayList();
+            ps.add(0); // place for the modified literal
+            for (int i = 0; i < getNbVars(); i++) {
+                IntVar var = (IntVar) getVar(i);
+                if (var != pivot) {
+                    if (var.isInstantiated()) {
+                        ps.add(var.getValLit());
+                    } else {
+                        ps.add(var.getMinLit());
+                        ps.add(var.getMaxLit());
+                        int j = var.nextValueOut(var.getLB());
+                        int to = var.previousValueOut(var.getUB());
+                        while (j <= to) {
+                            ps.add(var.getLit(j, 1));
+                            j = var.nextValueOut(j);
+                        }
                     }
                 }
             }
-        }
-        return Reason.r(ps.toArray());
+            return Reason.r(ps.toArray());
+        } else return Reason.undef();
     }
 
 
@@ -861,13 +853,6 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
 
     private void schedule() {
         scheduled = true;
-    }
-
-    /**
-     * @return true if scheduled for propagation
-     */
-    public final boolean isScheduled() {
-        return scheduled;
     }
 
 
