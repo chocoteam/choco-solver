@@ -37,7 +37,7 @@ import java.util.Arrays;
  * @since 08/11/2023
  */
 public class LazyClauseGeneration implements Learn {
-
+    public static boolean VERBOSE = false;
     private static final String ON_FAILURE = "On SAT failure,";
     private static final String ON_SOLUTION = "On solution,";
 
@@ -183,7 +183,7 @@ public class LazyClauseGeneration implements Learn {
             level = mSat.findConflictLevel();
             mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
-            if (false)
+            if (VERBOSE)
                 System.out.printf("%s learn %s\n",
                         message,
                         Arrays.stream(learnt_clause.toArray())
