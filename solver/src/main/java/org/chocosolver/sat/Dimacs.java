@@ -46,7 +46,7 @@ public interface Dimacs {
                 if (line.startsWith(TAG_COMM)) continue;
                 if (line.startsWith(TAG_PROB)) {
                     String[] values = Arrays.stream(line.split("\\s+"))
-                            .filter(v -> v.length() > 0)
+                            .filter(v -> !v.isEmpty())
                             .toArray(String[]::new);
                     if (!values[1].equals(TAG_CNF)) {
                         throw new IllegalStateException("Not a CNF file");
@@ -60,7 +60,7 @@ public interface Dimacs {
             while ((line = br.readLine()) != null) {
                 if (line.startsWith(TAG_COMM)) continue;
                 int[] ls = Arrays.stream(line.split("\\s+"))
-                        .filter(v -> v.length() > 0)
+                        .filter(v -> !v.isEmpty())
                         .mapToInt(Integer::parseInt)
                         .toArray();
                 int i = 0, j = 0, var;
@@ -76,7 +76,7 @@ public interface Dimacs {
                             MiniSat.neg(MiniSat.makeLiteral(var)));
                     j++;
                 }
-                if (i == 0 && lits.size() > 0) {
+                if (i == 0 && !lits.isEmpty()) {
                     nclauses--;
                     _me().addClause(lits);
                     lits.clear();
