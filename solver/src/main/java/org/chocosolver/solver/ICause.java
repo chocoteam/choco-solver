@@ -16,6 +16,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This interface describes services of smallest element which can act on variables.
@@ -38,12 +39,20 @@ public interface ICause {
 
     /**
      * Return the reason why the cause is responsible for the variable modification.
+     *
      * @param pivot the modified variable
      * @return the reason why the cause is responsible for the variable modification.
      * @implSpec by default, return {@link Reason#undef()}
      */
     default Reason defaultReason(Variable pivot) {
         return Reason.undef();
+    }
+
+    /**
+     * Manage reification when it matters
+     */
+    default Function<Reason, Reason> manageReification() {
+        return r -> r;
     }
 
 }
