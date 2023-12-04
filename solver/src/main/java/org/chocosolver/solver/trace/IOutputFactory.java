@@ -52,6 +52,7 @@ public interface IOutputFactory extends ISelf<Solver> {
     default void printFeatures() {
         ref().getMeasures().setReadingTimeCount(System.nanoTime() - ref().getModel().getCreationTime());
         ref().log().printf("- Model[%s] features:\n", ref().getModel().getName());
+        ref().log().printf("\tLCG : %s\n", ref().isLCG());
         ref().log().printf("\tVariables : %d\n", ref().getModel().getNbVars());
         ref().log().printf("\tConstraints : %d\n", ref().getModel().getNbCstrs());
         ref().log().printf("\tBuilding time : %.3fs\n", ref().getMeasures().getReadingTimeCount());
