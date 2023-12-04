@@ -138,7 +138,7 @@ public interface IViewFactory extends ISelf<Model> {
                 int bv = a * view.b + b;
                 if (av == 1 && bv == 0) {
                     return view.getVariable();
-                }else{
+                } else {
                     return intView(av, view.getVariable(), bv);
                 }
             } else {
@@ -423,8 +423,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x = c</i>
-     * @deprecated
      * @see #isEq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intEqView(IntVar x, int c) {
@@ -438,8 +438,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x != c</i>
-     * @deprecated
      * @see #isNeq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intNeView(IntVar x, int c) {
@@ -453,8 +453,8 @@ public interface IViewFactory extends ISelf<Model> {
      * @param x an integer variable.
      * @param c a constant
      * @return a BoolVar that reifies <i>x &le; c</i>
-     * @deprecated
      * @see #isLeq(IntVar, int)
+     * @deprecated
      */
     @Deprecated
     default BoolVar intLeView(IntVar x, int c) {
