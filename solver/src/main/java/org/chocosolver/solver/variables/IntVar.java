@@ -72,7 +72,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean removeValue(int value, ICause cause) throws ContradictionException {
-        return removeValue(value, cause, Reason.undef());
+        return removeValue(value, cause, cause.defaultReason(this));
     }
 
     /**
@@ -198,7 +198,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean removeValues(IntIterableSet values, ICause cause) throws ContradictionException {
-        return removeValues(values, cause, Reason.undef());
+        return removeValues(values, cause, cause.defaultReason(this));
     }
 
     /**
@@ -263,7 +263,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean removeAllValuesBut(IntIterableSet values, ICause cause) throws ContradictionException {
-        return removeAllValuesBut(values, cause, Reason.undef());
+        return removeAllValuesBut(values, cause, cause.defaultReason(this));
     }
 
     /**
@@ -316,7 +316,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean instantiateTo(int value, ICause cause) throws ContradictionException {
-        return instantiateTo(value, cause, Reason.undef());
+        return instantiateTo(value, cause, cause.defaultReason(this));
     }
 
     /**
@@ -385,7 +385,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateLowerBound(int value, ICause cause) throws ContradictionException {
-        return updateLowerBound(value, cause, Reason.undef());
+        return updateLowerBound(value, cause, cause.defaultReason(this));
     }
 
     /**
@@ -460,7 +460,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateUpperBound(int value, ICause cause) throws ContradictionException {
-        return updateUpperBound(value, cause, Reason.undef());
+        return updateUpperBound(value, cause, cause.defaultReason(this));
     }
 
     /**
@@ -542,7 +542,7 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
      * @throws ContradictionException if the domain become empty due to this action
      */
     default boolean updateBounds(int lb, int ub, ICause cause) throws ContradictionException {
-        return updateBounds(lb, ub, cause, Reason.undef());
+        return updateBounds(lb, ub, cause, cause.defaultReason(this));
     }
 
     /**
@@ -825,20 +825,9 @@ public interface IntVar extends ICause, Variable, Iterable<Integer>, ArExpressio
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /**
-     * Channeling between an instantiation of a SAT variable and the modification of the related variable in CP.
-     *
-     * @param val      the corresponding value
-     * @param val_type the corresponding type (EQ-NE or GE-LE)
-     * @param sign     the sign of the literal (0 or 1)
-     */
-    default void channel(int val, int val_type, int sign) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Get the literal corresponding to the value v and the type t
      *
-     * @param val
+     * @param val the value
      * @param type the corresponding type (NE, EQ, GE or LE)
      * @return the literal
      */
