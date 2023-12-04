@@ -20,7 +20,6 @@ import org.chocosolver.parser.flatzinc.ast.searches.SetSearch;
 import org.chocosolver.parser.flatzinc.ast.searches.VarChoice;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.ResolutionPolicy;
-import org.chocosolver.solver.search.limits.FailCounter;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;

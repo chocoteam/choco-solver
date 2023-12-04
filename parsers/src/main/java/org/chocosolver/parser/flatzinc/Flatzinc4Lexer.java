@@ -46,7 +46,7 @@ public class Flatzinc4Lexer extends Lexer {
 			"BOOL", "TRUE", "FALSE", "INT", "FLOAT", "SET", "OF", "ARRAY", "VAR", 
 			"PAR", "PREDICATE", "CONSTRAINT", "SOLVE", "SATISFY", "MINIMIZE", "MAXIMIZE", 
 			"DD", "DO", "LB", "RB", "CM", "LS", "RS", "EQ", "PL", "MN", "SC", "CL", 
-			"DC", "LP", "RP", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "FLOAT_CONST", 
+			"DC", "LP", "RP", "IDENTIFIER", "COMMENT", "WS", "INT_CONST", "FLOAT_CONST",
 			"STRING", "CHAR", "EXPONENT", "ESC_SEQ", "OCTAL_ESC", "HEX_DIGIT", "UNICODE_ESC"
 		};
 	}
