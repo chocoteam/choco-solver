@@ -387,6 +387,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
     private boolean initialize() {
         boolean ok = true;
         checkDeclaredConstraints();
+        checkExplainedVariables();
         checkExplainedConstraints();
         engine.initialize();
         getMeasures().setReadingTimeCount(System.nanoTime() - mModel.getCreationTime());
@@ -472,6 +473,51 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
                             .forEach(c -> logger.white().printf(String.format("%s is free\n", c)));
                 }
             }
+        }
+    }
+
+    /**
+     * Check the number of explained propagators
+     */
+    private void checkExplainedVariables() {
+        if (isLCG()) {
+            HashSet<String> warned = new HashSet<>();
+            int c = 0, e = 0;
+            for (Variable var : getModel().getVars()) {
+                boolean isExplained = false;
+                boolean isPartial = false;
+                // Check if the instance supports annotations
+                Annotation[] annotations = var.getClass().getAnnotations();
+                String comment = "";
+                for (Annotation annotation : annotations) {
+                    if (Objects.equals(annotation.annotationType(), Explained.class)) {
+                        isExplained = true;
+                        isPartial |= ((Explained) annotation).partial();
+                        comment = ((Explained) annotation).comment();
+                        e++;
+                    }
+                }
+                c++;
+                if (!isExplained) {
+                    if (getModel().getSettings().warnUser() && !warned.contains(var.getClass().getSimpleName())) {
+                        warned.add(var.getClass().getSimpleName());
+                        logger.white().println(
+                                "Warning: " + var.getClass().getSimpleName() + " is not explained.");
+                    }
+                } else if (isPartial) {
+                    if (getModel().getSettings().warnUser() && !warned.contains(var.getClass().getSimpleName())) {
+                        warned.add(var.getClass().getSimpleName());
+                        logger.white().println(
+                                "Warning: " + var.getClass().getSimpleName() + " is partially explained" +
+                                        (!comment.isEmpty() ? " (" + comment + ".)" : "."));
+                    }
+                }
+            }
+            if (getModel().getSettings().warnUser() && e < c) {
+                logger.printf(
+                        "%.2f%% variables are explained\n", e * 100. / c);
+            }
+            warned.clear();
         }
     }
 
