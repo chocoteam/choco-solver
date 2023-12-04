@@ -209,7 +209,7 @@ public class RegParserTest {
     public void testLc2() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.lc, 1);
+        Assert.assertEquals(parser.lc, 0);
         p.parseArgument("-f", "-lc", "2", "/file");
         Assert.assertEquals(parser.lc, 2);
     }
