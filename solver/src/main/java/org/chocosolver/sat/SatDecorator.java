@@ -9,7 +9,6 @@
  */
 package org.chocosolver.sat;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import org.chocosolver.memory.IStateInt;
@@ -58,6 +57,15 @@ public class SatDecorator extends MiniSat {
         early_deductions_ = new TIntArrayList();
         touched_variables_ = new TIntArrayList();
     }
+
+    public void beforeAddingClauses() {
+        this.synchro();
+    }
+
+    public void afterAddingClauses() {
+        this.storeEarlyDeductions();
+    }
+
 
     /**
      * Add a clause during resolution

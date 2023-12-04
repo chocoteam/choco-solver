@@ -13,7 +13,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.impl.LitVar;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.objects.IntHeap;
 
@@ -46,7 +46,7 @@ public class MiniSat implements SatFactory, Dimacs {
     private static final int litUndef = -2;
     // undefined clause
     public static final Clause C_Undef = Clause.undef();
-    public static final Reason R_Undef = Reason.undef();
+    private static final Reason R_Undef = Reason.undef();
     static final VarData VD_Undef = new VarData(R_Undef, -1, -1);
     public Clause confl = C_Undef;
 
@@ -131,17 +131,22 @@ public class MiniSat implements SatFactory, Dimacs {
         this.qhead_ = 0;
         num_vars_ = 0;
         rand = new Random(random_seed);
+        assignment_.add(Boolean.lUndef); // required because variable are numbered from 1
         if (addTautology) {
-            int varTrue = newVariable();
-            uncheckedEnqueue(makeLiteral(varTrue, true));
-            int varFalse = newVariable();
-            uncheckedEnqueue(makeLiteral(varFalse, false));
-            // permanently seen, todo: check others?
-            seen.set(varTrue);
-            seen.set(varFalse);
-        } else {
-            // required because variable are numbered from 1
-            assignment_.add(Boolean.lUndef);
+            // true literal
+            int v = newVariable();
+            int l = makeLiteral(v, true);
+            assignment_.set(v, makeBoolean(sgn(l)));
+            vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
+            trail_.add(l);
+            seen.set(v);
+            // false literal
+            v = newVariable();
+            l = makeLiteral(v, true);
+            assignment_.set(v, makeBoolean(sgn(l)));
+            vardata.set(v, new VarData(R_Undef, trailMarker(), trail_.size()));
+            trail_.add(l);
+            seen.set(v);
         }
         Clause.counter = 0;
     }
@@ -185,6 +190,14 @@ public class MiniSat implements SatFactory, Dimacs {
         if (!order_heap.contains(v) && decision.get(v)) {
             order_heap.insert(v);
         }
+    }
+
+    public void beforeAddingClauses() {
+        // nothing to do by default.
+    }
+
+    public void afterAddingClauses() {
+        // nothing to do by default.
     }
 
 
@@ -341,7 +354,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // The current value of a variable.
-    Boolean valueVar(int x) {
+    public Boolean valueVar(int x) {
         return assignment_.get(x);
     }
 
@@ -1014,6 +1027,9 @@ public class MiniSat implements SatFactory, Dimacs {
      * @return a literal
      */
     public static int makeLiteral(int var, boolean sign) {
+        if (var < 0) {
+            return (2 * (-var - 1) + (sign ? 0 : 1));
+        }
         return (2 * var + (sign ? 1 : 0));
     }
 
@@ -1150,6 +1166,16 @@ public class MiniSat implements SatFactory, Dimacs {
             this(ps, false);
         }
 
+        public Clause(TIntList ps, boolean learnt) {
+            literals_ = ps.toArray();
+            this.learnt = learnt;
+            this.id = counter++;
+        }
+
+        Clause(TIntList ps) {
+            this(ps, false);
+        }
+
         public static Clause undef() {
             return UNDEF;
         }
@@ -1252,17 +1278,17 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     public static class ChannelInfo implements Channeler {
-        IntVar var;
+        LitVar var;
         int cons_type;
         int val_type;
         int val;
         boolean reliable;
 
-        public ChannelInfo(IntVar var, int ct, int vt, int v) {
+        public ChannelInfo(LitVar var, int ct, int vt, int v) {
             this(var, ct, vt, v, true);
         }
 
-        public ChannelInfo(IntVar var, int ct, int vt, int v, boolean reliable) {
+        public ChannelInfo(LitVar var, int ct, int vt, int v, boolean reliable) {
             this.var = var;
             this.cons_type = ct;
             this.val_type = vt;
