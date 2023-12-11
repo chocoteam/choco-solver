@@ -68,6 +68,10 @@ public class PropagationEngine {
      */
     protected Propagator<?> lastProp;
     /**
+     * The last scheduled variable
+     */
+    protected Variable lastVar;
+    /**
      * One bit per queue: true if the queue is not empty.
      */
     private int notEmpty;
@@ -81,11 +85,11 @@ public class PropagationEngine {
     private boolean init;
     /**
      * When set to '0b00', this works as a constraint-oriented propagation engine;
-     * when set to '0b01', this workds as an hybridization between variable and constraint oriented
+     * when set to '0b01', this works as a hybridization between variable and constraint oriented
      * propagation engine.
-     * when set to '0b10', this workds as a variable- oriented propagation engine.
+     * when set to '0b10', this works as a variable-oriented propagation engine.
      */
-    private final byte hybrid;
+    private byte hybrid;
     /**
      * For dynamyc addition, avoid creating a new lambda at each call
      */
@@ -96,6 +100,11 @@ public class PropagationEngine {
             awake_queue.addLast(propagator);
         }
     };
+
+    /**
+     * A propagation insight to collect information about the propagation
+     */
+    private PropagationInsight insight = PropagationInsight.VOID;
 
     /**
      * A seven-queue propagation engine.
@@ -117,6 +126,8 @@ public class PropagationEngine {
         this.awake_queue = new CircularQueue<>(16);
         this.dynPropagators = new DynPropagators();
         this.propagators = new ArrayList<>();
+        //0b00: cstr-ori
+        //0b10: var-ori
         this.hybrid = model.getSettings().enableHybridizationOfPropagationEngine();
     }
 
@@ -138,29 +149,29 @@ public class PropagationEngine {
             }
             if (model.getSettings().sortPropagatorActivationWRTPriority()) {
                 propagators.sort(
-                    (p1, p2) -> {
-                        int p = p1.getPriority().getValue() - p2.getPriority().getValue();
-                        if (p == 0) {
-                            return p1.getNbVars() - p2.getNbVars();
-                        } else {
-                            return p;
-                        }
-                    });
+                        (p1, p2) -> {
+                            int p = p1.getPriority().getValue() - p2.getPriority().getValue();
+                            if (p == 0) {
+                                return p1.getNbVars() - p2.getNbVars();
+                            } else {
+                                return p;
+                            }
+                        });
             }
             for (int i = 0; i < propagators.size(); i++) {
                 Propagator<?> propagator = propagators.get(i);
                 if (propagator.getPriority().getValue() >= pro_queue.length) {
                     throw new SolverException(
-                            propagator+
-                            "\nThis propagator declares a priority (" +
-                            propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
-                            ") is greater than the maximum allowed priority (" +
-                            model.getSettings().getMaxPropagatorPriority() +
-                            ").\n" +
-                            "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
-                            (propagator.getPriority().getValue() + 1) +
-                            "));`)  " +
-                            "or decrease the propagator priority.");
+                            propagator +
+                                    "\nThis propagator declares a priority (" +
+                                    propagator.getPriority() + ") whose value (" + propagator.getPriority().getValue() +
+                                    ") is greater than the maximum allowed priority (" +
+                                    model.getSettings().getMaxPropagatorPriority() +
+                                    ").\n" +
+                                    "Either increase the maximum allowed priority (`Model model = new Model(Settings.init().setMaxPropagatorPriority(" +
+                                    (propagator.getPriority().getValue() + 1) +
+                                    "));`)  " +
+                                    "or decrease the propagator priority.");
                 }
                 propagator.setPosition(i);
                 awake_queue.addLast(propagator);
@@ -184,19 +195,27 @@ public class PropagationEngine {
      * @throws ContradictionException if a contradiction occurs
      */
     public void propagate() throws ContradictionException {
+        insight.clear();
         activatePropagators();
         do {
             manageModifications();
             for (int i = nextNotEmpty(); i > -1; i = nextNotEmpty()) {
                 assert !pro_queue[i].isEmpty() : "try to pop a propagator from an empty queue";
                 lastProp = pro_queue[i].pollFirst();
+                insight.cardinality(lastProp);
                 if (pro_queue[i].isEmpty()) {
                     notEmpty &= ~(1 << i);
                 }
                 // revision of the variable
                 lastProp.unschedule();
                 delayedPropagationType = 0;
-                propagateEvents();
+                try {
+                    propagateEvents();
+                    insight.update(lastProp, lastVar, false);
+                } catch (ContradictionException cex) {
+                    insight.update(lastProp, lastVar, true);
+                    throw cex;
+                }
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
@@ -218,6 +237,7 @@ public class PropagationEngine {
 
     /**
      * Checks if some propagators were added or have to be propagated on backtrack
+     *
      * @throws ContradictionException if a propagation fails
      */
     private void activatePropagators() throws ContradictionException {
@@ -278,6 +298,7 @@ public class PropagationEngine {
             notEmpty = notEmpty & ~(1 << i);
         }
         lastProp = null;
+        lastVar = null;
     }
 
     /**
@@ -297,6 +318,7 @@ public class PropagationEngine {
             }
             assert found : variable + " not in scope of " + cause;
         }
+        insight.modifiy(variable);
         if (!variable.isScheduled()) {
             var_queue.addLast(variable);
             variable.schedule();
@@ -324,7 +346,7 @@ public class PropagationEngine {
     /**
      * @return the propagator Event Type's mask for delayed propagation
      */
-    int getDelayedPropagation(){
+    int getDelayedPropagation() {
         return delayedPropagationType;
     }
 
@@ -348,6 +370,14 @@ public class PropagationEngine {
         }
     }
 
+    public void setInsight(PropagationInsight insight) {
+        this.insight = insight;
+    }
+
+    public void setHybrid(byte hybrid) {
+        this.hybrid = hybrid;
+    }
+
     /**
      * Reset the propagation engine.
      */
@@ -366,6 +396,7 @@ public class PropagationEngine {
         notEmpty = 0;
         init = false;
         lastProp = null;
+        lastVar = null;
     }
 
     public void ignoreModifications() {

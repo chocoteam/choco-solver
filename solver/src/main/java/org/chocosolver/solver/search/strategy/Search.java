@@ -105,8 +105,8 @@ public class Search {
      * This meta-heuristic is described in:
      * "Finding Good Partial Assignments During Restart-based Branch and Bound Search, AAAI'23".
      *
-     * @param ivars      variables to generate partial assignment from
-     * @param maxSolNum  maximum number of solutions to store
+     * @param ivars        variables to generate partial assignment from
+     * @param maxSolNum    maximum number of solutions to store
      * @param largerCutoff whether to use larger cutoff when looking for solutions
      * @param formerSearch former search heuristic
      * @return good partial assignment strategy to plug in as first strategy
@@ -572,6 +572,32 @@ public class Search {
      */
     public static AbstractStrategy<IntVar> failureLengthBasedSearch(IntVar... vars) {
         return intVarSearch(new FailureBased<>(vars, 0, 4), new IntDomainMin(), vars);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>PickOnDom</code> and assign.
+     * This version is based on the variables involved in the propagation.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote Based on "Guiding Backtrack Search by Tracking Variables During Constraint Propagation", C. Lecoutre et al., CP 2023.
+     * <br/>[DOI]:<a href="https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.9">10.4230/LIPIcs.CP.2023.9</a>
+     */
+    public static AbstractStrategy<IntVar> pickOnDom(IntVar... vars) {
+        return intVarSearch(new PickOnDom<>(vars), new IntDomainMin(), vars);
+    }
+
+    /**
+     * Assignment strategy which selects a variable according to <code>PickOnDom</code> and assign.
+     * This version is based on the constraints involved in the propagation.
+     *
+     * @param vars list of variables
+     * @return assignment strategy
+     * @implNote Based on "Guiding Backtrack Search by Tracking Variables During Constraint Propagation", C. Lecoutre et al., CP 2023.
+     * <br/>[DOI]:<a href="https://drops.dagstuhl.de/entities/document/10.4230/LIPIcs.CP.2023.9">10.4230/LIPIcs.CP.2023.9</a>
+     */
+    public static AbstractStrategy<IntVar> pickOnFil(IntVar... vars) {
+        return intVarSearch(new PickOnDom<>(vars), new IntDomainMin(), vars);
     }
 
     /**

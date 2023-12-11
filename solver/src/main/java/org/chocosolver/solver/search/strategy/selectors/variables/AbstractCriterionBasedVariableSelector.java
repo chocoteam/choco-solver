@@ -103,7 +103,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
      */
     private final HashMap<Variable, Integer> observed = new HashMap<>();
     /**
-     * Scoring for each variables, is updated dynamically.
+     * Scoring for each variable, is updated dynamically.
      */
     final TObjectDoubleMap<Variable> weights = new TObjectDoubleHashMap<>(15, 1.5f, 0.);
     /**
@@ -160,7 +160,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
             }
         }
         last.set(to);
-        if (bests.size() > 0) {
+        if (!bests.isEmpty()) {
             //System.out.printf("%s%n", bests);
             int currentVar = bests.get(random.nextInt(bests.size()));
             best = vars[currentVar];
@@ -171,7 +171,7 @@ public abstract class AbstractCriterionBasedVariableSelector<V extends Variable>
     protected abstract double weight(V v);
 
     @Override
-    public final void onContradiction(ContradictionException cex) {
+    public void onContradiction(ContradictionException cex) {
         conflicts++;
         if (cex.c instanceof Propagator) {
             Propagator<?> prop = (Propagator<?>) cex.c;

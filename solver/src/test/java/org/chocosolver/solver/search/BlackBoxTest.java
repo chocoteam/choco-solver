@@ -41,6 +41,8 @@ public class BlackBoxTest {
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::domOverWDegRefSearch},
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureRateBasedSearch},
                 {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::failureLengthBasedSearch},
+                {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::pickOnDom},
+                {(Function<IntVar[], AbstractStrategy<IntVar>>) Search::pickOnFil},
         };
     }
 

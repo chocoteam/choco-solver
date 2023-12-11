@@ -9,6 +9,8 @@ NEXT MILESTONE
 
 ### Major features:
 
+- Add `PickOnDom` and variants (see `Search.pickOnDom`)                            
+
 ### Deprecated API (to be removed in next release):
 
 ### Other closed issues and pull requests:
