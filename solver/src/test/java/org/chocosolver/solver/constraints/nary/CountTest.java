@@ -9,14 +9,17 @@
  */
 package org.chocosolver.solver.constraints.nary;
 
+import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Settings;
 import org.chocosolver.solver.Model;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.util.LinkedList;
@@ -30,6 +33,7 @@ import static org.chocosolver.solver.search.strategy.Search.inputOrderLBSearch;
 import static org.chocosolver.solver.search.strategy.Search.randomSearch;
 import static org.chocosolver.util.tools.ArrayUtils.append;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 /**
  * <br/>
@@ -249,4 +253,103 @@ public class CountTest {
         return model.sum(bs, "=", occ);
     }
 
+    @DataProvider(name = "testFilteringToZeroProvider")
+    public static Object[][] testFilteringToZeroProvider() {
+        return new Object[][] {{true}, {false}};
+    }
+
+    @Test(groups="1s", timeOut=60000, dataProvider = "testFilteringToZeroProvider")
+    public void testFilteringToZero(Boolean boundedDomain) {
+        Model model = new Model();
+        IntVar[] vars = model.intVarArray("vars", 10, 0, 10, boundedDomain);
+        IntVar count = model.intVar("count", 0, 10);
+        model.count(4, vars, count).post();
+
+        try {
+            model.getSolver().propagate();
+            for (int i = 0; i < vars.length; i++) {
+                Assert.assertEquals(11, vars[i].getDomainSize());
+            }
+            Assert.assertEquals(11, count.getDomainSize());
+        } catch (ContradictionException ex) {
+            fail();
+        }
+
+        try {
+            for (int i = 1; i < vars.length; i++) {
+                vars[i].updateLowerBound(5, Cause.Null);
+            }
+            model.getSolver().propagate();
+            for (int i = 0; i < vars.length; i++) {
+                if (i == 0) {
+                    Assert.assertEquals(11, vars[i].getDomainSize());
+                } else {
+                    Assert.assertEquals(6, vars[i].getDomainSize());
+                }
+            }
+            Assert.assertEquals(0, count.getLB());
+            Assert.assertEquals(1, count.getUB());
+        } catch (ContradictionException ex) {
+            fail();
+        }
+
+        try {
+            count.updateUpperBound(0, Cause.Null);
+            model.getSolver().propagate();
+            for (int i = 0; i < vars.length; i++) {
+                if (i == 0) {
+                    if (vars[i].hasEnumeratedDomain()) {
+                        Assert.assertEquals(10, vars[i].getDomainSize());
+                        Assert.assertFalse(vars[i].contains(4));
+                    } else {
+                        Assert.assertEquals(11, vars[i].getDomainSize());
+                        Assert.assertTrue(vars[i].contains(4));
+                    }
+                } else {
+                    Assert.assertEquals(6, vars[i].getDomainSize());
+                    Assert.assertFalse(vars[i].contains(4));
+                }
+            }
+            Assert.assertTrue(count.isInstantiatedTo(0));
+        } catch (ContradictionException ex) {
+            fail();
+        }
+
+        try {
+            // To test (in debug mode), that we do not enter in PropCount_AC.filter()
+            for (int j = 1; j < 4; j++) {
+                vars[0].updateLowerBound(j, Cause.Null);
+                model.getSolver().propagate();
+                for (int i = 0; i < vars.length; i++) {
+                    if (i == 0) {
+                        if (vars[i].hasEnumeratedDomain()) {
+                            Assert.assertEquals(10 - j, vars[i].getDomainSize());
+                            Assert.assertFalse(vars[i].contains(4));
+                        } else {
+                            Assert.assertEquals(11 - j, vars[i].getDomainSize());
+                            Assert.assertTrue(vars[i].contains(4));
+                        }
+                    } else {
+                        Assert.assertEquals(6, vars[i].getDomainSize());
+                        Assert.assertFalse(vars[i].contains(4));
+                    }
+                }
+                Assert.assertTrue(count.isInstantiatedTo(0));
+            }
+        } catch (ContradictionException ex) {
+            fail();
+        }
+
+        try {
+            vars[0].updateLowerBound(4, Cause.Null);
+            model.getSolver().propagate();
+            for (int i = 0; i < vars.length; i++) {
+                Assert.assertEquals(6, vars[i].getDomainSize());
+                Assert.assertFalse(vars[i].contains(4));
+            }
+            Assert.assertTrue(count.isInstantiatedTo(0));
+        } catch (ContradictionException ex) {
+            fail();
+        }
+    }
 }
