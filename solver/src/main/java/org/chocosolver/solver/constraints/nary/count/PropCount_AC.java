@@ -117,7 +117,7 @@ public class PropCount_AC extends Propagator<IntVar> {
                     possibles.remove(varIdx);
                     mandatories.add(varIdx);
                     forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
-                } else if (!vars[varIdx].hasEnumeratedDomain() && (vars[varIdx].getLB() == value || vars[varIdx].getLB() == value)) {
+                } else if (!vars[varIdx].hasEnumeratedDomain() && (vars[varIdx].getLB() == value || vars[varIdx].getUB() == value)) {
                     forcePropagate(PropagatorEventType.CUSTOM_PROPAGATION);
                 }
             }
