@@ -218,7 +218,20 @@ public interface IOutputFactory extends ISelf<Solver> {
      * @see IOutputFactory.DefaultSolutionMessage
      */
     default void showDecisions() {
-        showDecisions(new DefaultDecisionMessage(ref()));
+        showDecisions(120);
+    }
+
+    /**
+     * Plug a search monitor which outputs a message on each decision.
+     * <p>
+     * Recommended usage: to be called before the resolution step.
+     *
+     * @param nChars maximum number of characters to output
+     *
+     * @see IOutputFactory.DefaultSolutionMessage
+     */
+    default void showDecisions(int nChars) {
+        showDecisions(new DefaultDecisionMessage(ref(), nChars));
     }
 
     /**
@@ -519,19 +532,21 @@ public interface IOutputFactory extends ISelf<Solver> {
          * Solver to output
          */
         private final Solver solver;
+        private final int limit;
 
         /**
          * Create a decision message
          *
          * @param solver solver to output
+         * @param nChars maximum number of characters to output
          */
-        public DefaultDecisionMessage(Solver solver) {
+        public DefaultDecisionMessage(Solver solver, int nChars) {
             this.solver = solver;
+            this.limit = nChars;
         }
 
         @Override
         public String print() {
-            int limit = 120;
             Variable[] vars = solver.getSearch().getVariables();
             StringBuilder s = new StringBuilder(32);
             for (int i = 0; i < vars.length && s.length() < limit; i++) {
