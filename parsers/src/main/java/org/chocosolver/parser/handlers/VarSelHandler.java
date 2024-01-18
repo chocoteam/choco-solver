@@ -36,7 +36,7 @@ public class VarSelHandler extends OneArgumentOptionHandler<SearchParams.VarSelC
      */
     @Override
     public String getDefaultMetaVariable() {
-        return "[String,String,int]";
+        return "[String,int]";
     }
 
 
@@ -45,10 +45,10 @@ public class VarSelHandler extends OneArgumentOptionHandler<SearchParams.VarSelC
         if (argument.startsWith("[")) argument = argument.substring(1);
         if (argument.endsWith("]")) argument = argument.substring(0, argument.length() - 1);
         String[] pars = argument.split(",");
-        if (pars.length == 3) {
+        if (pars.length == 2) {
             return new SearchParams.VarSelConf(
                     SearchParams.VariableSelection.valueOf(pars[0].toUpperCase()),
-                    Integer.parseInt(pars[2])
+                    Integer.parseInt(pars[1])
             );
         }
         throw new CmdLineException(owner,
