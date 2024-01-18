@@ -154,7 +154,7 @@ public class RegParserTest {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
         Assert.assertNull(parser.varsel);
-        p.parseArgument("-f", "-varsel", "[CHS,LARGEST_DOMAIN,64]", "/file");
+        p.parseArgument("-f", "-varsel", "[CHS,64]", "/file");
         Assert.assertEquals(parser.varsel, new SearchParams.VarSelConf(
                 SearchParams.VariableSelection.CHS, 64));
     }
