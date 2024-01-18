@@ -100,8 +100,8 @@ public abstract class RegParser implements IParser {
     @Option(name = "-varsel",
             handler = VarSelHandler.class,
             depends = {"-f"},
-            forbids = {"-varh", "-tie", "-flush"},
-            usage = "Define the variable selector to use. Expected format: [varsel,tie,flush] as [String,String,int] -- no space allowed.")
+            forbids = {"-varh", "-flush"},
+            usage = "Define the variable selector to use. Expected format: [varsel,flush] as [String,int] -- no space allowed.")
     public SearchParams.VarSelConf varsel;
 
     @Option(name = "-valh", aliases = {"--valHeuristic"},
@@ -133,15 +133,15 @@ public abstract class RegParser implements IParser {
             handler = ValSelHandler.class,
             depends = {"-f"},
             forbids = {"-valh", "-best", "-bestRate", "-last"},
-            usage = "Define the variable selector to use. Expected format: [valsel,best,bestRate,last] " +
+            usage = "Define the variable selector to use. Expected format: [valh,best,bestRate,last] " +
                     "as [String,boolean,int,boolean]  -- no space allowed.")
     public SearchParams.ValSelConf valsel;
 
     @Option(name = "-restarts",
             handler = RestartHandler.class,
             depends = {"-f"},
-            usage = "Define the restart heuristic to use. Expected format: [policy,cutoff,geo?,offset] " +
-                    "as [String,int,double?,int]  -- no space allowed.")
+            usage = "Define the restart heuristic to use. Expected format: [policy,cutoff,geo?,offset,resetOnSolution] " +
+                    "as [String,int,double?,int,boolean]  -- no space allowed.")
     public SearchParams.ResConf restarts =
             new SearchParams.ResConf(SearchParams.Restart.GEOMETRIC, 10, 1.05, 50_000, true);
 

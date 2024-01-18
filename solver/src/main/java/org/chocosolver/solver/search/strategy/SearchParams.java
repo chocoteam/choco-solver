@@ -157,6 +157,15 @@ public interface SearchParams {
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
             }
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ResConf) {
+                ResConf other = (ResConf) obj;
+                return pol == other.pol && cutoff == other.cutoff && offset == other.offset && geo == other.geo && resetOnSolution == other.resetOnSolution;
+            }
+            return false;
+        }
     }
 
     /**
