@@ -1,17 +1,10 @@
 #!/bin/sh
 
-STOP_AT_FIRST="yes"
-FREE_SEARCH="no"
-STAT_SOL="no"
-EXP="no"
+JAVA_ARGS="-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M"
 LVL="COMPET"
 SOLS=-1
-SEED=0
-NB_NODES=1
 TIME_LIMIT=-1
-DIR=`dirname "$0"`
-CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.14-light.jar
-#${DIR}/${JAR_NAME}
+CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.15-SNAPSHOT-light.jar
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -22,10 +15,6 @@ OPTIONS:
 
     -h, --help
         Display this message.
-
-    -dir <s>
-        Stands for the directory where the uploaded files reside.
-        The default is ${DIR}.
 
     -a
         This causes the solver to search for, and output all solutions.
@@ -51,7 +40,7 @@ OPTIONS:
         Override the jar file.  (The default is $CHOCO_JAR.)
 
     --jargs <args>
-		Override default java argument (\"-Xss64m -Xms64m -Xmx4096m -server\")
+		Override default java argument (The default is $JAVA_ARGS.)
 		
 EXAMPLES:
 	
@@ -69,6 +58,9 @@ then
     exit 1
 fi
 
+FILE="$1"
+ARGS=""
+
 while test $# -gt 0
 do
     case "$1" in
@@ -78,21 +70,16 @@ do
             exit 0
         ;;
 
-        -dir)
-            DIR="$2"
-            shift
-        ;;
-
         -a)
-            STOP_AT_FIRST="no"
+            ARGS="$ARGS -a"
         ;;
 
         -f)
-            FREE_SEARCH="yes"
+            ARGS="$ARGS -f"
         ;;
 
         -p)
-            NB_NODES="$2"
+            ARGS="$ARGS -p $2"
             shift
         ;;
 
@@ -106,7 +93,7 @@ do
         ;;
 
        -s)
-            STAT_SOL="yes"
+            ARGS="$ARGS -stasol"
         ;;
 
         -n)
@@ -115,7 +102,7 @@ do
         ;;
 
         -r)
-            SEED="$2"
+            ARGS="$ARGS -seed $2"
             shift
         ;;
 
@@ -143,25 +130,9 @@ do
     shift
 done
 
-FILE="$1"
-ARGS=" -limit=[$TIME_LIMIT,${SOLS}sols] -p $NB_NODES -seed ${SEED}"
+ARGS="$ARGS -limit=[$TIME_LIMIT,${SOLS}sols] -lvl ${LVL}"
 
-if test "${STOP_AT_FIRST}" = "no"
-then
-    ARGS=$ARGS" -a"
-fi
-
-if test "${FREE_SEARCH}" = "yes"
-then
-    ARGS=$ARGS" -f"
-fi
-
-if test "${STAT_SOL}" = "yes"
-then
-    ARGS=$ARGS" -stasol"
-fi
-
-CMD="java -server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" -lvl ${LVL} ${ARGS}"
+CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
 
 if test "${LVL}" = "INFO"
 then
