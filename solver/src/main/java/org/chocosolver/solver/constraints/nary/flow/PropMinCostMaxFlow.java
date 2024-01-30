@@ -70,80 +70,33 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
         int maxcost = this.cost.getUB();
         try {
             for (int i = toCheck.nextSetBit(0); i > -1; i = toCheck.nextSetBit(i + 1)) {
-                updateFlow4(i, maxcost);
+                updateFlow(i, maxcost);
             }
         } finally {
             toCheck.clear();
         }
     }
 
-    private void updateFlow0(int i, int minCost, int maxcost) throws ContradictionException {
+    private void updateFlow(int i, int maxcost) throws ContradictionException {
         int l = flows[i].getLB();
         int u = flows[i].getUB();
         int m = u;
         g.refresh(i, m);
         int c = minCostFlow(i, m);
         if (c > maxcost || c == -1) {
+            // u is the first value that does not work
+            u--;
             while (l <= u) {
                 m = (l + u) >>> 1;
                 g.refresh(i, m);
                 c = minCostFlow(i, m);
-                if (c == -1) {
-                    u = m - 1;
-                } else if (c > maxcost) {
-                    u = m - 1;
-                } else if (c < maxcost) {
-                    l = m + 1;
-                } else break;
-            }
-            flows[i].updateUpperBound(m, this);
-        }
-    }
-
-    private void updateFlow1(int i, int minCost, int maxcost) throws ContradictionException {
-        int c;
-        int l;
-        do {
-            l = flows[i].getLB();
-            g.refresh(i, l);
-            c = minCostFlow(i, l);
-        } while ((c == -1 || c < minCost) && flows[i].updateLowerBound(l + 1, this));
-        int u;
-        do {
-            u = flows[i].getUB();
-            g.refresh(i, u);
-            c = minCostFlow(i, u);
-        } while ((c == -1 || c > maxcost) && flows[i].updateUpperBound(u - 1, this));
-    }
-
-    private void updateFlow4(int i, int maxcost) throws ContradictionException {
-        int l = flows[i].getLB();
-        int u = flows[i].getUB();
-        int m = u;
-        g.refresh(i, m);
-        int c = minCostFlow(i, m);
-        if (c > maxcost || c == -1) {
-            while (l <= u) {
-                m = (l + u) >>> 1;
-                g.refresh(i, m);
-                c = minCostFlow(i, m);
-                if (c == -1) {
-                    u = m - 1;
-                } else if (c > maxcost) {
-                    u = m - 1;
-                } else if (c < maxcost) {
-                    l = m + 1;
-                } else break;
-            }
-            flows[i].updateUpperBound(m, this);
-            if (l == u + 1) {
-                u = flows[i].getUB();
-                g.refresh(i, u);
-                c = minCostFlow(i, u);
                 if (c == -1 || c > maxcost) {
-                    flows[i].updateUpperBound(u - 1, this);
+                    u = m - 1;
+                } else {// if (c <= maxcost) {
+                    l = m + 1;
                 }
             }
+            flows[i].updateUpperBound(u, this);
         }
     }
 

@@ -214,4 +214,45 @@ public class NetworkflowTest {
         Assert.assertEquals(solver.getSolutionCount(), 11);
         Assert.assertEquals(solver.getNodeCount(), 33);
     }
+
+    @Test(groups = "1s")
+    public void testNCMats1() {
+        int[] startNodes = new int[]{1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4};
+        int[] endNodes = new int[]{2, 3, 4, 1, 3, 4, 1, 2, 4, 1, 2, 3};
+        int[] unitCosts = new int[]{0, 1, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0};
+        int[] supplies = new int[]{2, -2, 2, -2};
+
+        Model model = new Model();
+        IntVar[] flow = new IntVar[startNodes.length];
+        int i = 0;
+        flow[i++] = model.intVar("1", 1);
+        flow[i++] = model.intVar("0", 0);
+        flow[i++] = model.intVar("3", 3);
+        flow[i++] = model.intVar("0", 0);
+        flow[i++] = model.intVar("B", new int[]{1, 3});
+        flow[i++] = model.intVar("E", new int[]{2, 3});
+        flow[i++] = model.intVar("0", 0);
+        flow[i++] = model.intVar("K", new int[]{3, 4});
+        flow[i++] = model.intVar("I", new int[]{2, 4});
+        flow[i++] = model.intVar("2", 2);
+        flow[i++] = model.intVar("J", new int[]{1, 3, 4});
+        flow[i] = model.intVar("2", 2);
+        IntVar cost = model.intVar(new int[]{6, 8});
+        model.costFlow(startNodes, endNodes, supplies, unitCosts, flow, cost, 1);
+        Solver solver = model.getSolver();
+        solver.setSearch(Search.inputOrderLBSearch(flow));
+        while (solver.solve()) {
+              /*System.out.println("Minimum cost: " + cost.getValue());
+              System.out.println();
+              System.out.println(" Edge   Flow / Capacity  Cost");
+              for (int i = 0; i < startNodes.length; ++i) {
+                  long acost = (long) flow[i].getValue() * unitCosts[i];
+                  System.out.println(startNodes[i] + " -> " + endNodes[i] + "  "
+                          + flow[i].getValue() + "  / " + capacities[i] + "       " + acost);
+              }
+              System.out.println();
+              System.out.println();*/
+        }
+        Assert.assertEquals(solver.getSolutionCount(), 2);
+    }
 }
