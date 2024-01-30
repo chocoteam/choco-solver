@@ -1712,18 +1712,10 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXeqY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXeqY(value, valVar, b);
-            }
+             IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXeqY(nbOcc, countVar, b);
             cstr.post();
-
         }
     },
     fzn_count_geq_reif {
@@ -1734,16 +1726,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXgeY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXgeY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXgeY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1756,16 +1741,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXgtY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXgtY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXgtY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1778,16 +1756,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXleY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXleY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXleY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1800,16 +1771,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXltY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXltY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXltY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1822,16 +1786,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXneY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXneY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXneY(nbOcc, countVar, b);
             cstr.post();
 
         }

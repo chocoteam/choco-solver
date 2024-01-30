@@ -330,4 +330,24 @@ public class FlatzincModelTest {
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
 
+    @Test(groups = "1s")
+    public void testMats8() {
+        InputStream in = new ByteArrayInputStream((
+                "predicate fzn_count_eq_reif(array [int] of var int: x,var int: y,var int: c,var bool: b);\n" +
+                        "var {1,3}: A:: output_var;\n" +
+                        "constraint fzn_count_eq_reif([1],A,4,false);\n" +
+                        "solve  satisfy;" +
+                        "\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+    }
 }
