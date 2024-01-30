@@ -146,7 +146,6 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
         final int[] d; // distance
         final int[] p; // predecessor
         final int[] b; // balance or demand on each vertex
-        final BitSet inqueue;
         final IntCircularQueue queue;
         int D;
 
@@ -157,7 +156,6 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
             this.n2 = n - 2;
             this.d = new int[n];
             this.p = new int[n];
-            this.inqueue = new BitSet(n);
             this.queue = new IntCircularQueue(n);
             this.adj = new ArrayList[n];
             this.b = new int[n];
@@ -242,22 +240,17 @@ public class PropMinCostMaxFlow extends Propagator<IntVar> {
         Arrays.fill(g.d, Integer.MAX_VALUE);
         Arrays.fill(g.p, -1);
         g.d[s] = 0;
-        g.inqueue.clear();
         g.queue.clear();
         g.queue.addLast(s);
         while (!g.queue.isEmpty()) {
             int u = g.queue.pollFirst();
-            g.inqueue.clear(u);
             for (int i = 0; i < g.adj[u].size(); i++) {
                 Edge e = g.adj[u].get(i);
                 int v = e.to;
                 if (e.capacity > 0 && g.d[v] > g.d[u] + e.cost) {
                     g.d[v] = g.d[u] + e.cost;
                     g.p[v] = e.id; // not the predecessor but the arc
-                    if (!g.inqueue.get(v)) {
-                        g.inqueue.set(v);
-                        g.queue.addLast(v);
-                    }
+                    g.queue.addLast(v);
                 }
             }
         }
