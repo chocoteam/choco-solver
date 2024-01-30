@@ -403,4 +403,68 @@ public class ArgmaxminTest {
         Assert.assertEquals(solver.getSolutionCount(), 0);
     }
 
+    @Test(groups = "1s", dataProvider = "decAndOffset")
+    public void testMats3(boolean dec, int of) {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{1, 2, 3});
+        IntVar E = model.intVar("E", new int[]{1 + of, 2 + of, 3 + of});
+        IntVar[] vs = new IntVar[]{C, C};
+        if (dec) {
+            model.argminDec(E, of, vs);
+        } else {
+            model.argmin(E, of, vs).post();
+        }
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
+    @Test(groups = "1s", dataProvider = "decAndOffset")
+    public void testMats3b(boolean dec, int of) {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{1, 2, 3});
+        IntVar E = model.intVar("E", new int[]{of, 1 + of, 2 + of});
+        IntVar[] vs = new IntVar[]{C, C};
+        if (dec) {
+            model.argminDec(E, of, vs);
+        } else {
+            model.argmin(E, of, vs).post();
+        }
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 3);
+    }
+
+    @Test(groups = "1s", dataProvider = "decAndOffset")
+    public void testMats4(boolean dec, int of) {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{1, 2, 3});
+        IntVar E = model.intVar("E", new int[]{1 + of, 2 + of});
+        IntVar[] vs = new IntVar[]{C, C};
+        if (dec) {
+            model.argmaxDec(E, of, vs);
+        } else {
+            model.argmax(E, of, vs).post();
+        }
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 0);
+    }
+
+    @Test(groups = "1s", dataProvider = "decAndOffset")
+    public void testMats4b(boolean dec, int of) {
+        Model model = new Model();
+        IntVar C = model.intVar("C", new int[]{1, 2, 3});
+        IntVar E = model.intVar("E", new int[]{of, 1 + of, 2 + of});
+        IntVar[] vs = new IntVar[]{C, C};
+        if (dec) {
+            model.argmaxDec(E, of, vs);
+        } else {
+            model.argmax(E, of, vs).post();
+        }
+        Solver solver = model.getSolver();
+        solver.findAllSolutions();
+        Assert.assertEquals(solver.getSolutionCount(), 3);
+    }
+
 }

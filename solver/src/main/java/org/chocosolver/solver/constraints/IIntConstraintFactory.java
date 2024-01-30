@@ -1862,11 +1862,11 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * on this views.
      */
     default Constraint argmin(IntVar z, int offset, IntVar[] vars) {
-        Object[] args = variableUniqueness(vars, new IntVar[]{z});
+        Object[] args = variableUniqueness(Arrays.stream(vars).map(v -> ref().neg(v)).toArray(IntVar[]::new),
+                new IntVar[]{z});
         vars = (IntVar[]) args[0];
         z = ((IntVar[]) args[1])[0];
-        IntVar[] views = Arrays.stream(vars).map(v -> ref().neg(v)).toArray(IntVar[]::new);
-        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, views));
+        return new Constraint(ConstraintsName.ARGMAX, new PropArgmax(z, offset, vars));
     }
 
     /**
@@ -2620,8 +2620,8 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * This method ensures that no variable occurs more than once in the list of variables.
      * If this is the case, it replaces the duplicate variables by views.
      * <p>
-     *     Example of usage:
-     *     <pre>
+     * Example of usage:
+     * <pre>
      *         {@code
      *         Object[] args = variableUniqueness(vars1, vars2);
      *         vars1 = (IntVar[]) args[0];
