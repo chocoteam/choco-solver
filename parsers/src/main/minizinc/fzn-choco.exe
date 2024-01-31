@@ -15,7 +15,6 @@ if "%#"=="0" (
     exit /b 1
 )
 
-set FILE="%~1"
 set ARGS=""
 
 set usage="\
@@ -119,6 +118,8 @@ echo %usage%
 exit /b 2
 
 :end_parse_args
+
+set FILE="%~1"
 
 set ARGS=$ARGS" -limit=[%TIME_LIMIT%,%SOLS%sols] -lvl %LVL%"
 
