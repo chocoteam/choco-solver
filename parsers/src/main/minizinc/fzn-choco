@@ -58,7 +58,6 @@ then
     exit 1
 fi
 
-FILE="$1"
 ARGS=""
 
 while test $# -gt 0
@@ -129,6 +128,8 @@ do
     esac
     shift
 done
+
+FILE="$1"
 
 ARGS="$ARGS -limit=[$TIME_LIMIT,${SOLS}sols] -lvl ${LVL}"
 
