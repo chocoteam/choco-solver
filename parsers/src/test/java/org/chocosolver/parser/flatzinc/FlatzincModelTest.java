@@ -376,4 +376,28 @@ public class FlatzincModelTest {
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
+
+    @Test(groups = "1s")
+    public void testMats10() {
+        InputStream in = new ByteArrayInputStream((
+                "predicate fzn_count_eq(array [int] of var int: x,var int: y,var int: c);\n" +
+                        "var 1..2: B:: output_var;\n" +
+                        "var {0,3}: E:: output_var;\n" +
+                        "var {1,3}: F:: output_var;\n" +
+                        "array [1..5] of var int: X_INTRODUCED_17_ ::var_is_introduced  = [0,1,F,E,1];\n" +
+                        "constraint fzn_count_eq(X_INTRODUCED_17_,B,F);\n" +
+                        "solve  satisfy;" +
+                        "\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 0);
+    }
 }
