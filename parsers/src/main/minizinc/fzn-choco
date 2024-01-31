@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# echo "%" "$@"
+
 JAVA_ARGS="-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M"
 LVL="COMPET"
 SOLS=-1
