@@ -74,7 +74,7 @@ public final class MathUtils {
      * @return the power result
      */
     public static int pow(int value, int exp) {
-        return value == 2 ? 1 << exp : (int) Math.pow(value, exp);
+        return value == 2 && exp >= 0 ? 1 << exp : (int) Math.pow(value, exp);
     }
 
     public static double log(double value, double exponent) {

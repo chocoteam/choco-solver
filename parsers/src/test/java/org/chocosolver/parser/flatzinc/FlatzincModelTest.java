@@ -350,4 +350,30 @@ public class FlatzincModelTest {
         }
         Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
     }
+
+    @Test(groups = "1s")
+    public void testMats9() {
+        InputStream in = new ByteArrayInputStream((
+                "array [1..2] of int: X_INTRODUCED_3_ = [1,3];\n" +
+                        "var {-2,0}: A:: output_var;\n" +
+                        "var -1..1: x1:: is_defined_var:: output_var;\n" +
+                        "var -1..5: x2:: output_var:: is_defined_var;\n" +
+                        "var 0..32: X_INTRODUCED_4_ ::var_is_introduced :: is_defined_var;\n" +
+                        "constraint int_pow(-1,A,x1):: defines_var(x1);\n" +
+                        "constraint int_lin_eq(X_INTRODUCED_3_,[x2,x1],2):: defines_var(x2);\n" +
+                        "constraint int_pow(2,x2,X_INTRODUCED_4_):: defines_var(X_INTRODUCED_4_);\n" +
+                        "solve  satisfy;" +
+                        "\n").getBytes());
+
+        Flatzinc fzn = new Flatzinc(true, false, 1);
+        fzn.createSettings();
+        fzn.createSolver();
+        fzn.parse(fzn.getModel(), fzn.datas[0], in);
+        Model model = fzn.getModel();
+
+        while (model.getSolver().solve()) {
+            fzn.datas[0].onSolution();
+        }
+        Assert.assertEquals(model.getSolver().getSolutionCount(), 2);
+    }
 }
