@@ -1712,7 +1712,7 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-             IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length);
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length);
             Constraint cstr = model.count(valVar, decVars, nbOcc);
             model.reifyXeqY(nbOcc, countVar, b);
             cstr.post();
