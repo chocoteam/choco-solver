@@ -30,7 +30,7 @@ public class PropKnapsack extends Propagator<IntVar> {
     // VARIABLES
     //***********************************************************************************
 
-    private final int[] weigth;
+    private final int[] weight;
     private final int[] energy;
     private final int[] order;
     private final double[] ratio;
@@ -45,7 +45,7 @@ public class PropKnapsack extends Propagator<IntVar> {
     public PropKnapsack(IntVar[] itemOccurence, IntVar capacity, IntVar power,
                         int[] weight, int[] energy) {
         super(ArrayUtils.append(itemOccurence, new IntVar[]{capacity, power}), PropagatorPriority.LINEAR, false);
-        this.weigth = weight;
+        this.weight = weight;
         this.energy = energy;
         this.n = itemOccurence.length;
         this.capacity = vars[n];
@@ -74,7 +74,7 @@ public class PropKnapsack extends Propagator<IntVar> {
 		int maxPower = 0;
         for (int i = 0; i < n; i++) {
             int lb = vars[i].getLB();
-            remainingCapacity -= weigth[i] * lb;
+            remainingCapacity -= weight[i] * lb;
             maxPower += energy[i] * lb;
         }
         power.updateLowerBound(maxPower, this);
@@ -87,11 +87,11 @@ public class PropKnapsack extends Propagator<IntVar> {
                 idx = order[i];
                 int range = vars[idx].getUB() - vars[idx].getLB();
                 if (range > 0) {
-					int delta = weigth[idx] * (range);
+					int delta = weight[idx] * (range);
                     if (delta <= remainingCapacity) {
                         maxPower += energy[idx] * (range);
                         remainingCapacity -= delta;
-                        if (weigth[idx] > 0 && remainingCapacity == 0) {
+                        if (weight[idx] > 0 && remainingCapacity == 0) {
                             power.updateUpperBound(maxPower, this);
                             return;
                         }
@@ -110,7 +110,7 @@ public class PropKnapsack extends Propagator<IntVar> {
         double camax = capacity.getUB();
         double pomin = 0;
         for (int i = 0; i < n; i++) {
-            camax -= (long)weigth[i] * vars[i].getLB(); // potential overflow
+            camax -= (long)weight[i] * vars[i].getLB(); // potential overflow
             pomin += (long)energy[i] * vars[i].getLB(); // potential overflow
         }
         if (camax < 0 || pomin > power.getUB()) {
