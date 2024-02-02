@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -106,6 +106,17 @@ public class T_solve_goal extends GrammarTest {
                         "    ]),\n" +
                         "    int_search([y], input_order, indomain_max, complete)\n" +
                         "]) satisfy;", mSolver, datas
+        );
+        fp.solve_goal();
+    }
+
+    @Test(groups = "1s")
+    public void testRestart() throws IOException {
+        datas.register("y", mSolver.intVar("y", 0, 10, true));
+        Flatzinc4Parser fp = parser(
+                "solve :: int_search([y], input_order, indomain_min)\n" +
+                        "      :: restart_linear(1000)\n" +
+                        "      satisfy;", mSolver, datas
         );
         fp.solve_goal();
     }

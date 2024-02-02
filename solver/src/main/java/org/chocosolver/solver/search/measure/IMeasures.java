@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -271,7 +271,7 @@ public interface IMeasures extends Serializable {
      * @return statistics in a CSV format
      */
     default String toCSV() {
-        // solutionCount;buildingTime(sec);totalTime(sec);timeToBest(sec);objective;nodes;backtracks;fails;restarts;
+        // solutionCount;buildingTime(sec);totalTime(sec);timeToBest(sec);objective;nodes;backtracks;backjumps;fails;restarts;
         return String.format("%c;%d;%.3f;%.3f;%.3f;%d;%d;%d;%d;%d;%d;",
                 getSearchState().toString().charAt(0),
                 getSolutionCount(),

@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -62,6 +62,14 @@ public interface SearchParams {
         FLBA,
         FRBA,
         INPUT,
+        PICKONDOM0,
+        PICKONDOM1,
+        PICKONDOM2,
+        PICKONDOM3,
+        PICKONFIL0,
+        PICKONFIL1,
+        PICKONFIL2,
+        PICKONFIL3,
         RAND,
     }
 
@@ -149,6 +157,15 @@ public interface SearchParams {
                             c -> s.getFailCount() >= c, offset, resetOnSolution);
             }
         }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof ResConf) {
+                ResConf other = (ResConf) obj;
+                return pol == other.pol && cutoff == other.cutoff && offset == other.offset && geo == other.geo && resetOnSolution == other.resetOnSolution;
+            }
+            return false;
+        }
     }
 
     /**
@@ -229,8 +246,8 @@ public interface SearchParams {
         /**
          * Configure the variable selection strategy
          *
-         * @param varsel     variable selection strategy
-         * @param flushRate  number of restarts before flushing the scores of the variables
+         * @param varsel    variable selection strategy
+         * @param flushRate number of restarts before flushing the scores of the variables
          */
         public VarSelConf(SearchParams.VariableSelection varsel, int flushRate) {
             this.varsel = varsel;
@@ -263,6 +280,22 @@ public interface SearchParams {
                     return (vars, vsel) -> Search.intVarSearch(new FailureBased<>(vars, 0, 2), vsel, vars);
                 case INPUT:
                     return (vars, vsel) -> Search.intVarSearch(new InputOrder<>(vars[0].getModel()), vsel, vars);
+                case PICKONDOM0:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 0, flushRate), vsel, vars);
+                case PICKONDOM1:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 1, flushRate), vsel, vars);
+                case PICKONDOM2:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 2, flushRate), vsel, vars);
+                case PICKONDOM3:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnDom<>(vars, 3, flushRate), vsel, vars);
+                case PICKONFIL0:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 0, flushRate), vsel, vars);
+                case PICKONFIL1:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 1, flushRate), vsel, vars);
+                case PICKONFIL2:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 2, flushRate), vsel, vars);
+                case PICKONFIL3:
+                    return (vars, vsel) -> Search.intVarSearch(new PickOnFil<>(vars, 3, flushRate), vsel, vars);
                 case RAND:
                     return (vars, vsel) -> Search.intVarSearch(new Random<>(vars[0].getModel().getSeed()), vsel, vars);
             }

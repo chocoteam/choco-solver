@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -154,7 +154,7 @@ public class RegParserTest {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
         Assert.assertNull(parser.varsel);
-        p.parseArgument("-f", "-varsel", "[CHS,LARGEST_DOMAIN,64]", "/file");
+        p.parseArgument("-f", "-varsel", "[CHS,64]", "/file");
         Assert.assertEquals(parser.varsel, new SearchParams.VarSelConf(
                 SearchParams.VariableSelection.CHS, 64));
     }
@@ -184,6 +184,34 @@ public class RegParserTest {
     }
 
     @Test(groups = "1s")
+    public void testValsel2() throws CmdLineException {
+        CmdLineParser p = new CmdLineParser(parser);
+        p.parseArgument("/file");
+        Assert.assertNull(parser.valsel);
+        p.parseArgument("-f", "-valsel", "[MIN,true,32,true]", "-varh", "DOMWDEG", "-lc", "2",
+                "-restarts", "[luby,500,0,50000]",
+                "/file");
+        Assert.assertEquals(parser.valsel, new SearchParams.ValSelConf(SearchParams.ValueSelection.MIN, true, 32, true));
+    }
+
+    @Test(groups = "1s")
+    public void testValsel3() throws CmdLineException {
+        CmdLineParser p = new CmdLineParser(parser);
+        p.parseArgument("/file");
+        Assert.assertNull(parser.valsel);
+        p.parseArgument("-f", "-valh", "MIN", "-best", "-last", "-varh", "DOMWDEG", "-lc", "2",
+                "-restarts", "[luby,500,50000,true]",
+                "/file");
+        Assert.assertEquals(parser.valH, SearchParams.ValueSelection.MIN);
+        Assert.assertTrue(parser.best);
+        Assert.assertTrue(parser.last);
+        Assert.assertEquals(parser.varH, SearchParams.VariableSelection.DOMWDEG);
+        Assert.assertEquals(parser.lc, 2);
+        Assert.assertEquals(parser.restarts, new SearchParams.ResConf(SearchParams.Restart.LUBY, 500,  50000, true));
+
+    }
+
+    @Test(groups = "1s")
     public void test() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
@@ -209,7 +237,7 @@ public class RegParserTest {
     public void testLc2() throws CmdLineException {
         CmdLineParser p = new CmdLineParser(parser);
         p.parseArgument("/file");
-        Assert.assertEquals(parser.lc, 1);
+        Assert.assertEquals(parser.lc, 0);
         p.parseArgument("-f", "-lc", "2", "/file");
         Assert.assertEquals(parser.lc, 2);
     }

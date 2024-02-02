@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -99,8 +99,8 @@ public abstract class RegParser implements IParser {
     @Option(name = "-varsel",
             handler = VarSelHandler.class,
             depends = {"-f"},
-            forbids = {"-varh", "-tie", "-flush"},
-            usage = "Define the variable selector to use. Expected format: [varsel,tie,flush] as [String,String,int] -- no space allowed.")
+            forbids = {"-varh", "-flush"},
+            usage = "Define the variable selector to use. Expected format: [varsel,flush] as [String,int] -- no space allowed.")
     public SearchParams.VarSelConf varsel;
 
     @Option(name = "-valh", aliases = {"--valHeuristic"},
@@ -132,15 +132,15 @@ public abstract class RegParser implements IParser {
             handler = ValSelHandler.class,
             depends = {"-f"},
             forbids = {"-valh", "-best", "-bestRate", "-last"},
-            usage = "Define the variable selector to use. Expected format: [valsel,best,bestRate,last] " +
+            usage = "Define the variable selector to use. Expected format: [valh,best,bestRate,last] " +
                     "as [String,boolean,int,boolean]  -- no space allowed.")
     public SearchParams.ValSelConf valsel;
 
     @Option(name = "-restarts",
             handler = RestartHandler.class,
             depends = {"-f"},
-            usage = "Define the restart heuristic to use. Expected format: [policy,cutoff,geo?,offset] " +
-                    "as [String,int,double?,int]  -- no space allowed.")
+            usage = "Define the restart heuristic to use. Expected format: [policy,cutoff,geo?,offset,resetOnSolution] " +
+                    "as [String,int,double?,int,boolean]  -- no space allowed.")
     public SearchParams.ResConf restarts =
             new SearchParams.ResConf(SearchParams.Restart.GEOMETRIC, 10, 1.05, 50_000, true);
 
@@ -149,7 +149,7 @@ public abstract class RegParser implements IParser {
             depends = {"-f"},
             forbids = {"-cos"},
             usage = "Tell the solver to use last-conflict reasoning.")
-    protected int lc = 1;
+    protected int lc = 0;
     @Option(name = "-cos",
             depends = {"-f"},
             forbids = {"-lc"},
@@ -222,7 +222,7 @@ public abstract class RegParser implements IParser {
         }
     }
 
-    public void freesearch(Solver solver){
+    public void freesearch(Solver solver) {
         BlackBoxConfigurator bb;
         if (solver.getObjectiveManager().isOptimization()) {
             bb = BlackBoxConfigurator.forCOP();
@@ -246,10 +246,10 @@ public abstract class RegParser implements IParser {
         if (level.isLoggable(Level.INFO)) {
             System.out.printf("%s\n", Arrays.toString(args));
         }
-        if(varsel == null){
+        if (varsel == null) {
             varsel = new SearchParams.VarSelConf(varH, flushRate);
         }
-        if(valsel == null){
+        if (valsel == null) {
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
         }
         createSettings();

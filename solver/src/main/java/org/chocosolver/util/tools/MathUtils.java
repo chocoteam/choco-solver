@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -74,7 +74,7 @@ public final class MathUtils {
      * @return the power result
      */
     public static int pow(int value, int exp) {
-        return value == 2 ? 1 << exp : (int) Math.pow(value, exp);
+        return value == 2 && exp >= 0 ? 1 << exp : (int) Math.pow(value, exp);
     }
 
     public static double log(double value, double exponent) {

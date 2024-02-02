@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-parsers, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -407,7 +407,7 @@ public enum FConstraint {
             IntVar c = exps.get(2).intVarValue(model);
             BoolVar r = exps.get(3).boolVarValue(model);
 
-            if ((boolean) model.getSettings().get("adhocReification")) {
+            if ((boolean) model.getSettings().get("adhocReification").orElse(false)) {
                 if (bs.length == 1) {
                     if (bs[0].isInstantiated() || c.isInstantiated()) {
                         IntVar x;
@@ -647,7 +647,7 @@ public enum FConstraint {
             if ((a.getTypeAndKind() & Variable.KIND) == Variable.BOOL && ((b.getTypeAndKind() & Variable.KIND) == Variable.BOOL)) {
                 model.addClausesBoolIsNeqVar((BoolVar) a, (BoolVar) b, r);
             } else {
-                if ((boolean) model.getSettings().get("adhocReification")) {
+                if ((boolean) model.getSettings().get("adhocReification").orElse(false)) {
                     if (a.isInstantiated() || b.isInstantiated()) {
                         IntVar x;
                         int c;
@@ -1712,18 +1712,10 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXeqY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXeqY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXeqY(nbOcc, countVar, b);
             cstr.post();
-
         }
     },
     fzn_count_geq_reif {
@@ -1734,16 +1726,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXgeY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXgeY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXgeY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1756,16 +1741,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXgtY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXgtY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXgtY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1778,16 +1756,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXleY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXleY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXleY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1800,16 +1771,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXltY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXltY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXltY(nbOcc, countVar, b);
             cstr.post();
 
         }
@@ -1822,16 +1786,9 @@ public enum FConstraint {
             IntVar valVar = exps.get(1).intVarValue(model);
             IntVar countVar = exps.get(2).intVarValue(model);
             BoolVar b = exps.get(3).boolVarValue(model);
-            Constraint cstr;
-            if (valVar.isInstantiated()) {
-                IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
-                cstr = model.count(valVar.getValue(), decVars, nbOcc);
-                model.reifyXneY(nbOcc, countVar, b);
-            } else {
-                IntVar value = model.intVar(model.generateName(), valVar.getLB(), valVar.getUB());
-                cstr = model.count(value, decVars, countVar);
-                model.reifyXneY(value, valVar, b);
-            }
+            IntVar nbOcc = model.intVar(model.generateName(), 0, decVars.length, true);
+            Constraint cstr = model.count(valVar, decVars, nbOcc);
+            model.reifyXneY(nbOcc, countVar, b);
             cstr.post();
 
         }

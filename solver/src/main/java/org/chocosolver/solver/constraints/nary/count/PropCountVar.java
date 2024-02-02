@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -65,15 +65,15 @@ public class PropCountVar extends Propagator<IntVar> {
         StringBuilder st = new StringBuilder();
         st.append("PropCountVar_(");
         int i = 0;
-        for (; i < Math.min(4, vars.length-1); i++) {
+        for (; i < Math.min(4, vars.length - 1); i++) {
             st.append(vars[i].getName()).append(", ");
         }
         if (i < vars.length - 2) {
             st.append("..., ");
         }
         st.append(vars[vars.length - 1].getName());
-	    st.append(", value=").append(val.getName());
-	    st.append(", cardinality=").append(card.getName());
+        st.append(", value=").append(val.getName());
+        st.append(", cardinality=").append(card.getName());
         return st.toString();
     }
 
@@ -111,12 +111,16 @@ public class PropCountVar extends Propagator<IntVar> {
             int nb = card.getValue();
             int value = val.getValue();
             if (maxCard == nb) {
+                int cnt = 0;
                 for (int i = 0; i < n; i++) {
                     if (vars[i].contains(value)) {
                         vars[i].instantiateTo(value, this);
+                        cnt++;
                     }
                 }
-                setPassive();
+                if (cnt == nb) {
+                    setPassive();
+                } else fails();
             } else if (minCard == nb) {
                 int nbInst = 0; // security
                 for (int i = 0; i < n; i++) {

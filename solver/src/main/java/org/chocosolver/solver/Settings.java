@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -785,8 +785,8 @@ public class Settings {
         return ibexRestoreRounding;
     }
 
-    public Object get(String key) {
-        return additionalSettings.get(key);
+    public Optional<Object> get(String key) {
+        return Optional.ofNullable(additionalSettings.get(key));
     }
 
     public Settings set(String key, Object value) {
