@@ -9,12 +9,15 @@
  */
 package org.chocosolver.solver;
 
+import org.chocosolver.solver.exception.SolverException;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.TimeUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import static org.chocosolver.util.ProblemMaker.makeNQueenWithBinaryConstraints;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -33,6 +36,35 @@ public class LimitsTest {
         while (s.getSolver().solve()) ;
         int tc = (int) (s.getSolver().getTimeCount() * 1000);
         assertTrue(tl - (tl * 5 / 100) <= tc && tc <= tl + (tl * 5 / 100), tl + " vs. " + tc);
+    }
+
+    @Test(groups="1s", timeOut=60000)
+    public void testTime2() throws SolverException {
+        Model model = new Model();
+
+        IntVar v7 = model.intVar("@v7", IntVar.MIN_INT_BOUND, IntVar.MAX_INT_BOUND, true);
+
+        model.post(
+            model.arithm(v7, ">", v7),
+            model.arithm(v7, "<", v7)
+        );
+        // TODO : such a simple case should be detected within the constraint declaration
+        // TODO : this test might need to be changed if better model analysis is done during model declaration
+
+        Solver solver = model.getSolver();
+        solver.limitTime(250);
+
+        long start = System.currentTimeMillis();
+        boolean solved = solver.solve();
+        long took = System.currentTimeMillis() - start;
+
+        assertFalse(solved);
+        assertEquals(solver.getNodeCount(), 1);
+        assertEquals(solver.getBackTrackCount(), 0);
+        assertEquals(solver.getFailCount(), 0);
+        assertEquals(solver.getSolutionCount(), 0);
+        assertTrue(solver.isStopCriterionMet());
+        assertTrue(took <= 1000); // less than 1 second
     }
 
     @Test(groups="1s", timeOut=60000)
