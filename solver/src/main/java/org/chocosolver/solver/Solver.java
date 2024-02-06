@@ -283,7 +283,7 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
 
     public void throwsException(ICause c, Variable v, String s, Reason reason) throws ContradictionException {
         if (isLCG()) {
-            mSat.cEnqueue(0, reason);
+            mSat.cEnqueue(0, c.manageReification().apply(reason));
         }
         throwsException(c, v, s);
     }
