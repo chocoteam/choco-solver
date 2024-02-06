@@ -47,10 +47,10 @@ public class SatDecoratoTest {
         sat.addClause(an, bp);
         sat.addClause(cn, dp);
         sat.propagateOneLiteral(ap);
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         Assert.assertEquals(sat.qhead_, 2);
         Assert.assertEquals(sat.trail_.size(), 2);
         Assert.assertEquals(sat.trail_.get(0), 1);
@@ -59,10 +59,10 @@ public class SatDecoratoTest {
         Assert.assertEquals(sat.trailMarker(), 1);
         Assert.assertEquals(sat.trail_markers_.get(0), 0);
         sat.propagateOneLiteral(cp);
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lTrue);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lTrue);
         Assert.assertEquals(sat.qhead_, 4);
         Assert.assertEquals(sat.trail_.size(), 4);
         Assert.assertEquals(sat.trail_.get(0), 1);
@@ -74,10 +74,10 @@ public class SatDecoratoTest {
         Assert.assertEquals(sat.trail_markers_.get(0), 0);
         Assert.assertEquals(sat.trail_markers_.get(1), 2);
         sat.cancelUntil(1);
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         Assert.assertEquals(sat.qhead_, 2);
         Assert.assertEquals(sat.trail_.size(), 2);
         Assert.assertEquals(sat.trail_.get(0), 1);
@@ -86,10 +86,10 @@ public class SatDecoratoTest {
         Assert.assertEquals(sat.trailMarker(), 1);
         Assert.assertEquals(sat.trail_markers_.get(0), 0);
         sat.cancelUntil(0);
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         Assert.assertEquals(sat.qhead_, 0);
         Assert.assertEquals(sat.trail_.size(), 0);
         Assert.assertEquals(sat.trail_markers_.size(), 0);
@@ -98,13 +98,13 @@ public class SatDecoratoTest {
 
     @Test(groups = "1s")
     public void testValueVar() throws Exception {
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
         sat.propagateOneLiteral(MiniSat.makeLiteral(c, true));
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lTrue);
 
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         sat.propagateOneLiteral(MiniSat.makeLiteral(d, false));
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lFalse);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lFalse);
     }
 
     @Test(groups = "1s")
@@ -114,18 +114,18 @@ public class SatDecoratoTest {
         int dp = MiniSat.makeLiteral(d, true);
         int dn = MiniSat.makeLiteral(d, false);
 
-        Assert.assertEquals(sat.valueLit(cp), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueLit(cn), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueLit(dp), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueLit(dn), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueLit(cp), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueLit(cn), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueLit(dp), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueLit(dn), MiniSat.lUndef);
 
         sat.propagateOneLiteral(MiniSat.makeLiteral(c, true));
-        Assert.assertEquals(sat.valueLit(cp), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueLit(cn), MiniSat.Boolean.lFalse);
+        Assert.assertEquals(sat.valueLit(cp), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueLit(cn), MiniSat.lFalse);
 
         sat.propagateOneLiteral(MiniSat.makeLiteral(d, false));
-        Assert.assertEquals(sat.valueLit(dp), MiniSat.Boolean.lFalse);
-        Assert.assertEquals(sat.valueLit(dn), MiniSat.Boolean.lTrue);
+        Assert.assertEquals(sat.valueLit(dp), MiniSat.lFalse);
+        Assert.assertEquals(sat.valueLit(dn), MiniSat.lTrue);
     }
 
     @Test(groups = "1s")
@@ -143,10 +143,10 @@ public class SatDecoratoTest {
         sat.addClause(cp, dp);
 
         Assert.assertTrue(sat.propagateOneLiteral(ap));
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         Assert.assertEquals(sat.qhead_, 2);
         Assert.assertEquals(sat.trail_.size(), 2);
         Assert.assertEquals(sat.trail_.get(0), 1);
@@ -157,10 +157,10 @@ public class SatDecoratoTest {
 
         Assert.assertFalse(sat.propagateOneLiteral(an));
         Assert.assertTrue(sat.propagateOneLiteral(bp));
-        Assert.assertEquals(sat.valueVar(a), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(b), MiniSat.Boolean.lTrue);
-        Assert.assertEquals(sat.valueVar(c), MiniSat.Boolean.lUndef);
-        Assert.assertEquals(sat.valueVar(d), MiniSat.Boolean.lUndef);
+        Assert.assertEquals(sat.valueVar(a), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(b), MiniSat.lTrue);
+        Assert.assertEquals(sat.valueVar(c), MiniSat.lUndef);
+        Assert.assertEquals(sat.valueVar(d), MiniSat.lUndef);
         Assert.assertEquals(sat.qhead_, 2);
         Assert.assertEquals(sat.trail_.size(), 2);
         Assert.assertEquals(sat.trail_.get(0), 1);

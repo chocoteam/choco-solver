@@ -77,7 +77,6 @@ public class SatTest {
     private void run(String path, boolean sat) throws FileNotFoundException {
         String file = this.getClass().getResource(path).getFile();
         MiniSat solver = new MiniSat(false);
-        solver.solve();
         solver.parse(file);
         ESat ret = solver.solve();
         Assert.assertEquals(ret, sat ? ESat.TRUE : ESat.FALSE, "Unexpected search state");
