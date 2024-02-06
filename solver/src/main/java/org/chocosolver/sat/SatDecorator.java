@@ -84,7 +84,7 @@ public class SatDecorator extends MiniSat {
                 ok_ = (confl == C_Undef);
                 return;
             default:
-                Clause cr = new Clause(ps);
+                Clause cr = new MiniSat.Clause(ps);
                 removeDominated(cr);
                 dynClauses.add(cr);
                 attachClause(cr);
@@ -159,16 +159,16 @@ public class SatDecorator extends MiniSat {
         if (confl != C_Undef) {
             return false;
         }
-        if (valueLit(lit) == Boolean.lTrue) {
+        if (valueLit(lit) == lTrue) {
             // Dummy decision level:
             pushTrailMarker();
             return true;
-        } else if (valueLit(lit) == Boolean.lFalse) {
+        } else if (valueLit(lit) == lFalse) {
             return false;
         }
         pushTrailMarker();
         // Unchecked enqueue
-        assert valueLit(lit) == Boolean.lUndef;
+        assert valueLit(lit) == lUndef;
         assignment_.set(var(lit), makeBoolean(sgn(lit)));
         trail_.add(lit);
         propagate();
@@ -182,7 +182,7 @@ public class SatDecorator extends MiniSat {
                 assert (sat_trail_.get() == trailMarker());
             }
             toCheck.addFirst(cpvar);
-            while (toCheck.size() > 0) {
+            while (!toCheck.isEmpty()) {
                 Variable cvar = toCheck.pollFirst();
                 List<Literalizer> myLits = vars.get(cvar);
                 for (int i = 0; i < myLits.size(); i++) {
