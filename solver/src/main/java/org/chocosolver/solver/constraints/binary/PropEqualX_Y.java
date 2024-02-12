@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -28,6 +30,7 @@ import org.chocosolver.util.tools.ArrayUtils;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 1 oct. 2010
  */
+@Explained
 public final class PropEqualX_Y extends Propagator<IntVar> {
 
     private final IntVar x;
@@ -47,7 +50,8 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = i -> vars[indexToFilter].removeValue(i, this);
+            rem_proc = i -> vars[indexToFilter].removeValue(i, this,
+                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_NE)) : Reason.undef());
         }
     }
 
@@ -61,8 +65,12 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB(), this) | y.updateLowerBound(x.getLB(), this)) ;
-        while (x.updateUpperBound(y.getUB(), this) | y.updateUpperBound(x.getUB(), this)) ;
+        while (x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef())
+                | y.updateLowerBound(x.getLB(), this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef()))
+            ;
+        while (x.updateUpperBound(y.getUB(), this, lcg() ? Reason.r(y.getMaxLit()) : Reason.undef())
+                | y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef()))
+            ;
     }
 
     @Override
@@ -73,13 +81,13 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!(y.contains(val))) {
-                    x.removeValue(val, this);
+                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(val, IntVar.LR_NE)) : Reason.undef());
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!(x.contains(val))) {
-                    y.removeValue(val, this);
+                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(val, IntVar.LR_NE)) : Reason.undef());
                 }
             }
             idms[0].startMonitoring();
@@ -102,7 +110,7 @@ public final class PropEqualX_Y extends Propagator<IntVar> {
         if ((x.getUB() < y.getLB()) ||
                 (x.getLB() > y.getUB()) ||
                 x.hasEnumeratedDomain() && y.hasEnumeratedDomain() && !match()
-                )
+        )
             return ESat.FALSE;
         else if (x.isInstantiated() &&
                 y.isInstantiated() &&

@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -24,6 +26,7 @@ import org.chocosolver.util.ESat;
  * @author Charles Prud'homme
  * @since 1 oct. 2010
  */
+@Explained
 public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     private final IntVar x;
@@ -46,8 +49,8 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(y.getLB(), this);
-        y.updateUpperBound(x.getUB(), this);
+        x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef());
+        y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
         }
@@ -56,9 +59,9 @@ public final class PropGreaterOrEqualX_Y extends Propagator<IntVar> {
     @Override
     public void propagate(int varIdx, int mask) throws ContradictionException {
         if (varIdx == 0) {
-            y.updateUpperBound(x.getUB(), this);
+            y.updateUpperBound(x.getUB(), this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
         } else {
-            x.updateLowerBound(y.getLB(), this);
+            x.updateLowerBound(y.getLB(), this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef());
         }
         if (x.getLB() >= y.getUB()) {
             this.setPassive();
