@@ -206,7 +206,7 @@ public final class DecisionOperatorFactory {
         public boolean apply(IntVar var, int value, ICause cause) throws ContradictionException {
 			// not true because of parallel portfolio (bound update)
 			// assert var.contains(value) : "branching on value not in domain ; var :"+var+" val : "+value;
-            assert var.getLB()<value : "Branching value should be > LB; var :"+var+" val : "+value;
+            assert var.getLB() < value : "Branching value should be > LB; var :"+var+" val : "+value;
             return var.updateLowerBound(value, cause);
         }
 

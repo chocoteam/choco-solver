@@ -60,9 +60,9 @@ public class IntDomainMiddle implements IntValueSelector {
             int min = var.getLB();
             int max = var.getUB();
             if (roundingPolicy == FLOOR) {
-                value = min + (max - min - 1) / 2;
+                value = min + (max - min ) / 2;
             } else {
-                value = min + (max - min) / 2;
+                value = min + (max - min + 1) / 2;
             }
         } else {
             if (roundingPolicy == FLOOR) {
