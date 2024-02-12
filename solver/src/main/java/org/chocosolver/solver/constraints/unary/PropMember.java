@@ -62,8 +62,16 @@ public class PropMember extends Propagator<IntVar> implements UpdatablePropagato
     }
 
     private static boolean enforce(IntVar var, IntIterableRangeSet fset, Propagator<IntVar> prop) throws ContradictionException {
-        return var.removeAllValuesBut(fset, prop, Reason.undef())
-                && (var.hasEnumeratedDomain() || IntIterableSetUtils.includedIn(var, fset));
+        if (prop.lcg()) {
+            boolean rem = false;
+            for (int i : var) {
+                if (fset.contains(i)) continue;
+                rem |= var.removeValue(i, prop, Reason.undef());
+            }
+            return rem && (var.hasEnumeratedDomain() || IntIterableSetUtils.includedIn(var, fset));
+        } else
+            return var.removeAllValuesBut(fset, prop, Reason.undef())
+                    && (var.hasEnumeratedDomain() || IntIterableSetUtils.includedIn(var, fset));
     }
 
     @Override
