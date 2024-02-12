@@ -11,6 +11,7 @@ package org.chocosolver.solver.variables;
 
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.variables.impl.BoolViewEagerLit;
 import org.chocosolver.solver.variables.view.RealView;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
 import org.chocosolver.solver.variables.view.bool.BoolLeqView;
@@ -238,6 +239,9 @@ public interface IViewFactory extends ISelf<Model> {
                 if (p >= 0) {
                     return var.getView(p).asBoolVar();
                 } else {
+                    if (ref().getSolver().isLCG()) {
+                        return new BoolViewEagerLit(var, IntVar.LR_EQ, v);
+                    }
                     return new BoolEqView<>(var, v);
                 }
             } else {
@@ -271,6 +275,9 @@ public interface IViewFactory extends ISelf<Model> {
                 if (p >= 0) {
                     return var.getView(p).asBoolVar().not();
                 } else {
+                    if (ref().getSolver().isLCG()) {
+                        return new BoolViewEagerLit(var, IntVar.LR_GE, v);
+                    }
                     return new BoolLeqView<>(var, v - 1).not();
                 }
             } else {
@@ -299,6 +306,9 @@ public interface IViewFactory extends ISelf<Model> {
                 if (p >= 0) {
                     return var.getView(p).asBoolVar();
                 } else {
+                    if (ref().getSolver().isLCG()) {
+                        return new BoolViewEagerLit(var, IntVar.LR_LE, v);
+                    }
                     return new BoolLeqView<>(var, v);
                 }
             } else {
@@ -339,6 +349,9 @@ public interface IViewFactory extends ISelf<Model> {
                 if (p >= 0) {
                     return var.getView(p).asBoolVar().not();
                 } else {
+                    if (ref().getSolver().isLCG()) {
+                        return new BoolViewEagerLit(var, IntVar.LR_NE, v);
+                    }
                     return new BoolEqView<>(var, v).not();
                 }
             } else {
