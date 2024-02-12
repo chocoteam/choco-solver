@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -11,6 +11,7 @@ package org.chocosolver.solver.search.loop.learn;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import org.chocosolver.sat.Clause;
 import org.chocosolver.sat.MiniSat;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.Solver;
@@ -21,6 +22,7 @@ import org.chocosolver.solver.search.strategy.decision.DecisionPath;
 import org.chocosolver.solver.search.strategy.decision.IntDecision;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableRangeSet;
+import org.chocosolver.util.tools.VariableUtils;
 
 import java.util.Arrays;
 
@@ -50,6 +52,10 @@ public class LazyClauseGeneration implements Learn {
      */
     private final MiniSat mSat;
     /**
+     * The maximum number of learnt clauses
+     */
+    private final int max_learnts;
+    /**
      * Maintains the number of solutions found, required for {@link Learn#record()}.
      */
     private long nbSolutions = 0;
@@ -65,6 +71,7 @@ public class LazyClauseGeneration implements Learn {
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
         this.mSat = sat;
+        this.max_learnts = mSolver.getModel().getSettings().getNbMaxLearntClauses();
     }
 
     @Override
@@ -88,13 +95,16 @@ public class LazyClauseGeneration implements Learn {
         // required because MoveBinaryDFS add a useless decision level on refutation
         if (nbRestarts == mSolver.getRestartCount()) {
             mSolver.cancelTrail();
-            mSolver.getDecisionPath().synchronize(true, true);
+            mSolver.getDecisionPath().synchronize(true, learnt_clause.size() > 1);
             if (!learnt_clause.isEmpty()) {
                 mSat.addLearnt(learnt_clause);
             }
         } else {
             nbRestarts++;
             mSat.topLevelCleanUp();
+        }
+        if (mSat.nLearnts() >= max_learnts){
+            mSat.doReduceDB();
         }
     }
 
@@ -113,7 +123,8 @@ public class LazyClauseGeneration implements Learn {
             learnt_clause.clear();
             extractFromVariables();
             //extractFromDecisions();
-            mSat.confl = new MiniSat.Clause(learnt_clause.toArray(), false /*?*/);
+
+            mSat.confl = new Clause(learnt_clause.toArray(), false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
             int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
             mSolver.setJumpTo(upto);
@@ -124,7 +135,9 @@ public class LazyClauseGeneration implements Learn {
         IntVar[] ivars = mSolver.getModel().retrieveIntVars(true);
         for (int i = 0; i < ivars.length; i++) {
             // todo check root failure ==> isRootLevel ?
-            learnt_clause.add(ivars[i].getValLit());
+            if (!VariableUtils.isView(ivars[i])) {
+                learnt_clause.add(ivars[i].getValLit());
+            }
         }
     }
 
@@ -179,7 +192,7 @@ public class LazyClauseGeneration implements Learn {
         int level;
         learnt_clause.clear();
         if (mSat.confl != MiniSat.C_Undef) {
-            MiniSat.Clause cl = mSat.confl;
+            Clause cl = mSat.confl;
             level = mSat.findConflictLevel();
             mSat.cancelUntil(level);
             level = mSat.analyze(cl, learnt_clause);
