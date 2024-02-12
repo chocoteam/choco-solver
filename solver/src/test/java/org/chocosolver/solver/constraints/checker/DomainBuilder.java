@@ -125,6 +125,10 @@ public class DomainBuilder {
         return MIN_LOW_BND + rnd.nextInt(MAX_DOM_SIZE);
     }
 
+    public static int[] makeInts(Random rnd){
+        return rnd.ints(1 + rnd.nextInt(MAX_DOM_SIZE - 1), MIN_LOW_BND, MIN_LOW_BND + MAX_DOM_SIZE).toArray();
+    }
+
     public static IntVar makeIntVar(Model model, Random rnd, int pos) {
         IntVar var;
         String name = "X_" + pos;
@@ -140,7 +144,7 @@ public class DomainBuilder {
                 }
                 break;
             case 1: // enumerated
-                int[] values = rnd.ints(1 + rnd.nextInt(MAX_DOM_SIZE - 1), MIN_LOW_BND, MIN_LOW_BND + MAX_DOM_SIZE).toArray();
+                int[] values = makeInts(rnd);
                 var = model.intVar(name, values);
                 break;
             case 2: // boolean
