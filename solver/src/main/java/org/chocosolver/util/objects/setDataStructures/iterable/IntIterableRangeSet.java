@@ -18,7 +18,10 @@ import org.chocosolver.util.objects.setDataStructures.ISetIterator;
 import org.chocosolver.util.objects.setDataStructures.SetType;
 
 import java.util.Arrays;
+import java.util.Spliterator;
 import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
+import java.util.stream.StreamSupport;
 
 /**
  * Concrete implementation of {@link IntIterableSet} wherein values are stored in range set.
@@ -987,7 +990,7 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
      */
     @SuppressWarnings("Duplicates")
     public boolean intersect(int lb, int ub) {
-        if(CARDINALITY > 100) return intersectDichot(lb, ub);
+        if (CARDINALITY > 100) return intersectDichot(lb, ub);
         int s1 = this.SIZE >> 1;
         int s2 = ub - lb + 1;
         if (s1 > 0 && s2 > 0) {
@@ -1132,4 +1135,55 @@ public class IntIterableRangeSet extends AbstractSet implements IntIterableSet {
         }
         return a;
     }
+
+    /**
+     * @return a stream of values
+     */
+    public IntStream stream() {
+        Spliterator.OfInt it = new Spliterator.OfInt() {
+
+            int i = 0;
+            int k = 0;
+
+            @Override
+            public boolean tryAdvance(IntConsumer action) {
+                if (i < SIZE - 1) {
+                    if (ELEMENTS[i] == ELEMENTS[i + 1]) {
+                        k = 0;
+                        action.accept(ELEMENTS[i] + k);
+                        i += 2;
+                    } else {
+                        if (ELEMENTS[i] + k == ELEMENTS[i + 1]) {
+                            action.accept(ELEMENTS[i] + k);
+                            k = 0;
+                            i += 2;
+                        } else {
+                            action.accept(ELEMENTS[i] + k);
+                            k++;
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+
+            @Override
+            public OfInt trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return CARDINALITY;
+            }
+
+            @Override
+            public int characteristics() {
+                return Spliterator.ORDERED | Spliterator.DISTINCT | Spliterator.NONNULL | Spliterator.CONCURRENT;
+            }
+
+        };
+        return StreamSupport.intStream(it, false);
+    }
+
 }
