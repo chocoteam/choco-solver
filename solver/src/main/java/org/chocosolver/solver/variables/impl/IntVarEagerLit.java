@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -154,10 +154,16 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         return MiniSat.neg(getLELit(getUB()));
     }
 
+    /**
+     * @implNote the default implementation return the literal corresponding to the negation of the instantiation value
+     * <pre>
+     *    {@code return getLit(getValue(), LR_NE); }
+     * </pre>
+     */
     @Override
     public int getValLit() {
         assert (isInstantiated()) : var + " is not instantiated";
-        return getNELit(getLB());
+        return getLit(getLB(), LR_NE);
     }
 
     private int getNELit(int v) {
