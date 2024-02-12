@@ -242,6 +242,7 @@ public class PropagationEngine {
                 delayedPropagationType = 0;
                 try {
                     propagateEvents();
+                    propagateSat();
                     insight.update(lastProp, lastVar, false);
                 } catch (ContradictionException cex) {
                     insight.update(lastProp, lastVar, true);
@@ -250,7 +251,6 @@ public class PropagationEngine {
                 if (hybrid < 0b01) {
                     manageModifications();
                 }
-                propagateSat();
             }
         } while (!var_queue.isEmpty());
     }
