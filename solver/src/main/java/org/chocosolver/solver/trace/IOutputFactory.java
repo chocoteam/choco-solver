@@ -23,6 +23,7 @@ import org.chocosolver.util.tools.StringUtils;
 import java.io.Closeable;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -505,7 +506,7 @@ public interface IOutputFactory extends ISelf<Solver> {
         @Override
         public String print() {
             if (vars == null) {
-                vars = solver.getSearch().getVariables();
+                vars = Arrays.stream(solver.getSearch().getVariables()).distinct().toArray(Variable[]::new);
             }
             return String.format("- Solution #%s found. %s \n\t%s.",
                     solver.getSolutionCount(),
