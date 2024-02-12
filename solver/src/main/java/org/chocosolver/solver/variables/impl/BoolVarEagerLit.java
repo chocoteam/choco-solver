@@ -1,7 +1,7 @@
 /*
  * This file is part of choco-solver, http://choco-solver.org/
  *
- * Copyright (c) 2023, IMT Atlantique. All rights reserved.
+ * Copyright (c) 2024, IMT Atlantique. All rights reserved.
  *
  * Licensed under the BSD 4-clause license.
  *
@@ -80,21 +80,33 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
      * For boolean expression purpose
      */
     private boolean isNot = false;
+    int type;
+
+    /**
+     * Create a boolean variable for LCG.
+     */
+    public BoolVarEagerLit(String name, Model model, int lit) {
+        super(name, model);
+        this.sat = getModel().getSolver().getSat();
+        this.vlit = lit;
+        sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, 1));
+    }
 
     /**
      * Create a boolean variable for LCG.
      */
     public BoolVarEagerLit(String name, Model model, int min, int max) {
-        super(name, model);
-        this.sat = getModel().getSolver().getSat();
-        this.vlit = MiniSat.makeLiteral(sat.nVars(), true);
-        sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, 1));
+        this(name, model, MiniSat.makeLiteral(model.getSolver().getSat().nVars(), true));
+        int t = VAR;
         if (min == 1) {
             sat.cEnqueue(vlit, Reason.undef());
+            t = CSTE;
         }
         if (max == 0) {
             sat.cEnqueue(MiniSat.neg(vlit), Reason.undef());
+            t = CSTE;
         }
+        type = t;
     }
 
     @Override
@@ -117,10 +129,15 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
             this.notifyPropagators(IntEventType.INSTANTIATE, cause);
             return true;
         } else if (!isInstantiatedTo(value)) {
+            boolean inconsistent = (isInstantiated() || (value < kFALSE || value > kTRUE));
             this.notify(reason, cause, sat, getLit(value, LR_EQ));
-            MiniSat.Boolean cval = sat.valueLit(vlit);
-            if ((cval == MiniSat.Boolean.lTrue && value != kTRUE)
-                    || (cval == MiniSat.Boolean.lFalse && value != kFALSE)) {
+            if (inconsistent) {
+                assert (sat.confl != C_Undef);
+                this.contradiction(cause, "sat failure");
+            }
+            int cval = sat.valueLit(vlit);
+            if ((cval == MiniSat.lTrue && value != kTRUE)
+                    || (cval == MiniSat.lFalse && value != kFALSE)) {
                 assert (sat.confl != C_Undef);
                 this.contradiction(cause, "sat failure");
             }
@@ -207,15 +224,15 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
 
     @Override
     public boolean isInstantiated() {
-        return sat.valueLit(vlit) != MiniSat.Boolean.lUndef;
+        return sat.valueLit(vlit) != MiniSat.lUndef;
     }
 
     @Override
     public boolean isInstantiatedTo(int aValue) {
         switch (sat.valueLit(vlit)) {
-            case lTrue:
+            case MiniSat.lTrue:
                 return aValue == kTRUE;
-            case lFalse:
+            case MiniSat.lFalse:
                 return aValue == kFALSE;
             default:
                 return false;
@@ -225,9 +242,9 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
     @Override
     public boolean contains(int aValue) {
         switch (sat.valueLit(vlit)) {
-            case lTrue:
+            case MiniSat.lTrue:
                 return aValue == kTRUE;
-            case lFalse:
+            case MiniSat.lFalse:
                 return aValue == kFALSE;
             default:
                 return aValue == kFALSE || aValue == kTRUE;
@@ -259,10 +276,10 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
     @Override
     public int getLB() {
         switch (sat.valueLit(vlit)) {
-            case lTrue:
+            case MiniSat.lTrue:
                 return kTRUE;
             default:
-            case lFalse:
+            case MiniSat.lFalse:
                 return kFALSE;
         }
     }
@@ -276,9 +293,9 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
     public int getUB() {
         switch (sat.valueLit(vlit)) {
             default:
-            case lTrue:
+            case MiniSat.lTrue:
                 return kTRUE;
-            case lFalse:
+            case MiniSat.lFalse:
                 return kFALSE;
         }
     }
@@ -377,7 +394,7 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
 
     @Override
     public int getTypeAndKind() {
-        return VAR | BOOL;
+        return BOOL | type;
     }
 
     @Override
