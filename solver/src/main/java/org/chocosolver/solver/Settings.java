@@ -19,10 +19,7 @@ import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.IntPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 
 /**
  * Settings for Model and Solver.
@@ -602,6 +599,7 @@ public class Settings {
      */
     public Settings setLCG(boolean isLCG) {
         this.lcg = isLCG;
+        this.setEnableSAT(lcg || enableSAT);
         return this;
     }
 
