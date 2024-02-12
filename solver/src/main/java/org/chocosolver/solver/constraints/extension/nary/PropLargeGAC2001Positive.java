@@ -11,6 +11,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -23,6 +24,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  * @author Charles Prud'homme
  * @since 26/07/12
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropLargeGAC2001Positive extends PropLargeCSP<IterTuplesTable> {
 
     /**

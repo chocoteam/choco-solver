@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.memory.IStateLong;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -30,6 +31,7 @@ import org.chocosolver.util.procedure.UnaryIntProcedure;
  * @author Charles Prud'homme
  * @since 28/04/2016
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropCompactTable extends Propagator<IntVar> {
 
     //***********************************************************************************

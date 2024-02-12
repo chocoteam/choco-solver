@@ -16,15 +16,20 @@ import org.chocosolver.sat.MiniSat;
 import org.chocosolver.sat.SatDecorator;
 import org.chocosolver.solver.ISelf;
 import org.chocosolver.solver.Model;
+import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.constraints.extension.hybrid.HybridTuples;
 import org.chocosolver.solver.constraints.nary.cnf.ILogical;
 import org.chocosolver.solver.constraints.nary.cnf.LogOp;
 import org.chocosolver.solver.constraints.nary.cnf.LogicTreeToolBox;
 import org.chocosolver.solver.constraints.nary.sat.PropSat;
 import org.chocosolver.solver.constraints.reification.LocalConstructiveDisjunction;
 import org.chocosolver.solver.variables.BoolVar;
+import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Variable;
 
 import java.util.Arrays;
+
+import static org.chocosolver.solver.variables.IntVar.LR_NE;
 
 /**
  * A factory dedicated to SAT.
@@ -648,6 +653,91 @@ public interface ISatFactory extends ISelf<Model> {
     default boolean addConstructiveDisjunction(Constraint... cstrs) {
         new LocalConstructiveDisjunction(cstrs).post();
         return true;
+    }
+
+    default boolean addElement(IntVar VALUE, int[] TABLE, IntVar INDEX, int OFFSET) {
+        assert (ref().getSolver().isLCG() || ref().getSettings().enableSAT());
+        Tuples t = new Tuples(true);
+        for (int i = 0; i < TABLE.length; i++) {
+//        for(int i : INDEX){
+            t.add(i, TABLE[i]);
+        }
+        addTable(new IntVar[]{ref().intView(1, INDEX, -OFFSET), VALUE}, t);
+        return true;
+    }
+
+    default boolean addTable(IntVar[] vars, Tuples tuples) {
+        assert (ref().getSolver().isLCG() || ref().getSettings().enableSAT());
+        MiniSat sat = sat();
+        sat.beforeAddingClauses();
+        if (!tuples.isFeasible()) {
+            TIntList c = new TIntArrayList();
+            for (int i = 0; i < tuples.nbTuples(); i++) {
+                int[] t = tuples.get(i);
+                c.clear();
+                for (int j = 0; j < vars.length; j++) {
+                    c.add(vars[j].getLit(t[j], IntVar.LR_NE));
+                }
+                sat.addClause(c);
+            }
+            sat.afterAddingClauses();
+            return true;
+        }
+        int star = tuples.allowUniversalValue() ? tuples.getStarValue() : Integer.MAX_VALUE;
+        int base_lit = 2 * sat.nVars();
+        if (vars.length > 2) {
+            for (int i = 0; i < tuples.nbTuples(); i++) {
+                int[] t = tuples.get(i);
+                sat.newVariable();
+                for (int j = 0; j < vars.length; j++) {
+                    if (t[j] != star) {
+                        sat.addClause(base_lit + 2 * i, vars[j].getLit(t[j], IntVar.LR_EQ));
+                    }
+                }
+            }
+        }
+        for (int w = 0; w < vars.length; w++) {
+            int lb = vars[w].getLB();
+            TIntList[] sup = new TIntList[vars[w].getRange()];
+            for (int i = lb; i <= vars[w].getUB(); i = vars[w].nextValue(i)) {
+                sup[i - lb] = new TIntArrayList();
+            }
+            for (int i = 0; i < tuples.nbTuples(); i++) {
+                int[] t = tuples.get(i);
+                int p = vars.length == 2 ?
+                        t[1 - w] == star ? 1 : vars[1 - w].getLit(t[1 - w], IntVar.LR_EQ)
+                        : base_lit + 2 * i + 1;
+                int k = t[w] - lb;
+                if (k >= 0 && k < sup.length && sup[k] != null) {
+                    sup[k].add(p);
+                } else if (t[w] == star) {
+                    for (TIntList l : sup) {
+                        if (l != null) {
+                            l.add(p);
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < sup.length; i++) {
+                if (sup[i] == null) continue;
+                if (sup[i].isEmpty()) {
+                    sat.addClause(vars[w].getLit(i + lb, LR_NE));
+                } else {
+                    sup[i].add(vars[w].getLit(i + lb, LR_NE));
+                    int p = sup[i].get(0);
+                    int last = sup[i].size() - 1;
+                    sup[i].set(0, sup[i].get(last));
+                    sup[i].set(last, p);
+                    sat.addClause(sup[i]);
+                }
+            }
+        }
+        sat.afterAddingClauses();
+        return true;
+    }
+
+    default boolean addTable(IntVar[] vars, HybridTuples tuples) {
+        throw new UnsupportedOperationException();
     }
 
 }
