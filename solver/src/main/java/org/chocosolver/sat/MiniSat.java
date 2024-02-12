@@ -43,6 +43,7 @@ import java.util.Random;
  */
 public class MiniSat implements SatFactory, Dimacs {
 
+    private static final int DEBUG = 0;
     // Value of an undefined variable
     private static final int varUndef = -1;
     // value of an undefined literal
@@ -126,7 +127,6 @@ public class MiniSat implements SatFactory, Dimacs {
     IntHeap order_heap = new IntHeap((a, b) -> activity.get(a) > activity.get(b));
     Random rand;
     private final TIntArrayList temporary_add_vector_ = new TIntArrayList();
-    private static boolean debug = false;
 
     /**
      * Create a new instance of MiniSat solver.
@@ -328,6 +328,12 @@ public class MiniSat implements SatFactory, Dimacs {
             for (int c = trail_.size() - 1; c >= trail_markers_.get(level); c--) {
                 int x = var(trail_.get(c));
                 assignment_.set(x, lUndef);
+                if (DEBUG > 0) {
+                    if (DEBUG > 1)
+                        System.out.printf("Unfix %s\n", printLit(trail_.get(c)));
+                    else
+                        System.out.printf("Unfix %d\n", trail_.get(c));
+                }
                 if (phase_saving > 1 || (phase_saving == 1) && c > trail_markers_.get(trail_markers_.size() - 1))
                     polarity.set(x, sgn(trail_.get(c)));
                 insertVarOrder(x);
@@ -346,7 +352,7 @@ public class MiniSat implements SatFactory, Dimacs {
     // Overwrite the default root level (namely 0) -- for lcg
     public void setRootLevel() {
         rootlvl = trailMarker();
-        if(DEBUG>1) System.out.println("root level: " + rootlvl);
+        if (DEBUG > 1) System.out.println("root level: " + rootlvl);
         topLevelCleanUp();
     }
 
@@ -420,7 +426,12 @@ public class MiniSat implements SatFactory, Dimacs {
         }
         assignment_.set(v, makeBoolean(sgn(l)));
         //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), from);
-        if (debug) System.out.printf("Fix %s @ %d due to %s\n", printLit(l), trailMarker(), showReason(from));
+        if (DEBUG > 0) {
+            if (DEBUG > 1)
+                System.out.printf("Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(from));
+            else
+                System.out.printf("Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(from));
+        }
         // ensure capacity of vardata
         while (vardata.size() < v) {
             vardata.add(VD_Undef);
@@ -460,7 +471,12 @@ public class MiniSat implements SatFactory, Dimacs {
         }
         assignment_.set(v, makeBoolean(sgn(l)));
         //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), r);
-        if (debug) System.out.printf("Fix %s @ %d due to %s\n", printLit(l), trailMarker(), showReason(r));
+        if (DEBUG > 0) {
+            if (DEBUG > 1)
+                System.out.printf("Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(r));
+            else
+                System.out.printf("Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(r));
+        }
         while (vardata.size() < v) {
             vardata.add(VD_Undef);
         }
@@ -761,11 +777,13 @@ public class MiniSat implements SatFactory, Dimacs {
             assert (confl != C_Undef); // (otherwise should be UIP)
             Clause c = confl;
 
-            if (debug) {
+            if (DEBUG > 0) {
                 if (p != litUndef) {
                     c._s(0, p);
                 }
-                System.out.printf("analyze: %s\n", c);
+                if (DEBUG > 1)
+                    System.out.printf("%s\n", c.toString(this));
+                else System.out.printf("%s\n", c.toString());
             }
 
             if (c.learnt())
@@ -775,23 +793,28 @@ public class MiniSat implements SatFactory, Dimacs {
                 int q = c._g(j);
                 int x = var(q);
                 if (!seen.get(x) && level(x) > rootlvl) {
-                    assert p == litUndef || pos(var(p)) > pos(x):"chronological inconsistency :("+printLit(p)+") is explained by a previous event ("+printLit(x)+")";
+                    assert p == litUndef || pos(var(p)) > pos(x) : "chronological inconsistency :(" + printLit(p) + ") is explained by a previous event (" + printLit(x) + ")";
                     varBumpActivity(x);
                     seen.set(x);
-                    if (level(x) >= trailMarker())
+                    if (DEBUG > 1) System.out.printf("mark %d\n", x);
+                    if (level(x) >= trailMarker()) {
                         pathC++;
-                    else
+                        if (DEBUG > 1) System.out.printf("path++ (%d)\n", pathC);
+                    } else {
                         out_learnt.add(q);
+                        if (DEBUG > 1) System.out.printf("out %d\n", q);
+                    }
                 }
             }
-
             // Select next clause to look at:
             //noinspection StatementWithEmptyBody
             while (!seen.get(var(trail_.get(index--)))) ;
             p = trail_.get(index + 1);
             confl = getConfl(p);
             seen.clear(var(p));
+            if (DEBUG > 1) System.out.printf("clear %d\n", var(p));
             pathC--;
+            if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
         replaceUnreliableLits(out_learnt);
@@ -898,7 +921,6 @@ public class MiniSat implements SatFactory, Dimacs {
         if (ok_) propagate();
         if (!ok_ || (confl != C_Undef))
             return ok_ = false;
-        //System.err.println("TODO : simplify() ");
         // TODO
         /*if (nAssigns() == simpDB_assigns || (simpDB_props > 0))
             return true;
