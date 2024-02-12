@@ -9,7 +9,6 @@
  */
 package org.chocosolver.sat;
 
-import gnu.trove.list.TIntList;
 import org.chocosolver.solver.ICause;
 
 /**
@@ -21,13 +20,12 @@ import org.chocosolver.solver.ICause;
  * @since 04/09/2023
  */
 public abstract class Reason implements ICause {
-    private static final ReasonN UNDEF = new ReasonN(MiniSat.Clause.undef());
-    private final static MiniSat.Clause short_expl_2 = new MiniSat.Clause(new int[]{0, 0});
-    private final static MiniSat.Clause short_expl_3 = new MiniSat.Clause(new int[]{0, 0, 0});
+    static final Clause UNDEF = new Clause(new int[]{0});;//Clause.undef();
+    private final static Clause short_expl_2 = new Clause(new int[]{0, 0});
+    private final static Clause short_expl_3 = new Clause(new int[]{0, 0, 0});
 
     int type;
-
-    private Reason(int type) {
+    Reason(int type) {
         this.type = type;
     }
 
@@ -46,8 +44,8 @@ public abstract class Reason implements ICause {
      * @param cl a clause
      * @return a reason
      */
-    public static Reason r(MiniSat.Clause cl) {
-        return new ReasonN(cl);
+    public static Reason r(Clause cl) {
+        return cl;
     }
 
     /**
@@ -86,29 +84,7 @@ public abstract class Reason implements ICause {
             return new Reason2(ps[0], ps[1]);
         } else if (ps.length > 2) {
             assert ps[0] == 0 : "The first literal should be left empty for the asserting literal";
-            return Reason.r(new MiniSat.Clause(ps));
-        } else {
-            return Reason.UNDEF;
-        }
-    }
-
-    /**
-     * Create a reason from one or more literals
-     * <p>If more than 2 literals are given, the literal at index 0 should be left empty for the asserting literal.
-     * </p>
-     *
-     * @param ps other literals
-     * @return a reason
-     * @implSpec if length of ps is strictly greater than 2,
-     * then the literal at index 0 should be left empty for the asserting literal
-     */
-    public static Reason r(TIntList ps) {
-        if (ps.size() == 1) {
-            return new Reason1(ps.get(0));
-        } else if (ps.size() == 2) {
-            return new Reason2(ps.get(0), ps.get(1));
-        } else if (ps.size() > 2) {
-            return Reason.r(new MiniSat.Clause(ps));
+            return new Clause(ps);
         } else {
             return Reason.UNDEF;
         }
@@ -124,12 +100,12 @@ public abstract class Reason implements ICause {
     public static Reason gather(Reason r, int p) {
         switch (r.type) {
             case 0: {
-                ReasonN rn = (ReasonN) r;
-                int[] ps = new int[rn.cl.size() + 1];
-                for (int i = 0; i < rn.cl.size(); i++) {
-                    ps[i] = rn.cl._g(i);
+                Clause cl = (Clause) r;
+                int[] ps = new int[cl.size() + 1];
+                for (int i = 0; i < cl.size(); i++) {
+                    ps[i] = cl._g(i);
                 }
-                ps[rn.cl.size()] = p;
+                ps[cl.size()] = p;
                 return Reason.r(ps);
             }
             case 2:
@@ -151,7 +127,7 @@ public abstract class Reason implements ICause {
      * Extract the conflict clause from the reason.
      * @return a clause
      */
-    abstract MiniSat.Clause getConflict();
+    abstract Clause getConflict();
 
     /**
      * A reason with a single literal
@@ -165,7 +141,7 @@ public abstract class Reason implements ICause {
         }
 
         @Override
-        public MiniSat.Clause getConflict() {
+        public Clause getConflict() {
             short_expl_2._s(1, d1);
             return short_expl_2;
         }
@@ -190,7 +166,7 @@ public abstract class Reason implements ICause {
         }
 
         @Override
-        public MiniSat.Clause getConflict() {
+        public Clause getConflict() {
             short_expl_3._s(1, d1);
             short_expl_3._s(2, d2);
             return short_expl_3;
@@ -202,25 +178,4 @@ public abstract class Reason implements ICause {
         }
     }
 
-    /**
-     * A reason with more than two literals
-     */
-    final static class ReasonN extends Reason {
-        final MiniSat.Clause cl;
-
-        private ReasonN(MiniSat.Clause cl) {
-            super(0);
-            this.cl = cl;
-        }
-
-        @Override
-        public MiniSat.Clause getConflict() {
-            return cl;
-        }
-
-        @Override
-        public String toString() {
-            return "cl:" + cl.toString();
-        }
-    }
 }
