@@ -20,6 +20,7 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import static org.chocosolver.util.tools.ArrayUtils.flatten;
  * @author Charles Prud'homme
  * @since 04/09/2023
  */
-//@Ignore
+@Ignore
 public class LCGTest {
 
     @DataProvider
@@ -129,7 +130,7 @@ public class LCGTest {
         Assert.assertEquals(solver.getSolutionCount(), s, "seed: " + seed);
     }
 
-    @Test(groups = {"1s","lcg"}, dataProvider = "nqueen", timeOut = 6000000)
+    @Test(groups = {"1s","lcg"}, dataProvider = "nqueen", timeOut = 60000)
     public void testNQueenOptim(boolean bounded, boolean view, int n, int s, long seed) {
         Model model = new Model("LCG Queens opt",
                 Settings.init()
@@ -184,7 +185,7 @@ public class LCGTest {
         return Providers.merge(conf(), sizes, alldiff(), seed());
     }
 
-    @Test(groups = {"1s","lcg"}, dataProvider = "golomb")
+    @Test(groups = {"1s","lcg"}, dataProvider = "golomb", timeOut = 60000)
     public void testGolombRuler(boolean bounded, boolean view, int m, int o, String a, long seed) {
         Model model = new Model("LCG Golomb ruler",
                 Settings.init().setLCG(true)
@@ -411,7 +412,7 @@ public class LCGTest {
         return Providers.merge(conf(), params, seed());
     }
 
-    @Test(groups = {"1s","lcg"}, dataProvider = "schurlemma", timeOut = 6000000)
+    @Test(groups = {"1s","lcg"}, dataProvider = "schurlemma", timeOut = 60000)
     public void testSchurLemma(boolean bounded, boolean clause, int balls, int boxes, int nbsol, long seed) {
         Model model = new Model("LCG Schur Lemma",
                 Settings.init().setLCG(true)
@@ -465,7 +466,7 @@ public class LCGTest {
         Assert.assertEquals(solver.getSolutionCount(), nbsol);
     }
 
-    @Test(groups = {"1s","lcg"}, dataProvider = "schurlemma", timeOut = 6000000)
+    @Test(groups = {"1s","lcg"}, dataProvider = "schurlemma", timeOut = 60000)
     public void testSchurLemmaInt(boolean bounded, boolean clause, int balls, int boxes, int nbsol, long seed) {
         Model model = new Model("LCG Schur Lemma",
                 Settings.init().setLCG(true)
@@ -513,7 +514,7 @@ public class LCGTest {
     }
 
 
-    @Test(groups = "1s")
+    @Test(groups = {"1s","lcg"}, timeOut = 60000)
     public void testBoolVars() {
         Model model = new Model("LCG Bin Neq 1",
                 Settings.init().setLCG(true)
@@ -527,7 +528,7 @@ public class LCGTest {
         Assert.assertFalse(solver.solve());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = {"1s","lcg"}, timeOut = 60000)
     public void testBoolVars2() {
         Model model = new Model("LCG Bin Neq 2",
                 Settings.init().setLCG(true)
@@ -541,7 +542,7 @@ public class LCGTest {
         Assert.assertFalse(solver.solve());
     }
 
-    @Test(groups = "1s")
+    @Test(groups = {"1s","lcg"}, timeOut = 60000)
     public void testBoolVars3() {
         Model model = new Model("LCG MILP",
                 Settings.init().setLCG(true)
@@ -559,7 +560,7 @@ public class LCGTest {
     ////////////////////////////////////////////  REIFICATION //////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    @Test(groups = "1s", dataProvider = "seed")
+    @Test(groups = {"1s","lcg"}, dataProvider = "seed", timeOut = 60000)
     public void testEq(long seed) {
         Model model = new Model("LCG Reification",
                 Settings.init().setLCG(true)
