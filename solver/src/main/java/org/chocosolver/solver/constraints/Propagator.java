@@ -800,29 +800,78 @@ public abstract class Propagator<V extends Variable> implements ICause, Identity
      */
     public Reason defaultReason(Variable pivot) {
         if (lcg()) {
-            TIntList ps = new TIntArrayList();
-            ps.add(0); // place for the modified literal
-            for (int i = 0; i < getNbVars(); i++) {
-                IntVar var = (IntVar) getVar(i);
-                if (var != pivot) {
-                    if (var.isInstantiated()) {
-                        ps.add(var.getValLit());
-                    } else {
-                        ps.add(var.getMinLit());
-                        ps.add(var.getMaxLit());
-                        int j = var.nextValueOut(var.getLB());
-                        int to = var.previousValueOut(var.getUB());
-                        while (j <= to) {
-                            ps.add(var.getLit(j, 1));
-                            j = var.nextValueOut(j);
-                        }
-                    }
-                }
-            }
-            return Reason.r(ps.toArray());
+            return reason(pivot, vars);
         } else return Reason.undef();
     }
 
+    public static Reason reason(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                if (var.isInstantiated()) {
+                    ps.add(var.getValLit());
+                } else {
+                    ps.add(var.getMinLit());
+                    ps.add(var.getMaxLit());
+                    int j = var.nextValueOut(var.getLB());
+                    int to = var.previousValueOut(var.getUB());
+                    while (j <= to) {
+                        ps.add(var.getLit(j, 1));
+                        j = var.nextValueOut(j);
+                    }
+                }
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+    public static Reason bounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMinLit());
+                ps.add(var.getMaxLit());
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+    public static Reason lbounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMinLit());
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
+
+
+    public static Reason ubounds(Variable pivot, Variable... variables) {
+        assert variables.length > 0 : "A propagator should have at least one variable";
+        assert variables[0].getModel().getSolver().isLCG() : "This method should not be called if the LCG is not enabled";
+        TIntList ps = new TIntArrayList();
+        ps.add(0); // place for the modified literal
+        for (int i = 0; i < variables.length; i++) {
+            IntVar var = (IntVar) variables[i];
+            if (var != pivot) {
+                ps.add(var.getMaxLit());
+            }
+        }
+        return Reason.r(ps.toArray());
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     // FOR PROPAGATION PURPOSE
