@@ -12,6 +12,7 @@ package org.chocosolver.solver.constraints.extension.nary;
 import org.chocosolver.memory.IEnvironment;
 import org.chocosolver.memory.IStateInt;
 import org.chocosolver.solver.ICause;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.constraints.extension.Tuples;
@@ -31,6 +32,7 @@ import java.util.BitSet;
  * @author Guillaume Perez, Jean-Guillaume Fages (minor)
  * @since 26/07/2014
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropTableStr2 extends Propagator<IntVar> {
 
     //***********************************************************************************

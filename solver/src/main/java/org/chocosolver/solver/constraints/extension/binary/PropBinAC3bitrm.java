@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.exception.SolverException;
@@ -24,6 +25,7 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
  * @author Charles Prud'homme, Hadrien Cambazard
  * @since 22/04/2014
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropBinAC3bitrm extends PropBinCSP {
 
     private int offset0;

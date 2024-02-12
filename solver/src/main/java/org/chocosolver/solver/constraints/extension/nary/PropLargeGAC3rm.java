@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.nary;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -24,6 +25,7 @@ import java.util.Arrays;
  * @author Charles Prud'homme, Hadrien Cambazard
  * @since 24/04/2014
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropLargeGAC3rm extends PropLargeCSP<LargeRelation> {
 
     // Last valid supports Last(x_i, val) = supports( (blocks(i) + val) * size )
