@@ -19,6 +19,7 @@ import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.util.ESat;
 
 import java.util.HashMap;
+import java.util.Optional;
 import java.util.function.*;
 
 /**
@@ -595,6 +596,7 @@ public class Settings {
      */
     public Settings setLCG(boolean isLCG) {
         this.lcg = isLCG;
+        this.setEnableSAT(lcg || enableSAT);
         return this;
     }
 
