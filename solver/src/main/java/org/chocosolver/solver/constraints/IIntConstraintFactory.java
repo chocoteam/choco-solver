@@ -343,6 +343,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      * @param offset offset matching index.lb and table[0] (Generally 0)
      */
     default Constraint element(IntVar value, int[] table, IntVar index, int offset) {
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: element constraint is turned into clauses.");
+            }
+            ref().addElement(value, table, index, offset);
+            return ref().voidConstraint();
+        }
         return ElementFactory.detect(value, table, index, offset);
     }
 
@@ -423,6 +431,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
         Object[] args = variableUniqueness(new IntVar[]{var1, var2});
         var1 = ((IntVar[]) args[0])[0];
         var2 = ((IntVar[]) args[0])[1];
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: table constraint is turned into clauses.");
+            }
+            ref().addTable(new IntVar[]{var1, var2}, tuples);
+            return ref().voidConstraint();
+        }
         Propagator<IntVar> p;
         if (tuples.allowUniversalValue()) {
             p = new PropCompactTableStar(new IntVar[]{var1, var2}, tuples);
@@ -2474,6 +2490,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
     default Constraint table(IntVar[] vars, Tuples tuples, String algo) {
         // if some variables appears more than one time, the filtering algorithm can be not correct
         vars = (IntVar[]) variableUniqueness(vars)[0];
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: table constraint is turned into clauses.");
+            }
+            ref().addTable(vars, tuples);
+            return ref().voidConstraint();
+        }
         if (!tuples.allowUniversalValue() && vars.length == 2) {
             switch (algo) {
                 case "FC":
@@ -2557,6 +2581,14 @@ public interface IIntConstraintFactory extends ISelf<Model> {
      */
     default Constraint table(IntVar[] vars, HybridTuples htuples) {
         assert vars.length == htuples.arity();
+        if (ref().getSolver().isLCG()) {
+            if (ref().getSettings().warnUser()) {
+                ref().getSolver().log().white().println(
+                        "Warning: table constraint is turned into clauses.");
+            }
+            ref().addTable(vars, htuples);
+            return ref().voidConstraint();
+        }
         return new Constraint(ConstraintsName.TABLE, new PropHybridTable(vars, htuples));
     }
 

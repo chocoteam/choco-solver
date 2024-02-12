@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.extension.binary;
 
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.IntVar;
@@ -23,6 +24,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableBitSet
  * @author Charles Prud'homme, Hadrien Cambazard
  * @since 24/04/2014
  */
+@Explained(ignored = true, comment = "Turned into clauses")
 public class PropBinFC extends PropBinCSP {
 
     private final IntIterableBitSet vrms;
