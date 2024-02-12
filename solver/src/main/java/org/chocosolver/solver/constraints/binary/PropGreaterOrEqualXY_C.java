@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -24,6 +26,7 @@ import org.chocosolver.util.tools.MathUtils;
  * @author Charles Prud'homme
  * @since 13/06/12
  */
+@Explained(partial = true, comment = "must be tested")
 public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     private final IntVar x;
@@ -46,8 +49,10 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
 
     @Override
     public void propagate(int evtmask) throws ContradictionException {
-        x.updateLowerBound(MathUtils.safeSubstract(this.cste, y.getUB()), this);
-        y.updateLowerBound(MathUtils.safeSubstract(this.cste, x.getUB()), this);
+        x.updateLowerBound(MathUtils.safeSubstract(this.cste, y.getUB()), this,
+                lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
+        y.updateLowerBound(MathUtils.safeSubstract(this.cste, x.getUB()), this,
+                lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();
         }
@@ -56,9 +61,11 @@ public final class PropGreaterOrEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int idxVarInProp, int mask) throws ContradictionException {
         if (idxVarInProp == 0) {
-            y.updateLowerBound(this.cste - x.getUB(), this);
+            y.updateLowerBound(this.cste - x.getUB(), this,
+                    lcg() ? Reason.r(x.getMaxLit()) : Reason.undef());
         } else {
-            x.updateLowerBound(this.cste - y.getUB(), this);
+            x.updateLowerBound(this.cste - y.getUB(), this,
+                    lcg() ? Reason.r(y.getMaxLit()) : Reason.undef());
         }
         if (x.getLB() + y.getLB() >= this.cste) {
             this.setPassive();

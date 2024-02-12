@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -34,6 +36,7 @@ import org.chocosolver.util.ESat;
  * @version 0.01, june 2010
  * @since 0.01
  */
+@Explained(partial = true, comment = "must be tested")
 public class PropNotEqualXY_C extends Propagator<IntVar> {
 
     private final IntVar x;
@@ -59,11 +62,15 @@ public class PropNotEqualXY_C extends Propagator<IntVar> {
     @Override
     public void propagate(int evtmask) throws ContradictionException {
         if (x.isInstantiated()) {
-            if (y.removeValue(cste - x.getValue(), this) || !y.contains(cste - x.getValue())) {
+            if (y.removeValue(cste - x.getValue(), this,
+                    lcg() ? Reason.r(x.getValLit()): Reason.undef())
+                    || !y.contains(cste - x.getValue())) {
                 this.setPassive();
             }
         } else if (y.isInstantiated()) {
-            if (x.removeValue(cste - y.getValue(), this) || !x.contains(cste - y.getValue())) {
+            if (x.removeValue(cste - y.getValue(), this,
+                    lcg() ? Reason.r(y.getValLit()): Reason.undef())
+                    || !x.contains(cste - y.getValue())) {
                 this.setPassive();
             }
         } else if (x.getLB() + y.getLB() > cste || x.getUB() + y.getUB() < cste) {
