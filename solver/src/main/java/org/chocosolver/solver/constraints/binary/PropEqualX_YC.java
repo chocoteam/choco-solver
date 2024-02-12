@@ -9,6 +9,8 @@
  */
 package org.chocosolver.solver.constraints.binary;
 
+import org.chocosolver.sat.Reason;
+import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Propagator;
 import org.chocosolver.solver.constraints.PropagatorPriority;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -26,7 +28,7 @@ import org.chocosolver.util.procedure.IntProcedure;
  * @author Charles Prud'homme, Jean-Guillaume Fages
  * @since 1 oct. 2010
  */
-
+ @Explained(partial = true, comment = "must be tested")
 public final class PropEqualX_YC extends Propagator<IntVar> {
 
 
@@ -50,7 +52,8 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             idms = new IIntDeltaMonitor[2];
             idms[0] = vars[0].monitorDelta(this);
             idms[1] = vars[1].monitorDelta(this);
-            rem_proc = i -> vars[indexToFilter].removeValue(i + offSet, this);
+            rem_proc = i -> vars[indexToFilter].removeValue(i + offSet, this,
+                    lcg() ? Reason.r(vars[1 - indexToFilter].getLit(i, IntVar.LR_NE)) : Reason.undef());
         }
     }
 
@@ -70,13 +73,13 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
             int ub = x.getUB();
             for (int val = x.getLB(); val <= ub; val = x.nextValue(val)) {
                 if (!y.contains(val - cste)) {
-                    x.removeValue(val, this);
+                    x.removeValue(val, this, lcg() ? Reason.r(y.getLit(val - cste, IntVar.LR_NE)) : Reason.undef());
                 }
             }
             ub = y.getUB();
             for (int val = y.getLB(); val <= ub; val = y.nextValue(val)) {
                 if (!x.contains(val + cste)) {
-                    y.removeValue(val, this);
+                    y.removeValue(val, this, lcg() ? Reason.r(x.getLit(val + cste, IntVar.LR_NE)) : Reason.undef());
                 }
             }
             idms[0].startMonitoring();
@@ -101,8 +104,10 @@ public final class PropEqualX_YC extends Propagator<IntVar> {
 
     @SuppressWarnings("StatementWithEmptyBody")
     private void updateBounds() throws ContradictionException {
-        while (x.updateLowerBound(y.getLB() + cste, this) | y.updateLowerBound(x.getLB() - cste, this)) ;
-        while (x.updateUpperBound(y.getUB() + cste, this) | y.updateUpperBound(x.getUB() - cste, this)) ;
+        while (x.updateLowerBound(y.getLB() + cste, this, lcg() ? Reason.r(y.getMinLit()) : Reason.undef())
+                | y.updateLowerBound(x.getLB() - cste, this, lcg() ? Reason.r(x.getMinLit()) : Reason.undef())) ;
+        while (x.updateUpperBound(y.getUB() + cste, this, lcg() ? Reason.r(y.getMaxLit()) : Reason.undef())
+                | y.updateUpperBound(x.getUB() - cste, this, lcg() ? Reason.r(x.getMaxLit()) : Reason.undef())) ;
     }
 
     @Override
