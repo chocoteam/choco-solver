@@ -47,7 +47,7 @@ import java.util.stream.StreamSupport;
  * @see org.chocosolver.solver.constraints.Constraint
  * @since 0.01
  */
-public class Model implements IModel {
+public final class Model implements IModel {
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// PRIVATE FIELDS /////////////////////////////////////////////////////////////
@@ -171,8 +171,6 @@ public class Model implements IModel {
 
     private ModelAnalyser modelAnalyser = null;
 
-    private final boolean lcg;
-
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////// CONSTRUCTORS ///////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -198,7 +196,6 @@ public class Model implements IModel {
         this.settings = settings;
         this.solver = settings.initSolver(this);
         this.groups = new ArrayList<>();
-        this.lcg = settings.isLCG();
     }
 
     /**
@@ -611,6 +608,9 @@ public class Model implements IModel {
      * @return the minisat constraint
      */
     public SatConstraint getMinisat() {
+        if(solver.isLCG()){
+            throw new UnsupportedOperationException("MiniSat is not supported with LCG");
+        }
         if (getHook(MINISAT_HOOK_NAME) == null) {
             SatConstraint minisat = new SatConstraint(this);
             minisat.post();
