@@ -392,7 +392,7 @@ public class MiniSat implements SatFactory, Dimacs {
     }
 
     // The current number of original clauses.
-    int nClauses() {
+    public int nClauses() {
         return clauses.size();
     }
 
