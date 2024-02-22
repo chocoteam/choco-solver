@@ -1010,7 +1010,10 @@ public final class Model implements IModel {
     public String toString() {
         StringBuilder st = new StringBuilder(256);
         st.append(String.format("\n Model[%s]\n", name));
-        st.append(String.format("\n[ %d vars -- %d cstrs ]\n", vIdx, cIdx));
+        st.append(String.format("\n[ %d vars -- %d cstrs -- %d lits -- %d clauses ]\n",
+                vIdx, cIdx,
+                getSolver().getSat() == null ? 0 : getSolver().getSat().nVars(),
+                getSolver().getSat() == null ? 0 : getSolver().getSat().nClauses()));
         st.append(policy.name().toLowerCase()).append(" ");
         if (objective != null) {
             st.append(objective.getName()).append(" ");
@@ -1048,6 +1051,9 @@ public final class Model implements IModel {
                 }
             }
         }
+        if (getSolver().getSat() != null && getSolver().getSat().nClauses() > 0) {
+            l.put("lits", getSolver().getSat().nVars());
+        }
         solver.log().bold().printf("== %d variables ==%n", cnt);
         l.entrySet().stream()
                 .sorted(Map.Entry.comparingByValue())
@@ -1067,6 +1073,9 @@ public final class Model implements IModel {
                 l.compute(p.getClass().getSimpleName(), (n, k) -> k == null ? 1 : k + 1);
                 cnt++;
             }
+        }
+        if (getSolver().getSat() != null && getSolver().getSat().nClauses() > 0) {
+            l.put("clauses", getSolver().getSat().nClauses());
         }
         solver.log().bold().printf("== %d propagators ==%n", cnt);
         l.entrySet().stream()
