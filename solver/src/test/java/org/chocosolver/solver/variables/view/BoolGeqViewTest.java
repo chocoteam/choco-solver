@@ -17,7 +17,7 @@ import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.strategy.Search;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.view.bool.BoolLeqView;
+import org.chocosolver.solver.variables.view.bool.BoolGeqView;
 import org.chocosolver.util.ESat;
 import org.chocosolver.util.iterators.DisposableRangeIterator;
 import org.chocosolver.util.iterators.DisposableValueIterator;
@@ -26,7 +26,6 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 /**
@@ -36,7 +35,7 @@ import java.util.stream.Stream;
  * @author Charles Prud'homme
  * @since 26/11/2018.
  */
-public class BoolLeqViewTest {
+public class BoolGeqViewTest {
 
     Model model;
     IntVar x;
@@ -46,7 +45,7 @@ public class BoolLeqViewTest {
     public void before() {
         model = new Model();
         x = model.intVar("x", 0, 5);
-        b = new BoolLeqView(x, 3);
+        b = new BoolGeqView<>(x, 3);
     }
 
     @Test(groups = "1s")
@@ -86,38 +85,40 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testGetBooleanValueT() throws ContradictionException {
-        Assert.assertTrue(x.updateUpperBound(3, Cause.Null));
+        Assert.assertTrue(x.updateLowerBound(3, Cause.Null));
         Assert.assertEquals(b.getBooleanValue(), ESat.TRUE);
+        Assert.assertEquals(b.getValue(), 1);
     }
 
     @Test(groups = "1s")
     public void testGetBooleanValueF() throws ContradictionException {
-        Assert.assertTrue(x.updateLowerBound(4, Cause.Null));
+        Assert.assertTrue(x.updateUpperBound(2, Cause.Null));
         Assert.assertEquals(b.getBooleanValue(), ESat.FALSE);
+        Assert.assertEquals(b.getValue(), 0);
     }
 
     @Test(groups = "1s")
     public void testSetToTrue() throws ContradictionException {
         Assert.assertTrue(b.setToTrue(Cause.Null));
-        Assert.assertTrue(x.getUB() <= 3);
+        Assert.assertTrue(x.getLB() >= 3);
     }
 
     @Test(groups = "1s")
     public void testSetToFalse() throws ContradictionException {
         Assert.assertTrue(b.setToFalse(Cause.Null));
-        Assert.assertTrue(x.getLB() > 3);
+        Assert.assertTrue(x.getUB() < 3);
     }
 
     @Test(groups = "1s")
     public void testDoInstantiateVar0() throws ContradictionException {
         Assert.assertTrue(b.instantiateTo(0, Cause.Null));
-        Assert.assertTrue(x.getLB() > 3);
+        Assert.assertTrue(x.getUB() < 3);
     }
 
     @Test(groups = "1s")
     public void testDoInstantiateVar1() throws ContradictionException {
         Assert.assertTrue(b.instantiateTo(1, Cause.Null));
-        Assert.assertTrue(x.getUB() <= 3);
+        Assert.assertTrue(x.getLB() >= 3);
     }
 
     @Test(groups = "1s", expectedExceptions = ContradictionException.class)
@@ -133,7 +134,7 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testDoUpdateLowerBoundOfVar0() throws ContradictionException {
         Assert.assertFalse(b.updateLowerBound(0, Cause.Null));
-        Assert.assertFalse(x.getLB() > 3);
+        Assert.assertFalse(x.getLB() >= 3);
         Assert.assertTrue(3 <= x.getUB());
     }
 
@@ -157,8 +158,8 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testDoUpdateUpperBoundOfVar0() throws ContradictionException {
         Assert.assertTrue(b.updateUpperBound(0, Cause.Null));
-        Assert.assertTrue(x.getLB() > 3);
-        Assert.assertTrue(3 <= x.getUB());
+        Assert.assertTrue(x.getUB() < 3);
+        Assert.assertTrue(0 <= x.getLB());
     }
 
     @Test(groups = "1s")
@@ -179,15 +180,15 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testDoRemoveValueFromVar0() throws ContradictionException {
         Assert.assertTrue(b.removeValue(0, Cause.Null));
-        Assert.assertFalse(x.getLB() > 3);
-        Assert.assertTrue(3 <= x.getUB());
+        Assert.assertTrue(x.getLB() >= 3);
+        Assert.assertTrue(x.getUB() <= 5);
     }
 
     @Test(groups = "1s")
     public void testDoRemoveValueFromVar1() throws ContradictionException {
         Assert.assertTrue(b.removeValue(1, Cause.Null));
-        Assert.assertTrue(x.getLB() > 3);
-        Assert.assertTrue(3 <= x.getUB());
+        Assert.assertTrue(x.getUB() < 3);
+        Assert.assertTrue(0 <= x.getLB());
     }
 
     @Test(groups = "1s")
@@ -215,8 +216,8 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testDoRemoveIntervalFromVar12() throws Exception {
         Assert.assertTrue(b.removeInterval(1, 2, Cause.Null));
-        Assert.assertTrue(x.getLB() > 3);
-        Assert.assertTrue(3 <= x.getUB());
+        Assert.assertTrue(x.getUB() < 3);
+        Assert.assertTrue(0 <= x.getLB());
     }
 
     @Test(groups = "1s")
@@ -227,14 +228,14 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testContains0() throws ContradictionException {
         Assert.assertTrue(b.contains(0));
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertFalse(b.contains(0));
     }
 
     @Test(groups = "1s")
     public void testContains1() throws ContradictionException {
         Assert.assertTrue(b.contains(1));
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertFalse(b.contains(1));
     }
 
@@ -246,28 +247,28 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testIsInstantiatedTo0() throws ContradictionException {
         Assert.assertFalse(b.isInstantiatedTo(0));
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertTrue(b.isInstantiatedTo(0));
     }
 
     @Test(groups = "1s")
     public void testIsInstantiatedTo1() throws ContradictionException {
         Assert.assertFalse(b.isInstantiatedTo(1));
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertTrue(b.isInstantiatedTo(1));
     }
 
     @Test(groups = "1s")
     public void testGetLB0() throws Exception {
         Assert.assertEquals(b.getLB(), 0);
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertEquals(b.getLB(), 1);
     }
 
     @Test(groups = "1s")
     public void testGetLB1() throws Exception {
         Assert.assertEquals(b.getLB(), 0);
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.getLB(), 0);
     }
 
@@ -281,7 +282,7 @@ public class BoolLeqViewTest {
     @Test(groups = "1s")
     public void testGetUB1() throws ContradictionException {
         Assert.assertEquals(b.getUB(), 1);
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.getUB(), 0);
     }
 
@@ -294,7 +295,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testNextValue2() throws ContradictionException {
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertEquals(b.nextValue(-1), 1);
         Assert.assertEquals(b.nextValue(0), 1);
         Assert.assertEquals(b.nextValue(1), Integer.MAX_VALUE);
@@ -302,7 +303,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testNextValue3() throws ContradictionException {
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.nextValue(-1), 0);
         Assert.assertEquals(b.nextValue(0), Integer.MAX_VALUE);
         Assert.assertEquals(b.nextValue(1), Integer.MAX_VALUE);
@@ -319,7 +320,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testNextValueOut2() throws ContradictionException {
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertEquals(b.nextValueOut(-2), -1);
         Assert.assertEquals(b.nextValueOut(-1), 0);
         Assert.assertEquals(b.nextValueOut(0), 2);
@@ -329,7 +330,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testNextValueOut3() throws ContradictionException {
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.nextValueOut(-2), -1);
         Assert.assertEquals(b.nextValueOut(-1), 1);
         Assert.assertEquals(b.nextValueOut(0), 1);
@@ -347,7 +348,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testPreviousValue2() throws ContradictionException {
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertEquals(b.previousValue(10), 1);
         Assert.assertEquals(b.previousValue(2), 1);
         Assert.assertEquals(b.previousValue(1), Integer.MIN_VALUE);
@@ -356,7 +357,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testPreviousValue3() throws ContradictionException {
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.previousValue(10), 0);
         Assert.assertEquals(b.previousValue(2), 0);
         Assert.assertEquals(b.previousValue(1), 0);
@@ -373,7 +374,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testPreviousValueOut1() throws ContradictionException {
-        x.updateUpperBound(3, Cause.Null);
+        x.updateLowerBound(3, Cause.Null);
         Assert.assertEquals(b.previousValueOut(10), 9);
         Assert.assertEquals(b.previousValueOut(2), 0);
         Assert.assertEquals(b.previousValueOut(1), 0);
@@ -382,7 +383,7 @@ public class BoolLeqViewTest {
 
     @Test(groups = "1s")
     public void testPreviousValueOut2() throws ContradictionException {
-        x.updateLowerBound(4, Cause.Null);
+        x.updateUpperBound(2, Cause.Null);
         Assert.assertEquals(b.previousValueOut(10), 9);
         Assert.assertEquals(b.previousValueOut(2), 1);
         Assert.assertEquals(b.previousValueOut(1), -1);
@@ -432,8 +433,8 @@ public class BoolLeqViewTest {
             doms[i] = model.isEq(x, i);
         }
         while (model.getSolver().solve()) {
-            System.out.printf("%s\n", x);
-            System.out.printf("%s\n", Arrays.toString(doms));
+//            System.out.printf("%s\n", x);
+//            System.out.printf("%s\n", Arrays.toString(doms));
 
         }
     }
