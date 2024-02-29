@@ -25,9 +25,10 @@ import org.chocosolver.util.iterators.DisposableValueIterator;
 import org.chocosolver.util.iterators.EvtScheduler;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
-import static org.chocosolver.sat.MiniSat.C_Undef;
+import static org.chocosolver.sat.MiniSat.*;
 
 /**
  * A wrapper for integer variables, that maintains an internal data structure to ease the creation of clauses.
@@ -43,14 +44,16 @@ import static org.chocosolver.sat.MiniSat.C_Undef;
  */
 @Explained
 public final class IntVarEagerLit extends AbstractVariable implements IntVar, LitVar {
+    enum RoundMode {ROUND_DOWN, ROUND_UP, ROUND_NONE}
 
-    IntVar var; // the observed variable
-    MiniSat sat; // the sat solver
+    final IntVar var; // the observed variable
+    final MiniSat sat; // the sat solver
     boolean channeling = true; // to communicate with the sat solver or not
-    int lit_min; // the initial lower bound of the domain
-    int lit_max; // the initial upper bound of the domain
-    int base_vlit; // the base index of value literals
-    int base_blit; // the base index of bound literals
+    final int[] values; // values initially in the domain or null if the domain is not sparse
+    final int lit_min; // the initial lower bound of the domain
+    final int lit_max; // the initial upper bound of the domain
+    final int base_vlit; // the base index of value literals
+    final int base_blit; // the base index of bound literals
 
     /**
      * Create a variable wrapper with eager literals
@@ -65,13 +68,28 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             throw new UnsupportedOperationException("IntVarEagerLit can only wrap enumerated integer variables");
         }
         this.sat = getModel().getSolver().getSat();
-        int min = var.getLB(); // todo: keep ?
-        int max = var.getUB();
-        lit_min = min;
-        lit_max = max;
+        lit_min = var.getLB();
+        lit_max = var.getUB();
 
-        // init vlits
-        base_vlit = 2 * (sat.nVars() - lit_min);
+        int capacity = lit_max - lit_min + 1;
+        if (capacity > 30 && (lit_max - lit_min) / var.getDomainSize() > 5) {
+            values = var.stream().toArray();
+            // init vlits
+            base_vlit = 2 * (sat.nVars());
+            // init blits
+            base_blit = 2 * (sat.nVars() + values.length) + 1;
+            initSparseDomain();
+        } else {
+            values = null;
+            // init vlits
+            base_vlit = 2 * (sat.nVars() - lit_min);
+            // init blits
+            base_blit = 2 * (sat.nVars() + capacity - lit_min) + 1;
+            initDenseDomain();
+        }
+    }
+
+    private void initDenseDomain() {
         for (int v = lit_min; v <= lit_max; v++) {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, v));
             if (!var.contains(v)) {
@@ -81,16 +99,27 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         if (var.isInstantiated()) {
             sat.cEnqueue(getEQLit(lit_min), Reason.undef());
         }
-        // init blits
-        base_blit = 2 * (sat.nVars() - lit_min) + 1;
         for (int v = lit_min - 1; v <= lit_max; v++) {
             sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, v));
         }
-        for (int i = lit_min; i <= min; i++) {
+        for (int i = lit_min; i <= lit_min; i++) {
             sat.cEnqueue(getGELit(i), Reason.undef());
         }
-        for (int i = max; i <= lit_max; i++) {
+        for (int i = lit_max; i <= lit_max; i++) {
             sat.cEnqueue(getLELit(i), Reason.undef());
+        }
+    }
+
+    private void initSparseDomain() {
+        assert !var.isInstantiated() : "IntVarEagerLit should not wrap an instantiated variable";
+        // init vlits
+        for (int v : values) {
+            sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, v));
+        }
+        // init blits
+        sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, lit_min - 1));
+        for (int v : values) {
+            sat.newVariable(new MiniSat.ChannelInfo(this, 1, 1, v));
         }
     }
 
@@ -122,6 +151,37 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         channeling = true;
     }
 
+    /**
+     * @param v
+     * @param type
+     * @return
+     */
+    private int findIndex(int v, RoundMode type) {
+        int l = 0;
+        int u = values.length - 1;
+        int m;
+        do {
+            m = (l + u) / 2;
+            if (values[m] == v) {
+                return m; // 1-based index
+            }
+            if (values[m] < v) {
+                l = m + 1;
+            } else {
+                u = m - 1;
+            }
+        } while (u >= l);
+        switch (type) {
+            case ROUND_DOWN:
+                return u;
+            case ROUND_UP:
+                return l;
+            default:
+            case ROUND_NONE:
+                return -1;
+        }
+    }
+
     @Override
     public int getLit(int v, int t) {
         if (v < lit_min) {
@@ -131,14 +191,30 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
             return t - 1 >> 1 & 1;  // true, false, false, true
         }
         switch (t) {
-            case LR_NE:
-                return base_vlit + 2 * v;
-            case LR_EQ:
-                return base_vlit + 2 * v + 1;
-            case LR_GE:
-                return base_blit + 2 * v;
-            case LR_LE:
-                return base_blit + 2 * v + 1;
+            case LR_NE: {
+                if (values == null) {
+                    return base_vlit + 2 * v;
+                } else {
+                    int u = findIndex(v, RoundMode.ROUND_NONE);
+                    return (u == -1 ? 1 : base_vlit + 2 * u);
+                }
+            }
+            case LR_EQ: {
+                if (values == null) {
+                    return base_vlit + 2 * v + 1;
+                } else {
+                    int u = findIndex(v, RoundMode.ROUND_NONE);
+                    return (u == -1 ? 0 : base_vlit + 2 * u + 1);
+                }
+            }
+            case LR_GE: {
+                int u = values == null ? v : findIndex(v, RoundMode.ROUND_UP);
+                return base_blit + 2 * u;
+            }
+            case LR_LE: {
+                int u = values == null ? v : findIndex(v, RoundMode.ROUND_DOWN);
+                return base_blit + 2 * u + 1;
+            }
             default:
                 throw new UnsupportedOperationException("IntVarEagerLit#getLit");
         }
@@ -188,22 +264,49 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         // Set [x != v-1] to [x != min] using [x != i] \/ ![x >= v]
         Reason r = Reason.r(MiniSat.neg(getGELit(v)));
         int min = getLB();
-        for (int i = v - 1; i > min; i--) {
-            sat.cEnqueue(getGELit(i), r);
-            if (var.contains(i)) {
-                sat.cEnqueue(getNELit(i), r);
+        if (values == null) { // dense domain
+            for (int i = v - 1; i > min; i--) {
+                sat.cEnqueue(getGELit(i), r);
+                if (var.contains(i)) {
+                    sat.cEnqueue(getNELit(i), r);
+                }
+            }
+        } else { // sparse domain
+            // find pos of v in values
+            int i = Arrays.binarySearch(values, v - 1);
+            if (i < 0) {
+                // get the insertion point, as defined by Arrays.binarySearch, -1
+                i = -i - 2;
+            }
+            for (; i >= 0 && values[i] > min; i--) {
+                int u = values[i];
+                sat.cEnqueue(getGELit(u), r);
+                if (var.contains(u)) {
+                    sat.cEnqueue(getNELit(u), r);
+                }
             }
         }
         sat.cEnqueue(getNELit(min), r);
     }
 
     private void updateMin(int oldMin, int newMin) {
-        int v = oldMin;
-        while (v < newMin) {
-            // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
-            Reason r = Reason.r(getLELit(v - 1), getEQLit(v));
-            sat.cEnqueue(getGELit(v + 1), r);
-            v++;
+        if (values == null) { // dense domain
+            int v = oldMin;
+            while (v < newMin) {
+                // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
+                Reason r = Reason.r(getLELit(v - 1), getEQLit(v));
+                sat.cEnqueue(getGELit(v + 1), r);
+                v++;
+            }
+        } else { // sparse domain
+            int u = findIndex(oldMin, RoundMode.ROUND_UP);
+            int v = values[u];
+            while (v < newMin) {
+                // Set [x >= v+1] using [x >= v+1] \/ [x <= v-1] \/ [x = v]
+                Reason r = Reason.r(getLELit(v - 1), getEQLit(v));
+                sat.cEnqueue(getGELit(v + 1), r);
+                v = values[++u];
+            }
         }
     }
 
@@ -212,22 +315,49 @@ public final class IntVarEagerLit extends AbstractVariable implements IntVar, Li
         // Set [x != v+1] to [x != max] to using ![x = i] \/ ![x <= v]
         Reason r = Reason.r(MiniSat.neg(getLELit(v)));
         int max = getUB();
-        for (int i = v + 1; i < max; i++) {
-            sat.cEnqueue(getLELit(i), r);
-            if (var.contains(i)) {
-                sat.cEnqueue(getNELit(i), r);
+        if (values == null) { // dense domain
+            for (int i = v + 1; i < max; i++) {
+                sat.cEnqueue(getLELit(i), r);
+                if (var.contains(i)) {
+                    sat.cEnqueue(getNELit(i), r);
+                }
+            }
+        } else { // sparse domain
+            // find pos of v in values
+            int i = Arrays.binarySearch(values, v + 1);
+            if (i < 0) {
+                // get the insertion point, as defined by Arrays.binarySearch
+                i = -i - 1;
+            }
+            for (; i < values.length && values[i] < max; i++) {
+                int u = values[i];
+                sat.cEnqueue(getLELit(u), r);
+                if (var.contains(u)) {
+                    sat.cEnqueue(getNELit(u), r);
+                }
             }
         }
         sat.cEnqueue(getNELit(max), r);
     }
 
     private void updateMax(int oldMax, int newMax) {
-        int v = oldMax;
-        while (v > newMax) {
-            // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
-            Reason r = Reason.r(getGELit(v + 1), getEQLit(v));
-            sat.cEnqueue(getLELit(v - 1), r);
-            v--;
+        if (values == null) { // dense domain
+            int v = oldMax;
+            while (v > newMax) {
+                // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
+                Reason r = Reason.r(getGELit(v + 1), getEQLit(v));
+                sat.cEnqueue(getLELit(v - 1), r);
+                v--;
+            }
+        } else { // sparse domain
+            int u = findIndex(oldMax, RoundMode.ROUND_DOWN);
+            int v = values[u];
+            while (v > newMax) {
+                // Set [x <= v-1] using [x <= v-1] \/ [x >= v+1] \/ [x = v]
+                Reason r = Reason.r(getGELit(v + 1), getEQLit(v));
+                sat.cEnqueue(getLELit(v - 1), r);
+                v = values[--u];
+            }
         }
     }
 
