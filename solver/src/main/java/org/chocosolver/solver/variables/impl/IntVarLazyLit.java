@@ -31,7 +31,6 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static org.chocosolver.sat.MiniSat.C_Undef;
 
@@ -63,20 +62,20 @@ public final class IntVarLazyLit extends AbstractVariable implements IntVar, Lit
         }
     }
 
-    IntVar var; // the observed variable
-    MiniSat sat; // the sat solver
+    final IntVar var; // the observed variable
+    final MiniSat sat; // the sat solver
 
     boolean channeling = true; // to communicate with the sat solver or not
 
-    List<Node> ld; // todo: check type
-    TIntStack freelist = new TIntArrayStack();
+    final List<Node> ld; // todo: check type
+    final TIntStack freelist = new TIntArrayStack();
 
-    IStateInt li;
-    IStateInt hi;
+    final IStateInt li;
+    final IStateInt hi;
     int valLit;
 
-    int min0;
-    int max0;
+    final int min0;
+    final int max0;
 
     /**
      * Create a variable wrapper with eager literals
