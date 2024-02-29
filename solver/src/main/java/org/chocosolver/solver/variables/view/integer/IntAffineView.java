@@ -109,6 +109,9 @@ public final class IntAffineView<I extends IntVar> extends IntView<I> {
         value -= b;
         if (a > 1) {
             if ((value % a) != 0) {
+                if (getModel().getSolver().isLCG()) {
+                    getModel().getSolver().getSat().cEnqueue(0, reason);
+                }
                 this.contradiction(this, MSG_INST);
             }
             value /= a;

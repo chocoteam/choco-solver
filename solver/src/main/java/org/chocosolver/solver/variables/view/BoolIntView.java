@@ -23,7 +23,6 @@ import org.chocosolver.solver.variables.events.IntEventType;
 import org.chocosolver.solver.variables.impl.AbstractVariable;
 import org.chocosolver.solver.variables.impl.scheduler.BoolEvtScheduler;
 import org.chocosolver.solver.variables.view.bool.BoolEqView;
-import org.chocosolver.solver.variables.view.bool.BoolLeqView;
 import org.chocosolver.util.iterators.*;
 import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
 
@@ -32,7 +31,7 @@ import org.chocosolver.util.objects.setDataStructures.iterable.IntIterableSet;
  *
  * @author Charles Prud'homme
  * @see BoolEqView
- * @see BoolLeqView
+ * @see org.chocosolver.solver.variables.view.bool.BoolGeqView
  * <p>
  * Project: choco-solver.
  * @since 04/12/2018.
@@ -68,11 +67,10 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     /**
      * A view based on <i>var<i/> and a constant
      *
-     * @param var  an integer variable
-     * @param cste an int
+     * @param var an integer variable
      */
-    protected BoolIntView(final I var, String op, final int cste) {
-        super("(" + var.getName() + op + cste + ")", var);
+    protected BoolIntView(String name, final I var, final int cste) {
+        super(name, var);
         this.cste = cste;
         this.fixed = var.getModel().getEnvironment().makeBool(false);
     }
@@ -94,9 +92,9 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     public final boolean removeValue(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
         if (value == kFALSE)
-            return instantiateTo(kTRUE, cause);
+            return instantiateTo(kTRUE, cause, reason);
         else if (value == kTRUE)
-            return instantiateTo(kFALSE, cause);
+            return instantiateTo(kFALSE, cause, reason);
         return false;
     }
 
@@ -142,13 +140,13 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     @Override
     public final boolean updateLowerBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
-        return value > kFALSE && instantiateTo(value, cause);
+        return value > kFALSE && instantiateTo(value, cause, reason);
     }
 
     @Override
     public final boolean updateUpperBound(int value, ICause cause, Reason reason) throws ContradictionException {
         assert cause != null;
-        return value < kTRUE && instantiateTo(value, cause);
+        return value < kTRUE && instantiateTo(value, cause, reason);
     }
 
     @Override
@@ -173,8 +171,8 @@ public abstract class BoolIntView<I extends IntVar> extends IntView<I> implement
     }
 
     @Override
-    public final int getValue() throws IllegalStateException{
-        if(!isInstantiated()) {
+    public final int getValue() throws IllegalStateException {
+        if (!isInstantiated()) {
             throw new IllegalStateException("getValue() can be only called on instantiated variable. " +
                     name + " is not instantiated");
         }

@@ -85,18 +85,11 @@ public class BoolVarEagerLit extends AbstractVariable implements BoolVar, LitVar
     /**
      * Create a boolean variable for LCG.
      */
-    public BoolVarEagerLit(String name, Model model, int lit) {
+    public BoolVarEagerLit(String name, Model model, int min, int max) {
         super(name, model);
         this.sat = getModel().getSolver().getSat();
-        this.vlit = lit;
+        this.vlit = MiniSat.makeLiteral(sat.nVars(), true);
         sat.newVariable(new MiniSat.ChannelInfo(this, 1, 0, 1));
-    }
-
-    /**
-     * Create a boolean variable for LCG.
-     */
-    public BoolVarEagerLit(String name, Model model, int min, int max) {
-        this(name, model, MiniSat.makeLiteral(model.getSolver().getSat().nVars(), true));
         int t = VAR;
         if (min == 1) {
             sat.cEnqueue(vlit, Reason.undef());

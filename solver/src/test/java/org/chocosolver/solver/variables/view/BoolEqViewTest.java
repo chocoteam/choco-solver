@@ -44,7 +44,7 @@ public class BoolEqViewTest {
     public void before() {
         model = new Model();
         x = model.intVar("x", 0, 5);
-        b = new BoolEqView(x, 3);
+        b = new BoolEqView<>(x, 3);
     }
 
     @Test(groups = "1s")
