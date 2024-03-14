@@ -168,14 +168,11 @@ public abstract class RegParser implements IParser {
     @Option(name = "-seed", usage = "Set the seed for random number generator. ")
     protected long seed = 0L;
 
-    @Option(name = "-exp", usage = "Plug explanation in (default: false).")
-    public boolean exp = false;
-
-    @Option(name = "-dfx", usage = "Force default explanation algorithm.")
-    public boolean dftexp = false;
-
     @Option(name = "--cp-profiler", usage = "Connect to CP-Profiler. Two comma-separated values are expected: the execution id and the port.")
     public String cpProfiler = null;
+
+    @Option(name = "-lcg", usage = "Set Lazy Clause Generation (LCG) on. ")
+    protected boolean lcg = false;
 
     /**
      * Default settings to apply
@@ -213,7 +210,7 @@ public abstract class RegParser implements IParser {
     }
 
     public void createSettings() {
-        defaultSettings = Settings.prod();
+        defaultSettings = Settings.prod().setLCG(lcg);
     }
 
     public final Settings getSettings() {
