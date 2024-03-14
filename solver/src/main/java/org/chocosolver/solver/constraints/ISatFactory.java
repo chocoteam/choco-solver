@@ -667,6 +667,7 @@ public interface ISatFactory extends ISelf<Model> {
     }
 
     default boolean addTable(IntVar[] vars, Tuples tuples) {
+        assert vars.length >= 2;
         assert (ref().getSolver().isLCG() || ref().getSettings().enableSAT());
         MiniSat sat = sat();
         sat.beforeAddingClauses();
@@ -721,7 +722,8 @@ public interface ISatFactory extends ISelf<Model> {
             for (int i = 0; i < sup.length; i++) {
                 if (sup[i] == null) continue;
                 if (sup[i].isEmpty()) {
-                    sat.addClause(vars[w].getLit(i + lb, LR_NE));
+                    sat.addClause(vars[w].getLit(i + lb, LR_NE)); // Can lead to a bug in the SAT solver
+//                    vars[w].ne(i + lb).post();
                 } else {
                     sup[i].add(vars[w].getLit(i + lb, LR_NE));
                     int p = sup[i].get(0);
