@@ -25,7 +25,9 @@ import org.chocosolver.solver.variables.*;
 import org.chocosolver.util.tools.ArrayUtils;
 import org.chocosolver.util.tools.VariableUtils;
 import org.ehcache.sizeof.SizeOf;
+import org.ehcache.sizeof.filters.SizeOfFilter;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -631,7 +633,17 @@ public final class Model implements IModel {
      * @implNote this is based on : <a href="https://github.com/ehcache/sizeof">SizeOf</a>
      */
     public long getEstimatedMemory() throws UnsupportedOperationException {
-        SizeOf sizeOf = SizeOf.newInstance();
+        SizeOf sizeOf = SizeOf.newInstance(new SizeOfFilter() {
+            @Override
+            public Collection<Field> filterFields(Class<?> klazz, Collection<Field> fields) {
+                return fields;
+            }
+
+            @Override
+            public boolean filterClass(Class<?> klazz) {
+                return !klazz.getName().contains("Lambda");
+            }
+        });
         return sizeOf.deepSizeOf(this);
     }
 
