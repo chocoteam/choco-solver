@@ -104,7 +104,10 @@ public class Flatzinc extends RegParser {
                 .setLearntClausesDominancePerimeter(0)
                 .setNbMaxLearntClauses(Integer.MAX_VALUE)
                 .setRatioForClauseStoreReduction(.66f)
-                .set("adhocReification", true);
+                .set("adhocReification", true)
+                .setLCG(lcg)
+//                .setWarnUser(true)
+        ;
     }
 
     @Override
@@ -126,7 +129,7 @@ public class Flatzinc extends RegParser {
     @Override
     public void createSolver() {
         if (level.isLoggable(Level.COMPET)) {
-            System.out.println("%% Choco 240131");
+            System.out.printf("%% Choco%s (24.03.14 14:37)\n", lcg? " with LCG" : "");
         }
         super.createSolver();
         datas = new Datas[nb_cores];

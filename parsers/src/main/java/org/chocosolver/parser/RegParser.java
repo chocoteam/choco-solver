@@ -166,6 +166,9 @@ public abstract class RegParser implements IParser {
     @Option(name = "-seed", usage = "Set the seed for random number generator. ")
     protected long seed = 0L;
 
+    @Option(name = "-lcg", usage = "Set Lazy Clause Generation (LCG) on. ")
+    protected boolean lcg = false;
+
     /**
      * Default settings to apply
      */
@@ -202,7 +205,7 @@ public abstract class RegParser implements IParser {
     }
 
     public void createSettings() {
-        defaultSettings = Settings.prod();
+        defaultSettings = Settings.prod().setLCG(lcg);
     }
 
     public final Settings getSettings() {

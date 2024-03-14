@@ -6,8 +6,15 @@ set LVL="COMPET"
 set SOLS=-1
 set TIME_LIMIT=-1
 
-:: set the full path to the java archive of choco-solver
-set CHOCO_JAR=choco-parsers-4.10.15-SNAPSHOT-light.jar
+set SCRIPT_DIR=%~dp0
+for /r "%SCRIPT_DIR%\..\..\..\target" %%i in (*-light.jar) do (
+    set "CHOCO_JAR=%%i"
+    goto :found
+)
+echo Aucun fichier JAR trouvé.
+exit /b
+
+:found
 
 
 if "%#"=="0" (
@@ -48,11 +55,14 @@ OPTIONS:
     -t <n>
         Limit the resolution time of each problem instance to n ms.  (The default is %TIME_LIMIT%.)
 
+    -lcg
+        When invoked with this option the solver uses the LCG.
+
     -jar <j>
         Override the jar file.  (The default is %CHOCO_JAR%.)
 
     --jargs <args>
-    Override default java argument (The default is %JAVA_ARGS%.)
+        Override default java argument (The default is %JAVA_ARGS%.)
 
 EXAMPLES:
 
@@ -97,6 +107,9 @@ if /i "%~1"=="-n" (
 if /i "%~1"=="-r" (
     set ARGS=%ARGS%" -seed %~2"
     shift
+)else
+if /i "%~1"=="-lcg" (
+    set ARGS=%ARGS%" -lcg"
 )else
 if /i "%~1"=="-jar" (
     set "CHOCO_JAR=%~2"

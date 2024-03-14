@@ -6,7 +6,10 @@ JAVA_ARGS="-server -Xss64M -Xms2G -Xmx8G -XX:NewSize=512M"
 LVL="COMPET"
 SOLS=-1
 TIME_LIMIT=-1
-CHOCO_JAR=/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/target/choco-parsers-4.10.15-SNAPSHOT-light.jar
+SCRIPT_DIR=$(dirname "$0")
+CHOCO_JAR=$(find "${SCRIPT_DIR}/../../../target" -name '*-light.jar')
+
+
 usage="\
 
 Usage: fzn_choco.sh [<options>] [<file>]
@@ -38,11 +41,14 @@ OPTIONS:
     -t <n>
         Limit the resolution time of each problem instance to n ms.  (The default is $TIME_LIMIT.)
 
+    -lcg
+        When invoked with this option the solver uses the LCG.
+
     -jar <j>
         Override the jar file.  (The default is $CHOCO_JAR.)
 
     --jargs <args>
-		Override default java argument (The default is $JAVA_ARGS.)
+		  Override default java argument (The default is $JAVA_ARGS.)
 		
 EXAMPLES:
 	
@@ -59,8 +65,6 @@ then
     echo "%% No flatzinc file found"
     exit 1
 fi
-
-ARGS=""
 
 while test $# -gt 0
 do
@@ -107,6 +111,10 @@ do
             shift
         ;;
 
+      -lcg)
+          ARGS="$ARGS -lcg"
+        ;;
+
         -jar)
             CHOCO_JAR="$2"
             shift
@@ -133,7 +141,7 @@ done
 
 FILE="$1"
 
-ARGS="$ARGS -limit=[$TIME_LIMIT,${SOLS}sols] -lvl ${LVL}"
+ARGS="$ARGS -limit [$TIME_LIMIT,${SOLS}sols] -lvl ${LVL}"
 
 CMD="java ${JAVA_ARGS} -cp .:${CHOCO_JAR} org.chocosolver.parser.flatzinc.ChocoFZN \"${FILE}\" ${ARGS}"
 
@@ -141,5 +149,6 @@ if test "${LVL}" = "INFO"
 then
   echo "% $CMD"
 fi
+echo "% $CMD"
 eval "${CMD}"
 
