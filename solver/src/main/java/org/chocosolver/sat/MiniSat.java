@@ -85,7 +85,7 @@ public class MiniSat implements SatFactory, Dimacs {
     int num_vars_;
     int rootlvl = 0;
     int ccmin_mode = 0; // Controls conflict clause minimization (0=none, 1=basic, 2=deep)
-    int phase_saving = 2; // Controls the level of phase saving (0=none, 1=limited, 2=full)
+    int phase_saving = 0; // Controls the level of phase saving (0=none, 1=limited, 2=full)
     double cla_inc = 1;
     double var_inc = 1;
     double var_decay = 0.95;
@@ -242,7 +242,7 @@ public class MiniSat implements SatFactory, Dimacs {
                 propagate();
                 return (ok_ = (confl == C_Undef));
             default:
-                Clause cr = new Clause(ps.toArray());
+                Clause cr = new Clause(ps);
                 clauses.add(cr);
                 attachClause(cr);
                 break;
@@ -300,7 +300,7 @@ public class MiniSat implements SatFactory, Dimacs {
         if (learnt_clause.size() == 1) {
             uncheckedEnqueue(learnt_clause.get(0));
         } else {
-            Clause cr = new Clause(learnt_clause.toArray(), true);
+            Clause cr = new Clause(learnt_clause, true);
             learnts.add(cr);
             attachClause(cr);
             claBumpActivity(cr);
@@ -428,14 +428,12 @@ public class MiniSat implements SatFactory, Dimacs {
         //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), from);
         if (DEBUG > 0) {
             if (DEBUG > 1)
-                System.out.printf("Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(from));
+                System.out.printf("uncheckedEnqueue:: Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(from));
             else
-                System.out.printf("Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(from));
+                System.out.printf("uncheckedEnqueue:: Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(from));
         }
         // ensure capacity of vardata
-        while (vardata.size() < v) {
-            vardata.add(VD_Undef);
-        }
+        assert vardata.size() >= v;
         VarData vd = vardata.get(v);
         if (vd != VD_Undef) {
             vd.cr = from;
@@ -473,13 +471,11 @@ public class MiniSat implements SatFactory, Dimacs {
         //System.out.printf("Fix %d to %d @ %d due to %s\n", v, sgn(l) ? 1 : 0, trailMarker(), r);
         if (DEBUG > 0) {
             if (DEBUG > 1)
-                System.out.printf("Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(r));
+                System.out.printf("cEnqueue:: Fix %s at %d due to %s\n", printLit(l), trailMarker(), showReason(r));
             else
-                System.out.printf("Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(r));
+                System.out.printf("cEnqueue:: Fix %d at %d due to %s\n", l, sgn(l) ? 0 : 1, showReason(r));
         }
-        while (vardata.size() < v) {
-            vardata.add(VD_Undef);
-        }
+        assert vardata.size() >= v;
         VarData vd = vardata.get(v);
         if (vd != VD_Undef) {
             vd.cr = r;
@@ -683,7 +679,7 @@ public class MiniSat implements SatFactory, Dimacs {
         assert ok_;
         int backtrack_level;
         int conflictC = 0;
-        TIntList learnt_clause = new TIntArrayList();
+        TIntArrayList learnt_clause = new TIntArrayList();
 
         for (; ; ) {
             propagate();
@@ -764,12 +760,62 @@ public class MiniSat implements SatFactory, Dimacs {
         return lvl;
     }
 
-    public int analyze(Clause confl, TIntList out_learnt) {
+    public int analyze(Clause confl, TIntArrayList out_learnt) {
         int pathC = 0;
         int p = litUndef;
 
         // Generate conflict clause:
         //
+        analyseConflict(confl, out_learnt, p, pathC);
+        replaceUnreliableLits(out_learnt);
+        // Simplify conflict clause:
+        //
+        int i, j = 1;
+        analyze_toclear.resetQuick();
+        analyze_toclear.addAll(out_learnt);
+        /*if (ccmin_mode == 2) {
+            uint32_t abstract_level = 0;
+            for (i = 1; i < out_learnt.size(); i++)
+                abstract_level |= abstractLevel(var(out_learnt.get(i))); // (maintain an abstraction of levels involved in conflict)
+
+            for (i = j = 1; i < out_learnt.size(); i++)
+                if (reason(var(out_learnt.get(i))) == CR_Undef || !litRedundant(out_learnt.get(i), abstract_level))
+                    out_learnt.set(j++, out_learnt.get(i));
+
+        } else */
+        if (ccmin_mode == 1) {
+            //todo fix ccmin_mode
+            for (i = j = 1; i < out_learnt.size(); i++) {
+                int x = var(out_learnt.get(i));
+
+                if (getConfl(x) == C_Undef)
+                    out_learnt.set(j++, out_learnt.get(i));
+                else {
+                    Clause c = getConfl(var(out_learnt.get(i)));
+                    for (int k = 1; k < c.size(); k++)
+                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
+                            out_learnt.set(j++, out_learnt.get(i));
+                            break;
+                        }
+                }
+            }
+        } else
+            j = out_learnt.size();
+
+        max_literals += out_learnt.size();
+        out_learnt.subList(j, out_learnt.size()).clear();
+        tot_literals += out_learnt.size();
+
+        // Find correct backtrack level:
+        //
+        int out_btlevel = getBacktrackLevel(out_learnt);
+
+        for (j = 0; j < analyze_toclear.size(); j++)
+            seen.clear(var(analyze_toclear.get(j)));    // ('seen[]' is now cleared)
+        return out_btlevel;
+    }
+
+    private void analyseConflict(Clause confl, TIntList out_learnt, int p, int pathC) {
         out_learnt.add(litUndef);      // (leave room for the asserting literal)
         int index = trail_.size() - 1;
 
@@ -812,71 +858,11 @@ public class MiniSat implements SatFactory, Dimacs {
             p = trail_.get(index + 1);
             confl = getConfl(p);
             seen.clear(var(p));
-            if (DEBUG > 1) System.out.printf("clear %d\n", var(p));
+            if (DEBUG > 1) System.out.printf("clear %d l:%d\n", var(p), p);
             pathC--;
             if (DEBUG > 1) System.out.printf("path-- (%d)\n", pathC);
         } while (pathC > 0 || !cinfo.get(var(p)).reliable);
         out_learnt.set(0, neg(p));
-        replaceUnreliableLits(out_learnt);
-        // Simplify conflict clause:
-        //
-        int i, j = 1;
-        analyze_toclear.clear();
-        analyze_toclear.addAll(out_learnt);
-        /*if (ccmin_mode == 2) {
-            uint32_t abstract_level = 0;
-            for (i = 1; i < out_learnt.size(); i++)
-                abstract_level |= abstractLevel(var(out_learnt.get(i))); // (maintain an abstraction of levels involved in conflict)
-
-            for (i = j = 1; i < out_learnt.size(); i++)
-                if (reason(var(out_learnt.get(i))) == CR_Undef || !litRedundant(out_learnt.get(i), abstract_level))
-                    out_learnt.set(j++, out_learnt.get(i));
-
-        } else */
-        if (ccmin_mode == 1) {
-            //todo fix ccmin_mode
-            for (i = j = 1; i < out_learnt.size(); i++) {
-                int x = var(out_learnt.get(i));
-
-                if (getConfl(x) == C_Undef)
-                    out_learnt.set(j++, out_learnt.get(i));
-                else {
-                    Clause c = getConfl(var(out_learnt.get(i)));
-                    for (int k = 1; k < c.size(); k++)
-                        if (!seen.get(var(c._g(k))) && level(var(c._g(k))) > rootlvl) {
-                            out_learnt.set(j++, out_learnt.get(i));
-                            break;
-                        }
-                }
-            }
-        } else
-            j = out_learnt.size();
-
-        max_literals += out_learnt.size();
-        out_learnt.subList(j, out_learnt.size()).clear();
-        tot_literals += out_learnt.size();
-
-        // Find correct backtrack level:
-        //
-        int out_btlevel;
-        if (out_learnt.size() == 1)
-            out_btlevel = rootlvl;
-        else {
-            int max_i = 1;
-            // Find the first literal assigned at the next-highest level:
-            for (i = 2; i < out_learnt.size(); i++)
-                if (level(var(out_learnt.get(i))) > level(var(out_learnt.get(max_i))))
-                    max_i = i;
-            // Swap-in this literal at index 1:
-            p = out_learnt.get(max_i);
-            out_learnt.set(max_i, out_learnt.get(1));
-            out_learnt.set(1, p);
-            out_btlevel = level(var(p));
-        }
-
-        for (j = 0; j < analyze_toclear.size(); j++)
-            seen.clear(var(analyze_toclear.get(j)));    // ('seen[]' is now cleared)
-        return out_btlevel;
     }
 
     /**
@@ -886,7 +872,7 @@ public class MiniSat implements SatFactory, Dimacs {
      * @param out_learnt the current clause
      */
     private void replaceUnreliableLits(TIntList out_learnt) {
-        temporary_add_vector_.clear();
+        temporary_add_vector_.resetQuick();
         for (int i = 1; i < out_learnt.size(); i++) {
             int p = out_learnt.get(i);
             if (cinfo.get(var(p)).reliable) {
@@ -912,6 +898,27 @@ public class MiniSat implements SatFactory, Dimacs {
         while (!temporary_add_vector_.isEmpty()) {
             seen.clear(var(temporary_add_vector_.removeAt(temporary_add_vector_.size() - 1)));
         }
+    }
+
+    private int getBacktrackLevel(TIntList out_learnt) {
+        int i;
+        int p;
+        int out_btlevel;
+        if (out_learnt.size() == 1)
+            out_btlevel = rootlvl;
+        else {
+            int max_i = 1;
+            // Find the first literal assigned at the next-highest level:
+            for (i = 2; i < out_learnt.size(); i++)
+                if (level(var(out_learnt.get(i))) > level(var(out_learnt.get(max_i))))
+                    max_i = i;
+            // Swap-in this literal at index 1:
+            p = out_learnt.get(max_i);
+            out_learnt.set(max_i, out_learnt.get(1));
+            out_learnt.set(1, p);
+            out_btlevel = level(var(p));
+        }
+        return out_btlevel;
     }
 
 

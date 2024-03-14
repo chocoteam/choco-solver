@@ -9,7 +9,6 @@
  */
 package org.chocosolver.solver.search.loop.learn;
 
-import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.chocosolver.sat.Clause;
 import org.chocosolver.sat.MiniSat;
@@ -66,7 +65,7 @@ public class LazyClauseGeneration implements Learn {
     /**
      * A temporary storage for learnt clauses.
      */
-    final TIntList learnt_clause = new TIntArrayList();
+    final TIntArrayList learnt_clause = new TIntArrayList();
 
     public LazyClauseGeneration(Solver solver, MiniSat sat) {
         this.mSolver = solver;
@@ -103,7 +102,7 @@ public class LazyClauseGeneration implements Learn {
             nbRestarts++;
             mSat.topLevelCleanUp();
         }
-        if (mSat.nLearnts() >= max_learnts){
+        if (mSat.nLearnts() >= max_learnts) {
             mSat.doReduceDB();
         }
     }
@@ -119,14 +118,18 @@ public class LazyClauseGeneration implements Learn {
     }
 
     private void onSolution() {
+        assert mSat.confl == MiniSat.C_Undef;
         if (!mSolver.getObjectiveManager().isOptimization()) {
-            learnt_clause.clear();
+            learnt_clause.resetQuick();
             extractFromVariables();
             //extractFromDecisions();
 
-            mSat.confl = new Clause(learnt_clause.toArray(), false /*?*/);
+            mSat.confl = new Clause(learnt_clause, false /*?*/);
             int backtrack_level = analyze(mSolver.getContradictionException().set(Cause.Sat, null, null), ON_SOLUTION);
             int upto = mSolver.getEnvironment().getWorldIndex() - backtrack_level;
+            if (upto > 1) {
+                mSolver.getMeasures().incBackjumpCount();
+            }
             mSolver.setJumpTo(upto);
         } // else  always restart on a solution, managed in Solver
     }
@@ -190,7 +193,7 @@ public class LazyClauseGeneration implements Learn {
 
     private int analyze(ContradictionException cex, String message) {
         int level;
-        learnt_clause.clear();
+        learnt_clause.resetQuick();
         if (mSat.confl != MiniSat.C_Undef) {
             Clause cl = mSat.confl;
             level = mSat.findConflictLevel();
