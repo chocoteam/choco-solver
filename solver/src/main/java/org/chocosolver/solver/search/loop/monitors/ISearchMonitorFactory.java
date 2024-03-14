@@ -34,7 +34,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * @param vars array of decision variables
      */
     default void setNoGoodRecordingFromSolutions(IntVar... vars) {
-        ref().plugMonitor(new NogoodFromSolutions(vars));
+        if(!ref().isLCG()) ref().plugMonitor(new NogoodFromSolutions(vars));
     }
 
     /**
@@ -42,7 +42,7 @@ public interface ISearchMonitorFactory extends ISelf<Solver> {
      * scanning the same sub-search tree.
      */
     default void setNoGoodRecordingFromRestarts() {
-        ref().plugMonitor(new NogoodFromRestarts(ref().getModel()));
+        if(!ref().isLCG()) ref().plugMonitor(new NogoodFromRestarts(ref().getModel()));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
