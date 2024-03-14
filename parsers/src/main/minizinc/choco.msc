@@ -7,6 +7,9 @@
   "executable" : "/Users/kyzrsoze/Sources/CHOCO/continuous-branch/parsers/src/main/minizinc/fzn-choco.sh",
   "tags": ["cp","int"],
   "stdFlags": ["-a","-f","-n","-p","-r","-s","-t","--cp-profiler"],
+  "extraFlags": [
+    ["-lcg", "Use LCG", "bool", "false"],
+  ],
   "supportsMzn": false,
   "supportsFzn": true,
   "needsSolns2Out": true,

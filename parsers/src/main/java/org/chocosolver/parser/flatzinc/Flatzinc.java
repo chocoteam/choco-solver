@@ -104,7 +104,10 @@ public class Flatzinc extends RegParser {
                 .setLearntClausesDominancePerimeter(0)
                 .setNbMaxLearntClauses(Integer.MAX_VALUE)
                 .setRatioForClauseStoreReduction(.66f)
-                .set("adhocReification", true);
+                .set("adhocReification", true)
+                .setLCG(lcg)
+//                .setWarnUser(true)
+        ;
     }
 
     @Override
