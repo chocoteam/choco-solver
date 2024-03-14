@@ -402,6 +402,10 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
         try {
             checkTasks();
             mMeasures.incFixpointCount();
+            // check sat
+            if (isLCG() && !getSat().ok_) {
+                this.throwsException(Cause.Sat, null, null);
+            }
             doPropagate();
             action = extend;
             pushTrail(); // store state after initial propagation; w = 1 -> 2
@@ -412,9 +416,6 @@ public final class Solver implements ISolver, IMeasures, IOutputFactory {
             engine.flush();
             mMeasures.incFailCount();
             searchMonitors.onContradiction(ce);
-            //L.init();
-            //L.record();
-            //L.forget();
             cancelTrail();
             stop = true;
             ok = false;
