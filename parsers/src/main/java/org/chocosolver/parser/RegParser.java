@@ -174,6 +174,9 @@ public abstract class RegParser implements IParser {
     @Option(name = "-lcg", usage = "Set Lazy Clause Generation (LCG) on. ")
     protected boolean lcg = false;
 
+    @Option(name = "--disable-shutdown-hook", usage = "Disable the shutdown hook.")
+    protected boolean disableShutdownHook = false;
+
     /**
      * Default settings to apply
      */
@@ -261,7 +264,9 @@ public abstract class RegParser implements IParser {
             valsel = new SearchParams.ValSelConf(valH, best, bestRate, last);
         }
         createSettings();
-        Runtime.getRuntime().addShutdownHook(statOnKill);
+        if (!disableShutdownHook) {
+            Runtime.getRuntime().addShutdownHook(statOnKill);
+        }
         return true;
     }
 
