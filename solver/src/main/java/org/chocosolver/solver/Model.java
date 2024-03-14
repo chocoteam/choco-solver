@@ -852,10 +852,8 @@ public final class Model implements IModel {
         if (variable.getNbProps() > 0) {
             throw new SolverException("Try to remove a variable (" + variable.getName() + ")which is still involved in at least one constraint");
         }
-        int idx = 0;
-        for (; idx < vIdx; idx++) {
-            if (variable == vars[idx]) break;
-        }
+        // to check if the variable is in the model (debug purpose only
+        int idx = Arrays.binarySearch(vars, 0, vIdx, variable, Comparator.comparingInt(Identity::getId));
         System.arraycopy(vars, idx + 1, vars, idx + 1 - 1, vIdx - (idx + 1));
         vars[--vIdx] = null;
         switch ((variable.getTypeAndKind() & Variable.KIND)) {
