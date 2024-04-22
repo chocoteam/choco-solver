@@ -9,6 +9,7 @@
  */
 package org.chocosolver.solver.constraints.nary.sum;
 
+import org.chocosolver.sat.Reason;
 import org.chocosolver.solver.constraints.Explained;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -36,11 +37,12 @@ public class PropScalar extends PropSum {
     /**
      * Create a scalar product: SUM(x_i*c_i) o b
      * Variables and coefficients are excepted to be ordered wrt to coefficients: first positive ones then negative ones.
+     *
      * @param variables list of integer variables
-     * @param coeffs list of coefficients
-     * @param pos position of the last positive coefficient
-     * @param o operator
-     * @param b bound to respect.
+     * @param coeffs    list of coefficients
+     * @param pos       position of the last positive coefficient
+     * @param o         operator
+     * @param b         bound to respect.
      */
     public PropScalar(IntVar[] variables, int[] coeffs, int pos, Operator o, int b) {
         super(variables, pos, o, b);
@@ -59,7 +61,7 @@ public class PropScalar extends PropSum {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
         for (; i < l; i++) { // then the negative ones
             lb = vars[i].getUB() * c[i];
@@ -67,7 +69,7 @@ public class PropScalar extends PropSum {
             sumLB += lb;
             sumUB += ub;
             I[i] = (ub - lb);
-            if(maxI < I[i])maxI = I[i];
+            if (maxI < I[i]) maxI = I[i];
         }
     }
 
@@ -80,7 +82,7 @@ public class PropScalar extends PropSum {
         do {
             anychange = false;
             // When explanations are on, no global failure allowed
-            if (!model.getSolver().isLCG() && (F < 0 || E < 0)) {
+            if (!lcg() && (F < 0 || E < 0)) {
                 fails();
             }
             if (maxI > F || maxI > E) {
@@ -91,7 +93,8 @@ public class PropScalar extends PropSum {
                     if (I[i] - F > 0) {
                         lb = vars[i].getLB() * c[i];
                         ub = lb + I[i];
-                        if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this, explainMax(i))) {
+                        int bnd = divFloor(F + lb, c[i]);
+                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainByMin(i))) {
                             int nub = vars[i].getUB() * c[i];
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -101,14 +104,14 @@ public class PropScalar extends PropSum {
                     if (I[i] - E > 0) {
                         ub = vars[i].getUB() * c[i];
                         lb = ub - I[i];
-                        if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainMin(i))) {
+                        if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainByMax(i))) {
                             int nlb = vars[i].getLB() * c[i];
                             F -= nlb - lb;
                             I[i] = ub - nlb;
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
                 // then negative ones
@@ -116,7 +119,7 @@ public class PropScalar extends PropSum {
                     if (I[i] - F > 0) {
                         lb = vars[i].getUB() * c[i];
                         ub = lb + I[i];
-                        if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainMax(i))) {
+                        if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainByMin(i))) {
                             int nub = vars[i].getLB() * c[i];
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -126,14 +129,14 @@ public class PropScalar extends PropSum {
                     if (I[i] - E > 0) {
                         ub = vars[i].getLB() * c[i];
                         lb = ub - I[i];
-                        if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainMin(i))) {
+                        if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainByMax(i))) {
                             int nlb = vars[i].getUB() * c[i];
                             F -= nlb - lb;
                             I[i] = ub - nlb;
                             anychange = true;
                         }
                     }
-                    if(maxI < I[i])maxI = I[i];
+                    if (maxI < I[i]) maxI = I[i];
                     i++;
                 }
             }
@@ -149,7 +152,7 @@ public class PropScalar extends PropSum {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (!model.getSolver().isLCG() &&F < 0) {
+        if (!lcg() && F < 0) {
             fails();
         }
         if (maxI > F) {
@@ -161,13 +164,13 @@ public class PropScalar extends PropSum {
                 if (I[i] - F > 0) {
                     lb = vars[i].getLB() * c[i];
                     ub = lb + I[i];
-                    if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this, explainMax(i))) {
+                    if (vars[i].updateUpperBound(divFloor(F + lb, c[i]), this, explainByMin(i))) {
                         int nub = vars[i].getUB() * c[i];
                         E += nub - ub;
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -175,13 +178,13 @@ public class PropScalar extends PropSum {
                 if (I[i] - F > 0) {
                     lb = vars[i].getUB() * c[i];
                     ub = lb + I[i];
-                    if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainMax(i))) {
+                    if (vars[i].updateLowerBound(divCeil(-F - lb, -c[i]), this, explainByMin(i))) {
                         int nub = vars[i].getLB() * c[i];
                         E += nub - ub;
                         I[i] = nub - lb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -195,7 +198,7 @@ public class PropScalar extends PropSum {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (!model.getSolver().isLCG() && E < 0) {
+        if (!lcg() && E < 0) {
             fails();
         }
         if (maxI > E) {
@@ -206,13 +209,13 @@ public class PropScalar extends PropSum {
                 if (I[i] - E > 0) {
                     ub = vars[i].getUB() * c[i];
                     lb = ub - I[i];
-                    if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainMin(i))) {
+                    if (vars[i].updateLowerBound(divCeil(ub - E, c[i]), this, explainByMax(i))) {
                         int nlb = vars[i].getLB() * c[i];
                         F -= nlb - lb;
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
             // then negative ones
@@ -220,13 +223,13 @@ public class PropScalar extends PropSum {
                 if (I[i] - E > 0) {
                     ub = vars[i].getLB() * c[i];
                     lb = ub - I[i];
-                    if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainMin(i))) {
+                    if (vars[i].updateUpperBound(divFloor(-ub + E, -c[i]), this, explainByMax(i))) {
                         int nlb = vars[i].getUB() * c[i];
                         F -= nlb - lb;
                         I[i] = ub - nlb;
                     }
                 }
-                if(maxI < I[i])maxI = I[i];
+                if (maxI < I[i]) maxI = I[i];
                 i++;
             }
         }
@@ -257,8 +260,9 @@ public class PropScalar extends PropSum {
                 // default reason is ok
                 this.fails();
             }
-        } else if(c[w]!=0 && (b - sum)%c[w]==0){
-            vars[w].removeValue((b - sum)/c[w], this, this.defaultReason(vars[w]));
+        } else if (c[w] != 0 && (b - sum) % c[w] == 0) {
+            vars[w].removeValue((b - sum) / c[w], this,
+                    lcg()?this.defaultReason(vars[w]): Reason.undef());
         }
     }
 
@@ -312,7 +316,7 @@ public class PropScalar extends PropSum {
     }
 
     @Override
-    protected PropSum opposite(){
+    protected PropSum opposite() {
         return new PropScalar(vars, c, pos, nop(o), b + nb(o));
     }
 

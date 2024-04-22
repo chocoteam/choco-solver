@@ -99,7 +99,7 @@ public class PropSum extends Propagator<IntVar> {
         l = variables.length;
         I = new int[l];
         maxI = 0;
-        ps = new int[!model.getSolver().isLCG() ? 0 : l + 1];
+        ps = new int[!lcg() ? 0 : l + 1];
     }
 
     /**
@@ -210,8 +210,13 @@ public class PropSum extends Propagator<IntVar> {
         do {
             anychange = false;
             // When explanations are on, no global failure allowed
-            if (!model.getSolver().isLCG() && (F < 0 || E < 0)) {
+            /*if (!lcg() && (F < 0 || E < 0)) {
                 fails();
+            }*/
+            if (F < 0) {
+                fails(explainByMin(-1));
+            } else if (E < 0) {
+                fails(explainByMax(-1));
             }
             if (maxI > F || maxI > E) {
                 int lb, ub, i = 0;
@@ -222,7 +227,7 @@ public class PropSum extends Propagator<IntVar> {
                         lb = vars[i].getLB();
                         ub = lb + I[i];
                         int bnd = F + lb;
-                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainMax(i))) {
+                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainByMin(i))) {
                             int nub = vars[i].getUB();
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -233,7 +238,7 @@ public class PropSum extends Propagator<IntVar> {
                         ub = vars[i].getUB();
                         lb = ub - I[i];
                         int bnd = ub - E;
-                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
+                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                             int nlb = vars[i].getLB();
                             F -= nlb - lb;
                             I[i] = ub - nlb;
@@ -249,7 +254,7 @@ public class PropSum extends Propagator<IntVar> {
                         lb = -vars[i].getUB();
                         ub = lb + I[i];
                         int bnd = -F - lb;
-                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(bnd, this, explainMax(i))) {
+                        if (vars[i].getLB() < bnd && vars[i].updateLowerBound(bnd, this, explainByMin(i))) {
                             int nub = -vars[i].getLB();
                             E += nub - ub;
                             I[i] = nub - lb;
@@ -260,7 +265,7 @@ public class PropSum extends Propagator<IntVar> {
                         ub = -vars[i].getLB();
                         lb = ub - I[i];
                         int bnd = -ub + E;
-                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainMin(i))) {
+                        if (vars[i].getUB() > bnd && vars[i].updateUpperBound(bnd, this, explainByMax(i))) {
                             int nlb = -vars[i].getUB();
                             F -= nlb - lb;
                             I[i] = ub - nlb;
@@ -288,8 +293,8 @@ public class PropSum extends Propagator<IntVar> {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (!model.getSolver().isLCG() && F < 0) {
-            fails();
+        if (F < 0) {
+            fails(explainByMin(-1));
         }
         if (maxI > F) {
             maxI = 0;
@@ -299,7 +304,7 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - F > 0) {
                     lb = vars[i].getLB();
                     ub = lb + I[i];
-                    if (vars[i].updateUpperBound(F + lb, this, explainMax(i))) {
+                    if (vars[i].updateUpperBound(F + lb, this, explainByMin(i))) {
                         int nub = vars[i].getUB();
                         E += nub - ub;
                         I[i] = nub - lb;
@@ -313,7 +318,7 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - F > 0) {
                     lb = -vars[i].getUB();
                     ub = lb + I[i];
-                    if (vars[i].updateLowerBound(-F - lb, this, explainMax(i))) {
+                    if (vars[i].updateLowerBound(-F - lb, this, explainByMin(i))) {
                         int nub = -vars[i].getLB();
                         E += nub - ub;
                         I[i] = nub - lb;
@@ -337,8 +342,8 @@ public class PropSum extends Propagator<IntVar> {
         int F = b - sumLB;
         int E = sumUB - b;
         // When explanations are on, no global failure allowed
-        if (!model.getSolver().isLCG() && E < 0) {
-            fails();
+        if (E < 0) {
+            fails(explainByMax(-1));
         }
         if (maxI > E) {
             maxI = 0;
@@ -348,7 +353,7 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - E > 0) {
                     ub = vars[i].getUB();
                     lb = ub - I[i];
-                    if (vars[i].updateLowerBound(ub - E, this, explainMin(i))) {
+                    if (vars[i].updateLowerBound(ub - E, this, explainByMax(i))) {
                         int nlb = vars[i].getLB();
                         F -= nlb - lb;
                         I[i] = ub - nlb;
@@ -362,7 +367,7 @@ public class PropSum extends Propagator<IntVar> {
                 if (I[i] - E > 0) {
                     ub = -vars[i].getLB();
                     lb = ub - I[i];
-                    if (vars[i].updateUpperBound(-ub + E, this, explainMin(i))) {
+                    if (vars[i].updateUpperBound(-ub + E, this, explainByMax(i))) {
                         int nlb = -vars[i].getUB();
                         F -= nlb - lb;
                         I[i] = ub - nlb;
@@ -377,8 +382,8 @@ public class PropSum extends Propagator<IntVar> {
         }
     }
 
-    Reason explainMin(int i) {
-        if (model.getSolver().isLCG()) {
+    Reason explainByMax(int i) {
+        if (lcg()) {
             int m = 1;
             int j = 0;
             for (; j < pos; j++) {
@@ -387,13 +392,13 @@ public class PropSum extends Propagator<IntVar> {
             for (; j < l; j++) {
                 ps[m++] = vars[j].getMinLit();
             }
-            ps[i + 1] = ps[0] = 0;
+            if (i > -1) ps[i + 1] = ps[0] = 0;
             return Reason.r(ps);
         } else return Reason.undef();
     }
 
-    Reason explainMax(int i) {
-        if (model.getSolver().isLCG()) {
+    Reason explainByMin(int i) {
+        if (lcg()) {
             int m = 1;
             int j = 0;
             for (; j < pos; j++) {
@@ -402,7 +407,7 @@ public class PropSum extends Propagator<IntVar> {
             for (; j < l; j++) {
                 ps[m++] = vars[j].getMaxLit();
             }
-            ps[i + 1] = ps[0] = 0;
+            if (i > -1) ps[i + 1] = ps[0] = 0;
             return Reason.r(ps);
         } else return Reason.undef();
     }
@@ -434,7 +439,8 @@ public class PropSum extends Propagator<IntVar> {
                 this.fails();
             }
         } else {
-            vars[w].removeValue(w < pos ? b - sum : sum - b, this, this.defaultReason(vars[w]));
+            vars[w].removeValue(w < pos ? b - sum : sum - b, this,
+                    lcg() ? this.defaultReason(vars[w]) : Reason.undef());
         }
     }
 
